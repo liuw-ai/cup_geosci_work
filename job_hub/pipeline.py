@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -149,7 +149,11 @@ class JobPipeline:
     ) -> dict[str, Any]:
         text = f"{posting.title} {posting.employer} {posting.text}"
         matching_text = posting.match_text or text
-        category = classify_category(matching_text, source.get("category"))
+        category = classify_category(
+            matching_text,
+            source.get("category"),
+            identity_text=f"{posting.title} {posting.employer}",
+        )
         relevance_score, relevance_band, major_tags = score_relevance(
             matching_text,
             source["source_tier"],
@@ -157,7 +161,12 @@ class JobPipeline:
         )
         degree_levels = extract_degree_levels(text)
         today = datetime.now(self.timezone).date()
-        status = "expired" if is_expired(posting.deadline_date, today) else "open"
+        status = self._job_status(
+            posting.deadline_date,
+            published_date=posting.published_date,
+            source=source,
+            today=today,
+        )
         fingerprint = stable_hash(
             source["id"],
             posting.external_id or posting.source_url,
@@ -194,3 +203,80 @@ class JobPipeline:
             "relevance_band": relevance_band,
             "status": status,
         }
+
+    @staticmethod
+    def _job_status(
+        deadline_date: str | None,
+        *,
+        published_date: str | None,
+        source: dict[str, Any],
+        today: date,
+    ) -> str:
+        """Avoid treating old undated announcements as currently accepting applications."""
+        if is_expired(deadline_date, today):
+            return "expired"
+        if deadline_date:
+            return "open"
+        max_age_days = source.get("config", {}).get("undated_open_window_days")
+        if not published_date or max_age_days is None:
+            return "open"
+        try:
+            published = date.fromisoformat(published_date)
+            return "expired" if (today - published).days > int(max_age_days) else "open"
+        except (TypeError, ValueError):
+            return "open"
+
+    def reindex_jobs(self) -> dict[str, int]:
+        """Recompute taxonomy and matching fields for existing official records.
+
+        Reindexing is deliberately separate from source synchronization.  It
+        preserves fingerprints, original URLs, descriptions, dates and ordinary
+        update events while recording a dedicated internal ``reclassified`` event
+        only when a derived value actually changes.
+        """
+        sources = {source["id"]: source for source in self.database.list_sources()}
+        jobs, _ = self.database.list_jobs(page_size=None, only_open=False)
+        result = {"checked": len(jobs), "reclassified": 0, "unchanged": 0}
+        for job in jobs:
+            source = sources.get(job.get("source_id"))
+            source_tier = (
+                source["source_tier"] if source else str(job["source_tier"])
+            )
+            source_category = source["category"] if source else job.get("category")
+            matching_text = " ".join(
+                str(value)
+                for value in (
+                    job.get("title"),
+                    job.get("employer"),
+                    job.get("description"),
+                )
+                if value
+            )
+            category = classify_category(
+                matching_text,
+                source_category,
+                identity_text=f"{job.get('title', '')} {job.get('employer', '')}",
+            )
+            relevance_score, relevance_band, major_tags = score_relevance(
+                matching_text,
+                source_tier,
+                category,
+            )
+            degree_levels = extract_degree_levels(matching_text)
+            status = self._job_status(
+                str(job.get("deadline_date") or "") or None,
+                published_date=str(job.get("published_date") or "") or None,
+                source=source or {"config": {}},
+                today=datetime.now(self.timezone).date(),
+            )
+            changed = self.database.update_derived_job_fields(
+                int(job["id"]),
+                category=category,
+                degree_levels=degree_levels,
+                major_tags=major_tags,
+                relevance_score=relevance_score,
+                relevance_band=relevance_band,
+                status=status,
+            )
+            result["reclassified" if changed else "unchanged"] += 1
+        return result

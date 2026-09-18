@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import base64
 from dataclasses import dataclass
+import json
 import zlib
+
+from bs4 import BeautifulSoup
 
 from job_hub.sources import OfficialSourceCollector
 
@@ -268,3 +271,123 @@ def test_halliburton_adapter_preserves_official_job_url_and_search_topic(tmp_pat
     )
     assert "Search topic: geology" in postings[0].text
     assert "Search topic" not in (postings[0].match_text or "")
+
+
+def test_halliburton_adapter_reads_public_detail_page_when_enabled(
+    tmp_path, monkeypatch
+) -> None:
+    settings = make_settings(tmp_path)
+    collector = OfficialSourceCollector(settings)
+    source = {
+        "id": "halliburton-career",
+        "name": "Halliburton Careers",
+        "publisher": "Halliburton",
+        "homepage_url": "https://jobs.halliburton.com/",
+        "source_type": "successfactors_search",
+        "category": "油气工程技术服务",
+        "source_tier": "A",
+        "config": {
+            "search_url": "https://jobs.halliburton.com/search/",
+            "locale": "en_US",
+            "queries": ["geology"],
+            "max_items": 10,
+            "request_interval_seconds": 0,
+            "fetch_detail_pages": True,
+            "detail_content_selector": ".jobDisplay",
+            "detail_location_selector": "#job-location",
+        },
+    }
+    search_url = "https://jobs.halliburton.com/search/?q=geology&locale=en_US"
+    detail_url = "https://jobs.halliburton.com/job/Houston-Geologist-TX-77001/12345/"
+    responses = {
+        search_url: FakeResponse(
+            text=(
+                '<table><tr class="data-row"><td><a class="jobTitle-link" '
+                'href="/job/Houston-Geologist-TX-77001/12345/">Geologist</a></td>'
+                '<td class="colLocation"><span class="jobLocation">Houston, TX, US</span>'
+                "</td></tr></table>"
+            ),
+            url=search_url,
+        ),
+        detail_url: FakeResponse(
+            text=(
+                '<div class="jobDisplay"><h1>Geologist</h1>'
+                '<span id="job-location">Houston, TX, US</span>'
+                '<h2>Job Duties</h2><p>Interpret seismic and reservoir data.</p>'
+                '<h2>Qualifications</h2><p>Master degree in Geology or Geophysics. '
+                'Application deadline: December 31, 2026.</p>'
+                '<a href="/talentcommunity/apply/12345/">Apply now</a></div>'
+            ),
+            url=detail_url,
+        ),
+    }
+
+    def get(url, _source):
+        return responses[url]
+
+    monkeypatch.setattr(collector, "_get", get)
+
+    postings = collector.collect(source)
+
+    assert len(postings) == 1
+    assert postings[0].location == "Houston, TX, US"
+    assert postings[0].deadline_date == "2026-12-31"
+    assert "Interpret seismic" in postings[0].text
+    assert "Geophysics" in (postings[0].match_text or "")
+    assert postings[0].application_url == (
+        "https://jobs.halliburton.com/talentcommunity/apply/12345/"
+    )
+
+
+def test_attachment_is_not_treated_as_an_application_url(tmp_path) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    attachment = BeautifulSoup(
+        '<p>附件：<a href="/files/application-form.xlsx">应聘登记表</a></p>',
+        "html.parser",
+    )
+    live_application = BeautifulSoup(
+        '<p><a href="/apply/123">立即报名</a></p>',
+        "html.parser",
+    )
+
+    assert collector._find_application_url(
+        attachment, "https://official.example.cn/jobs/1"
+    ) is None
+    assert collector._find_application_url(
+        live_application, "https://official.example.cn/jobs/1"
+    ) == "https://official.example.cn/apply/123"
+
+def test_selector_order_preserves_configured_priority(tmp_path) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    soup = BeautifulSoup("<body><div id='specific'>正文</div></body>", "html.parser")
+    selected = collector._select_first(soup, "#specific, body")
+    assert selected is not None and selected.get("id") == "specific"
+
+def test_html_notice_prefers_first_content_selector(tmp_path) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "beijing-hrss",
+        "publisher": "北京市人力资源和社会保障局",
+        "source_type": "html_notice",
+        "config": {
+            "require_recruitment_word": True,
+            "exclude_patterns": ["\u804c\u79f0"],
+            "detail_exclude_patterns": [],
+            "title_selector": "#mainText h1, h1",
+            "content_selector": "#mainTextZoom .view, #mainTextZoom, article, main, body",
+        },
+    }
+    document = (
+        "<html><body><header>网站导航</header>"
+        "<div id='mainText'><h1>某事业单位公开招聘</h1>"
+        "<div id='mainTextZoom'><div class='view'>2026年公开招聘地质工程岗位，报名截止时间为2026年12月31日。</div>"
+        "\u804c\u79f0要求。"
+        "</div></div></body></html>"
+    )
+    posting = collector._extract_html_detail(
+        document, "https://rsj.beijing.gov.cn/xxgk/gkzp/202609/t1.html", source, "公告"
+    )
+    assert posting is not None
+    assert posting.title == "某事业单位公开招聘"
+    assert "地质工程" in posting.summary
+    assert "网站导航" not in posting.summary

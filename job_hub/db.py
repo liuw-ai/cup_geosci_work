@@ -6,6 +6,8 @@ from contextlib import contextmanager
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
+
+from job_hub.employers import enrich_job
 from zoneinfo import ZoneInfo
 
 
@@ -473,6 +475,79 @@ class Database:
             ).fetchone()
         return self._job_row(row) if row else None
 
+    def update_derived_job_fields(
+        self,
+        job_id: int,
+        *,
+        category: str,
+        degree_levels: list[str],
+        major_tags: list[str],
+        relevance_score: int,
+        relevance_band: str,
+        status: str,
+    ) -> bool:
+        """Refresh rule-derived fields without changing the official job record.
+
+        Taxonomy maintenance must remain traceable, but it must not create a
+        student-facing "updated vacancy" event or alter source content dates.
+        """
+        degrees_json = json.dumps(degree_levels, ensure_ascii=False)
+        majors_json = json.dumps(major_tags, ensure_ascii=False)
+        with self.transaction() as connection:
+            current = connection.execute(
+                """
+                SELECT category, degree_levels_json, major_tags_json,
+                       relevance_score, relevance_band, status
+                FROM jobs
+                WHERE id = ?
+                """,
+                (job_id,),
+            ).fetchone()
+            if current is None:
+                return False
+            derived = {
+                "category": category,
+                "degree_levels_json": degrees_json,
+                "major_tags_json": majors_json,
+                "relevance_score": relevance_score,
+                "relevance_band": relevance_band,
+                "status": status,
+            }
+            if all(current[key] == value for key, value in derived.items()):
+                return False
+            connection.execute(
+                """
+                UPDATE jobs
+                SET category = ?, degree_levels_json = ?, major_tags_json = ?,
+                    relevance_score = ?, relevance_band = ?, status = ?
+                WHERE id = ?
+                """,
+                (
+                    category,
+                    degrees_json,
+                    majors_json,
+                    relevance_score,
+                    relevance_band,
+                    status,
+                    job_id,
+                ),
+            )
+            connection.execute(
+                """
+                INSERT INTO job_events (job_id, event_type, occurred_at, payload_json)
+                VALUES (?, 'reclassified', ?, ?)
+                """,
+                (
+                    job_id,
+                    utc_now(),
+                    json.dumps(
+                        {"before": dict(current), "after": derived},
+                        ensure_ascii=False,
+                    ),
+                ),
+            )
+        return True
+
     def list_jobs(
         self,
         *,
@@ -581,7 +656,7 @@ class Database:
             job = self._job_row(row)
             if row["event_type"] == "created":
                 created.append(job)
-            else:
+            elif row["event_type"] == "updated":
                 updated.append(job)
         return {"new": created, "updated": updated}
 
@@ -658,6 +733,18 @@ class Database:
                 (source_id,),
             )
             return int(cursor.rowcount)
+
+    def delete_job(self, job_id: int) -> bool:
+        """Remove one exact invalid record and its cascade-owned change events.
+
+        This deliberately accepts a primary key rather than a fuzzy title or a
+        source-wide selector. It is used only after an operator has previewed a
+        concrete audit finding, so valid records from the same official source
+        remain untouched.
+        """
+        with self.transaction() as connection:
+            cursor = connection.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
+            return bool(cursor.rowcount)
 
     def expire_jobs_before(self, today: str) -> int:
         now = utc_now()
@@ -780,4 +867,4 @@ class Database:
         item = dict(row)
         item["degree_levels"] = json.loads(item.pop("degree_levels_json"))
         item["major_tags"] = json.loads(item.pop("major_tags_json"))
-        return item
+        return enrich_job(item)

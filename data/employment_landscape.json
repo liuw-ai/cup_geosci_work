@@ -1,0 +1,320 @@
+{
+  "title": "地球科学学院就业单位图谱",
+  "updated": "2026-09-18",
+  "scope_note": "图谱列出资源勘查工程、地质工程、地质学、地质资源与地质工程学生应长期关注的代表性雇主和官方入口。它不是全国全部单位名录，也不表示每个单位当前均有公开岗位。",
+  "source_note": "职位发布仍只来自已核验的官方来源。图谱用于帮助学生理解产业链、建立检索关键词，并快速进入单位官方主页或招聘入口。",
+  "groups": [
+    {
+      "category": "油气上游业主与研究机构",
+      "summary": "油气资源的勘探部署、油藏评价、开发生产与科研决策主体。油田、勘探开发分公司和研究机构通常是毕业生关注的直接雇主。",
+      "units": [
+        {
+          "name": "中国石油天然气集团有限公司及油田、勘探开发研究机构",
+          "role": "上游油气勘探开发、油田生产与技术研究",
+          "affiliation": "中国石油体系",
+          "official_url": "https://www.cnpc.com.cn/"
+        },
+        {
+          "name": "中国石油化工集团有限公司及油田、勘探开发研究机构",
+          "role": "上游勘探开发、油气田评价与能源化工一体化",
+          "affiliation": "中国石化体系",
+          "official_url": "https://www.sinopecgroup.com/"
+        },
+        {
+          "name": "中国海洋石油集团有限公司及勘探开发公司、研究总院",
+          "role": "海上及陆上油气勘探开发、海洋地质与油藏研究",
+          "affiliation": "中国海油体系",
+          "official_url": "https://www.cnooc.com.cn/"
+        },
+        {
+          "name": "Shell、ExxonMobil、TotalEnergies、Chevron 等国际上游能源企业",
+          "role": "油气勘探开发、综合能源与技术研究",
+          "affiliation": "国际能源企业",
+          "official_url": "https://www.shell.com/"
+        }
+      ]
+    },
+    {
+      "category": "油气工程技术服务",
+      "summary": "为上游业主提供物探、测井、钻完井、定向井、固井、压裂、修井和数字化等专业服务。这里既有三大集团体系内的专业服务公司，也有独立和国际服务商。",
+      "units": [
+        {
+          "name": "中国石油东方物探公司（BGP）",
+          "role": "地震勘探、地球物理采集处理解释与综合地球物理服务",
+          "affiliation": "中国石油体系",
+          "official_url": "https://bgp.cnpc.com.cn/"
+        },
+        {
+          "name": "中国石油钻井、测井、川庆、长城、渤海、西部等专业工程技术体系",
+          "role": "钻完井、测井、井下作业与工程技术服务",
+          "affiliation": "中国石油体系",
+          "official_url": "https://www.cnpc.com.cn/"
+        },
+        {
+          "name": "中石化石油工程技术服务股份有限公司及地球物理、钻井、测录定导单位",
+          "role": "地球物理、钻井、测录井、定向井、井下作业与工程建设",
+          "affiliation": "中国石化体系",
+          "official_url": "http://ssc.sinopec.com/sosc/"
+        },
+        {
+          "name": "中海油田服务股份有限公司（COSL）",
+          "role": "物探勘察、钻井、测井、定向井、固井、修井与海上油田服务",
+          "affiliation": "中国海油体系",
+          "official_url": "https://www.cosl.com.cn/"
+        },
+        {
+          "name": "中海油能源发展股份有限公司",
+          "role": "海洋油气工程、技术服务、装备与能源服务",
+          "affiliation": "中国海油体系",
+          "official_url": "https://www.cnooc.com.cn/"
+        },
+        {
+          "name": "杰瑞股份、安东油田服务、海隆控股、中曼石油、贝肯能源、通源石油等",
+          "role": "民营和独立油服的装备、井工程、增产改造与技术服务岗位",
+          "affiliation": "独立/民营油服",
+          "official_url": "https://www.jereh.com/"
+        },
+        {
+          "name": "SLB、Halliburton、Baker Hughes、Weatherford 等",
+          "role": "国际油服的地球科学、测井、储层、钻完井、软件与现场技术岗位",
+          "affiliation": "国际企业",
+          "official_url": "https://www.slb.com/"
+        }
+      ]
+    },
+    {
+      "category": "管网、炼化与综合能源",
+      "summary": "适合关注油气储运、地下储气库、管网完整性、炼化原料评价、CCUS 和能源转型方向的学生。",
+      "units": [
+        {
+          "name": "国家石油天然气管网集团有限公司",
+          "role": "油气管输、储气库、基础设施运行与完整性管理",
+          "affiliation": "国家管网体系",
+          "official_url": "https://www.pipechina.com.cn/"
+        },
+        {
+          "name": "中国石油、中国石化、中国海油炼化与化工业务单元",
+          "role": "炼化、化工、储运、地下储库和综合能源业务",
+          "affiliation": "能源央企",
+          "official_url": "https://www.sinopecgroup.com/"
+        },
+        {
+          "name": "国家能源集团、国家电投、华能、华电、大唐等能源集团",
+          "role": "综合能源、新能源、地热、储能、CCUS 与资源环境相关岗位",
+          "affiliation": "能源央企",
+          "official_url": "https://www.ceic.com/"
+        }
+      ]
+    },
+    {
+      "category": "自然资源、地调与地勘",
+      "summary": "地质调查、基础地质、矿产资源、水工环和地质灾害方向的核心雇主。省级地勘单位应按所在省份长期跟踪。",
+      "units": [
+        {
+          "name": "中国地质调查局",
+          "role": "国家基础地质调查、资源调查评价、海洋地质与地质灾害调查",
+          "affiliation": "自然资源部系统",
+          "official_url": "https://www.cgs.gov.cn/"
+        },
+        {
+          "name": "中国地质科学院",
+          "role": "地球科学基础研究、资源环境与技术创新",
+          "affiliation": "自然资源部系统",
+          "official_url": "https://www.cags.ac.cn/"
+        },
+        {
+          "name": "中国煤炭地质总局",
+          "role": "煤炭及能源资源勘查、地质工程与生态修复",
+          "affiliation": "中央地勘单位",
+          "official_url": "http://www.ccgc.cn/"
+        },
+        {
+          "name": "中国冶金地质总局",
+          "role": "金属矿产勘查、地质工程与资源评价",
+          "affiliation": "中央地勘单位",
+          "official_url": "https://www.cmgb.com.cn/"
+        },
+        {
+          "name": "中国核工业集团及核地质单位",
+          "role": "铀矿与核资源地质调查、勘查和资源评价",
+          "affiliation": "核工业地质体系",
+          "official_url": "https://www.cnnc.com.cn/"
+        },
+        {
+          "name": "各省地质调查院、地质矿产勘查局、地质环境监测院",
+          "role": "区域地调、矿产勘查、水工环、地灾调查和技术服务",
+          "affiliation": "地方地勘体系",
+          "official_url": "https://www.mnr.gov.cn/"
+        }
+      ]
+    },
+    {
+      "category": "矿产资源与矿业",
+      "summary": "面向固体矿产勘查、资源评价、矿山地质、生产地质和海外矿业的就业路径。",
+      "units": [
+        {
+          "name": "中国五矿集团有限公司",
+          "role": "金属矿产资源、矿业开发与全球资源业务",
+          "affiliation": "中央资源企业",
+          "official_url": "https://www.minmetals.com.cn/"
+        },
+        {
+          "name": "中国黄金集团有限公司",
+          "role": "黄金资源勘查、矿山建设与生产地质",
+          "affiliation": "中央资源企业",
+          "official_url": "https://www.chinagoldgroup.com/"
+        },
+        {
+          "name": "中国铝业集团有限公司",
+          "role": "铝土矿等矿产资源、矿业工程与资源开发",
+          "affiliation": "中央资源企业",
+          "official_url": "https://www.chinalco.com.cn/"
+        },
+        {
+          "name": "紫金矿业、山东黄金等大型矿业集团",
+          "role": "矿产勘查、矿山地质、资源评价与海外项目",
+          "affiliation": "大型矿业集团",
+          "official_url": "https://www.zijinmining.com/"
+        }
+      ]
+    },
+    {
+      "category": "地质工程、环境与基础设施",
+      "summary": "工程地质、水文地质、地质灾害、环境地质、地下空间与大型工程建设是地学专业的重要非油气出口。",
+      "units": [
+        {
+          "name": "中国电力建设集团有限公司",
+          "role": "水电、抽蓄、新能源、地下工程与工程地质",
+          "affiliation": "能源建设央企",
+          "official_url": "https://www.powerchina.cn/"
+        },
+        {
+          "name": "中国能源建设集团有限公司",
+          "role": "能源工程、地热、地下工程与环境技术",
+          "affiliation": "能源建设央企",
+          "official_url": "https://www.ceec.net.cn/"
+        },
+        {
+          "name": "中国交通建设集团、中国中铁、中国铁建等",
+          "role": "铁路、公路、隧道、海洋工程与岩土工程地质",
+          "affiliation": "基础设施央企",
+          "official_url": "https://www.crcc.cn/"
+        },
+        {
+          "name": "省级地灾防治、生态环境、测绘遥感与工程勘察单位",
+          "role": "地质灾害调查、环境地质、遥感监测和工程勘察",
+          "affiliation": "地方专业技术体系",
+          "official_url": "https://www.mnr.gov.cn/"
+        }
+      ]
+    },
+    {
+      "category": "科研院所、高校与博士后",
+      "summary": "硕士和博士应持续关注研究助理、博士后、教师和科研岗位，并留意学科方向与导师团队的原始公告。",
+      "units": [
+        {
+          "name": "中国科学院地学相关研究所",
+          "role": "地质、地球物理、地球化学、地理、海洋和资源环境科研",
+          "affiliation": "中国科学院",
+          "official_url": "https://www.cas.cn/"
+        },
+        {
+          "name": "中国地质科学院及所属研究所",
+          "role": "基础地质、资源环境和地学技术研究",
+          "affiliation": "自然资源部系统",
+          "official_url": "https://www.cags.ac.cn/"
+        },
+        {
+          "name": "中国石油大学（北京）、中国石油大学（华东）等石油高校",
+          "role": "教师、博士后、科研助理和科研管理岗位",
+          "affiliation": "高校",
+          "official_url": "https://www.cup.edu.cn/"
+        },
+        {
+          "name": "中国地质大学（北京/武汉）、吉林大学等地学高校",
+          "role": "教师、博士后、实验技术与科研岗位",
+          "affiliation": "高校",
+          "official_url": "https://www.cugb.edu.cn/"
+        }
+      ]
+    },
+    {
+      "category": "事业单位与人才引进",
+      "summary": "通过单位官网、主管部门或人社系统发布的公开招聘与人才引进公告，重点看专业目录、学历、户籍和资格条件。",
+      "units": [
+        {
+          "name": "自然资源、地震、应急、水利、生态环境等直属及地方事业单位",
+          "role": "专业技术岗、科研技术岗、监测预警与资源管理支持岗位",
+          "affiliation": "政府直属/地方事业单位",
+          "official_url": "https://www.mnr.gov.cn/"
+        },
+        {
+          "name": "省市人力资源和社会保障部门及地方人才引进平台",
+          "role": "公开招聘、急需紧缺人才、青年人才与博士专项",
+          "affiliation": "地方人才体系",
+          "official_url": "https://www.mohrss.gov.cn/"
+        }
+      ]
+    },
+    {
+      "category": "公务员与选调",
+      "summary": "国考、省考和选调须以年度职位表为准，重点检索自然资源、生态环境、应急、水利、能源和综合管理岗位的专业目录。",
+      "units": [
+        {
+          "name": "国家公务员局考试录用专题",
+          "role": "中央机关及其直属机构考试录用",
+          "affiliation": "国家机关",
+          "official_url": "https://bm.scs.gov.cn/"
+        },
+        {
+          "name": "各省公务员局、组织部和人事考试机构",
+          "role": "省考、选调生和地方机关招录",
+          "affiliation": "地方机关",
+          "official_url": "https://www.mohrss.gov.cn/"
+        }
+      ]
+    },
+    {
+      "category": "金融与央国企综合机会",
+      "summary": "银行和综合央国企的管理培训、风险、数据、资源金融和区域分支机构岗位，通常需要单独核对专业限制。",
+      "units": [
+        {
+          "name": "国家开发银行、中国进出口银行、中国农业发展银行",
+          "role": "政策性金融、资源能源项目和综合管理岗位",
+          "affiliation": "政策性金融机构",
+          "official_url": "https://www.cdb.com.cn/"
+        },
+        {
+          "name": "工商银行、农业银行、中国银行、建设银行等",
+          "role": "总分行校招、科技、风险、客户和综合培养岗位",
+          "affiliation": "大型商业银行",
+          "official_url": "https://www.icbc.com.cn/"
+        },
+        {
+          "name": "资源能源类央国企的综合管理、数字化与投资岗位",
+          "role": "综合培养、数据分析、投资和运营支持",
+          "affiliation": "央国企",
+          "official_url": "https://www.sasac.gov.cn/"
+        }
+      ]
+    },
+    {
+      "category": "能源、工程与地学拓展",
+      "summary": "地热、CCUS、储能、地学数据、遥感、碳管理和资源环境咨询可拓宽就业面，但学生应优先核实岗位是否列出本专业。",
+      "units": [
+        {
+          "name": "国家能源集团、国家电投、三峡集团等新能源与综合能源企业",
+          "role": "地热、储能、风光资源评价、地下空间和碳管理",
+          "affiliation": "能源央企",
+          "official_url": "https://www.spic.com.cn/"
+        },
+        {
+          "name": "能源咨询、地学软件、遥感和地理信息技术企业",
+          "role": "地学数据、地质建模、遥感解译、资源评价与技术咨询",
+          "affiliation": "行业技术企业",
+          "official_url": "https://www.mnr.gov.cn/"
+        }
+      ]
+    }
+  ]
+}

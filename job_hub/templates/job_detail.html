@@ -23,6 +23,11 @@
     <article class="detail-content">
       <h2>岗位信息</h2>
       <dl class="detail-grid">
+        <div><dt>就业路径</dt><dd>{{ job.employment_path }}</dd></div>
+        <div><dt>岗位方向</dt><dd>{{ job.role_direction }}</dd></div>
+        <div><dt>单位属性</dt><dd>{{ job.employer_type }}</dd></div>
+        <div><dt>所属体系</dt><dd>{{ job.affiliation }}</dd></div>
+        <div><dt>机会范围</dt><dd>{{ job.opportunity_scope }}</dd></div>
         <div><dt>工作地点</dt><dd>{{ job.location or "原始公告未注明" }}</dd></div>
         <div><dt>学历要求</dt><dd>{{ " / ".join(job.degree_levels) if job.degree_levels else "原始公告未注明" }}</dd></div>
         <div><dt>发布时间</dt><dd>{{ job.published_date|cn_date }}</dd></div>

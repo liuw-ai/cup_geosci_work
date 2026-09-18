@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}就业单位图谱 | {{ site_name }}{% endblock %}
+
+{% block content %}
+  <section class="page-heading landscape-heading">
+    <div class="shell">
+      <p class="eyebrow">产业链与雇主角色</p>
+      <h1>{{ landscape.title }}</h1>
+      <p class="lede">按雇主在产业链中的职责浏览，而不是把上游业主、油服企业、管网和外企混为同一类别。</p>
+    </div>
+  </section>
+
+  <section class="shell content-section landscape-context">
+    <p>{{ landscape.scope_note }}</p>
+    <p>{{ landscape.source_note }}</p>
+  </section>
+
+  <section class="shell content-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">代表性单位</p>
+        <h2>按就业路径建立长期关注清单</h2>
+      </div>
+      <span class="section-count">更新于 {{ landscape.updated|cn_date }}</span>
+    </div>
+
+    <div class="landscape-groups">
+      {% for group in landscape.groups %}
+        <section class="landscape-group">
+          <div class="landscape-group-heading">
+            <h2>{{ group.category }}</h2>
+            <p>{{ group.summary }}</p>
+            <a class="text-link" href="{{ url_for('jobs', category=group.category) }}">查看当前岗位</a>
+          </div>
+          <div class="landscape-unit-list">
+            {% for unit in group.units %}
+              <article class="landscape-unit">
+                <div class="landscape-unit-main">
+                  <h3><a href="{{ unit.official_url }}" target="_blank" rel="noopener noreferrer">{{ unit.name }}</a></h3>
+                  <p>{{ unit.role }}</p>
+                </div>
+                <dl>
+                  <div><dt>所属体系</dt><dd>{{ unit.affiliation }}</dd></div>
+                  <div><dt>官方入口</dt><dd><a href="{{ unit.official_url }}" target="_blank" rel="noopener noreferrer">单位主页</a></dd></div>
+                </dl>
+              </article>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

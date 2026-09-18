@@ -5,7 +5,7 @@
     "publisher": "中国石油大学（北京）",
     "homepage_url": "https://career.cup.edu.cn/",
     "source_type": "cupb_career",
-    "category": "三桶油与油服",
+    "category": "能源、工程与地学拓展",
     "source_tier": "B",
     "enabled": true,
     "config": {
@@ -43,6 +43,9 @@
       ],
       "minimum_relevance": 38,
       "max_items": 28,
+      "undated_open_window_days": 45,
+      "require_detail_content": true,
+      "minimum_detail_characters": 80,
       "request_interval_seconds": 1.0,
       "note": "公开栏目包含学院发布、招聘公告、全职和实习岗位；仅采集其中的具体岗位和招聘公告。适配器优先读取公告表格中的专业范围、学历、面向对象和地点，不把招聘会、宣讲会、就业通知或活动发布为岗位。"
     }
@@ -53,7 +56,7 @@
     "publisher": "中国科学院",
     "homepage_url": "http://job.cas.cn/",
     "source_type": "cas_job_board",
-    "category": "科研院所与高校",
+    "category": "科研院所、高校与博士后",
     "source_tier": "A",
     "enabled": true,
     "config": {
@@ -70,7 +73,7 @@
     "publisher": "中国石油大学（华东）",
     "homepage_url": "https://career.upc.edu.cn/career/index",
     "source_type": "landing_page",
-    "category": "三桶油与油服",
+    "category": "能源、工程与地学拓展",
     "source_tier": "B",
     "enabled": false,
     "config": {
@@ -86,7 +89,7 @@
     "publisher": "Halliburton",
     "homepage_url": "https://jobs.halliburton.com/",
     "source_type": "successfactors_search",
-    "category": "在华外企与国际机会",
+    "category": "油气工程技术服务",
     "source_tier": "A",
     "enabled": true,
     "config": {
@@ -104,8 +107,18 @@
         "drilling",
         "wireline"
       ],
+      "required_title_patterns": [
+        "geology|geoscience|geophysic|geologist|reservoir|wireline|well[ -]?logging|drilling|completion|perforating|mud logging|petrophysics|seismic|subsurface|petroleum"
+      ],
+      "excluded_title_patterns": [
+        "software|developer|platform|devops|application architect|data engineer|database administrator|IT support"
+      ],
       "minimum_relevance": 45,
       "max_items": 45,
+      "fetch_detail_pages": true,
+      "detail_title_selector": ".jobDisplay h1, .job-title, h1",
+      "detail_content_selector": ".jobDisplayShell, .jobDisplay, #content",
+      "detail_location_selector": "#job-location, .job-location",
       "request_interval_seconds": 1.2,
       "note": "仅收录 Halliburton 官方公开检索页中与地学、油气、测井、储层、钻完井等关键词匹配的岗位；地点与资格以原始岗位页为准。"
     }
@@ -116,7 +129,7 @@
     "publisher": "中国地质调查局",
     "homepage_url": "https://www.cgs.gov.cn/tzgg/tzgg/",
     "source_type": "html_notice",
-    "category": "自然资源与地勘",
+    "category": "自然资源、地调与地勘",
     "source_tier": "A",
     "enabled": true,
     "config": {
@@ -150,7 +163,7 @@
     "publisher": "中华人民共和国自然资源部",
     "homepage_url": "https://www.mnr.gov.cn/gk/tzgg/",
     "source_type": "html_notice",
-    "category": "自然资源与地勘",
+    "category": "自然资源、地调与地勘",
     "source_tier": "A",
     "enabled": true,
     "config": {
@@ -184,7 +197,7 @@
     "publisher": "中国石油天然气集团有限公司",
     "homepage_url": "https://zhaopin.cnpc.com.cn/",
     "source_type": "landing_page",
-    "category": "三桶油与油服",
+    "category": "油气上游业主与研究机构",
     "source_tier": "A",
     "enabled": false,
     "config": {
@@ -200,7 +213,7 @@
     "publisher": "中国石油化工集团有限公司",
     "homepage_url": "https://job.sinopec.com/",
     "source_type": "landing_page",
-    "category": "三桶油与油服",
+    "category": "油气上游业主与研究机构",
     "source_tier": "A",
     "enabled": false,
     "config": {
@@ -216,7 +229,7 @@
     "publisher": "中国海洋石油集团有限公司",
     "homepage_url": "https://zhaopin.cnooc.com.cn/",
     "source_type": "landing_page",
-    "category": "三桶油与油服",
+    "category": "油气上游业主与研究机构",
     "source_tier": "A",
     "enabled": false,
     "config": {
@@ -232,7 +245,7 @@
     "publisher": "国家石油天然气管网集团有限公司",
     "homepage_url": "https://zhaopin.pipechina.com.cn/",
     "source_type": "landing_page",
-    "category": "三桶油与油服",
+    "category": "管网、炼化与综合能源",
     "source_tier": "A",
     "enabled": false,
     "config": {
@@ -248,7 +261,7 @@
     "publisher": "中国地质科学院",
     "homepage_url": "https://www.cags.ac.cn/",
     "source_type": "landing_page",
-    "category": "科研院所与高校",
+    "category": "科研院所、高校与博士后",
     "source_tier": "A",
     "enabled": false,
     "config": {
@@ -280,7 +293,7 @@
     "publisher": "国家大学生就业服务平台",
     "homepage_url": "https://www.ncss.cn/",
     "source_type": "landing_page",
-    "category": "能源与工程拓展",
+    "category": "能源、工程与地学拓展",
     "source_tier": "A",
     "enabled": false,
     "config": {
@@ -311,15 +324,28 @@
     "name": "北京市人力资源和社会保障局公开招聘",
     "publisher": "北京市人力资源和社会保障局",
     "homepage_url": "https://rsj.beijing.gov.cn/",
-    "source_type": "landing_page",
+    "source_type": "html_notice",
     "category": "事业单位与人才引进",
     "source_tier": "A",
-    "enabled": false,
+    "enabled": true,
     "config": {
-      "employer_hint": "北京市人力资源和社会保障局",
+      "listing_urls": ["https://rsj.beijing.gov.cn/xxgk/gkzp/"],
       "allowed_hosts": ["rsj.beijing.gov.cn"],
+      "listing_selector": "a[href$='.html']",
+      "detail_path_patterns": ["/xxgk/gkzp/20\\d{4}/t20\\d+_\\d+\\.html"],
+      "title_selector": "#mainText h1, h1",
+      "content_selector": "#mainTextZoom .view, #mainTextZoom, article, main, body",
+      "remove_selectors": ["script", "style", ".m-share", ".print", ".doc-fj"],
+      "require_recruitment_word": true,
+      "include_patterns": ["招聘|人才引进|博士后|科研助理|实习|公开招聘"],
+      "exclude_patterns": ["拟聘|拟录用|录用公示|采购|招标|中标|会议|培训|职称|社会保险"],
+      "detail_exclude_patterns": [],
       "minimum_relevance": 40,
-      "note": "已登记为全国事业单位渠道之一，待公开招聘列表页与 robots 规则逐项核验后接入。"
+      "max_items": 18,
+      "undated_open_window_days": 45,
+      "infer_employer_from_title": true,
+      "request_interval_seconds": 1.2,
+      "note": "已核验北京市人力资源和社会保障局事业单位公开招聘栏目。只读取公开招聘、人才引进、博士后、科研助理和实习公告；原公告与公开附件是唯一依据，过期和非地学相关信息不会作为在招岗位展示。"
     }
   },
   {
@@ -344,7 +370,7 @@
     "publisher": "SLB",
     "homepage_url": "https://careers.slb.com/",
     "source_type": "landing_page",
-    "category": "在华外企与国际机会",
+    "category": "油气工程技术服务",
     "source_tier": "A",
     "enabled": false,
     "config": {
@@ -360,7 +386,7 @@
     "publisher": "Baker Hughes",
     "homepage_url": "https://careers.bakerhughes.com/",
     "source_type": "landing_page",
-    "category": "在华外企与国际机会",
+    "category": "油气工程技术服务",
     "source_tier": "A",
     "enabled": false,
     "config": {
@@ -376,7 +402,7 @@
     "publisher": "Weatherford",
     "homepage_url": "https://jobs.weatherford.com/",
     "source_type": "landing_page",
-    "category": "在华外企与国际机会",
+    "category": "油气工程技术服务",
     "source_tier": "A",
     "enabled": false,
     "config": {
@@ -387,12 +413,123 @@
     }
   },
   {
+    "id": "ccgc-careers",
+    "name": "中国煤炭地质总局人才招聘",
+    "publisher": "中国煤炭地质总局",
+    "homepage_url": "https://www.ccgc.cn/rlzy/rczp.htm",
+    "source_type": "html_notice",
+    "category": "自然资源、地调与地勘",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "listing_urls": ["https://www.ccgc.cn/rlzy/rczp.htm"],
+      "allowed_hosts": ["www.ccgc.cn"],
+      "listing_selector": "a[href*='/info/1771/']",
+      "detail_path_patterns": ["/info/1771/\\d+\\.htm"],
+      "title_selector": "h1, .article-title, .v_news_content h1",
+      "content_selector": ".news_xq, article, main, .v_news_content, .content, body",
+      "require_recruitment_word": true,
+      "include_patterns": ["招聘|招录|人才引进|校园招聘|社会招聘|公开招聘"],
+      "exclude_patterns": ["拟录用|拟接收|录用公示|采购|招标|中标|会议|培训"],
+      "minimum_relevance": 42,
+      "max_items": 18,
+      "undated_open_window_days": 45,
+      "request_interval_seconds": 1.2,
+      "note": "已核验的人力资源公开栏目。只从中国煤炭地质总局官方网站读取可回溯的招聘公告；正文必须达到地学专业相关度阈值后才入库。"
+    }
+  },
+  {
+    "id": "cmgb-careers",
+    "name": "中国冶金地质总局招聘信息",
+    "publisher": "中国冶金地质总局",
+    "homepage_url": "https://www.cmgb.com.cn/category/zpxx.html",
+    "source_type": "html_notice",
+    "category": "自然资源、地调与地勘",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "listing_urls": ["https://www.cmgb.com.cn/category/zpxx.html"],
+      "allowed_hosts": ["www.cmgb.com.cn"],
+      "listing_selector": "a[href*='/content/']",
+      "detail_path_patterns": ["/content/.+\\.html"],
+      "title_selector": "article h1, h1, .article-title",
+      "content_selector": "article, .article-content, .content, main, body",
+      "require_recruitment_word": true,
+      "include_patterns": ["招聘|招录|人才引进|校园招聘|社会招聘|公开招聘"],
+      "exclude_patterns": ["拟录用|拟接收|录用公示|采购|招标|中标|会议|培训"],
+      "minimum_relevance": 40,
+      "max_items": 16,
+      "undated_open_window_days": 45,
+      "request_interval_seconds": 1.2,
+      "infer_employer_from_title": true,
+      "note": "已核验的人力资源公开栏目，robots.txt 允许抓取。只保留可回溯的公开招聘公告，并按地学专业相关度阈值过滤。"
+    }
+  },
+  {
+    "id": "zijin-social-career",
+    "name": "紫金矿业社会招聘官方门户",
+    "publisher": "紫金矿业集团股份有限公司",
+    "homepage_url": "https://app.mokahr.com/social-recruitment/zijinmining/140688?locale=zh-CN#/jobs",
+    "source_type": "mokahr_search",
+    "category": "矿产资源与矿业",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "listing_url": "https://app.mokahr.com/social-recruitment/zijinmining/140688?locale=zh-CN#/jobs",
+      "org_id": "zijinmining",
+      "site_id": 140688,
+      "mode": "social",
+      "locale": "zh-CN",
+      "include_patterns": ["地质|勘查|物探|化探|遥感|测绘|水文|矿产|采矿|选矿|矿业|资源|地球物理"],
+      "exclude_patterns": ["人力|财务|法务|行政|物流|语言|市场|采购|审计"],
+      "detail_exclude_patterns": [],
+      "fetch_detail_pages": true,
+      "require_detail_pages": true,
+      "minimum_relevance": 40,
+      "max_items": 30,
+      "page_size": 50,
+      "undated_open_window_days": 45,
+      "request_interval_seconds": 1.2,
+      "allowed_hosts": ["app.mokahr.com"],
+      "note": "紫金矿业官网链接的官方 MokaHR 社会招聘门户；仅采集公开岗位，不提交申请。"
+    }
+  },
+  {
+    "id": "zijin-campus-career",
+    "name": "紫金矿业校园招聘官方门户",
+    "publisher": "紫金矿业集团股份有限公司",
+    "homepage_url": "https://join.zjky.cn/campus-recruitment/zijinmining/117957/?locale=zh-CN#/jobs",
+    "source_type": "mokahr_search",
+    "category": "矿产资源与矿业",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "listing_url": "https://join.zjky.cn/campus-recruitment/zijinmining/117957/?locale=zh-CN#/jobs",
+      "org_id": "zijinmining",
+      "site_id": 117957,
+      "mode": "campus",
+      "locale": "zh-CN",
+      "include_patterns": ["地质|勘查|物探|化探|遥感|测绘|水文|矿产|采矿|选矿|矿业|资源|地球物理"],
+      "exclude_patterns": ["人力|财务|法务|行政|物流|语言|市场|采购|审计"],
+      "detail_exclude_patterns": [],
+      "fetch_detail_pages": true,
+      "require_detail_pages": true,
+      "minimum_relevance": 40,
+      "max_items": 30,
+      "page_size": 50,
+      "undated_open_window_days": 45,
+      "request_interval_seconds": 1.2,
+      "allowed_hosts": ["join.zjky.cn"],
+      "note": "紫金矿业官网链接的官方校园招聘门户；仅采集公开岗位，不提交申请。"
+    }
+  },
+  {
     "id": "official-manual-import",
     "name": "人工核验的官方公告",
     "publisher": "项目管理员",
     "homepage_url": "https://example.invalid/manual-import",
     "source_type": "manual",
-    "category": "能源与工程拓展",
+    "category": "能源、工程与地学拓展",
     "source_tier": "A",
     "enabled": false,
     "config": {

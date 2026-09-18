@@ -17,7 +17,7 @@ def test_geoscience_oil_and_gas_post_is_strong_match() -> None:
     category = classify_category(text)
     score, band, tags = score_relevance(text, "A", category)
 
-    assert category == "三桶油与油服"
+    assert category == "油气上游业主与研究机构"
     assert score >= 55
     assert band == "强相关"
     assert "资源勘查工程" in tags
@@ -56,7 +56,7 @@ def test_geophysical_exploration_terms_are_exposed_as_major_tags() -> None:
 def test_external_employer_is_classified_without_losing_major_match() -> None:
     text = "SLB 中国招聘测井与储层评价工程师，要求地质工程或资源勘查工程硕士。"
 
-    assert classify_category(text) == "在华外企与国际机会"
+    assert classify_category(text) == "油气工程技术服务"
     assert {"测井", "储层", "地质工程", "资源勘查工程"}.issubset(
         set(extract_major_tags(text))
     )
@@ -71,10 +71,77 @@ def test_english_official_job_fields_are_matched_and_dated() -> None:
     category = classify_category(text)
     score, band, tags = score_relevance(text, "A", category)
 
-    assert category == "在华外企与国际机会"
+    assert category == "油气工程技术服务"
     assert extract_degree_levels(text) == ["硕士"]
     assert "geophysics" in tags
     assert extract_deadline(text) == "2026-12-31"
     assert parse_date_value("31 December 2026") == "2026-12-31"
     assert score >= 55
     assert band == "强相关"
+
+
+def test_employment_taxonomy_separates_operator_service_and_scope() -> None:
+    from job_hub.employers import classify_employment
+
+    operator = classify_employment("中国石油某油田勘探开发研究院地质工程师招聘")
+    service = classify_employment("中国石油东方物探公司物探解释岗位招聘")
+    international = classify_employment(
+        "Halliburton Geophysicist", location="Kuala Lumpur, 10, MY, 50400"
+    )
+
+    assert operator.category == "油气上游业主与研究机构"
+    assert operator.affiliation == "中国石油体系"
+    assert service.category == "油气工程技术服务"
+    assert service.employer_type == "油气地球物理技术服务企业"
+    assert service.affiliation == "中国石油体系"
+    assert international.category == "油气工程技术服务"
+    assert international.affiliation == "国际企业"
+    assert international.opportunity_scope == "海外岗位"
+
+
+def test_service_affiliation_uses_employer_before_competitor_mentions() -> None:
+    from job_hub.employers import enrich_job
+
+    job = enrich_job(
+        {
+            "title": "中国石油东方物探公司物探地质研发岗招聘",
+            "employer": "中国石油东方物探公司",
+            "group_name": "中国石油大学（北京）",
+            "category": "油气工程技术服务",
+            "description": (
+                "东方物探为中国石油体系内专业化子公司，产品也服务中石化、"
+                "中海油等客户。"
+            ),
+            "summary": "面向地质资源与地质工程专业。",
+            "location": "北京、成都",
+        }
+    )
+
+    assert job["category"] == "油气工程技术服务"
+    assert job["affiliation"] == "中国石油体系"
+
+
+def test_operator_affiliation_uses_employer_before_body_mentions() -> None:
+    from job_hub.employers import classify_employment
+
+    profile = classify_employment(
+        "中国石油某油田公开招聘，项目同时服务中国石化和中国海油客户。",
+        source_category="油气上游业主与研究机构",
+        identity_text="中国石油某油田",
+    )
+
+    assert profile.category == "油气上游业主与研究机构"
+    assert profile.affiliation == "中国石油体系"
+
+
+def test_official_source_category_beats_generic_body_keyword() -> None:
+    from job_hub.employers import classify_employment
+
+    profile = classify_employment(
+        "中国煤炭地质总局公开招聘，服务国家能源资源安全和地质调查。",
+        source_category="自然资源、地调与地勘",
+        identity_text="中国煤炭地质总局公开招聘公告 中国煤炭地质总局",
+    )
+
+    assert profile.category == "自然资源、地调与地勘"
+    assert profile.affiliation == "中央地勘单位"

@@ -1,0 +1,19 @@
+# Replace the hostname with the public HTTPS domain configured in APP_BASE_URL.
+# Caddy obtains and renews the certificate automatically when DNS and firewall
+# rules point the hostname at this server.
+jobs.example.edu.cn {
+    encode gzip
+
+    # Gunicorn is intentionally bound to the server loopback by Compose.
+    reverse_proxy 127.0.0.1:8080 {
+        header_up Host {host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Real-IP {remote_host}
+    }
+
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        X-Frame-Options SAMEORIGIN
+    }
+}

@@ -7,27 +7,12 @@ from datetime import date, datetime
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 
-CATEGORY_ORDER = (
-    "三桶油与油服",
-    "自然资源与地勘",
-    "事业单位与人才引进",
-    "公务员与选调",
-    "科研院所与高校",
-    "在华外企与国际机会",
-    "金融与央国企",
-    "能源与工程拓展",
+from job_hub.employers import (
+    CATEGORY_DESCRIPTIONS,
+    CATEGORY_ORDER,
+    classify_employment,
 )
 
-CATEGORY_DESCRIPTIONS = {
-    "三桶油与油服": "中石油、中石化、中海油、油服、管网与油气技术服务",
-    "自然资源与地勘": "自然资源、地质调查、地勘、矿产、环境地质与测绘遥感",
-    "事业单位与人才引进": "事业单位公开招聘、人才引进与专业技术岗位",
-    "公务员与选调": "国考、省考、选调及自然资源、能源等相关机关岗位",
-    "科研院所与高校": "高校、科研院所、博士后、科研助理与教师岗位",
-    "在华外企与国际机会": "在华外企、国际能源服务与符合条件的海外机会",
-    "金融与央国企": "银行、保险、央国企综合岗位及管培机会",
-    "能源与工程拓展": "新能源、工程咨询、地学数据、环境与其他相邻行业",
-}
 
 DEGREE_ORDER = ("本科", "硕士", "博士")
 
@@ -61,6 +46,8 @@ RECRUITMENT_WORDS = (
 
 CORE_MAJOR_KEYWORDS = {
     "资源勘查工程": 32,
+    "资源勘探工程": 28,
+    "资源勘探": 24,
     "资源勘查": 28,
     "勘查技术与工程": 28,
     "矿产普查与勘探": 28,
@@ -157,25 +144,6 @@ OIL_AND_ENERGY_KEYWORDS = (
     "carbon storage",
 )
 
-FOREIGN_EMPLOYERS = (
-    "slb",
-    "斯伦贝谢",
-    "halliburton",
-    "哈里伯顿",
-    "baker hughes",
-    "贝克休斯",
-    "weatherford",
-    "威德福",
-    "exxonmobil",
-    "埃克森美孚",
-    "shell",
-    "壳牌",
-    "totalenergies",
-    "道达尔",
-    "chevron",
-    "雪佛龙",
-)
-
 
 def clean_text(value: str | None) -> str:
     if not value:
@@ -245,25 +213,14 @@ def extract_major_tags(text: str) -> list[str]:
 def classify_category(
     text: str,
     source_category: str | None = None,
+    *,
+    identity_text: str | None = None,
 ) -> str:
-    lowered = clean_text(text).lower()
-    if any(item in lowered for item in ("中石油", "中石化", "中海油", "中国石油", "中国石化", "中国海油", "油服")):
-        return "三桶油与油服"
-    if any(item in lowered for item in FOREIGN_EMPLOYERS):
-        return "在华外企与国际机会"
-    if any(item in lowered for item in ("公务员", "国考", "省考", "选调生", "选调")):
-        return "公务员与选调"
-    if any(item in lowered for item in ("事业单位", "人才引进", "公开招聘")):
-        return "事业单位与人才引进"
-    if any(item in lowered for item in ("博士后", "科研助理", "研究员", "讲师", "教师", "高校", "研究所")):
-        return "科研院所与高校"
-    if any(item in lowered for item in ("自然资源", "地质调查", "地勘", "地质局", "地矿", "矿产", "测绘")):
-        return "自然资源与地勘"
-    if any(item in lowered for item in ("银行", "金融", "保险", "证券")):
-        return "金融与央国企"
-    if source_category in CATEGORY_ORDER:
-        return source_category
-    return "能源与工程拓展"
+    return classify_employment(
+        text,
+        source_category=source_category,
+        identity_text=identity_text,
+    ).category
 
 
 def score_relevance(
@@ -285,17 +242,21 @@ def score_relevance(
     score += min(sum(CORE_MAJOR_KEYWORDS[tag] for tag in matched_tags), 58)
     if any(keyword in lowered for keyword in OIL_AND_ENERGY_KEYWORDS):
         score += 15
-    if category == "三桶油与油服":
+    if category in {
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源",
+    }:
         score += 18
     elif category in {
-        "自然资源与地勘",
+        "自然资源、地调与地勘",
+        "矿产资源与矿业",
+        "地质工程、环境与基础设施",
         "事业单位与人才引进",
         "公务员与选调",
-        "科研院所与高校",
+        "科研院所、高校与博士后",
     }:
         score += 10
-    elif category == "在华外企与国际机会":
-        score += 8
 
     if "中国石油大学" in lowered or "石油大学" in lowered:
         score += 8

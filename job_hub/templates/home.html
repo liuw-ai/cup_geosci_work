@@ -11,7 +11,7 @@
         {% if is_preview %}
           <p class="lede">今天的正式日报将在 20:00 固化发布；当前展示的是实时预览。</p>
         {% else %}
-          <p class="lede">公开、可追溯的地学就业信息，按专业相关性和截止时间整理。</p>
+          <p class="lede">公开、可追溯的地学就业信息，按专业相关性和截止时间整理。本页是 {{ report.report_date|cn_date }} 20:00 固化快照，当前实时岗位请进入全部岗位。</p>
         {% endif %}
       </div>
       <a class="action-link" href="{{ url_for('daily_report', report_date=report.report_date) }}">打开完整日报</a>
@@ -35,9 +35,9 @@
       <small>条需要关注</small>
     </div>
     <div class="stat">
-      <span>当前在招</span>
+      <span>{% if is_preview %}当前在招{% else %}日报时在招{% endif %}</span>
       <strong>{{ report.stats.open_total }}</strong>
-      <small>条可检索岗位</small>
+      <small>{% if is_preview %}条可检索岗位{% else %}条日报快照岗位{% endif %}</small>
     </div>
   </section>
 

@@ -43,7 +43,7 @@ STUDENT_PROFILES = (
         id="undergraduate-resource-exploration",
         degree="本科",
         major="资源勘查工程",
-        exact_major_terms=("资源勘查工程", "勘查技术与工程", "矿产普查与勘探"),
+        exact_major_terms=("资源勘查工程", "资源勘探工程", "资源勘探", "勘查技术与工程", "矿产普查与勘探"),
     ),
     StudentProfile(
         id="master-geology",

@@ -68,6 +68,48 @@ def test_pipeline_deduplicates_and_creates_daily_change(tmp_path) -> None:
         assert connection.execute("SELECT COUNT(*) FROM job_events").fetchone()[0] == 0
 
 
+def test_delete_job_removes_only_the_exact_invalid_record(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    database.upsert_source(official_source)
+    pipeline = JobPipeline(settings, database)
+    postings = [
+        RawPosting(
+            title="Title-only false positive",
+            employer="Test employer",
+            source_url="https://careers.example.edu.cn/jobs/invalid",
+            application_url=None,
+            text="Title-only false positive.",
+            summary="",
+            published_date=None,
+            deadline_date=None,
+            location=None,
+        ),
+        RawPosting(
+            title="Geological engineering role",
+            employer="Test employer",
+            source_url="https://careers.example.edu.cn/jobs/valid",
+            application_url=None,
+            text="Official role for geological engineering master graduates.",
+            summary="A valid official vacancy.",
+            published_date=None,
+            deadline_date="2099-12-31",
+            location="Beijing",
+        ),
+    ]
+    job_ids = [
+        database.save_job(pipeline.normalize_posting(posting, official_source))[0]
+        for posting in postings
+    ]
+
+    assert database.delete_job(job_ids[0]) is True
+    assert database.find_job(job_ids[0]) is None
+    assert database.find_job(job_ids[1]) is not None
+    assert database.delete_job(job_ids[0]) is False
+
+
 def test_stale_crawl_run_blocks_audit_then_is_safely_recovered_before_sync(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)

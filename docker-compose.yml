@@ -1,3 +1,4 @@
+name: cupb-geoscience-job-hub
 services:
   web:
     build:

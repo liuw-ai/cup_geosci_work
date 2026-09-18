@@ -108,6 +108,10 @@ def main() -> None:
     subparsers.add_parser("init", help="初始化数据库和来源白名单")
     subparsers.add_parser("sync", help="立即同步已启用的公开来源")
     subparsers.add_parser("audit", help="审计岗位来源、阈值、日期和公告噪声")
+    subparsers.add_parser(
+        "reindex-jobs",
+        help="按当前分类和专业匹配规则重算历史岗位的派生字段",
+    )
     sync_source_parser = subparsers.add_parser(
         "sync-source",
         help="立即同步一个已启用的公开来源",
@@ -133,6 +137,16 @@ def main() -> None:
         "--confirm",
         action="store_true",
         help="确认执行删除；未提供时只显示受影响岗位数量",
+    )
+    delete_job_parser = subparsers.add_parser(
+        "delete-job",
+        help="按精确岗位 ID 删除已确认的误采记录",
+    )
+    delete_job_parser.add_argument("job_id", type=int)
+    delete_job_parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="确认执行删除；未提供时只显示该岗位的预览",
     )
     simulation_parser = subparsers.add_parser(
         "simulate-cohort",
@@ -186,6 +200,9 @@ def main() -> None:
         return
     if args.command == "sync":
         print(json.dumps(pipeline.sync_all().as_dict(), ensure_ascii=False, indent=2))
+        return
+    if args.command == "reindex-jobs":
+        print(json.dumps(pipeline.reindex_jobs(), ensure_ascii=False, indent=2))
         return
     if args.command == "audit":
         print(json.dumps(audit_database(database, settings), ensure_ascii=False, indent=2))
@@ -258,6 +275,24 @@ def main() -> None:
         if args.output:
             display_result["output"] = str(args.output)
         print(json.dumps(display_result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "delete-job":
+        job = database.find_job(args.job_id)
+        if job is None:
+            parser.error(f"job_id is not present: {args.job_id}")
+        result = {
+            "job_id": job["id"],
+            "source_id": job["source_id"],
+            "title": job["title"],
+            "source_url": job["source_url"],
+            "deleted": False,
+            "confirmed": bool(args.confirm),
+        }
+        if args.confirm:
+            result["deleted"] = database.delete_job(args.job_id)
+        else:
+            result["message"] = "仅预览；添加 --confirm 后才会删除这一条精确岗位记录。"
+        print(json.dumps(result, ensure_ascii=False, indent=2))
         return
     if args.command == "purge-source":
         source = database.get_source(args.source_id)

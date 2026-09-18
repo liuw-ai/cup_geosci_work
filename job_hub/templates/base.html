@@ -25,6 +25,7 @@
         <nav id="primary-nav" class="primary-nav" aria-label="主要导航">
           <a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}aria-current="page"{% endif %}>今日日报</a>
           <a href="{{ url_for('jobs') }}" {% if request.endpoint in ['jobs', 'job_detail'] %}aria-current="page"{% endif %}>全部岗位</a>
+          <a href="{{ url_for('landscape') }}" {% if request.endpoint == 'landscape' %}aria-current="page"{% endif %}>就业单位图谱</a>
           <a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}aria-current="page"{% endif %}>来源说明</a>
         </nav>
       </div>

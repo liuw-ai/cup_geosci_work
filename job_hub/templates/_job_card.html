@@ -5,6 +5,21 @@
   </div>
   <h3><a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
   <p class="employer">{{ job.employer }}</p>
+  <p class="job-employer-type">{{ job.employer_type }} · {{ job.role_direction }}</p>
+  <dl class="job-path-meta" aria-label="单位与机会属性">
+    <div>
+      <dt>就业路径</dt>
+      <dd>{{ job.employment_path }}</dd>
+    </div>
+    <div>
+      <dt>所属体系</dt>
+      <dd>{{ job.affiliation }}</dd>
+    </div>
+    <div>
+      <dt>机会范围</dt>
+      <dd>{{ job.opportunity_scope }}</dd>
+    </div>
+  </dl>
   {% if job.profile_match %}
     <div class="profile-match profile-match-{{ job.profile_match.level }}">
       <strong>{{ job.profile_match.label }}</strong>

@@ -8,12 +8,19 @@ import time
 import xml.etree.ElementTree as ET
 import zlib
 from dataclasses import dataclass
+from html import unescape
 from typing import Any
 from urllib.parse import urlencode, urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 
 import requests
 from bs4 import BeautifulSoup
+
+try:
+    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+    from cryptography.hazmat.primitives.padding import PKCS7
+except ImportError:  # pragma: no cover - exercised only in minimal deployments
+    Cipher = algorithms = modes = PKCS7 = None  # type: ignore[assignment]
 
 from job_hub.config import Settings
 from job_hub.matching import (
@@ -89,6 +96,8 @@ class OfficialSourceCollector:
             return self._collect_cas_job_board(source)
         if source_type == "successfactors_search":
             return self._collect_successfactors_search(source)
+        if source_type == "mokahr_search":
+            return self._collect_mokahr_search(source)
         if source_type in {"html_notice", "landing_page"}:
             return self._collect_html_notice(source)
         raise SourceCollectionError(f"Unsupported source type: {source_type}")
@@ -278,6 +287,8 @@ class OfficialSourceCollector:
                 detail_url = normalize_url(urljoin(response.url, anchor["href"]))
                 if not title or detail_url in seen:
                     continue
+                if not self._title_matches_filters(title, config):
+                    continue
                 seen.add(detail_url)
                 location_node = row.select_one(
                     ".colLocation .jobLocation, .jobLocation"
@@ -286,6 +297,27 @@ class OfficialSourceCollector:
                     location_node.get_text(" ", strip=True) if location_node else ""
                 ) or None
                 row_text = clean_text(row.get_text(" ", strip=True))
+                detail_posting: RawPosting | None = None
+                if config.get("fetch_detail_pages"):
+                    self._wait(source)
+                    try:
+                        detail_response = self._get(detail_url, source)
+                        detail_posting = self._extract_successfactors_detail(
+                            detail_response.text,
+                            detail_response.url,
+                            source,
+                            title,
+                            location,
+                        )
+                    except (SourceSkipped, SourceCollectionError):
+                        # Keep the public search-row fallback when a detail page
+                        # is temporarily unavailable or has stricter robots rules.
+                        detail_posting = None
+                    if detail_posting is not None:
+                        postings.append(detail_posting)
+                        if len(postings) >= item_limit:
+                            return postings
+                        continue
                 postings.append(
                     RawPosting(
                         title=title,
@@ -311,6 +343,356 @@ class OfficialSourceCollector:
                     return postings
             self._wait(source)
         return postings
+
+    def _extract_successfactors_detail(
+        self,
+        document: str,
+        source_url: str,
+        source: dict[str, Any],
+        title_hint: str,
+        location_hint: str | None,
+    ) -> RawPosting:
+        """Read a public SuccessFactors detail page when the source permits it."""
+        soup = BeautifulSoup(document, "html.parser")
+        config = source["config"]
+        title_node = self._select_first(
+            soup,
+            config.get("detail_title_selector", "h1, .job-title, .jobTitle")
+        )
+        title = clean_text(title_node.get_text(" ", strip=True)) if title_node else title_hint
+        content_node = self._select_first(
+            soup,
+            config.get("detail_content_selector", ".jobDisplayShell, .jobDisplay, #content")
+        ) or soup.body
+        if content_node:
+            for selector in (
+                "script",
+                "style",
+                "noscript",
+                "form.jobAlertsSearchForm",
+                ".cookie-banner",
+            ):
+                for node in content_node.select(selector):
+                    node.decompose()
+        body_text = clean_text(
+            content_node.get_text(" ", strip=True) if content_node else document
+        )
+        location_node = soup.select_one(
+            config.get(
+                "detail_location_selector",
+                "#job-location, .job-location, [id*='job-location']",
+            )
+        )
+        location = clean_text(
+            location_node.get_text(" ", strip=True) if location_node else ""
+        ) or location_hint
+        if not location:
+            location_match = re.search(
+                r"Location\s*:\s*(.+?)(?=\s+(?:Date|Job Duties|Qualifications|We are|$))",
+                body_text,
+                re.IGNORECASE,
+            )
+            location = clean_text(location_match.group(1)) if location_match else None
+        summary_sections: list[str] = []
+        for marker in ("Job Duties", "Qualifications", "Job Details"):
+            marker_position = body_text.lower().find(marker.lower())
+            if marker_position >= 0:
+                summary_sections.append(body_text[marker_position : marker_position + 210])
+        summary = clean_text("；".join(summary_sections))[:420] or body_text[:420] or title
+        return RawPosting(
+            title=title or title_hint,
+            employer=source["publisher"],
+            source_url=normalize_url(source_url),
+            application_url=self._find_application_url(soup, source_url)
+            or normalize_url(source_url),
+            text=clean_text(f"{title or title_hint} {body_text}"),
+            summary=summary,
+            published_date=extract_published_date(body_text),
+            deadline_date=extract_deadline(body_text),
+            location=location,
+            external_id=self._external_id_from_url(source_url),
+            match_text=clean_text(f"{title or title_hint} {body_text}"),
+        )
+
+    def _collect_mokahr_search(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Collect public jobs from an employer's official MokaHR portal."""
+        config = source["config"]
+        listing_url = config.get("listing_url", source["homepage_url"])
+        listing_response = self._get(listing_url, source)
+        initial = self._mokahr_initial_data(listing_response.text)
+        organization = initial.get("org") if isinstance(initial.get("org"), dict) else {}
+        org_id = str(config.get("org_id") or organization.get("id") or "").strip()
+        site_id = config.get("site_id") or initial.get("siteId") or organization.get("siteId")
+        if not org_id or site_id is None:
+            raise SourceCollectionError("MokaHR public page is missing organization/site id")
+        try:
+            site_id = int(site_id)
+        except (TypeError, ValueError) as error:
+            raise SourceCollectionError("MokaHR site id is invalid") from error
+        iv = str(initial.get("aesIv") or "").strip()
+        if not iv:
+            raise SourceCollectionError("MokaHR public page is missing its AES IV")
+        mode = str(config.get("mode") or initial.get("mode") or "").lower()
+        mode = "campus" if mode == "camp" else mode
+        if mode not in {"social", "campus"}:
+            raise SourceCollectionError("MokaHR source mode must be social or campus")
+        locale = str(config.get("locale", "zh-CN"))
+        parsed = urlparse(listing_response.url)
+        api_base = f"{parsed.scheme}://{parsed.netloc}"
+        list_url = urljoin(api_base, "/api/outer/ats-apply/website/jobs/v2")
+        result = self._mokahr_api_json(
+            list_url,
+            {
+                "orgId": org_id,
+                "siteId": site_id,
+                "limit": self._mokahr_page_size(source),
+                "offset": 0,
+                "needStat": True,
+                "site": mode,
+                "locale": locale,
+            },
+            iv,
+        )
+        result_data = result.get("data")
+        jobs = result_data.get("jobs") if isinstance(result_data, dict) else None
+        if not isinstance(jobs, list):
+            raise SourceCollectionError("MokaHR job list payload does not contain jobs")
+        detail_url = urljoin(api_base, "/api/outer/ats-apply/website/job")
+        postings: list[RawPosting] = []
+        seen: set[str] = set()
+        for listed_job in jobs:
+            if not isinstance(listed_job, dict):
+                continue
+            job_id = str(listed_job.get("id") or "").strip()
+            if not job_id or job_id in seen:
+                continue
+            seen.add(job_id)
+            if not self._mokahr_candidate_allowed(
+                self._mokahr_job_text(listed_job), config
+            ):
+                continue
+            job = listed_job
+            if config.get("fetch_detail_pages", True):
+                self._wait(source)
+                try:
+                    detail_result = self._mokahr_api_json(
+                        detail_url,
+                        {
+                            "orgId": org_id,
+                            "siteId": site_id,
+                            "jobId": job_id,
+                            "locale": locale,
+                        },
+                        iv,
+                    )
+                    detail_data = detail_result.get("data")
+                    if not isinstance(detail_data, dict):
+                        raise SourceCollectionError("MokaHR job detail payload is invalid")
+                    job = {**listed_job, **detail_data}
+                except (SourceSkipped, SourceCollectionError):
+                    if config.get("require_detail_pages"):
+                        continue
+            if not self._mokahr_candidate_allowed(
+                self._mokahr_job_text(job),
+                config,
+                exclude_patterns=config.get("detail_exclude_patterns", []),
+            ):
+                continue
+            postings.append(self._mokahr_posting(job, source, listing_url))
+            if len(postings) >= self._item_limit(source):
+                break
+        return postings
+
+    def _mokahr_api_json(
+        self,
+        url: str,
+        payload: dict[str, Any],
+        initialization_vector: str,
+        source: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        response = self._post_json(url, payload)
+        try:
+            encrypted = response.json()
+        except ValueError as error:
+            raise SourceCollectionError("MokaHR API did not return JSON") from error
+        if not isinstance(encrypted, dict):
+            raise SourceCollectionError("MokaHR API returned an unexpected payload")
+        return self._decrypt_mokahr_payload(encrypted, initialization_vector)
+
+    @staticmethod
+    def _mokahr_initial_data(document: str) -> dict[str, Any]:
+        node = BeautifulSoup(document, "html.parser").select_one("#init-data")
+        value = node.get("value") if node else None
+        if not isinstance(value, str) or not value.strip():
+            raise SourceCollectionError("MokaHR public page is missing #init-data")
+        try:
+            parsed = json.loads(unescape(value))
+        except json.JSONDecodeError as error:
+            raise SourceCollectionError("MokaHR init-data is invalid JSON") from error
+        if not isinstance(parsed, dict):
+            raise SourceCollectionError("MokaHR init-data is not an object")
+        return parsed
+
+    @staticmethod
+    def _decrypt_mokahr_payload(
+        payload: dict[str, Any],
+        initialization_vector: str,
+    ) -> dict[str, Any]:
+        if isinstance(payload.get("data"), dict):
+            return payload
+        if Cipher is None or algorithms is None or modes is None or PKCS7 is None:
+            raise SourceCollectionError("MokaHR support requires cryptography")
+        encrypted_data = payload.get("data")
+        response_key = payload.get("necromancer")
+        if not isinstance(encrypted_data, str) or not isinstance(response_key, str):
+            raise SourceCollectionError("MokaHR encrypted response is incomplete")
+        try:
+            cipher = Cipher(
+                algorithms.AES(response_key.encode("utf-8")),
+                modes.CBC(initialization_vector.encode("utf-8")),
+            )
+            decryptor = cipher.decryptor()
+            padded = decryptor.update(base64.b64decode(encrypted_data, validate=True))
+            padded += decryptor.finalize()
+            unpadder = PKCS7(algorithms.AES.block_size).unpadder()
+            decoded = json.loads((unpadder.update(padded) + unpadder.finalize()).decode("utf-8"))
+        except (ValueError, TypeError, UnicodeDecodeError, binascii.Error, json.JSONDecodeError) as error:
+            raise SourceCollectionError("Unable to decrypt MokaHR public response") from error
+        if not isinstance(decoded, dict):
+            raise SourceCollectionError("MokaHR decrypted response is not an object")
+        if decoded.get("success") is False:
+            raise SourceCollectionError(clean_text(str(decoded.get("msg") or "MokaHR API rejected the request")))
+        return decoded
+
+    @staticmethod
+    def _mokahr_job_text(job: dict[str, Any]) -> str:
+        values: list[str] = []
+        for field in ("title", "education", "commitment", "jobDescription"):
+            value = job.get(field)
+            if isinstance(value, str):
+                values.append(value)
+        for field in ("department", "zhineng"):
+            value = job.get(field)
+            if isinstance(value, dict) and isinstance(value.get("name"), str):
+                values.append(value["name"])
+        return clean_text(
+            " ".join(
+                BeautifulSoup(value, "html.parser").get_text(" ", strip=True)
+                if value.lstrip().startswith("<")
+                else value
+                for value in values
+            )
+        )
+
+    @staticmethod
+    def _mokahr_candidate_allowed(
+        value: str,
+        config: dict[str, Any],
+        *,
+        exclude_patterns: list[str] | None = None,
+    ) -> bool:
+        normalized = clean_text(value)
+        patterns = config.get("exclude_patterns", []) if exclude_patterns is None else exclude_patterns
+        if any(
+            re.search(pattern, normalized, re.IGNORECASE)
+            for pattern in patterns
+        ):
+            return False
+        include_patterns = config.get("include_patterns", [])
+        if include_patterns:
+            return any(
+                re.search(pattern, normalized, re.IGNORECASE)
+                for pattern in include_patterns
+            )
+        return bool(extract_major_tags(normalized))
+
+    @staticmethod
+    def _mokahr_page_size(source: dict[str, Any]) -> int:
+        value = source["config"].get(
+            "page_size", source["config"].get("max_items", 40)
+        )
+        try:
+            return max(1, min(int(value), 100))
+        except (TypeError, ValueError):
+            return 40
+
+    @staticmethod
+    def _mokahr_date(value: Any) -> str | None:
+        match = re.search(r"(20\d{2}-\d{2}-\d{2})", str(value or ""))
+        return match.group(1) if match else None
+
+    @staticmethod
+    def _mokahr_location(job: dict[str, Any]) -> str | None:
+        def labels(value: Any) -> list[str]:
+            if isinstance(value, str):
+                return [clean_text(value)]
+            if isinstance(value, list):
+                return [item for entry in value for item in labels(entry)]
+            if isinstance(value, dict):
+                named = clean_text(str(value.get("name") or value.get("label") or ""))
+                if named:
+                    return [named]
+                return [
+                    item
+                    for key in ("country", "province", "city", "district")
+                    for item in labels(value.get(key))
+                ]
+            return []
+
+        values = labels(job.get("locations")) or labels(job.get("location"))
+        unique = list(dict.fromkeys(value for value in values if value))
+        return "、".join(unique) or None
+
+    @staticmethod
+    def _mokahr_detail_url(listing_url: str, job_id: str) -> str:
+        return f"{listing_url.split('#', 1)[0]}#/job/{job_id}"
+
+    @staticmethod
+    def _mokahr_named_value(value: Any) -> str | None:
+        if isinstance(value, dict):
+            value = value.get("name")
+        return clean_text(str(value or "")) or None
+
+    def _mokahr_posting(
+        self,
+        job: dict[str, Any],
+        source: dict[str, Any],
+        listing_url: str,
+    ) -> RawPosting:
+        title = clean_text(str(job.get("title") or "未命名岗位"))
+        description = clean_text(
+            BeautifulSoup(
+                str(job.get("jobDescription") or ""), "html.parser"
+            ).get_text(" ", strip=True)
+        )
+        education = clean_text(str(job.get("education") or ""))
+        commitment = clean_text(str(job.get("commitment") or ""))
+        function = self._mokahr_named_value(job.get("zhineng"))
+        department = self._mokahr_named_value(job.get("department"))
+        location = self._mokahr_location(job)
+        fields = [
+            f"学历：{education}" if education else "",
+            f"职位性质：{commitment}" if commitment else "",
+            f"职位类别：{function}" if function else "",
+            f"所属部门：{department}" if department else "",
+            f"工作地点：{location}" if location else "",
+        ]
+        field_text = clean_text("；".join(value for value in fields if value))
+        match_text = clean_text(f"{title} {field_text} {description}")
+        detail_url = self._mokahr_detail_url(listing_url, str(job.get("id") or ""))
+        return RawPosting(
+            title=title,
+            employer=source["publisher"],
+            source_url=detail_url,
+            application_url=detail_url,
+            text=match_text,
+            summary=clean_text(f"{field_text}；{description}")[:420] or field_text or title,
+            published_date=self._mokahr_date(job.get("publishedAt")),
+            deadline_date=self._mokahr_date(job.get("closedAt")) or extract_deadline(description),
+            location=location,
+            external_id=str(job.get("id") or "") or None,
+            match_text=match_text,
+        )
 
     def _collect_rss(self, source: dict[str, Any]) -> list[RawPosting]:
         response = self._get(source["homepage_url"], source)
@@ -510,12 +892,12 @@ class OfficialSourceCollector:
     ) -> RawPosting | None:
         soup = BeautifulSoup(document, "html.parser")
         config = source["config"]
-        title_node = soup.select_one(config.get("title_selector", "h1"))
+        title_node = self._select_first(soup, config.get("title_selector", "h1"))
         title = clean_text(title_node.get_text(" ", strip=True) if title_node else "")
         if not title:
             title = clean_text(soup.title.get_text(" ", strip=True) if soup.title else title_hint)
         content_selector = config.get("content_selector")
-        content_node = soup.select_one(content_selector) if content_selector else None
+        content_node = self._select_first(soup, content_selector) if content_selector else None
         if not content_node:
             content_node = soup.find("article") or soup.find("main") or soup.body
         if content_node:
@@ -526,7 +908,11 @@ class OfficialSourceCollector:
             content_node.get_text(" ", strip=True) if content_node else document
         )
         combined = f"{title} {body_text}"
-        if not self._accept_candidate(combined, source):
+        if not self._accept_candidate(
+            combined,
+            source,
+            exclude_patterns=config.get("detail_exclude_patterns"),
+        ):
             return None
         application_url = self._find_application_url(soup, source_url)
         published_date = self._published_date_from_meta(soup) or extract_published_date(
@@ -534,11 +920,21 @@ class OfficialSourceCollector:
         )
         employer_selector = config.get("employer_selector")
         employer_node = (
-            soup.select_one(employer_selector) if employer_selector else None
+            self._select_first(soup, employer_selector) if employer_selector else None
         )
         employer = clean_text(
             employer_node.get_text(" ", strip=True) if employer_node else ""
         ) or config.get("employer_hint", source["publisher"])
+        if config.get("infer_employer_from_title"):
+            employer = self._employer_from_title(title, employer)
+
+        location = config.get("location_hint")
+        if not location:
+            location = self._label_value(
+                body_text,
+                "工作地点",
+                ("岗位职责", "任职要求", "学历要求", "招聘人数", "薪酬", "报名", "截止", "联系"),
+            )
         return RawPosting(
             title=title,
             employer=employer,
@@ -548,7 +944,7 @@ class OfficialSourceCollector:
             summary=body_text[:420],
             published_date=published_date,
             deadline_date=extract_deadline(body_text),
-            location=config.get("location_hint"),
+            location=location,
         )
 
     def _extract_cupb_detail(
@@ -591,6 +987,14 @@ class OfficialSourceCollector:
         # job notice through source-level exclusion patterns.
         combined = clean_text(f"{title} {body_text}")
         if not self._accept_candidate(combined, source):
+            return None
+        if (
+            source["config"].get("require_detail_content")
+            and len(body_text) < int(source["config"].get("minimum_detail_characters", 80))
+        ):
+            # A listing title alone cannot establish the target major, degree,
+            # deadline or official application route. Keep it out until its
+            # public detail page exposes substantive recruitment content.
             return None
         employer_node = soup.select_one(".title-message .name")
         employer = clean_text(
@@ -784,6 +1188,22 @@ class OfficialSourceCollector:
         except requests.RequestException as error:
             raise SourceCollectionError(f"Request failed for {normalized}: {error}") from error
 
+    def _post_json(self, url: str, payload: dict[str, Any]) -> requests.Response:
+        normalized = normalize_url(url)
+        if not self._robots_allowed(normalized):
+            raise SourceSkipped(f"robots.txt does not permit collection: {normalized}")
+        try:
+            response = self.session.post(
+                normalized,
+                json=payload,
+                timeout=self.settings.request_timeout_seconds,
+                allow_redirects=True,
+            )
+            response.raise_for_status()
+            return response
+        except requests.RequestException as error:
+            raise SourceCollectionError(f"Request failed for {normalized}: {error}") from error
+
     def _robots_allowed(self, url: str) -> bool:
         parsed = urlparse(url)
         root = f"{parsed.scheme}://{parsed.netloc}"
@@ -813,12 +1233,48 @@ class OfficialSourceCollector:
         return parser.can_fetch(USER_AGENT, url)
 
     @staticmethod
-    def _accept_candidate(value: str, source: dict[str, Any]) -> bool:
+    def _select_first(soup: BeautifulSoup, selector: str) -> Any | None:
+        """Return the first match in the configured selector order.
+
+        BeautifulSoup treats a comma-separated selector as one CSS query and
+        returns the first document-order match, which can make a broad fallback
+        such as ``body`` win over the intended article container. Splitting the
+        configured alternatives preserves their explicit priority.
+        """
+        for candidate in (part.strip() for part in selector.split(",")):
+            if not candidate:
+                continue
+            node = soup.select_one(candidate)
+            if node is not None:
+                return node
+        return None
+
+    @staticmethod
+    def _title_matches_filters(title: str, config: dict[str, Any]) -> bool:
+        normalized = clean_text(title)
+        if any(
+            re.search(pattern, normalized, re.IGNORECASE)
+            for pattern in config.get("excluded_title_patterns", [])
+        ):
+            return False
+        required = config.get("required_title_patterns", [])
+        return not required or any(
+            re.search(pattern, normalized, re.IGNORECASE) for pattern in required
+        )
+
+    @staticmethod
+    def _accept_candidate(
+        value: str,
+        source: dict[str, Any],
+        *,
+        exclude_patterns: list[str] | None = None,
+    ) -> bool:
         config = source["config"]
         if config.get("accept_all_entries"):
             return True
         normalized = clean_text(value)
-        exclude_patterns = config.get("exclude_patterns", [])
+        if exclude_patterns is None:
+            exclude_patterns = config.get("exclude_patterns", [])
         if any(
             re.search(pattern, normalized, re.IGNORECASE)
             for pattern in exclude_patterns
@@ -920,8 +1376,9 @@ class OfficialSourceCollector:
             context = clean_text(
                 context_node.get_text(" ", strip=True) if context_node else label
             )
-            if href and any(
-                word in f"{label} {context}"
+            candidate = f"{label} {context}".lower()
+            if not href or not any(
+                word in candidate
                 for word in (
                     "报名",
                     "申请",
@@ -930,15 +1387,27 @@ class OfficialSourceCollector:
                     "应聘",
                     "招聘平台",
                     "招聘网",
+                    "apply",
+                    "application",
                 )
             ):
-                return normalize_url(urljoin(base_url, href))
+                continue
+            candidate_url = normalize_url(urljoin(base_url, href))
+            # An application form or job-list attachment is supporting evidence,
+            # not a live application route. The original announcement remains the
+            # authoritative link when a public page only provides attachments.
+            if re.search(r"\.(?:pdf|docx?|xlsx?|csv|zip|rar)$", urlparse(candidate_url).path, re.IGNORECASE):
+                continue
+            return candidate_url
         return None
 
     @staticmethod
     def _published_date_from_meta(soup: BeautifulSoup) -> str | None:
         for selector in (
             "meta[property='article:published_time']",
+            "meta[name='PubDate']",
+            "meta[name='pubdate']",
+            "meta[name='ArticleDate']",
             "meta[name='publishdate']",
             "meta[name='date']",
             "time",

@@ -1101,6 +1101,159 @@ small {
   font-size: 14px;
 }
 
+.job-employer-type {
+  margin: -8px 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.job-path-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.job-path-meta div {
+  min-width: 0;
+}
+
+.job-path-meta dt {
+  margin-bottom: 2px;
+  color: var(--muted-light);
+  font-size: 11px;
+}
+
+.job-path-meta dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.job-card-topline {
+  align-items: flex-start;
+}
+
+.category-label {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.relevance {
+  max-width: 40%;
+  white-space: nowrap;
+}
+
+.landscape-context {
+  display: grid;
+  gap: 9px;
+  margin-top: 34px;
+  padding: 18px 20px;
+  border-left: 4px solid var(--amber);
+  background: var(--amber-soft);
+}
+
+.landscape-context p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.landscape-groups {
+  display: grid;
+  gap: 42px;
+}
+
+.landscape-group {
+  padding-top: 22px;
+  border-top: 2px solid var(--teal-dark);
+}
+
+.landscape-group-heading {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.75fr) minmax(0, 1.5fr) auto;
+  gap: 18px 28px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.landscape-group-heading h2 {
+  margin: 0;
+  color: var(--teal-dark);
+  font-size: 23px;
+}
+
+.landscape-group-heading p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.landscape-group-heading .text-link {
+  padding-top: 2px;
+  white-space: nowrap;
+}
+
+.landscape-unit-list {
+  border-top: 1px solid var(--line);
+}
+
+.landscape-unit {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(260px, 0.75fr);
+  gap: 20px 32px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.landscape-unit-main h3 {
+  margin: 0 0 7px;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.landscape-unit-main h3 a,
+.landscape-unit dd a {
+  color: var(--teal);
+}
+
+.landscape-unit-main p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.landscape-unit dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0;
+}
+
+.landscape-unit dl div {
+  min-width: 0;
+}
+
+.landscape-unit dt {
+  margin-bottom: 3px;
+  color: var(--muted-light);
+  font-size: 12px;
+}
+
+.landscape-unit dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
 @media (max-width: 960px) {
   .category-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1132,6 +1285,30 @@ small {
 }
 
 @media (max-width: 720px) {
+  .job-path-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landscape-group-heading,
+  .landscape-unit {
+    grid-template-columns: 1fr;
+  }
+
+  .landscape-group-heading {
+    gap: 10px;
+  }
+
+  .landscape-group-heading .text-link {
+    padding-top: 0;
+  }
+
+  .landscape-unit {
+    gap: 14px;
+  }
+
+  .landscape-unit dl {
+    grid-template-columns: 1fr 1fr;
+  }
   h1 {
     font-size: 30px;
   }

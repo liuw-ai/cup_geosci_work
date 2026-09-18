@@ -12,6 +12,7 @@ from flask import Flask, abort, jsonify, render_template, request, url_for
 from job_hub.audit import audit_database
 from job_hub.config import Settings
 from job_hub.db import Database
+from job_hub.employers import enrich_job, load_employment_landscape
 from job_hub.matching import CATEGORY_DESCRIPTIONS, CATEGORY_ORDER, DEGREE_ORDER
 from job_hub.pipeline import JobPipeline
 from job_hub.profiles import (
@@ -102,11 +103,21 @@ def create_app(settings: Settings | None = None) -> Flask:
         response.headers["X-Frame-Options"] = "SAMEORIGIN"
         return response
 
+    def report_for_display(report: dict[str, Any]) -> dict[str, Any]:
+        """Enrich historical daily snapshots without rewriting frozen report data."""
+        displayed = dict(report)
+        for key in ("new_jobs", "updated_jobs", "deadline_jobs"):
+            displayed[key] = [
+                enrich_job(item)
+                for item in report.get(key, [])
+            ]
+        return displayed
+
     def active_report() -> tuple[dict[str, Any], bool]:
         report = database.latest_daily_report()
         if report is not None:
-            return report, False
-        return build_daily_report(database, settings), True
+            return report_for_display(report), False
+        return report_for_display(build_daily_report(database, settings)), True
 
     def requested_profile() -> StudentProfile | None:
         profile_id = request.args.get("profile", "").strip()
@@ -191,7 +202,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             return home()
         return render_template(
             "daily.html",
-            report=report,
+            report=report_for_display(report),
             is_preview=False,
             report_dates=database.list_report_dates(30),
         )
@@ -211,7 +222,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             abort(404)
         return render_template(
             "daily.html",
-            report=report,
+            report=report_for_display(report),
             is_preview=is_preview,
             report_dates=database.list_report_dates(30),
         )
@@ -278,6 +289,12 @@ def create_app(settings: Settings | None = None) -> Flask:
             failures=database.recent_crawl_failures(),
         )
 
+    @app.get("/landscape")
+    def landscape() -> str:
+        return render_template(
+            "landscape.html",
+            landscape=load_employment_landscape(),
+        )
     @app.get("/healthz")
     def healthz() -> Any:
         return jsonify(

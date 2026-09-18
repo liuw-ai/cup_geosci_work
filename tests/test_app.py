@@ -41,6 +41,11 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     assert client.get(f"/jobs/{job_id}").status_code == 200
     assert client.get(f"/daily/{report['report_date']}").status_code == 200
     assert client.get("/api/jobs").get_json()["total"] == 1
+    landscape_response = client.get("/landscape")
+    assert landscape_response.status_code == 200
+    assert "油气工程技术服务" in landscape_response.get_data(as_text=True)
+    detail_response = client.get(f"/jobs/{job_id}")
+    assert "就业路径" in detail_response.get_data(as_text=True)
 
     profile_response = client.get(
         "/jobs?profile=master-geological-engineering"
