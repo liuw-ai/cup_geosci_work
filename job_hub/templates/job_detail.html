@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} | {{ site_name }}{% endblock %}
+
+{% block content %}
+  <section class="page-heading job-heading">
+    <div class="shell">
+      {% if profile %}
+        <a class="back-link" href="{{ url_for('jobs', profile=profile.id) }}">返回匹配岗位</a>
+      {% else %}
+        <a class="back-link" href="{{ url_for('jobs') }}">返回全部岗位</a>
+      {% endif %}
+      <div class="detail-topline">
+        <span class="category-label">{{ job.category }}</span>
+        <span class="relevance relevance-{{ job.relevance_band }}">{{ job.relevance_band }}</span>
+      </div>
+      <h1>{{ job.title }}</h1>
+      <p class="employer large-employer">{{ job.employer }}</p>
+    </div>
+  </section>
+
+  <section class="shell detail-layout">
+    <article class="detail-content">
+      <h2>岗位信息</h2>
+      <dl class="detail-grid">
+        <div><dt>工作地点</dt><dd>{{ job.location or "原始公告未注明" }}</dd></div>
+        <div><dt>学历要求</dt><dd>{{ " / ".join(job.degree_levels) if job.degree_levels else "原始公告未注明" }}</dd></div>
+        <div><dt>发布时间</dt><dd>{{ job.published_date|cn_date }}</dd></div>
+        <div><dt>报名截止</dt><dd class="deadline">{{ job.deadline_date|cn_date }}</dd></div>
+        <div><dt>信息来源</dt><dd>{{ job.source_name }}（{{ job.source_tier }} 级）</dd></div>
+        <div><dt>专业匹配</dt><dd>{{ job.relevance_band }}</dd></div>
+      </dl>
+      {% if job.major_tags %}
+        <div class="tag-row detail-tags" aria-label="专业相关标签">
+          {% for tag in job.major_tags %}
+            <span>{{ tag }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if job.profile_match %}
+        <h2>与 {{ profile.label }} 的匹配</h2>
+        <div class="profile-match profile-match-{{ job.profile_match.level }} detail-profile-match">
+          <strong>{{ job.profile_match.label }}</strong>
+          <span>{{ job.profile_match.reason }}</span>
+        </div>
+      {% endif %}
+      <h2>公告摘录</h2>
+      <p class="description">{{ job.description or job.summary or "请查看原始公告获取完整岗位要求。" }}</p>
+    </article>
+    <aside class="source-panel">
+      <p class="eyebrow">核验与报名</p>
+      <h2>以原始公告为准</h2>
+      <p>本页仅整理公开信息。请在投递前核对资格条件、报名入口、截止时间和单位通知。</p>
+      <a class="action-link full-width" href="{{ job.source_url }}" target="_blank" rel="noopener noreferrer">打开官方原文</a>
+      {% if job.application_url and job.application_url != job.source_url %}
+        <a class="secondary-link" href="{{ job.application_url }}" target="_blank" rel="noopener noreferrer">打开报名入口</a>
+      {% endif %}
+      <dl class="source-meta">
+        <div><dt>首次收录</dt><dd>{{ job.first_seen_at|local_timestamp_date }}</dd></div>
+        <div><dt>最近核对</dt><dd>{{ job.last_seen_at|local_timestamp_date }}</dd></div>
+      </dl>
+    </aside>
+  </section>
+{% endblock %}

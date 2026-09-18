@@ -1,0 +1,14 @@
+[
+  {
+    "title": "请填写岗位名称",
+    "employer": "请填写招聘单位全称",
+    "source_url": "https://招聘单位或政府平台的官方公告链接",
+    "application_url": "https://如有独立报名入口则填写，否则删除此字段",
+    "location": "工作地点",
+    "published_date": "2026-09-17",
+    "deadline_date": "2026-10-01",
+    "summary": "一句话说明岗位、学历或专业要求。",
+    "description": "粘贴经核验的官方公告摘要。不要粘贴学生个人信息、账号密码或非公开材料。",
+    "source_id": "official-manual-import"
+  }
+]

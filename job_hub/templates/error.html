@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | {{ site_name }}{% endblock %}
+
+{% block content %}
+  <section class="shell error-page">
+    <p class="eyebrow">HTTP {{ code }}</p>
+    <h1>{{ title }}</h1>
+    <p>请返回首页或继续浏览当前在招岗位。</p>
+    <a class="action-link" href="{{ url_for('home') }}">返回今日日报</a>
+  </section>
+{% endblock %}

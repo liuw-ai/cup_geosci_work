@@ -1,0 +1,402 @@
+[
+  {
+    "id": "cupb-career",
+    "name": "中国石油大学（北京）就业信息网",
+    "publisher": "中国石油大学（北京）",
+    "homepage_url": "https://career.cup.edu.cn/",
+    "source_type": "cupb_career",
+    "category": "三桶油与油服",
+    "source_tier": "B",
+    "enabled": true,
+    "config": {
+      "allowed_hosts": ["career.cup.edu.cn"],
+      "listing_urls": [
+        "https://career.cup.edu.cn/",
+        "https://career.cup.edu.cn/campus",
+        "https://career.cup.edu.cn/news/index/tag/xwzp",
+        "https://career.cup.edu.cn/job/search/d_category/0"
+      ],
+      "detail_path_patterns": [
+        "/campus/view/id/",
+        "/job/view/id/",
+        "/news/view/.+tag/xwzp"
+      ],
+      "require_recruitment_word": false,
+      "exclude_patterns": [
+        "招聘会",
+        "宣讲会",
+        "双选会",
+        "双选",
+        "邀请函",
+        "活动",
+        "讲座",
+        "就业补贴",
+        "生涯",
+        "就业指导",
+        "签约",
+        "调查",
+        "征集",
+        "通知",
+        "采购",
+        "招标",
+        "中标"
+      ],
+      "minimum_relevance": 38,
+      "max_items": 28,
+      "request_interval_seconds": 1.0,
+      "note": "公开栏目包含学院发布、招聘公告、全职和实习岗位；仅采集其中的具体岗位和招聘公告。适配器优先读取公告表格中的专业范围、学历、面向对象和地点，不把招聘会、宣讲会、就业通知或活动发布为岗位。"
+    }
+  },
+  {
+    "id": "cas-job-board",
+    "name": "中国科学院人才招聘网",
+    "publisher": "中国科学院",
+    "homepage_url": "http://job.cas.cn/",
+    "source_type": "cas_job_board",
+    "category": "科研院所与高校",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "job_link_selector": "a[href*='toRecruitment.do'][href*='postInfo.id']",
+      "minimum_relevance": 42,
+      "max_items": 36,
+      "request_interval_seconds": 1.0,
+      "note": "从中国科学院官方招聘页面读取岗位详情，保留原始岗位页作为报名入口。"
+    }
+  },
+  {
+    "id": "cup-east-career",
+    "name": "中国石油大学（华东）智慧就业网",
+    "publisher": "中国石油大学（华东）",
+    "homepage_url": "https://career.upc.edu.cn/career/index",
+    "source_type": "landing_page",
+    "category": "三桶油与油服",
+    "source_tier": "B",
+    "enabled": false,
+    "config": {
+      "employer_hint": "中国石油大学（华东）智慧就业网",
+      "allowed_hosts": ["career.upc.edu.cn"],
+      "minimum_relevance": 38,
+      "note": "公开岗位列表接口可访问，但当前多数岗位详情要求该校账号登录；待核验所有学生可访问的公开详情或附件解析方案后再启用。"
+    }
+  },
+  {
+    "id": "halliburton-career",
+    "name": "Halliburton Careers",
+    "publisher": "Halliburton",
+    "homepage_url": "https://jobs.halliburton.com/",
+    "source_type": "successfactors_search",
+    "category": "在华外企与国际机会",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "search_url": "https://jobs.halliburton.com/search/",
+      "locale": "en_US",
+      "queries": [
+        "geology",
+        "geophysics",
+        "geoscience",
+        "petrophysics",
+        "reservoir",
+        "seismic",
+        "subsurface",
+        "petroleum",
+        "drilling",
+        "wireline"
+      ],
+      "minimum_relevance": 45,
+      "max_items": 45,
+      "request_interval_seconds": 1.2,
+      "note": "仅收录 Halliburton 官方公开检索页中与地学、油气、测井、储层、钻完井等关键词匹配的岗位；地点与资格以原始岗位页为准。"
+    }
+  },
+  {
+    "id": "cgs-notices",
+    "name": "中国地质调查局招聘与人才公告",
+    "publisher": "中国地质调查局",
+    "homepage_url": "https://www.cgs.gov.cn/tzgg/tzgg/",
+    "source_type": "html_notice",
+    "category": "自然资源与地勘",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "listing_urls": ["https://www.cgs.gov.cn/tzgg/tzgg/"],
+      "allowed_hosts": ["www.cgs.gov.cn"],
+      "title_selector": "h1, .title",
+      "content_selector": "article, main, .TRS_Editor, .content, body",
+      "require_recruitment_word": true,
+      "include_patterns": ["招聘|招录|招考|人才引进|博士后|科研助理|实习"],
+      "exclude_patterns": [
+        "采购",
+        "招标",
+        "中标",
+        "征求意见",
+        "比选",
+        "废标",
+        "合同",
+        "预算",
+        "会议",
+        "培训"
+      ],
+      "minimum_relevance": 40,
+      "max_items": 18,
+      "request_interval_seconds": 1.0,
+      "note": "只从官方公告中保留明确招聘、人才引进、博士后、科研助理或实习信息；采购和招标信息会被排除。"
+    }
+  },
+  {
+    "id": "mnr-notices",
+    "name": "自然资源部招聘与人才公告",
+    "publisher": "中华人民共和国自然资源部",
+    "homepage_url": "https://www.mnr.gov.cn/gk/tzgg/",
+    "source_type": "html_notice",
+    "category": "自然资源与地勘",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "listing_urls": ["https://www.mnr.gov.cn/gk/tzgg/"],
+      "allowed_hosts": ["www.mnr.gov.cn"],
+      "title_selector": "h1, .title",
+      "content_selector": "article, main, .TRS_Editor, .content, body",
+      "require_recruitment_word": true,
+      "include_patterns": ["招聘|招录|招考|人才引进|博士后|科研助理|实习"],
+      "exclude_patterns": [
+        "采购",
+        "招标",
+        "中标",
+        "征求意见",
+        "比选",
+        "废标",
+        "合同",
+        "预算",
+        "会议",
+        "培训"
+      ],
+      "minimum_relevance": 40,
+      "max_items": 18,
+      "request_interval_seconds": 1.0,
+      "note": "只从自然资源部正式公开公告中保留与招聘、人才引进、博士后、科研助理或实习有关的内容。"
+    }
+  },
+  {
+    "id": "cnpc-career",
+    "name": "中国石油高校毕业生招聘平台",
+    "publisher": "中国石油天然气集团有限公司",
+    "homepage_url": "https://zhaopin.cnpc.com.cn/",
+    "source_type": "landing_page",
+    "category": "三桶油与油服",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "中国石油天然气集团有限公司",
+      "allowed_hosts": ["zhaopin.cnpc.com.cn"],
+      "minimum_relevance": 20,
+      "note": "当前公开请求返回 HTTP 412。待取得合规公开接口或专用适配器后再启用，不绕过访问限制。"
+    }
+  },
+  {
+    "id": "sinopec-career",
+    "name": "中国石化人才招聘网站",
+    "publisher": "中国石油化工集团有限公司",
+    "homepage_url": "https://job.sinopec.com/",
+    "source_type": "landing_page",
+    "category": "三桶油与油服",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "中国石油化工集团有限公司",
+      "allowed_hosts": ["job.sinopec.com"],
+      "minimum_relevance": 20,
+      "note": "当前 robots.txt 访问返回 HTTP 403。待网站公开规则和稳定入口核验后接入。"
+    }
+  },
+  {
+    "id": "cnooc-career",
+    "name": "中国海油招聘平台",
+    "publisher": "中国海洋石油集团有限公司",
+    "homepage_url": "https://zhaopin.cnooc.com.cn/",
+    "source_type": "landing_page",
+    "category": "三桶油与油服",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "中国海洋石油集团有限公司",
+      "allowed_hosts": ["zhaopin.cnooc.com.cn"],
+      "minimum_relevance": 20,
+      "note": "当前环境无法稳定连接。待验证公开招聘入口和 robots 规则后接入。"
+    }
+  },
+  {
+    "id": "pipechina-career",
+    "name": "国家管网集团招聘平台",
+    "publisher": "国家石油天然气管网集团有限公司",
+    "homepage_url": "https://zhaopin.pipechina.com.cn/",
+    "source_type": "landing_page",
+    "category": "三桶油与油服",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "国家石油天然气管网集团有限公司",
+      "allowed_hosts": ["zhaopin.pipechina.com.cn"],
+      "minimum_relevance": 20,
+      "note": "当前 robots.txt 访问返回 HTTP 403。待公开接口或专用适配器核验后接入。"
+    }
+  },
+  {
+    "id": "cags-notices",
+    "name": "中国地质科学院公开招聘信息",
+    "publisher": "中国地质科学院",
+    "homepage_url": "https://www.cags.ac.cn/",
+    "source_type": "landing_page",
+    "category": "科研院所与高校",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "中国地质科学院",
+      "allowed_hosts": ["www.cags.ac.cn"],
+      "minimum_relevance": 40,
+      "note": "当前环境连接失败；待页面可访问且岗位列表结构核验后添加专用公告适配器。"
+    }
+  },
+  {
+    "id": "mohrss-notices",
+    "name": "人力资源和社会保障部公开招聘信息",
+    "publisher": "人力资源和社会保障部",
+    "homepage_url": "https://www.mohrss.gov.cn/",
+    "source_type": "landing_page",
+    "category": "事业单位与人才引进",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "人力资源和社会保障部",
+      "allowed_hosts": ["www.mohrss.gov.cn"],
+      "minimum_relevance": 40,
+      "note": "当前首页出现浏览器验证，不绕过验证；待获得合规公开公告入口后接入。"
+    }
+  },
+  {
+    "id": "ncss-career",
+    "name": "国家大学生就业服务平台",
+    "publisher": "国家大学生就业服务平台",
+    "homepage_url": "https://www.ncss.cn/",
+    "source_type": "landing_page",
+    "category": "能源与工程拓展",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "国家大学生就业服务平台",
+      "allowed_hosts": ["www.ncss.cn"],
+      "minimum_relevance": 40,
+      "note": "岗位检索为动态页面，待核验官方公开数据接口或稳定页面结构后接入。"
+    }
+  },
+  {
+    "id": "national-civil-service",
+    "name": "国家公务员局考试录用专题",
+    "publisher": "国家公务员局",
+    "homepage_url": "https://bm.scs.gov.cn/",
+    "source_type": "landing_page",
+    "category": "公务员与选调",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "国家公务员局",
+      "allowed_hosts": ["bm.scs.gov.cn"],
+      "minimum_relevance": 40,
+      "note": "职位表与专题入口按年度变化，需在每年公告期验证公开职位表后建立专用解析器。"
+    }
+  },
+  {
+    "id": "beijing-hrss",
+    "name": "北京市人力资源和社会保障局公开招聘",
+    "publisher": "北京市人力资源和社会保障局",
+    "homepage_url": "https://rsj.beijing.gov.cn/",
+    "source_type": "landing_page",
+    "category": "事业单位与人才引进",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "北京市人力资源和社会保障局",
+      "allowed_hosts": ["rsj.beijing.gov.cn"],
+      "minimum_relevance": 40,
+      "note": "已登记为全国事业单位渠道之一，待公开招聘列表页与 robots 规则逐项核验后接入。"
+    }
+  },
+  {
+    "id": "shandong-hrss",
+    "name": "山东省人力资源和社会保障厅公开招聘",
+    "publisher": "山东省人力资源和社会保障厅",
+    "homepage_url": "http://hrss.shandong.gov.cn/",
+    "source_type": "landing_page",
+    "category": "事业单位与人才引进",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "山东省人力资源和社会保障厅",
+      "allowed_hosts": ["hrss.shandong.gov.cn"],
+      "minimum_relevance": 40,
+      "note": "已登记为全国事业单位渠道之一，待公开招聘列表页与 robots 规则逐项核验后接入。"
+    }
+  },
+  {
+    "id": "slb-career",
+    "name": "SLB Careers",
+    "publisher": "SLB",
+    "homepage_url": "https://careers.slb.com/",
+    "source_type": "landing_page",
+    "category": "在华外企与国际机会",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "SLB",
+      "allowed_hosts": ["careers.slb.com"],
+      "minimum_relevance": 45,
+      "note": "官网 robots.txt 明确禁止自动访问岗位搜索路径；保留官方入口，暂不自动采集。"
+    }
+  },
+  {
+    "id": "baker-hughes-career",
+    "name": "Baker Hughes Careers",
+    "publisher": "Baker Hughes",
+    "homepage_url": "https://careers.bakerhughes.com/",
+    "source_type": "landing_page",
+    "category": "在华外企与国际机会",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "Baker Hughes",
+      "allowed_hosts": ["careers.bakerhughes.com"],
+      "minimum_relevance": 45,
+      "note": "当前入口未发现可稳定提取的公开静态岗位列表，待专用公开接口核验后接入。"
+    }
+  },
+  {
+    "id": "weatherford-career",
+    "name": "Weatherford Careers",
+    "publisher": "Weatherford",
+    "homepage_url": "https://jobs.weatherford.com/",
+    "source_type": "landing_page",
+    "category": "在华外企与国际机会",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "Weatherford",
+      "allowed_hosts": ["jobs.weatherford.com"],
+      "minimum_relevance": 45,
+      "note": "当前环境 TLS 连接不稳定，待可重复验证公开岗位列表后接入。"
+    }
+  },
+  {
+    "id": "official-manual-import",
+    "name": "人工核验的官方公告",
+    "publisher": "项目管理员",
+    "homepage_url": "https://example.invalid/manual-import",
+    "source_type": "manual",
+    "category": "能源与工程拓展",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "note": "仅用于补录已核验的单位官网、政府公告或高校就业网岗位；第三方转载不得直接发布。"
+    }
+  }
+]

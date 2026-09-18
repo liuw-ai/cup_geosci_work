@@ -1,0 +1,83 @@
+services:
+  web:
+    build:
+      context: .
+    image: cupb-geoscience-job-hub:latest
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+    command:
+      - gunicorn
+      - --bind
+      - 0.0.0.0:8080
+      - --workers
+      - "2"
+      - --threads
+      - "4"
+      - job_hub.wsgi:app
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "from urllib.request import urlopen; urlopen('http://127.0.0.1:8080/healthz', timeout=5).read()"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  worker:
+    build:
+      context: .
+    image: cupb-geoscience-job-hub:latest
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+    command:
+      - python
+      - -m
+      - job_hub.worker
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -m
+        - job_hub.cli
+        - worker-health
+        - --max-age
+        - "180"
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 180s
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  job_hub_data:

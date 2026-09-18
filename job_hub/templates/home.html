@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}今日就业日报 | {{ site_name }}{% endblock %}
+
+{% block content %}
+  <section class="report-band">
+    <div class="shell report-heading">
+      <div>
+        <p class="eyebrow">每日 20:00 发布</p>
+        <h1>{{ report.report_date|cn_date }}就业日报</h1>
+        {% if is_preview %}
+          <p class="lede">今天的正式日报将在 20:00 固化发布；当前展示的是实时预览。</p>
+        {% else %}
+          <p class="lede">公开、可追溯的地学就业信息，按专业相关性和截止时间整理。</p>
+        {% endif %}
+      </div>
+      <a class="action-link" href="{{ url_for('daily_report', report_date=report.report_date) }}">打开完整日报</a>
+    </div>
+  </section>
+
+  <section class="shell stats-grid" aria-label="今日就业信息统计">
+    <div class="stat">
+      <span>今日新增</span>
+      <strong>{{ report.stats.new }}</strong>
+      <small>条官方信息</small>
+    </div>
+    <div class="stat">
+      <span>信息更新</span>
+      <strong>{{ report.stats.updated }}</strong>
+      <small>条岗位变更</small>
+    </div>
+    <div class="stat urgent">
+      <span>7 日内截止</span>
+      <strong>{{ report.stats.deadline_soon }}</strong>
+      <small>条需要关注</small>
+    </div>
+    <div class="stat">
+      <span>当前在招</span>
+      <strong>{{ report.stats.open_total }}</strong>
+      <small>条可检索岗位</small>
+    </div>
+  </section>
+
+  <section class="shell profile-entry" aria-label="按学历与专业筛选岗位">
+    <form class="profile-entry-form" method="get" action="{{ url_for('jobs') }}">
+      <div>
+        <p class="eyebrow">地球科学学院</p>
+        <h2>按我的学历与专业查看</h2>
+      </div>
+      <div class="field">
+        <label for="home-profile">学历与专业</label>
+        <select id="home-profile" name="profile" required>
+          <option value="" selected disabled>请选择</option>
+          {% for item in student_profiles %}
+            <option value="{{ item.id }}">{{ item.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit">查看匹配岗位</button>
+    </form>
+  </section>
+
+  <section class="shell content-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">快速入口</p>
+        <h2>按就业方向查看</h2>
+      </div>
+      <a class="text-link" href="{{ url_for('jobs') }}">进入全部岗位库</a>
+    </div>
+    <div class="category-grid">
+      {% for category in category_order %}
+        <a class="category-item" href="{{ url_for('jobs', category=category) }}">
+          <strong>{{ category }}</strong>
+          <span>{{ category_descriptions[category] }}</span>
+          {% for item in categories if item.category == category %}
+            <small>{{ item.count }} 条在招</small>
+          {% else %}
+            <small>查看岗位</small>
+          {% endfor %}
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="shell content-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">优先关注</p>
+        <h2>高相关岗位与最新更新</h2>
+      </div>
+      <a class="text-link" href="{{ url_for('jobs', relevance='强相关') }}">查看强相关岗位</a>
+    </div>
+    {% if featured %}
+      <div class="job-grid">
+        {% for job in featured %}
+          {% include "_job_card.html" %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <h3>正在等待首批已核验岗位</h3>
+        <p>系统会在完成官方来源同步后更新本页；你也可以稍后查看全部岗位库。</p>
+        <a class="action-link" href="{{ url_for('jobs') }}">查看岗位库</a>
+      </div>
+    {% endif %}
+  </section>
+
+  {% if report.deadline_jobs %}
+    <section class="shell content-section deadline-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">时间敏感</p>
+          <h2>未来 7 天截止</h2>
+        </div>
+        <a class="text-link" href="{{ url_for('daily_report', report_date=report.report_date) }}#deadline-jobs">查看日报清单</a>
+      </div>
+      <div class="compact-list">
+        {% for job in report.deadline_jobs[:5] %}
+          <a href="{{ url_for('job_detail', job_id=job.id) }}">
+            <span class="deadline-date">{{ job.deadline_date|cn_date }}</span>
+            <strong>{{ job.title }}</strong>
+            <span>{{ job.employer }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}来源与收录规则 | {{ site_name }}{% endblock %}
+
+{% block content %}
+  <section class="page-heading">
+    <div class="shell">
+      <p class="eyebrow">可靠性优先</p>
+      <h1>来源与收录规则</h1>
+      <p class="lede">只发布可追溯的公开招聘信息，并保留单位官方原文链接。</p>
+    </div>
+  </section>
+
+  <section class="shell content-section policy-grid">
+    <article>
+      <h2>A 级来源</h2>
+      <p>招聘单位官网、官方招聘系统、政府部门官网和法定公开招聘平台。</p>
+    </article>
+    <article>
+      <h2>B 级来源</h2>
+      <p>高校就业网、学院就业通知和经学校或主管单位认证的招聘公告。</p>
+    </article>
+    <article>
+      <h2>线索处理</h2>
+      <p>第三方转载仅用于发现线索；未回溯到正式原始链接的信息不会公开发布。</p>
+    </article>
+  </section>
+
+  <section class="shell content-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">来源白名单</p>
+        <h2>已登记的官方信息源</h2>
+      </div>
+      <span class="section-count">{{ sources|length }} 个</span>
+    </div>
+    <div class="source-table-wrap">
+      <table class="source-table">
+        <thead>
+          <tr><th>来源</th><th>方向</th><th>级别</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+          {% for source in sources %}
+            <tr>
+              <td>
+                <a href="{{ source.homepage_url }}" target="_blank" rel="noopener noreferrer">{{ source.name }}</a>
+                <small>{{ source.publisher }}</small>
+                {% if source.config.note %}<small class="source-note">{{ source.config.note }}</small>{% endif %}
+              </td>
+              <td>{{ source.category }}</td>
+              <td>{{ source.source_tier }} 级</td>
+              <td>
+                {% if source.enabled %}已启用{% else %}待核验{% endif %}
+                {% if source.last_synced_at %}<small>最近同步：{{ source.last_synced_at|local_timestamp_date }}</small>{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="shell content-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">运行状态</p>
+        <h2>近期来源异常</h2>
+      </div>
+    </div>
+    {% if failures %}
+      <div class="failure-list">
+        {% for failure in failures %}
+          <article>
+            <strong>{{ failure.source_name or failure.source_id }}</strong>
+            <span>{{ failure.started_at[:10]|cn_date }}</span>
+            <p>{{ failure.error_message }}</p>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">暂无记录的来源异常。</p>
+    {% endif %}
+  </section>
+{% endblock %}

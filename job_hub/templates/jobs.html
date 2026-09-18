@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}全部在招岗位 | {{ site_name }}{% endblock %}
+
+{% block content %}
+  <section class="page-heading">
+    <div class="shell">
+      <p class="eyebrow">公开岗位库</p>
+      <h1>全部在招岗位</h1>
+      <p class="lede">按地球科学学院培养方向、就业类别和截止时间查找公开官方岗位。</p>
+    </div>
+  </section>
+
+  <section class="shell content-section jobs-layout">
+    <form class="filters" method="get" action="{{ url_for('jobs') }}">
+      <div class="field">
+        <label for="profile">我的学历与专业</label>
+        <select id="profile" name="profile">
+          <option value="">不按个人画像筛选</option>
+          {% for item in student_profiles %}
+            <option value="{{ item.id }}" {% if selected.profile == item.id %}selected{% endif %}>{{ item.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field search-field">
+        <label for="q">搜索岗位、单位或地点</label>
+        <input id="q" name="q" type="search" value="{{ selected.q }}" placeholder="例如：测井、地质工程、新疆">
+      </div>
+      <div class="field">
+        <label for="category">就业方向</label>
+        <select id="category" name="category">
+          <option value="">全部方向</option>
+          {% for category in category_order %}
+            <option value="{{ category }}" {% if selected.category == category %}selected{% endif %}>{{ category }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% if profile %}
+        <div class="field">
+          <label for="match">匹配状态</label>
+          <select id="match" name="match">
+            <option value="">明确匹配与需核验</option>
+            <option value="explicit" {% if selected.match == "explicit" %}selected{% endif %}>仅明确匹配</option>
+            <option value="review" {% if selected.match == "review" %}selected{% endif %}>仅需核验原公告</option>
+          </select>
+        </div>
+      {% else %}
+        <div class="field">
+          <label for="degree">公告标注学历</label>
+          <select id="degree" name="degree">
+            <option value="">全部学历</option>
+            {% for degree in degree_order %}
+              <option value="{{ degree }}" {% if selected.degree == degree %}selected{% endif %}>{{ degree }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      {% endif %}
+      <div class="field">
+        <label for="relevance">专业匹配</label>
+        <select id="relevance" name="relevance">
+          <option value="">全部匹配度</option>
+          <option value="强相关" {% if selected.relevance == "强相关" %}selected{% endif %}>强相关</option>
+          <option value="相关机会" {% if selected.relevance == "相关机会" %}selected{% endif %}>相关机会</option>
+          <option value="拓展机会" {% if selected.relevance == "拓展机会" %}selected{% endif %}>拓展机会</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button type="submit">筛选岗位</button>
+        <a href="{{ url_for('jobs') }}" aria-label="清除全部筛选条件" title="清除筛选条件">×</a>
+      </div>
+    </form>
+
+    <div class="result-heading">
+      {% if profile %}
+        <p><strong>{{ profile.label }}</strong>：当前找到 <strong>{{ total }}</strong> 条可优先查看的岗位</p>
+        <p class="muted">“明确匹配”同时具备专业和学历证据；其余岗位请以原始公告为准。</p>
+      {% else %}
+        <p>当前找到 <strong>{{ total }}</strong> 条在招岗位</p>
+      {% endif %}
+      {% if selected.category or selected.degree or selected.relevance or selected.q %}
+        <p class="muted">筛选结果按匹配度、截止日期和更新时间排序。</p>
+      {% endif %}
+    </div>
+
+    {% if jobs %}
+      <div class="job-grid">
+        {% for job in jobs %}
+          {% include "_job_card.html" %}
+        {% endfor %}
+      </div>
+      {% if page_count > 1 %}
+        <nav class="pagination" aria-label="岗位分页">
+          {% if page > 1 %}
+            <a href="{{ url_for('jobs', page=page-1, category=selected.category, degree=selected.degree, relevance=selected.relevance, q=selected.q, profile=selected.profile, match=selected.match) }}">上一页</a>
+          {% endif %}
+          <span>第 {{ page }} / {{ page_count }} 页</span>
+          {% if page < page_count %}
+            <a href="{{ url_for('jobs', page=page+1, category=selected.category, degree=selected.degree, relevance=selected.relevance, q=selected.q, profile=selected.profile, match=selected.match) }}">下一页</a>
+          {% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <div class="empty-state">
+        <h2>暂未找到匹配岗位</h2>
+        <p>可以放宽筛选条件，或稍后再查看官方来源同步后的更新。</p>
+        <a class="action-link" href="{{ url_for('jobs') }}">清除筛选</a>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

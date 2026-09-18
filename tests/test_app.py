@@ -1,0 +1,128 @@
+from __future__ import annotations
+
+from job_hub.app import create_app
+from job_hub.db import Database
+from job_hub.pipeline import JobPipeline
+from job_hub.reports import publish_daily_report
+from job_hub.sources import RawPosting
+
+from conftest import make_settings, source
+
+
+def test_public_pages_and_verified_import_api(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    pipeline = app.extensions["pipeline"]
+    database.upsert_source(source())
+    manual_source = source()
+    manual_source["id"] = "official-manual-import"
+    manual_source["source_type"] = "manual"
+    database.upsert_source(manual_source)
+    posting = RawPosting(
+        title="地质工程师招聘",
+        employer="测试能源集团",
+        source_url="https://careers.example.edu.cn/jobs/1",
+        application_url=None,
+        text="石油勘探岗位，面向地质工程硕士，报名截止时间2026年12月20日。",
+        summary="测试官方岗位。",
+        published_date="2026-09-17",
+        deadline_date="2026-12-20",
+        location="北京",
+    )
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+    )
+    report = publish_daily_report(database, settings)
+
+    client = app.test_client()
+    assert client.get("/").status_code == 200
+    assert client.get("/jobs").status_code == 200
+    assert client.get(f"/jobs/{job_id}").status_code == 200
+    assert client.get(f"/daily/{report['report_date']}").status_code == 200
+    assert client.get("/api/jobs").get_json()["total"] == 1
+
+    profile_response = client.get(
+        "/jobs?profile=master-geological-engineering"
+    )
+    assert profile_response.status_code == 200
+    assert "明确匹配" in profile_response.get_data(as_text=True)
+    profile_api = client.get(
+        "/api/jobs?profile=master-geological-engineering"
+    ).get_json()
+    assert profile_api["items"][0]["profile_match"]["level"] == "explicit"
+
+    response = client.post(
+        "/api/admin/jobs",
+        headers={"X-Admin-Token": "test-admin-token"},
+        json={
+            "title": "官方地学实习岗位",
+            "employer": "测试能源集团",
+            "source_url": "https://careers.example.edu.cn/jobs/2",
+            "description": "面向资源勘查工程本科生的官方实习招聘。",
+            "deadline_date": "2026-12-31",
+        },
+    )
+    assert response.status_code == 201
+    assert response.get_json()["outcome"] == "created"
+
+
+def test_admin_import_rejects_invalid_token(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    client = app.test_client()
+
+    response = client.post(
+        "/api/admin/jobs",
+        json={
+            "title": "无效请求",
+            "employer": "测试单位",
+            "source_url": "https://example.edu.cn/job",
+        },
+    )
+    assert response.status_code == 403
+
+
+def test_utc_timestamps_are_rendered_in_site_timezone(tmp_path) -> None:
+    app = create_app(make_settings(tmp_path))
+    render_timestamp = app.jinja_env.filters["local_timestamp_date"]
+
+    assert render_timestamp("2026-09-17T17:30:00Z") == "2026年9月18日"
+    assert render_timestamp("2026-09-18") == "2026年9月18日"
+
+
+def test_admin_publish_refuses_data_that_fails_the_same_audit_as_worker(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    pipeline = app.extensions["pipeline"]
+    official_source = source()
+    official_source["source_type"] = "html_notice"
+    database.upsert_source(official_source)
+    posting = RawPosting(
+        title="地质工程师招聘",
+        employer="测试能源集团",
+        source_url="https://careers.example.edu.cn/jobs/audit-guard",
+        application_url=None,
+        text="面向地质工程硕士的官方招聘。",
+        summary="官方招聘岗位。",
+        published_date="2026-09-17",
+        deadline_date="2026-12-20",
+        location="北京",
+    )
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+    )
+    with database.transaction() as connection:
+        connection.execute(
+            "UPDATE jobs SET source_url = ? WHERE id = ?",
+            ("https://unverified.example.org/jobs/1", job_id),
+        )
+
+    response = app.test_client().post(
+        "/api/admin/publish",
+        headers={"X-Admin-Token": "test-admin-token"},
+    )
+
+    assert response.status_code == 409
+    assert response.get_json()["audit"]["ok"] is False

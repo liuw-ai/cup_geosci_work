@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{{ report.report_date|cn_date }}就业日报 | {{ site_name }}{% endblock %}
+
+{% macro report_section(id, title, subtitle, jobs) %}
+  <section id="{{ id }}" class="shell content-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">{{ subtitle }}</p>
+        <h2>{{ title }}</h2>
+      </div>
+      <span class="section-count">{{ jobs|length }} 条</span>
+    </div>
+    {% if jobs %}
+      <div class="job-grid">
+        {% for job in jobs %}
+          {% include "_job_card.html" %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-inline">本时段没有符合收录标准的信息。</div>
+    {% endif %}
+  </section>
+{% endmacro %}
+
+{% block content %}
+  <section class="report-band">
+    <div class="shell report-heading">
+      <div>
+        <p class="eyebrow">{% if is_preview %}实时预览{% else %}已于 20:00 固化发布{% endif %}</p>
+        <h1>{{ report.report_date|cn_date }}就业日报</h1>
+        <p class="lede">适合地学相关专业学生的正式招聘信息与即将截止提醒。</p>
+      </div>
+      <a class="action-link" href="{{ url_for('jobs') }}">浏览全部在招岗位</a>
+    </div>
+  </section>
+
+  <section class="shell compact-stats" aria-label="日报统计">
+    <span>新增 <strong>{{ report.stats.new }}</strong></span>
+    <span>更新 <strong>{{ report.stats.updated }}</strong></span>
+    <span>7 日内截止 <strong>{{ report.stats.deadline_soon }}</strong></span>
+    <span>在招总数 <strong>{{ report.stats.open_total }}</strong></span>
+  </section>
+
+  {% if report_dates %}
+    <nav class="shell report-history" aria-label="历史日报">
+      <span>历史日报</span>
+      {% for day in report_dates %}
+        <a href="{{ url_for('daily_report', report_date=day) }}" {% if day == report.report_date %}aria-current="page"{% endif %}>{{ day|cn_date }}</a>
+      {% endfor %}
+    </nav>
+  {% endif %}
+
+  {{ report_section("new-jobs", "今日新增", "当天首次收录的官方岗位", report.new_jobs) }}
+  {{ report_section("updated-jobs", "信息更新", "已收录岗位的内容或截止时间变更", report.updated_jobs) }}
+  {{ report_section("deadline-jobs", "未来 7 天截止", "建议优先核对报名要求和截止时间", report.deadline_jobs) }}
+{% endblock %}

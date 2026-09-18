@@ -1,0 +1,48 @@
+<article class="job-card">
+  <div class="job-card-topline">
+    <span class="category-label">{{ job.category }}</span>
+    <span class="relevance relevance-{{ job.relevance_band }}">{{ job.relevance_band }}</span>
+  </div>
+  <h3><a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
+  <p class="employer">{{ job.employer }}</p>
+  {% if job.profile_match %}
+    <div class="profile-match profile-match-{{ job.profile_match.level }}">
+      <strong>{{ job.profile_match.label }}</strong>
+      <span>{{ job.profile_match.reason }}</span>
+    </div>
+  {% endif %}
+  <dl class="job-meta">
+    <div>
+      <dt>地点</dt>
+      <dd>{{ job.location or "未注明" }}</dd>
+    </div>
+    <div>
+      <dt>学历</dt>
+      <dd>{{ " / ".join(job.degree_levels) if job.degree_levels else "未注明" }}</dd>
+    </div>
+    <div>
+      <dt>截止</dt>
+      <dd class="{% if job.deadline_date %}deadline{% endif %}">
+        {{ job.deadline_date|cn_date if job.deadline_date else "未注明" }}
+      </dd>
+    </div>
+  </dl>
+  {% if job.major_tags %}
+    <div class="tag-row" aria-label="专业相关标签">
+      {% for tag in job.major_tags[:4] %}
+        <span>{{ tag }}</span>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% if job.summary %}
+    <p class="job-summary">{{ job.summary }}</p>
+  {% endif %}
+  <div class="job-card-footer">
+    <span>来源：{{ job.source_name }}</span>
+    {% if active_profile_id %}
+      <a class="text-link" href="{{ url_for('job_detail', job_id=job.id, profile=active_profile_id) }}">查看详情</a>
+    {% else %}
+      <a class="text-link" href="{{ url_for('job_detail', job_id=job.id) }}">查看详情</a>
+    {% endif %}
+  </div>
+</article>

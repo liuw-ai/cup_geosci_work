@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="面向中国石油大学（北京）地球科学学院学生的官方就业信息服务">
+    <title>{% block title %}{{ site_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='site.css') }}">
+    <script defer src="{{ url_for('static', filename='site.js') }}"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到主要内容</a>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="brand" href="{{ url_for('home') }}" aria-label="返回就业信息站首页">
+          <span class="brand-mark" aria-hidden="true">GEO</span>
+          <span>
+            <strong>{{ site_name }}</strong>
+            <small>面向中国石油大学（北京）地球科学学院</small>
+          </span>
+        </a>
+        <button class="nav-toggle" type="button" aria-controls="primary-nav" aria-expanded="false">
+          菜单
+        </button>
+        <nav id="primary-nav" class="primary-nav" aria-label="主要导航">
+          <a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}aria-current="page"{% endif %}>今日日报</a>
+          <a href="{{ url_for('jobs') }}" {% if request.endpoint in ['jobs', 'job_detail'] %}aria-current="page"{% endif %}>全部岗位</a>
+          <a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}aria-current="page"{% endif %}>来源说明</a>
+        </nav>
+      </div>
+    </header>
+    <main id="main-content">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <p>仅收录公开招聘信息，报名与录用以招聘单位原始公告为准。</p>
+        <a href="{{ url_for('about') }}">查看来源与收录规则</a>
+      </div>
+    </footer>
+  </body>
+</html>
