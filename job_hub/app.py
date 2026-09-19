@@ -11,8 +11,10 @@ from flask import Flask, abort, jsonify, render_template, request, url_for
 
 from job_hub.audit import audit_database
 from job_hub.config import Settings
+from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
 from job_hub.employers import enrich_job, load_employment_landscape
+from job_hub.locations import PROVINCES
 from job_hub.matching import CATEGORY_DESCRIPTIONS, CATEGORY_ORDER, DEGREE_ORDER
 from job_hub.pipeline import JobPipeline
 from job_hub.profiles import (
@@ -23,6 +25,11 @@ from job_hub.profiles import (
 )
 from job_hub.reports import build_daily_report, local_today, publish_daily_report
 from job_hub.sources import RawPosting
+
+
+def _is_http_url(value: str) -> bool:
+    parsed = urlparse(value)
+    return parsed.scheme in {"http", "https"} and bool(parsed.hostname)
 
 
 def create_app(settings: Settings | None = None) -> Flask:
@@ -47,6 +54,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             "category_order": CATEGORY_ORDER,
             "category_descriptions": CATEGORY_DESCRIPTIONS,
             "degree_order": DEGREE_ORDER,
+            "provinces": PROVINCES,
             "student_profiles": list_student_profiles(),
             "active_profile_id": request.args.get("profile", "").strip(),
         }
@@ -131,6 +139,7 @@ def create_app(settings: Settings | None = None) -> Flask:
         page: int,
         category: str | None,
         degree: str | None,
+        province: str | None,
         relevance_band: str | None,
         query: str | None,
         profile: StudentProfile | None,
@@ -140,6 +149,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             return database.list_jobs(
                 category=category,
                 degree=degree,
+                province=province,
                 relevance_band=relevance_band,
                 q=query,
                 page=page,
@@ -149,6 +159,7 @@ def create_app(settings: Settings | None = None) -> Flask:
         # The source registry bounds the public corpus, and no student data is kept.
         candidates, _ = database.list_jobs(
             category=category,
+            province=province,
             relevance_band=relevance_band,
             q=query,
             page_size=None,
@@ -232,6 +243,9 @@ def create_app(settings: Settings | None = None) -> Flask:
         page = max(request.args.get("page", 1, type=int), 1)
         category = request.args.get("category", "").strip() or None
         degree = request.args.get("degree", "").strip() or None
+        province = request.args.get("province", "").strip() or None
+        if province and province not in PROVINCES:
+            abort(404)
         relevance_band = request.args.get("relevance", "").strip() or None
         query = request.args.get("q", "").strip() or None
         profile = requested_profile()
@@ -242,6 +256,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             page=page,
             category=category,
             degree=degree if profile is None else None,
+            province=province,
             relevance_band=relevance_band,
             query=query,
             profile=profile,
@@ -260,6 +275,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             selected={
                 "category": category or "",
                 "degree": (degree or "") if profile is None else "",
+                "province": province or "",
                 "relevance": relevance_band or "",
                 "q": query or "",
                 "profile": profile.id if profile else "",
@@ -283,10 +299,29 @@ def create_app(settings: Settings | None = None) -> Flask:
 
     @app.get("/about")
     def about() -> str:
+        source_health = {
+            item["source_id"]: item for item in database.list_source_health()
+        }
+        latest_runs = {
+            item["source_id"]: item for item in database.list_latest_crawl_runs()
+        }
         return render_template(
             "about.html",
             sources=database.list_sources(),
             failures=database.recent_crawl_failures(),
+            coverage=build_coverage_report(
+                database,
+                snapshot_date=local_today(settings).isoformat(),
+            ),
+            source_health=source_health,
+            latest_runs=latest_runs,
+            health_labels={
+                "source_active": "入口可访问",
+                "source_degraded": "入口待修复",
+                "source_blocked": "访问受限",
+                "source_error": "检查异常",
+                "unknown": "尚未检查",
+            },
         )
 
     @app.get("/landscape")
@@ -312,6 +347,9 @@ def create_app(settings: Settings | None = None) -> Flask:
     def jobs_api() -> Any:
         page = max(request.args.get("page", 1, type=int), 1)
         profile = requested_profile()
+        province = request.args.get("province", "").strip() or None
+        if province and province not in PROVINCES:
+            return jsonify({"error": "province is not a supported mainland province"}), 400
         match_filter = request.args.get("match", "").strip()
         if match_filter not in {"", "explicit", "review"}:
             match_filter = ""
@@ -323,6 +361,7 @@ def create_app(settings: Settings | None = None) -> Flask:
                 if profile is None
                 else None
             ),
+            province=province,
             relevance_band=request.args.get("relevance", "").strip() or None,
             query=request.args.get("q", "").strip() or None,
             profile=profile,
@@ -339,6 +378,15 @@ def create_app(settings: Settings | None = None) -> Flask:
                     else None
                 ),
             }
+        )
+
+    @app.get("/api/coverage")
+    def coverage_api() -> Any:
+        return jsonify(
+            build_coverage_report(
+                database,
+                snapshot_date=local_today(settings).isoformat(),
+            )
         )
 
     def require_admin(view: Callable[..., Any]) -> Callable[..., Any]:
@@ -385,6 +433,87 @@ def create_app(settings: Settings | None = None) -> Flask:
         normalized = pipeline.normalize_posting(raw, source)
         job_id, outcome = database.save_job(normalized)
         return jsonify({"id": job_id, "outcome": outcome}), 201
+
+    @app.route("/api/admin/leads", methods=["GET", "POST"])
+    @require_admin
+    def candidate_leads_api() -> Any:
+        """Keep third-party discovery clues private until official verification."""
+        if request.method == "GET":
+            status = request.args.get("status", "").strip() or None
+            return jsonify({"items": database.list_candidate_leads(status)})
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({"error": "Request body must be a JSON object."}), 400
+        for field in ("lead_url", "official_url"):
+            value = str(payload.get(field, "")).strip()
+            if value and not _is_http_url(value):
+                return jsonify({"error": f"{field} must be an HTTP(S) URL."}), 400
+        try:
+            lead = database.create_candidate_lead(payload)
+        except ValueError as error:
+            return jsonify({"error": str(error)}), 400
+        return jsonify(lead), 201
+
+    @app.patch("/api/admin/leads/<int:lead_id>")
+    @require_admin
+    def update_candidate_lead_api(lead_id: int) -> Any:
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({"error": "Request body must be a JSON object."}), 400
+        official_url = str(payload.get("official_url", "")).strip()
+        if official_url and not _is_http_url(official_url):
+            return jsonify({"error": "official_url must be an HTTP(S) URL."}), 400
+        try:
+            lead = database.update_candidate_lead(lead_id, payload)
+        except ValueError as error:
+            return jsonify({"error": str(error)}), 409
+        if lead is None:
+            abort(404)
+        return jsonify(lead)
+
+    @app.post("/api/admin/leads/<int:lead_id>/publish")
+    @require_admin
+    def publish_candidate_lead_api(lead_id: int) -> Any:
+        lead = database.get_candidate_lead(lead_id)
+        if lead is None:
+            abort(404)
+        if lead["verification_status"] != "official_content_verified":
+            return jsonify(
+                {"error": "Only official-content-verified leads can be published."}
+            ), 409
+        if not _is_http_url(str(lead.get("official_url") or "")):
+            return jsonify({"error": "Lead has no valid official_url."}), 409
+        metadata = lead.get("metadata", {})
+        employer = str(metadata.get("employer") or lead.get("employer_hint") or "").strip()
+        if not employer:
+            return jsonify({"error": "Verified lead needs an employer before publication."}), 409
+        source = database.get_source(
+            str(metadata.get("source_id") or "official-manual-import")
+        )
+        if source is None:
+            return jsonify({"error": "Configured source_id is not registered."}), 409
+        raw = RawPosting(
+            title=str(metadata.get("title") or lead["title"]).strip(),
+            employer=employer,
+            source_url=str(lead["official_url"]).strip(),
+            application_url=str(metadata.get("application_url") or "").strip() or None,
+            text=str(metadata.get("description") or lead["title"]).strip(),
+            summary=str(metadata.get("summary") or "").strip(),
+            published_date=str(
+                metadata.get("published_date") or lead.get("published_date") or ""
+            ).strip()
+            or None,
+            deadline_date=str(metadata.get("deadline_date") or "").strip() or None,
+            location=str(metadata.get("location") or lead.get("location_hint") or "").strip()
+            or None,
+            external_id=f"verified-lead-{lead_id}",
+        )
+        job_id, outcome = database.save_job(pipeline.normalize_posting(raw, source))
+        try:
+            published = database.mark_candidate_lead_published(lead_id, job_id)
+        except ValueError as error:
+            return jsonify({"error": str(error)}), 409
+        return jsonify({"job_id": job_id, "outcome": outcome, "lead": published}), 201
 
     @app.post("/api/admin/publish")
     @require_admin

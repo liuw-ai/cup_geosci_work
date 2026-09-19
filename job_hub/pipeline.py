@@ -7,6 +7,8 @@ from zoneinfo import ZoneInfo
 
 from job_hub.config import Settings
 from job_hub.db import Database
+from job_hub.employers import resolve_employer
+from job_hub.locations import extract_location_hint, normalize_location
 from job_hub.matching import (
     classify_category,
     extract_degree_levels,
@@ -19,7 +21,7 @@ from job_hub.sources import (
     RawPosting,
     SourceCollectionError,
     SourceSkipped,
-    load_source_registry,
+    load_source_registries,
 )
 
 
@@ -28,6 +30,7 @@ class SourceSyncResult:
     source_id: str
     status: str
     discovered: int = 0
+    open_matches: int = 0
     created: int = 0
     updated: int = 0
     skipped: int = 0
@@ -49,6 +52,10 @@ class SyncSummary:
         return sum(item.created for item in self.source_results)
 
     @property
+    def open_matches(self) -> int:
+        return sum(item.open_matches for item in self.source_results)
+
+    @property
     def updated(self) -> int:
         return sum(item.updated for item in self.source_results)
 
@@ -59,6 +66,7 @@ class SyncSummary:
     def as_dict(self) -> dict[str, Any]:
         return {
             "discovered": self.discovered,
+            "open_matches": self.open_matches,
             "created": self.created,
             "updated": self.updated,
             "expired": self.expired,
@@ -81,7 +89,13 @@ class JobPipeline:
         self.timezone = ZoneInfo(settings.timezone)
 
     def bootstrap_sources(self) -> int:
-        sources = load_source_registry(str(self.settings.source_registry_path))
+        registry_paths = [str(self.settings.source_registry_path)]
+        provincial_registry = self.settings.source_registry_path.with_name(
+            "provincial_sources.json"
+        )
+        if provincial_registry.exists():
+            registry_paths.append(str(provincial_registry))
+        sources = load_source_registries(registry_paths)
         for source in sources:
             self.database.upsert_source(source)
         return len(sources)
@@ -111,22 +125,41 @@ class JobPipeline:
                 if normalized["relevance_score"] < minimum_score:
                     result.skipped += 1
                     continue
+                if normalized["status"] == "open":
+                    result.open_matches += 1
                 _, outcome = self.database.save_job(normalized)
                 if outcome == "created":
                     result.created += 1
                 elif outcome == "updated":
                     result.updated += 1
             self.database.mark_source_synced(source["id"])
+            self.database.record_source_health(
+                source["id"],
+                status="source_active",
+                detail=(
+                    f"公开采集完成：发现 {result.discovered} 条候选，"
+                    f"当前在招匹配 {result.open_matches} 条，"
+                    f"新增 {result.created} 条，更新 {result.updated} 条，"
+                    f"过滤 {result.skipped} 条。"
+                ),
+                successful=True,
+            )
             self.database.record_crawl_finish(
                 run_id,
                 result.status,
-                result.discovered,
-                result.created,
-                result.updated,
+                discovered_count=result.discovered,
+                open_matching_count=result.open_matches,
+                inserted_count=result.created,
+                updated_count=result.updated,
             )
         except SourceSkipped as error:
             result.status = "skipped"
             result.error = str(error)
+            self.database.record_source_health(
+                source["id"],
+                status=self._skipped_source_health_status(result.error),
+                detail=result.error,
+            )
             self.database.record_crawl_finish(
                 run_id,
                 result.status,
@@ -135,6 +168,11 @@ class JobPipeline:
         except Exception as error:
             result.status = "failed"
             result.error = str(error)
+            self.database.record_source_health(
+                source["id"],
+                status="source_error",
+                detail=result.error,
+            )
             self.database.record_crawl_finish(
                 run_id,
                 result.status,
@@ -149,11 +187,18 @@ class JobPipeline:
     ) -> dict[str, Any]:
         text = f"{posting.title} {posting.employer} {posting.text}"
         matching_text = posting.match_text or text
-        category = classify_category(
-            matching_text,
-            source.get("category"),
-            identity_text=f"{posting.title} {posting.employer}",
+        employer_identity = resolve_employer(posting.employer)
+        category = (
+            employer_identity["category"]
+            if employer_identity
+            else classify_category(
+                matching_text,
+                source.get("category"),
+                identity_text=f"{posting.title} {posting.employer}",
+            )
         )
+        location_text = posting.location or extract_location_hint(posting.text)
+        location = normalize_location(location_text)
         relevance_score, relevance_band, major_tags = score_relevance(
             matching_text,
             source["source_tier"],
@@ -192,7 +237,25 @@ class JobPipeline:
             "source_name": source["name"],
             "source_url": posting.source_url,
             "application_url": posting.application_url,
-            "location": posting.location,
+            "location": location_text,
+            "canonical_employer_id": (
+                employer_identity.get("canonical_employer_id")
+                if employer_identity
+                else None
+            ),
+            "canonical_employer_name": (
+                employer_identity.get("canonical_employer_name")
+                if employer_identity
+                else None
+            ),
+            "parent_employer_name": (
+                employer_identity.get("parent_employer_name")
+                if employer_identity
+                else None
+            ),
+            **location,
+            "verification_status": "published_official",
+            "official_evidence_url": posting.source_url,
             "published_date": posting.published_date,
             "deadline_date": posting.deadline_date,
             "degree_levels": degree_levels,
@@ -203,6 +266,13 @@ class JobPipeline:
             "relevance_band": relevance_band,
             "status": status,
         }
+
+    @staticmethod
+    def _skipped_source_health_status(detail: str) -> str:
+        normalized = detail.lower()
+        if "robots" in normalized or "permit" in normalized:
+            return "source_blocked"
+        return "source_degraded"
 
     @staticmethod
     def _job_status(
@@ -236,7 +306,12 @@ class JobPipeline:
         """
         sources = {source["id"]: source for source in self.database.list_sources()}
         jobs, _ = self.database.list_jobs(page_size=None, only_open=False)
-        result = {"checked": len(jobs), "reclassified": 0, "unchanged": 0}
+        result = {
+            "checked": len(jobs),
+            "reclassified": 0,
+            "normalized": 0,
+            "unchanged": 0,
+        }
         for job in jobs:
             source = sources.get(job.get("source_id"))
             source_tier = (
@@ -252,10 +327,15 @@ class JobPipeline:
                 )
                 if value
             )
-            category = classify_category(
-                matching_text,
-                source_category,
-                identity_text=f"{job.get('title', '')} {job.get('employer', '')}",
+            employer_identity = resolve_employer(str(job.get("employer") or ""))
+            category = (
+                employer_identity["category"]
+                if employer_identity
+                else classify_category(
+                    matching_text,
+                    source_category,
+                    identity_text=f"{job.get('title', '')} {job.get('employer', '')}",
+                )
             )
             relevance_score, relevance_band, major_tags = score_relevance(
                 matching_text,
@@ -278,5 +358,35 @@ class JobPipeline:
                 relevance_band=relevance_band,
                 status=status,
             )
-            result["reclassified" if changed else "unchanged"] += 1
+            existing_location = str(job.get("location") or "").strip() or None
+            location_text = existing_location or extract_location_hint(
+                f"{job.get('summary', '')} {job.get('description', '')}"
+            )
+            location = normalize_location(location_text)
+            normalized = self.database.update_job_normalization(
+                int(job["id"]),
+                canonical_employer_id=(
+                    employer_identity.get("canonical_employer_id")
+                    if employer_identity
+                    else None
+                ),
+                canonical_employer_name=(
+                    employer_identity.get("canonical_employer_name")
+                    if employer_identity
+                    else None
+                ),
+                parent_employer_name=(
+                    employer_identity.get("parent_employer_name")
+                    if employer_identity
+                    else None
+                ),
+                location=location_text,
+                **location,
+            )
+            if changed:
+                result["reclassified"] += 1
+            if normalized:
+                result["normalized"] += 1
+            if not changed and not normalized:
+                result["unchanged"] += 1
         return result

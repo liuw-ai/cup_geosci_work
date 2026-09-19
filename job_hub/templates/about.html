@@ -29,6 +29,101 @@
   <section class="shell content-section">
     <div class="section-heading">
       <div>
+        <p class="eyebrow">覆盖质量</p>
+        <h2>当前数据状态</h2>
+      </div>
+      <span class="section-count">{{ coverage.open_jobs }} 条在招</span>
+    </div>
+    <p class="muted">已登记 {{ coverage.source_health.registered_sources }} 个官方入口。入口可访问不等于完成扫描；只有最近一次扫描成功且有开放匹配时，系统才把结果计入“在招”。</p>
+    <div class="stats-grid quality-stats" aria-label="覆盖质量指标">
+      <div class="stat">
+        <span>成功扫描来源</span>
+        <strong>{{ coverage.scan_quality.successful_scan_sources }}</strong>
+        <small>最近一次运行</small>
+      </div>
+      <div class="stat">
+        <span>有开放匹配来源</span>
+        <strong>{{ coverage.scan_quality.sources_with_open_matches }}</strong>
+        <small>不是岗位总数</small>
+      </div>
+      <div class="stat">
+        <span>备用入口覆盖</span>
+        <strong>{{ (coverage.source_resilience.coverage_rate * 100)|round|int }}%</strong>
+        <small>{{ coverage.source_resilience.sources_with_backup }} / {{ coverage.source_resilience.registered_sources }} 个来源</small>
+      </div>
+      <div class="stat">
+        <span>明确匹配岗位</span>
+        <strong>{{ coverage.profile_match_quality.cohort_summary.explicit_job_profile_matches }}</strong>
+        {% set profile_trend = coverage.profile_match_quality.trend %}
+        {% if profile_trend.available %}
+          {% set explicit_change = profile_trend.explicit_job_profile_matches_change %}
+          <small>较 {{ profile_trend.baseline_snapshot_date }} {% if explicit_change > 0 %}+{% endif %}{{ explicit_change }}</small>
+        {% else %}
+          <small>100 人模拟，待次日比较</small>
+        {% endif %}
+      </div>
+      <div class="stat">
+        <span>扩源矩阵已核验</span>
+        <strong>{{ coverage.source_target_matrix.totals.verified }}</strong>
+        <small>/ {{ coverage.source_target_matrix.totals.targets }} 个角色目标</small>
+      </div>
+      <div class="stat">
+        <span>质量门槛</span>
+        <strong>{{ "通过" if coverage.quality_gate.status == "pass" else "待改进" }}</strong>
+        <small>不是岗位数量指标</small>
+      </div>
+    </div>
+    <div class="coverage-fields">
+      <span>官方原文 {{ (coverage.field_completeness.official_evidence_url.rate * 100)|round|int }}%</span>
+      <span>专业 {{ (coverage.field_completeness.major_tags.rate * 100)|round|int }}%</span>
+      <span>学历 {{ (coverage.field_completeness.degree_levels.rate * 100)|round|int }}%</span>
+      <span>地点（含海外） {{ (coverage.location_quality.normalized_region.rate * 100)|round|int }}%</span>
+      <span>国内省份 {{ (coverage.location_quality.mainland_province.rate * 100)|round|int }}%</span>
+      <span>截止日或来源规则 {{ (coverage.deadline_quality.known_or_policy.rate * 100)|round|int }}%</span>
+      <span>明确匹配占比 {{ (coverage.profile_match_quality.explicit_match_rate * 100)|round|int }}%</span>
+    </div>
+    {% if coverage.quality_gate.failed_checks %}
+      <p class="notice notice-warning">当前需要优先改进：{{ coverage.quality_gate.failed_checks|join("、") }}。这些指标只用于提示扩源和字段核验，不会把待核验线索发布为岗位。</p>
+    {% endif %}
+    <div class="coverage-risk-grid">
+      <p class="muted">来源集中：{{ coverage.job_distribution.source_concentration.top_name or "暂无" }}（{{ (coverage.job_distribution.source_concentration.top_share * 100)|round|int }}%）</p>
+      <p class="muted">类别集中：{{ coverage.job_distribution.category_concentration.top_key or "暂无" }}（{{ (coverage.job_distribution.category_concentration.top_share * 100)|round|int }}%）</p>
+    </div>
+  </section>
+
+  <section class="shell content-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">全国扩源矩阵</p>
+        <h2>每省五类官方入口的核验进度</h2>
+      </div>
+      <span class="section-count">{{ coverage.source_target_matrix.province_count }} 省</span>
+    </div>
+    <p class="muted">“已核验”必须绑定已登记来源并通过来源健康检查；“候选/待定位”只代表下一步核验任务，绝不参与学生端岗位统计，也不能解释为当地无岗位。</p>
+    <div class="source-table-wrap">
+      <table class="source-table target-table">
+        <thead><tr><th>省份</th><th>已核验角色</th><th>待补角色</th><th>岗位扫描结论</th></tr></thead>
+        <tbody>
+          {% for item in coverage.province_coverage %}
+            <tr>
+              <td>{{ item.province }}</td>
+              <td>{{ item.verified_target_sources }} / {{ item.target_source_count }}</td>
+              <td>
+                {% if item.missing_target_role_labels %}
+                  {{ item.missing_target_role_labels|join("、") }}
+                {% else %}已覆盖{% endif %}
+              </td>
+              <td>{{ item.scan_interpretation }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="shell content-section">
+    <div class="section-heading">
+      <div>
         <p class="eyebrow">来源白名单</p>
         <h2>已登记的官方信息源</h2>
       </div>
@@ -52,6 +147,14 @@
               <td>
                 {% if source.enabled %}已启用{% else %}待核验{% endif %}
                 {% if source.last_synced_at %}<small>最近同步：{{ source.last_synced_at|local_timestamp_date }}</small>{% endif %}
+                {% set health = source_health.get(source.id, {}) %}
+                <small>{{ health_labels.get(health.status, "尚未检查") }}</small>
+                {% set run = latest_runs.get(source.id, {}) %}
+                {% if run.status == "finished" %}
+                  <small>本次扫描：候选 {{ run.discovered_count }}，开放匹配 {{ run.open_matching_count }}</small>
+                {% elif run.status %}
+                  <small>本次扫描未完成：{{ run.status }}，不能解释为无岗位</small>
+                {% endif %}
               </td>
             </tr>
           {% endfor %}

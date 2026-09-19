@@ -97,7 +97,19 @@ worker 会按 `SOURCE_SYNC_INTERVAL_MINUTES` 周期刷新来源。到达 `DAILY_
 - `worker-health --max-age 180` 返回 `ok: true`，说明 worker 最近有心跳。
 - 邮件发送失败不会修改已经冻结的日报内容；worker 会记录失败并在下一轮尝试重发。
 
-## 6. 备份与更新
+## 6. 上线后的质量基线
+
+首次上线、调整来源配置或更新解析器后，应先在服务器上建立一份可追溯的质量基线：
+
+```bash
+docker compose exec web python -m job_hub.cli audit
+docker compose exec web python -m job_hub.cli coverage --record --output /var/lib/job-hub/coverage.json
+docker compose exec web python -m job_hub.cli simulate-cohort --output /var/lib/job-hub/cohort-coverage.json
+```
+
+`audit` 必须通过，才允许冻结日报。`coverage --record` 将本日省级来源状态、字段完整率、来源集中度和 100 人匿名画像匹配结果写入 SQLite；同日可被后续成功同步替换，页面趋势只与前一个不同日期比较。来源异常、尚未扫描或五类省级官方入口未全部核验时，零岗位只表示当前无法判断，不能对外写成“当地没有招聘”。
+
+## 7. 备份与更新
 
 更新代码前先备份数据库卷。最简单的做法是在服务器上停止写入后导出 SQLite：
 
@@ -110,6 +122,6 @@ docker compose up -d worker
 
 更新后依次运行 `docker compose config`、`docker compose up -d --build`、`audit` 和 `worker-health`。不要把 `.env`、数据库、SMTP 授权码或运行时日志提交到 Git。
 
-## 7. 数据质量边界
+## 8. 数据质量边界
 
 岗位详情页保留单位官网、政府公告或高校就业网的原始链接。动态招聘系统只有在公开入口、robots 规则、字段结构和详情页都能稳定核验时才会启用；遇到登录、验证码或禁止自动访问的来源，系统会跳过并在来源状态中留下原因，而不是伪造岗位或绕过限制。

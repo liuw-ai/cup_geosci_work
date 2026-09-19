@@ -68,6 +68,41 @@ def test_pipeline_deduplicates_and_creates_daily_change(tmp_path) -> None:
         assert connection.execute("SELECT COUNT(*) FROM job_events").fetchone()[0] == 0
 
 
+def test_successful_scan_records_zero_open_matches_without_marking_source_unavailable(
+    tmp_path,
+) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    official_source["config"] = {"minimum_relevance": 100}
+    database.upsert_source(official_source)
+    posting = RawPosting(
+        title="普通行政岗位",
+        employer="测试单位",
+        source_url="https://careers.example.edu.cn/jobs/no-match",
+        application_url=None,
+        text="面向不限专业毕业生的公开招聘。",
+        summary="不属于地学专业的测试公告。",
+        published_date="2026-09-17",
+        deadline_date="2026-12-31",
+        location="北京",
+    )
+
+    result = JobPipeline(settings, database, FakeCollector(posting)).sync_source(
+        database.get_source("official-test-source")
+    )
+
+    assert result.status == "finished"
+    assert result.discovered == 1
+    assert result.open_matches == 0
+    assert result.skipped == 1
+    assert database.get_source_health("official-test-source")["status"] == "source_active"
+    latest_run = database.list_latest_crawl_runs()[0]
+    assert latest_run["status"] == "finished"
+    assert latest_run["open_matching_count"] == 0
+
+
 def test_delete_job_removes_only_the_exact_invalid_record(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)

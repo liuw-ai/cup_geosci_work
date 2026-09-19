@@ -4,7 +4,10 @@
     <span class="relevance relevance-{{ job.relevance_band }}">{{ job.relevance_band }}</span>
   </div>
   <h3><a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
-  <p class="employer">{{ job.employer }}</p>
+  <p class="employer">{{ job.canonical_employer_name or job.employer }}</p>
+  {% if job.canonical_employer_name and job.canonical_employer_name != job.employer %}
+    <p class="muted">公告单位：{{ job.employer }}</p>
+  {% endif %}
   <p class="job-employer-type">{{ job.employer_type }} · {{ job.role_direction }}</p>
   <dl class="job-path-meta" aria-label="单位与机会属性">
     <div>
@@ -29,7 +32,7 @@
   <dl class="job-meta">
     <div>
       <dt>地点</dt>
-      <dd>{{ job.location or "未注明" }}</dd>
+      <dd>{{ job.city or job.province or job.location or "未注明" }}</dd>
     </div>
     <div>
       <dt>学历</dt>

@@ -8,6 +8,7 @@ import time
 import xml.etree.ElementTree as ET
 import zlib
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from html import unescape
 from typing import Any
 from urllib.parse import urlencode, urljoin, urlparse
@@ -23,6 +24,7 @@ except ImportError:  # pragma: no cover - exercised only in minimal deployments
     Cipher = algorithms = modes = PKCS7 = None  # type: ignore[assignment]
 
 from job_hub.config import Settings
+from job_hub.locations import extract_location_hint
 from job_hub.matching import (
     clean_text,
     extract_deadline,
@@ -30,12 +32,31 @@ from job_hub.matching import (
     extract_major_tags,
     looks_like_recruitment,
     normalize_url,
+    parse_date_value,
 )
 
 
 USER_AGENT = (
     "CUPB-Geoscience-Employment-Information-Service/1.0 "
     "(official-public-source-crawler; contact: site-administrator)"
+)
+
+# Recruitment portals often leave assessment and appointment notices next to the
+# original vacancy.  These are valuable to applicants who already applied, but
+# they are not new employment opportunities and must never enter the public job
+# corpus as active vacancies.  Match only announcement titles: a valid original
+# vacancy may legitimately describe its written-test or interview process in
+# the body text.
+NON_VACANCY_TITLE_PATTERNS = (
+    r"拟(?:聘|录用|聘用)",
+    r"(?:进入|面试)(?:范围|名单)",
+    r"递补",
+    r"资格(?:审查|复审)",
+    r"笔试(?:成绩|公告|结果)",
+    r"面试(?:成绩|公告|结果)",
+    r"体检(?:公告|名单|结果)",
+    r"考察(?:公告|名单|结果)",
+    r"录用(?:公示|名单|结果)",
 )
 
 
@@ -45,6 +66,152 @@ class SourceCollectionError(RuntimeError):
 
 class SourceSkipped(RuntimeError):
     pass
+
+
+@dataclass(frozen=True)
+class SourceHealthResult:
+    status: str
+    detail: str
+    status_code: int | None = None
+    successful: bool = False
+
+
+class SourceHealthProbe:
+    """Perform a light, compliant availability check for one public source.
+
+    This is intentionally distinct from collection.  A healthy landing page is
+    not proof that a source has matching vacancies, and a failed page must not
+    be displayed as "no jobs" in province coverage.
+    """
+
+    def __init__(
+        self,
+        settings: Settings,
+        session: requests.Session | None = None,
+    ) -> None:
+        self.settings = settings
+        self.session = session or requests.Session()
+        self.session.headers.update({"User-Agent": USER_AGENT})
+
+    def check(self, source: dict[str, Any]) -> SourceHealthResult:
+        if source.get("source_type") == "manual":
+            return SourceHealthResult(
+                "unknown",
+                "人工补录来源不执行网络探测。",
+            )
+        entry_url = self._entry_url(source)
+        parsed = urlparse(entry_url)
+        root = f"{parsed.scheme}://{parsed.netloc}"
+        robots_url = urljoin(root, "/robots.txt")
+        try:
+            robots_response = self.session.get(
+                robots_url,
+                timeout=min(self.settings.request_timeout_seconds, 10),
+                allow_redirects=True,
+            )
+        except requests.RequestException as error:
+            return SourceHealthResult("source_degraded", f"robots.txt 无法核验：{error}")
+
+        if robots_response.status_code == 404:
+            robots_allowed = True
+        elif robots_response.ok:
+            parser = RobotFileParser()
+            parser.parse(robots_response.text.splitlines())
+            robots_allowed = parser.can_fetch(USER_AGENT, entry_url)
+        else:
+            return SourceHealthResult(
+                "source_degraded",
+                f"robots.txt 返回 HTTP {robots_response.status_code}，未访问来源页面。",
+                robots_response.status_code,
+            )
+        if not robots_allowed:
+            return SourceHealthResult(
+                "source_blocked",
+                "robots.txt 不允许本服务访问公开入口。",
+                robots_response.status_code,
+            )
+
+        try:
+            response = self.session.get(
+                entry_url,
+                timeout=self.settings.request_timeout_seconds,
+                allow_redirects=True,
+            )
+        except requests.RequestException as error:
+            return SourceHealthResult("source_error", f"公开入口请求失败：{error}")
+        if response.ok and self._is_soft_not_found(response):
+            return SourceHealthResult(
+                "source_degraded",
+                "公开入口返回了站点的未找到页面，不能作为可用来源。",
+                response.status_code,
+            )
+        if response.ok and not self._preserves_entry_path(entry_url, response.url, source):
+            return SourceHealthResult(
+                "source_degraded",
+                "公开入口重定向后丢失了登记的栏目路径，不能作为可用来源。",
+                response.status_code,
+            )
+        if response.ok:
+            return SourceHealthResult(
+                "source_active",
+                "robots.txt 允许且登记的公开入口可访问；尚未代表有匹配岗位。",
+                response.status_code,
+                successful=True,
+            )
+        if response.status_code in {401, 403, 412, 429}:
+            status = "source_blocked"
+        elif response.status_code == 404:
+            status = "source_degraded"
+        else:
+            status = "source_error"
+        return SourceHealthResult(
+            status,
+            f"公开入口返回 HTTP {response.status_code}。",
+            response.status_code,
+        )
+
+    @staticmethod
+    def _entry_url(source: dict[str, Any]) -> str:
+        """Probe the recruitment listing, not just an institution's home page."""
+        config = source.get("config", {})
+        configured = str(config.get("healthcheck_url") or "").strip()
+        listing_urls = config.get("listing_urls") or []
+        candidate = configured or (listing_urls[0] if listing_urls else source["homepage_url"])
+        return normalize_url(str(candidate))
+
+    @staticmethod
+    def _preserves_entry_path(
+        entry_url: str,
+        resolved_url: str,
+        source: dict[str, Any],
+    ) -> bool:
+        """Reject redirects from a registered recruitment column to a generic page."""
+        if source.get("config", {}).get("require_path_stability") is False:
+            return True
+        expected = urlparse(entry_url)
+        resolved = urlparse(resolved_url)
+        expected_path = expected.path.rstrip("/")
+        if not expected_path:
+            return True
+        if expected.hostname and resolved.hostname and expected.hostname.lower() != resolved.hostname.lower():
+            return False
+        return resolved.path.rstrip("/").startswith(expected_path)
+
+    @staticmethod
+    def _is_soft_not_found(response: requests.Response) -> bool:
+        """Detect common HTTP-200 error pages returned by government sites."""
+        path = urlparse(response.url).path.lower()
+        if "/404/" in path or path.endswith("/404.html"):
+            return True
+        soup = BeautifulSoup(response.text[:160_000], "html.parser")
+        title = clean_text(
+            soup.title.get_text(" ", strip=True) if soup.title else ""
+        ).lower()
+        body = clean_text(soup.get_text(" ", strip=True))[:1_000].lower()
+        signals = ("404", "页面不存在", "您访问的页面不存在", "找不到页面", "not found")
+        return any(signal in title for signal in signals) or any(
+            signal in body for signal in signals
+        )
 
 
 @dataclass(frozen=True)
@@ -98,9 +265,497 @@ class OfficialSourceCollector:
             return self._collect_successfactors_search(source)
         if source_type == "mokahr_search":
             return self._collect_mokahr_search(source)
+        if source_type == "mnr_recruitment":
+            return self._collect_mnr_recruitment(source)
+        if source_type == "slb_coveo_search":
+            return self._collect_slb_coveo_search(source)
         if source_type in {"html_notice", "landing_page"}:
             return self._collect_html_notice(source)
         raise SourceCollectionError(f"Unsupported source type: {source_type}")
+
+    def _collect_mnr_recruitment(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Collect public MNR recruitment rows through its own exposed API.
+
+        The API powers the unauthenticated recruitment listing.  We only read
+        announcement and position fields that the public web client itself
+        requests; registration, user data, and any write endpoints are never
+        called.
+        """
+        config = source["config"]
+        api_base = str(config.get("api_base", "")).rstrip("/")
+        public_detail_url = str(config.get("public_detail_url", "")).strip()
+        if not api_base or not public_detail_url:
+            raise SourceCollectionError("MNR source needs api_base and public_detail_url")
+        announcement_limit = self._item_limit(source)
+        self._wait(source)
+        listing = self._post_json(
+            f"{api_base}/Affiche/GetAfficheList",
+            {
+                "pageIndex": 1,
+                "pageSize": announcement_limit,
+                "type": int(config.get("notice_type", 0)),
+            },
+        )
+        try:
+            notices = listing.json().get("items", [])
+        except (ValueError, AttributeError) as error:
+            raise SourceCollectionError("MNR listing is not valid JSON") from error
+        if not isinstance(notices, list):
+            raise SourceCollectionError("MNR listing does not contain an items list")
+
+        postings: list[RawPosting] = []
+        seen_external_ids: set[str] = set()
+        for notice in notices:
+            if not isinstance(notice, dict):
+                continue
+            view_id = clean_text(str(notice.get("ViewId") or ""))
+            title = clean_text(str(notice.get("Title") or ""))
+            if not view_id or not title:
+                continue
+            self._wait(source)
+            detail_response = self._post_json(
+                f"{api_base}/Affiche/GetAfficheInfo",
+                {"viewId": view_id, "type": int(config.get("notice_type", 0))},
+            )
+            try:
+                detail_payload = detail_response.json()
+            except ValueError as error:
+                raise SourceCollectionError("MNR announcement detail is not valid JSON") from error
+            detail = (
+                detail_payload[0]
+                if isinstance(detail_payload, list) and detail_payload
+                else detail_payload
+            )
+            if not isinstance(detail, dict):
+                continue
+            announcement_url = f"{public_detail_url}?ViewId={view_id}"
+            published_date = parse_date_value(
+                str(detail.get("FbDate") or notice.get("FbDate") or "")
+            )
+            deadline_date = parse_date_value(str(detail.get("BmjsDate") or ""))
+            announcement_text = clean_text(
+                BeautifulSoup(str(detail.get("AnncCont") or ""), "html.parser").get_text(
+                    " ", strip=True
+                )
+            )
+            positions = self._mnr_positions(
+                api_base,
+                view_id,
+                source,
+                int(config.get("notice_type", 0)),
+                announcement_limit,
+            )
+            if positions:
+                for position in positions:
+                    posting = self._mnr_position_posting(
+                        position,
+                        view_id=view_id,
+                        announcement_title=title,
+                        announcement_url=announcement_url,
+                        published_date=published_date,
+                        deadline_date=deadline_date,
+                        source=source,
+                    )
+                    if posting is None or posting.external_id in seen_external_ids:
+                        continue
+                    seen_external_ids.add(str(posting.external_id))
+                    postings.append(posting)
+                    if len(postings) >= announcement_limit:
+                        return postings
+                continue
+            if config.get("include_announcement_fallback", True) and self._accept_candidate(
+                f"{title} {announcement_text}", source
+            ):
+                postings.append(
+                    RawPosting(
+                        title=title,
+                        employer=clean_text(str(detail.get("Fbdw") or source["publisher"])),
+                        source_url=announcement_url,
+                        application_url=None,
+                        text=announcement_text,
+                        summary=announcement_text[:500],
+                        published_date=published_date,
+                        deadline_date=deadline_date,
+                        location=None,
+                        external_id=view_id,
+                        match_text=f"{title} {announcement_text}",
+                    )
+                )
+        return postings[:announcement_limit]
+
+    def _mnr_positions(
+        self,
+        api_base: str,
+        view_id: str,
+        source: dict[str, Any],
+        notice_type: int,
+        item_limit: int,
+    ) -> list[dict[str, Any]]:
+        self._wait(source)
+        response = self._post_json(
+            f"{api_base}/Affiche/GetPostSelectFyList",
+            {
+                "viewId": view_id,
+                "zpdw": "",
+                "zpgw": "",
+                "xwxlyq": "",
+                "pageIndex": 1,
+                "pageSize": min(item_limit, 100),
+                "type": notice_type,
+            },
+        )
+        try:
+            items = response.json().get("items", [])
+        except (ValueError, AttributeError) as error:
+            raise SourceCollectionError("MNR position list is not valid JSON") from error
+        return [item for item in items if isinstance(item, dict)]
+
+    def _mnr_position_posting(
+        self,
+        position: dict[str, Any],
+        *,
+        view_id: str,
+        announcement_title: str,
+        announcement_url: str,
+        published_date: str | None,
+        deadline_date: str | None,
+        source: dict[str, Any],
+    ) -> RawPosting | None:
+        employer = clean_text(str(position.get("zpdw") or source["publisher"]))
+        role = clean_text(str(position.get("zpgw") or ""))
+        if not role:
+            return None
+        details = " ".join(
+            clean_text(str(position.get(field) or ""))
+            for field in (
+                "gwbh",
+                "zpryfw",
+                "zy",
+                "xwxlyq",
+                "gwyq",
+                "yjfx",
+                "gzdd",
+                "remark",
+            )
+        )
+        # Eligibility filtering must not use the employer name.  A finance role
+        # at a geological institution is not a geology role merely because the
+        # institution's name contains a geological keyword.
+        eligibility_text = clean_text(f"{role} {details}")
+        if not self._accept_candidate(eligibility_text, source):
+            return None
+        matching_text = clean_text(f"{employer} {eligibility_text}")
+        external_position_id = clean_text(
+            str(position.get("gwbh") or position.get("gwbm") or role)
+        )
+        return RawPosting(
+            title=f"{employer} - {role}",
+            employer=employer,
+            source_url=announcement_url,
+            application_url=None,
+            text=clean_text(f"{announcement_title} {details}"),
+            summary=clean_text(
+                f"岗位：{role}；专业：{position.get('zy') or '未注明'}；"
+                f"学历：{position.get('xwxlyq') or '未注明'}；"
+                f"地点：{position.get('gzdd') or '未注明'}"
+            ),
+            published_date=published_date,
+            deadline_date=deadline_date,
+            location=clean_text(str(position.get("gzdd") or "")) or None,
+            external_id=f"{view_id}:{external_position_id}",
+            match_text=matching_text,
+        )
+
+    def _collect_slb_coveo_search(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Collect SLB's unauthenticated job search results and public details.
+
+        The search page itself exposes a short-lived public search credential to
+        its browser client.  It is read at runtime and never stored in source
+        configuration or the database.  Registration, login and application
+        endpoints are deliberately out of scope.
+        """
+        config = source["config"]
+        listing_url = str(config.get("listing_url") or source["homepage_url"])
+        listing_response = self._get(listing_url, source)
+        listing_soup = BeautifulSoup(listing_response.text, "html.parser")
+        organization_id = self._hidden_input_value(listing_soup, "organizationId")
+        access_token = self._hidden_input_value(listing_soup, "accessToken")
+        search_hub = self._hidden_input_value(listing_soup, "searchHub")
+        source_name = self._hidden_input_value(listing_soup, "searchsource")
+        if not organization_id or not access_token:
+            raise SourceCollectionError(
+                "SLB public job page is missing its browser search configuration"
+            )
+
+        api_base = str(
+            config.get("search_api_url", "https://platform.cloud.coveo.com/rest/search/v2")
+        ).rstrip("/")
+        api_host = (urlparse(api_base).hostname or "").lower()
+        allowed_api_hosts = {
+            str(host).lower() for host in config.get("api_allowed_hosts", [])
+        }
+        if api_host not in allowed_api_hosts:
+            raise SourceCollectionError("SLB search API host is not allowlisted")
+
+        queries = [str(query).strip() for query in config.get("queries", []) if str(query).strip()]
+        if not queries:
+            raise SourceCollectionError("SLB source requires at least one query")
+        item_limit = self._item_limit(source)
+        page_size = max(1, min(int(config.get("query_page_size", 20)), 50))
+        pipeline = str(config.get("pipeline", "ATSJobsPipeline"))
+        fields = config.get(
+            "fields_to_include",
+            ["title", "date", "country", "city", "category", "jobposteddate"],
+        )
+        source_filter = f'@source=="{source_name}"' if source_name else ""
+        search_url = f"{api_base}?{urlencode({'organizationId': organization_id})}"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+            "Origin": f"{urlparse(listing_response.url).scheme}://{urlparse(listing_response.url).netloc}",
+        }
+
+        # A query can return hundreds of overlapping roles. Bound detail-page
+        # requests before fetching any role, because the detail is required for
+        # reliable location and qualification evidence.
+        detail_limit = self._slb_detail_limit(source, item_limit)
+        candidates: list[dict[str, Any]] = []
+        seen_candidates: set[str] = set()
+        for query in queries:
+            self._wait(source)
+            response = self._post_json(
+                search_url,
+                {
+                    "q": query,
+                    "numberOfResults": page_size,
+                    "searchHub": search_hub or "CoveoJobsHub",
+                    "pipeline": pipeline,
+                    "cq": source_filter,
+                    "fieldsToInclude": fields,
+                },
+                headers=headers,
+            )
+            try:
+                results = response.json().get("results", [])
+            except (ValueError, AttributeError) as error:
+                raise SourceCollectionError("SLB public search did not return JSON") from error
+            if not isinstance(results, list):
+                raise SourceCollectionError("SLB public search did not return a result list")
+
+            for item in results:
+                if not isinstance(item, dict):
+                    continue
+                candidate_id = self._slb_candidate_id(item, source)
+                if not candidate_id or candidate_id in seen_candidates:
+                    continue
+                seen_candidates.add(candidate_id)
+                candidates.append(item)
+                if len(candidates) >= detail_limit:
+                    break
+            if len(candidates) >= detail_limit:
+                break
+
+        postings: list[RawPosting] = []
+        for item in candidates:
+            posting = self._slb_posting_from_result(item, source)
+            if posting is None:
+                continue
+            postings.append(posting)
+            if len(postings) >= item_limit:
+                break
+        return postings
+
+    def _slb_detail_limit(self, source: dict[str, Any], item_limit: int) -> int:
+        """Keep public detail requests bounded even when searches overlap."""
+        value = source["config"].get("max_detail_candidates", item_limit)
+        try:
+            return max(1, min(int(value), self.settings.max_source_items))
+        except (TypeError, ValueError):
+            return item_limit
+
+    def _slb_candidate_id(
+        self,
+        item: dict[str, Any],
+        source: dict[str, Any],
+    ) -> str | None:
+        """Return a safe unique key only for a relevant official result row."""
+        config = source["config"]
+        raw = item.get("raw") if isinstance(item.get("raw"), dict) else {}
+        title = clean_text(str(item.get("title") or raw.get("title") or ""))
+        source_url = clean_text(
+            str(
+                item.get("clickUri")
+                or raw.get("clickableuri")
+                or item.get("uri")
+                or raw.get("uri")
+                or ""
+            )
+        )
+        if not title or not source_url or not self._title_matches_filters(title, config):
+            return None
+        source_host = (urlparse(source_url).hostname or "").lower()
+        allowed_hosts = {
+            str(host).lower() for host in config.get("allowed_hosts", [])
+        }
+        if source_host not in allowed_hosts:
+            return None
+        return clean_text(
+            str(raw.get("sysurihash") or raw.get("urihash") or source_url)
+        ) or None
+
+    def _slb_posting_from_result(
+        self,
+        item: dict[str, Any],
+        source: dict[str, Any],
+    ) -> RawPosting | None:
+        config = source["config"]
+        raw = item.get("raw") if isinstance(item.get("raw"), dict) else {}
+        title = clean_text(str(item.get("title") or raw.get("title") or ""))
+        source_url = clean_text(
+            str(
+                item.get("clickUri")
+                or raw.get("clickableuri")
+                or item.get("uri")
+                or raw.get("uri")
+                or ""
+            )
+        )
+        if not title or not source_url or not self._title_matches_filters(title, config):
+            return None
+        source_host = (urlparse(source_url).hostname or "").lower()
+        if source_host not in {
+            str(host).lower() for host in config.get("allowed_hosts", [])
+        }:
+            return None
+
+        city = self._slb_text_value(raw.get("city"))
+        country = self._slb_text_value(raw.get("country"))
+        location = ", ".join(part for part in (city, country) if part) or None
+        published_date = self._epoch_date(
+            raw.get("jobposteddate") or raw.get("date")
+        )
+        external_id = clean_text(
+            str(raw.get("sysurihash") or raw.get("urihash") or source_url)
+        )
+
+        if not config.get("fetch_detail_pages", True):
+            return RawPosting(
+                title=title,
+                employer=source["publisher"],
+                source_url=normalize_url(source_url),
+                application_url=normalize_url(source_url),
+                text=clean_text(f"{title} {location or ''}"),
+                summary=clean_text(f"SLB 官方职位检索结果：{title}。"),
+                published_date=published_date,
+                deadline_date=None,
+                location=location,
+                external_id=external_id,
+                match_text=title,
+            )
+
+        self._wait(source)
+        try:
+            detail_response = self._get(source_url, source)
+        except (SourceSkipped, SourceCollectionError):
+            return None
+        return self._extract_slb_detail(
+            detail_response.text,
+            detail_response.url,
+            source,
+            title,
+            location,
+            published_date,
+            external_id,
+        )
+
+    def _extract_slb_detail(
+        self,
+        document: str,
+        source_url: str,
+        source: dict[str, Any],
+        title_hint: str,
+        location_hint: str | None,
+        published_date: str | None,
+        external_id: str,
+    ) -> RawPosting | None:
+        soup = BeautifulSoup(document, "html.parser")
+        page_text = clean_text(soup.get_text(" ", strip=True))
+        role_match = re.search(
+            r"Job Name:\s*(.+?)(?=\s+(?:City|Country|Nationality|Job Summary|Requirements|Responsibilities):)",
+            page_text,
+            re.IGNORECASE,
+        )
+        title = clean_text(role_match.group(1)) if role_match else title_hint
+        if len(page_text) < int(source["config"].get("minimum_detail_characters", 250)):
+            return None
+        if not self._title_matches_filters(title, source["config"]):
+            return None
+        if (
+            source["config"].get("require_location_evidence", True)
+            and location_hint
+            and not self._slb_location_is_evidenced(location_hint, page_text)
+        ):
+            # Some generic early-career records share a role page across countries.
+            # A page that describes a different country must not be labeled with the
+            # search result's country on the student-facing site.
+            return None
+
+        city_match = re.search(
+            r"City:\s*(.+?)(?=\s+(?:Nationality|Job Summary|Requirements|Responsibilities):)",
+            page_text,
+            re.IGNORECASE,
+        )
+        detail_location = clean_text(city_match.group(1)) if city_match else None
+        location = detail_location or location_hint
+        summary_start = max(
+            page_text.lower().find("job summary:"),
+            page_text.lower().find("requirements:"),
+        )
+        summary = page_text[summary_start : summary_start + 500] if summary_start >= 0 else page_text[:500]
+        return RawPosting(
+            title=title,
+            employer=source["publisher"],
+            source_url=normalize_url(source_url),
+            application_url=self._find_application_url(soup, source_url)
+            or normalize_url(source_url),
+            text=page_text,
+            summary=clean_text(summary),
+            published_date=published_date,
+            deadline_date=extract_deadline(page_text),
+            location=location,
+            external_id=external_id,
+            match_text=clean_text(f"{title} {page_text}"),
+        )
+
+    @staticmethod
+    def _hidden_input_value(soup: BeautifulSoup, input_id: str) -> str:
+        node = soup.select_one(f"input#{input_id}")
+        return clean_text(str(node.get("value") or "")) if node else ""
+
+    @staticmethod
+    def _slb_text_value(value: Any) -> str:
+        if isinstance(value, list):
+            return clean_text(", ".join(str(item) for item in value if str(item).strip()))
+        return clean_text(str(value or ""))
+
+    @staticmethod
+    def _epoch_date(value: Any) -> str | None:
+        try:
+            numeric = float(value)
+            if numeric <= 0:
+                return None
+            return datetime.fromtimestamp(numeric / 1000, tz=timezone.utc).date().isoformat()
+        except (TypeError, ValueError, OverflowError, OSError):
+            return None
+
+    @staticmethod
+    def _slb_location_is_evidenced(location: str, page_text: str) -> bool:
+        expected = [
+            part.strip().lower()
+            for part in location.split(",")
+            if part.strip() and part.strip().lower() not in {"multi-location", "multiple locations"}
+        ]
+        return not expected or any(part in page_text.lower() for part in expected)
 
     def _collect_html_notice(self, source: dict[str, Any]) -> list[RawPosting]:
         config = source["config"]
@@ -639,7 +1294,21 @@ class OfficialSourceCollector:
                 ]
             return []
 
-        values = labels(job.get("locations")) or labels(job.get("location"))
+        values: list[str] = []
+        for key in (
+            "locations",
+            "location",
+            "workLocation",
+            "workplace",
+            "workPlace",
+            "city",
+            "address",
+            "place",
+        ):
+            values.extend(labels(job.get(key)))
+        # Different MokaHR tenants use different field names.  Preserve the
+        # first explicit location-like value and avoid treating a department
+        # or business function as a place.
         unique = list(dict.fromkeys(value for value in values if value))
         return "、".join(unique) or None
 
@@ -670,6 +1339,18 @@ class OfficialSourceCollector:
         function = self._mokahr_named_value(job.get("zhineng"))
         department = self._mokahr_named_value(job.get("department"))
         location = self._mokahr_location(job)
+        if not location:
+            location = extract_location_hint(
+                " ".join(
+                    value
+                    for value in (
+                        description,
+                        clean_text(str(job.get("content") or "")),
+                        clean_text(str(job.get("detail") or "")),
+                    )
+                    if value
+                )
+            )
         fields = [
             f"学历：{education}" if education else "",
             f"职位性质：{commitment}" if commitment else "",
@@ -830,7 +1511,24 @@ class OfficialSourceCollector:
     ) -> list[tuple[str, str]]:
         config = source["config"]
         selector = config.get("listing_selector")
-        anchors = soup.select(selector) if selector else soup.find_all("a")
+        anchors = list(soup.select(selector) if selector else soup.find_all("a"))
+        # A number of government CMS portals render their list as HTML nested
+        # inside ``<script type="text/xml">`` or CDATA blocks.  A normal CSS
+        # query cannot see those anchors, which silently turns a real source
+        # into a false "no matching jobs" result.  Parse only these explicitly
+        # marked markup blocks and run the same host/pattern checks below.
+        for script in soup.select("script[type='text/xml'], script[type='application/xml']"):
+            raw = script.string or script.get_text()
+            if not raw:
+                continue
+            fragments = re.findall(r"<!\[CDATA\[(.*?)\]\]>", raw, re.DOTALL)
+            if not fragments:
+                fragments = [raw]
+            for fragment in fragments:
+                embedded = BeautifulSoup(fragment, "html.parser")
+                anchors.extend(
+                    embedded.select(selector) if selector else embedded.find_all("a")
+                )
         allowed_hosts = set(config.get("allowed_hosts", []))
         base_parts = urlparse(base_url)
         allowed_hosts.add(base_parts.netloc.lower())
@@ -845,6 +1543,10 @@ class OfficialSourceCollector:
             href = anchor.get("href")
             title = clean_text(anchor.get("title") or anchor.get_text(" ", strip=True))
             if not href or not title:
+                continue
+            if self._is_non_vacancy_notice_title(title):
+                continue
+            if not self._title_matches_filters(title, config):
                 continue
             detail_url = normalize_url(urljoin(base_url, href))
             parsed = urlparse(detail_url)
@@ -895,7 +1597,14 @@ class OfficialSourceCollector:
         title_node = self._select_first(soup, config.get("title_selector", "h1"))
         title = clean_text(title_node.get_text(" ", strip=True) if title_node else "")
         if not title:
+            meta_title = soup.select_one("meta[name='ArticleTitle'], meta[property='og:title']")
+            title = clean_text(str(meta_title.get("content") or "")) if meta_title else ""
+        if not title:
             title = clean_text(soup.title.get_text(" ", strip=True) if soup.title else title_hint)
+        if self._is_non_vacancy_notice_title(title):
+            return None
+        if not self._title_matches_filters(title, config):
+            return None
         content_selector = config.get("content_selector")
         content_node = self._select_first(soup, content_selector) if content_selector else None
         if not content_node:
@@ -1188,7 +1897,13 @@ class OfficialSourceCollector:
         except requests.RequestException as error:
             raise SourceCollectionError(f"Request failed for {normalized}: {error}") from error
 
-    def _post_json(self, url: str, payload: dict[str, Any]) -> requests.Response:
+    def _post_json(
+        self,
+        url: str,
+        payload: dict[str, Any],
+        *,
+        headers: dict[str, str] | None = None,
+    ) -> requests.Response:
         normalized = normalize_url(url)
         if not self._robots_allowed(normalized):
             raise SourceSkipped(f"robots.txt does not permit collection: {normalized}")
@@ -1196,6 +1911,7 @@ class OfficialSourceCollector:
             response = self.session.post(
                 normalized,
                 json=payload,
+                headers=headers,
                 timeout=self.settings.request_timeout_seconds,
                 allow_redirects=True,
             )
@@ -1260,6 +1976,14 @@ class OfficialSourceCollector:
         required = config.get("required_title_patterns", [])
         return not required or any(
             re.search(pattern, normalized, re.IGNORECASE) for pattern in required
+        )
+
+    @staticmethod
+    def _is_non_vacancy_notice_title(title: str) -> bool:
+        normalized = clean_text(title)
+        return any(
+            re.search(pattern, normalized, re.IGNORECASE)
+            for pattern in NON_VACANCY_TITLE_PATTERNS
         )
 
     @staticmethod
@@ -1474,3 +2198,23 @@ def load_source_registry(path: str) -> list[dict[str, Any]]:
         source.setdefault("config", {})
         source.setdefault("enabled", True)
     return payload
+
+
+def load_source_registries(paths: list[str]) -> list[dict[str, Any]]:
+    """Load a primary registry and optional supplementary source matrices.
+
+    A separate provincial file keeps the active collector configuration compact
+    while allowing the nationwide source network to remain versioned and
+    inspectable.  IDs are global so a duplicate cannot silently overwrite a
+    source in SQLite.
+    """
+    sources: list[dict[str, Any]] = []
+    source_ids: set[str] = set()
+    for path in paths:
+        for source in load_source_registry(path):
+            source_id = str(source["id"])
+            if source_id in source_ids:
+                raise SourceCollectionError(f"Duplicate source id: {source_id}")
+            source_ids.add(source_id)
+            sources.append(source)
+    return sources

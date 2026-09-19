@@ -15,7 +15,10 @@
         <span class="relevance relevance-{{ job.relevance_band }}">{{ job.relevance_band }}</span>
       </div>
       <h1>{{ job.title }}</h1>
-      <p class="employer large-employer">{{ job.employer }}</p>
+      <p class="employer large-employer">{{ job.canonical_employer_name or job.employer }}</p>
+      {% if job.canonical_employer_name and job.canonical_employer_name != job.employer %}
+        <p class="muted">公告单位：{{ job.employer }}</p>
+      {% endif %}
     </div>
   </section>
 
@@ -27,8 +30,12 @@
         <div><dt>岗位方向</dt><dd>{{ job.role_direction }}</dd></div>
         <div><dt>单位属性</dt><dd>{{ job.employer_type }}</dd></div>
         <div><dt>所属体系</dt><dd>{{ job.affiliation }}</dd></div>
+        {% if job.parent_employer_name %}
+          <div><dt>上级单位</dt><dd>{{ job.parent_employer_name }}</dd></div>
+        {% endif %}
         <div><dt>机会范围</dt><dd>{{ job.opportunity_scope }}</dd></div>
         <div><dt>工作地点</dt><dd>{{ job.location or "原始公告未注明" }}</dd></div>
+        <div><dt>标准化地点</dt><dd>{{ job.province or job.country_or_region or "未识别" }}{% if job.city and job.city != job.province %} · {{ job.city }}{% endif %}</dd></div>
         <div><dt>学历要求</dt><dd>{{ " / ".join(job.degree_levels) if job.degree_levels else "原始公告未注明" }}</dd></div>
         <div><dt>发布时间</dt><dd>{{ job.published_date|cn_date }}</dd></div>
         <div><dt>报名截止</dt><dd class="deadline">{{ job.deadline_date|cn_date }}</dd></div>

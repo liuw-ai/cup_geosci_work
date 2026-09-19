@@ -42,6 +42,21 @@ def test_deadline_extraction_repairs_digit_spans_from_rich_text_announcements() 
     assert extract_deadline(text) == "2026-10-15"
 
 
+def test_deadline_extraction_handles_same_year_application_window_with_times() -> None:
+    text = "网上报名时间：2026年9月9日9:00至9月16日17:00。"
+
+    assert extract_deadline(text) == "2026-09-16"
+
+
+def test_deadline_extraction_prefers_overall_rolling_window_over_first_batch() -> None:
+    text = (
+        "报名时间：自公告发布之日起至2026年10月31日止，拟分批次进行。"
+        "第一批次：报名截止时间为2026年5月18日。"
+    )
+
+    assert extract_deadline(text) == "2026-10-31"
+
+
 def test_expiry_label_is_a_deadline_not_a_publication_date() -> None:
     text = "中国石油东方物探公司招聘公告 过期时间：2026-11-17"
 

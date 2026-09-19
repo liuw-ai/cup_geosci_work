@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from datetime import date, datetime
+import re
 from typing import Any
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
@@ -21,6 +22,18 @@ FORBIDDEN_JOB_TEXT = (
     "中标",
 )
 
+NON_VACANCY_TITLE_PATTERNS = (
+    r"拟(?:聘|录用|聘用)",
+    r"(?:进入|面试)(?:范围|名单)",
+    r"递补",
+    r"资格(?:审查|复审)",
+    r"笔试(?:成绩|公告|结果)",
+    r"面试(?:成绩|公告|结果)",
+    r"体检(?:公告|名单|结果)",
+    r"考察(?:公告|名单|结果)",
+    r"录用(?:公示|名单|结果)",
+)
+
 
 def audit_database(
     database: Database,
@@ -37,7 +50,7 @@ def audit_database(
         only_open=False,
     )
     issues: list[dict[str, Any]] = []
-    source_urls: dict[str, list[int]] = defaultdict(list)
+    source_urls: dict[str, list[tuple[int, str]]] = defaultdict(list)
 
     for job in jobs:
         job_id = int(job["id"])
@@ -55,7 +68,27 @@ def audit_database(
             continue
 
         source_url = str(job.get("source_url") or "")
-        source_urls[source_url].append(job_id)
+        source_urls[source_url].append((job_id, source_id))
+        if job.get("verification_status") != "published_official":
+            issues.append(
+                {
+                    "code": "unpublished_job_record",
+                    "job_id": job_id,
+                    "source_id": source_id,
+                    "message": "候选线索或未完成核验记录不能进入公开岗位库。",
+                }
+            )
+        official_evidence_url = str(job.get("official_evidence_url") or "")
+        evidence = urlparse(official_evidence_url)
+        if evidence.scheme not in {"http", "https"} or not evidence.hostname:
+            issues.append(
+                {
+                    "code": "missing_official_evidence_url",
+                    "job_id": job_id,
+                    "source_id": source_id,
+                    "message": "公开岗位缺少可访问的官方原文证据链接。",
+                }
+            )
         parsed = urlparse(source_url)
         if parsed.scheme not in {"http", "https"} or not parsed.hostname:
             issues.append(
@@ -96,6 +129,19 @@ def audit_database(
                     }
                 )
                 break
+
+        if any(
+            re.search(pattern, str(job.get("title") or ""), re.IGNORECASE)
+            for pattern in NON_VACANCY_TITLE_PATTERNS
+        ):
+            issues.append(
+                {
+                    "code": "non_vacancy_process_notice",
+                    "job_id": job_id,
+                    "source_id": source_id,
+                    "message": "岗位标题是招聘流程或结果公告，不是可投递岗位。",
+                }
+            )
 
         try:
             minimum = int(source.get("config", {}).get("minimum_relevance", 0))
@@ -175,12 +221,17 @@ def audit_database(
                         }
                     )
 
-    for source_url, job_ids in source_urls.items():
-        if source_url and len(job_ids) > 1:
+    for source_url, job_entries in source_urls.items():
+        source_ids = {source_id for _, source_id in job_entries}
+        shared_url_allowed = all(
+            bool(sources.get(source_id, {}).get("config", {}).get("allow_shared_source_url"))
+            for source_id in source_ids
+        )
+        if source_url and len(job_entries) > 1 and not shared_url_allowed:
             issues.append(
                 {
                     "code": "duplicate_source_url",
-                    "job_ids": job_ids,
+                    "job_ids": [job_id for job_id, _ in job_entries],
                     "message": "多个岗位记录共用同一原始来源链接。",
                 }
             )

@@ -102,6 +102,16 @@ def simulate_cohort(jobs: Iterable[dict[str, Any]]) -> dict[str, Any]:
     students_without_recommendation = len(students) - (
         students_with_explicit + students_with_review_only
     )
+    explicit_job_profile_matches = sum(
+        item["explicit_matches"] for item in by_profile.values()
+    )
+    review_job_profile_matches = sum(
+        item["review_matches"] for item in by_profile.values()
+    )
+    weighted_explicit_opportunities = sum(
+        profile_counts[profile_id] * result["explicit_matches"]
+        for profile_id, result in by_profile.items()
+    )
     return {
         "simulation": "CUPB 地球科学学院匿名 100 人岗位覆盖检查",
         "input_open_jobs": len(job_list),
@@ -118,6 +128,9 @@ def simulate_cohort(jobs: Iterable[dict[str, Any]]) -> dict[str, Any]:
             "students_with_explicit_match": students_with_explicit,
             "students_with_review_only": students_with_review_only,
             "students_without_recommendation": students_without_recommendation,
+            "explicit_job_profile_matches": explicit_job_profile_matches,
+            "review_job_profile_matches": review_job_profile_matches,
+            "cohort_weighted_explicit_opportunities": weighted_explicit_opportunities,
         },
         "profiles": [by_profile[item.id] for item in list_student_profiles()],
         "students": student_results,

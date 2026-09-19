@@ -44,6 +44,16 @@ CREATE TABLE IF NOT EXISTS jobs (
     source_url TEXT NOT NULL,
     application_url TEXT,
     location TEXT,
+    canonical_employer_id TEXT,
+    canonical_employer_name TEXT,
+    parent_employer_name TEXT,
+    province TEXT,
+    city TEXT,
+    country_or_region TEXT,
+    location_confidence TEXT NOT NULL DEFAULT 'unknown',
+    location_evidence TEXT,
+    verification_status TEXT NOT NULL DEFAULT 'published_official',
+    official_evidence_url TEXT,
     published_date TEXT,
     deadline_date TEXT,
     degree_levels_json TEXT NOT NULL DEFAULT '[]',
@@ -89,6 +99,7 @@ CREATE TABLE IF NOT EXISTS crawl_runs (
     finished_at TEXT,
     status TEXT NOT NULL,
     discovered_count INTEGER NOT NULL DEFAULT 0,
+    open_matching_count INTEGER NOT NULL DEFAULT 0,
     inserted_count INTEGER NOT NULL DEFAULT 0,
     updated_count INTEGER NOT NULL DEFAULT 0,
     error_message TEXT
@@ -108,6 +119,56 @@ CREATE TABLE IF NOT EXISTS daily_reports (
     delivery_status TEXT NOT NULL DEFAULT 'pending',
     delivery_error TEXT
 );
+
+CREATE TABLE IF NOT EXISTS source_health (
+    source_id TEXT PRIMARY KEY REFERENCES sources(id) ON DELETE CASCADE,
+    status TEXT NOT NULL,
+    checked_at TEXT NOT NULL,
+    last_success_at TEXT,
+    status_code INTEGER,
+    detail TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_source_health_status
+ON source_health(status, checked_at DESC);
+
+CREATE TABLE IF NOT EXISTS coverage_snapshots (
+    snapshot_date TEXT PRIMARY KEY,
+    captured_at TEXT NOT NULL,
+    open_jobs INTEGER NOT NULL,
+    explicit_job_profile_matches INTEGER NOT NULL,
+    review_job_profile_matches INTEGER NOT NULL,
+    students_with_explicit_match INTEGER NOT NULL,
+    successful_scan_sources INTEGER NOT NULL,
+    sources_with_open_matches INTEGER NOT NULL,
+    source_top_share REAL NOT NULL,
+    category_top_share REAL NOT NULL,
+    payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_coverage_snapshots_captured
+ON coverage_snapshots(captured_at DESC);
+
+CREATE TABLE IF NOT EXISTS candidate_leads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lead_provider TEXT NOT NULL,
+    lead_url TEXT NOT NULL,
+    title TEXT NOT NULL,
+    employer_hint TEXT,
+    location_hint TEXT,
+    province_hint TEXT,
+    published_date TEXT,
+    official_url TEXT,
+    verification_status TEXT NOT NULL DEFAULT 'candidate',
+    verification_note TEXT NOT NULL DEFAULT '',
+    published_job_id INTEGER REFERENCES jobs(id) ON DELETE SET NULL,
+    metadata_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_candidate_leads_status
+ON candidate_leads(verification_status, updated_at DESC);
 """
 
 
@@ -134,6 +195,59 @@ class Database:
     def initialize(self) -> None:
         with self.connect() as connection:
             connection.executescript(SCHEMA)
+            self._migrate_schema(connection)
+
+    @staticmethod
+    def _migrate_schema(connection: sqlite3.Connection) -> None:
+        """Apply additive migrations to databases created before v0.3.
+
+        SQLite supports the small, non-destructive column additions needed by
+        this project.  No jobs, reports, or crawl history are rewritten here.
+        """
+        existing_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(jobs)").fetchall()
+        }
+        additions = {
+            "canonical_employer_id": "TEXT",
+            "canonical_employer_name": "TEXT",
+            "parent_employer_name": "TEXT",
+            "province": "TEXT",
+            "city": "TEXT",
+            "country_or_region": "TEXT",
+            "location_confidence": "TEXT NOT NULL DEFAULT 'unknown'",
+            "location_evidence": "TEXT",
+            "verification_status": "TEXT NOT NULL DEFAULT 'published_official'",
+            "official_evidence_url": "TEXT",
+        }
+        added_official_evidence_url = False
+        for name, definition in additions.items():
+            if name not in existing_columns:
+                connection.execute(f"ALTER TABLE jobs ADD COLUMN {name} {definition}")
+                added_official_evidence_url = (
+                    added_official_evidence_url or name == "official_evidence_url"
+                )
+        crawl_run_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(crawl_runs)").fetchall()
+        }
+        if "open_matching_count" not in crawl_run_columns:
+            connection.execute(
+                "ALTER TABLE crawl_runs "
+                "ADD COLUMN open_matching_count INTEGER NOT NULL DEFAULT 0"
+            )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_jobs_province ON jobs(province, status)"
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_jobs_canonical_employer "
+            "ON jobs(canonical_employer_id, status)"
+        )
+        if added_official_evidence_url:
+            connection.execute(
+                "UPDATE jobs SET official_evidence_url = source_url "
+                "WHERE official_evidence_url IS NULL OR official_evidence_url = ''"
+            )
 
     @contextmanager
     def transaction(self) -> Iterator[sqlite3.Connection]:
@@ -200,6 +314,152 @@ class Database:
             ).fetchone()
         return self._source_row(row) if row else None
 
+    def record_source_health(
+        self,
+        source_id: str,
+        *,
+        status: str,
+        detail: str = "",
+        status_code: int | None = None,
+        successful: bool = False,
+    ) -> None:
+        """Store public-entry availability; scan outcomes live in ``crawl_runs``."""
+        now = utc_now()
+        with self.transaction() as connection:
+            existing = connection.execute(
+                "SELECT last_success_at FROM source_health WHERE source_id = ?",
+                (source_id,),
+            ).fetchone()
+            last_success_at = (
+                now
+                if successful
+                else (existing["last_success_at"] if existing else None)
+            )
+            connection.execute(
+                """
+                INSERT INTO source_health (
+                    source_id, status, checked_at, last_success_at, status_code, detail
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(source_id) DO UPDATE SET
+                    status=excluded.status,
+                    checked_at=excluded.checked_at,
+                    last_success_at=excluded.last_success_at,
+                    status_code=excluded.status_code,
+                    detail=excluded.detail
+                """,
+                (
+                    source_id,
+                    status,
+                    now,
+                    last_success_at,
+                    status_code,
+                    detail[:1000],
+                ),
+            )
+
+    def get_source_health(self, source_id: str) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT * FROM source_health WHERE source_id = ?", (source_id,)
+            ).fetchone()
+        return dict(row) if row else None
+
+    def list_source_health(self) -> list[dict[str, Any]]:
+        with self.connect() as connection:
+            rows = connection.execute(
+                "SELECT * FROM source_health ORDER BY checked_at DESC, source_id"
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def save_coverage_snapshot(
+        self,
+        snapshot_date: str,
+        report: dict[str, Any],
+    ) -> None:
+        """Persist one compact, replaceable daily quality observation.
+
+        This is deliberately separate from immutable daily reports.  It records
+        whether the source network and the 100-person explicit-match result are
+        improving from day to day, even when no employment bulletin is published.
+        """
+        try:
+            date.fromisoformat(snapshot_date)
+        except (TypeError, ValueError) as error:
+            raise ValueError("snapshot_date must use ISO YYYY-MM-DD format") from error
+
+        profile_summary = report.get("profile_match_quality", {}).get(
+            "cohort_summary", {}
+        )
+        scan_quality = report.get("scan_quality", {})
+        distribution = report.get("job_distribution", {})
+        compact_payload = {
+            "field_completeness": report.get("field_completeness", {}),
+            "location_quality": report.get("location_quality", {}),
+            "deadline_quality": report.get("deadline_quality", {}),
+            "source_target_totals": report.get("source_target_matrix", {}).get(
+                "totals", {}
+            ),
+            "quality_gate": report.get("quality_gate", {}),
+        }
+        values = (
+            snapshot_date,
+            utc_now(),
+            int(report.get("open_jobs", 0)),
+            int(profile_summary.get("explicit_job_profile_matches", 0)),
+            int(profile_summary.get("review_job_profile_matches", 0)),
+            int(profile_summary.get("students_with_explicit_match", 0)),
+            int(scan_quality.get("successful_scan_sources", 0)),
+            int(scan_quality.get("sources_with_open_matches", 0)),
+            float(distribution.get("source_concentration", {}).get("top_share", 0)),
+            float(distribution.get("category_concentration", {}).get("top_share", 0)),
+            json.dumps(compact_payload, ensure_ascii=False),
+        )
+        with self.transaction() as connection:
+            connection.execute(
+                """
+                INSERT INTO coverage_snapshots (
+                    snapshot_date, captured_at, open_jobs,
+                    explicit_job_profile_matches, review_job_profile_matches,
+                    students_with_explicit_match, successful_scan_sources,
+                    sources_with_open_matches, source_top_share,
+                    category_top_share, payload_json
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(snapshot_date) DO UPDATE SET
+                    captured_at=excluded.captured_at,
+                    open_jobs=excluded.open_jobs,
+                    explicit_job_profile_matches=excluded.explicit_job_profile_matches,
+                    review_job_profile_matches=excluded.review_job_profile_matches,
+                    students_with_explicit_match=excluded.students_with_explicit_match,
+                    successful_scan_sources=excluded.successful_scan_sources,
+                    sources_with_open_matches=excluded.sources_with_open_matches,
+                    source_top_share=excluded.source_top_share,
+                    category_top_share=excluded.category_top_share,
+                    payload_json=excluded.payload_json
+                """,
+                values,
+            )
+
+    def list_coverage_snapshots(self, limit: int = 2) -> list[dict[str, Any]]:
+        if limit < 1:
+            raise ValueError("limit must be greater than zero")
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT * FROM coverage_snapshots
+                ORDER BY snapshot_date DESC, captured_at DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        snapshots = []
+        for row in rows:
+            item = dict(row)
+            item["payload"] = json.loads(item.pop("payload_json"))
+            snapshots.append(item)
+        return snapshots
+
     def record_crawl_start(self, source_id: str) -> int:
         with self.transaction() as connection:
             cursor = connection.execute(
@@ -219,19 +479,23 @@ class Database:
         inserted_count: int = 0,
         updated_count: int = 0,
         error_message: str | None = None,
+        *,
+        open_matching_count: int = 0,
     ) -> None:
         with self.transaction() as connection:
             connection.execute(
                 """
                 UPDATE crawl_runs
                 SET finished_at = ?, status = ?, discovered_count = ?,
-                    inserted_count = ?, updated_count = ?, error_message = ?
+                    open_matching_count = ?, inserted_count = ?,
+                    updated_count = ?, error_message = ?
                 WHERE id = ?
                 """,
                 (
                     utc_now(),
                     status,
                     discovered_count,
+                    open_matching_count,
                     inserted_count,
                     updated_count,
                     error_message,
@@ -335,12 +599,16 @@ class Database:
                     INSERT INTO jobs (
                         source_id, external_id, fingerprint, content_hash, title,
                         employer, group_name, category, source_tier, source_name,
-                        source_url, application_url, location, published_date,
+                        source_url, application_url, location,
+                        canonical_employer_id, canonical_employer_name,
+                        parent_employer_name, province, city, country_or_region,
+                        location_confidence, location_evidence, verification_status,
+                        official_evidence_url, published_date,
                         deadline_date, degree_levels_json, major_tags_json, summary,
                         description, relevance_score, relevance_band, status,
                         first_seen_at, last_seen_at, created_at, updated_at
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         job.get("source_id"),
@@ -356,6 +624,16 @@ class Database:
                         job["source_url"],
                         job.get("application_url"),
                         job.get("location"),
+                        job.get("canonical_employer_id"),
+                        job.get("canonical_employer_name"),
+                        job.get("parent_employer_name"),
+                        job.get("province"),
+                        job.get("city"),
+                        job.get("country_or_region"),
+                        job.get("location_confidence", "unknown"),
+                        job.get("location_evidence"),
+                        job.get("verification_status", "published_official"),
+                        job.get("official_evidence_url", job["source_url"]),
                         job.get("published_date"),
                         job.get("deadline_date"),
                         json_fields["degree_levels_json"],
@@ -389,6 +667,11 @@ class Database:
                     SET external_id = ?, title = ?, employer = ?, group_name = ?,
                         category = ?, source_tier = ?, source_name = ?,
                         source_url = ?, application_url = ?, location = ?,
+                        canonical_employer_id = ?, canonical_employer_name = ?,
+                        parent_employer_name = ?, province = ?, city = ?,
+                        country_or_region = ?, location_confidence = ?,
+                        location_evidence = ?, verification_status = ?,
+                        official_evidence_url = ?,
                         published_date = ?, deadline_date = ?, degree_levels_json = ?,
                         major_tags_json = ?, summary = ?, description = ?,
                         relevance_score = ?, relevance_band = ?, status = ?,
@@ -406,6 +689,16 @@ class Database:
                         job["source_url"],
                         job.get("application_url"),
                         job.get("location"),
+                        job.get("canonical_employer_id"),
+                        job.get("canonical_employer_name"),
+                        job.get("parent_employer_name"),
+                        job.get("province"),
+                        job.get("city"),
+                        job.get("country_or_region"),
+                        job.get("location_confidence", "unknown"),
+                        job.get("location_evidence"),
+                        job.get("verification_status", "published_official"),
+                        job.get("official_evidence_url", job["source_url"]),
                         job.get("published_date"),
                         job.get("deadline_date"),
                         json_fields["degree_levels_json"],
@@ -427,6 +720,11 @@ class Database:
                 SET external_id = ?, content_hash = ?, title = ?, employer = ?,
                     group_name = ?, category = ?, source_tier = ?, source_name = ?,
                     source_url = ?, application_url = ?, location = ?,
+                    canonical_employer_id = ?, canonical_employer_name = ?,
+                    parent_employer_name = ?, province = ?, city = ?,
+                    country_or_region = ?, location_confidence = ?,
+                    location_evidence = ?, verification_status = ?,
+                    official_evidence_url = ?,
                     published_date = ?, deadline_date = ?, degree_levels_json = ?,
                     major_tags_json = ?, summary = ?, description = ?,
                     relevance_score = ?, relevance_band = ?, status = ?,
@@ -445,6 +743,16 @@ class Database:
                     job["source_url"],
                     job.get("application_url"),
                     job.get("location"),
+                    job.get("canonical_employer_id"),
+                    job.get("canonical_employer_name"),
+                    job.get("parent_employer_name"),
+                    job.get("province"),
+                    job.get("city"),
+                    job.get("country_or_region"),
+                    job.get("location_confidence", "unknown"),
+                    job.get("location_evidence"),
+                    job.get("verification_status", "published_official"),
+                    job.get("official_evidence_url", job["source_url"]),
                     job.get("published_date"),
                     job.get("deadline_date"),
                     json_fields["degree_levels_json"],
@@ -548,11 +856,124 @@ class Database:
             )
         return True
 
+    def update_job_normalization(
+        self,
+        job_id: int,
+        *,
+        canonical_employer_id: str | None,
+        canonical_employer_name: str | None,
+        parent_employer_name: str | None,
+        location: str | None = None,
+        province: str | None,
+        city: str | None,
+        country_or_region: str | None,
+        location_confidence: str,
+        location_evidence: str | None,
+    ) -> bool:
+        """Refresh deterministic registry/location fields without a vacancy event."""
+        values = {
+            "canonical_employer_id": canonical_employer_id,
+            "canonical_employer_name": canonical_employer_name,
+            "parent_employer_name": parent_employer_name,
+            "province": province,
+            "city": city,
+            "country_or_region": country_or_region,
+            "location_confidence": location_confidence,
+            "location_evidence": location_evidence,
+        }
+        with self.transaction() as connection:
+            current = connection.execute(
+                """
+                SELECT location, canonical_employer_id, canonical_employer_name,
+                       parent_employer_name, province, city, country_or_region,
+                       location_confidence, location_evidence
+                FROM jobs WHERE id = ?
+                """,
+                (job_id,),
+            ).fetchone()
+            if current is None:
+                return False
+            if location is None:
+                values.pop("location", None)
+            else:
+                values["location"] = location
+            if all(current[key] == value for key, value in values.items()):
+                return False
+            if "location" in values:
+                connection.execute(
+                    """
+                    UPDATE jobs
+                    SET location = ?, canonical_employer_id = ?,
+                        canonical_employer_name = ?, parent_employer_name = ?,
+                        province = ?, city = ?, country_or_region = ?,
+                        location_confidence = ?, location_evidence = ?
+                    WHERE id = ?
+                    """,
+                    (
+                        values["location"],
+                        values["canonical_employer_id"],
+                        values["canonical_employer_name"],
+                        values["parent_employer_name"],
+                        values["province"],
+                        values["city"],
+                        values["country_or_region"],
+                        values["location_confidence"],
+                        values["location_evidence"],
+                        job_id,
+                    ),
+                )
+                return True
+            connection.execute(
+                """
+                UPDATE jobs
+                SET canonical_employer_id = ?, canonical_employer_name = ?,
+                    parent_employer_name = ?, province = ?, city = ?,
+                    country_or_region = ?, location_confidence = ?,
+                    location_evidence = ?
+                WHERE id = ?
+                """,
+                (
+                    values["canonical_employer_id"],
+                    values["canonical_employer_name"],
+                    values["parent_employer_name"],
+                    values["province"],
+                    values["city"],
+                    values["country_or_region"],
+                    values["location_confidence"],
+                    values["location_evidence"],
+                    job_id,
+                ),
+            )
+            return True
+
+    def list_latest_crawl_runs(self) -> list[dict[str, Any]]:
+        """Return the newest run for each source, including failed attempts.
+
+        A previous successful scan must not mask a newer source failure. Coverage
+        therefore reads the newest run rather than the last successful one.
+        """
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT crawl_runs.*
+                FROM crawl_runs
+                JOIN (
+                    SELECT source_id, MAX(id) AS latest_id
+                    FROM crawl_runs
+                    GROUP BY source_id
+                ) AS latest ON latest.latest_id = crawl_runs.id
+                ORDER BY crawl_runs.source_id
+                """
+            ).fetchall()
+        return [dict(row) for row in rows]
+        return True
+
     def list_jobs(
         self,
         *,
         category: str | None = None,
         degree: str | None = None,
+        province: str | None = None,
         relevance_band: str | None = None,
         q: str | None = None,
         page: int = 1,
@@ -569,15 +990,19 @@ class Database:
         if degree:
             clauses.append("degree_levels_json LIKE ?")
             values.append(f'%"{degree}"%')
+        if province:
+            clauses.append("province = ?")
+            values.append(province)
         if relevance_band:
             clauses.append("relevance_band = ?")
             values.append(relevance_band)
         if q:
             clauses.append(
-                "(title LIKE ? OR employer LIKE ? OR location LIKE ? OR description LIKE ?)"
+                "(title LIKE ? OR employer LIKE ? OR canonical_employer_name LIKE ? "
+                "OR location LIKE ? OR description LIKE ?)"
             )
             search = f"%{q.strip()}%"
-            values.extend([search, search, search, search])
+            values.extend([search, search, search, search, search])
         where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
         with self.connect() as connection:
             count = connection.execute(
@@ -746,6 +1171,195 @@ class Database:
             cursor = connection.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
             return bool(cursor.rowcount)
 
+    def create_candidate_lead(self, lead: dict[str, Any]) -> dict[str, Any]:
+        """Store a third-party discovery clue outside the public jobs table."""
+        required = ("lead_provider", "lead_url", "title")
+        missing = [field for field in required if not str(lead.get(field, "")).strip()]
+        if missing:
+            raise ValueError(f"Candidate lead is missing: {', '.join(missing)}")
+        now = utc_now()
+        metadata = lead.get("metadata", {})
+        if not isinstance(metadata, dict):
+            raise ValueError("Candidate lead metadata must be an object")
+        with self.transaction() as connection:
+            cursor = connection.execute(
+                """
+                INSERT INTO candidate_leads (
+                    lead_provider, lead_url, title, employer_hint, location_hint,
+                    province_hint, published_date, official_url, verification_status,
+                    verification_note, metadata_json, created_at, updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'candidate', ?, ?, ?, ?)
+                """,
+                (
+                    str(lead["lead_provider"]).strip(),
+                    str(lead["lead_url"]).strip(),
+                    str(lead["title"]).strip(),
+                    self._optional_text(lead.get("employer_hint")),
+                    self._optional_text(lead.get("location_hint")),
+                    self._optional_text(lead.get("province_hint")),
+                    self._optional_text(lead.get("published_date")),
+                    self._optional_text(lead.get("official_url")),
+                    self._optional_text(lead.get("verification_note")) or "",
+                    json.dumps(metadata, ensure_ascii=False),
+                    now,
+                    now,
+                ),
+            )
+            lead_id = int(cursor.lastrowid)
+            row = connection.execute(
+                "SELECT * FROM candidate_leads WHERE id = ?", (lead_id,)
+            ).fetchone()
+        return self._lead_row(row)
+
+    def get_candidate_lead(self, lead_id: int) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT * FROM candidate_leads WHERE id = ?", (lead_id,)
+            ).fetchone()
+        return self._lead_row(row) if row else None
+
+    def list_candidate_leads(
+        self,
+        verification_status: str | None = None,
+        *,
+        limit: int = 100,
+    ) -> list[dict[str, Any]]:
+        query = "SELECT * FROM candidate_leads"
+        values: list[Any] = []
+        if verification_status:
+            query += " WHERE verification_status = ?"
+            values.append(verification_status)
+        query += " ORDER BY updated_at DESC, id DESC LIMIT ?"
+        values.append(max(1, min(limit, 500)))
+        with self.connect() as connection:
+            rows = connection.execute(query, values).fetchall()
+        return [self._lead_row(row) for row in rows]
+
+    def update_candidate_lead(
+        self,
+        lead_id: int,
+        changes: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        """Advance an internal lead, never publishing it implicitly."""
+        current = self.get_candidate_lead(lead_id)
+        if current is None:
+            return None
+        editable = {
+            "employer_hint",
+            "location_hint",
+            "province_hint",
+            "published_date",
+            "official_url",
+            "verification_note",
+            "metadata",
+            "verification_status",
+        }
+        unexpected = set(changes).difference(editable)
+        if unexpected:
+            raise ValueError(f"Unsupported lead fields: {', '.join(sorted(unexpected))}")
+        next_status = str(
+            changes.get("verification_status", current["verification_status"])
+        ).strip()
+        if next_status == "published":
+            raise ValueError("Use the verified-lead publication action instead")
+        allowed_statuses = {
+            "candidate",
+            "official_url_found",
+            "official_content_verified",
+            "rejected",
+            "expired",
+        }
+        if next_status not in allowed_statuses:
+            raise ValueError("Unsupported candidate lead verification status")
+        official_url = self._optional_text(
+            changes.get("official_url", current.get("official_url"))
+        )
+        verification_note = self._optional_text(
+            changes.get("verification_note", current.get("verification_note"))
+        ) or ""
+        if next_status in {"official_url_found", "official_content_verified"} and not official_url:
+            raise ValueError("A verified lead requires an official_url")
+        if next_status == "official_content_verified" and not verification_note:
+            raise ValueError("Official-content verification requires a verification_note")
+        metadata = changes.get("metadata", current.get("metadata", {}))
+        if not isinstance(metadata, dict):
+            raise ValueError("Candidate lead metadata must be an object")
+        fields = {
+            "employer_hint": self._optional_text(
+                changes.get("employer_hint", current.get("employer_hint"))
+            ),
+            "location_hint": self._optional_text(
+                changes.get("location_hint", current.get("location_hint"))
+            ),
+            "province_hint": self._optional_text(
+                changes.get("province_hint", current.get("province_hint"))
+            ),
+            "published_date": self._optional_text(
+                changes.get("published_date", current.get("published_date"))
+            ),
+            "official_url": official_url,
+            "verification_status": next_status,
+            "verification_note": verification_note,
+            "metadata_json": json.dumps(metadata, ensure_ascii=False),
+            "updated_at": utc_now(),
+        }
+        with self.transaction() as connection:
+            connection.execute(
+                """
+                UPDATE candidate_leads
+                SET employer_hint = ?, location_hint = ?, province_hint = ?,
+                    published_date = ?, official_url = ?, verification_status = ?,
+                    verification_note = ?, metadata_json = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (
+                    fields["employer_hint"],
+                    fields["location_hint"],
+                    fields["province_hint"],
+                    fields["published_date"],
+                    fields["official_url"],
+                    fields["verification_status"],
+                    fields["verification_note"],
+                    fields["metadata_json"],
+                    fields["updated_at"],
+                    lead_id,
+                ),
+            )
+            row = connection.execute(
+                "SELECT * FROM candidate_leads WHERE id = ?", (lead_id,)
+            ).fetchone()
+        return self._lead_row(row)
+
+    def mark_candidate_lead_published(
+        self,
+        lead_id: int,
+        job_id: int,
+    ) -> dict[str, Any] | None:
+        """Link a verified lead to its published official job record."""
+        with self.transaction() as connection:
+            row = connection.execute(
+                "SELECT * FROM candidate_leads WHERE id = ?", (lead_id,)
+            ).fetchone()
+            if row is None:
+                return None
+            if row["verification_status"] != "official_content_verified":
+                raise ValueError("Lead has not passed official-content verification")
+            if not row["official_url"]:
+                raise ValueError("Verified lead has no official_url")
+            connection.execute(
+                """
+                UPDATE candidate_leads
+                SET verification_status = 'published', published_job_id = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (job_id, utc_now(), lead_id),
+            )
+            updated = connection.execute(
+                "SELECT * FROM candidate_leads WHERE id = ?", (lead_id,)
+            ).fetchone()
+        return self._lead_row(updated)
+
     def expire_jobs_before(self, today: str) -> int:
         now = utc_now()
         with self.transaction() as connection:
@@ -841,6 +1455,11 @@ class Database:
                 FROM crawl_runs
                 LEFT JOIN sources ON sources.id = crawl_runs.source_id
                 WHERE crawl_runs.status = 'failed'
+                  AND crawl_runs.id = (
+                      SELECT MAX(latest.id)
+                      FROM crawl_runs AS latest
+                      WHERE latest.source_id = crawl_runs.source_id
+                  )
                 ORDER BY crawl_runs.started_at DESC
                 LIMIT ?
                 """,
@@ -861,6 +1480,17 @@ class Database:
         item["enabled"] = bool(item["enabled"])
         item["config"] = json.loads(item.pop("config_json"))
         return item
+
+    @staticmethod
+    def _lead_row(row: sqlite3.Row) -> dict[str, Any]:
+        item = dict(row)
+        item["metadata"] = json.loads(item.pop("metadata_json"))
+        return item
+
+    @staticmethod
+    def _optional_text(value: Any) -> str | None:
+        text = str(value or "").strip()
+        return text or None
 
     @staticmethod
     def _job_row(row: sqlite3.Row) -> dict[str, Any]:

@@ -18,6 +18,14 @@ class FakeResponse:
     url: str
 
 
+@dataclass
+class FakeJsonResponse:
+    payload: object
+
+    def json(self) -> object:
+        return self.payload
+
+
 def test_cupb_adapter_keeps_vacancies_and_skips_recruitment_events(tmp_path, monkeypatch) -> None:
     settings = make_settings(tmp_path)
     collector = OfficialSourceCollector(settings)
@@ -391,3 +399,363 @@ def test_html_notice_prefers_first_content_selector(tmp_path) -> None:
     assert posting.title == "某事业单位公开招聘"
     assert "地质工程" in posting.summary
     assert "网站导航" not in posting.summary
+
+
+def test_html_notice_skips_interview_replacement_announcements(tmp_path, monkeypatch) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    listing_url = "https://official.example.cn/notices"
+    source = {
+        "id": "official-notice",
+        "publisher": "测试地质局",
+        "homepage_url": listing_url,
+        "source_type": "html_notice",
+        "config": {
+            "listing_urls": [listing_url],
+            "allowed_hosts": ["official.example.cn"],
+            "listing_selector": "a",
+            "require_recruitment_word": True,
+            "max_items": 10,
+            "request_interval_seconds": 0,
+        },
+    }
+
+    def get(url, _source):
+        assert url == listing_url
+        return FakeResponse(
+            text=(
+                '<a href="/notices/replacement.html">'
+                '2026年公开招聘进入面试范围人员递补情况公告</a>'
+            ),
+            url=listing_url,
+        )
+
+    monkeypatch.setattr(collector, "_get", get)
+
+    assert collector.collect(source) == []
+
+
+def test_html_notice_applies_configured_title_filters(tmp_path, monkeypatch) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    listing_url = "https://official.example.cn/notices"
+    original_url = "https://official.example.cn/notices/original.html"
+    source = {
+        "id": "official-notice",
+        "publisher": "测试地质局",
+        "homepage_url": listing_url,
+        "source_type": "html_notice",
+        "config": {
+            "listing_urls": [listing_url],
+            "allowed_hosts": ["official.example.cn"],
+            "listing_selector": "a",
+            "title_selector": "h1",
+            "content_selector": "article",
+            "require_recruitment_word": True,
+            "required_title_patterns": ["招聘公告"],
+            "excluded_title_patterns": ["资格条件变更"],
+            "max_items": 10,
+            "request_interval_seconds": 0,
+        },
+    }
+    requested: list[str] = []
+
+    def get(url, _source):
+        requested.append(url)
+        if url == listing_url:
+            return FakeResponse(
+                text=(
+                    '<a href="/notices/original.html">2026年公开招聘公告</a>'
+                    '<a href="/notices/change.html">2026年公开招聘公告（资格条件变更）</a>'
+                ),
+                url=listing_url,
+            )
+        if url == original_url:
+            return FakeResponse(
+                text=(
+                    "<h1>2026年公开招聘公告</h1>"
+                    "<article>面向地质工程、资源勘查工程毕业生。</article>"
+                ),
+                url=original_url,
+            )
+        raise AssertionError(url)
+
+    monkeypatch.setattr(collector, "_get", get)
+
+    postings = collector.collect(source)
+
+    assert [posting.title for posting in postings] == ["2026年公开招聘公告"]
+    assert requested == [listing_url, original_url]
+
+
+def test_mnr_public_api_adapter_uses_public_position_fields(tmp_path, monkeypatch) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "mnr-public-recruitment",
+        "name": "自然资源部所属企事业单位公开招聘平台",
+        "publisher": "中华人民共和国自然资源部",
+        "homepage_url": "https://www.sydwgkzp.cn/mnr/",
+        "source_type": "mnr_recruitment",
+        "category": "自然资源、地调与地勘",
+        "source_tier": "A",
+        "config": {
+            "api_base": "https://www.sydwgkzp.cn/mnr/api",
+            "public_detail_url": "https://www.sydwgkzp.cn/mnr/index.html#/recruitmentDetails",
+            "notice_type": 0,
+            "require_major_match": True,
+            "max_items": 10,
+            "request_interval_seconds": 0,
+        },
+    }
+
+    def post_json(url, payload):
+        if url.endswith("GetAfficheList"):
+            return FakeJsonResponse(
+                {
+                    "items": [
+                        {
+                            "ViewId": "notice-1",
+                            "Title": "自然资源部所属单位公开招聘公告",
+                            "FbDate": "2026-09-18T10:00:00",
+                        }
+                    ]
+                }
+            )
+        if url.endswith("GetAfficheInfo"):
+            return FakeJsonResponse(
+                {
+                    "Fbdw": "自然资源部所属单位",
+                    "FbDate": "2026-09-18T10:00:00",
+                    "BmjsDate": "2026-12-31T17:00:00",
+                    "AnncCont": "<p>公开招聘工作人员。</p>",
+                }
+            )
+        if url.endswith("GetPostSelectFyList"):
+            return FakeJsonResponse(
+                {
+                    "items": [
+                        {
+                            "gwbm": "G-001",
+                            "zpdw": "中国地质调查局测试中心",
+                            "zpgw": "地质调查岗",
+                            "zy": "地质工程、资源勘查工程",
+                            "xwxlyq": "硕士研究生",
+                            "gzdd": "新疆克拉玛依",
+                            "gwyq": "地质调查和资源评价能力。",
+                        },
+                        {
+                            "gwbm": "G-002",
+                            "zpdw": "中国地质调查局测试中心",
+                            "zpgw": "财务岗",
+                            "zy": "会计学",
+                            "xwxlyq": "本科",
+                            "gzdd": "北京",
+                        },
+                    ]
+                }
+            )
+        raise AssertionError(url)
+
+    monkeypatch.setattr(collector, "_post_json", post_json)
+    postings = collector.collect(source)
+
+    assert len(postings) == 1
+    assert postings[0].external_id == "notice-1:G-001"
+    assert postings[0].location == "新疆克拉玛依"
+    assert postings[0].deadline_date == "2026-12-31"
+    assert "地质工程" in (postings[0].match_text or "")
+    assert postings[0].source_url.endswith("?ViewId=notice-1")
+
+
+def test_slb_public_search_keeps_only_detail_consistent_locations(
+    tmp_path, monkeypatch
+) -> None:
+    """A generic role page must not be published under another country's label."""
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "slb-career",
+        "name": "SLB Careers",
+        "publisher": "SLB",
+        "homepage_url": "https://careers.slb.com/job-listing",
+        "source_type": "slb_coveo_search",
+        "category": "油气工程技术服务",
+        "source_tier": "A",
+        "config": {
+            "allowed_hosts": ["careers.slb.com"],
+            "api_allowed_hosts": ["platform.cloud.coveo.com"],
+            "listing_url": "https://careers.slb.com/job-listing",
+            "queries": ["geology"],
+            "pipeline": "ATSJobsPipeline",
+            "required_title_patterns": ["geolog"],
+            "max_items": 10,
+            "query_page_size": 10,
+            "fetch_detail_pages": True,
+            "require_detail_content": True,
+            "minimum_detail_characters": 80,
+            "require_location_evidence": True,
+            "request_interval_seconds": 0,
+        },
+    }
+    listing_url = "https://careers.slb.com/job-listing"
+    incorrect_detail_url = (
+        "https://careers.slb.com/jobdescription.aspx?id=Geologist&location='ChinaMulti-Location'"
+    )
+    correct_detail_url = "https://careers.slb.com/jobdescription.aspx?id=87273"
+    responses = {
+        listing_url: FakeResponse(
+            text=(
+                '<input id="organizationId" value="slb-org">'
+                '<input id="accessToken" value="public-browser-token">'
+                '<input id="searchHub" value="CoveoJobsHub">'
+                '<input id="searchsource" value="ATS_Jobs_Source - Prod">'
+            ),
+            url=listing_url,
+        ),
+        incorrect_detail_url: FakeResponse(
+            text=(
+                "Job Name: Early Careers - Geologist City: Luanda, Angola "
+                "Nationality: Open Job Summary: Interpret subsurface data and "
+                "support reservoir evaluation. Requirements: Bachelor's degree in Geology."
+            ),
+            url=incorrect_detail_url,
+        ),
+        correct_detail_url: FakeResponse(
+            text=(
+                "Job Name: Geologist City: Tashkent, Uzbekistan Nationality: Uzbekistan "
+                "Job Summary: Interpret seismic and petrophysical data for reservoir "
+                "evaluation. Requirements: Bachelor's or Master's degree in Geology."
+            ),
+            url=correct_detail_url,
+        ),
+    }
+
+    def get(url, _source):
+        return responses[url]
+
+    def post_json(url, payload, *, headers=None):
+        assert url.startswith("https://platform.cloud.coveo.com/rest/search/v2?")
+        assert payload["q"] == "geology"
+        assert headers and headers["Authorization"] == "Bearer public-browser-token"
+        return FakeJsonResponse(
+            {
+                "results": [
+                    {
+                        "title": "Early Careers - Geologist",
+                        "clickUri": incorrect_detail_url,
+                        "raw": {
+                            "sysurihash": "generic-china-role",
+                            "city": "Multi-Location",
+                            "country": ["China"],
+                            "date": 1789771794000,
+                        },
+                    },
+                    {
+                        "title": "Geologist",
+                        "clickUri": correct_detail_url,
+                        "raw": {
+                            "sysurihash": "tashkent-geologist",
+                            "city": "Tashkent",
+                            "country": ["Uzbekistan"],
+                            "jobposteddate": 1789543483000,
+                        },
+                    },
+                ]
+            }
+        )
+
+    monkeypatch.setattr(collector, "_get", get)
+    monkeypatch.setattr(collector, "_post_json", post_json)
+
+    postings = collector.collect(source)
+
+    assert len(postings) == 1
+    assert postings[0].title == "Geologist"
+    assert postings[0].location == "Tashkent, Uzbekistan"
+    assert postings[0].published_date == "2026-09-16"
+    assert "Master's degree" in (postings[0].match_text or "")
+
+
+def test_slb_detail_requests_are_deduplicated_and_bounded(tmp_path, monkeypatch) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "slb-career",
+        "name": "SLB Careers",
+        "publisher": "SLB",
+        "homepage_url": "https://careers.slb.com/job-listing",
+        "source_type": "slb_coveo_search",
+        "category": "油气工程技术服务",
+        "source_tier": "A",
+        "config": {
+            "allowed_hosts": ["careers.slb.com"],
+            "api_allowed_hosts": ["platform.cloud.coveo.com"],
+            "listing_url": "https://careers.slb.com/job-listing",
+            "search_api_url": "https://platform.cloud.coveo.com/rest/search/v2",
+            "queries": ["geology", "geophysics"],
+            "required_title_patterns": ["geolog"],
+            "max_items": 5,
+            "max_detail_candidates": 2,
+            "query_page_size": 10,
+            "minimum_detail_characters": 80,
+            "require_location_evidence": True,
+            "request_interval_seconds": 0,
+        },
+    }
+    listing_url = "https://careers.slb.com/job-listing"
+    detail_urls = [
+        f"https://careers.slb.com/jobdescription.aspx?id={identifier}"
+        for identifier in ("one", "two", "three")
+    ]
+    detail_requests: list[str] = []
+    responses = {
+        listing_url: FakeResponse(
+            text=(
+                '<input id="organizationId" value="slb-org">'
+                '<input id="accessToken" value="public-browser-token">'
+            ),
+            url=listing_url,
+        ),
+        **{
+            url: FakeResponse(
+                text=(
+                    f"Job Name: Geologist {index} City: Tashkent, Uzbekistan "
+                    "Nationality: Uzbekistan Job Summary: Interpret seismic data "
+                    "for reservoir evaluation. Requirements: Bachelor's degree in Geology."
+                ),
+                url=url,
+            )
+            for index, url in enumerate(detail_urls, start=1)
+        },
+    }
+
+    def result(identifier: str) -> dict[str, object]:
+        index = detail_urls.index(
+            f"https://careers.slb.com/jobdescription.aspx?id={identifier}"
+        ) + 1
+        return {
+            "title": f"Geologist {index}",
+            "clickUri": detail_urls[index - 1],
+            "raw": {
+                "sysurihash": identifier,
+                "city": "Tashkent",
+                "country": ["Uzbekistan"],
+            },
+        }
+
+    def get(url, _source):
+        if url != listing_url:
+            detail_requests.append(url)
+        return responses[url]
+
+    def post_json(_url, payload, *, headers=None):
+        assert headers and headers["Authorization"] == "Bearer public-browser-token"
+        if payload["q"] == "geology":
+            return FakeJsonResponse({"results": [result("one")]})
+        return FakeJsonResponse(
+            {"results": [result("one"), result("two"), result("three")]}
+        )
+
+    monkeypatch.setattr(collector, "_get", get)
+    monkeypatch.setattr(collector, "_post_json", post_json)
+
+    postings = collector.collect(source)
+
+    assert [posting.title for posting in postings] == ["Geologist 1", "Geologist 2"]
+    assert detail_requests == detail_urls[:2]

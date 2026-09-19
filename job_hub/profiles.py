@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import re
 from typing import Any
 
 from job_hub.matching import clean_text
@@ -18,6 +19,7 @@ class StudentProfile:
     degree: str
     major: str
     exact_major_terms: tuple[str, ...]
+    english_exact_major_terms: tuple[str, ...] = ()
 
     @property
     def label(self) -> str:
@@ -44,42 +46,49 @@ STUDENT_PROFILES = (
         degree="本科",
         major="资源勘查工程",
         exact_major_terms=("资源勘查工程", "资源勘探工程", "资源勘探", "勘查技术与工程", "矿产普查与勘探"),
+        english_exact_major_terms=("resource exploration engineering", "mineral exploration"),
     ),
     StudentProfile(
         id="master-geology",
         degree="硕士",
         major="地质学",
         exact_major_terms=("地质学",),
+        english_exact_major_terms=("geology", "geological science", "geological sciences"),
     ),
     StudentProfile(
         id="master-geological-engineering",
         degree="硕士",
         major="地质工程",
         exact_major_terms=("地质工程",),
+        english_exact_major_terms=("geological engineering",),
     ),
     StudentProfile(
         id="master-geological-resources-engineering",
         degree="硕士",
         major="地质资源与地质工程",
         exact_major_terms=("地质资源与地质工程", "地质资源"),
+        english_exact_major_terms=("geological resources and engineering",),
     ),
     StudentProfile(
         id="doctoral-geology",
         degree="博士",
         major="地质学",
         exact_major_terms=("地质学",),
+        english_exact_major_terms=("geology", "geological science", "geological sciences"),
     ),
     StudentProfile(
         id="doctoral-geological-engineering",
         degree="博士",
         major="地质工程",
         exact_major_terms=("地质工程",),
+        english_exact_major_terms=("geological engineering",),
     ),
     StudentProfile(
         id="doctoral-geological-resources-engineering",
         degree="博士",
         major="地质资源与地质工程",
         exact_major_terms=("地质资源与地质工程", "地质资源"),
+        english_exact_major_terms=("geological resources and engineering",),
     ),
 )
 
@@ -166,9 +175,53 @@ def _major_status(
     ]
     if exact:
         return "explicit", f"专业范围明确包含“{exact[0]}”"
+    explicit_english = [
+        term
+        for term in profile.english_exact_major_terms
+        if _english_major_requirement_is_explicit(job, term)
+    ]
+    if explicit_english:
+        return "explicit", f"公告学历条件明确包含“{explicit_english[0]}”"
     if tags:
         return "related", "公告列出了地学或油气相邻专业，需核对专业范围"
     return "unspecified", "公告未明确列出目标专业"
+
+
+def _english_major_requirement_is_explicit(
+    job: dict[str, Any],
+    major_term: str,
+) -> bool:
+    """Require degree-context evidence before translating an English discipline.
+
+    A job title such as ``Geologist`` or a responsibility paragraph mentioning
+    geology is useful for discovery, but it does not prove the applicant's
+    major requirement.  Only a nearby degree, major, discipline, or field-of-
+    study condition can upgrade an English term to an explicit profile match.
+    """
+    source_text = clean_text(
+        " ".join(
+            str(job.get(field, ""))
+            for field in ("title", "summary", "description")
+        )
+    ).lower()
+    term_pattern = re.escape(major_term).replace(r"\ ", r"\s+")
+    degree_context = (
+        r"(?:bachelor(?:'s)?|master(?:'s)?|ph\.?d\.?|doctoral|"
+        r"degree|major|discipline|field\s+of\s+study|qualification|"
+        r"academic\s+background)"
+    )
+    return bool(
+        re.search(
+            rf"\b{degree_context}\b[^.!?;]{{0,100}}\b{term_pattern}\b",
+            source_text,
+            re.IGNORECASE,
+        )
+        or re.search(
+            rf"\b{term_pattern}\b[^.!?;]{{0,100}}\b{degree_context}\b",
+            source_text,
+            re.IGNORECASE,
+        )
+    )
 
 
 def _degree_status(

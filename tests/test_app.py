@@ -41,6 +41,10 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     assert client.get(f"/jobs/{job_id}").status_code == 200
     assert client.get(f"/daily/{report['report_date']}").status_code == 200
     assert client.get("/api/jobs").get_json()["total"] == 1
+    assert client.get("/jobs?province=北京").status_code == 200
+    assert client.get("/api/jobs?province=北京").get_json()["total"] == 1
+    assert client.get("/api/jobs?province=山东").get_json()["total"] == 0
+    assert client.get("/api/coverage").status_code == 200
     landscape_response = client.get("/landscape")
     assert landscape_response.status_code == 200
     assert "油气工程技术服务" in landscape_response.get_data(as_text=True)

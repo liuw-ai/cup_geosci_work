@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import asdict, dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -66,6 +67,71 @@ class EmploymentProfile:
 
     def as_dict(self) -> dict[str, str]:
         return asdict(self)
+
+
+def load_employer_registry(path: Path | None = None) -> list[dict[str, Any]]:
+    """Load the small, auditable canonical employer registry.
+
+    This registry is deliberately not a speculative directory of every
+    subsidiary.  It contains only named units that have a clear public identity
+    and keeps aliases visible in version control for later correction.
+    """
+    registry_path = path or Path(__file__).resolve().parent.parent / "data" / "employer_registry.json"
+    return [dict(item) for item in _load_employer_registry(str(registry_path))]
+
+
+@lru_cache(maxsize=8)
+def _load_employer_registry(path: str) -> tuple[dict[str, Any], ...]:
+    with Path(path).open("r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+    if not isinstance(payload, list):
+        raise ValueError("employer_registry.json must contain a list")
+    required = {
+        "id",
+        "canonical_name",
+        "parent_id",
+        "parent_name",
+        "category",
+        "employer_type",
+        "affiliation",
+        "aliases",
+    }
+    for item in payload:
+        if not isinstance(item, dict) or required.difference(item):
+            raise ValueError("employer_registry.json contains an invalid employer")
+    return tuple(dict(item) for item in payload)
+
+
+def resolve_employer(
+    employer: str | None,
+    *,
+    registry_path: Path | None = None,
+) -> dict[str, Any] | None:
+    """Resolve an explicit employer string without guessing from a job body.
+
+    Longest aliases win, so a specific technical-service subsidiary is not
+    collapsed into a broad parent such as China National Petroleum Corporation.
+    """
+    identity = clean_employment_text(employer).lower()
+    if not identity:
+        return None
+    matches: list[tuple[int, dict[str, Any]]] = []
+    for item in load_employer_registry(registry_path):
+        for alias in item["aliases"]:
+            normalized_alias = clean_employment_text(str(alias)).lower()
+            if normalized_alias and normalized_alias in identity:
+                matches.append((len(normalized_alias), item))
+    if not matches:
+        return None
+    _, best = max(matches, key=lambda item: item[0])
+    return {
+        "canonical_employer_id": best["id"],
+        "canonical_employer_name": best["canonical_name"],
+        "parent_employer_name": best.get("parent_name"),
+        "category": best["category"],
+        "employer_type": best["employer_type"],
+        "affiliation": best["affiliation"],
+    }
 
 
 def clean_employment_text(value: str | None) -> str:
@@ -208,6 +274,7 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
     """Add non-persistent display attributes to a database or report job row."""
     enriched = dict(job)
     identity_values = (job.get("title"), job.get("employer"))
+    identity = resolve_employer(str(job.get("employer") or ""))
     profile = classify_employment(
         " ".join(
             str(value)
@@ -224,6 +291,18 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
         identity_text=" ".join(str(value) for value in identity_values if value),
     )
     enriched.update(profile.as_dict())
+    if identity:
+        # Persistent rows already carry these values after v0.3 migration.
+        # Applying them here also keeps frozen reports from older versions clear.
+        if not enriched.get("canonical_employer_id"):
+            enriched["canonical_employer_id"] = identity["canonical_employer_id"]
+        if not enriched.get("canonical_employer_name"):
+            enriched["canonical_employer_name"] = identity["canonical_employer_name"]
+        if not enriched.get("parent_employer_name"):
+            enriched["parent_employer_name"] = identity["parent_employer_name"]
+        enriched["category"] = identity["category"]
+        enriched["employer_type"] = identity["employer_type"]
+        enriched["affiliation"] = identity["affiliation"]
     return enriched
 
 

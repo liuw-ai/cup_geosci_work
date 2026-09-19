@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "description": "全国省级官方来源核验矩阵。只有 state=verified 且绑定 source_id 的条目才可参与采集；candidate/unlocated 条目仅用于扩源排期。",
+  "required_roles": [
+    "human_resources_or_exam",
+    "natural_resources",
+    "geology_bureau_or_institute",
+    "public_institution_recruitment",
+    "civil_service"
+  ],
+  "national_fallbacks": [
+    "mnr-public-recruitment",
+    "cgs-notices",
+    "national-civil-service",
+    "mohrss-notices"
+  ],
+  "province_targets": {
+    "北京": {
+      "human_resources_or_exam": {"state": "verified", "source_id": "beijing-hrss"},
+      "natural_resources": {"state": "verified", "source_id": "beijing-natural-resources"},
+      "geology_bureau_or_institute": {"state": "unlocated", "discovery_hint": "北京市地质调查研究院/规划自然资源系统"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "北京市事业单位公开招聘服务平台"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "北京市公务员考试录用专题"}
+    },
+    "天津": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "天津市人力资源和社会保障局公开招聘"},
+      "natural_resources": {"state": "verified", "source_id": "tianjin-natural-resources"},
+      "geology_bureau_or_institute": {"state": "unlocated", "discovery_hint": "天津市地质调查研究院"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "天津市事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "天津市公务员考试录用"}
+    },
+    "河北": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "河北省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "http://zrzy.hebei.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "verified", "source_id": "hebei-geology-bureau"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "河北省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "河北省公务员考试录用"}
+    },
+    "山西": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "山西省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://zrzyt.shanxi.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://dkj.shanxi.gov.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "山西省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "山西省公务员考试录用"}
+    },
+    "内蒙古": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "内蒙古自治区人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "http://zrzy.nmg.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://www.nmgeology.com"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "内蒙古自治区事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "内蒙古公务员考试录用"}
+    },
+    "辽宁": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "辽宁省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://zrzy.ln.gov.cn/zrzy/zfgkzdgz/"},
+      "geology_bureau_or_institute": {"state": "unlocated", "discovery_hint": "辽宁省地质勘查局/地质调查院"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "辽宁省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "辽宁省公务员考试录用"}
+    },
+    "吉林": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "吉林省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "http://zrzy.jl.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://dkj.jl.gov.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "吉林省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "吉林省公务员考试录用"}
+    },
+    "黑龙江": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "黑龙江省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://zrzyt.hlj.gov.cn/zrzyt/c112211/"},
+      "geology_bureau_or_institute": {"state": "unlocated", "discovery_hint": "黑龙江省地质调查院/地质矿产局"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "黑龙江省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "黑龙江省公务员考试录用"}
+    },
+    "上海": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "上海市人力资源和社会保障局公开招聘"},
+      "natural_resources": {"state": "verified", "source_id": "shanghai-natural-resources"},
+      "geology_bureau_or_institute": {"state": "unlocated", "discovery_hint": "上海市地质调查研究院"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "上海市事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "上海市公务员考试录用"}
+    },
+    "江苏": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "江苏省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "verified", "source_id": "jiangsu-natural-resources"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://dkj.jiangsu.gov.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "江苏省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "江苏省公务员考试录用"}
+    },
+    "浙江": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "浙江省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "verified", "source_id": "zhejiang-natural-resources"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://www.zjdzy.org.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "浙江省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "浙江省公务员考试录用"}
+    },
+    "安徽": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "安徽省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "verified", "source_id": "anhui-natural-resources"},
+        "geology_bureau_or_institute": {"state": "verified", "source_id": "anhui-geology-bureau"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "安徽省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "安徽省公务员考试录用"}
+    },
+    "福建": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "福建省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "verified", "source_id": "fujian-natural-resources"},
+      "geology_bureau_or_institute": {"state": "unlocated", "discovery_hint": "福建省地质调查研究院"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "福建省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "福建省公务员考试录用"}
+    },
+    "江西": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "江西省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://zrzy.jiangxi.gov.cn/col/col38/index.html"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://dzj.jiangxi.gov.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "江西省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "江西省公务员考试录用"}
+    },
+    "山东": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "山东省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "http://dnr.shandong.gov.cn/zwgk_324/xxgkml/rsxx/"},
+      "geology_bureau_or_institute": {"state": "verified", "source_id": "shandong-geology-bureau"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "山东省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "山东省公务员考试录用"}
+    },
+    "河南": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "河南省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://zrzyt.henan.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "verified", "source_id": "henan-geology-bureau"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "河南省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "河南省公务员考试录用"}
+    },
+    "湖北": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "湖北省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "verified", "source_id": "hubei-natural-resources"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://dzj.hubei.gov.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "湖北省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "湖北省公务员考试录用"}
+    },
+    "湖南": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "湖南省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "http://zrzyt.hunan.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "verified", "source_id": "hunan-geology-institute"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "湖南省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "湖南省公务员考试录用"}
+    },
+    "广东": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "广东省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "http://nr.gd.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://dzj.gd.gov.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "广东省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "广东省公务员考试录用"}
+    },
+    "广西": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "广西壮族自治区人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "http://dnr.gxzf.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://dkj.gxzf.gov.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "广西事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "广西公务员考试录用"}
+    },
+    "海南": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "海南省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://zizhijian.hainan.gov.cn/xxgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://dzj.hainan.gov.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "海南省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "海南省公务员考试录用"}
+    },
+    "重庆": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "重庆市人力资源和社会保障局公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://ghzrzyw.cq.gov.cn/zwgk_186/rsxx/"},
+      "geology_bureau_or_institute": {"state": "unlocated", "discovery_hint": "重庆市地质调查院"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "重庆市事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "重庆市公务员考试录用"}
+    },
+    "四川": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "四川省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://dnr.sc.gov.cn/scdnr/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://dkj.sc.gov.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "四川省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "四川省公务员考试录用"}
+    },
+    "贵州": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "贵州省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://zrzy.guizhou.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "https://dk.guizhou.gov.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "贵州省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "贵州省公务员考试录用"}
+    },
+    "云南": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "云南省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "http://dnr.yn.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://dkj.yn.gov.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "云南省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "云南省公务员考试录用"}
+    },
+    "西藏": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "西藏自治区人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "http://zrzyt.xizang.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "unlocated", "discovery_hint": "西藏自治区地质调查院"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "西藏自治区事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "西藏自治区公务员考试录用"}
+    },
+    "陕西": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "陕西省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://zrzyt.shaanxi.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://www.sxsddy.com"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "陕西省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "陕西省公务员考试录用"}
+    },
+    "甘肃": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "甘肃省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://zrzy.gansu.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://gsdkj.net/xxgk/rsxx"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "甘肃省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "甘肃省公务员考试录用"}
+    },
+    "青海": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "青海省人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "http://zrzy.qinghai.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "unlocated", "discovery_hint": "青海省地质矿产勘查开发局"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "青海省事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "青海省公务员考试录用"}
+    },
+    "宁夏": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "宁夏回族自治区人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "https://zrzyt.nx.gov.cn/zwgk/rsxx/"},
+        "geology_bureau_or_institute": {"state": "verified", "source_id": "ningxia-geology-bureau"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "宁夏事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "宁夏公务员考试录用"}
+    },
+    "新疆": {
+      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "新疆维吾尔自治区人力资源和社会保障厅公开招聘"},
+      "natural_resources": {"state": "candidate", "official_entry_url": "http://zrzyt.xinjiang.gov.cn/zwgk/rsxx/"},
+      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://xjdkj.tianshanzw.cn"},
+      "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "新疆事业单位公开招聘"},
+      "civil_service": {"state": "unlocated", "discovery_hint": "新疆公务员考试录用"}
+    }
+  }
+}

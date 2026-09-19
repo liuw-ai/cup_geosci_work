@@ -97,6 +97,11 @@ CORE_MAJOR_KEYWORDS = {
     "geoscience": 28,
     "geologist": 28,
     "geology": 28,
+    "geological science": 28,
+    "geological sciences": 28,
+    "geological engineering": 30,
+    "geological resources and engineering": 32,
+    "resource exploration engineering": 30,
     "geophysical": 24,
     "geophysics": 24,
     "geophysicist": 24,
@@ -311,6 +316,18 @@ def parse_date_value(value: str | None) -> str | None:
 
 def extract_deadline(text: str) -> str | None:
     normalized = _normalize_date_text(text)
+    # Some rolling announcements describe a short first batch and then a
+    # later overall closing date. Prefer the explicit overall "至 YYYY-MM-DD"
+    # boundary over an earlier nested "第一批次截止" date.
+    overall_window = re.compile(
+        r"(?:报名|申请|网申|投递|应聘).{0,24}?(?:时间|期间|日期)"
+        r".{0,32}?(?:自|从).{0,24}?"
+        r"(?:至|到)\s*(20\d{2}\s*[年./-]\s*\d{1,2}\s*[月./-]\s*\d{1,2})",
+        re.IGNORECASE,
+    )
+    match = overall_window.search(normalized)
+    if match:
+        return parse_date_value(match.group(1))
     range_pattern = re.compile(
         r"(?:报名|申请|网申|投递|应聘).{0,24}?(?:时间|期间|日期)"
         r".{0,20}?(20\d{2}\s*[年./-]\s*\d{1,2}\s*[月./-]\s*\d{1,2})"
@@ -321,6 +338,28 @@ def extract_deadline(text: str) -> str | None:
     match = range_pattern.search(normalized)
     if match:
         return parse_date_value(match.group(2))
+    # Government recruitment notices commonly write a range such as
+    # "2026年9月9日9:00至9月16日17:00".  The end of the range deliberately
+    # omits its year, so the full-date pattern above cannot see it.  Treat the
+    # end date as the same year only inside an explicit application window.
+    implicit_year_range = re.compile(
+        r"(?:报名|申请|网申|投递|应聘).{0,24}?(?:时间|期间|日期)"
+        r".{0,32}?(?P<start_year>20\d{2})\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*日"
+        r"(?:\s*\d{1,2}:\d{2})?\s*(?:至|到|-|—|~)\s*"
+        r"(?:(?P<end_year>20\d{2})\s*年\s*)?"
+        r"(?P<end_month>\d{1,2})\s*月\s*(?P<end_day>\d{1,2})\s*日",
+        re.IGNORECASE,
+    )
+    match = implicit_year_range.search(normalized)
+    if match:
+        try:
+            return date(
+                int(match.group("end_year") or match.group("start_year")),
+                int(match.group("end_month")),
+                int(match.group("end_day")),
+            ).isoformat()
+        except ValueError:
+            pass
     pattern = re.compile(
         r"(?:报名|申请|网申|投递|应聘|招聘).{0,24}?(?:截止|截至|截止时间|结束)"
         r".{0,32}?(20\d{2}\s*[年./-]\s*\d{1,2}\s*[月./-]\s*\d{1,2})",

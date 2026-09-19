@@ -60,6 +60,47 @@ def test_profile_match_marks_related_or_missing_fields_for_original_notice_revie
     assert result.label == "需核验原公告"
 
 
+def test_profile_match_translates_explicit_english_degree_and_major_evidence() -> None:
+    profile = get_student_profile("master-geology")
+    assert profile is not None
+
+    result = evaluate_profile_match(
+        job(
+            title="Geologist",
+            degree_levels=["本科", "硕士"],
+            major_tags=["geology", "geophysics"],
+            description=(
+                "Requirements: Bachelor's or Master's degree in Geology, "
+                "Geophysics, or a related discipline."
+            ),
+        ),
+        profile,
+    )
+
+    assert result.level == "explicit"
+    assert "geology" in result.reason
+
+
+def test_profile_match_does_not_translate_a_title_only_english_discipline() -> None:
+    profile = get_student_profile("master-geology")
+    assert profile is not None
+
+    result = evaluate_profile_match(
+        job(
+            title="Geologist",
+            degree_levels=["硕士"],
+            major_tags=["geology"],
+            description=(
+                "The Geologist interprets seismic data. A master's degree in "
+                "engineering is required."
+            ),
+        ),
+        profile,
+    )
+
+    assert result.level == "review"
+
+
 def test_lower_degree_candidate_is_not_recommended_when_notice_requires_higher_degree() -> None:
     profile = get_student_profile("undergraduate-resource-exploration")
     assert profile is not None

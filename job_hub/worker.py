@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 
 from job_hub.audit import audit_database
 from job_hub.config import Settings
+from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
 from job_hub.emailer import DeliveryError, Mailer
 from job_hub.pipeline import JobPipeline
@@ -66,10 +67,16 @@ class DailyWorker:
         self._heartbeat("syncing")
         try:
             summary = self.pipeline.sync_all()
+            snapshot_date = datetime.now(self.timezone).date().isoformat()
+            self.database.save_coverage_snapshot(
+                snapshot_date,
+                build_coverage_report(self.database, snapshot_date=snapshot_date),
+            )
             self.last_sync_monotonic = time.monotonic()
             LOGGER.info(
-                "Source synchronization complete: %s",
+                "Source synchronization complete: %s; coverage snapshot recorded for %s.",
                 summary.as_dict(),
+                snapshot_date,
             )
             if summary.failed:
                 self._send_failure_safely(
