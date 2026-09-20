@@ -6,6 +6,8 @@
 
 完整的数据流、专业匹配边界、100 人模拟检查和运维边界见 [ARCHITECTURE.md](ARCHITECTURE.md)。生产部署、HTTPS 反向代理和手机/微信访问排查见 [DEPLOYMENT.md](DEPLOYMENT.md)。
 
+项目进入长期迭代前的 Phase 0 审阅材料见 [docs/phase-0/README.md](docs/phase-0/README.md)。其中明确区分当前已经实现的能力、尚未实现的能力，以及后续扩源时不得突破的公开发布边界。
+
 ## 已实现的能力
 
 - 官方来源白名单：单位官网、官方招聘系统、政府公开招聘平台、高校就业网优先。
