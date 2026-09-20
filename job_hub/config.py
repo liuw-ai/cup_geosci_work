@@ -45,6 +45,14 @@ class Settings:
     smtp_to: tuple[str, ...]
     smtp_use_ssl: bool
     crawl_run_stale_seconds: int = 1800
+    artifact_storage_dir: Path | None = None
+    attachment_max_bytes: int = 25_000_000
+    attachment_discovery_max_bytes: int = 2_000_000
+    attachment_max_rows: int = 2_000
+    attachment_max_text_characters: int = 250_000
+    attachment_ocr_enabled: bool = False
+    attachment_ocr_language: str = "chi_sim+eng"
+    attachment_ocr_max_pages: int = 12
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -86,8 +94,40 @@ class Settings:
             smtp_to=recipients,
             smtp_use_ssl=_env_bool("SMTP_USE_SSL", True),
             crawl_run_stale_seconds=_env_int("CRAWL_RUN_STALE_SECONDS", 1800),
+            artifact_storage_dir=Path(
+                os.getenv("ATTACHMENT_STORAGE_DIR", data_dir / "official-attachments")
+            ),
+            attachment_max_bytes=_env_int("ATTACHMENT_MAX_BYTES", 25_000_000),
+            attachment_discovery_max_bytes=_env_int(
+                "ATTACHMENT_DISCOVERY_MAX_BYTES", 2_000_000
+            ),
+            attachment_max_rows=_env_int("ATTACHMENT_MAX_ROWS", 2_000),
+            attachment_max_text_characters=_env_int(
+                "ATTACHMENT_MAX_TEXT_CHARACTERS", 250_000
+            ),
+            attachment_ocr_enabled=_env_bool("ATTACHMENT_OCR_ENABLED"),
+            attachment_ocr_language=os.getenv("ATTACHMENT_OCR_LANGUAGE", "chi_sim+eng"),
+            attachment_ocr_max_pages=_env_int("ATTACHMENT_OCR_MAX_PAGES", 12),
         )
 
     def ensure_runtime_paths(self) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
+        self.managed_artifact_dir().mkdir(parents=True, exist_ok=True)
+
+    def managed_artifact_dir(self) -> Path:
+        """Return the private attachment directory, always below APP_DATA_DIR."""
+        data_root = self.data_dir.resolve()
+        configured = self.artifact_storage_dir or Path("official-attachments")
+        # Relative storage paths are intentionally relative to APP_DATA_DIR so
+        # the same .env works in a local checkout and inside the Docker image.
+        candidate = (
+            configured if configured.is_absolute() else self.data_dir / configured
+        ).resolve()
+        try:
+            candidate.relative_to(data_root)
+        except ValueError as error:
+            raise ValueError(
+                "ATTACHMENT_STORAGE_DIR must be located inside APP_DATA_DIR"
+            ) from error
+        return candidate

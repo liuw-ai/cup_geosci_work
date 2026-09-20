@@ -4,13 +4,17 @@ import hashlib
 import json
 import sqlite3
 from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
+from urllib.parse import urlparse
 
 from job_hub.contracts import (
     OFFICIAL_EVIDENCE_TYPES,
     is_http_url,
+    validate_artifact_candidate,
+    validate_artifact_candidate_transition,
     validate_candidate_lead_transition,
     validate_job_evidence,
     validate_source_artifact,
@@ -109,6 +113,56 @@ CREATE TABLE IF NOT EXISTS source_artifacts (
 
 CREATE INDEX IF NOT EXISTS idx_source_artifacts_source_status
 ON source_artifacts(source_id, extraction_status, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS source_artifact_rows (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    artifact_id INTEGER NOT NULL REFERENCES source_artifacts(id) ON DELETE CASCADE,
+    row_key TEXT NOT NULL,
+    sheet_name TEXT NOT NULL,
+    row_number INTEGER NOT NULL,
+    row_kind TEXT NOT NULL DEFAULT 'tabular',
+    cells_json TEXT NOT NULL DEFAULT '{}',
+    row_text TEXT NOT NULL DEFAULT '',
+    extraction_confidence TEXT NOT NULL DEFAULT 'high',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE(artifact_id, row_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_source_artifact_rows_artifact
+ON source_artifact_rows(artifact_id, sheet_name, row_number);
+
+CREATE TABLE IF NOT EXISTS artifact_job_candidates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    artifact_row_id INTEGER NOT NULL UNIQUE
+        REFERENCES source_artifact_rows(id) ON DELETE CASCADE,
+    source_id TEXT NOT NULL REFERENCES sources(id) ON DELETE RESTRICT,
+    candidate_key TEXT NOT NULL UNIQUE,
+    official_page_url TEXT NOT NULL,
+    title TEXT NOT NULL,
+    employer TEXT NOT NULL,
+    application_url TEXT,
+    location TEXT,
+    published_date TEXT,
+    deadline_date TEXT,
+    degree_levels_json TEXT NOT NULL DEFAULT '[]',
+    major_tags_json TEXT NOT NULL DEFAULT '[]',
+    summary TEXT NOT NULL DEFAULT '',
+    description TEXT NOT NULL DEFAULT '',
+    field_evidence_json TEXT NOT NULL DEFAULT '{}',
+    relevance_score INTEGER NOT NULL DEFAULT 0,
+    review_status TEXT NOT NULL DEFAULT 'needs_review',
+    review_note TEXT NOT NULL DEFAULT '',
+    published_job_id INTEGER REFERENCES jobs(id) ON DELETE SET NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_artifact_job_candidates_status
+ON artifact_job_candidates(review_status, updated_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_artifact_job_candidates_source
+ON artifact_job_candidates(source_id, review_status);
 
 CREATE TABLE IF NOT EXISTS job_evidence (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -242,6 +296,11 @@ def utc_now() -> str:
     return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
 
 
+_ACTIVE_TRANSACTION: ContextVar[tuple[Path, sqlite3.Connection] | None] = ContextVar(
+    "job_hub_active_transaction", default=None
+)
+
+
 class Database:
     def __init__(self, path: Path):
         self.path = path
@@ -327,7 +386,18 @@ class Database:
 
     @contextmanager
     def transaction(self) -> Iterator[sqlite3.Connection]:
+        active_transaction = _ACTIVE_TRANSACTION.get()
+        database_path = self.path.resolve()
+        if (
+            active_transaction is not None
+            and active_transaction[0] == database_path
+        ):
+            # Reuse the outer connection so compound operations can commit or
+            # roll back as one unit without opening a nested SQLite transaction.
+            yield active_transaction[1]
+            return
         connection = self.connect()
+        token = _ACTIVE_TRANSACTION.set((database_path, connection))
         try:
             yield connection
             connection.commit()
@@ -335,6 +405,7 @@ class Database:
             connection.rollback()
             raise
         finally:
+            _ACTIVE_TRANSACTION.reset(token)
             connection.close()
 
     def upsert_source(self, source: dict[str, Any]) -> None:
@@ -857,20 +928,18 @@ class Database:
             return job_id, "updated"
 
     def upsert_source_artifact(self, artifact: dict[str, Any]) -> dict[str, Any]:
-        """Register official attachment metadata without downloading its content.
-
-        Phase 1 intentionally stores only the public URL and processing state.
-        A later attachment pipeline may add a content hash and managed storage
-        path after a compliant, controlled download.
-        """
+        """Register one attachment whose parent page and file URL are official."""
         normalized = validate_source_artifact(artifact)
         now = utc_now()
         with self.transaction() as connection:
             source = connection.execute(
-                "SELECT id FROM sources WHERE id = ?", (normalized["source_id"],)
+                "SELECT * FROM sources WHERE id = ?", (normalized["source_id"],)
             ).fetchone()
             if source is None:
                 raise ValueError("Source artifact references an unregistered source_id")
+            self._validate_source_artifact_urls(
+                self._source_row(source), normalized
+            )
             connection.execute(
                 """
                 INSERT INTO source_artifacts (
@@ -944,6 +1013,431 @@ class Database:
             rows = connection.execute(query, values).fetchall()
         return [self._artifact_row(row) for row in rows]
 
+    def update_source_artifact_processing(
+        self,
+        artifact_id: int,
+        *,
+        extraction_status: str,
+        media_type: str | None = None,
+        content_sha256: str | None = None,
+        storage_path: str | None = None,
+        parser_version: str | None = None,
+        metadata_updates: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Record a controlled download or parser result without changing its URL."""
+        if metadata_updates is not None and not isinstance(metadata_updates, dict):
+            raise ValueError("metadata_updates must be an object")
+        now = utc_now()
+        with self.transaction() as connection:
+            existing = connection.execute(
+                "SELECT * FROM source_artifacts WHERE id = ?", (artifact_id,)
+            ).fetchone()
+            if existing is None:
+                raise ValueError("Source artifact does not exist")
+            source = connection.execute(
+                "SELECT * FROM sources WHERE id = ?", (existing["source_id"],)
+            ).fetchone()
+            if source is None:  # pragma: no cover - protected by the foreign key
+                raise ValueError("Source artifact references an unregistered source_id")
+            metadata = json.loads(existing["metadata_json"])
+            metadata.update(metadata_updates or {})
+            payload = {
+                "source_id": existing["source_id"],
+                "parent_url": existing["parent_url"],
+                "artifact_url": existing["artifact_url"],
+                "artifact_kind": existing["artifact_kind"],
+                "media_type": media_type if media_type is not None else existing["media_type"],
+                "content_sha256": (
+                    content_sha256
+                    if content_sha256 is not None
+                    else existing["content_sha256"]
+                ),
+                "storage_path": (
+                    storage_path if storage_path is not None else existing["storage_path"]
+                ),
+                "parser_version": (
+                    parser_version
+                    if parser_version is not None
+                    else existing["parser_version"]
+                ),
+                "extraction_status": extraction_status,
+                "metadata": metadata,
+            }
+            normalized = validate_source_artifact(payload)
+            self._validate_source_artifact_urls(
+                self._source_row(source), normalized
+            )
+            connection.execute(
+                """
+                UPDATE source_artifacts
+                SET media_type = ?, content_sha256 = ?, storage_path = ?,
+                    parser_version = ?, extraction_status = ?, metadata_json = ?,
+                    updated_at = ?
+                WHERE id = ?
+                """,
+                (
+                    normalized["media_type"],
+                    normalized["content_sha256"],
+                    normalized["storage_path"],
+                    normalized["parser_version"],
+                    normalized["extraction_status"],
+                    json.dumps(normalized["metadata"], ensure_ascii=False),
+                    now,
+                    artifact_id,
+                ),
+            )
+            row = connection.execute(
+                "SELECT * FROM source_artifacts WHERE id = ?", (artifact_id,)
+            ).fetchone()
+        if row is None:  # pragma: no cover - protected by the UPDATE above
+            raise RuntimeError("Source artifact processing state could not be persisted")
+        return self._artifact_row(row)
+
+    def upsert_source_artifact_rows(
+        self,
+        artifact_id: int,
+        rows: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Persist extracted table rows with stable identities for later review."""
+        normalized_rows = [self._normalize_artifact_row(item) for item in rows]
+        if not normalized_rows:
+            return []
+        now = utc_now()
+        persisted: list[dict[str, Any]] = []
+        with self.transaction() as connection:
+            artifact = connection.execute(
+                "SELECT id FROM source_artifacts WHERE id = ?", (artifact_id,)
+            ).fetchone()
+            if artifact is None:
+                raise ValueError("Source artifact does not exist")
+            for item in normalized_rows:
+                row_key = self._artifact_row_key(artifact_id, item)
+                connection.execute(
+                    """
+                    INSERT INTO source_artifact_rows (
+                        artifact_id, row_key, sheet_name, row_number, row_kind,
+                        cells_json, row_text, extraction_confidence, created_at, updated_at
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(artifact_id, row_key) DO UPDATE SET
+                        cells_json = excluded.cells_json,
+                        row_text = excluded.row_text,
+                        extraction_confidence = excluded.extraction_confidence,
+                        updated_at = excluded.updated_at
+                    """,
+                    (
+                        artifact_id,
+                        row_key,
+                        item["sheet_name"],
+                        item["row_number"],
+                        item["row_kind"],
+                        json.dumps(item["cells"], ensure_ascii=False, sort_keys=True),
+                        item["row_text"],
+                        item["extraction_confidence"],
+                        now,
+                        now,
+                    ),
+                )
+                row = connection.execute(
+                    """
+                    SELECT * FROM source_artifact_rows
+                    WHERE artifact_id = ? AND row_key = ?
+                    """,
+                    (artifact_id, row_key),
+                ).fetchone()
+                if row is None:  # pragma: no cover - protected by UPSERT above
+                    raise RuntimeError("Source artifact row could not be persisted")
+                persisted.append(self._source_artifact_row(row))
+        return persisted
+
+    def list_source_artifact_rows(
+        self,
+        artifact_id: int,
+        *,
+        limit: int = 100,
+    ) -> list[dict[str, Any]]:
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT * FROM source_artifact_rows
+                WHERE artifact_id = ?
+                ORDER BY sheet_name ASC, row_number ASC, id ASC
+                LIMIT ?
+                """,
+                (artifact_id, max(1, min(limit, 500))),
+            ).fetchall()
+        return [self._source_artifact_row(row) for row in rows]
+
+    def upsert_artifact_job_candidate(
+        self,
+        candidate: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Store a private, review-required job candidate from one table row."""
+        normalized = validate_artifact_candidate(candidate)
+        now = utc_now()
+        with self.transaction() as connection:
+            row = connection.execute(
+                """
+                SELECT rows.artifact_id, artifacts.source_id, artifacts.parent_url
+                FROM source_artifact_rows AS rows
+                JOIN source_artifacts AS artifacts ON artifacts.id = rows.artifact_id
+                WHERE rows.id = ?
+                """,
+                (normalized["artifact_row_id"],),
+            ).fetchone()
+            if row is None:
+                raise ValueError("Artifact job candidate references an unknown artifact row")
+            if str(row["source_id"]) != normalized["source_id"]:
+                raise ValueError("Artifact job candidate source must match its attachment")
+            if str(row["parent_url"]) != normalized["official_page_url"]:
+                raise ValueError(
+                    "Artifact job candidate official_page_url must be its attachment parent_url"
+                )
+            candidate_key = self._artifact_candidate_key(normalized["artifact_row_id"])
+            existing = connection.execute(
+                """
+                SELECT id, review_status FROM artifact_job_candidates
+                WHERE artifact_row_id = ?
+                """,
+                (normalized["artifact_row_id"],),
+            ).fetchone()
+            if existing is not None and existing["review_status"] == "published":
+                persisted = self._select_artifact_job_candidate(
+                    connection, int(existing["id"])
+                )
+                if persisted is None:  # pragma: no cover - protected by SELECT above
+                    raise RuntimeError("Published artifact candidate disappeared")
+                return self._artifact_candidate_row(persisted)
+            connection.execute(
+                """
+                INSERT INTO artifact_job_candidates (
+                    artifact_row_id, source_id, candidate_key, official_page_url,
+                    title, employer, application_url, location, published_date,
+                    deadline_date, degree_levels_json, major_tags_json, summary,
+                    description, field_evidence_json, relevance_score, review_status,
+                    review_note, created_at, updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(artifact_row_id) DO UPDATE SET
+                    source_id = excluded.source_id,
+                    candidate_key = excluded.candidate_key,
+                    official_page_url = excluded.official_page_url,
+                    title = excluded.title,
+                    employer = excluded.employer,
+                    application_url = excluded.application_url,
+                    location = excluded.location,
+                    published_date = excluded.published_date,
+                    deadline_date = excluded.deadline_date,
+                    degree_levels_json = excluded.degree_levels_json,
+                    major_tags_json = excluded.major_tags_json,
+                    summary = excluded.summary,
+                    description = excluded.description,
+                    field_evidence_json = excluded.field_evidence_json,
+                    relevance_score = excluded.relevance_score,
+                    updated_at = excluded.updated_at
+                """,
+                (
+                    normalized["artifact_row_id"],
+                    normalized["source_id"],
+                    candidate_key,
+                    normalized["official_page_url"],
+                    normalized["title"],
+                    normalized["employer"],
+                    normalized["application_url"],
+                    normalized["location"],
+                    normalized["published_date"],
+                    normalized["deadline_date"],
+                    json.dumps(normalized["degree_levels"], ensure_ascii=False),
+                    json.dumps(normalized["major_tags"], ensure_ascii=False),
+                    normalized["summary"] or "",
+                    normalized["description"],
+                    json.dumps(normalized["field_evidence"], ensure_ascii=False),
+                    normalized["relevance_score"],
+                    normalized["review_status"],
+                    normalized["review_note"] or "",
+                    now,
+                    now,
+                ),
+            )
+            candidate_row = connection.execute(
+                "SELECT id FROM artifact_job_candidates WHERE artifact_row_id = ?",
+                (normalized["artifact_row_id"],),
+            ).fetchone()
+            if candidate_row is None:  # pragma: no cover - protected by UPSERT
+                raise RuntimeError("Artifact job candidate could not be persisted")
+            persisted = self._select_artifact_job_candidate(
+                connection, int(candidate_row["id"])
+            )
+        if persisted is None:  # pragma: no cover - protected by SELECT above
+            raise RuntimeError("Artifact job candidate could not be loaded")
+        return self._artifact_candidate_row(persisted)
+
+    def get_artifact_job_candidate(self, candidate_id: int) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = self._select_artifact_job_candidate(connection, candidate_id)
+        return self._artifact_candidate_row(row) if row else None
+
+    def list_artifact_job_candidates(
+        self,
+        *,
+        artifact_id: int | None = None,
+        review_status: str | None = None,
+        limit: int = 100,
+    ) -> list[dict[str, Any]]:
+        query = self._artifact_candidate_select_sql()
+        values: list[Any] = []
+        conditions: list[str] = []
+        if artifact_id is not None:
+            conditions.append("rows.artifact_id = ?")
+            values.append(artifact_id)
+        if review_status:
+            conditions.append("candidates.review_status = ?")
+            values.append(review_status)
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        query += " ORDER BY candidates.updated_at DESC, candidates.id DESC LIMIT ?"
+        values.append(max(1, min(limit, 500)))
+        with self.connect() as connection:
+            rows = connection.execute(query, values).fetchall()
+        return [self._artifact_candidate_row(row) for row in rows]
+
+    def update_artifact_job_candidate(
+        self,
+        candidate_id: int,
+        changes: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        """Advance private attachment candidates only after a human review note."""
+        if not isinstance(changes, dict):
+            raise ValueError("Artifact candidate changes must be an object")
+        current = self.get_artifact_job_candidate(candidate_id)
+        if current is None:
+            return None
+        editable = {"review_status", "review_note"}
+        unexpected = set(changes) - editable
+        if unexpected:
+            raise ValueError(
+                "Artifact candidate fields are not editable after extraction: "
+                + ", ".join(sorted(unexpected))
+            )
+        review_note = self._optional_text(
+            changes.get("review_note", current.get("review_note"))
+        ) or ""
+        review_status = validate_artifact_candidate_transition(
+            current["review_status"],
+            changes.get("review_status", current["review_status"]),
+            review_note=review_note,
+        )
+        if review_status == "published":
+            raise ValueError(
+                "Use mark_artifact_job_candidate_published after saving the verified job"
+            )
+        now = utc_now()
+        with self.transaction() as connection:
+            connection.execute(
+                """
+                UPDATE artifact_job_candidates
+                SET review_status = ?, review_note = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (review_status, review_note, now, candidate_id),
+            )
+            row = self._select_artifact_job_candidate(connection, candidate_id)
+        return self._artifact_candidate_row(row) if row else None
+
+    def mark_artifact_job_candidate_published(
+        self,
+        candidate_id: int,
+        job_id: int,
+    ) -> dict[str, Any]:
+        """Seal the private candidate after its verified job and evidence exist."""
+        now = utc_now()
+        with self.transaction() as connection:
+            candidate = self._select_artifact_job_candidate(connection, candidate_id)
+            if candidate is None:
+                raise ValueError("Artifact job candidate does not exist")
+            if candidate["review_status"] != "official_content_verified":
+                raise ValueError("Artifact job candidate has not passed official-content review")
+            artifact = connection.execute(
+                """
+                SELECT extraction_status, content_sha256
+                FROM source_artifacts
+                WHERE id = ?
+                """,
+                (candidate["artifact_id"],),
+            ).fetchone()
+            if artifact is None or artifact["extraction_status"] != "extracted":
+                raise ValueError("Artifact must finish extraction before publication")
+            if not artifact["content_sha256"]:
+                raise ValueError("Artifact publication requires a content hash")
+            job = connection.execute(
+                "SELECT source_id, source_url FROM jobs WHERE id = ?", (job_id,)
+            ).fetchone()
+            if job is None:
+                raise ValueError("Published job does not exist")
+            if str(job["source_id"] or "") != str(candidate["source_id"]):
+                raise ValueError("Published job source must match the artifact candidate")
+            if str(job["source_url"] or "") != str(candidate["official_page_url"]):
+                raise ValueError("Published job source_url must be the official parent page")
+            connection.execute(
+                """
+                UPDATE artifact_job_candidates
+                SET review_status = 'published', published_job_id = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (job_id, now, candidate_id),
+            )
+            row = self._select_artifact_job_candidate(connection, candidate_id)
+        if row is None:  # pragma: no cover - protected by UPDATE above
+            raise RuntimeError("Artifact candidate publication state could not be persisted")
+        return self._artifact_candidate_row(row)
+
+    def publish_artifact_job_candidate(
+        self,
+        candidate_id: int,
+        job: dict[str, Any],
+        attachment_evidence: dict[str, Any],
+    ) -> tuple[int, str, dict[str, Any]]:
+        """Publish an attachment candidate and all of its evidence atomically.
+
+        ``save_job``, ``add_job_evidence`` and the candidate state transition
+        each use ``transaction()``.  The re-entrant transaction context keeps
+        those calls on this one connection, so any validation or database
+        error rolls back the public job, evidence and private state together.
+        """
+        with self.transaction() as connection:
+            candidate_row = self._select_artifact_job_candidate(
+                connection, candidate_id
+            )
+            if candidate_row is None:
+                raise ValueError("Artifact job candidate does not exist")
+            candidate = self._artifact_candidate_row(candidate_row)
+            if candidate["review_status"] != "official_content_verified":
+                raise ValueError(
+                    "Artifact job candidate has not passed official-content review"
+                )
+            if candidate.get("extraction_confidence") == "low":
+                raise ValueError(
+                    "Low-confidence OCR candidates require manual import after independent verification"
+                )
+            evidence_artifact_id = attachment_evidence.get("artifact_id")
+            if int(evidence_artifact_id or 0) != int(candidate["artifact_id"]):
+                raise ValueError(
+                    "Attachment evidence must reference the candidate's artifact"
+                )
+            if str(attachment_evidence.get("evidence_url") or "") != str(
+                candidate["artifact_url"]
+            ):
+                raise ValueError(
+                    "Attachment evidence must reference the candidate's artifact URL"
+                )
+
+            job_id, outcome = self.save_job(job)
+            self.add_job_evidence(job_id, attachment_evidence)
+            published = self.mark_artifact_job_candidate_published(
+                candidate_id, job_id
+            )
+            return job_id, outcome, published
+
     def add_job_evidence(
         self,
         job_id: int,
@@ -960,13 +1454,21 @@ class Database:
             artifact_id = normalized["artifact_id"]
             if artifact_id is not None:
                 artifact = connection.execute(
-                    "SELECT source_id FROM source_artifacts WHERE id = ?", (artifact_id,)
+                    "SELECT source_id, artifact_url FROM source_artifacts WHERE id = ?",
+                    (artifact_id,),
                 ).fetchone()
                 if artifact is None:
                     raise ValueError("Job evidence references an unknown artifact_id")
                 if str(job["source_id"] or "") != str(artifact["source_id"]):
                     raise ValueError(
                         "Job evidence artifact must belong to the job's registered source"
+                    )
+                if (
+                    normalized["evidence_type"] == "attachment"
+                    and normalized["evidence_url"] != str(artifact["artifact_url"])
+                ):
+                    raise ValueError(
+                        "Attachment evidence_url must match the registered artifact URL"
                     )
             return self._upsert_job_evidence(connection, job_id, normalized)
 
@@ -1969,6 +2471,134 @@ class Database:
         return cutoff.replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
     @staticmethod
+    def _validate_source_artifact_urls(
+        source: dict[str, Any],
+        artifact: dict[str, Any],
+    ) -> None:
+        """Keep parent pages and downloads inside explicit official host lists."""
+        config = source.get("config", {})
+        if not isinstance(config, dict):  # pragma: no cover - source contract prevents this
+            raise ValueError("Registered source config must be an object")
+        homepage_host = urlparse(str(source.get("homepage_url") or "")).hostname
+        page_hosts = {
+            str(host).strip().lower()
+            for host in config.get("allowed_hosts", [])
+            if str(host).strip()
+        }
+        if homepage_host:
+            page_hosts.add(homepage_host.lower())
+        attachment_hosts = set(page_hosts)
+        attachment_hosts.update(
+            str(host).strip().lower()
+            for host in config.get("attachment_allowed_hosts", [])
+            if str(host).strip()
+        )
+        parent_host = urlparse(artifact["parent_url"]).hostname
+        file_host = urlparse(artifact["artifact_url"]).hostname
+        if not parent_host or parent_host.lower() not in page_hosts:
+            raise ValueError(
+                "Source artifact parent_url host is not in the registered official source hosts"
+            )
+        if not file_host or file_host.lower() not in attachment_hosts:
+            raise ValueError(
+                "Source artifact artifact_url host is not in the registered attachment hosts"
+            )
+
+    @staticmethod
+    def _normalize_artifact_row(value: dict[str, Any]) -> dict[str, Any]:
+        if not isinstance(value, dict):
+            raise ValueError("Source artifact row must be an object")
+        sheet_name = str(value.get("sheet_name") or "").strip()
+        if not sheet_name:
+            raise ValueError("Source artifact row sheet_name is required")
+        row_number = value.get("row_number")
+        if isinstance(row_number, bool):
+            raise ValueError("Source artifact row row_number must be a positive integer")
+        try:
+            row_number = int(row_number)
+        except (TypeError, ValueError) as error:
+            raise ValueError(
+                "Source artifact row row_number must be a positive integer"
+            ) from error
+        if row_number < 1:
+            raise ValueError("Source artifact row row_number must be a positive integer")
+        cells_value = value.get("cells", {})
+        if not isinstance(cells_value, dict):
+            raise ValueError("Source artifact row cells must be an object")
+        cells = {
+            str(key).strip(): str(cell).strip()
+            for key, cell in cells_value.items()
+            if str(key).strip() and str(cell).strip()
+        }
+        row_kind = str(value.get("row_kind") or "tabular").strip()
+        if row_kind not in {"tabular", "text_table"}:
+            raise ValueError("Source artifact row row_kind must be tabular or text_table")
+        confidence = str(value.get("extraction_confidence") or "high").strip()
+        if confidence not in {"high", "medium", "low"}:
+            raise ValueError("Source artifact row extraction_confidence is unsupported")
+        row_text = str(value.get("row_text") or "").strip()
+        if not row_text:
+            row_text = "；".join(f"{key}：{cell}" for key, cell in cells.items())
+        return {
+            "sheet_name": sheet_name,
+            "row_number": row_number,
+            "row_kind": row_kind,
+            "cells": cells,
+            "row_text": row_text,
+            "extraction_confidence": confidence,
+        }
+
+    @staticmethod
+    def _artifact_row_key(artifact_id: int, row: dict[str, Any]) -> str:
+        identity = {
+            "artifact_id": artifact_id,
+            "sheet_name": row["sheet_name"],
+            "row_number": row["row_number"],
+            "row_kind": row["row_kind"],
+        }
+        return hashlib.sha256(
+            json.dumps(identity, ensure_ascii=False, sort_keys=True).encode("utf-8")
+        ).hexdigest()
+
+    @staticmethod
+    def _artifact_candidate_key(artifact_row_id: int) -> str:
+        return hashlib.sha256(
+            f"artifact-job-candidate:{artifact_row_id}".encode("utf-8")
+        ).hexdigest()
+
+    @staticmethod
+    def _artifact_candidate_select_sql() -> str:
+        return """
+            SELECT candidates.*,
+                   rows.artifact_id,
+                   rows.sheet_name AS row_sheet_name,
+                   rows.row_number AS row_number,
+                   rows.row_kind AS row_kind,
+                   rows.cells_json AS row_cells_json,
+                   rows.row_text AS row_text,
+                   rows.extraction_confidence AS extraction_confidence,
+                   artifacts.artifact_url AS artifact_url,
+                   artifacts.parent_url AS artifact_parent_url,
+                   artifacts.content_sha256 AS artifact_content_sha256,
+                   artifacts.storage_path AS artifact_storage_path,
+                   artifacts.parser_version AS artifact_parser_version
+            FROM artifact_job_candidates AS candidates
+            JOIN source_artifact_rows AS rows ON rows.id = candidates.artifact_row_id
+            JOIN source_artifacts AS artifacts ON artifacts.id = rows.artifact_id
+        """
+
+    @staticmethod
+    def _select_artifact_job_candidate(
+        connection: sqlite3.Connection,
+        candidate_id: int,
+    ) -> sqlite3.Row | None:
+        return connection.execute(
+            Database._artifact_candidate_select_sql()
+            + " WHERE candidates.id = ?",
+            (candidate_id,),
+        ).fetchone()
+
+    @staticmethod
     def _source_row(row: sqlite3.Row) -> dict[str, Any]:
         item = dict(row)
         item["enabled"] = bool(item["enabled"])
@@ -1985,6 +2615,22 @@ class Database:
     def _artifact_row(row: sqlite3.Row) -> dict[str, Any]:
         item = dict(row)
         item["metadata"] = json.loads(item.pop("metadata_json"))
+        return item
+
+    @staticmethod
+    def _source_artifact_row(row: sqlite3.Row) -> dict[str, Any]:
+        item = dict(row)
+        item["cells"] = json.loads(item.pop("cells_json"))
+        return item
+
+    @staticmethod
+    def _artifact_candidate_row(row: sqlite3.Row) -> dict[str, Any]:
+        item = dict(row)
+        item["degree_levels"] = json.loads(item.pop("degree_levels_json"))
+        item["major_tags"] = json.loads(item.pop("major_tags_json"))
+        item["field_evidence"] = json.loads(item.pop("field_evidence_json"))
+        if "row_cells_json" in item:
+            item["row_cells"] = json.loads(item.pop("row_cells_json"))
         return item
 
     @staticmethod

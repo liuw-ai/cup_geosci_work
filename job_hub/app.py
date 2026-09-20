@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 from flask import Flask, abort, jsonify, render_template, request, url_for
 
 from job_hub.audit import audit_database
+from job_hub.attachments import AttachmentProcessingError, OfficialAttachmentProcessor
 from job_hub.config import Settings
 from job_hub.contracts import is_http_url
 from job_hub.coverage import build_coverage_report
@@ -41,6 +42,7 @@ def create_app(settings: Settings | None = None) -> Flask:
     app.extensions["settings"] = settings
     app.extensions["database"] = database
     app.extensions["pipeline"] = pipeline
+    app.extensions["attachment_processor"] = OfficialAttachmentProcessor(settings, database)
 
     @app.context_processor
     def inject_globals() -> dict[str, Any]:
@@ -532,6 +534,140 @@ def create_app(settings: Settings | None = None) -> Flask:
         except ValueError as error:
             return jsonify({"error": str(error)}), 400
         return jsonify(artifact), 201
+
+    @app.post("/api/admin/artifacts/<int:artifact_id>/process")
+    @require_admin
+    def process_source_artifact_api(artifact_id: int) -> Any:
+        """Download and parse one official attachment into the private review queue."""
+        payload = request.get_json(silent=True) or {}
+        if not isinstance(payload, dict):
+            return jsonify({"error": "Request body must be a JSON object."}), 400
+        processor = app.extensions["attachment_processor"]
+        try:
+            result = processor.process(
+                artifact_id,
+                force_download=bool(payload.get("force_download", False)),
+                extract=bool(payload.get("extract", True)),
+            )
+        except (AttachmentProcessingError, ValueError) as error:
+            return jsonify({"error": str(error)}), 409
+        return jsonify(result.as_dict()), 200
+
+    @app.post("/api/admin/artifacts/discover")
+    @require_admin
+    def discover_source_artifacts_api() -> Any:
+        """Find public PDF/Excel links on one approved announcement page."""
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({"error": "Request body must be a JSON object."}), 400
+        source_id = str(payload.get("source_id") or "").strip()
+        parent_url = str(payload.get("parent_url") or "").strip()
+        if not source_id or not parent_url:
+            return jsonify({"error": "source_id and parent_url are required."}), 400
+        processor = app.extensions["attachment_processor"]
+        try:
+            artifacts = processor.discover_from_page(
+                source_id,
+                parent_url,
+                html=(str(payload["html"]) if "html" in payload else None),
+            )
+        except (AttachmentProcessingError, ValueError) as error:
+            return jsonify({"error": str(error)}), 409
+        return jsonify({"items": artifacts, "count": len(artifacts)}), 201
+
+    @app.get("/api/admin/artifacts/<int:artifact_id>/rows")
+    @require_admin
+    def source_artifact_rows_api(artifact_id: int) -> Any:
+        if database.get_source_artifact(artifact_id) is None:
+            abort(404)
+        limit = request.args.get("limit", 100, type=int)
+        return jsonify({"items": database.list_source_artifact_rows(artifact_id, limit=limit)})
+
+    @app.route("/api/admin/artifact-candidates", methods=["GET", "POST"])
+    @require_admin
+    def artifact_candidates_api() -> Any:
+        if request.method == "GET":
+            artifact_id = request.args.get("artifact_id", type=int)
+            status = request.args.get("status", "").strip() or None
+            return jsonify(
+                {
+                    "items": database.list_artifact_job_candidates(
+                        artifact_id=artifact_id,
+                        review_status=status,
+                    )
+                }
+            )
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({"error": "Request body must be a JSON object."}), 400
+        try:
+            candidate = database.upsert_artifact_job_candidate(payload)
+        except ValueError as error:
+            return jsonify({"error": str(error)}), 400
+        return jsonify(candidate), 201
+
+    @app.patch("/api/admin/artifact-candidates/<int:candidate_id>")
+    @require_admin
+    def update_artifact_candidate_api(candidate_id: int) -> Any:
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({"error": "Request body must be a JSON object."}), 400
+        try:
+            candidate = database.update_artifact_job_candidate(candidate_id, payload)
+        except ValueError as error:
+            return jsonify({"error": str(error)}), 409
+        if candidate is None:
+            abort(404)
+        return jsonify(candidate)
+
+    @app.post("/api/admin/artifact-candidates/<int:candidate_id>/publish")
+    @require_admin
+    def publish_artifact_candidate_api(candidate_id: int) -> Any:
+        candidate = database.get_artifact_job_candidate(candidate_id)
+        if candidate is None:
+            abort(404)
+        if candidate["review_status"] != "official_content_verified":
+            return jsonify({"error": "Only officially verified attachment candidates can be published."}), 409
+        if candidate.get("extraction_confidence") == "low":
+            return jsonify({"error": "Low-confidence OCR candidates require manual import after independent verification."}), 409
+        source = database.get_source(str(candidate["source_id"]))
+        if source is None:
+            return jsonify({"error": "Candidate source is no longer registered."}), 409
+        raw = RawPosting(
+            title=str(candidate["title"]),
+            employer=str(candidate["employer"]),
+            source_url=str(candidate["official_page_url"]),
+            application_url=candidate.get("application_url"),
+            text=str(candidate.get("description") or candidate["title"]),
+            summary=str(candidate.get("summary") or ""),
+            published_date=candidate.get("published_date"),
+            deadline_date=candidate.get("deadline_date"),
+            location=candidate.get("location"),
+            external_id=f"artifact-candidate-{candidate_id}",
+            official_evidence_url=str(candidate["official_page_url"]),
+        )
+        try:
+            job_id, outcome, published = database.publish_artifact_job_candidate(
+                candidate_id,
+                pipeline.normalize_posting(raw, source),
+                {
+                    "artifact_id": candidate["artifact_id"],
+                    "evidence_type": "attachment",
+                    "field_name": "job_record",
+                    "evidence_url": str(candidate["artifact_url"]),
+                    "locator": f"{candidate['row_sheet_name']}!{candidate['row_number']}",
+                    "excerpt": str(candidate.get("row_text") or "")[:2000],
+                    "verification_status": "verified",
+                    "metadata": {
+                        "candidate_id": candidate_id,
+                        "content_sha256": candidate.get("artifact_content_sha256"),
+                        "parser_version": candidate.get("artifact_parser_version"),
+                    },
+                },
+            )
+        except ValueError as error:
+            return jsonify({"error": str(error)}), 409
+        return jsonify({"job_id": job_id, "outcome": outcome, "candidate": published}), 201
 
     @app.route("/api/admin/jobs/<int:job_id>/evidence", methods=["GET", "POST"])
     @require_admin

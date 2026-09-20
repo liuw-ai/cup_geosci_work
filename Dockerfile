@@ -6,6 +6,13 @@ ENV APP_DATA_DIR=/var/lib/job-hub
 
 WORKDIR /app
 
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        poppler-utils \
+        tesseract-ocr \
+        tesseract-ocr-chi-sim \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN addgroup --system jobhub \
     && adduser --system --ingroup jobhub --home /app jobhub
 

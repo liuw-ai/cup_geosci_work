@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from job_hub.config import Settings
@@ -30,6 +31,15 @@ def make_settings(tmp_path: Path) -> Settings:
         smtp_from="",
         smtp_to=(),
         smtp_use_ssl=True,
+    )
+
+
+def make_settings_with_artifact_path(
+    tmp_path: Path, artifact_storage_dir: Path
+) -> Settings:
+    """Build test settings with an explicit attachment storage path."""
+    return replace(
+        make_settings(tmp_path), artifact_storage_dir=artifact_storage_dir
     )
 
 

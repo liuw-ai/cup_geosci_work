@@ -10,6 +10,8 @@
 
 当前待审阅的 Phase 1 数据契约、SQLite 迁移、岗位证据、附件台账和私有线索状态机见 [docs/phase-1/README.md](docs/phase-1/README.md)。本阶段不新增爬虫或招聘数据；它为后续官方职位表解析和全国来源扩展建立可追溯的数据基础。
 
+当前待审阅的 Phase 2 官方 PDF/Excel/扫描件职位表流水线见 [docs/phase-2/README.md](docs/phase-2/README.md)。它只处理已登记官方公告页的公开附件，解析结果先进入管理员私有候选池，经过人工核验并同时保留公告页和附件证据后才允许公开。
+
 ## 已实现的能力
 
 - 官方来源白名单：单位官网、官方招聘系统、政府公开招聘平台、高校就业网优先。
@@ -40,6 +42,7 @@ job_hub/
   app.py          公开网站与管理接口
   db.py           SQLite 数据库与查询
   contracts.py    来源、单位、证据、附件和线索状态的数据契约
+  attachments.py  官方附件发现、受控下载、解析和私有候选队列
   sources.py      公开来源采集器和 robots 合规检查
   locations.py    省份、城市和国家/地区标准化
   source_targets.py 31 省五类官方来源扩展矩阵
@@ -58,6 +61,8 @@ examples/         人工补录模板
 tests/            自动化测试
 ARCHITECTURE.md    数据流、收录边界、运维与代码职责
 ~~~
+
+附件处理不会在学生端请求中触发。管理员先用 `discover-artifacts` 登记官方公告页中的附件，再用 `process-artifact` 受控下载和解析；低置信度 OCR 结果必须人工复核，不能自动发布。完整的字段、状态和回退边界见 [docs/phase-2/README.md](docs/phase-2/README.md)。
 
 ## 本地启动
 

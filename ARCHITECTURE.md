@@ -4,6 +4,8 @@
 
 已完成、待审阅的岗位证据、附件台账、私有线索状态机与 SQLite 迁移契约见 [docs/phase-1/README.md](docs/phase-1/README.md)。它不代表 PDF/Excel 已经开始自动下载或解析。
 
+Phase 2 的官方附件处理契约见 [docs/phase-2/README.md](docs/phase-2/README.md)。它把公告附件下载和解析放在管理员私有流程，不改变学生端公开接口。
+
 ## 服务目标
 
 本项目是中国石油大学（北京）地球科学学院的公开就业信息站，而不是一个通用招聘转载站。学生可以在微信或手机浏览器直接打开日报链接，无需登录；系统不收集、保存或展示学生个人数据。
@@ -34,6 +36,18 @@ Flask 公开网页 / 省份筛选 / 只读 JSON / 微信可直接访问
         |
         v
 私有 candidate_leads 核验池 --官网定位--> 内容核验 --> 已发布官方岗位
+
+已核验官方公告页
+        |
+        v
+附件链接登记（source_artifacts） --robots/域名/大小检查-->
+受控哈希存储（private storage）
+        |
+        v
+PDF/Excel/CSV/DOCX 解析 -> source_artifact_rows -> artifact_job_candidates
+        |
+        v
+人工核验说明 -> 官方页面证据 + 附件证据 -> 公开 jobs
 ```
 
 数据库是唯一事实来源。日报是不可变快照，因此某日的链接可以长期回看；`/daily/latest` 只指向最新一份已发布日报。第三方线索只允许进入 `candidate_leads`，不会出现在岗位查询、日报或公开 API 中；只有管理员记录官方原文和核验说明后，才可转成公开岗位。
@@ -116,7 +130,8 @@ Flask 公开网页 / 省份筛选 / 只读 JSON / 微信可直接访问
 | `employers.py` | 就业路径分类和可审计单位标准名/母体单位解析 |
 | `profiles.py` | CUPB 地球科学学院画像与可解释匹配 |
 | `simulation.py` | 匿名 100 人覆盖检查 |
-| `db.py` | SQLite 模式、事务、日报快照、来源健康、候选线索与服务心跳 |
+| `db.py` | SQLite 模式、事务、日报快照、来源健康、附件原始行/候选、证据与服务心跳 |
+| `attachments.py` | 官方附件发现、robots/域名约束、受控下载、哈希存储、解析和私有候选生成 |
 | `audit.py` | 发布前来源、阈值、日期和噪声审计 |
 | `reports.py` | 北京时间日报构建与冻结 |
 | `worker.py` | 定时同步、20:00 发布、邮件和心跳 |

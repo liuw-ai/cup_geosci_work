@@ -48,6 +48,21 @@ ARTIFACT_EXTRACTION_STATUSES = frozenset(
     {"registered", "downloaded", "extracted", "failed", "skipped"}
 )
 
+ARTIFACT_CANDIDATE_REVIEW_STATUSES = frozenset(
+    {"needs_review", "official_content_verified", "published", "rejected", "expired"}
+)
+ARTIFACT_CANDIDATE_REVIEW_TRANSITIONS = {
+    "needs_review": frozenset(
+        {"needs_review", "official_content_verified", "rejected", "expired"}
+    ),
+    "official_content_verified": frozenset(
+        {"official_content_verified", "published", "rejected", "expired"}
+    ),
+    "published": frozenset({"published"}),
+    "rejected": frozenset({"rejected"}),
+    "expired": frozenset({"expired"}),
+}
+
 EVIDENCE_TYPES = frozenset(
     {"official_page", "official_record", "attachment", "field_excerpt"}
 )
@@ -271,7 +286,7 @@ def validate_employer_registry(payload: Any) -> list[dict[str, Any]]:
 
 
 def validate_source_artifact(value: Any) -> dict[str, Any]:
-    """Validate attachment metadata only; Phase 1 does not download any content."""
+    """Validate official attachment metadata and its controlled processing state."""
     artifact = _mapping_copy(value, "Source artifact")
     artifact["source_id"] = _required_text(artifact.get("source_id"), "source_id")
     artifact["parent_url"] = validate_http_url(artifact.get("parent_url"), "parent_url")
@@ -306,7 +321,93 @@ def validate_source_artifact(value: Any) -> dict[str, Any]:
             + ", ".join(sorted(ARTIFACT_EXTRACTION_STATUSES))
         )
     artifact["metadata"] = _metadata_object(artifact.get("metadata", {}), "metadata")
+    if artifact["extraction_status"] in {"downloaded", "extracted"}:
+        if not artifact["content_sha256"] or not artifact["storage_path"]:
+            raise ContractValidationError(
+                "downloaded or extracted artifacts require content_sha256 and storage_path"
+            )
+        if not artifact["parser_version"]:
+            raise ContractValidationError(
+                "downloaded or extracted artifacts require parser_version"
+            )
     return artifact
+
+
+def validate_artifact_candidate(value: Any) -> dict[str, Any]:
+    """Validate a private candidate derived from one official attachment row."""
+    candidate = _mapping_copy(value, "Artifact job candidate")
+    candidate["artifact_row_id"] = _optional_positive_integer(
+        candidate.get("artifact_row_id"), "artifact_row_id"
+    )
+    if candidate["artifact_row_id"] is None:
+        raise ContractValidationError("artifact_row_id must be a positive integer")
+    candidate["source_id"] = _required_text(candidate.get("source_id"), "source_id")
+    candidate["official_page_url"] = validate_http_url(
+        candidate.get("official_page_url"), "official_page_url"
+    )
+    candidate["title"] = _required_text(candidate.get("title"), "title")
+    candidate["employer"] = _required_text(candidate.get("employer"), "employer")
+    for field_name in (
+        "application_url",
+        "location",
+        "published_date",
+        "deadline_date",
+        "summary",
+        "description",
+        "review_note",
+    ):
+        candidate[field_name] = _optional_text(candidate.get(field_name))
+    if candidate["application_url"] is not None:
+        candidate["application_url"] = validate_http_url(
+            candidate["application_url"], "application_url"
+        )
+    candidate["description"] = candidate["description"] or candidate["title"]
+    candidate["degree_levels"] = _optional_text_list(
+        candidate.get("degree_levels", []), "degree_levels"
+    )
+    candidate["major_tags"] = _optional_text_list(
+        candidate.get("major_tags", []), "major_tags"
+    )
+    try:
+        candidate["relevance_score"] = int(candidate.get("relevance_score", 0))
+    except (TypeError, ValueError) as error:
+        raise ContractValidationError("relevance_score must be an integer") from error
+    candidate["field_evidence"] = _metadata_object(
+        candidate.get("field_evidence", {}), "field_evidence"
+    )
+    candidate["review_status"] = _required_text(
+        candidate.get("review_status", "needs_review"), "review_status"
+    )
+    if candidate["review_status"] not in ARTIFACT_CANDIDATE_REVIEW_STATUSES:
+        raise ContractValidationError(
+            "review_status must be one of: "
+            + ", ".join(sorted(ARTIFACT_CANDIDATE_REVIEW_STATUSES))
+        )
+    return candidate
+
+
+def validate_artifact_candidate_transition(
+    current_status: Any,
+    next_status: Any,
+    *,
+    review_note: Any,
+) -> str:
+    """Require a review note before an extracted row becomes publishable."""
+    current = _required_text(current_status, "current artifact candidate review_status")
+    target = _required_text(next_status, "artifact candidate review_status")
+    if current not in ARTIFACT_CANDIDATE_REVIEW_STATUSES:
+        raise ContractValidationError("Unsupported current artifact candidate status")
+    if target not in ARTIFACT_CANDIDATE_REVIEW_STATUSES:
+        raise ContractValidationError("Unsupported artifact candidate review status")
+    if target not in ARTIFACT_CANDIDATE_REVIEW_TRANSITIONS[current]:
+        raise ContractValidationError(
+            f"Illegal artifact candidate transition: {current} -> {target}"
+        )
+    if target == "official_content_verified" and not _optional_text(review_note):
+        raise ContractValidationError(
+            "Official-content verification requires a review_note"
+        )
+    return target
 
 
 def validate_job_evidence(value: Any) -> dict[str, Any]:
@@ -408,6 +509,12 @@ def _optional_text(value: Any) -> str | None:
 def _validate_nonempty_text_list(value: Any, field_name: str) -> list[str]:
     if not isinstance(value, list) or not value:
         raise ContractValidationError(f"{field_name} must be a non-empty list")
+    return [_required_text(item, field_name) for item in value]
+
+
+def _optional_text_list(value: Any, field_name: str) -> list[str]:
+    if not isinstance(value, list):
+        raise ContractValidationError(f"{field_name} must be a list")
     return [_required_text(item, field_name) for item in value]
 
 

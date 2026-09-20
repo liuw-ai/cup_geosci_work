@@ -8,6 +8,10 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from job_hub.audit import audit_database
+from job_hub.attachments import (
+    AttachmentProcessingError,
+    OfficialAttachmentProcessor,
+)
 from job_hub.config import Settings
 from job_hub.contracts import is_http_url
 from job_hub.coverage import build_coverage_report
@@ -227,6 +231,38 @@ def main() -> None:
         help="允许的最大心跳年龄（秒，默认 180）",
     )
     subparsers.add_parser("worker", help="启动持续同步和 20:00 发布任务")
+    artifact_process_parser = subparsers.add_parser(
+        "process-artifact",
+        help="受控下载并解析一个已登记的官方 PDF/Excel/CSV/DOCX 附件",
+    )
+    artifact_process_parser.add_argument("artifact_id", type=int)
+    artifact_process_parser.add_argument(
+        "--force-download",
+        action="store_true",
+        help="忽略已有下载文件并重新下载",
+    )
+    artifact_process_parser.add_argument(
+        "--download-only",
+        action="store_true",
+        help="只下载并哈希，不提取表格或生成候选",
+    )
+    artifact_rows_parser = subparsers.add_parser(
+        "list-artifact-rows",
+        help="查看一个附件解析出的私有原始行",
+    )
+    artifact_rows_parser.add_argument("artifact_id", type=int)
+    artifact_discover_parser = subparsers.add_parser(
+        "discover-artifacts",
+        help="从一个已核验官方公告页登记公开 PDF/Excel/CSV/DOCX 附件链接",
+    )
+    artifact_discover_parser.add_argument("source_id")
+    artifact_discover_parser.add_argument("parent_url")
+    artifact_candidate_parser = subparsers.add_parser(
+        "list-artifact-candidates",
+        help="查看官方附件派生的私有岗位候选",
+    )
+    artifact_candidate_parser.add_argument("--artifact-id", type=int)
+    artifact_candidate_parser.add_argument("--status")
 
     args = parser.parse_args()
     if args.command == "worker":
@@ -254,6 +290,62 @@ def main() -> None:
                     "registered_sources": len(database.list_sources()),
                 },
                 ensure_ascii=False,
+            )
+        )
+        return
+    if args.command == "process-artifact":
+        processor = OfficialAttachmentProcessor(settings, database)
+        try:
+            result = processor.process(
+                args.artifact_id,
+                force_download=args.force_download,
+                extract=not args.download_only,
+            )
+        except (AttachmentProcessingError, ValueError) as error:
+            print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        print(json.dumps(result.as_dict(), ensure_ascii=False, indent=2))
+        return
+    if args.command == "discover-artifacts":
+        processor = OfficialAttachmentProcessor(settings, database)
+        try:
+            artifacts = processor.discover_from_page(
+                args.source_id,
+                args.parent_url,
+            )
+        except (AttachmentProcessingError, ValueError) as error:
+            print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        print(
+            json.dumps(
+                {"count": len(artifacts), "items": artifacts},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if args.command == "list-artifact-rows":
+        if database.get_source_artifact(args.artifact_id) is None:
+            parser.error(f"artifact_id is not present: {args.artifact_id}")
+        print(
+            json.dumps(
+                {"items": database.list_source_artifact_rows(args.artifact_id)},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if args.command == "list-artifact-candidates":
+        print(
+            json.dumps(
+                {
+                    "items": database.list_artifact_job_candidates(
+                        artifact_id=args.artifact_id,
+                        review_status=args.status,
+                    )
+                },
+                ensure_ascii=False,
+                indent=2,
             )
         )
         return
