@@ -4,13 +4,13 @@ import hmac
 from datetime import date, datetime, timezone
 from functools import wraps
 from typing import Any, Callable
-from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 from flask import Flask, abort, jsonify, render_template, request, url_for
 
 from job_hub.audit import audit_database
 from job_hub.config import Settings
+from job_hub.contracts import is_http_url
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
 from job_hub.employers import enrich_job, load_employment_landscape
@@ -25,11 +25,6 @@ from job_hub.profiles import (
 )
 from job_hub.reports import build_daily_report, local_today, publish_daily_report
 from job_hub.sources import RawPosting
-
-
-def _is_http_url(value: str) -> bool:
-    parsed = urlparse(value)
-    return parsed.scheme in {"http", "https"} and bool(parsed.hostname)
 
 
 def create_app(settings: Settings | None = None) -> Flask:
@@ -411,8 +406,13 @@ def create_app(settings: Settings | None = None) -> Flask:
         if missing:
             return jsonify({"error": f"Missing required fields: {', '.join(missing)}"}), 400
         source_url = str(payload["source_url"]).strip()
-        if urlparse(source_url).scheme not in {"http", "https"}:
+        if not is_http_url(source_url):
             return jsonify({"error": "source_url must be an HTTP(S) URL."}), 400
+        official_evidence_url = str(payload.get("official_evidence_url", "")).strip()
+        if official_evidence_url and not is_http_url(official_evidence_url):
+            return jsonify(
+                {"error": "official_evidence_url must be an HTTP(S) URL."}
+            ), 400
         source = database.get_source(
             str(payload.get("source_id", "official-manual-import"))
         )
@@ -429,6 +429,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             deadline_date=str(payload.get("deadline_date", "")).strip() or None,
             location=str(payload.get("location", "")).strip() or None,
             external_id=str(payload.get("external_id", "")).strip() or None,
+            official_evidence_url=official_evidence_url or None,
         )
         normalized = pipeline.normalize_posting(raw, source)
         job_id, outcome = database.save_job(normalized)
@@ -446,7 +447,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             return jsonify({"error": "Request body must be a JSON object."}), 400
         for field in ("lead_url", "official_url"):
             value = str(payload.get(field, "")).strip()
-            if value and not _is_http_url(value):
+            if value and not is_http_url(value):
                 return jsonify({"error": f"{field} must be an HTTP(S) URL."}), 400
         try:
             lead = database.create_candidate_lead(payload)
@@ -461,7 +462,7 @@ def create_app(settings: Settings | None = None) -> Flask:
         if not isinstance(payload, dict):
             return jsonify({"error": "Request body must be a JSON object."}), 400
         official_url = str(payload.get("official_url", "")).strip()
-        if official_url and not _is_http_url(official_url):
+        if official_url and not is_http_url(official_url):
             return jsonify({"error": "official_url must be an HTTP(S) URL."}), 400
         try:
             lead = database.update_candidate_lead(lead_id, payload)
@@ -481,7 +482,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             return jsonify(
                 {"error": "Only official-content-verified leads can be published."}
             ), 409
-        if not _is_http_url(str(lead.get("official_url") or "")):
+        if not is_http_url(str(lead.get("official_url") or "")):
             return jsonify({"error": "Lead has no valid official_url."}), 409
         metadata = lead.get("metadata", {})
         employer = str(metadata.get("employer") or lead.get("employer_hint") or "").strip()
@@ -507,6 +508,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             location=str(metadata.get("location") or lead.get("location_hint") or "").strip()
             or None,
             external_id=f"verified-lead-{lead_id}",
+            official_evidence_url=str(lead["official_url"]).strip(),
         )
         job_id, outcome = database.save_job(pipeline.normalize_posting(raw, source))
         try:
@@ -514,6 +516,47 @@ def create_app(settings: Settings | None = None) -> Flask:
         except ValueError as error:
             return jsonify({"error": str(error)}), 409
         return jsonify({"job_id": job_id, "outcome": outcome, "lead": published}), 201
+
+    @app.route("/api/admin/artifacts", methods=["GET", "POST"])
+    @require_admin
+    def source_artifacts_api() -> Any:
+        """Maintain private metadata for official announcement attachments."""
+        if request.method == "GET":
+            source_id = request.args.get("source_id", "").strip() or None
+            return jsonify({"items": database.list_source_artifacts(source_id)})
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({"error": "Request body must be a JSON object."}), 400
+        try:
+            artifact = database.upsert_source_artifact(payload)
+        except ValueError as error:
+            return jsonify({"error": str(error)}), 400
+        return jsonify(artifact), 201
+
+    @app.route("/api/admin/jobs/<int:job_id>/evidence", methods=["GET", "POST"])
+    @require_admin
+    def job_evidence_api(job_id: int) -> Any:
+        """Expose per-job evidence only to the administrator, never publicly."""
+        if database.find_job(job_id) is None:
+            abort(404)
+        if request.method == "GET":
+            return jsonify({"items": database.list_job_evidence(job_id)})
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({"error": "Request body must be a JSON object."}), 400
+        try:
+            evidence = database.add_job_evidence(job_id, payload)
+        except ValueError as error:
+            return jsonify({"error": str(error)}), 400
+        return jsonify(evidence), 201
+
+    @app.get("/api/admin/leads/<int:lead_id>/events")
+    @require_admin
+    def candidate_lead_events_api(lead_id: int) -> Any:
+        """Return the private verification history for one discovery lead."""
+        if database.get_candidate_lead(lead_id) is None:
+            abort(404)
+        return jsonify({"items": database.list_candidate_lead_events(lead_id)})
 
     @app.post("/api/admin/publish")
     @require_admin

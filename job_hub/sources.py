@@ -24,6 +24,7 @@ except ImportError:  # pragma: no cover - exercised only in minimal deployments
     Cipher = algorithms = modes = PKCS7 = None  # type: ignore[assignment]
 
 from job_hub.config import Settings
+from job_hub.contracts import ContractValidationError, validate_source_registry
 from job_hub.locations import extract_location_hint
 from job_hub.matching import (
     clean_text,
@@ -227,6 +228,7 @@ class RawPosting:
     location: str | None
     external_id: str | None = None
     match_text: str | None = None
+    official_evidence_url: str | None = None
 
 
 class OfficialSourceCollector:
@@ -2178,26 +2180,10 @@ def load_source_registry(path: str) -> list[dict[str, Any]]:
             payload = json.load(handle)
     except OSError as error:
         raise SourceCollectionError(f"Cannot read source registry: {error}") from error
-    if not isinstance(payload, list):
-        raise SourceCollectionError("The source registry must be a JSON list")
-    required = {
-        "id",
-        "name",
-        "publisher",
-        "homepage_url",
-        "source_type",
-        "category",
-        "source_tier",
-    }
-    for source in payload:
-        missing = required.difference(source)
-        if missing:
-            raise SourceCollectionError(
-                f"Source {source.get('id', '<unknown>')} is missing: {', '.join(sorted(missing))}"
-            )
-        source.setdefault("config", {})
-        source.setdefault("enabled", True)
-    return payload
+    try:
+        return validate_source_registry(payload)
+    except ContractValidationError as error:
+        raise SourceCollectionError(f"Invalid source registry: {error}") from error
 
 
 def load_source_registries(paths: list[str]) -> list[dict[str, Any]]:

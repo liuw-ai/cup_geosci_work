@@ -5,11 +5,11 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 from job_hub.audit import audit_database
 from job_hub.config import Settings
+from job_hub.contracts import is_http_url
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
 from job_hub.emailer import Mailer
@@ -46,8 +46,11 @@ def import_verified_jobs(
             if not str(item.get(field, "")).strip():
                 raise ValueError(f"Imported job is missing {field}")
         source_url = str(item["source_url"]).strip()
-        if urlparse(source_url).scheme not in {"http", "https"}:
+        if not is_http_url(source_url):
             raise ValueError("source_url must be an HTTP(S) URL")
+        official_evidence_url = str(item.get("official_evidence_url", "")).strip()
+        if official_evidence_url and not is_http_url(official_evidence_url):
+            raise ValueError("official_evidence_url must be an HTTP(S) URL")
         source = database.get_source(
             str(item.get("source_id", "official-manual-import"))
         )
@@ -64,6 +67,7 @@ def import_verified_jobs(
             deadline_date=str(item.get("deadline_date", "")).strip() or None,
             location=str(item.get("location", "")).strip() or None,
             external_id=str(item.get("external_id", "")).strip() or None,
+            official_evidence_url=official_evidence_url or None,
         )
         _, outcome = database.save_job(pipeline.normalize_posting(posting, source))
         results[outcome] += 1

@@ -255,7 +255,7 @@ class JobPipeline:
             ),
             **location,
             "verification_status": "published_official",
-            "official_evidence_url": posting.source_url,
+            "official_evidence_url": posting.official_evidence_url or posting.source_url,
             "published_date": posting.published_date,
             "deadline_date": posting.deadline_date,
             "degree_levels": degree_levels,

@@ -51,11 +51,20 @@ def test_candidate_leads_stay_private_until_official_content_is_verified(tmp_pat
     )
     assert blocked_publish.status_code == 409
 
-    verified = client.patch(
+    located = client.patch(
         f"/api/admin/leads/{lead_id}",
         headers=headers,
         json={
             "official_url": "https://official.example.gov.cn/jobs/1",
+            "verification_status": "official_url_found",
+        },
+    )
+    assert located.status_code == 200
+
+    verified = client.patch(
+        f"/api/admin/leads/{lead_id}",
+        headers=headers,
+        json={
             "verification_status": "official_content_verified",
             "verification_note": "已逐项核对政府官网原文、单位、专业和截止日期。",
             "metadata": {

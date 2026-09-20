@@ -16,6 +16,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from job_hub.contracts import ContractValidationError, validate_employer_registry
+
 
 CATEGORY_ORDER = (
     "油气上游业主与研究机构",
@@ -84,22 +86,10 @@ def load_employer_registry(path: Path | None = None) -> list[dict[str, Any]]:
 def _load_employer_registry(path: str) -> tuple[dict[str, Any], ...]:
     with Path(path).open("r", encoding="utf-8") as handle:
         payload = json.load(handle)
-    if not isinstance(payload, list):
-        raise ValueError("employer_registry.json must contain a list")
-    required = {
-        "id",
-        "canonical_name",
-        "parent_id",
-        "parent_name",
-        "category",
-        "employer_type",
-        "affiliation",
-        "aliases",
-    }
-    for item in payload:
-        if not isinstance(item, dict) or required.difference(item):
-            raise ValueError("employer_registry.json contains an invalid employer")
-    return tuple(dict(item) for item in payload)
+    try:
+        return tuple(validate_employer_registry(payload))
+    except ContractValidationError as error:
+        raise ValueError(f"employer_registry.json is invalid: {error}") from error
 
 
 def resolve_employer(

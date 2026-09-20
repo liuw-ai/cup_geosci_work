@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 from contextlib import contextmanager
@@ -7,6 +8,14 @@ from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
+from job_hub.contracts import (
+    OFFICIAL_EVIDENCE_TYPES,
+    is_http_url,
+    validate_candidate_lead_transition,
+    validate_job_evidence,
+    validate_source_artifact,
+    validate_source_record,
+)
 from job_hub.employers import enrich_job
 from zoneinfo import ZoneInfo
 
@@ -80,6 +89,48 @@ ON jobs(relevance_score DESC);
 
 CREATE INDEX IF NOT EXISTS idx_jobs_updated
 ON jobs(updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS source_artifacts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_id TEXT NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
+    parent_url TEXT NOT NULL,
+    artifact_url TEXT NOT NULL,
+    artifact_kind TEXT NOT NULL,
+    media_type TEXT,
+    content_sha256 TEXT,
+    storage_path TEXT,
+    parser_version TEXT,
+    extraction_status TEXT NOT NULL DEFAULT 'registered',
+    metadata_json TEXT NOT NULL DEFAULT '{}',
+    discovered_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE(source_id, artifact_url)
+);
+
+CREATE INDEX IF NOT EXISTS idx_source_artifacts_source_status
+ON source_artifacts(source_id, extraction_status, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS job_evidence (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+    artifact_id INTEGER REFERENCES source_artifacts(id) ON DELETE SET NULL,
+    evidence_key TEXT NOT NULL UNIQUE,
+    evidence_type TEXT NOT NULL,
+    field_name TEXT NOT NULL DEFAULT 'job_record',
+    evidence_url TEXT NOT NULL,
+    locator TEXT,
+    excerpt TEXT,
+    verification_status TEXT NOT NULL DEFAULT 'verified',
+    metadata_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_job_evidence_job_status
+ON job_evidence(job_id, verification_status, evidence_type);
+
+CREATE INDEX IF NOT EXISTS idx_job_evidence_artifact
+ON job_evidence(artifact_id);
 
 CREATE TABLE IF NOT EXISTS job_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -169,6 +220,21 @@ CREATE TABLE IF NOT EXISTS candidate_leads (
 
 CREATE INDEX IF NOT EXISTS idx_candidate_leads_status
 ON candidate_leads(verification_status, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS candidate_lead_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lead_id INTEGER NOT NULL REFERENCES candidate_leads(id) ON DELETE CASCADE,
+    event_key TEXT NOT NULL UNIQUE,
+    event_type TEXT NOT NULL,
+    from_status TEXT,
+    to_status TEXT,
+    note TEXT NOT NULL DEFAULT '',
+    payload_json TEXT NOT NULL DEFAULT '{}',
+    occurred_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_candidate_lead_events_lead
+ON candidate_lead_events(lead_id, occurred_at DESC, id DESC);
 """
 
 
@@ -199,10 +265,12 @@ class Database:
 
     @staticmethod
     def _migrate_schema(connection: sqlite3.Connection) -> None:
-        """Apply additive migrations to databases created before v0.3.
+        """Apply additive migrations without rewriting public job records.
 
         SQLite supports the small, non-destructive column additions needed by
-        this project.  No jobs, reports, or crawl history are rewritten here.
+        this project.  Existing jobs gain only an evidence index row when they
+        already contain a valid official link; reports and crawl history remain
+        untouched.
         """
         existing_columns = {
             row["name"]
@@ -248,6 +316,14 @@ class Database:
                 "UPDATE jobs SET official_evidence_url = source_url "
                 "WHERE official_evidence_url IS NULL OR official_evidence_url = ''"
             )
+        else:
+            connection.execute(
+                "UPDATE jobs SET official_evidence_url = source_url "
+                "WHERE (official_evidence_url IS NULL OR official_evidence_url = '') "
+                "AND source_url IS NOT NULL AND source_url != ''"
+            )
+        Database._backfill_job_evidence(connection)
+        Database._backfill_candidate_lead_events(connection)
 
     @contextmanager
     def transaction(self) -> Iterator[sqlite3.Connection]:
@@ -262,6 +338,7 @@ class Database:
             connection.close()
 
     def upsert_source(self, source: dict[str, Any]) -> None:
+        source = validate_source_record(source)
         now = utc_now()
         payload = json.dumps(source.get("config", {}), ensure_ascii=False)
         with self.transaction() as connection:
@@ -657,6 +734,7 @@ class Database:
                     """,
                     (job_id, now, json.dumps({"title": job["title"]}, ensure_ascii=False)),
                 )
+                self._ensure_official_page_evidence(connection, job_id, job)
                 return job_id, "created"
 
             job_id = int(existing["id"])
@@ -712,6 +790,7 @@ class Database:
                         job_id,
                     ),
                 )
+                self._ensure_official_page_evidence(connection, job_id, job)
                 return job_id, "unchanged"
 
             connection.execute(
@@ -774,7 +853,265 @@ class Database:
                 """,
                 (job_id, now, json.dumps({"title": job["title"]}, ensure_ascii=False)),
             )
+            self._ensure_official_page_evidence(connection, job_id, job)
             return job_id, "updated"
+
+    def upsert_source_artifact(self, artifact: dict[str, Any]) -> dict[str, Any]:
+        """Register official attachment metadata without downloading its content.
+
+        Phase 1 intentionally stores only the public URL and processing state.
+        A later attachment pipeline may add a content hash and managed storage
+        path after a compliant, controlled download.
+        """
+        normalized = validate_source_artifact(artifact)
+        now = utc_now()
+        with self.transaction() as connection:
+            source = connection.execute(
+                "SELECT id FROM sources WHERE id = ?", (normalized["source_id"],)
+            ).fetchone()
+            if source is None:
+                raise ValueError("Source artifact references an unregistered source_id")
+            connection.execute(
+                """
+                INSERT INTO source_artifacts (
+                    source_id, parent_url, artifact_url, artifact_kind, media_type,
+                    content_sha256, storage_path, parser_version, extraction_status,
+                    metadata_json, discovered_at, updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(source_id, artifact_url) DO UPDATE SET
+                    parent_url=excluded.parent_url,
+                    artifact_kind=excluded.artifact_kind,
+                    media_type=COALESCE(excluded.media_type, source_artifacts.media_type),
+                    content_sha256=COALESCE(
+                        excluded.content_sha256, source_artifacts.content_sha256
+                    ),
+                    storage_path=COALESCE(excluded.storage_path, source_artifacts.storage_path),
+                    parser_version=COALESCE(
+                        excluded.parser_version, source_artifacts.parser_version
+                    ),
+                    extraction_status=excluded.extraction_status,
+                    metadata_json=excluded.metadata_json,
+                    updated_at=excluded.updated_at
+                """,
+                (
+                    normalized["source_id"],
+                    normalized["parent_url"],
+                    normalized["artifact_url"],
+                    normalized["artifact_kind"],
+                    normalized["media_type"],
+                    normalized["content_sha256"],
+                    normalized["storage_path"],
+                    normalized["parser_version"],
+                    normalized["extraction_status"],
+                    json.dumps(normalized["metadata"], ensure_ascii=False),
+                    now,
+                    now,
+                ),
+            )
+            row = connection.execute(
+                """
+                SELECT * FROM source_artifacts
+                WHERE source_id = ? AND artifact_url = ?
+                """,
+                (normalized["source_id"], normalized["artifact_url"]),
+            ).fetchone()
+        if row is None:  # pragma: no cover - INSERT/SELECT is atomic in this transaction
+            raise RuntimeError("Source artifact could not be persisted")
+        return self._artifact_row(row)
+
+    def get_source_artifact(self, artifact_id: int) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT * FROM source_artifacts WHERE id = ?", (artifact_id,)
+            ).fetchone()
+        return self._artifact_row(row) if row else None
+
+    def list_source_artifacts(
+        self,
+        source_id: str | None = None,
+        *,
+        limit: int = 100,
+    ) -> list[dict[str, Any]]:
+        query = "SELECT * FROM source_artifacts"
+        values: list[Any] = []
+        if source_id:
+            query += " WHERE source_id = ?"
+            values.append(source_id)
+        query += " ORDER BY updated_at DESC, id DESC LIMIT ?"
+        values.append(max(1, min(limit, 500)))
+        with self.connect() as connection:
+            rows = connection.execute(query, values).fetchall()
+        return [self._artifact_row(row) for row in rows]
+
+    def add_job_evidence(
+        self,
+        job_id: int,
+        evidence: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Attach a validated public evidence record to one exact job."""
+        normalized = validate_job_evidence(evidence)
+        with self.transaction() as connection:
+            job = connection.execute(
+                "SELECT id, source_id FROM jobs WHERE id = ?", (job_id,)
+            ).fetchone()
+            if job is None:
+                raise ValueError("Job evidence references an unknown job_id")
+            artifact_id = normalized["artifact_id"]
+            if artifact_id is not None:
+                artifact = connection.execute(
+                    "SELECT source_id FROM source_artifacts WHERE id = ?", (artifact_id,)
+                ).fetchone()
+                if artifact is None:
+                    raise ValueError("Job evidence references an unknown artifact_id")
+                if str(job["source_id"] or "") != str(artifact["source_id"]):
+                    raise ValueError(
+                        "Job evidence artifact must belong to the job's registered source"
+                    )
+            return self._upsert_job_evidence(connection, job_id, normalized)
+
+    def list_job_evidence(
+        self,
+        job_id: int,
+        *,
+        limit: int = 100,
+    ) -> list[dict[str, Any]]:
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT * FROM job_evidence
+                WHERE job_id = ?
+                ORDER BY created_at ASC, id ASC
+                LIMIT ?
+                """,
+                (job_id, max(1, min(limit, 500))),
+            ).fetchall()
+        return [self._evidence_row(row) for row in rows]
+
+    def has_verified_official_evidence(self, job_id: int) -> bool:
+        placeholders = ", ".join("?" for _ in OFFICIAL_EVIDENCE_TYPES)
+        with self.connect() as connection:
+            row = connection.execute(
+                f"""
+                SELECT 1
+                FROM job_evidence
+                WHERE job_id = ?
+                  AND verification_status = 'verified'
+                  AND evidence_type IN ({placeholders})
+                LIMIT 1
+                """,
+                (job_id, *sorted(OFFICIAL_EVIDENCE_TYPES)),
+            ).fetchone()
+        return row is not None
+
+    def verified_official_evidence_job_ids(self) -> set[int]:
+        """Return the audit-ready evidence set in one query for large job pools."""
+        placeholders = ", ".join("?" for _ in OFFICIAL_EVIDENCE_TYPES)
+        with self.connect() as connection:
+            rows = connection.execute(
+                f"""
+                SELECT DISTINCT job_id
+                FROM job_evidence
+                WHERE verification_status = 'verified'
+                  AND evidence_type IN ({placeholders})
+                """,
+                tuple(sorted(OFFICIAL_EVIDENCE_TYPES)),
+            ).fetchall()
+        return {int(row["job_id"]) for row in rows}
+
+    def _ensure_official_page_evidence(
+        self,
+        connection: sqlite3.Connection,
+        job_id: int,
+        job: dict[str, Any],
+    ) -> None:
+        official_url = str(
+            job.get("official_evidence_url") or job.get("source_url") or ""
+        ).strip()
+        if not is_http_url(official_url):
+            return
+        self._upsert_job_evidence(
+            connection,
+            job_id,
+            {
+                "evidence_type": "official_page",
+                "field_name": "job_record",
+                "evidence_url": official_url,
+                "locator": "official_evidence_url",
+                "verification_status": "verified",
+                "metadata": {"origin": "job_save"},
+            },
+        )
+
+    @staticmethod
+    def _evidence_key(job_id: int, evidence: dict[str, Any]) -> str:
+        identity = {
+            "job_id": job_id,
+            "artifact_id": evidence.get("artifact_id"),
+            "evidence_type": evidence["evidence_type"],
+            "field_name": evidence["field_name"],
+            "evidence_url": evidence["evidence_url"],
+            "locator": evidence.get("locator"),
+        }
+        serialized = json.dumps(identity, ensure_ascii=False, sort_keys=True)
+        return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+    @staticmethod
+    def _upsert_job_evidence(
+        connection: sqlite3.Connection,
+        job_id: int,
+        evidence: dict[str, Any],
+    ) -> dict[str, Any]:
+        normalized = validate_job_evidence(evidence)
+        evidence_key = normalized.get("evidence_key") or Database._evidence_key(
+            job_id, normalized
+        )
+        existing = connection.execute(
+            "SELECT job_id FROM job_evidence WHERE evidence_key = ?", (evidence_key,)
+        ).fetchone()
+        if existing is not None and int(existing["job_id"]) != job_id:
+            raise ValueError("evidence_key is already assigned to another job")
+        now = utc_now()
+        connection.execute(
+            """
+            INSERT INTO job_evidence (
+                job_id, artifact_id, evidence_key, evidence_type, field_name,
+                evidence_url, locator, excerpt, verification_status, metadata_json,
+                created_at, updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(evidence_key) DO UPDATE SET
+                artifact_id=excluded.artifact_id,
+                evidence_type=excluded.evidence_type,
+                field_name=excluded.field_name,
+                evidence_url=excluded.evidence_url,
+                locator=excluded.locator,
+                excerpt=excluded.excerpt,
+                verification_status=excluded.verification_status,
+                metadata_json=excluded.metadata_json,
+                updated_at=excluded.updated_at
+            """,
+            (
+                job_id,
+                normalized["artifact_id"],
+                evidence_key,
+                normalized["evidence_type"],
+                normalized["field_name"],
+                normalized["evidence_url"],
+                normalized["locator"],
+                normalized["excerpt"],
+                normalized["verification_status"],
+                json.dumps(normalized["metadata"], ensure_ascii=False),
+                now,
+                now,
+            ),
+        )
+        row = connection.execute(
+            "SELECT * FROM job_evidence WHERE evidence_key = ?", (evidence_key,)
+        ).fetchone()
+        if row is None:  # pragma: no cover - protected by the preceding INSERT
+            raise RuntimeError("Job evidence could not be persisted")
+        return Database._evidence_row(row)
 
     def find_job(self, job_id: int) -> dict[str, Any] | None:
         with self.connect() as connection:
@@ -1177,6 +1514,12 @@ class Database:
         missing = [field for field in required if not str(lead.get(field, "")).strip()]
         if missing:
             raise ValueError(f"Candidate lead is missing: {', '.join(missing)}")
+        lead_url = str(lead["lead_url"]).strip()
+        if not is_http_url(lead_url):
+            raise ValueError("Candidate lead lead_url must be an HTTP(S) URL")
+        official_url = self._optional_text(lead.get("official_url"))
+        if official_url and not is_http_url(official_url):
+            raise ValueError("Candidate lead official_url must be an HTTP(S) URL")
         now = utc_now()
         metadata = lead.get("metadata", {})
         if not isinstance(metadata, dict):
@@ -1193,13 +1536,13 @@ class Database:
                 """,
                 (
                     str(lead["lead_provider"]).strip(),
-                    str(lead["lead_url"]).strip(),
+                    lead_url,
                     str(lead["title"]).strip(),
                     self._optional_text(lead.get("employer_hint")),
                     self._optional_text(lead.get("location_hint")),
                     self._optional_text(lead.get("province_hint")),
                     self._optional_text(lead.get("published_date")),
-                    self._optional_text(lead.get("official_url")),
+                    official_url,
                     self._optional_text(lead.get("verification_note")) or "",
                     json.dumps(metadata, ensure_ascii=False),
                     now,
@@ -1207,6 +1550,16 @@ class Database:
                 ),
             )
             lead_id = int(cursor.lastrowid)
+            self._record_candidate_lead_event(
+                connection,
+                lead_id,
+                event_type="created",
+                from_status=None,
+                to_status="candidate",
+                note=self._optional_text(lead.get("verification_note")) or "",
+                payload={"lead_provider": str(lead["lead_provider"]).strip()},
+                occurred_at=now,
+            )
             row = connection.execute(
                 "SELECT * FROM candidate_leads WHERE id = ?", (lead_id,)
             ).fetchone()
@@ -1236,6 +1589,19 @@ class Database:
             rows = connection.execute(query, values).fetchall()
         return [self._lead_row(row) for row in rows]
 
+    def list_candidate_lead_events(self, lead_id: int) -> list[dict[str, Any]]:
+        """Return private status history for one candidate lead."""
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT * FROM candidate_lead_events
+                WHERE lead_id = ?
+                ORDER BY occurred_at ASC, id ASC
+                """,
+                (lead_id,),
+            ).fetchall()
+        return [self._candidate_lead_event_row(row) for row in rows]
+
     def update_candidate_lead(
         self,
         lead_id: int,
@@ -1263,25 +1629,19 @@ class Database:
         ).strip()
         if next_status == "published":
             raise ValueError("Use the verified-lead publication action instead")
-        allowed_statuses = {
-            "candidate",
-            "official_url_found",
-            "official_content_verified",
-            "rejected",
-            "expired",
-        }
-        if next_status not in allowed_statuses:
-            raise ValueError("Unsupported candidate lead verification status")
         official_url = self._optional_text(
             changes.get("official_url", current.get("official_url"))
         )
         verification_note = self._optional_text(
             changes.get("verification_note", current.get("verification_note"))
         ) or ""
-        if next_status in {"official_url_found", "official_content_verified"} and not official_url:
-            raise ValueError("A verified lead requires an official_url")
-        if next_status == "official_content_verified" and not verification_note:
-            raise ValueError("Official-content verification requires a verification_note")
+        next_status, normalized_official_url = validate_candidate_lead_transition(
+            current["verification_status"],
+            next_status,
+            official_url=official_url,
+            verification_note=verification_note,
+        )
+        official_url = normalized_official_url or None
         metadata = changes.get("metadata", current.get("metadata", {}))
         if not isinstance(metadata, dict):
             raise ValueError("Candidate lead metadata must be an object")
@@ -1326,6 +1686,17 @@ class Database:
                     lead_id,
                 ),
             )
+            if current["verification_status"] != next_status:
+                self._record_candidate_lead_event(
+                    connection,
+                    lead_id,
+                    event_type="status_changed",
+                    from_status=current["verification_status"],
+                    to_status=next_status,
+                    note=verification_note,
+                    payload={},
+                    occurred_at=fields["updated_at"],
+                )
             row = connection.execute(
                 "SELECT * FROM candidate_leads WHERE id = ?", (lead_id,)
             ).fetchone()
@@ -1345,20 +1716,143 @@ class Database:
                 return None
             if row["verification_status"] != "official_content_verified":
                 raise ValueError("Lead has not passed official-content verification")
-            if not row["official_url"]:
-                raise ValueError("Verified lead has no official_url")
+            if connection.execute("SELECT 1 FROM jobs WHERE id = ?", (job_id,)).fetchone() is None:
+                raise ValueError("Published lead references an unknown job_id")
+            validate_candidate_lead_transition(
+                row["verification_status"],
+                "published",
+                official_url=row["official_url"],
+                verification_note=row["verification_note"],
+            )
+            now = utc_now()
             connection.execute(
                 """
                 UPDATE candidate_leads
                 SET verification_status = 'published', published_job_id = ?, updated_at = ?
                 WHERE id = ?
                 """,
-                (job_id, utc_now(), lead_id),
+                (job_id, now, lead_id),
+            )
+            self._record_candidate_lead_event(
+                connection,
+                lead_id,
+                event_type="published",
+                from_status=row["verification_status"],
+                to_status="published",
+                note=str(row["verification_note"] or ""),
+                payload={"published_job_id": job_id},
+                occurred_at=now,
             )
             updated = connection.execute(
                 "SELECT * FROM candidate_leads WHERE id = ?", (lead_id,)
             ).fetchone()
         return self._lead_row(updated)
+
+    @staticmethod
+    def _backfill_job_evidence(connection: sqlite3.Connection) -> None:
+        """Index legacy official links as evidence without changing job content."""
+        rows = connection.execute(
+            """
+            SELECT jobs.id, jobs.source_url, jobs.official_evidence_url
+            FROM jobs
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM job_evidence
+                WHERE job_evidence.job_id = jobs.id
+                  AND job_evidence.verification_status = 'verified'
+                  AND job_evidence.evidence_type IN ('official_page', 'official_record')
+            )
+            """
+        ).fetchall()
+        for row in rows:
+            evidence_url = str(
+                row["official_evidence_url"] or row["source_url"] or ""
+            ).strip()
+            if not is_http_url(evidence_url):
+                continue
+            Database._upsert_job_evidence(
+                connection,
+                int(row["id"]),
+                {
+                    "evidence_type": "official_page",
+                    "field_name": "job_record",
+                    "evidence_url": evidence_url,
+                    "locator": "official_evidence_url",
+                    "verification_status": "verified",
+                    "metadata": {"origin": "phase_1_migration"},
+                },
+            )
+
+    @staticmethod
+    def _backfill_candidate_lead_events(connection: sqlite3.Connection) -> None:
+        """Give pre-Phase-1 private leads one immutable status snapshot event."""
+        rows = connection.execute(
+            """
+            SELECT candidate_leads.*
+            FROM candidate_leads
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM candidate_lead_events
+                WHERE candidate_lead_events.lead_id = candidate_leads.id
+            )
+            """
+        ).fetchall()
+        for row in rows:
+            Database._record_candidate_lead_event(
+                connection,
+                int(row["id"]),
+                event_type="status_snapshot",
+                from_status=None,
+                to_status=str(row["verification_status"]),
+                note=str(row["verification_note"] or ""),
+                payload={"origin": "phase_1_migration"},
+                occurred_at=str(row["updated_at"] or utc_now()),
+            )
+
+    @staticmethod
+    def _record_candidate_lead_event(
+        connection: sqlite3.Connection,
+        lead_id: int,
+        *,
+        event_type: str,
+        from_status: str | None,
+        to_status: str | None,
+        note: str,
+        payload: dict[str, Any],
+        occurred_at: str,
+    ) -> None:
+        event_identity = {
+            "lead_id": lead_id,
+            "event_type": event_type,
+            "from_status": from_status,
+            "to_status": to_status,
+            "note": note,
+            "payload": payload,
+            "occurred_at": occurred_at,
+        }
+        event_key = hashlib.sha256(
+            json.dumps(event_identity, ensure_ascii=False, sort_keys=True).encode("utf-8")
+        ).hexdigest()
+        connection.execute(
+            """
+            INSERT INTO candidate_lead_events (
+                lead_id, event_key, event_type, from_status, to_status,
+                note, payload_json, occurred_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(event_key) DO NOTHING
+            """,
+            (
+                lead_id,
+                event_key,
+                event_type,
+                from_status,
+                to_status,
+                note,
+                json.dumps(payload, ensure_ascii=False),
+                occurred_at,
+            ),
+        )
 
     def expire_jobs_before(self, today: str) -> int:
         now = utc_now()
@@ -1485,6 +1979,24 @@ class Database:
     def _lead_row(row: sqlite3.Row) -> dict[str, Any]:
         item = dict(row)
         item["metadata"] = json.loads(item.pop("metadata_json"))
+        return item
+
+    @staticmethod
+    def _artifact_row(row: sqlite3.Row) -> dict[str, Any]:
+        item = dict(row)
+        item["metadata"] = json.loads(item.pop("metadata_json"))
+        return item
+
+    @staticmethod
+    def _evidence_row(row: sqlite3.Row) -> dict[str, Any]:
+        item = dict(row)
+        item["metadata"] = json.loads(item.pop("metadata_json"))
+        return item
+
+    @staticmethod
+    def _candidate_lead_event_row(row: sqlite3.Row) -> dict[str, Any]:
+        item = dict(row)
+        item["payload"] = json.loads(item.pop("payload_json"))
         return item
 
     @staticmethod

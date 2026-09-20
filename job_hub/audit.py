@@ -51,6 +51,7 @@ def audit_database(
     )
     issues: list[dict[str, Any]] = []
     source_urls: dict[str, list[tuple[int, str]]] = defaultdict(list)
+    verified_evidence_job_ids = database.verified_official_evidence_job_ids()
 
     for job in jobs:
         job_id = int(job["id"])
@@ -87,6 +88,15 @@ def audit_database(
                     "job_id": job_id,
                     "source_id": source_id,
                     "message": "公开岗位缺少可访问的官方原文证据链接。",
+                }
+            )
+        if job_id not in verified_evidence_job_ids:
+            issues.append(
+                {
+                    "code": "missing_verified_official_evidence",
+                    "job_id": job_id,
+                    "source_id": source_id,
+                    "message": "公开岗位缺少已核验的官方页面或官方记录证据。",
                 }
             )
         parsed = urlparse(source_url)
