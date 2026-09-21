@@ -14,6 +14,8 @@
 
 当前待审阅的 Phase 3 组织层级与正式入口矩阵见 [docs/phase-3/README.md](docs/phase-3/README.md)。它将组织身份、集团关系、正式校招/社招/公告入口和来源绑定独立管理，不会把“已登记单位”或“官方入口”夸大为已采集岗位。
 
+当前待审阅的 Phase 4 省级官方来源核验矩阵见 [docs/phase-4/README.md](docs/phase-4/README.md)。它把“入口已查看、样例可解析、运行时可访问、已产生公开岗位”分成独立状态；本阶段只交付可审计的核验台账和回归夹具，不宣称 31 省已经全部自动化。
+
 ## 已实现的能力
 
 - 官方来源白名单：单位官网、官方招聘系统、政府公开招聘平台、高校就业网优先。
@@ -34,6 +36,7 @@
 - 招聘流程过滤：标题级规则统一排除进入面试、面试名单、递补、资格审查、成绩、体检、考察、拟聘和拟录用等后续流程通知；它们不是新的可投岗位。
 - 扩源矩阵：`data/source_targets.json` 按 31 个省和五类官方角色记录已核验、候选和待定位入口。候选入口只进入扩源排期，不会被 worker 抓取或在学生端显示。
 - 组织与入口矩阵：`data/organization_registry.json` 将集团、油田/区域运营单位、研究院、集团内技术服务、独立/国际油服、中央地勘、矿业、重点高校和政府招聘系统分层登记。每个频道独立记录正式入口、备用官方入口、来源绑定和验证状态；`official_confirmed` 不等于可抓取，只有 `automation_ready` 且来源健康的频道才可能进入自动同步。
+- 省级来源核验：`data/source_validation_registry.json` 记录已查看的官方入口、真实公告样例、字段证据、备用入口、离线解析夹具和回归测试节点。`adapter_fixture_verified` 只表示解析器能理解样例，不会自动启用来源；山东人事考试候选源在运行时健康检查通过前保持停用。
 - 质量报告与日报快照：`/api/coverage` 输出来源健康、每省有效/备用来源、来源角色矩阵、原文/专业/学历/地点/截止日完整率、来源与类别集中度，以及 100 人模拟中的明确匹配率；每次同步会记录当天可更新的质量快照，用于与前一个不同日期比较，而不是只看岗位总数。
 - 公开接口：/api/jobs 提供只读 JSON 数据，支持 `province` 省份筛选；/api/coverage 输出上述可观测指标。
 - 私有线索池：中公、华图、国聘、行业公众号等只可进入受保护的候选线索池，完成官方原文核验后才可发布为公开岗位。
@@ -50,6 +53,7 @@ job_hub/
   locations.py    省份、城市和国家/地区标准化
   source_targets.py 31 省五类官方来源扩展矩阵
   organizations.py 组织层级、正式入口和来源绑定矩阵
+  source_validation.py 省级官方来源样例、夹具和运行状态核验
   coverage.py     省份来源覆盖、字段完整率和集中度检查
   matching.py     专业匹配、分类和日期提取
   profiles.py     地球科学学院学历×专业画像与可解释匹配
@@ -60,6 +64,7 @@ job_hub/
 data/sources.json 官方来源白名单和已验证采集器
 data/provincial_sources.json 31 省官方入口矩阵（默认待核验）
 data/source_targets.json 31 省五类来源角色核验目标（不自动抓取候选项）
+data/source_validation_registry.json 官方入口样例、字段证据、备用入口和离线回归台账
 data/employer_registry.json 可审计的高价值单位标准名与体系关系
 data/organization_registry.json 组织层级、正式招聘频道、备用入口与来源绑定
 examples/         人工补录模板
@@ -154,6 +159,16 @@ python -m job_hub.cli organization-matrix --output .\runtime\organization-matrix
 ~~~
 
 网页管理接口为 `GET /api/admin/organization-matrix`，必须携带 `X-Admin-Token`。学生端与公开 `/api/coverage` 只显示汇总数字，不展示备用 URL、内部核验说明或来源绑定明细。
+
+管理员可以审阅省级官方来源核验矩阵。该命令只读取版本化台账和运行数据库，不触发网络采集：
+
+~~~powershell
+python -m job_hub.cli source-validation-matrix
+python -m job_hub.cli source-validation-matrix --province 山东 --validation-stage adapter_fixture_verified
+python -m job_hub.cli source-validation-matrix --output .\runtime\source-validation-matrix.json
+~~~
+
+网页接口为 `GET /api/admin/source-validation-matrix`，同样必须携带 `X-Admin-Token`，支持 `province`、`role` 和 `validation_stage` 筛选。样例原文 URL、备用入口、夹具路径和运行健康状态只在该管理员接口返回；公开 `/api/coverage` 只返回阶段计数和质量汇总。
 
 ### “本轮未发现匹配岗位”的严格含义
 

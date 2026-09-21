@@ -13,10 +13,15 @@ from job_hub.attachments import (
     OfficialAttachmentProcessor,
 )
 from job_hub.config import Settings
-from job_hub.contracts import ORGANIZATION_ROLES, is_http_url
+from job_hub.contracts import (
+    ORGANIZATION_ROLES,
+    SOURCE_VALIDATION_STAGES,
+    is_http_url,
+)
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
 from job_hub.emailer import Mailer
+from job_hub.locations import PROVINCES
 from job_hub.pipeline import JobPipeline
 from job_hub.organizations import (
     load_organization_registry,
@@ -25,6 +30,12 @@ from job_hub.organizations import (
 )
 from job_hub.reports import publish_daily_report
 from job_hub.simulation import simulate_cohort
+from job_hub.source_targets import REQUIRED_ROLES
+from job_hub.source_validation import (
+    load_source_validation_registry,
+    source_validation_matrix_rows,
+    source_validation_summary,
+)
 from job_hub.sources import RawPosting, SourceHealthProbe
 from job_hub.worker import main as worker_main
 
@@ -170,6 +181,30 @@ def main() -> None:
         help="可选：按所属体系精确筛选",
     )
     organization_matrix_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整 JSON 写入指定文件",
+    )
+    source_validation_parser = subparsers.add_parser(
+        "source-validation-matrix",
+        help="输出省级官方来源的样例、字段证据、备用入口和运行状态",
+    )
+    source_validation_parser.add_argument(
+        "--province",
+        choices=PROVINCES,
+        help="可选：按省份筛选",
+    )
+    source_validation_parser.add_argument(
+        "--role",
+        choices=REQUIRED_ROLES,
+        help="可选：按省级官方来源角色筛选",
+    )
+    source_validation_parser.add_argument(
+        "--validation-stage",
+        choices=sorted(SOURCE_VALIDATION_STAGES),
+        help="可选：按核验阶段筛选",
+    )
+    source_validation_parser.add_argument(
         "--output",
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
@@ -341,6 +376,53 @@ def main() -> None:
             "filters": {
                 "organization_role": args.organization_role,
                 "affiliation": args.affiliation,
+            },
+            "items": rows,
+        }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "source-validation-matrix":
+        registry = load_source_validation_registry()
+        sources = database.list_sources()
+        source_health = {
+            item["source_id"]: item for item in database.list_source_health()
+        }
+        latest_runs = {
+            item["source_id"]: item for item in database.list_latest_crawl_runs()
+        }
+        rows = source_validation_matrix_rows(
+            registry,
+            source_records=sources,
+            province=args.province,
+            role=args.role,
+            validation_stage=args.validation_stage,
+        )
+        for row in rows:
+            source_id = str(row["source_id"])
+            row["source_health_status"] = source_health.get(source_id, {}).get(
+                "status"
+            )
+            row["latest_crawl_status"] = latest_runs.get(source_id, {}).get(
+                "status"
+            )
+            row["last_synced_at"] = latest_runs.get(source_id, {}).get(
+                "finished_at"
+            )
+        result = {
+            "summary": source_validation_summary(
+                registry,
+                source_records=sources,
+            ),
+            "filters": {
+                "province": args.province,
+                "role": args.role,
+                "validation_stage": args.validation_stage,
             },
             "items": rows,
         }

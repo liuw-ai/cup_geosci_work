@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import copy
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,7 @@ from job_hub.contracts import (
     validate_employer_registry,
     validate_source_artifact,
     validate_source_registry,
+    validate_source_validation_registry,
 )
 from job_hub.employers import load_employer_registry
 from job_hub.sources import SourceCollectionError, load_source_registry
@@ -135,3 +137,45 @@ def test_artifact_contract_rejects_invalid_hash_and_unmanaged_storage_path() -> 
     artifact["storage_path"] = "..\\outside\\jobs.pdf"
     with pytest.raises(ContractValidationError, match="relative path"):
         validate_source_artifact(artifact)
+
+
+def test_source_validation_contract_rejects_malformed_records() -> None:
+    payload = json.loads(
+        (PROJECT_ROOT / "data" / "source_validation_registry.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    duplicate_slot = copy.deepcopy(payload)
+    duplicate_slot["records"].append(copy.deepcopy(duplicate_slot["records"][0]))
+    duplicate_slot["records"][-1]["id"] = "duplicate-slot"
+    with pytest.raises(
+        ContractValidationError,
+        match="Duplicate source validation target slot",
+    ):
+        validate_source_validation_registry(duplicate_slot)
+
+    invalid_stage = copy.deepcopy(payload)
+    invalid_stage["records"][0]["validation_stage"] = "verified_enough"
+    with pytest.raises(ContractValidationError, match="unsupported validation_stage"):
+        validate_source_validation_registry(invalid_stage)
+
+    malformed_url = copy.deepcopy(payload)
+    malformed_url["records"][0]["official_entry_url"] = "not-a-url"
+    with pytest.raises(ContractValidationError, match="official_entry_url"):
+        validate_source_validation_registry(malformed_url)
+
+    missing_fixture = copy.deepcopy(payload)
+    missing_fixture["records"][0].pop("fixture_path")
+    with pytest.raises(
+        ContractValidationError,
+        match="requires sample, fixture_path and regression_test",
+    ):
+        validate_source_validation_registry(missing_fixture)
+
+    entry_with_sample = copy.deepcopy(payload)
+    entry_with_sample["records"][6]["sample"] = copy.deepcopy(
+        payload["records"][0]["sample"]
+    )
+    with pytest.raises(ContractValidationError, match="must not claim a parser fixture"):
+        validate_source_validation_registry(entry_with_sample)

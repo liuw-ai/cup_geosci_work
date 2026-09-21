@@ -11,6 +11,10 @@ from job_hub.db import Database, utc_now
 from job_hub.employers import CATEGORY_ORDER
 from job_hub.locations import PROVINCES
 from job_hub.organizations import organization_matrix_summary
+from job_hub.source_validation import (
+    load_source_validation_registry,
+    source_validation_summary,
+)
 from job_hub.simulation import simulate_cohort
 from job_hub.source_targets import load_source_targets, target_matrix_summary
 
@@ -100,6 +104,10 @@ def build_coverage_report(
     target_matrix = target_matrix_summary(
         load_source_targets(),
         source_ids=set(source_by_id),
+    )
+    source_validation = source_validation_summary(
+        load_source_validation_registry(),
+        source_records=sources,
     )
     organization_matrix = organization_matrix_summary(source_records=sources)
     province_coverage = [
@@ -208,6 +216,28 @@ def build_coverage_report(
         },
         "province_coverage": province_coverage,
         "source_target_matrix": target_matrix,
+        # Public consumers can assess expansion quality, but the detailed
+        # official sample URLs, backup entries and fixtures remain an
+        # administrator concern.
+        "provincial_source_validation": {
+            key: source_validation[key]
+            for key in (
+                "registry_version",
+                "record_count",
+                "records_by_validation_stage",
+                "adapter_fixture_verified_records",
+                "adapter_fixture_verified_targets",
+                "candidate_targets_with_adapter_fixture",
+                "fixture_verified_role_counts",
+                "fixture_verified_province_count",
+                "fixture_backed_records",
+                "fixture_verified_enabled_sources",
+                "records_with_backup",
+                "backup_rate",
+                "verified_targets_without_adapter_fixture",
+                "scope_note",
+            )
+        },
         # Keep the public coverage response aggregate-only.  Channel notes,
         # alternate URLs and source bindings stay behind the administrator API.
         "organization_registry": {

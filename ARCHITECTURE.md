@@ -8,6 +8,8 @@ Phase 2 的官方附件处理契约见 [docs/phase-2/README.md](docs/phase-2/REA
 
 Phase 3 的组织层级与正式入口矩阵见 [docs/phase-3/README.md](docs/phase-3/README.md)。它将组织身份、集团关系、招聘频道和来源绑定独立管理，不会把已登记单位误写成已采集岗位。
 
+Phase 4 的省级官方来源核验矩阵见 [docs/phase-4/README.md](docs/phase-4/README.md)。它为 31 省五类官方角色建立证据台账，但只对当前已取得真实公告样例的有限批次提供离线解析回归；没有把入口故障、未找到样例或尚未扫描压缩成“无岗位”。
+
 ## 服务目标
 
 本项目是中国石油大学（北京）地球科学学院的公开就业信息站，而不是一个通用招聘转载站。学生可以在微信或手机浏览器直接打开日报链接，无需登录；系统不收集、保存或展示学生个人数据。
@@ -56,6 +58,17 @@ PDF/Excel/CSV/DOCX 解析 -> source_artifact_rows -> artifact_job_candidates
 人工核验说明 -> 官方页面证据 + 附件证据 -> 公开 jobs
 ```
 
+省级来源核验台账位于采集链路旁边，不会绕过采集准入直接产生岗位：
+
+```text
+省份 × 五类官方角色
+    -> source_targets.json（verified / candidate / unlocated / blocked）
+    -> source_validation_registry.json（入口、样例、字段证据、备用入口）
+    -> 离线 fixture + 回归测试
+    -> 运行时 robots/健康检查
+    -> 只有启用且成功扫描的 source_id 才能进入公开岗位流水线
+```
+
 数据库是唯一事实来源。日报是不可变快照，因此某日的链接可以长期回看；`/daily/latest` 只指向最新一份已发布日报。第三方线索只允许进入 `candidate_leads`，不会出现在岗位查询、日报或公开 API 中；只有管理员记录官方原文和核验说明后，才可转成公开岗位。
 
 ## 来源健康与省份覆盖
@@ -74,6 +87,20 @@ PDF/Excel/CSV/DOCX 解析 -> source_artifact_rows -> artifact_job_candidates
 `data/provincial_sources.json` 现登记 31 个省级自然资源正式入口。它们不是 31 个已启用爬虫：已确认入口结构、robots 规则和样例岗位后才会启用。`data/source_targets.json` 将每省进一步拆成五类官方角色：人社/考试、自然资源、地质局/地质院、事业单位统一招聘、公务员。目标状态为 `candidate` 或 `unlocated` 时只表示核验任务，不会被 worker 抓取，也不能使省份进入“扫描成功”；只有 `verified` 且绑定数据库 `source_id` 的目标才算已核验来源。
 
 `python -m job_hub.cli coverage` 和 `/api/coverage` 输出以下可量化检查，而不是只显示岗位总数：省份已登记/入口可访问/成功扫描来源与备用入口、五类角色目标状态、最近一次扫描是否有开放匹配、官方原文完整率、专业/学历/地点/截止日期或来源期限规则完整率、来源和类别集中度，以及匿名 100 人队列的明确匹配与需核验数量。地点指标区分国内省份和海外国家/地区；截止日指标区分明确日期、官方系统未公布固定期限和完全未说明。页面和报告不会把未扫描或失败来源解释成“当地没有岗位”。
+
+### 省级来源核验阶段
+
+`data/source_validation_registry.json` 的阶段含义如下：
+
+| 阶段 | 证据 | 能否自动采集 | 能否证明有/无岗位 |
+| --- | --- | --- | --- |
+| `official_identity_verified` | 官方主体和入口身份已确认 | 否 | 否 |
+| `entry_checked_no_recruitment_sample` | 当前入口可查看，但本轮没有可用招聘原文样例 | 否 | 否，不能解释成无岗位 |
+| `adapter_fixture_verified` | 真实官方公告样例、字段证据、离线夹具和回归测试齐全 | 仍须通过 robots/运行时健康检查 | 否，只证明解析器理解样例 |
+| `access_policy_verified` | 公开访问规则和自动化权限已核验 | 还需启用前试运行 | 否 |
+| `access_limited` / `retired` | 访问受限或来源退役 | 否 | 否 |
+
+当前批次包含北京人社、天津规划和自然资源、安徽/山东/河南地质系统，以及山东人社考试候选源的 9 条核验记录：6 条有真实公告样例和夹具，3 条只有入口检查。山东人社考试样例虽然解析回归通过，仍因部署环境的 robots/TLS 健康检查未完成而保持禁用。完整证据只通过 `X-Admin-Token` 保护的 `/api/admin/source-validation-matrix` 和 `source-validation-matrix` CLI 查看；公开覆盖报告只返回聚合计数。
 
 ### 每日质量快照与严格的无匹配结论
 
@@ -132,6 +159,7 @@ PDF/Excel/CSV/DOCX 解析 -> source_artifact_rows -> artifact_job_candidates
 | `locations.py` | 只按公告地点文本标准化省份、城市和国家/地区；支持国际国家代码与正文地点标签 |
 | `source_targets.py` | 读取 31 省五类角色扩源矩阵，区分已核验、候选和待定位入口 |
 | `organizations.py` | 读取组织层级、官方招聘频道与来源绑定；向管理员提供入口准备度矩阵 |
+| `source_validation.py` | 交叉验证省级目标、来源注册表、官方样例、字段证据和离线夹具；生成公开聚合与管理员明细 |
 | `coverage.py` | 来源健康、省份覆盖、字段完整率和集中度指标 |
 | `matching.py` | 通用地学词表、类别和日期提取 |
 | `employers.py` | 就业路径分类和可审计单位标准名/母体单位解析 |

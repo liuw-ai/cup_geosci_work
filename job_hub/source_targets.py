@@ -6,14 +6,9 @@ import json
 from pathlib import Path
 from typing import Any
 
+from job_hub.contracts import PROVINCIAL_SOURCE_TARGET_ROLES
 
-REQUIRED_ROLES = (
-    "human_resources_or_exam",
-    "natural_resources",
-    "geology_bureau_or_institute",
-    "public_institution_recruitment",
-    "civil_service",
-)
+REQUIRED_ROLES = PROVINCIAL_SOURCE_TARGET_ROLES
 
 ROLE_LABELS = {
     "human_resources_or_exam": "人社/考试",
@@ -71,6 +66,17 @@ def load_source_targets(path: Path | None = None) -> dict[str, Any]:
                 raise ValueError(
                     f"Verified target {province}/{role} must bind source_id"
                 )
+            candidate_source_id = target.get("candidate_source_id")
+            if candidate_source_id is not None:
+                if state != "candidate":
+                    raise ValueError(
+                        f"candidate_source_id is only valid for candidate target "
+                        f"{province}/{role}"
+                    )
+                if not isinstance(candidate_source_id, str) or not candidate_source_id.strip():
+                    raise ValueError(
+                        f"candidate_source_id for {province}/{role} must be non-empty text"
+                    )
     payload["required_roles"] = list(required_roles)
     return payload
 

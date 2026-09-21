@@ -11,7 +11,7 @@ from flask import Flask, abort, jsonify, render_template, request, url_for
 from job_hub.audit import audit_database
 from job_hub.attachments import AttachmentProcessingError, OfficialAttachmentProcessor
 from job_hub.config import Settings
-from job_hub.contracts import ORGANIZATION_ROLES, is_http_url
+from job_hub.contracts import ORGANIZATION_ROLES, SOURCE_VALIDATION_STAGES, is_http_url
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
 from job_hub.employers import enrich_job, load_employment_landscape
@@ -28,6 +28,12 @@ from job_hub.profiles import (
     annotate_profile_match,
     get_student_profile,
     list_student_profiles,
+)
+from job_hub.source_targets import REQUIRED_ROLES
+from job_hub.source_validation import (
+    load_source_validation_registry,
+    source_validation_matrix_rows,
+    source_validation_summary,
 )
 from job_hub.reports import build_daily_report, local_today, publish_daily_report
 from job_hub.sources import RawPosting
@@ -447,6 +453,61 @@ def create_app(settings: Settings | None = None) -> Flask:
                 "filters": {
                     "organization_role": organization_role,
                     "affiliation": affiliation,
+                },
+                "items": rows,
+            }
+        )
+
+    @app.get("/api/admin/source-validation-matrix")
+    @require_admin
+    def source_validation_matrix_api() -> Any:
+        """Show private evidence and runtime context for provincial sources."""
+        province = request.args.get("province", "").strip() or None
+        role = request.args.get("role", "").strip() or None
+        validation_stage = request.args.get("validation_stage", "").strip() or None
+        if province and province not in PROVINCES:
+            return jsonify({"error": "Unsupported province."}), 400
+        if role and role not in REQUIRED_ROLES:
+            return jsonify({"error": "Unsupported role."}), 400
+        if validation_stage and validation_stage not in SOURCE_VALIDATION_STAGES:
+            return jsonify({"error": "Unsupported validation_stage."}), 400
+
+        sources = database.list_sources()
+        source_health = {
+            item["source_id"]: item for item in database.list_source_health()
+        }
+        latest_runs = {
+            item["source_id"]: item for item in database.list_latest_crawl_runs()
+        }
+        registry = load_source_validation_registry()
+        rows = source_validation_matrix_rows(
+            registry,
+            source_records=sources,
+            province=province,
+            role=role,
+            validation_stage=validation_stage,
+        )
+        for row in rows:
+            source_id = str(row["source_id"])
+            row["source_health_status"] = source_health.get(source_id, {}).get(
+                "status"
+            )
+            row["latest_crawl_status"] = latest_runs.get(source_id, {}).get(
+                "status"
+            )
+            row["last_synced_at"] = latest_runs.get(source_id, {}).get(
+                "finished_at"
+            )
+        return jsonify(
+            {
+                "summary": source_validation_summary(
+                    registry,
+                    source_records=sources,
+                ),
+                "filters": {
+                    "province": province,
+                    "role": role,
+                    "validation_stage": validation_stage,
                 },
                 "items": rows,
             }

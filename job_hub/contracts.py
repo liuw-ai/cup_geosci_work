@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Mapping
+from datetime import date
 from pathlib import PurePosixPath, PureWindowsPath
 from typing import Any
 from urllib.parse import urlparse
@@ -35,6 +36,26 @@ SOURCE_TYPES = frozenset(
     }
 )
 SOURCE_TIERS = frozenset({"A", "B"})
+
+# Keep the five provincial roles in the data-contract layer so the target
+# matrix and the validation ledger cannot silently drift apart.
+PROVINCIAL_SOURCE_TARGET_ROLES = (
+    "human_resources_or_exam",
+    "natural_resources",
+    "geology_bureau_or_institute",
+    "public_institution_recruitment",
+    "civil_service",
+)
+SOURCE_VALIDATION_STAGES = frozenset(
+    {
+        "official_identity_verified",
+        "access_policy_verified",
+        "adapter_fixture_verified",
+        "entry_checked_no_recruitment_sample",
+        "access_limited",
+        "retired",
+    }
+)
 
 ORGANIZATION_ROLES = frozenset(
     {
@@ -520,6 +541,216 @@ def validate_organization_registry(
     }
 
 
+def validate_source_validation_registry(payload: Any) -> dict[str, Any]:
+    """Validate the Phase 4 provincial source-validation ledger.
+
+    A record documents evidence that an official provincial entry was checked.
+    It is intentionally separate from the active source registry: a fixture can
+    prove that a parser understands a public sample while runtime robots and
+    network checks still keep that source disabled.
+    """
+    if not isinstance(payload, dict):
+        raise ContractValidationError("source validation registry must be an object")
+    version = payload.get("version", 1)
+    if isinstance(version, bool) or not isinstance(version, int) or version < 1:
+        raise ContractValidationError(
+            "source validation registry version must be a positive integer"
+        )
+    description = payload.get("description", "")
+    if description is not None and not isinstance(description, str):
+        raise ContractValidationError("source validation registry description must be text")
+    records = payload.get("records")
+    if not isinstance(records, list) or not records:
+        raise ContractValidationError(
+            "source validation registry records must be a non-empty list"
+        )
+
+    normalized: list[dict[str, Any]] = []
+    record_ids: set[str] = set()
+    target_slots: set[tuple[str, str]] = set()
+    for index, value in enumerate(records):
+        record = _mapping_copy(value, f"Source validation record at index {index}")
+        for field_name in (
+            "id",
+            "source_id",
+            "province",
+            "role",
+            "validation_stage",
+            "official_entry_url",
+            "backup_entry_urls",
+            "last_checked_on",
+            "access_assessment",
+            "finding",
+        ):
+            if field_name not in record:
+                raise ContractValidationError(
+                    f"Source validation record at index {index} is missing: {field_name}"
+                )
+        record_id = _required_text(record["id"], f"Source validation record at index {index} id")
+        if record_id in record_ids:
+            raise ContractValidationError(f"Duplicate source validation record id: {record_id}")
+        record_ids.add(record_id)
+        record["id"] = record_id
+        record["source_id"] = _required_text(
+            record["source_id"], f"Source validation record {record_id} source_id"
+        )
+        record["province"] = _required_text(
+            record["province"], f"Source validation record {record_id} province"
+        )
+        record["role"] = _required_text(
+            record["role"], f"Source validation record {record_id} role"
+        )
+        if record["role"] not in PROVINCIAL_SOURCE_TARGET_ROLES:
+            raise ContractValidationError(
+                f"Source validation record {record_id} has unsupported role"
+            )
+        target_slot = (record["province"], record["role"])
+        if target_slot in target_slots:
+            raise ContractValidationError(
+                "Duplicate source validation target slot: "
+                f"{record['province']}/{record['role']}"
+            )
+        target_slots.add(target_slot)
+        record["validation_stage"] = _required_text(
+            record["validation_stage"],
+            f"Source validation record {record_id} validation_stage",
+        )
+        if record["validation_stage"] not in SOURCE_VALIDATION_STAGES:
+            raise ContractValidationError(
+                f"Source validation record {record_id} has unsupported validation_stage"
+            )
+        record["official_entry_url"] = validate_http_url(
+            record["official_entry_url"],
+            f"Source validation record {record_id} official_entry_url",
+        )
+        backup_urls = record["backup_entry_urls"]
+        if not isinstance(backup_urls, list) or not backup_urls:
+            raise ContractValidationError(
+                f"Source validation record {record_id} backup_entry_urls must be a non-empty list"
+            )
+        record["backup_entry_urls"] = [
+            validate_http_url(
+                url,
+                f"Source validation record {record_id} backup_entry_url",
+            )
+            for url in backup_urls
+        ]
+        record["last_checked_on"] = _validate_iso_date(
+            record["last_checked_on"],
+            f"Source validation record {record_id} last_checked_on",
+        )
+        access = _mapping_copy(
+            record["access_assessment"],
+            f"Source validation record {record_id} access_assessment",
+        )
+        access["observed_access"] = _required_text(
+            access.get("observed_access"),
+            f"Source validation record {record_id} observed_access",
+        )
+        access["robots_assessment"] = _required_text(
+            access.get("robots_assessment"),
+            f"Source validation record {record_id} robots_assessment",
+        )
+        access["note"] = _optional_text(access.get("note")) or ""
+        record["access_assessment"] = access
+        record["finding"] = _required_text(
+            record["finding"], f"Source validation record {record_id} finding"
+        )
+
+        sample_value = record.get("sample")
+        sample: dict[str, Any] | None = None
+        if sample_value is not None:
+            sample = _mapping_copy(
+                sample_value, f"Source validation record {record_id} sample"
+            )
+            for field_name in (
+                "official_url",
+                "title",
+                "publisher",
+                "published_date",
+                "field_evidence",
+            ):
+                if field_name not in sample:
+                    raise ContractValidationError(
+                        f"Source validation record {record_id} sample is missing: {field_name}"
+                    )
+            sample["official_url"] = validate_http_url(
+                sample["official_url"],
+                f"Source validation record {record_id} sample official_url",
+            )
+            sample["title"] = _required_text(
+                sample["title"], f"Source validation record {record_id} sample title"
+            )
+            sample["publisher"] = _required_text(
+                sample["publisher"],
+                f"Source validation record {record_id} sample publisher",
+            )
+            sample["published_date"] = _validate_iso_date(
+                sample["published_date"],
+                f"Source validation record {record_id} sample published_date",
+            )
+            deadline_date = _optional_text(sample.get("deadline_date"))
+            if deadline_date is not None:
+                deadline_date = _validate_iso_date(
+                    deadline_date,
+                    f"Source validation record {record_id} sample deadline_date",
+                )
+            sample["deadline_date"] = deadline_date
+            field_evidence = _mapping_copy(
+                sample["field_evidence"],
+                f"Source validation record {record_id} sample field_evidence",
+            )
+            for field_name in (
+                "publisher",
+                "published_date",
+                "recruitment_scope",
+                "application_or_deadline",
+            ):
+                field_evidence[field_name] = _required_text(
+                    field_evidence.get(field_name),
+                    f"Source validation record {record_id} sample field_evidence {field_name}",
+                )
+            field_evidence["attachment_or_position_table"] = (
+                _optional_text(field_evidence.get("attachment_or_position_table"))
+                or ""
+            )
+            sample["field_evidence"] = field_evidence
+
+        fixture_path = _optional_text(record.get("fixture_path"))
+        if fixture_path is not None:
+            fixture_path = _validate_relative_project_path(
+                fixture_path,
+                f"Source validation record {record_id} fixture_path",
+            )
+        regression_test = _optional_text(record.get("regression_test"))
+        if regression_test is not None and "::" not in regression_test:
+            raise ContractValidationError(
+                f"Source validation record {record_id} regression_test must name a test node"
+            )
+        if record["validation_stage"] == "adapter_fixture_verified":
+            if sample is None or fixture_path is None or regression_test is None:
+                raise ContractValidationError(
+                    f"Source validation record {record_id} adapter_fixture_verified "
+                    "requires sample, fixture_path and regression_test"
+                )
+        if record["validation_stage"] == "entry_checked_no_recruitment_sample":
+            if sample is not None or fixture_path is not None or regression_test is not None:
+                raise ContractValidationError(
+                    f"Source validation record {record_id} entry_checked_no_recruitment_sample "
+                    "must not claim a parser fixture or recruitment sample"
+                )
+        record["sample"] = sample
+        record["fixture_path"] = fixture_path
+        record["regression_test"] = regression_test
+        normalized.append(record)
+
+    return {
+        "version": version,
+        "description": (description or "").strip(),
+        "records": normalized,
+    }
+
+
 def validate_source_artifact(value: Any) -> dict[str, Any]:
     """Validate official attachment metadata and its controlled processing state."""
     artifact = _mapping_copy(value, "Source artifact")
@@ -778,6 +1009,32 @@ def _validate_relative_storage_path(value: Any) -> str | None:
         or ".." in posix_path.parts
     ):
         raise ContractValidationError("storage_path must be a relative path inside managed storage")
+    return text
+
+
+def _validate_relative_project_path(value: Any, field_name: str) -> str:
+    text = _required_text(value, field_name)
+    windows_path = PureWindowsPath(text)
+    posix_path = PurePosixPath(text)
+    if (
+        windows_path.is_absolute()
+        or posix_path.is_absolute()
+        or bool(windows_path.drive)
+        or ".." in windows_path.parts
+        or ".." in posix_path.parts
+    ):
+        raise ContractValidationError(
+            f"{field_name} must be a relative path inside the project"
+        )
+    return text.replace("\\", "/")
+
+
+def _validate_iso_date(value: Any, field_name: str) -> str:
+    text = _required_text(value, field_name)
+    try:
+        date.fromisoformat(text)
+    except ValueError as error:
+        raise ContractValidationError(f"{field_name} must use ISO YYYY-MM-DD") from error
     return text
 
 

@@ -114,7 +114,7 @@
       "civil_service": {"state": "unlocated", "discovery_hint": "江西省公务员考试录用"}
     },
     "山东": {
-      "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "山东省人力资源和社会保障厅公开招聘"},
+      "human_resources_or_exam": {"state": "candidate", "candidate_source_id": "shandong-hrss-exam", "official_entry_url": "https://hrss.shandong.gov.cn/rsks/", "discovery_hint": "已确认山东人事考试信息网省属事业单位公开招聘入口和公告样例；待部署环境 robots/TLS 健康检查及受控试运行后再转为 verified。"},
       "natural_resources": {"state": "candidate", "official_entry_url": "http://dnr.shandong.gov.cn/zwgk_324/xxgkml/rsxx/"},
       "geology_bureau_or_institute": {"state": "verified", "source_id": "shandong-geology-bureau"},
       "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "山东省事业单位公开招聘"},

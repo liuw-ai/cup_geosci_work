@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
+
 from job_hub.app import create_app
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
 from job_hub.reports import publish_daily_report
 from job_hub.sources import RawPosting
+from job_hub.source_validation import load_source_validation_registry
 
 from conftest import make_settings, source
 
@@ -107,6 +110,47 @@ def test_organization_matrix_is_admin_only_and_supports_role_filter(tmp_path) ->
         for item in payload["items"]
     )
     assert all("channels" in item for item in payload["items"])
+
+
+def test_source_validation_matrix_is_admin_only_and_keeps_evidence_private(tmp_path) -> None:
+    app = create_app(make_settings(tmp_path))
+    client = app.test_client()
+
+    assert client.get("/api/source-validation-matrix").status_code == 404
+    assert client.get("/api/admin/source-validation-matrix").status_code == 403
+    assert (
+        client.get(
+            "/api/admin/source-validation-matrix?validation_stage=not-a-stage",
+            headers={"X-Admin-Token": "test-admin-token"},
+        ).status_code
+        == 400
+    )
+
+    response = client.get(
+        "/api/admin/source-validation-matrix?validation_stage=adapter_fixture_verified",
+        headers={"X-Admin-Token": "test-admin-token"},
+    )
+    assert response.status_code == 200
+    private_payload = response.get_json()
+    assert private_payload["summary"]["record_count"] == 9
+    assert len(private_payload["items"]) == 6
+    assert all(
+        "sample" in item and "fixture_path" in item
+        for item in private_payload["items"]
+    )
+
+    public_payload = client.get("/api/coverage").get_json()
+    public_text = json.dumps(public_payload, ensure_ascii=False)
+    for record in load_source_validation_registry()["records"]:
+        if record.get("sample"):
+            assert record["sample"]["official_url"] not in public_text
+        if record.get("fixture_path"):
+            assert record["fixture_path"] not in public_text
+        for backup_url in record["backup_entry_urls"]:
+            assert backup_url not in public_text
+    assert "unvalidated_verified_targets" not in public_payload[
+        "provincial_source_validation"
+    ]
 
 
 def test_admin_import_rejects_invalid_token(tmp_path) -> None:

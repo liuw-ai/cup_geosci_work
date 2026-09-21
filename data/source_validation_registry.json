@@ -1,0 +1,255 @@
+{
+  "version": 1,
+  "description": "Phase 4 省级官方来源核验台账。它记录当前正式入口、真实公告样例、字段证据、备用入口和离线解析夹具；adapter_fixture_verified 仍不等于来源已启用或本轮存在岗位。",
+  "records": [
+    {
+      "id": "beijing-hrss-human-resources-v1",
+      "source_id": "beijing-hrss",
+      "province": "北京",
+      "role": "human_resources_or_exam",
+      "validation_stage": "adapter_fixture_verified",
+      "official_entry_url": "https://rsj.beijing.gov.cn/xxgk/gkzp/",
+      "backup_entry_urls": ["https://rsj.beijing.gov.cn/"],
+      "last_checked_on": "2026-09-21",
+      "access_assessment": {
+        "observed_access": "browser_public_page_accessible",
+        "robots_assessment": "runtime_probe_pending",
+        "note": "浏览器可公开打开事业单位公开招聘列表与详情页；当前命令行 TLS 探测失败不被写成来源故障或无岗位。"
+      },
+      "finding": "列表、详情页和 XLSX 岗位信息表均为正式公开内容；样例仅用于结构回归，不代表地学岗位或当前有效岗位。",
+      "sample": {
+        "official_url": "https://rsj.beijing.gov.cn/xxgk/gkzp/202609/t20260917_4867574.html",
+        "title": "北京工商大学2026年高层次人才及海外优秀学者招聘公告",
+        "publisher": "北京市人力资源和社会保障局（页面来源：北京市教育委员会）",
+        "published_date": "2026-09-17",
+        "deadline_date": "2026-11-15",
+        "field_evidence": {
+          "publisher": "页面标注“来源：北京市教育委员会”，页脚标注北京市人力资源和社会保障局主办。",
+          "published_date": "页面标注“日期：2026-09-17”。",
+          "recruitment_scope": "正文明确“公开招聘编制内专任教师岗位人员”，并说明计划招聘30人。",
+          "application_or_deadline": "正文明确“自公告发布之日起至2026年11月15日期间接受报名”。",
+          "attachment_or_position_table": "页面附件为《北京工商大学2026年高层次人才及海外优秀学者招聘岗位信息表》。"
+        }
+      },
+      "fixture_path": "tests/fixtures/source_validation/beijing_hrss_detail.html",
+      "regression_test": "tests/test_source_validation.py::test_adapter_fixture_records_collect_current_official_samples"
+    },
+    {
+      "id": "tianjin-natural-resources-v1",
+      "source_id": "tianjin-natural-resources",
+      "province": "天津",
+      "role": "natural_resources",
+      "validation_stage": "adapter_fixture_verified",
+      "official_entry_url": "https://ghhzrzy.tj.gov.cn/zwgk_143/zfxxgk1/fdzdgknr1/zkly/",
+      "backup_entry_urls": ["https://ghhzrzy.tj.gov.cn/", "https://hrss.tj.gov.cn/jsdw/rsksw/"],
+      "last_checked_on": "2026-09-21",
+      "access_assessment": {
+        "observed_access": "browser_public_page_accessible",
+        "robots_assessment": "runtime_probe_pending",
+        "note": "正式招考录用栏目可公开打开，原公告列出了本局、天津市城市建设档案馆（天津市地质资料馆）和天津人社考试入口。"
+      },
+      "finding": "公告正文、报名期限和 XLS 岗位计划表均为同一官方信息链；招聘后续公示和资格复审通知由标题过滤器排除。",
+      "sample": {
+        "official_url": "https://ghhzrzy.tj.gov.cn/zwgk_143/zfxxgk1/fdzdgknr1/zkly/202602/t20260228_7252855.html",
+        "title": "天津市规划和自然资源局所属事业单位2026年公开招聘事业单位工作人员公告",
+        "publisher": "天津市规划和自然资源局",
+        "published_date": "2026-03-05",
+        "deadline_date": "2026-03-25",
+        "field_evidence": {
+          "publisher": "页面标注“来源：天津市规划和自然资源局”。",
+          "published_date": "页面标注“发布时间：2026-03-05 11:00”。",
+          "recruitment_scope": "正文明确“面向社会公开招聘60名事业单位工作人员”。",
+          "application_or_deadline": "正文明确“报名时间：2026年3月18日9:00至3月25日9:00”。",
+          "attachment_or_position_table": "页面附件为《2026年天津市规划和自然资源局所属事业单位公开招聘工作人员计划表.xls》。"
+        }
+      },
+      "fixture_path": "tests/fixtures/source_validation/tianjin_natural_resources_detail.html",
+      "regression_test": "tests/test_source_validation.py::test_adapter_fixture_records_collect_current_official_samples"
+    },
+    {
+      "id": "anhui-geology-bureau-v1",
+      "source_id": "anhui-geology-bureau",
+      "province": "安徽",
+      "role": "geology_bureau_or_institute",
+      "validation_stage": "adapter_fixture_verified",
+      "official_entry_url": "https://dkj.ah.gov.cn/xwzx/tzgg/index.html",
+      "backup_entry_urls": ["https://dkj.ah.gov.cn/", "https://zrzyt.ah.gov.cn/"],
+      "last_checked_on": "2026-09-21",
+      "access_assessment": {
+        "observed_access": "browser_public_page_accessible",
+        "robots_assessment": "runtime_probe_pending",
+        "note": "通知公告列表和公开详情页可由浏览器访问；样例附件显示职位表与报名材料被清晰区分。"
+      },
+      "finding": "高层次人才公告提供独立岗位表和明确报名期限，适合走官方附件私有处理流水线；附件行仍必须人工核验后才公开。",
+      "sample": {
+        "official_url": "https://dkj.ah.gov.cn/xwzx/tzgg/40788529.html",
+        "title": "安徽工业经济职业技术学院2026年高层次人才招聘公告",
+        "publisher": "安徽省地质矿产勘查局",
+        "published_date": "2026-04-29",
+        "deadline_date": "2026-10-31",
+        "field_evidence": {
+          "publisher": "页面页眉和页脚均标明安徽省地质矿产勘查局，正文来源标注为省地矿局。",
+          "published_date": "页面标注“2026-04-29 17:56 来源：省地矿局”。",
+          "recruitment_scope": "正文明确“学校2026年度招聘高层次人才29人”。",
+          "application_or_deadline": "正文明确“自公告发布之日起至2026年10月31日止”。",
+          "attachment_or_position_table": "页面附件1为《安徽工业经济职业技术学院2026年高层次人才招聘岗位汇总表.xls》。"
+        }
+      },
+      "fixture_path": "tests/fixtures/source_validation/anhui_geology_bureau_detail.html",
+      "regression_test": "tests/test_source_validation.py::test_adapter_fixture_records_collect_current_official_samples"
+    },
+    {
+      "id": "shandong-geology-bureau-v1",
+      "source_id": "shandong-geology-bureau",
+      "province": "山东",
+      "role": "geology_bureau_or_institute",
+      "validation_stage": "adapter_fixture_verified",
+      "official_entry_url": "http://dkj.shandong.gov.cn/col/col185988/index.html?number=DKJ09",
+      "backup_entry_urls": ["http://dkj.shandong.gov.cn/", "http://dnr.shandong.gov.cn/", "https://hrss.shandong.gov.cn/rsks/"],
+      "last_checked_on": "2026-09-21",
+      "access_assessment": {
+        "observed_access": "browser_public_page_accessible",
+        "robots_assessment": "runtime_probe_pending",
+        "note": "正式人事栏目、公开招聘原公告和岗位汇总表附件可在浏览器公开打开；页面使用嵌套列表组件，因此回归夹具必须覆盖该列表结构。"
+      },
+      "finding": "原公告明确15家所属地勘事业单位、72个专业技术岗位和报名区间，附件表是逐岗位专业与学历证据的唯一可靠来源。",
+      "sample": {
+        "official_url": "http://dkj.shandong.gov.cn/art/2026/7/17/art_356047_10333801.html",
+        "title": "山东省地质矿产勘查开发局所属事业单位2026年公开招聘人员公告",
+        "publisher": "山东省地质矿产勘查开发局",
+        "published_date": "2026-07-17",
+        "deadline_date": "2026-07-28",
+        "field_evidence": {
+          "publisher": "页面标注“信息来源：山东省地矿局”，页脚标明山东省地质矿产勘查开发局主办。",
+          "published_date": "页面标注“发布时间：2026-07-17”。",
+          "recruitment_scope": "正文明确所属15家事业单位公开招聘专业技术岗位人员72人。",
+          "application_or_deadline": "正文明确“报名时间：2026年7月22日9:00—7月28日16:00”。",
+          "attachment_or_position_table": "页面附件1为《山东省事业单位公开招聘人员岗位汇总表》。"
+        }
+      },
+      "fixture_path": "tests/fixtures/source_validation/shandong_geology_bureau_detail.html",
+      "regression_test": "tests/test_source_validation.py::test_adapter_fixture_records_collect_current_official_samples"
+    },
+    {
+      "id": "henan-geology-bureau-v1",
+      "source_id": "henan-geology-bureau",
+      "province": "河南",
+      "role": "geology_bureau_or_institute",
+      "validation_stage": "adapter_fixture_verified",
+      "official_entry_url": "https://dzj.henan.gov.cn/tzgg1/",
+      "backup_entry_urls": ["https://dzj.henan.gov.cn/", "https://zrzyt.henan.gov.cn/", "https://hrss.henan.gov.cn/"],
+      "last_checked_on": "2026-09-21",
+      "access_assessment": {
+        "observed_access": "browser_public_page_accessible",
+        "robots_assessment": "runtime_probe_pending",
+        "note": "通知公告列表和带岗位表附件的原公告可公开打开；列表中招聘流程后续通知与原招聘公告并存，必须保持标题级排除规则。"
+      },
+      "finding": "样例为河南省地质局转发并提供本局岗位表的全省事业单位联考公告；公开附件是判断具体地学专业岗位的必要证据。",
+      "sample": {
+        "official_url": "https://dzj.henan.gov.cn/2026/04-22/8190.html",
+        "title": "河南省地质局转发中共河南省委组织部 河南省人力资源和社会保障厅2026年河南省事业单位公开招聘联考工作的公告",
+        "publisher": "河南省地质局",
+        "published_date": "2026-04-22",
+        "deadline_date": "2026-04-30",
+        "field_evidence": {
+          "publisher": "页面来源标注为“组织人事处”，页脚标明河南省地质局版权所有。",
+          "published_date": "页面标注“时间：2026-04-22 15:56”。",
+          "recruitment_scope": "正文明确全省事业单位公开招聘联考，且附件含河南省地质局所属事业单位岗位信息表。",
+          "application_or_deadline": "正文明确“报名时间为2026年4月24日9:00至4月30日17:00”。",
+          "attachment_or_position_table": "页面附件为《2026年河南省地质局所属事业单位公开招聘联考岗位信息表.xlsx》。"
+        }
+      },
+      "fixture_path": "tests/fixtures/source_validation/henan_geology_bureau_detail.html",
+      "regression_test": "tests/test_source_validation.py::test_adapter_fixture_records_collect_current_official_samples"
+    },
+    {
+      "id": "shandong-hrss-exam-v1",
+      "source_id": "shandong-hrss-exam",
+      "province": "山东",
+      "role": "human_resources_or_exam",
+      "validation_stage": "adapter_fixture_verified",
+      "official_entry_url": "https://hrss.shandong.gov.cn/rsks/",
+      "backup_entry_urls": ["https://hrss.shandong.gov.cn/", "http://dkj.shandong.gov.cn/"],
+      "last_checked_on": "2026-09-21",
+      "access_assessment": {
+        "observed_access": "browser_public_page_accessible",
+        "robots_assessment": "runtime_probe_pending",
+        "note": "山东人事考试信息网可公开打开省属事业单位招聘公告及职位表附件；当前环境的 requests TLS 健康探测未稳定通过，因此来源保持停用。"
+      },
+      "finding": "这是新登记的正式候选来源：身份、列表、详情和附件解析夹具已验证，但尚未通过部署环境的合规健康检查，不计入已自动化来源或岗位覆盖。",
+      "sample": {
+        "official_url": "https://hrss.shandong.gov.cn/articles/ch00232/202601/f257f59a-0904-4130-935e-d959873b68d3.shtml",
+        "title": "2026年度省属事业单位公开招聘初级综合类岗位人员公告",
+        "publisher": "山东省人力资源和社会保障厅",
+        "published_date": "2026-01-22",
+        "deadline_date": "2026-01-30",
+        "field_evidence": {
+          "publisher": "页面页脚标明山东省人力资源和社会保障厅版权所有。",
+          "published_date": "页面标注“2026-01-22 山东省人力资源和社会保障厅”。",
+          "recruitment_scope": "正文明确省属事业单位初级综合类岗位公开招聘人员。",
+          "application_or_deadline": "正文明确“报名时间：2026年1月26日9:00—1月30日16:00”。",
+          "attachment_or_position_table": "页面附件1为《2026年度省属事业单位公开招聘工作人员岗位汇总表》。"
+        }
+      },
+      "fixture_path": "tests/fixtures/source_validation/shandong_hrss_exam_detail.html",
+      "regression_test": "tests/test_source_validation.py::test_adapter_fixture_records_collect_current_official_samples"
+    },
+    {
+      "id": "beijing-natural-resources-entry-check-v1",
+      "source_id": "beijing-natural-resources",
+      "province": "北京",
+      "role": "natural_resources",
+      "validation_stage": "entry_checked_no_recruitment_sample",
+      "official_entry_url": "https://ghzrzyw.beijing.gov.cn/zhengwuxinxi/rsxx/",
+      "backup_entry_urls": ["https://ghzrzyw.beijing.gov.cn/", "https://rsj.beijing.gov.cn/xxgk/gkzp/"],
+      "last_checked_on": "2026-09-21",
+      "access_assessment": {
+        "observed_access": "browser_public_page_accessible",
+        "robots_assessment": "runtime_probe_pending",
+        "note": "官方人事信息栏目可公开打开，但本次可见列表未出现可作为招聘原公告样例的条目。"
+      },
+      "finding": "入口可访问不等于存在当前招聘；保留为正式来源登记，待出现招聘原公告后再补充字段证据与解析夹具。",
+      "sample": null,
+      "fixture_path": null,
+      "regression_test": null
+    },
+    {
+      "id": "shanghai-natural-resources-entry-check-v1",
+      "source_id": "shanghai-natural-resources",
+      "province": "上海",
+      "role": "natural_resources",
+      "validation_stage": "entry_checked_no_recruitment_sample",
+      "official_entry_url": "https://ghzyj.sh.gov.cn/rsxx/",
+      "backup_entry_urls": ["https://ghzyj.sh.gov.cn/", "https://rsj.sh.gov.cn/"],
+      "last_checked_on": "2026-09-21",
+      "access_assessment": {
+        "observed_access": "browser_public_page_accessible",
+        "robots_assessment": "runtime_probe_pending",
+        "note": "官方人事信息栏目可公开打开；当期可见条目以职称、任免和项目通知为主，未见可核验招聘原公告。"
+      },
+      "finding": "不能用可访问性替代岗位证据，也不能把没有匹配的列表解释为上海没有相关招聘；后续应重新定位事业单位招聘或人才引进正式栏目。",
+      "sample": null,
+      "fixture_path": null,
+      "regression_test": null
+    },
+    {
+      "id": "anhui-natural-resources-entry-check-v1",
+      "source_id": "anhui-natural-resources",
+      "province": "安徽",
+      "role": "natural_resources",
+      "validation_stage": "entry_checked_no_recruitment_sample",
+      "official_entry_url": "https://zrzyt.ah.gov.cn/xwdt/tzgg/",
+      "backup_entry_urls": ["https://zrzyt.ah.gov.cn/", "https://dkj.ah.gov.cn/"],
+      "last_checked_on": "2026-09-21",
+      "access_assessment": {
+        "observed_access": "browser_public_page_accessible",
+        "robots_assessment": "runtime_probe_pending",
+        "note": "通知公告栏目可公开打开；当期列表主要为矿权、测绘资质、行业评审和业务公告，未发现合格招聘样例。"
+      },
+      "finding": "该入口的官方主体和当前栏目已确认，但未满足招聘样例、字段验证和夹具要求；不能据此产生岗位或宣称本轮无岗位。",
+      "sample": null,
+      "fixture_path": null,
+      "regression_test": null
+    }
+  ]
+}
