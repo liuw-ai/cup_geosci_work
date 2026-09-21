@@ -45,6 +45,9 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     assert client.get("/api/jobs?province=北京").get_json()["total"] == 1
     assert client.get("/api/jobs?province=山东").get_json()["total"] == 0
     assert client.get("/api/coverage").status_code == 200
+    coverage_payload = client.get("/api/coverage").get_json()
+    assert coverage_payload["organization_registry"]["organization_count"] > 0
+    assert "source_bindings" not in coverage_payload["organization_registry"]
     landscape_response = client.get("/landscape")
     assert landscape_response.status_code == 200
     assert "油气工程技术服务" in landscape_response.get_data(as_text=True)
@@ -74,6 +77,36 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     )
     assert response.status_code == 201
     assert response.get_json()["outcome"] == "created"
+
+
+def test_organization_matrix_is_admin_only_and_supports_role_filter(tmp_path) -> None:
+    app = create_app(make_settings(tmp_path))
+    client = app.test_client()
+
+    assert client.get("/api/organization-matrix").status_code == 404
+    assert client.get("/api/admin/organization-matrix").status_code == 403
+    assert (
+        client.get(
+            "/api/admin/organization-matrix?organization_role=not-a-role",
+            headers={"X-Admin-Token": "test-admin-token"},
+        ).status_code
+        == 400
+    )
+
+    response = client.get(
+        "/api/admin/organization-matrix?organization_role=internal_technical_service",
+        headers={"X-Admin-Token": "test-admin-token"},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["summary"]["organization_count"] > 0
+    assert payload["items"]
+    assert all(
+        item["organization_role"] == "internal_technical_service"
+        for item in payload["items"]
+    )
+    assert all("channels" in item for item in payload["items"])
 
 
 def test_admin_import_rejects_invalid_token(tmp_path) -> None:

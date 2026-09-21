@@ -11,12 +11,17 @@ from flask import Flask, abort, jsonify, render_template, request, url_for
 from job_hub.audit import audit_database
 from job_hub.attachments import AttachmentProcessingError, OfficialAttachmentProcessor
 from job_hub.config import Settings
-from job_hub.contracts import is_http_url
+from job_hub.contracts import ORGANIZATION_ROLES, is_http_url
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
 from job_hub.employers import enrich_job, load_employment_landscape
 from job_hub.locations import PROVINCES
 from job_hub.matching import CATEGORY_DESCRIPTIONS, CATEGORY_ORDER, DEGREE_ORDER
+from job_hub.organizations import (
+    load_organization_registry,
+    organization_matrix_rows,
+    organization_matrix_summary,
+)
 from job_hub.pipeline import JobPipeline
 from job_hub.profiles import (
     StudentProfile,
@@ -396,6 +401,56 @@ def create_app(settings: Settings | None = None) -> Flask:
             return view(*args, **kwargs)
 
         return wrapped
+
+    @app.get("/api/admin/organization-matrix")
+    @require_admin
+    def organization_matrix_api() -> Any:
+        """Show private source-readiness detail for the registered organizations."""
+        organization_role = request.args.get("organization_role", "").strip() or None
+        affiliation = request.args.get("affiliation", "").strip() or None
+        if organization_role and organization_role not in ORGANIZATION_ROLES:
+            return jsonify({"error": "Unsupported organization_role."}), 400
+
+        registry = load_organization_registry()
+        sources = database.list_sources()
+        source_health = {
+            item["source_id"]: item for item in database.list_source_health()
+        }
+        latest_runs = {
+            item["source_id"]: item for item in database.list_latest_crawl_runs()
+        }
+        rows = organization_matrix_rows(
+            registry,
+            source_records=sources,
+            organization_role=organization_role,
+            affiliation=affiliation,
+        )
+        for row in rows:
+            for channel in row["channels"]:
+                source_id = channel.get("source_id")
+                if not source_id:
+                    channel["source_health_status"] = None
+                    channel["latest_crawl_status"] = None
+                    continue
+                health = source_health.get(str(source_id), {})
+                latest_run = latest_runs.get(str(source_id), {})
+                channel["source_health_status"] = health.get("status")
+                channel["latest_crawl_status"] = latest_run.get("status")
+                channel["last_synced_at"] = latest_run.get("finished_at")
+
+        return jsonify(
+            {
+                "summary": organization_matrix_summary(
+                    registry,
+                    source_records=sources,
+                ),
+                "filters": {
+                    "organization_role": organization_role,
+                    "affiliation": affiliation,
+                },
+                "items": rows,
+            }
+        )
 
     @app.post("/api/admin/jobs")
     @require_admin

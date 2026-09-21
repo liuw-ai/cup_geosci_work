@@ -13,11 +13,16 @@ from job_hub.attachments import (
     OfficialAttachmentProcessor,
 )
 from job_hub.config import Settings
-from job_hub.contracts import is_http_url
+from job_hub.contracts import ORGANIZATION_ROLES, is_http_url
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
 from job_hub.emailer import Mailer
 from job_hub.pipeline import JobPipeline
+from job_hub.organizations import (
+    load_organization_registry,
+    organization_matrix_rows,
+    organization_matrix_summary,
+)
 from job_hub.reports import publish_daily_report
 from job_hub.simulation import simulate_cohort
 from job_hub.sources import RawPosting, SourceHealthProbe
@@ -151,6 +156,24 @@ def main() -> None:
         action="store_true",
         help="将当前质量指标写入当天可更新的快照，用于次日趋势比较",
     )
+    organization_matrix_parser = subparsers.add_parser(
+        "organization-matrix",
+        help="输出组织层级、官方入口、备用入口和来源绑定状态",
+    )
+    organization_matrix_parser.add_argument(
+        "--organization-role",
+        choices=sorted(ORGANIZATION_ROLES),
+        help="可选：按组织角色筛选",
+    )
+    organization_matrix_parser.add_argument(
+        "--affiliation",
+        help="可选：按所属体系精确筛选",
+    )
+    organization_matrix_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整 JSON 写入指定文件",
+    )
     source_health_parser = subparsers.add_parser(
         "source-health",
         help="轻量检查公开来源和 robots.txt，不采集岗位",
@@ -282,6 +305,53 @@ def main() -> None:
         return
 
     settings, database, pipeline = services()
+    if args.command == "organization-matrix":
+        registry = load_organization_registry()
+        sources = database.list_sources()
+        source_health = {
+            item["source_id"]: item for item in database.list_source_health()
+        }
+        latest_runs = {
+            item["source_id"]: item for item in database.list_latest_crawl_runs()
+        }
+        rows = organization_matrix_rows(
+            registry,
+            source_records=sources,
+            organization_role=args.organization_role,
+            affiliation=args.affiliation,
+        )
+        for row in rows:
+            for channel in row["channels"]:
+                source_id = channel.get("source_id")
+                if not source_id:
+                    channel["source_health_status"] = None
+                    channel["latest_crawl_status"] = None
+                    continue
+                channel["source_health_status"] = source_health.get(
+                    str(source_id), {}
+                ).get("status")
+                channel["latest_crawl_status"] = latest_runs.get(
+                    str(source_id), {}
+                ).get("status")
+        result = {
+            "summary": organization_matrix_summary(
+                registry,
+                source_records=sources,
+            ),
+            "filters": {
+                "organization_role": args.organization_role,
+                "affiliation": args.affiliation,
+            },
+            "items": rows,
+        }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command == "init":
         print(
             json.dumps(

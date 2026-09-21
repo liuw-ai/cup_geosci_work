@@ -1,0 +1,1127 @@
+{
+  "version": 1,
+  "description": "中国石油大学（北京）地球科学学院就业信息站的组织与官方入口种子矩阵。official_confirmed 只表示官方主体和入口已登记，不表示当前可自动采集；只有 automation_ready 且绑定已注册来源的频道才可进入自动化审查。",
+  "organizations": [
+    {
+      "id": "cnpc",
+      "canonical_name": "中国石油天然气集团有限公司",
+      "parent_id": null,
+      "organization_role": "group",
+      "industry_path": "油气勘探开发运营单位",
+      "affiliation": "中国石油体系",
+      "aliases": ["中国石油", "中石油", "CNPC", "中国石油天然气集团"],
+      "official_domains": ["cnpc.com.cn", "zhaopin.cnpc.com.cn"],
+      "channels": [
+        {
+          "id": "cnpc-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.cnpc.com.cn/",
+          "backup_urls": ["https://cnpc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "集团官方网站；招聘入口是否可自动读取由来源健康记录决定。"
+        },
+        {
+          "id": "cnpc-campus-portal",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://zhaopin.cnpc.com.cn/",
+          "backup_urls": ["https://www.cnpc.com.cn/zh/rczp/"],
+          "source_id": "cnpc-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "中国石油高校毕业生招聘平台；当前来源记录为停用，未完成稳定自动化验证。"
+        }
+      ]
+    },
+    {
+      "id": "cnpc-riped",
+      "canonical_name": "中国石油勘探开发研究院",
+      "parent_id": "cnpc",
+      "organization_role": "research_institute",
+      "industry_path": "油气勘探开发研究机构",
+      "affiliation": "中国石油体系",
+      "aliases": ["勘探开发研究院", "中国石油勘探开发研究院"],
+      "official_domains": ["rip.ed.cnpc.com.cn"],
+      "channels": [
+        {
+          "id": "cnpc-riped-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://rip.ed.cnpc.com.cn/",
+          "backup_urls": ["https://www.cnpc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "研究院官方域名；具体招聘公告仍需逐条核验。"
+        }
+      ]
+    },
+    {
+      "id": "cnpc-changqing",
+      "canonical_name": "中国石油长庆油田分公司",
+      "parent_id": "cnpc",
+      "organization_role": "upstream_operator",
+      "industry_path": "油气勘探开发运营单位",
+      "affiliation": "中国石油体系",
+      "aliases": ["长庆油田", "长庆油田分公司"],
+      "official_domains": ["cqyt.cnpc.com.cn"],
+      "channels": [
+        {
+          "id": "cnpc-changqing-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://cqyt.cnpc.com.cn/",
+          "backup_urls": ["https://www.cnpc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "油田官方域名；不把油田名称本身当作岗位证据。"
+        },
+        {
+          "id": "cnpc-changqing-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://zhaopin.cnpc.com.cn/",
+          "backup_urls": ["https://cqyt.cnpc.com.cn/"],
+          "source_id": "cnpc-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "集团统一校招入口，单位归属需以具体公告为准。"
+        }
+      ]
+    },
+    {
+      "id": "cnpc-bgp",
+      "canonical_name": "中国石油集团东方地球物理勘探有限责任公司",
+      "parent_id": "cnpc",
+      "organization_role": "internal_technical_service",
+      "industry_path": "集团内油气工程技术服务单位",
+      "affiliation": "中国石油体系",
+      "aliases": ["东方物探", "BGP", "中国石油东方物探"],
+      "official_domains": ["bgp.com.cn"],
+      "channels": [
+        {
+          "id": "cnpc-bgp-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.bgp.com.cn/",
+          "backup_urls": ["https://www.cnpc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "集团内地球物理技术服务单位，和上游油田运营主体分列。"
+        },
+        {
+          "id": "cnpc-bgp-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://zhaopin.cnpc.com.cn/",
+          "backup_urls": ["https://www.bgp.com.cn/"],
+          "source_id": "cnpc-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "统一校招入口；具体岗位单位以公告职位表为准。"
+        }
+      ]
+    },
+    {
+      "id": "cnpc-logging",
+      "canonical_name": "中国石油集团测井有限公司",
+      "parent_id": "cnpc",
+      "organization_role": "internal_technical_service",
+      "industry_path": "集团内油气工程技术服务单位",
+      "affiliation": "中国石油体系",
+      "aliases": ["中油测井", "中国石油集团测井", "中国石油测井"],
+      "official_domains": ["cpl.cnpc.com.cn"],
+      "channels": [
+        {
+          "id": "cnpc-logging-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://cpl.cnpc.com.cn/",
+          "backup_urls": ["https://www.cnpc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "中油测井为集团内技术服务单位，不归入油田业主。"
+        },
+        {
+          "id": "cnpc-logging-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://zhaopin.cnpc.com.cn/",
+          "backup_urls": ["https://cpl.cnpc.com.cn/"],
+          "source_id": "cnpc-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "统一校招入口；西安、新疆等工作地点必须从原公告提取。"
+        }
+      ]
+    },
+    {
+      "id": "cnpc-sichuan-changqing-drilling",
+      "canonical_name": "中国石油集团川庆钻探工程有限公司",
+      "parent_id": "cnpc",
+      "organization_role": "internal_technical_service",
+      "industry_path": "集团内油气工程技术服务单位",
+      "affiliation": "中国石油体系",
+      "aliases": ["川庆钻探", "川庆钻探工程"],
+      "official_domains": ["cqdrilling.cnpc.com.cn"],
+      "channels": [
+        {
+          "id": "cnpc-cqdrilling-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://cqdrilling.cnpc.com.cn/",
+          "backup_urls": ["https://www.cnpc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "集团内钻探工程技术服务单位。"
+        },
+        {
+          "id": "cnpc-cqdrilling-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://zhaopin.cnpc.com.cn/",
+          "backup_urls": ["https://cqdrilling.cnpc.com.cn/"],
+          "source_id": "cnpc-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "统一校招入口；不将集团入口的所有岗位都归给川庆钻探。"
+        }
+      ]
+    },
+    {
+      "id": "cnpc-greatwall-drilling",
+      "canonical_name": "中国石油集团长城钻探工程有限公司",
+      "parent_id": "cnpc",
+      "organization_role": "internal_technical_service",
+      "industry_path": "集团内油气工程技术服务单位",
+      "affiliation": "中国石油体系",
+      "aliases": ["长城钻探", "长城钻探工程"],
+      "official_domains": ["gwdrilling.cnpc.com.cn"],
+      "channels": [
+        {
+          "id": "cnpc-gwdrilling-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://gwdrilling.cnpc.com.cn/",
+          "backup_urls": ["https://www.cnpc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "集团内钻探工程技术服务单位。"
+        },
+        {
+          "id": "cnpc-gwdrilling-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://zhaopin.cnpc.com.cn/",
+          "backup_urls": ["https://gwdrilling.cnpc.com.cn/"],
+          "source_id": "cnpc-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "统一校招入口，等待具体公告和岗位表核验。"
+        }
+      ]
+    },
+    {
+      "id": "cnpc-bohai-drilling",
+      "canonical_name": "中国石油集团渤海钻探工程有限公司",
+      "parent_id": "cnpc",
+      "organization_role": "internal_technical_service",
+      "industry_path": "集团内油气工程技术服务单位",
+      "affiliation": "中国石油体系",
+      "aliases": ["渤海钻探", "渤海钻探工程"],
+      "official_domains": ["bhdrilling.cnpc.com.cn"],
+      "channels": [
+        {
+          "id": "cnpc-bhdrilling-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://bhdrilling.cnpc.com.cn/",
+          "backup_urls": ["https://www.cnpc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "集团内钻探工程技术服务单位。"
+        },
+        {
+          "id": "cnpc-bhdrilling-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://zhaopin.cnpc.com.cn/",
+          "backup_urls": ["https://bhdrilling.cnpc.com.cn/"],
+          "source_id": "cnpc-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "统一校招入口，岗位归属以原公告为准。"
+        }
+      ]
+    },
+    {
+      "id": "cnpc-western-drilling",
+      "canonical_name": "中国石油集团西部钻探工程有限公司",
+      "parent_id": "cnpc",
+      "organization_role": "internal_technical_service",
+      "industry_path": "集团内油气工程技术服务单位",
+      "affiliation": "中国石油体系",
+      "aliases": ["西部钻探", "西部钻探工程"],
+      "official_domains": ["xbzk.cnpc.com.cn"],
+      "channels": [
+        {
+          "id": "cnpc-xbzk-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://xbzk.cnpc.com.cn/",
+          "backup_urls": ["https://www.cnpc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "集团内钻探工程技术服务单位。"
+        },
+        {
+          "id": "cnpc-xbzk-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://zhaopin.cnpc.com.cn/",
+          "backup_urls": ["https://xbzk.cnpc.com.cn/"],
+          "source_id": "cnpc-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "统一校招入口；新疆及西部地点以岗位原文为准。"
+        }
+      ]
+    },
+    {
+      "id": "sinopec",
+      "canonical_name": "中国石油化工集团有限公司",
+      "parent_id": null,
+      "organization_role": "group",
+      "industry_path": "油气勘探开发运营单位",
+      "affiliation": "中国石化体系",
+      "aliases": ["中国石化", "中石化", "Sinopec", "中国石油化工集团"],
+      "official_domains": ["sinopecgroup.com", "job.sinopec.com"],
+      "channels": [
+        {
+          "id": "sinopec-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.sinopecgroup.com/",
+          "backup_urls": ["https://sinopecgroup.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "集团官方网站。"
+        },
+        {
+          "id": "sinopec-campus-portal",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://job.sinopec.com/",
+          "backup_urls": ["https://www.sinopecgroup.com/"],
+          "source_id": "sinopec-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "中国石化人才招聘网站；当前来源记录为停用，待完成公开页面稳定性验证。"
+        }
+      ]
+    },
+    {
+      "id": "sinopec-petroleum-exploration-production-research",
+      "canonical_name": "中国石化石油勘探开发研究院有限公司",
+      "parent_id": "sinopec",
+      "organization_role": "research_institute",
+      "industry_path": "油气勘探开发研究机构",
+      "affiliation": "中国石化体系",
+      "aliases": ["中国石化石油勘探开发研究院", "中石化石油勘探开发研究院"],
+      "official_domains": ["pepris.sinopec.com"],
+      "channels": [
+        {
+          "id": "sinopec-pepris-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://pepris.sinopec.com/",
+          "backup_urls": ["https://www.sinopecgroup.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "研究院官方域名；招聘公告需逐条查验。"
+        }
+      ]
+    },
+    {
+      "id": "sinopec-shengli",
+      "canonical_name": "中国石化胜利油田分公司",
+      "parent_id": "sinopec",
+      "organization_role": "upstream_operator",
+      "industry_path": "油气勘探开发运营单位",
+      "affiliation": "中国石化体系",
+      "aliases": ["胜利油田", "胜利油田分公司"],
+      "official_domains": ["slof.sinopec.com"],
+      "channels": [
+        {
+          "id": "sinopec-shengli-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://slof.sinopec.com/",
+          "backup_urls": ["https://www.sinopecgroup.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "油田运营单位，与石化油服单列。"
+        },
+        {
+          "id": "sinopec-shengli-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://job.sinopec.com/",
+          "backup_urls": ["https://slof.sinopec.com/"],
+          "source_id": "sinopec-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "集团统一招聘入口；具体岗位单位以公告为准。"
+        }
+      ]
+    },
+    {
+      "id": "sinopec-jianghan",
+      "canonical_name": "中国石化江汉油田分公司",
+      "parent_id": "sinopec",
+      "organization_role": "upstream_operator",
+      "industry_path": "油气勘探开发运营单位",
+      "affiliation": "中国石化体系",
+      "aliases": ["江汉油田", "江汉油田分公司"],
+      "official_domains": ["jhof.sinopec.com"],
+      "channels": [
+        {
+          "id": "sinopec-jianghan-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://jhof.sinopec.com/",
+          "backup_urls": ["https://www.sinopecgroup.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "油田运营单位。"
+        },
+        {
+          "id": "sinopec-jianghan-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://job.sinopec.com/",
+          "backup_urls": ["https://jhof.sinopec.com/"],
+          "source_id": "sinopec-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "集团统一招聘入口，需保留具体岗位公告证据。"
+        }
+      ]
+    },
+    {
+      "id": "sinopec-oilfield-service",
+      "canonical_name": "中石化石油工程技术服务股份有限公司",
+      "parent_id": "sinopec",
+      "organization_role": "internal_technical_service",
+      "industry_path": "集团内油气工程技术服务单位",
+      "affiliation": "中国石化体系",
+      "aliases": ["石化油服", "中石化油服", "Sinopec Oilfield Service"],
+      "official_domains": ["sinopec-oss.com"],
+      "channels": [
+        {
+          "id": "sinopec-oss-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.sinopec-oss.com/",
+          "backup_urls": ["https://www.sinopecgroup.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "集团体系内工程技术服务单位，不归入油田运营主体。"
+        },
+        {
+          "id": "sinopec-oss-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://job.sinopec.com/",
+          "backup_urls": ["https://www.sinopec-oss.com/"],
+          "source_id": "sinopec-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "统一招聘入口；具体服务单位和工作地点以原文为准。"
+        }
+      ]
+    },
+    {
+      "id": "cnooc",
+      "canonical_name": "中国海洋石油集团有限公司",
+      "parent_id": null,
+      "organization_role": "group",
+      "industry_path": "油气勘探开发运营单位",
+      "affiliation": "中国海油体系",
+      "aliases": ["中国海油", "中海油", "CNOOC", "中国海洋石油集团"],
+      "official_domains": ["cnooc.com.cn", "cnooc.zhaopin.com"],
+      "channels": [
+        {
+          "id": "cnooc-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.cnooc.com.cn/",
+          "backup_urls": ["https://cnooc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "集团官方网站。"
+        },
+        {
+          "id": "cnooc-campus-portal",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://cnooc.zhaopin.com/",
+          "backup_urls": ["https://www.cnooc.com.cn/"],
+          "source_id": "cnooc-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "中国海油招聘平台；当前来源记录为停用，需在招聘周期重新验证。"
+        }
+      ]
+    },
+    {
+      "id": "cnooc-tianjin",
+      "canonical_name": "中海石油（中国）有限公司天津分公司",
+      "parent_id": "cnooc",
+      "organization_role": "upstream_operator",
+      "industry_path": "油气勘探开发运营单位",
+      "affiliation": "中国海油体系",
+      "aliases": ["中国海油天津分公司", "中海油天津分公司"],
+      "official_domains": ["cnooc.com.cn"],
+      "channels": [
+        {
+          "id": "cnooc-tianjin-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.cnooc.com.cn/",
+          "backup_urls": ["https://cnooc.zhaopin.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "分公司岗位通常通过集团招聘平台发布，具体单位须由原公告确认。"
+        }
+      ]
+    },
+    {
+      "id": "cnooc-shanghai",
+      "canonical_name": "中海石油（中国）有限公司上海分公司",
+      "parent_id": "cnooc",
+      "organization_role": "upstream_operator",
+      "industry_path": "油气勘探开发运营单位",
+      "affiliation": "中国海油体系",
+      "aliases": ["中国海油上海分公司", "中海油上海分公司"],
+      "official_domains": ["cnooc.com.cn"],
+      "channels": [
+        {
+          "id": "cnooc-shanghai-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.cnooc.com.cn/",
+          "backup_urls": ["https://cnooc.zhaopin.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "分公司岗位以集团官方公告或招聘系统原文为准。"
+        }
+      ]
+    },
+    {
+      "id": "cnooc-hainan",
+      "canonical_name": "中海石油（中国）有限公司海南分公司",
+      "parent_id": "cnooc",
+      "organization_role": "upstream_operator",
+      "industry_path": "油气勘探开发运营单位",
+      "affiliation": "中国海油体系",
+      "aliases": ["中国海油海南分公司", "中海油海南分公司"],
+      "official_domains": ["cnooc.com.cn"],
+      "channels": [
+        {
+          "id": "cnooc-hainan-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.cnooc.com.cn/",
+          "backup_urls": ["https://cnooc.zhaopin.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "分公司岗位以集团官方公告或招聘系统原文为准。"
+        }
+      ]
+    },
+    {
+      "id": "cosl",
+      "canonical_name": "中海油田服务股份有限公司",
+      "parent_id": "cnooc",
+      "organization_role": "internal_technical_service",
+      "industry_path": "集团内油气工程技术服务单位",
+      "affiliation": "中国海油体系",
+      "aliases": ["中海油服", "COSL", "中海油田服务"],
+      "official_domains": ["cosl.com.cn"],
+      "channels": [
+        {
+          "id": "cosl-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.cosl.com.cn/",
+          "backup_urls": ["https://www.cnooc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "中海油体系内油服乙方单位，与海上油气运营主体分列。"
+        },
+        {
+          "id": "cosl-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://cnooc.zhaopin.com/",
+          "backup_urls": ["https://www.cosl.com.cn/"],
+          "source_id": "cnooc-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "集团招聘入口；服务区域和岗位方向需从职位原文提取。"
+        }
+      ]
+    },
+    {
+      "id": "cnooc-energy-development",
+      "canonical_name": "中海油能源发展股份有限公司",
+      "parent_id": "cnooc",
+      "organization_role": "internal_technical_service",
+      "industry_path": "集团内油气工程技术服务单位",
+      "affiliation": "中国海油体系",
+      "aliases": ["中海油能源发展", "海油发展"],
+      "official_domains": ["cnoocet.com"],
+      "channels": [
+        {
+          "id": "cnooc-energy-development-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.cnoocet.com/",
+          "backup_urls": ["https://www.cnooc.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "中国海油体系内综合技术服务与能源发展单位。"
+        },
+        {
+          "id": "cnooc-energy-development-campus",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://cnooc.zhaopin.com/",
+          "backup_urls": ["https://www.cnoocet.com/"],
+          "source_id": "cnooc-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "集团招聘入口；具体岗位需核验公告主体。"
+        }
+      ]
+    },
+    {
+      "id": "pipechina",
+      "canonical_name": "国家石油天然气管网集团有限公司",
+      "parent_id": null,
+      "organization_role": "pipeline_operator",
+      "industry_path": "油气管网与储运运营单位",
+      "affiliation": "国家管网体系",
+      "aliases": ["国家管网", "国家石油天然气管网集团"],
+      "official_domains": ["pipechina.com.cn", "zhaopin.pipechina.com.cn"],
+      "channels": [
+        {
+          "id": "pipechina-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.pipechina.com.cn/",
+          "backup_urls": ["https://pipechina.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "油气管网运营单位，单独于三桶油上游和油服标注。"
+        },
+        {
+          "id": "pipechina-campus-portal",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://zhaopin.pipechina.com.cn/",
+          "backup_urls": ["https://www.pipechina.com.cn/"],
+          "source_id": "pipechina-career",
+          "verification_status": "official_confirmed",
+          "evidence_note": "国家管网招聘平台；当前来源记录为停用，待稳定性验证。"
+        }
+      ]
+    },
+    {
+      "id": "slb",
+      "canonical_name": "斯伦贝谢（中国）投资有限公司",
+      "parent_id": null,
+      "organization_role": "international_technical_service",
+      "industry_path": "国际油气工程技术服务单位",
+      "affiliation": "在华国际油服",
+      "aliases": ["斯伦贝谢", "SLB", "Schlumberger"],
+      "official_domains": ["careers.slb.com", "slb.com"],
+      "channels": [
+        {
+          "id": "slb-career",
+          "channel_type": "social_recruitment",
+          "official_url": "https://careers.slb.com/job-listing",
+          "backup_urls": ["https://www.slb.com/"],
+          "source_id": "slb-career",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "SLB 官方公开职位检索入口；只发布逐条可回溯的官方详情。"
+        }
+      ]
+    },
+    {
+      "id": "halliburton",
+      "canonical_name": "Halliburton",
+      "parent_id": null,
+      "organization_role": "international_technical_service",
+      "industry_path": "国际油气工程技术服务单位",
+      "affiliation": "在华国际油服",
+      "aliases": ["哈里伯顿", "Halliburton"],
+      "official_domains": ["jobs.halliburton.com", "halliburton.com"],
+      "channels": [
+        {
+          "id": "halliburton-career",
+          "channel_type": "social_recruitment",
+          "official_url": "https://jobs.halliburton.com/",
+          "backup_urls": ["https://www.halliburton.com/"],
+          "source_id": "halliburton-career",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "Halliburton 官方公开职位入口。"
+        }
+      ]
+    },
+    {
+      "id": "baker-hughes",
+      "canonical_name": "Baker Hughes",
+      "parent_id": null,
+      "organization_role": "international_technical_service",
+      "industry_path": "国际油气工程技术服务单位",
+      "affiliation": "在华国际油服",
+      "aliases": ["贝克休斯", "Baker Hughes"],
+      "official_domains": ["careers.bakerhughes.com", "bakerhughes.com"],
+      "channels": [
+        {
+          "id": "baker-hughes-career",
+          "channel_type": "social_recruitment",
+          "official_url": "https://careers.bakerhughes.com/",
+          "backup_urls": ["https://www.bakerhughes.com/"],
+          "source_id": "baker-hughes-career",
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "官方职业入口已登记；当前来源停用，不代表没有岗位。"
+        }
+      ]
+    },
+    {
+      "id": "weatherford",
+      "canonical_name": "Weatherford",
+      "parent_id": null,
+      "organization_role": "international_technical_service",
+      "industry_path": "国际油气工程技术服务单位",
+      "affiliation": "在华国际油服",
+      "aliases": ["威德福", "Weatherford"],
+      "official_domains": ["jobs.weatherford.com", "weatherford.com"],
+      "channels": [
+        {
+          "id": "weatherford-career",
+          "channel_type": "social_recruitment",
+          "official_url": "https://jobs.weatherford.com/",
+          "backup_urls": ["https://www.weatherford.com/"],
+          "source_id": "weatherford-career",
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "官方职业入口已登记；当前来源停用，待访问和结构回归。"
+        }
+      ]
+    },
+    {
+      "id": "jereh",
+      "canonical_name": "烟台杰瑞石油服务集团股份有限公司",
+      "parent_id": null,
+      "organization_role": "independent_technical_service",
+      "industry_path": "独立油气工程技术服务单位",
+      "affiliation": "独立/民营油服",
+      "aliases": ["杰瑞", "杰瑞石油服务", "Jereh"],
+      "official_domains": ["jereh-group.com"],
+      "channels": [
+        {
+          "id": "jereh-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.jereh-group.com/",
+          "backup_urls": ["https://jereh-group.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "独立油服单位；不与三桶油集团内乙方混称。"
+        }
+      ]
+    },
+    {
+      "id": "anton-oil",
+      "canonical_name": "安东石油技术（集团）有限公司",
+      "parent_id": null,
+      "organization_role": "independent_technical_service",
+      "industry_path": "独立油气工程技术服务单位",
+      "affiliation": "独立/民营油服",
+      "aliases": ["安东石油", "安东油服", "Anton Oil"],
+      "official_domains": ["antonoil.com"],
+      "channels": [
+        {
+          "id": "anton-oil-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.antonoil.com/",
+          "backup_urls": ["https://antonoil.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "独立油服单位；招聘详情需要单独定位正式入口。"
+        }
+      ]
+    },
+    {
+      "id": "zpec",
+      "canonical_name": "中曼石油天然气集团股份有限公司",
+      "parent_id": null,
+      "organization_role": "independent_technical_service",
+      "industry_path": "独立油气工程技术服务单位",
+      "affiliation": "独立/民营油服",
+      "aliases": ["中曼石油", "ZPEC"],
+      "official_domains": ["zpec.com"],
+      "channels": [
+        {
+          "id": "zpec-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.zpec.com/",
+          "backup_urls": ["https://zpec.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "独立油气工程技术服务单位。"
+        }
+      ]
+    },
+    {
+      "id": "cgs",
+      "canonical_name": "中国地质调查局",
+      "parent_id": null,
+      "organization_role": "geology_survey",
+      "industry_path": "自然资源与地质调查事业单位",
+      "affiliation": "自然资源部地质调查系统",
+      "aliases": ["中国地调局", "CGS"],
+      "official_domains": ["cgs.gov.cn"],
+      "channels": [
+        {
+          "id": "cgs-notices",
+          "channel_type": "official_announcement",
+          "official_url": "https://www.cgs.gov.cn/tzgg/tzgg/",
+          "backup_urls": ["https://m.cgs.gov.cn/zpxx/"],
+          "source_id": "cgs-notices",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "中国地质调查局官方招聘与人才公告栏目。"
+        }
+      ]
+    },
+    {
+      "id": "cags",
+      "canonical_name": "中国地质科学院",
+      "parent_id": null,
+      "organization_role": "geology_research",
+      "industry_path": "自然资源与地学科研院所",
+      "affiliation": "自然资源部地质调查系统",
+      "aliases": ["中国地质科学院", "CAGS"],
+      "official_domains": ["cags.ac.cn"],
+      "channels": [
+        {
+          "id": "cags-notices",
+          "channel_type": "research_recruitment",
+          "official_url": "https://www.cags.ac.cn/",
+          "backup_urls": ["https://www.cgs.gov.cn/"],
+          "source_id": "cags-notices",
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "中国地质科学院官网已登记；招聘来源当前停用，需逐条验证。"
+        }
+      ]
+    },
+    {
+      "id": "ccgc",
+      "canonical_name": "中国煤炭地质总局",
+      "parent_id": null,
+      "organization_role": "geology_survey",
+      "industry_path": "中央地勘与资源勘查单位",
+      "affiliation": "中央地勘系统",
+      "aliases": ["中国煤炭地质总局", "煤炭地质总局", "CCGC"],
+      "official_domains": ["ccgc.cn", "zhaopin.ccgc.cn"],
+      "channels": [
+        {
+          "id": "ccgc-careers",
+          "channel_type": "official_announcement",
+          "official_url": "https://www.ccgc.cn/rlzy/rczp.htm",
+          "backup_urls": ["https://zhaopin.ccgc.cn/"],
+          "source_id": "ccgc-careers",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "中国煤炭地质总局官方招聘栏目。"
+        }
+      ]
+    },
+    {
+      "id": "cmgb",
+      "canonical_name": "中国冶金地质总局",
+      "parent_id": null,
+      "organization_role": "geology_survey",
+      "industry_path": "中央地勘与资源勘查单位",
+      "affiliation": "中央地勘系统",
+      "aliases": ["中国冶金地质总局", "冶金地质总局", "CMGB"],
+      "official_domains": ["cmgb.com.cn"],
+      "channels": [
+        {
+          "id": "cmgb-careers",
+          "channel_type": "official_announcement",
+          "official_url": "https://www.cmgb.com.cn/category/zpxx.html",
+          "backup_urls": ["https://www.cmgb.com.cn/"],
+          "source_id": "cmgb-careers",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "中国冶金地质总局官方招聘信息栏目。"
+        }
+      ]
+    },
+    {
+      "id": "zijin",
+      "canonical_name": "紫金矿业集团股份有限公司",
+      "parent_id": null,
+      "organization_role": "mining_group",
+      "industry_path": "矿产资源与矿业集团",
+      "affiliation": "矿业企业",
+      "aliases": ["紫金矿业", "Zijin Mining"],
+      "official_domains": ["zijinmining.com", "join.zjky.cn", "app.mokahr.com"],
+      "channels": [
+        {
+          "id": "zijin-campus-career",
+          "channel_type": "campus_recruitment",
+          "official_url": "https://join.zjky.cn/campus-recruitment/zijinmining/117957/?locale=zh-CN#/jobs",
+          "backup_urls": ["https://www.zijinmining.com/"],
+          "source_id": "zijin-campus-career",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "紫金矿业官方校园招聘门户。"
+        },
+        {
+          "id": "zijin-social-career",
+          "channel_type": "social_recruitment",
+          "official_url": "https://app.mokahr.com/social-recruitment/zijinmining/140688?locale=zh-CN#/jobs",
+          "backup_urls": ["https://www.zijinmining.com/"],
+          "source_id": "zijin-social-career",
+          "verification_status": "automation_ready",
+          "evidence_note": "紫金矿业官方社会招聘门户。"
+        }
+      ]
+    },
+    {
+      "id": "minmetals",
+      "canonical_name": "中国五矿集团有限公司",
+      "parent_id": null,
+      "organization_role": "mining_group",
+      "industry_path": "矿产资源与综合资源企业",
+      "affiliation": "中央资源企业",
+      "aliases": ["中国五矿", "五矿集团", "Minmetals"],
+      "official_domains": ["minmetals.com"],
+      "channels": [
+        {
+          "id": "minmetals-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.minmetals.com/",
+          "backup_urls": ["https://www.minmetals.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "中央资源企业官网；招聘入口待单独核验。"
+        }
+      ]
+    },
+    {
+      "id": "china-gold",
+      "canonical_name": "中国黄金集团有限公司",
+      "parent_id": null,
+      "organization_role": "mining_group",
+      "industry_path": "矿产资源与矿业集团",
+      "affiliation": "中央资源企业",
+      "aliases": ["中国黄金", "中国黄金集团", "China Gold"],
+      "official_domains": ["chinagoldgroup.com"],
+      "channels": [
+        {
+          "id": "china-gold-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.chinagoldgroup.com/",
+          "backup_urls": ["https://chinagoldgroup.com/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "中央黄金资源企业官网；招聘入口待单独核验。"
+        }
+      ]
+    },
+    {
+      "id": "chinalco",
+      "canonical_name": "中国铝业集团有限公司",
+      "parent_id": null,
+      "organization_role": "mining_group",
+      "industry_path": "矿产资源与矿业集团",
+      "affiliation": "中央资源企业",
+      "aliases": ["中国铝业", "中铝集团", "Chinalco"],
+      "official_domains": ["chinalco.com.cn"],
+      "channels": [
+        {
+          "id": "chinalco-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.chinalco.com.cn/",
+          "backup_urls": ["https://chinalco.com.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "中央有色资源企业官网；招聘入口待单独核验。"
+        }
+      ]
+    },
+    {
+      "id": "cupb",
+      "canonical_name": "中国石油大学（北京）",
+      "parent_id": null,
+      "organization_role": "university",
+      "industry_path": "石油与地学高校",
+      "affiliation": "石油院校与地学教育",
+      "aliases": ["中国石油大学（北京）", "中国石油大学北京", "CUPB"],
+      "official_domains": ["cup.edu.cn", "career.cup.edu.cn"],
+      "channels": [
+        {
+          "id": "cupb-career",
+          "channel_type": "official_announcement",
+          "official_url": "https://career.cup.edu.cn/",
+          "backup_urls": ["https://www.cup.edu.cn/"],
+          "source_id": "cupb-career",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "中国石油大学（北京）官方就业信息网。"
+        }
+      ]
+    },
+    {
+      "id": "cup-east",
+      "canonical_name": "中国石油大学（华东）",
+      "parent_id": null,
+      "organization_role": "university",
+      "industry_path": "石油与地学高校",
+      "affiliation": "石油院校与地学教育",
+      "aliases": ["中国石油大学（华东）", "中国石油大学华东", "UPC"],
+      "official_domains": ["upc.edu.cn", "career.upc.edu.cn"],
+      "channels": [
+        {
+          "id": "cup-east-career",
+          "channel_type": "official_announcement",
+          "official_url": "https://career.upc.edu.cn/career/index",
+          "backup_urls": ["https://www.upc.edu.cn/"],
+          "source_id": "cup-east-career",
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "官方就业入口已登记；当前来源停用，待页面结构回归。"
+        }
+      ]
+    },
+    {
+      "id": "northeast-petroleum-university",
+      "canonical_name": "东北石油大学",
+      "parent_id": null,
+      "organization_role": "university",
+      "industry_path": "石油与地学高校",
+      "affiliation": "石油院校与地学教育",
+      "aliases": ["东北石油大学", "大庆石油学院", "NEPU"],
+      "official_domains": ["nepu.edu.cn"],
+      "channels": [
+        {
+          "id": "nepu-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.nepu.edu.cn/",
+          "backup_urls": ["https://www.nepu.edu.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "石油地学高校官网；招聘信息需进一步定位正式就业栏目。"
+        }
+      ]
+    },
+    {
+      "id": "southwest-petroleum-university",
+      "canonical_name": "西南石油大学",
+      "parent_id": null,
+      "organization_role": "university",
+      "industry_path": "石油与地学高校",
+      "affiliation": "石油院校与地学教育",
+      "aliases": ["西南石油大学", "SWPU"],
+      "official_domains": ["swpu.edu.cn"],
+      "channels": [
+        {
+          "id": "swpu-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.swpu.edu.cn/",
+          "backup_urls": ["https://www.swpu.edu.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "石油地学高校官网；招聘信息需进一步定位正式就业栏目。"
+        }
+      ]
+    },
+    {
+      "id": "yangtze-university",
+      "canonical_name": "长江大学",
+      "parent_id": null,
+      "organization_role": "university",
+      "industry_path": "地学与石油高校",
+      "affiliation": "石油院校与地学教育",
+      "aliases": ["长江大学", "Yangtze University"],
+      "official_domains": ["yangtzeu.edu.cn"],
+      "channels": [
+        {
+          "id": "yangtzeu-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.yangtzeu.edu.cn/",
+          "backup_urls": ["https://www.yangtzeu.edu.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "含石油地质相关专业的高校官网；招聘入口需逐校核验。"
+        }
+      ]
+    },
+    {
+      "id": "hebei-geology-university",
+      "canonical_name": "河北地质大学",
+      "parent_id": null,
+      "organization_role": "university",
+      "industry_path": "地学与资源高校",
+      "affiliation": "地学教育",
+      "aliases": ["河北地质大学", "Hebei GEO University"],
+      "official_domains": ["hgu.edu.cn"],
+      "channels": [
+        {
+          "id": "hgu-homepage",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.hgu.edu.cn/",
+          "backup_urls": ["https://www.hgu.edu.cn/"],
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "地学高校官网；招聘入口需从学校正式人事/就业栏目定位。"
+        }
+      ]
+    },
+    {
+      "id": "cas",
+      "canonical_name": "中国科学院",
+      "parent_id": null,
+      "organization_role": "geology_research",
+      "industry_path": "科研院所与高校科研岗位",
+      "affiliation": "中国科学院系统",
+      "aliases": ["中国科学院", "中科院", "CAS"],
+      "official_domains": ["cas.cn", "job.cas.cn"],
+      "channels": [
+        {
+          "id": "cas-job-board",
+          "channel_type": "research_recruitment",
+          "official_url": "http://job.cas.cn/",
+          "backup_urls": ["https://www.cas.cn/"],
+          "source_id": "cas-job-board",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "中国科学院人才招聘网；岗位仍需按专业和学历证据筛选。"
+        }
+      ]
+    },
+    {
+      "id": "mnr",
+      "canonical_name": "自然资源部",
+      "parent_id": null,
+      "organization_role": "government_recruitment_system",
+      "industry_path": "自然资源与地质调查公务事业单位",
+      "affiliation": "中央政府招聘与自然资源系统",
+      "aliases": ["自然资源部", "MNR"],
+      "official_domains": ["mnr.gov.cn", "sydwgkzp.cn"],
+      "channels": [
+        {
+          "id": "mnr-notices",
+          "channel_type": "official_announcement",
+          "official_url": "https://www.mnr.gov.cn/gk/tzgg/",
+          "backup_urls": ["https://www.sydwgkzp.cn/mnr/"],
+          "source_id": "mnr-notices",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "自然资源部官方公告入口。"
+        },
+        {
+          "id": "mnr-public-recruitment",
+          "channel_type": "public_institution_recruitment",
+          "official_url": "https://www.sydwgkzp.cn/mnr/",
+          "backup_urls": ["https://www.mnr.gov.cn/gk/tzgg/"],
+          "source_id": "mnr-public-recruitment",
+          "verification_status": "automation_ready",
+          "evidence_note": "自然资源部所属企事业单位公开招聘平台。"
+        }
+      ]
+    },
+    {
+      "id": "beijing-hrss",
+      "canonical_name": "北京市人力资源和社会保障局",
+      "parent_id": null,
+      "organization_role": "government_recruitment_system",
+      "industry_path": "公务员与事业单位招聘系统",
+      "affiliation": "北京市政府招聘系统",
+      "aliases": ["北京市人社局", "北京人力资源和社会保障局"],
+      "official_domains": ["rsj.beijing.gov.cn"],
+      "channels": [
+        {
+          "id": "beijing-hrss-notices",
+          "channel_type": "public_institution_recruitment",
+          "official_url": "https://rsj.beijing.gov.cn/",
+          "backup_urls": ["https://www.beijing.gov.cn/"],
+          "source_id": "beijing-hrss",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "北京官方人社入口；具体招聘栏目和职位表按来源配置验证。"
+        }
+      ]
+    }
+  ]
+}

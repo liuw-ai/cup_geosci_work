@@ -10,6 +10,7 @@ from typing import Any
 from job_hub.db import Database, utc_now
 from job_hub.employers import CATEGORY_ORDER
 from job_hub.locations import PROVINCES
+from job_hub.organizations import organization_matrix_summary
 from job_hub.simulation import simulate_cohort
 from job_hub.source_targets import load_source_targets, target_matrix_summary
 
@@ -100,6 +101,7 @@ def build_coverage_report(
         load_source_targets(),
         source_ids=set(source_by_id),
     )
+    organization_matrix = organization_matrix_summary(source_records=sources)
     province_coverage = [
         _province_coverage(
             province,
@@ -206,6 +208,26 @@ def build_coverage_report(
         },
         "province_coverage": province_coverage,
         "source_target_matrix": target_matrix,
+        # Keep the public coverage response aggregate-only.  Channel notes,
+        # alternate URLs and source bindings stay behind the administrator API.
+        "organization_registry": {
+            key: organization_matrix[key]
+            for key in (
+                "registry_version",
+                "organization_count",
+                "channel_count",
+                "organization_role_counts",
+                "affiliation_counts",
+                "channel_status_counts",
+                "channels_with_backup",
+                "backup_rate",
+                "channels_with_registered_source",
+                "automation_ready_channels",
+                "automation_ready_registered",
+                "automation_ready_enabled_channels",
+                "scope_note",
+            )
+        },
         "field_completeness": field_completeness,
         "location_quality": location_quality,
         "deadline_quality": deadline_quality,

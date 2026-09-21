@@ -6,6 +6,8 @@
 
 Phase 2 的官方附件处理契约见 [docs/phase-2/README.md](docs/phase-2/README.md)。它把公告附件下载和解析放在管理员私有流程，不改变学生端公开接口。
 
+Phase 3 的组织层级与正式入口矩阵见 [docs/phase-3/README.md](docs/phase-3/README.md)。它将组织身份、集团关系、招聘频道和来源绑定独立管理，不会把已登记单位误写成已采集岗位。
+
 ## 服务目标
 
 本项目是中国石油大学（北京）地球科学学院的公开就业信息站，而不是一个通用招聘转载站。学生可以在微信或手机浏览器直接打开日报链接，无需登录；系统不收集、保存或展示学生个人数据。
@@ -15,7 +17,11 @@ Phase 2 的官方附件处理契约见 [docs/phase-2/README.md](docs/phase-2/REA
 ## 数据流
 
 ```text
-官方公开来源白名单 + 31 省来源矩阵 + 五类角色扩源目标
+组织层级与官方入口矩阵 + 官方公开来源白名单 + 31 省来源矩阵 + 五类角色扩源目标
+        |
+        +--> 集团/运营单位/研究院/集团内技术服务/独立油服/国际油服
+        |    -> 校招、社招、公告、科研招聘频道 -> source_id 绑定
+        |    -> 来源启用状态、robots 健康检查和 crawl_run 决定是否可运行
         |
         v
 robots 检查 + 限速 + 专用公开接口/页面适配器
@@ -125,6 +131,7 @@ PDF/Excel/CSV/DOCX 解析 -> source_artifact_rows -> artifact_job_candidates
 | `pipeline.py` | 原始岗位标准化、相关度、去重和变更写入 |
 | `locations.py` | 只按公告地点文本标准化省份、城市和国家/地区；支持国际国家代码与正文地点标签 |
 | `source_targets.py` | 读取 31 省五类角色扩源矩阵，区分已核验、候选和待定位入口 |
+| `organizations.py` | 读取组织层级、官方招聘频道与来源绑定；向管理员提供入口准备度矩阵 |
 | `coverage.py` | 来源健康、省份覆盖、字段完整率和集中度指标 |
 | `matching.py` | 通用地学词表、类别和日期提取 |
 | `employers.py` | 就业路径分类和可审计单位标准名/母体单位解析 |
@@ -137,7 +144,9 @@ PDF/Excel/CSV/DOCX 解析 -> source_artifact_rows -> artifact_job_candidates
 | `worker.py` | 定时同步、20:00 发布、邮件和心跳 |
 | `app.py` | 公开网页、只读 API 和受保护管理接口 |
 
-`data/employer_registry.json` 不是企业名录的替代品，而是一个可审查的高价值单位别名表。它把上游业主、集团内技术服务、独立油服和国际油服分开，避免将“油服”错误视为与“三桶油”并列的同一类别。无法精确识别的名称保留公告原文，不做猜测性映射。
+`data/employer_registry.json` 不是企业名录的替代品，而是一个可审查的高价值单位别名表。它把上游运营单位、集团内技术服务、独立油服和国际油服分开，避免将“油服”错误视为与“三桶油”并列的同一类别。无法精确识别的名称保留公告原文，不做猜测性映射。
+
+`data/organization_registry.json` 回答的是另一类问题：某个组织属于哪个集团或产业角色，它有哪些正式校招、社招、公告或科研招聘入口，以及这些入口是否已绑定来源适配器。`official_confirmed` 只表示组织和入口身份已登记；它不能触发采集，也不能构成“有岗位”的结论。只有 `automation_ready` 且绑定来源的频道才可以进入来源健康和抓取运行检查。完整频道明细仅通过受 `X-Admin-Token` 保护的 `/api/admin/organization-matrix` 和 `python -m job_hub.cli organization-matrix` 提供；公开覆盖接口只返回汇总，不泄露内部核验备注。
 
 ## 可靠性与部署
 

@@ -36,6 +36,36 @@ SOURCE_TYPES = frozenset(
 )
 SOURCE_TIERS = frozenset({"A", "B"})
 
+ORGANIZATION_ROLES = frozenset(
+    {
+        "group",
+        "upstream_operator",
+        "research_institute",
+        "internal_technical_service",
+        "independent_technical_service",
+        "international_technical_service",
+        "pipeline_operator",
+        "geology_survey",
+        "geology_research",
+        "mining_group",
+        "university",
+        "government_recruitment_system",
+    }
+)
+ORGANIZATION_CHANNEL_TYPES = frozenset(
+    {
+        "official_homepage",
+        "campus_recruitment",
+        "social_recruitment",
+        "official_announcement",
+        "research_recruitment",
+        "public_institution_recruitment",
+    }
+)
+ORGANIZATION_CHANNEL_STATUSES = frozenset(
+    {"automation_ready", "official_confirmed", "candidate", "blocked", "unlocated"}
+)
+
 ARTIFACT_KINDS = frozenset(
     {
         "announcement_attachment",
@@ -283,6 +313,211 @@ def validate_employer_registry(payload: Any) -> list[dict[str, Any]]:
             visited.add(parent_id)
             current = by_id[parent_id]
     return normalized
+
+
+def validate_organization_registry(
+    payload: Any,
+    *,
+    source_ids: set[str] | None = None,
+) -> dict[str, Any]:
+    """Validate the hierarchical organization and official-entry matrix.
+
+    This registry describes who an organization is and where its official
+    recruitment/announcement entrances live.  It does not make an entrance
+    crawlable: only ``automation_ready`` channels bound to a registered source
+    may be considered by the worker.
+    """
+    if not isinstance(payload, dict):
+        raise ContractValidationError("organization registry must be an object")
+    version = payload.get("version", 1)
+    if isinstance(version, bool) or not isinstance(version, int) or version < 1:
+        raise ContractValidationError("organization registry version must be a positive integer")
+    description = payload.get("description", "")
+    if description is not None and not isinstance(description, str):
+        raise ContractValidationError("organization registry description must be text")
+    organizations = payload.get("organizations")
+    if not isinstance(organizations, list) or not organizations:
+        raise ContractValidationError(
+            "organization registry organizations must be a non-empty list"
+        )
+    normalized: list[dict[str, Any]] = []
+    by_id: dict[str, dict[str, Any]] = {}
+    channel_ids: set[str] = set()
+    known_source_ids = source_ids
+    for index, value in enumerate(organizations):
+        organization = _mapping_copy(
+            value, f"Organization at index {index}"
+        )
+        for field_name in (
+            "id",
+            "canonical_name",
+            "parent_id",
+            "organization_role",
+            "industry_path",
+            "affiliation",
+            "aliases",
+            "official_domains",
+            "channels",
+        ):
+            if field_name not in organization:
+                raise ContractValidationError(
+                    f"Organization at index {index} is missing: {field_name}"
+                )
+        organization_id = _required_text(
+            organization["id"], f"Organization at index {index} id"
+        )
+        if organization_id in by_id:
+            raise ContractValidationError(
+                f"Duplicate organization id: {organization_id}"
+            )
+        organization["id"] = organization_id
+        organization["canonical_name"] = _required_text(
+            organization["canonical_name"],
+            f"Organization {organization_id} canonical_name",
+        )
+        organization["parent_id"] = _optional_text(organization["parent_id"])
+        organization["organization_role"] = _required_text(
+            organization["organization_role"],
+            f"Organization {organization_id} organization_role",
+        )
+        if organization["organization_role"] not in ORGANIZATION_ROLES:
+            raise ContractValidationError(
+                f"Organization {organization_id} has unsupported organization_role"
+            )
+        for field_name in ("industry_path", "affiliation"):
+            organization[field_name] = _required_text(
+                organization[field_name],
+                f"Organization {organization_id} {field_name}",
+            )
+        organization["aliases"] = _validate_nonempty_text_list(
+            organization["aliases"], f"Organization {organization_id} aliases"
+        )
+        organization["official_domains"] = _validate_domains(
+            organization["official_domains"],
+            f"Organization {organization_id} official_domains",
+        )
+        channels = organization["channels"]
+        if not isinstance(channels, list) or not channels:
+            raise ContractValidationError(
+                f"Organization {organization_id} channels must be a non-empty list"
+            )
+        normalized_channels: list[dict[str, Any]] = []
+        for channel_index, channel_value in enumerate(channels):
+            channel = _mapping_copy(
+                channel_value,
+                f"Organization {organization_id} channel {channel_index}",
+            )
+            for field_name in (
+                "id",
+                "channel_type",
+                "official_url",
+                "backup_urls",
+                "verification_status",
+            ):
+                if field_name not in channel:
+                    raise ContractValidationError(
+                        f"Organization {organization_id} channel {channel_index} "
+                        f"is missing: {field_name}"
+                    )
+            channel_id = _required_text(
+                channel["id"],
+                f"Organization {organization_id} channel id",
+            )
+            if channel_id in channel_ids:
+                raise ContractValidationError(f"Duplicate organization channel id: {channel_id}")
+            channel_ids.add(channel_id)
+            channel["channel_type"] = _required_text(
+                channel["channel_type"],
+                f"Organization {organization_id} channel_type",
+            )
+            if channel["channel_type"] not in ORGANIZATION_CHANNEL_TYPES:
+                raise ContractValidationError(
+                    f"Organization {organization_id} channel {channel_id} has unsupported channel_type"
+                )
+            channel["official_url"] = validate_http_url(
+                channel["official_url"],
+                f"Organization {organization_id} channel {channel_id} official_url",
+            )
+            backup_urls = channel["backup_urls"]
+            if not isinstance(backup_urls, list):
+                raise ContractValidationError(
+                    f"Organization {organization_id} channel {channel_id} backup_urls must be a list"
+                )
+            channel["backup_urls"] = [
+                validate_http_url(
+                    item,
+                    f"Organization {organization_id} channel {channel_id} backup_url",
+                )
+                for item in backup_urls
+            ]
+            channel["verification_status"] = _required_text(
+                channel["verification_status"],
+                f"Organization {organization_id} channel {channel_id} verification_status",
+            )
+            if channel["verification_status"] not in ORGANIZATION_CHANNEL_STATUSES:
+                raise ContractValidationError(
+                    f"Organization {organization_id} channel {channel_id} has unsupported verification_status"
+                )
+            source_id = _optional_text(channel.get("source_id"))
+            if source_id and known_source_ids is not None and source_id not in known_source_ids:
+                raise ContractValidationError(
+                    f"Organization {organization_id} channel {channel_id} references unknown source_id: {source_id}"
+                )
+            if channel["verification_status"] == "automation_ready" and not source_id:
+                raise ContractValidationError(
+                    f"Organization {organization_id} automation_ready channel {channel_id} requires source_id"
+                )
+            is_primary = channel.get("is_primary", False)
+            if not isinstance(is_primary, bool):
+                raise ContractValidationError(
+                    f"Organization {organization_id} channel {channel_id} "
+                    "is_primary must be true or false"
+                )
+            channel["source_id"] = source_id
+            channel["is_primary"] = is_primary
+            channel["evidence_note"] = _optional_text(channel.get("evidence_note")) or ""
+            normalized_channels.append(channel)
+        primary_count = sum(
+            1 for channel in normalized_channels if channel["is_primary"]
+        )
+        if primary_count > 1:
+            raise ContractValidationError(
+                f"Organization {organization_id} has more than one primary channel"
+            )
+        if primary_count == 0:
+            normalized_channels[0]["is_primary"] = True
+        organization["channels"] = normalized_channels
+        organization["notes"] = _optional_text(organization.get("notes")) or ""
+        by_id[organization_id] = organization
+        normalized.append(organization)
+
+    for organization in normalized:
+        parent_id = organization["parent_id"]
+        if parent_id is None:
+            continue
+        if parent_id == organization["id"]:
+            raise ContractValidationError(
+                f"Organization {organization['id']} cannot parent itself"
+            )
+        if parent_id not in by_id:
+            raise ContractValidationError(
+                f"Organization {organization['id']} references unknown parent_id: {parent_id}"
+            )
+        visited: set[str] = set()
+        current_id = organization["id"]
+        while current_id is not None:
+            if current_id in visited:
+                raise ContractValidationError(
+                    f"Organization hierarchy contains a cycle at {organization['id']}"
+                )
+            visited.add(current_id)
+            current_id = by_id[current_id]["parent_id"]
+
+    return {
+        "version": version,
+        "description": (description or "").strip(),
+        "organizations": normalized,
+    }
 
 
 def validate_source_artifact(value: Any) -> dict[str, Any]:
