@@ -16,6 +16,8 @@
 
 当前待审阅的 Phase 4 省级官方来源核验矩阵见 [docs/phase-4/README.md](docs/phase-4/README.md)。它把“入口已查看、样例可解析、运行时可访问、已产生公开岗位”分成独立状态；本阶段只交付可审计的核验台账和回归夹具，不宣称 31 省已经全部自动化。
 
+当前待审阅的 Phase 5 私有发现线索与官方核验流见 [docs/phase-5/README.md](docs/phase-5/README.md)。中公、华图、国聘、应届生、行业平台和微信公众号只进入管理员私有发现池；只有回溯到单位/政府/高校正式原文并完成域名和内容核验后，才允许发布到学生端。
+
 ## 已实现的能力
 
 - 官方来源白名单：单位官网、官方招聘系统、政府公开招聘平台、高校就业网优先。
@@ -40,6 +42,7 @@
 - 质量报告与日报快照：`/api/coverage` 输出来源健康、每省有效/备用来源、来源角色矩阵、原文/专业/学历/地点/截止日完整率、来源与类别集中度，以及 100 人模拟中的明确匹配率；每次同步会记录当天可更新的质量快照，用于与前一个不同日期比较，而不是只看岗位总数。
 - 公开接口：/api/jobs 提供只读 JSON 数据，支持 `province` 省份筛选；/api/coverage 输出上述可观测指标。
 - 私有线索池：中公、华图、国聘、行业公众号等只可进入受保护的候选线索池，完成官方原文核验后才可发布为公开岗位。
+- 私有发现注册与漏斗：`data/discovery_sources.json` 记录第三方发现入口的用途和访问状态；规范化 URL 指纹合并重复线索，`candidate_lead_mentions` 保留多渠道归因，管理员可查看官方原文定位、内容核验和发布转化漏斗，学生端不接触这些记录。
 
 ## 项目结构
 
@@ -54,6 +57,7 @@ job_hub/
   source_targets.py 31 省五类官方来源扩展矩阵
   organizations.py 组织层级、正式入口和来源绑定矩阵
   source_validation.py 省级官方来源样例、夹具和运行状态核验
+  discovery.py   私有发现入口契约、线索去重、域名评估和转化漏斗
   coverage.py     省份来源覆盖、字段完整率和集中度检查
   matching.py     专业匹配、分类和日期提取
   profiles.py     地球科学学院学历×专业画像与可解释匹配
@@ -65,6 +69,7 @@ data/sources.json 官方来源白名单和已验证采集器
 data/provincial_sources.json 31 省官方入口矩阵（默认待核验）
 data/source_targets.json 31 省五类来源角色核验目标（不自动抓取候选项）
 data/source_validation_registry.json 官方入口样例、字段证据、备用入口和离线回归台账
+data/discovery_sources.json 私有发现入口注册表（不作为学生端来源）
 data/employer_registry.json 可审计的高价值单位标准名与体系关系
 data/organization_registry.json 组织层级、正式招聘频道、备用入口与来源绑定
 examples/         人工补录模板

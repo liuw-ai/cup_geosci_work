@@ -14,7 +14,17 @@ from job_hub.config import Settings
 from job_hub.contracts import ORGANIZATION_ROLES, SOURCE_VALIDATION_STAGES, is_http_url
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
-from job_hub.employers import enrich_job, load_employment_landscape
+from job_hub.discovery import (
+    discovery_funnel,
+    discovery_source_rows,
+    discovery_source_summary,
+    load_discovery_source_registry,
+)
+from job_hub.employers import (
+    CATEGORY_DISPLAY_NAMES,
+    enrich_job,
+    load_employment_landscape,
+)
 from job_hub.locations import PROVINCES
 from job_hub.matching import CATEGORY_DESCRIPTIONS, CATEGORY_ORDER, DEGREE_ORDER
 from job_hub.organizations import (
@@ -61,6 +71,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             "site_name": settings.site_name,
             "category_order": CATEGORY_ORDER,
             "category_descriptions": CATEGORY_DESCRIPTIONS,
+            "category_display_names": CATEGORY_DISPLAY_NAMES,
             "degree_order": DEGREE_ORDER,
             "provinces": PROVINCES,
             "student_profiles": list_student_profiles(),
@@ -76,6 +87,12 @@ def create_app(settings: Settings | None = None) -> Flask:
         except ValueError:
             return value
         return f"{parsed.year}年{parsed.month}月{parsed.day}日"
+
+    @app.template_filter("category_label")
+    def category_label(value: str | None) -> str:
+        """Render precise student-facing category wording while keeping keys stable."""
+        text = str(value or "")
+        return CATEGORY_DISPLAY_NAMES.get(text, text)
 
     @app.template_filter("local_timestamp_date")
     def local_timestamp_date(value: str | None) -> str:
@@ -559,7 +576,17 @@ def create_app(settings: Settings | None = None) -> Flask:
         """Keep third-party discovery clues private until official verification."""
         if request.method == "GET":
             status = request.args.get("status", "").strip() or None
-            return jsonify({"items": database.list_candidate_leads(status)})
+            discovery_source_id = request.args.get("discovery_source_id", "").strip() or None
+            province = request.args.get("province", "").strip() or None
+            return jsonify(
+                {
+                    "items": database.list_candidate_leads(
+                        status,
+                        discovery_source_id=discovery_source_id,
+                        province=province,
+                    )
+                }
+            )
         payload = request.get_json(silent=True)
         if not isinstance(payload, dict):
             return jsonify({"error": "Request body must be a JSON object."}), 400
@@ -567,11 +594,38 @@ def create_app(settings: Settings | None = None) -> Flask:
             value = str(payload.get(field, "")).strip()
             if value and not is_http_url(value):
                 return jsonify({"error": f"{field} must be an HTTP(S) URL."}), 400
+        discovery_source_id = str(payload.get("discovery_source_id", "")).strip()
+        if discovery_source_id:
+            registry = load_discovery_source_registry()
+            known = {str(item["id"]) for item in registry["sources"]}
+            if discovery_source_id not in known:
+                return jsonify({"error": "Unknown discovery_source_id."}), 400
         try:
             lead = database.create_candidate_lead(payload)
         except ValueError as error:
             return jsonify({"error": str(error)}), 400
         return jsonify(lead), 201
+
+    @app.get("/api/admin/discovery-sources")
+    @require_admin
+    def discovery_sources_api() -> Any:
+        """Expose the private discovery-channel registry to administrators."""
+        registry = load_discovery_source_registry()
+        leads = database.list_candidate_leads(limit=5000)
+        return jsonify(
+            {
+                "summary": discovery_source_summary(registry, lead_rows=leads),
+                "items": discovery_source_rows(registry),
+            }
+        )
+
+    @app.get("/api/admin/discovery-funnel")
+    @require_admin
+    def discovery_funnel_api() -> Any:
+        """Show private lead conversion counts without exposing third-party content."""
+        registry = load_discovery_source_registry()
+        leads = database.list_candidate_leads(limit=5000)
+        return jsonify(discovery_funnel(leads, registry))
 
     @app.patch("/api/admin/leads/<int:lead_id>")
     @require_admin
@@ -602,12 +656,28 @@ def create_app(settings: Settings | None = None) -> Flask:
             ), 409
         if not is_http_url(str(lead.get("official_url") or "")):
             return jsonify({"error": "Lead has no valid official_url."}), 409
+        if lead.get("official_domain_status") not in {
+            "registered_source_match",
+            "manual_review_approved",
+        }:
+            return jsonify(
+                {
+                    "error": (
+                        "Lead needs a registered-source match or explicit "
+                        "manual-domain approval."
+                    )
+                }
+            ), 409
         metadata = lead.get("metadata", {})
         employer = str(metadata.get("employer") or lead.get("employer_hint") or "").strip()
         if not employer:
             return jsonify({"error": "Verified lead needs an employer before publication."}), 409
         source = database.get_source(
-            str(metadata.get("source_id") or "official-manual-import")
+            str(
+                metadata.get("source_id")
+                or lead.get("official_source_id")
+                or "official-manual-import"
+            )
         )
         if source is None:
             return jsonify({"error": "Configured source_id is not registered."}), 409
@@ -809,6 +879,14 @@ def create_app(settings: Settings | None = None) -> Flask:
         if database.get_candidate_lead(lead_id) is None:
             abort(404)
         return jsonify({"items": database.list_candidate_lead_events(lead_id)})
+
+    @app.get("/api/admin/leads/<int:lead_id>/mentions")
+    @require_admin
+    def candidate_lead_mentions_api(lead_id: int) -> Any:
+        """Return every private discovery source that mentioned one lead."""
+        if database.get_candidate_lead(lead_id) is None:
+            abort(404)
+        return jsonify({"items": database.list_candidate_lead_mentions(lead_id)})
 
     @app.post("/api/admin/publish")
     @require_admin

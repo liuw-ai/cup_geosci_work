@@ -142,7 +142,7 @@
                 <small>{{ source.publisher }}</small>
                 {% if source.config.note %}<small class="source-note">{{ source.config.note }}</small>{% endif %}
               </td>
-              <td>{{ source.category }}</td>
+              <td>{{ category_display_names.get(source.category, source.category) }}</td>
               <td>{{ source.source_tier }} 级</td>
               <td>
                 {% if source.enabled %}已启用{% else %}待核验{% endif %}

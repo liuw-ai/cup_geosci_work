@@ -33,6 +33,12 @@ CATEGORY_ORDER = (
     "能源、工程与地学拓展",
 )
 
+# Keep the historical storage/filter key stable while using precise language
+# in the student-facing UI.  Existing URLs and SQLite rows remain compatible.
+CATEGORY_DISPLAY_NAMES = {
+    "油气上游业主与研究机构": "油气上游运营单位与研究机构",
+}
+
 CATEGORY_DESCRIPTIONS = {
     "油气上游业主与研究机构": "油田、勘探开发公司及油藏、地球物理研究机构",
     "油气工程技术服务": "物探、测井、钻完井、井下作业与油气技术服务",
@@ -263,6 +269,9 @@ def classify_employment(
 def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
     """Add non-persistent display attributes to a database or report job row."""
     enriched = dict(job)
+    enriched["category_label"] = CATEGORY_DISPLAY_NAMES.get(
+        str(job.get("category") or ""), str(job.get("category") or "")
+    )
     identity_values = (job.get("title"), job.get("employer"))
     identity = resolve_employer(str(job.get("employer") or ""))
     profile = classify_employment(
@@ -291,6 +300,9 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
         if not enriched.get("parent_employer_name"):
             enriched["parent_employer_name"] = identity["parent_employer_name"]
         enriched["category"] = identity["category"]
+        enriched["category_label"] = CATEGORY_DISPLAY_NAMES.get(
+            identity["category"], identity["category"]
+        )
         enriched["employer_type"] = identity["employer_type"]
         enriched["affiliation"] = identity["affiliation"]
     return enriched

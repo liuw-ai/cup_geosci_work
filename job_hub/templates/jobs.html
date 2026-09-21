@@ -31,7 +31,7 @@
         <select id="category" name="category">
           <option value="">全部方向</option>
           {% for category in category_order %}
-            <option value="{{ category }}" {% if selected.category == category %}selected{% endif %}>{{ category }}</option>
+            <option value="{{ category }}" {% if selected.category == category %}selected{% endif %}>{{ category_display_names.get(category, category) }}</option>
           {% endfor %}
         </select>
       </div>

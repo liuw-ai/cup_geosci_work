@@ -7,7 +7,7 @@
     <div class="shell">
       <p class="eyebrow">产业链与雇主角色</p>
       <h1>{{ landscape.title }}</h1>
-      <p class="lede">按雇主在产业链中的职责浏览，而不是把上游业主、油服企业、管网和外企混为同一类别。</p>
+      <p class="lede">按雇主在产业链中的职责浏览，而不是把上游运营单位、油服企业、管网和外企混为同一类别。</p>
     </div>
   </section>
 
@@ -29,7 +29,7 @@
       {% for group in landscape.groups %}
         <section class="landscape-group">
           <div class="landscape-group-heading">
-            <h2>{{ group.category }}</h2>
+            <h2>{{ category_display_names.get(group.category, group.category) }}</h2>
             <p>{{ group.summary }}</p>
             <a class="text-link" href="{{ url_for('jobs', category=group.category) }}">查看当前岗位</a>
           </div>

@@ -133,7 +133,23 @@ def test_service_affiliation_uses_employer_before_competitor_mentions() -> None:
     )
 
     assert job["category"] == "油气工程技术服务"
+    assert job["category_label"] == "油气工程技术服务"
     assert job["affiliation"] == "中国石油体系"
+
+
+def test_upstream_category_uses_precise_student_facing_label() -> None:
+    from job_hub.employers import enrich_job
+
+    job = enrich_job(
+        {
+            "title": "油气地质研究岗",
+            "employer": "中国石油勘探开发研究院",
+            "category": "油气上游业主与研究机构",
+        }
+    )
+
+    assert job["category"] == "油气上游业主与研究机构"
+    assert job["category_label"] == "油气上游运营单位与研究机构"
 
 
 def test_operator_affiliation_uses_employer_before_body_mentions() -> None:

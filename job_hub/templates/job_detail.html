@@ -11,7 +11,7 @@
         <a class="back-link" href="{{ url_for('jobs') }}">返回全部岗位</a>
       {% endif %}
       <div class="detail-topline">
-        <span class="category-label">{{ job.category }}</span>
+        <span class="category-label">{{ job.category_label or job.category|category_label }}</span>
         <span class="relevance relevance-{{ job.relevance_band }}">{{ job.relevance_band }}</span>
       </div>
       <h1>{{ job.title }}</h1>

@@ -20,6 +20,12 @@ from job_hub.contracts import (
 )
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
+from job_hub.discovery import (
+    discovery_funnel,
+    discovery_source_rows,
+    discovery_source_summary,
+    load_discovery_source_registry,
+)
 from job_hub.emailer import Mailer
 from job_hub.locations import PROVINCES
 from job_hub.pipeline import JobPipeline
@@ -99,10 +105,17 @@ def import_candidate_leads(database: Database, path: Path) -> dict[str, int]:
     with path.open("r", encoding="utf-8") as handle:
         payload = json.load(handle)
     items = payload if isinstance(payload, list) else [payload]
+    registry = load_discovery_source_registry()
+    known_discovery_sources = {str(item["id"]) for item in registry["sources"]}
     created = 0
     for item in items:
         if not isinstance(item, dict):
             raise ValueError("Each lead must be a JSON object")
+        discovery_source_id = str(item.get("discovery_source_id") or "").strip()
+        if discovery_source_id and discovery_source_id not in known_discovery_sources:
+            raise ValueError(
+                f"Unknown discovery_source_id: {discovery_source_id}"
+            )
         database.create_candidate_lead(item)
         created += 1
     return {"created": created, "public_jobs_created": 0}
@@ -249,6 +262,16 @@ def main() -> None:
         help="列出私有候选线索，不会显示在公开网页",
     )
     list_leads_parser.add_argument("--status")
+    list_leads_parser.add_argument("--discovery-source-id")
+    list_leads_parser.add_argument("--province")
+    subparsers.add_parser(
+        "discovery-sources",
+        help="输出私有发现来源注册表和线索归因统计",
+    )
+    subparsers.add_parser(
+        "discovery-funnel",
+        help="输出私有线索从发现到官方核验的转化漏斗",
+    )
     purge_parser = subparsers.add_parser(
         "purge-source",
         help="仅删除一个来源的已采集岗位，保留来源配置",
@@ -639,11 +662,36 @@ def main() -> None:
     if args.command == "list-leads":
         print(
             json.dumps(
-                {"items": database.list_candidate_leads(args.status)},
+                {
+                    "items": database.list_candidate_leads(
+                        args.status,
+                        discovery_source_id=args.discovery_source_id,
+                        province=args.province,
+                    )
+                },
                 ensure_ascii=False,
                 indent=2,
             )
         )
+        return
+    if args.command == "discovery-sources":
+        registry = load_discovery_source_registry()
+        leads = database.list_candidate_leads(limit=5000)
+        print(
+            json.dumps(
+                {
+                    "summary": discovery_source_summary(registry, lead_rows=leads),
+                    "items": discovery_source_rows(registry),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if args.command == "discovery-funnel":
+        registry = load_discovery_source_registry()
+        leads = database.list_candidate_leads(limit=5000)
+        print(json.dumps(discovery_funnel(leads, registry), ensure_ascii=False, indent=2))
         return
     if args.command == "simulate-cohort":
         jobs, _ = database.list_jobs(page_size=None)

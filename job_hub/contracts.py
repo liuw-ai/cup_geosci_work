@@ -57,6 +57,35 @@ SOURCE_VALIDATION_STAGES = frozenset(
     }
 )
 
+# Discovery channels are deliberately a separate contract from official
+# sources.  They can help an operator find a notice, but they are never a
+# student-facing evidence source.
+DISCOVERY_SOURCE_TYPES = frozenset(
+    {
+        "aggregator",
+        "vertical_job_board",
+        "university_aggregation",
+        "official_account",
+        "search_index",
+        "manual_tip",
+    }
+)
+DISCOVERY_SOURCE_STATUSES = frozenset(
+    {"registered", "checked", "access_limited", "paused", "retired"}
+)
+DISCOVERY_ACCESS_MODES = frozenset(
+    {"manual", "authorized_api", "rss", "public_page"}
+)
+OFFICIAL_DOMAIN_STATUSES = frozenset(
+    {
+        "unverified",
+        "registered_source_match",
+        "manual_review_required",
+        "manual_review_approved",
+        "source_domain_mismatch",
+    }
+)
+
 ORGANIZATION_ROLES = frozenset(
     {
         "group",
@@ -201,6 +230,111 @@ def validate_source_registry(payload: Any) -> list[dict[str, Any]]:
         source_ids.add(source_id)
         normalized.append(source)
     return normalized
+
+
+def validate_discovery_source_registry(payload: Any) -> dict[str, Any]:
+    """Validate private discovery channels without treating them as evidence.
+
+    A discovery source is intentionally weaker than an official source.  The
+    contract therefore requires an explicit ``private_discovery_only`` policy
+    and does not allow these records to be loaded into the collector registry.
+    """
+    if not isinstance(payload, Mapping):
+        raise ContractValidationError("discovery source registry must be an object")
+    version = payload.get("version", 1)
+    if isinstance(version, bool) or not isinstance(version, int) or version < 1:
+        raise ContractValidationError(
+            "discovery source registry version must be a positive integer"
+        )
+    description = payload.get("description", "")
+    if description is not None and not isinstance(description, str):
+        raise ContractValidationError("discovery source registry description must be text")
+    records = payload.get("sources")
+    if not isinstance(records, list) or not records:
+        raise ContractValidationError(
+            "discovery source registry sources must be a non-empty list"
+        )
+
+    normalized: list[dict[str, Any]] = []
+    source_ids: set[str] = set()
+    for index, value in enumerate(records):
+        context = f"Discovery source at index {index}"
+        source = _mapping_copy(value, context)
+        for field_name in (
+            "id",
+            "name",
+            "source_type",
+            "homepage_url",
+            "access_mode",
+            "status",
+            "scope",
+            "publication_policy",
+            "last_checked_on",
+        ):
+            if field_name not in source:
+                raise ContractValidationError(f"{context} is missing: {field_name}")
+        source_id = _required_text(source["id"], f"{context} id")
+        if source_id in source_ids:
+            raise ContractValidationError(f"Duplicate discovery source id: {source_id}")
+        source_ids.add(source_id)
+        source["id"] = source_id
+        source["name"] = _required_text(source["name"], f"{context} name")
+        source["source_type"] = _required_text(
+            source["source_type"], f"{context} source_type"
+        )
+        if source["source_type"] not in DISCOVERY_SOURCE_TYPES:
+            raise ContractValidationError(
+                f"{context} source_type is unsupported: {source['source_type']}"
+            )
+        source["homepage_url"] = validate_http_url(
+            source["homepage_url"], f"{context} homepage_url"
+        )
+        source["access_mode"] = _required_text(
+            source["access_mode"], f"{context} access_mode"
+        )
+        if source["access_mode"] not in DISCOVERY_ACCESS_MODES:
+            raise ContractValidationError(
+                f"{context} access_mode is unsupported: {source['access_mode']}"
+            )
+        source["status"] = _required_text(source["status"], f"{context} status")
+        if source["status"] not in DISCOVERY_SOURCE_STATUSES:
+            raise ContractValidationError(
+                f"{context} status is unsupported: {source['status']}"
+            )
+        source["scope"] = _required_text(source["scope"], f"{context} scope")
+        source["publication_policy"] = _required_text(
+            source["publication_policy"], f"{context} publication_policy"
+        )
+        if source["publication_policy"] != "private_discovery_only":
+            raise ContractValidationError(
+                f"{context} publication_policy must be private_discovery_only"
+            )
+        source["last_checked_on"] = _validate_iso_date(
+            source["last_checked_on"], f"{context} last_checked_on"
+        )
+        allowlist = source.get("official_domain_allowlist", [])
+        if not isinstance(allowlist, list):
+            raise ContractValidationError(
+                f"{context} official_domain_allowlist must be a list"
+            )
+        source["official_domain_allowlist"] = (
+            _validate_domains(allowlist, f"{context} official_domain_allowlist")
+            if allowlist
+            else []
+        )
+        source["notes"] = _optional_text(source.get("notes")) or ""
+        source["verification_url"] = (
+            validate_http_url(source["verification_url"], f"{context} verification_url")
+            if source.get("verification_url")
+            else None
+        )
+        normalized.append(source)
+
+    return {
+        "version": version,
+        "description": (description or "").strip(),
+        "sources": normalized,
+    }
 
 
 def validate_source_record(value: Any, *, context: str = "Source") -> dict[str, Any]:

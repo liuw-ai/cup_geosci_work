@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 
 from job_hub.contracts import (
     OFFICIAL_EVIDENCE_TYPES,
+    OFFICIAL_DOMAIN_STATUSES,
     is_http_url,
     validate_artifact_candidate,
     validate_artifact_candidate_transition,
@@ -21,6 +22,11 @@ from job_hub.contracts import (
     validate_source_record,
 )
 from job_hub.employers import enrich_job
+from job_hub.discovery import (
+    lead_fingerprint,
+    normalize_lead_url,
+    official_domain_assessment,
+)
 from zoneinfo import ZoneInfo
 
 
@@ -264,6 +270,11 @@ CREATE TABLE IF NOT EXISTS candidate_leads (
     province_hint TEXT,
     published_date TEXT,
     official_url TEXT,
+    discovery_source_id TEXT,
+    lead_fingerprint TEXT,
+    official_source_id TEXT,
+    official_domain_status TEXT NOT NULL DEFAULT 'unverified',
+    official_checked_at TEXT,
     verification_status TEXT NOT NULL DEFAULT 'candidate',
     verification_note TEXT NOT NULL DEFAULT '',
     published_job_id INTEGER REFERENCES jobs(id) ON DELETE SET NULL,
@@ -289,6 +300,23 @@ CREATE TABLE IF NOT EXISTS candidate_lead_events (
 
 CREATE INDEX IF NOT EXISTS idx_candidate_lead_events_lead
 ON candidate_lead_events(lead_id, occurred_at DESC, id DESC);
+
+CREATE TABLE IF NOT EXISTS candidate_lead_mentions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lead_id INTEGER NOT NULL REFERENCES candidate_leads(id) ON DELETE CASCADE,
+    discovery_source_id TEXT,
+    lead_url TEXT NOT NULL,
+    normalized_url TEXT NOT NULL,
+    captured_at TEXT NOT NULL,
+    metadata_json TEXT NOT NULL DEFAULT '{}',
+    UNIQUE(lead_id, discovery_source_id, normalized_url)
+);
+
+CREATE INDEX IF NOT EXISTS idx_candidate_lead_mentions_lead
+ON candidate_lead_mentions(lead_id, captured_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_candidate_lead_mentions_source
+ON candidate_lead_mentions(discovery_source_id, captured_at DESC);
 """
 
 
@@ -363,6 +391,49 @@ class Database:
                 "ALTER TABLE crawl_runs "
                 "ADD COLUMN open_matching_count INTEGER NOT NULL DEFAULT 0"
             )
+        lead_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(candidate_leads)").fetchall()
+        }
+        lead_additions = {
+            "discovery_source_id": "TEXT",
+            "lead_fingerprint": "TEXT",
+            "official_source_id": "TEXT",
+            "official_domain_status": "TEXT NOT NULL DEFAULT 'unverified'",
+            "official_checked_at": "TEXT",
+        }
+        for name, definition in lead_additions.items():
+            if name not in lead_columns:
+                connection.execute(
+                    f"ALTER TABLE candidate_leads ADD COLUMN {name} {definition}"
+                )
+        legacy_leads = connection.execute(
+            "SELECT id, lead_url, title, employer_hint, lead_fingerprint "
+            "FROM candidate_leads WHERE lead_fingerprint IS NULL OR lead_fingerprint = ''"
+        ).fetchall()
+        for lead in legacy_leads:
+            connection.execute(
+                "UPDATE candidate_leads SET lead_fingerprint = ? WHERE id = ?",
+                (
+                    lead_fingerprint(
+                        str(lead["lead_url"]),
+                        title=str(lead["title"] or ""),
+                        employer_hint=str(lead["employer_hint"] or ""),
+                    ),
+                    int(lead["id"]),
+                ),
+            )
+        # These indexes must be created after the additive columns above.  An
+        # existing Phase 1 database may have the candidate_leads table without
+        # the Phase 5 columns when executescript() starts.
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_candidate_leads_discovery_source "
+            "ON candidate_leads(discovery_source_id, verification_status, updated_at DESC)"
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_candidate_leads_fingerprint "
+            "ON candidate_leads(lead_fingerprint)"
+        )
         connection.execute(
             "CREATE INDEX IF NOT EXISTS idx_jobs_province ON jobs(province, status)"
         )
@@ -2022,19 +2093,48 @@ class Database:
         official_url = self._optional_text(lead.get("official_url"))
         if official_url and not is_http_url(official_url):
             raise ValueError("Candidate lead official_url must be an HTTP(S) URL")
+        discovery_source_id = self._optional_text(lead.get("discovery_source_id"))
+        official_source_id = self._optional_text(lead.get("official_source_id"))
+        fingerprint = lead_fingerprint(
+            lead_url,
+            title=str(lead["title"]),
+            employer_hint=str(lead.get("employer_hint") or ""),
+        )
         now = utc_now()
         metadata = lead.get("metadata", {})
         if not isinstance(metadata, dict):
             raise ValueError("Candidate lead metadata must be an object")
         with self.transaction() as connection:
+            existing = connection.execute(
+                "SELECT * FROM candidate_leads WHERE lead_fingerprint = ? "
+                "ORDER BY id LIMIT 1",
+                (fingerprint,),
+            ).fetchone()
+            if existing is not None:
+                self._record_candidate_lead_mention(
+                    connection,
+                    int(existing["id"]),
+                    discovery_source_id=discovery_source_id,
+                    lead_url=lead_url,
+                    metadata={"lead_provider": str(lead["lead_provider"]).strip()},
+                    captured_at=now,
+                )
+                return self._lead_row(existing)
+            assessment = self._assess_official_url(
+                connection,
+                official_url,
+                official_source_id=official_source_id,
+            )
             cursor = connection.execute(
                 """
                 INSERT INTO candidate_leads (
                     lead_provider, lead_url, title, employer_hint, location_hint,
-                    province_hint, published_date, official_url, verification_status,
-                    verification_note, metadata_json, created_at, updated_at
+                    province_hint, published_date, official_url, discovery_source_id,
+                    lead_fingerprint, official_source_id, official_domain_status,
+                    official_checked_at, verification_status, verification_note,
+                    metadata_json, created_at, updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'candidate', ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'candidate', ?, ?, ?, ?)
                 """,
                 (
                     str(lead["lead_provider"]).strip(),
@@ -2045,6 +2145,11 @@ class Database:
                     self._optional_text(lead.get("province_hint")),
                     self._optional_text(lead.get("published_date")),
                     official_url,
+                    discovery_source_id,
+                    fingerprint,
+                    assessment.get("source_id"),
+                    assessment["status"] if official_url else "unverified",
+                    now if official_url else None,
                     self._optional_text(lead.get("verification_note")) or "",
                     json.dumps(metadata, ensure_ascii=False),
                     now,
@@ -2062,10 +2167,50 @@ class Database:
                 payload={"lead_provider": str(lead["lead_provider"]).strip()},
                 occurred_at=now,
             )
+            self._record_candidate_lead_mention(
+                connection,
+                lead_id,
+                discovery_source_id=discovery_source_id,
+                lead_url=lead_url,
+                metadata={"lead_provider": str(lead["lead_provider"]).strip()},
+                captured_at=now,
+            )
             row = connection.execute(
                 "SELECT * FROM candidate_leads WHERE id = ?", (lead_id,)
             ).fetchone()
         return self._lead_row(row)
+
+    @staticmethod
+    def _record_candidate_lead_mention(
+        connection: sqlite3.Connection,
+        lead_id: int,
+        *,
+        discovery_source_id: str | None,
+        lead_url: str,
+        metadata: dict[str, Any],
+        captured_at: str,
+    ) -> None:
+        """Retain every private discovery channel that pointed to one lead."""
+        connection.execute(
+            """
+            INSERT INTO candidate_lead_mentions (
+                lead_id, discovery_source_id, lead_url, normalized_url,
+                captured_at, metadata_json
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(lead_id, discovery_source_id, normalized_url) DO UPDATE SET
+                captured_at = excluded.captured_at,
+                metadata_json = excluded.metadata_json
+            """,
+            (
+                lead_id,
+                discovery_source_id,
+                lead_url,
+                normalize_lead_url(lead_url),
+                captured_at,
+                json.dumps(metadata, ensure_ascii=False),
+            ),
+        )
 
     def get_candidate_lead(self, lead_id: int) -> dict[str, Any] | None:
         with self.connect() as connection:
@@ -2074,22 +2219,78 @@ class Database:
             ).fetchone()
         return self._lead_row(row) if row else None
 
+    @staticmethod
+    def _assess_official_url(
+        connection: sqlite3.Connection,
+        official_url: str | None,
+        *,
+        official_source_id: str | None = None,
+    ) -> dict[str, Any]:
+        if not official_url:
+            return {
+                "status": "unverified",
+                "source_id": official_source_id,
+                "host": "",
+            }
+        source_rows = connection.execute(
+            "SELECT * FROM sources ORDER BY id"
+        ).fetchall()
+        records: list[dict[str, Any]] = []
+        for row in source_rows:
+            item = dict(row)
+            item["config"] = json.loads(item.pop("config_json", "{}"))
+            records.append(item)
+        return official_domain_assessment(
+            official_url,
+            records,
+            official_source_id=official_source_id,
+        )
+
     def list_candidate_leads(
         self,
         verification_status: str | None = None,
         *,
+        discovery_source_id: str | None = None,
+        province: str | None = None,
         limit: int = 100,
     ) -> list[dict[str, Any]]:
         query = "SELECT * FROM candidate_leads"
         values: list[Any] = []
+        clauses: list[str] = []
         if verification_status:
-            query += " WHERE verification_status = ?"
+            clauses.append("verification_status = ?")
             values.append(verification_status)
+        if discovery_source_id:
+            clauses.append("discovery_source_id = ?")
+            values.append(discovery_source_id)
+        if province:
+            clauses.append("province_hint = ?")
+            values.append(province)
+        if clauses:
+            query += " WHERE " + " AND ".join(clauses)
         query += " ORDER BY updated_at DESC, id DESC LIMIT ?"
-        values.append(max(1, min(limit, 500)))
+        values.append(max(1, min(limit, 5000)))
         with self.connect() as connection:
             rows = connection.execute(query, values).fetchall()
         return [self._lead_row(row) for row in rows]
+
+    def list_candidate_lead_mentions(self, lead_id: int) -> list[dict[str, Any]]:
+        """Return private source mentions for one deduplicated lead."""
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT * FROM candidate_lead_mentions
+                WHERE lead_id = ?
+                ORDER BY captured_at DESC, id DESC
+                """,
+                (lead_id,),
+            ).fetchall()
+        result: list[dict[str, Any]] = []
+        for row in rows:
+            item = dict(row)
+            item["metadata"] = json.loads(item.pop("metadata_json"))
+            result.append(item)
+        return result
 
     def list_candidate_lead_events(self, lead_id: int) -> list[dict[str, Any]]:
         """Return private status history for one candidate lead."""
@@ -2119,6 +2320,8 @@ class Database:
             "province_hint",
             "published_date",
             "official_url",
+            "official_source_id",
+            "official_domain_status",
             "verification_note",
             "metadata",
             "verification_status",
@@ -2144,6 +2347,14 @@ class Database:
             verification_note=verification_note,
         )
         official_url = normalized_official_url or None
+        official_source_id = self._optional_text(
+            changes.get("official_source_id", current.get("official_source_id"))
+        )
+        requested_domain_status = self._optional_text(
+            changes.get("official_domain_status")
+        )
+        if requested_domain_status and requested_domain_status not in OFFICIAL_DOMAIN_STATUSES:
+            raise ValueError("Unsupported official_domain_status")
         metadata = changes.get("metadata", current.get("metadata", {}))
         if not isinstance(metadata, dict):
             raise ValueError("Candidate lead metadata must be an object")
@@ -2167,12 +2378,51 @@ class Database:
             "updated_at": utc_now(),
         }
         with self.transaction() as connection:
+            assessment = self._assess_official_url(
+                connection,
+                official_url,
+                official_source_id=official_source_id,
+            )
+            domain_status = requested_domain_status or (
+                assessment["status"] if official_url else "unverified"
+            )
+            if domain_status == "manual_review_approved" and not verification_note:
+                raise ValueError(
+                    "Manual official-domain approval requires a verification_note"
+                )
+            if (
+                domain_status != "manual_review_approved"
+                and domain_status != assessment["status"]
+            ):
+                raise ValueError(
+                    "official_domain_status must match the current official URL "
+                    "assessment unless manually approved"
+                )
+            if (
+                next_status in {"official_content_verified", "published"}
+                and assessment["status"] == "source_domain_mismatch"
+                and domain_status != "manual_review_approved"
+            ):
+                raise ValueError(
+                    "Official URL host does not match the selected registered source"
+                )
+            if next_status == "official_content_verified" and domain_status not in {
+                "registered_source_match",
+                "manual_review_approved",
+            }:
+                raise ValueError(
+                    "Official-content verification requires a registered source match "
+                    "or explicit manual-domain approval"
+                )
+            checked_at = utc_now() if official_url else None
             connection.execute(
                 """
                 UPDATE candidate_leads
-                SET employer_hint = ?, location_hint = ?, province_hint = ?,
-                    published_date = ?, official_url = ?, verification_status = ?,
-                    verification_note = ?, metadata_json = ?, updated_at = ?
+                    SET employer_hint = ?, location_hint = ?, province_hint = ?,
+                    published_date = ?, official_url = ?, official_source_id = ?,
+                    official_domain_status = ?, official_checked_at = ?,
+                    verification_status = ?, verification_note = ?, metadata_json = ?,
+                    updated_at = ?
                 WHERE id = ?
                 """,
                 (
@@ -2181,6 +2431,9 @@ class Database:
                     fields["province_hint"],
                     fields["published_date"],
                     fields["official_url"],
+                    official_source_id,
+                    domain_status,
+                    checked_at,
                     fields["verification_status"],
                     fields["verification_note"],
                     fields["metadata_json"],
@@ -2218,6 +2471,13 @@ class Database:
                 return None
             if row["verification_status"] != "official_content_verified":
                 raise ValueError("Lead has not passed official-content verification")
+            if row["official_domain_status"] not in {
+                "registered_source_match",
+                "manual_review_approved",
+            }:
+                raise ValueError(
+                    "Lead has no registered-source match or explicit manual-domain approval"
+                )
             if connection.execute("SELECT 1 FROM jobs WHERE id = ?", (job_id,)).fetchone() is None:
                 raise ValueError("Published lead references an unknown job_id")
             validate_candidate_lead_transition(

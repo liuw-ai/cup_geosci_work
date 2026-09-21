@@ -66,6 +66,7 @@ def test_candidate_leads_stay_private_until_official_content_is_verified(tmp_pat
         headers=headers,
         json={
             "verification_status": "official_content_verified",
+            "official_domain_status": "manual_review_approved",
             "verification_note": "已逐项核对政府官网原文、单位、专业和截止日期。",
             "metadata": {
                 "employer": "某省地质局",

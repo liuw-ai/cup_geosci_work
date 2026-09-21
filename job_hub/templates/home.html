@@ -71,7 +71,7 @@
     <div class="category-grid">
       {% for category in category_order %}
         <a class="category-item" href="{{ url_for('jobs', category=category) }}">
-          <strong>{{ category }}</strong>
+          <strong>{{ category_display_names.get(category, category) }}</strong>
           <span>{{ category_descriptions[category] }}</span>
           {% for item in categories if item.category == category %}
             <small>{{ item.count }} 条在招</small>

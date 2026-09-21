@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "description": "第三方平台、行业媒体和公众号仅用于私有发现线索；学生端永远只展示经过核验的单位官网、政府官网、高校官网或正式招聘系统原文。",
+  "sources": [
+    {
+      "id": "offcn-discovery",
+      "name": "中公教育招聘公告汇总",
+      "source_type": "aggregator",
+      "homepage_url": "https://www.offcn.com/",
+      "access_mode": "manual",
+      "status": "access_limited",
+      "scope": "公务员、事业单位和地方公开招聘线索",
+      "publication_policy": "private_discovery_only",
+      "official_domain_allowlist": [],
+      "last_checked_on": "2026-09-21",
+      "notes": "当前网络 TLS 检查未完成；不把中公页面作为学生端原文。"
+    },
+    {
+      "id": "huatu-discovery",
+      "name": "华图教育招聘公告汇总",
+      "source_type": "aggregator",
+      "homepage_url": "https://www.huatu.com/",
+      "access_mode": "manual",
+      "status": "checked",
+      "scope": "公务员、事业单位和地方公开招聘线索",
+      "publication_policy": "private_discovery_only",
+      "official_domain_allowlist": [],
+      "last_checked_on": "2026-09-21",
+      "notes": "仅记录标题和线索链接；必须回溯政府或单位正式原文。"
+    },
+    {
+      "id": "iguopin-discovery",
+      "name": "国聘网线索入口",
+      "source_type": "aggregator",
+      "homepage_url": "https://www.iguopin.com/",
+      "access_mode": "manual",
+      "status": "access_limited",
+      "scope": "央国企、地方国企和校招线索",
+      "publication_policy": "private_discovery_only",
+      "official_domain_allowlist": [],
+      "last_checked_on": "2026-09-21",
+      "notes": "国聘可用于发现批次和单位名称，但公开记录仍需核对招聘单位官方入口。"
+    },
+    {
+      "id": "yingjiesheng-discovery",
+      "name": "应届生求职网线索入口",
+      "source_type": "aggregator",
+      "homepage_url": "https://www.yingjiesheng.com/",
+      "access_mode": "manual",
+      "status": "access_limited",
+      "scope": "校园招聘、宣讲会和社会招聘线索",
+      "publication_policy": "private_discovery_only",
+      "official_domain_allowlist": [],
+      "last_checked_on": "2026-09-21",
+      "notes": "宣讲会和转载信息不直接进入岗位库。"
+    },
+    {
+      "id": "chinaoilhr-discovery",
+      "name": "石油英才网线索入口",
+      "source_type": "vertical_job_board",
+      "homepage_url": "https://www.chinaoilhr.com/",
+      "access_mode": "manual",
+      "status": "access_limited",
+      "scope": "石油石化、油田和油气技术服务线索",
+      "publication_policy": "private_discovery_only",
+      "official_domain_allowlist": [],
+      "last_checked_on": "2026-09-21",
+      "notes": "平台返回访问限制；不得把平台自身链接当作单位官方原文。"
+    },
+    {
+      "id": "geotalent-discovery",
+      "name": "中国地质人才网线索入口",
+      "source_type": "vertical_job_board",
+      "homepage_url": "http://www.geotalent.cn/",
+      "access_mode": "manual",
+      "status": "access_limited",
+      "scope": "地质勘查、矿业和水文地质线索",
+      "publication_policy": "private_discovery_only",
+      "official_domain_allowlist": [],
+      "last_checked_on": "2026-09-21",
+      "notes": "当前网络返回网关错误；恢复访问后仍需逐条回溯官方主体。"
+    },
+    {
+      "id": "cnpcjob-discovery",
+      "name": "阿果石油英才网线索入口",
+      "source_type": "vertical_job_board",
+      "homepage_url": "http://www.cnpcjob.com/",
+      "access_mode": "manual",
+      "status": "access_limited",
+      "scope": "石油行业技术和补录线索",
+      "publication_policy": "private_discovery_only",
+      "official_domain_allowlist": [],
+      "last_checked_on": "2026-09-21",
+      "notes": "不得把内推、转载或平台职位描述直接发布。"
+    },
+    {
+      "id": "mininghr-discovery",
+      "name": "矿业人才网线索入口",
+      "source_type": "vertical_job_board",
+      "homepage_url": "http://www.mininghr.com/",
+      "access_mode": "manual",
+      "status": "access_limited",
+      "scope": "金属、非金属矿业和地勘线索",
+      "publication_policy": "private_discovery_only",
+      "official_domain_allowlist": [],
+      "last_checked_on": "2026-09-21",
+      "notes": "平台访问受限；必须通过单位官网或政府公告完成证据闭环。"
+    },
+    {
+      "id": "wechat-official-account-manual",
+      "name": "微信公众号官方账号白名单（人工登记）",
+      "source_type": "official_account",
+      "homepage_url": "https://mp.weixin.qq.com/",
+      "access_mode": "manual",
+      "status": "registered",
+      "scope": "官方单位、人社部门、高校和油气企业公众号招聘线索",
+      "publication_policy": "private_discovery_only",
+      "official_domain_allowlist": [],
+      "last_checked_on": "2026-09-21",
+      "notes": "当前仅登记渠道规则，具体账号须由管理员补充主体、认证信息和文章原文；公众号文章不能作为学生端最终证据。"
+    }
+  ]
+}

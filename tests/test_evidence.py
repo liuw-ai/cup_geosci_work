@@ -232,6 +232,7 @@ def test_candidate_lead_state_machine_records_private_history(tmp_path) -> None:
         lead["id"],
         {
             "verification_status": "official_content_verified",
+            "official_domain_status": "manual_review_approved",
             "verification_note": "已核对官方公告、专业要求和截止日期。",
         },
     )
