@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "as_of": "2026-09-22",
+  "description": "国家能源体系公开入口探测证据。探测记录描述访问和接口行为，不等于岗位数据；业务错误和访问故障不能解释为无岗位。",
+  "probes": [
+    {
+      "source_id": "cnooc-career",
+      "observed_on": "2026-09-22",
+      "landing_url": "https://cnooc.zhaopin.com/job/index.html",
+      "landing_http_status": 200,
+      "landing_content_type": "text/html; charset=utf-8",
+      "landing_observation": "公开页面标题为中国海洋石油集团有限公司2026届校园招聘，页面加载公开前端脚本。",
+      "public_api_url": "https://fe.zhaopin.com/grace/api/dsc/search-job-list",
+      "public_api_method": "POST",
+      "api_http_status": 200,
+      "api_business_code": 500,
+      "api_observed_message": "接口转换失败",
+      "result": "adapter_ready_probe_failed",
+      "scan_conclusion": "source_unavailable",
+      "published_jobs": 0,
+      "field_validation": {
+        "title": false,
+        "employer": false,
+        "degree": false,
+        "major": false,
+        "location": false,
+        "deadline": false,
+        "application_url": false
+      },
+      "evidence_urls": [
+        "https://cnooc.zhaopin.com/job/index.html",
+        "https://cnooc.zhaopin.com/assets/global-data-ba66b0a6.js"
+      ],
+      "note": "HTTP 200 只证明入口和脚本可访问；岗位接口返回业务错误，不能标记为扫描成功无匹配，也未启用来源。"
+    }
+  ]
+}

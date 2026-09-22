@@ -69,10 +69,10 @@
       ],
       "acquisition_mode": "public_dynamic_portal",
       "runtime_status": "accessible_structure_unverified",
-      "scan_conclusion": "structure_needs_adapter",
+      "scan_conclusion": "adapter_probe_failed",
       "observed_on": "2026-09-22",
       "observed_http_status": 200,
-      "observed_error_class": "dynamic_html_shell",
+      "observed_error_class": "public_api_business_error",
       "sample_announcement_url": null,
       "field_validation": {
         "title": false,
@@ -83,7 +83,7 @@
         "deadline": false,
         "application_url": false
       },
-      "note": "入口返回 200，但页面仅有动态脚本壳、无岗位链接；尚未确认公开 JSON 接口或附件。需要逐项记录公开脚本配置和合规访问规则后开发专用适配器。"
+      "note": "入口返回 200，公开脚本确认只读岗位接口；Phase 7 适配器夹具已通过，但 2026-09-22 接口返回业务 code=500，不能解释为无岗位，来源继续停用。"
     },
     {
       "source_id": "pipechina-career",

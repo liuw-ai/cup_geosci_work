@@ -61,6 +61,12 @@ candidate_leads（规范化 URL 指纹） --多渠道 mentions--> 官网定位
         v
 合规来源适配器 -> 岗位证据核验 -> 公开岗位
 
+公开动态招聘入口探测证据
+        |
+        +--> 页面脚本/公开只读接口观察
+        +--> 业务错误、结构异常、访问故障（不计为无岗位）
+        +--> 公开岗位字段完整 -> 适配器候选 -> 原文审计
+
 已核验官方公告页
         |
         v
@@ -90,6 +96,8 @@ PDF/Excel/CSV/DOCX 解析 -> source_artifact_rows -> artifact_job_candidates
 Phase 5 新增的 `data/discovery_sources.json` 与正式来源白名单严格分离。它只记录中公、华图、国聘、应届生、行业垂直平台和微信公众号等发现渠道，所有记录强制标注 `private_discovery_only`。同一公告从多个渠道出现时，数据库用规范化 URL 指纹合并线索，并在 `candidate_lead_mentions` 保留来源归因；这不会增加学生端岗位条数。管理员可通过 `/api/admin/discovery-sources` 和 `/api/admin/discovery-funnel` 查看漏斗，但公开 `/api/jobs`、日报和覆盖接口不会泄露发现链接。
 
 Phase 6 新增的 `data/national_source_matrix.json` 与组织层级台账分工：组织台账记录单位和官方频道，采集矩阵记录每个频道当前可采用的获取方式、运行状态、字段验证和扫描结论。`source_unavailable`、`structure_needs_adapter` 与 `scan_success_no_match` 是三个不同结论，前两者绝不能在日报中被解释成“没有岗位”。管理员可通过 `/api/admin/national-source-matrix` 或 CLI 查看；学生端只看到最终通过证据审计的岗位。
+
+Phase 7 新增的 `zhaopin_campus` 适配器只读取公开校招页面及其前端调用的只读岗位接口。`data/national_source_probes.json` 保存入口、API、HTTP/业务状态和字段证据；`adapter_probe_failed` 表示适配器已具备但当前公开接口异常，不能转化为“扫描成功无匹配”。探测证据只在管理员 CLI/API 返回，不进入学生端。
 
 官方链接未命中已登记来源时，线索只能停留在 `official_url_found` 或 `need_review`。管理员必须显式设置 `official_domain_status=manual_review_approved` 并留下核验说明，才能进入 `official_content_verified`；域名不匹配且未获人工批准的线索不能发布。该机制用于容纳确实存在但尚未完成来源注册的政府/高校正式公告，不把第三方平台自身链接当成官方证据。
 

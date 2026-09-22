@@ -20,6 +20,8 @@
 
 当前待审阅的 Phase 6 国家能源体系正式入口采集准入矩阵见 [docs/phase-6/README.md](docs/phase-6/README.md)。它逐频道记录中国石油、中国石化、中国海油、国家管网及重点下属单位的采集方式、访问状态、字段验证和下一步动作；登记数量不等于岗位数量，访问故障不等于无岗位。
 
+当前待审阅的 Phase 7 公开动态校招接口适配器见 [docs/phase-7/README.md](docs/phase-7/README.md)。本阶段首先接入中国海油公开校招页面的只读接口证据和严格适配器；接口当前返回业务错误，因此来源保持停用，不会产生虚假的“无岗位”结果。
+
 ## 已实现的能力
 
 - 官方来源白名单：单位官网、官方招聘系统、政府公开招聘平台、高校就业网优先。
@@ -61,6 +63,7 @@ job_hub/
   source_validation.py 省级官方来源样例、夹具和运行状态核验
   discovery.py   私有发现入口契约、线索去重、域名评估和转化漏斗
   national_sources.py 国家能源体系入口采集准入矩阵和状态汇总
+  national_probes.py 国家能源体系公开入口/API探测证据与状态汇总
   coverage.py     省份来源覆盖、字段完整率和集中度检查
   matching.py     专业匹配、分类和日期提取
   profiles.py     地球科学学院学历×专业画像与可解释匹配
@@ -74,6 +77,7 @@ data/source_targets.json 31 省五类来源角色核验目标（不自动抓取�
 data/source_validation_registry.json 官方入口样例、字段证据、备用入口和离线回归台账
 data/discovery_sources.json 私有发现入口注册表（不作为学生端来源）
 data/national_source_matrix.json 国家能源体系正式入口采集准入矩阵
+data/national_source_probes.json 国家能源体系公开入口/API探测证据（管理员）
 data/employer_registry.json 可审计的高价值单位标准名与体系关系
 data/organization_registry.json 组织层级、正式招聘频道、备用入口与来源绑定
 examples/         人工补录模板

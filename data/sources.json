@@ -256,7 +256,7 @@
     "name": "中国海油招聘平台",
     "publisher": "中国海洋石油集团有限公司",
     "homepage_url": "https://cnooc.zhaopin.com/",
-    "source_type": "landing_page",
+    "source_type": "zhaopin_campus",
     "category": "油气上游业主与研究机构",
     "source_tier": "A",
     "enabled": false,
@@ -264,14 +264,27 @@
       "employer_hint": "中国海洋石油集团有限公司",
       "allowed_hosts": ["cnooc.zhaopin.com"],
       "healthcheck_url": "https://cnooc.zhaopin.com/job/index.html",
+      "listing_url": "https://cnooc.zhaopin.com/job/index.html",
       "fallback_entry_urls": [
         "https://cnooc.zhaopin.com/notice/index.html",
         "https://www.cnooc.com.cn/"
       ],
       "coverage_scope": "全国",
-      "automation_status": "verified_public_entry_no_live_positions",
+      "company_id": "CZ258591510",
+      "company_number": "25859151",
+      "scene": "cam",
+      "api_host": "https://fe.zhaopin.com",
+      "api_path": "/grace/api/dsc/search-job-list",
+      "api_allowed_hosts": ["fe.zhaopin.com"],
+      "require_major_match": true,
+      "include_patterns": ["地质|勘查|物探|化探|测井|地球物理|油气|石油|资源|储层|海洋"],
+      "exclude_patterns": ["财务|法务|行政|人力资源|审计|采购|市场"],
+      "max_items": 40,
+      "request_interval_seconds": 1.2,
+      "allow_shared_source_url": false,
+      "automation_status": "adapter_ready_probe_failed",
       "minimum_relevance": 20,
-      "note": "已核验为中国海油官方公开校园招聘站。当前岗位页显示暂无数据，且岗位接口会随年度招聘周期变化；在出现公开岗位并完成页面结构、robots 规则和样例详情核验前保持停用，不绕过登录或验证。"
+      "note": "已实现公开 Zhaopin 校招接口适配器，但 2026-09-22 公开岗位接口返回业务 code=500，不能解释为无岗位；来源继续停用，待招聘平台恢复有效公开响应后重新探测。适配器不登录、不调用申请接口。"
     }
   },
   {

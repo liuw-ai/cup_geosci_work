@@ -29,6 +29,7 @@ SOURCE_TYPES = frozenset(
         "cas_job_board",
         "successfactors_search",
         "mokahr_search",
+        "zhaopin_campus",
         "mnr_recruitment",
         "slb_coveo_search",
         "html_notice",
@@ -148,6 +149,7 @@ NATIONAL_SCAN_CONCLUSIONS = frozenset(
         "scan_success_no_match",
         "source_unavailable",
         "structure_needs_adapter",
+        "adapter_probe_failed",
         "manual_review_required",
         "candidate_source",
     }
@@ -160,6 +162,14 @@ NATIONAL_FIELD_KEYS = (
     "location",
     "deadline",
     "application_url",
+)
+NATIONAL_PROBE_RESULTS = frozenset(
+    {
+        "verified_public_api",
+        "adapter_ready_probe_failed",
+        "source_unavailable",
+        "manual_review_required",
+    }
 )
 
 ARTIFACT_KINDS = frozenset(
@@ -936,6 +946,112 @@ def validate_national_source_matrix(
         "target_channel_types": normalized_channel_types,
         "source_assessments": normalized_assessments,
         "channel_defaults": normalized_defaults,
+    }
+
+
+def validate_national_source_probes(
+    payload: Any,
+    *,
+    source_ids: set[str] | None = None,
+) -> dict[str, Any]:
+    """Validate read-only probe evidence without treating it as job data."""
+    if not isinstance(payload, Mapping):
+        raise ContractValidationError("national source probes must be an object")
+    version = payload.get("version", 1)
+    if isinstance(version, bool) or not isinstance(version, int) or version < 1:
+        raise ContractValidationError("national source probes version must be positive")
+    as_of = _validate_iso_date(payload.get("as_of"), "national source probes as_of")
+    probes = payload.get("probes")
+    if not isinstance(probes, list) or not probes:
+        raise ContractValidationError("national source probes must contain probes")
+    normalized: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for index, value in enumerate(probes):
+        context = f"National source probe at index {index}"
+        probe = _mapping_copy(value, context)
+        required = (
+            "source_id",
+            "observed_on",
+            "landing_url",
+            "landing_http_status",
+            "landing_content_type",
+            "landing_observation",
+            "public_api_url",
+            "public_api_method",
+            "api_http_status",
+            "api_business_code",
+            "api_observed_message",
+            "result",
+            "scan_conclusion",
+            "published_jobs",
+            "field_validation",
+            "evidence_urls",
+            "note",
+        )
+        for field_name in required:
+            if field_name not in probe:
+                raise ContractValidationError(f"{context} is missing: {field_name}")
+        source_id = _required_text(probe["source_id"], f"{context} source_id")
+        if source_id in seen_ids:
+            raise ContractValidationError(f"Duplicate national source probe: {source_id}")
+        if source_ids is not None and source_id not in source_ids:
+            raise ContractValidationError(f"{context} references unknown source_id: {source_id}")
+        seen_ids.add(source_id)
+        probe["source_id"] = source_id
+        probe["observed_on"] = _validate_iso_date(
+            probe["observed_on"], f"{context} observed_on"
+        )
+        for field_name in ("landing_url", "public_api_url"):
+            probe[field_name] = validate_http_url(probe[field_name], f"{context} {field_name}")
+        for field_name in ("landing_content_type", "public_api_method", "landing_observation", "api_observed_message", "note"):
+            probe[field_name] = _required_text(probe[field_name], f"{context} {field_name}")
+        for field_name in ("landing_http_status", "api_http_status"):
+            status = probe[field_name]
+            if status is not None and (isinstance(status, bool) or not isinstance(status, int)):
+                raise ContractValidationError(f"{context} {field_name} must be an integer or null")
+        business_code = probe["api_business_code"]
+        if business_code is not None and not isinstance(business_code, (int, str)):
+            raise ContractValidationError(f"{context} api_business_code must be text, integer or null")
+        probe["result"] = _required_text(probe["result"], f"{context} result")
+        if probe["result"] not in NATIONAL_PROBE_RESULTS:
+            raise ContractValidationError(f"{context} has unsupported result: {probe['result']}")
+        probe["scan_conclusion"] = _required_text(
+            probe["scan_conclusion"], f"{context} scan_conclusion"
+        )
+        if probe["scan_conclusion"] not in NATIONAL_SCAN_CONCLUSIONS:
+            raise ContractValidationError(
+                f"{context} has unsupported scan_conclusion: {probe['scan_conclusion']}"
+            )
+        published_jobs = probe["published_jobs"]
+        if isinstance(published_jobs, bool) or not isinstance(published_jobs, int) or published_jobs < 0:
+            raise ContractValidationError(f"{context} published_jobs must be a non-negative integer")
+        fields = probe["field_validation"]
+        if not isinstance(fields, Mapping):
+            raise ContractValidationError(f"{context} field_validation must be an object")
+        probe["field_validation"] = {}
+        for field_name in NATIONAL_FIELD_KEYS:
+            field_value = fields.get(field_name)
+            if not isinstance(field_value, bool):
+                raise ContractValidationError(
+                    f"{context} field_validation.{field_name} must be true or false"
+                )
+            probe["field_validation"][field_name] = field_value
+        evidence_urls = probe["evidence_urls"]
+        if not isinstance(evidence_urls, list) or not evidence_urls:
+            raise ContractValidationError(f"{context} evidence_urls must be non-empty")
+        probe["evidence_urls"] = [
+            validate_http_url(item, f"{context} evidence_url") for item in evidence_urls
+        ]
+        if probe["result"] == "adapter_ready_probe_failed" and published_jobs != 0:
+            raise ContractValidationError(
+                f"{context} probe failure cannot claim published jobs"
+            )
+        normalized.append(probe)
+    return {
+        "version": version,
+        "as_of": as_of,
+        "description": _optional_text(payload.get("description")) or "",
+        "probes": normalized,
     }
 
 

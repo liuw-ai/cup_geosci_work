@@ -267,6 +267,8 @@ class OfficialSourceCollector:
             return self._collect_successfactors_search(source)
         if source_type == "mokahr_search":
             return self._collect_mokahr_search(source)
+        if source_type == "zhaopin_campus":
+            return self._collect_zhaopin_campus(source)
         if source_type == "mnr_recruitment":
             return self._collect_mnr_recruitment(source)
         if source_type == "slb_coveo_search":
@@ -1159,6 +1161,236 @@ class OfficialSourceCollector:
             if len(postings) >= self._item_limit(source):
                 break
         return postings
+
+    def _collect_zhaopin_campus(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Collect a public Zhaopin campus campaign without login or writes.
+
+        Zhaopin's campaign pages are a static shell around a public, read-only
+        JSON request.  The adapter follows the request shape used by the page
+        itself, but treats a business error, malformed payload, or missing job
+        evidence as a collection failure.  Only an explicit ``code=200`` with
+        a valid ``jobList`` can produce the legitimate empty result ``[]``.
+        """
+        config = source["config"]
+        listing_url = str(config.get("listing_url") or source["homepage_url"])
+        landing = self._get(listing_url, source)
+        metadata = self._zhaopin_campaign_metadata(
+            landing.text,
+            config,
+            landing.url,
+        )
+        company_id = str(
+            config.get("company_id")
+            or metadata.get("companyId")
+            or metadata.get("xiaozhaoId")
+            or ""
+        ).strip()
+        if not company_id:
+            raise SourceCollectionError(
+                "Zhaopin public campaign is missing companyId/xiaozhaoId"
+            )
+        scene = str(config.get("scene") or metadata.get("scene") or "cam").lower()
+        if scene not in {"cam", "social"}:
+            raise SourceCollectionError(f"Unsupported Zhaopin campaign scene: {scene}")
+        api_host = str(config.get("api_host") or "https://fe.zhaopin.com").rstrip("/")
+        api_url = urljoin(api_host + "/", str(
+            config.get("api_path") or "/grace/api/dsc/search-job-list"
+        ).lstrip("/"))
+        parsed_api_host = urlparse(api_url).hostname
+        allowed_api_hosts = {
+            str(value).lower()
+            for value in config.get("api_allowed_hosts", [])
+            if str(value).strip()
+        }
+        if not parsed_api_host or parsed_api_host.lower() not in allowed_api_hosts:
+            raise SourceCollectionError(
+                f"Zhaopin API host is not allowlisted: {parsed_api_host or api_url}"
+            )
+        job_source = 2 if scene == "cam" else 1
+        page_size = min(self._item_limit(source), 100)
+        request_payload = {
+            "orgNumbers": [company_id],
+            "jobSource": job_source,
+            "pageIndex": 1,
+            "pageSize": page_size,
+            "orgDepartmentIds": [],
+            "workRegionIds": "",
+            "jobTypes": "",
+            "priorityMajors": "",
+            "customTags": "",
+        }
+        self._wait(source)
+        response = self._post_json(
+            api_url,
+            request_payload,
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Origin": f"{urlparse(landing.url).scheme}://{urlparse(landing.url).netloc}",
+                "Referer": landing.url,
+            },
+        )
+        try:
+            payload = response.json()
+        except ValueError as error:
+            raise SourceCollectionError(
+                "Zhaopin public job API did not return JSON"
+            ) from error
+        if not isinstance(payload, dict):
+            raise SourceCollectionError("Zhaopin public job API returned an unexpected payload")
+        code = payload.get("code")
+        if str(code) != "200":
+            message = clean_text(str(payload.get("message") or payload.get("msg") or ""))
+            detail = f"; message={message}" if message else ""
+            raise SourceCollectionError(
+                f"Zhaopin public job API business error code={code}{detail}"
+            )
+        data = payload.get("data")
+        if not isinstance(data, dict):
+            raise SourceCollectionError("Zhaopin public job API data is not an object")
+        jobs = data.get("jobList")
+        page_info = data.get("pageInfo")
+        if not isinstance(jobs, list) or not isinstance(page_info, dict):
+            raise SourceCollectionError(
+                "Zhaopin public job API is missing jobList/pageInfo"
+            )
+        # An empty list is only a valid no-match result when the public page
+        # explicitly reports a zero total.  Missing or inconsistent counts are
+        # treated as an adapter regression instead of silently publishing none.
+        try:
+            total = int(page_info.get("totalNum", -1))
+        except (TypeError, ValueError):
+            total = -1
+        if total < 0 or (total == 0 and jobs) or (total > 0 and not jobs):
+            raise SourceCollectionError(
+                "Zhaopin public job API returned inconsistent pageInfo/jobList"
+            )
+        postings: list[RawPosting] = []
+        for item in jobs:
+            if not isinstance(item, dict):
+                continue
+            job = item.get("job") if isinstance(item.get("job"), dict) else item
+            posting = self._zhaopin_posting(job, source, listing_url)
+            if posting is not None:
+                postings.append(posting)
+            if len(postings) >= page_size:
+                break
+        if jobs and not postings:
+            raise SourceCollectionError(
+                "Zhaopin public job API returned rows but no row had publishable evidence"
+            )
+        return postings
+
+    def _zhaopin_campaign_metadata(
+        self,
+        document: str,
+        config: dict[str, Any],
+        base_url: str,
+    ) -> dict[str, str]:
+        """Read public campaign identifiers from configured values or assets."""
+        metadata: dict[str, str] = {}
+        for key in ("companyId", "companyNumber", "scene", "xiaozhaoId"):
+            configured_value = config.get(
+                {
+                    "companyId": "company_id",
+                    "companyNumber": "company_number",
+                    "scene": "scene",
+                    "xiaozhaoId": "campaign_id",
+                }[key]
+            )
+            configured = (
+                str(configured_value).strip() if configured_value is not None else ""
+            )
+            if configured:
+                metadata[key] = configured
+
+        candidates = [document]
+        if not metadata.get("companyId") and not metadata.get("xiaozhaoId"):
+            soup = BeautifulSoup(document, "html.parser")
+            asset_hosts = {
+                str(value).lower()
+                for value in config.get(
+                    "metadata_allowed_hosts",
+                    [urlparse(base_url).netloc, "webapp.zhaopin.com", "common-bucket.zhaopin.cn"],
+                )
+                if str(value).strip()
+            }
+            for script in soup.find_all("script", src=True)[: int(config.get("metadata_asset_limit", 8))]:
+                asset_url = normalize_url(urljoin(base_url, str(script.get("src"))))
+                if urlparse(asset_url).hostname not in asset_hosts:
+                    continue
+                try:
+                    candidates.append(self._get(asset_url, {"config": {"request_interval_seconds": 0}}).text)
+                except (SourceSkipped, SourceCollectionError):
+                    continue
+        for candidate in candidates:
+            for key in ("companyId", "companyNumber", "scene", "xiaozhaoId"):
+                if metadata.get(key):
+                    continue
+                match = re.search(
+                    rf"[\"']?{key}[\"']?\s*:\s*[\"']([^\"']*)[\"']",
+                    candidate,
+                )
+                if match and match.group(1).strip():
+                    metadata[key] = clean_text(match.group(1))
+        return metadata
+
+    def _zhaopin_posting(
+        self,
+        job: dict[str, Any],
+        source: dict[str, Any],
+        listing_url: str,
+    ) -> RawPosting | None:
+        title = clean_text(str(job.get("title") or ""))
+        detail_html = str(job.get("detail") or job.get("jobDetail") or "")
+        detail = clean_text(BeautifulSoup(detail_html, "html.parser").get_text(" ", strip=True))
+        category_value = job.get("jobCategories")
+        if isinstance(category_value, list):
+            categories = "、".join(clean_text(str(value)) for value in category_value)
+        else:
+            categories = clean_text(str(category_value or ""))
+        city = clean_text(str(job.get("cityName") or job.get("workCity") or ""))
+        evidence_url = normalize_url(str(job.get("url") or "")) if job.get("url") else ""
+        if evidence_url:
+            allowed_hosts = {
+                str(value).lower()
+                for value in source["config"].get("allowed_hosts", [])
+            }
+            if urlparse(evidence_url).hostname not in allowed_hosts:
+                evidence_url = ""
+        if not title or not detail or not evidence_url:
+            return None
+        match_text = clean_text(f"{title} {categories} {city} {detail}")
+        include_patterns = source["config"].get("include_patterns", [])
+        if include_patterns and not any(
+            re.search(pattern, match_text, re.IGNORECASE)
+            for pattern in include_patterns
+        ):
+            return None
+        if not self._accept_candidate(match_text, source):
+            return None
+        job_number = clean_text(str(job.get("jobNumber") or job.get("id") or ""))
+        fields = [
+            f"职位类别：{categories}" if categories else "",
+            f"工作地点：{city}" if city else "",
+        ]
+        summary = clean_text("；".join(value for value in fields if value))
+        if detail:
+            summary = clean_text(f"{summary}；{detail}" if summary else detail)[:420]
+        return RawPosting(
+            title=title,
+            employer=source["publisher"],
+            source_url=evidence_url,
+            application_url=evidence_url,
+            text=match_text,
+            summary=summary or title,
+            published_date=extract_published_date(detail),
+            deadline_date=extract_deadline(detail),
+            location=city or extract_location_hint(detail),
+            external_id=job_number or self._external_id_from_url(evidence_url),
+            match_text=match_text,
+            official_evidence_url=evidence_url,
+        )
 
     def _mokahr_api_json(
         self,

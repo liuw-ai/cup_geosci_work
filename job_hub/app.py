@@ -42,6 +42,10 @@ from job_hub.national_sources import (
     national_source_matrix_rows,
     national_source_matrix_summary,
 )
+from job_hub.national_probes import (
+    load_national_source_probes,
+    national_source_probe_summary,
+)
 from job_hub.pipeline import JobPipeline
 from job_hub.profiles import (
     StudentProfile,
@@ -527,6 +531,18 @@ def create_app(settings: Settings | None = None) -> Flask:
                     "runtime_status": runtime_status,
                 },
                 "items": rows,
+            }
+        )
+
+    @app.get("/api/admin/national-source-probes")
+    @require_admin
+    def national_source_probes_api() -> Any:
+        """Show read-only endpoint probe evidence to administrators only."""
+        probes = load_national_source_probes()
+        return jsonify(
+            {
+                "summary": national_source_probe_summary(probes),
+                "items": probes["probes"],
             }
         )
 

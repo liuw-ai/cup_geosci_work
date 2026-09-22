@@ -40,6 +40,10 @@ from job_hub.national_sources import (
     national_source_matrix_rows,
     national_source_matrix_summary,
 )
+from job_hub.national_probes import (
+    load_national_source_probes,
+    national_source_probe_summary,
+)
 from job_hub.reports import publish_daily_report
 from job_hub.simulation import simulate_cohort
 from job_hub.source_targets import REQUIRED_ROLES
@@ -223,6 +227,15 @@ def main() -> None:
         help="可选：按当前采集状态筛选",
     )
     national_matrix_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整 JSON 写入指定文件",
+    )
+    national_probe_parser = subparsers.add_parser(
+        "national-source-probes",
+        help="输出国家能源体系公开入口/API探测证据",
+    )
+    national_probe_parser.add_argument(
         "--output",
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
@@ -469,6 +482,20 @@ def main() -> None:
                 "runtime_status": args.runtime_status,
             },
             "items": rows,
+        }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "national-source-probes":
+        probes = load_national_source_probes()
+        result = {
+            "summary": national_source_probe_summary(probes),
+            "items": probes["probes"],
         }
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)

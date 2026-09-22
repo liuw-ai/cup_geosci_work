@@ -38,7 +38,7 @@ def test_access_limited_sources_cannot_claim_successful_no_match() -> None:
         if item["source_id"] == "cnooc-career"
     )
     assert cnooc["observed_http_status"] == 200
-    assert cnooc["scan_conclusion"] == "structure_needs_adapter"
+    assert cnooc["scan_conclusion"] == "adapter_probe_failed"
 
 
 def test_national_matrix_contract_rejects_unknown_source_and_false_no_match() -> None:
