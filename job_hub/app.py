@@ -167,7 +167,11 @@ def create_app(settings: Settings | None = None) -> Flask:
 
     def active_report() -> tuple[dict[str, Any], bool]:
         report = database.latest_daily_report()
-        if report is not None:
+        # A frozen report is immutable, but the homepage must not keep showing
+        # yesterday's date when today's 20:00 publication has not happened yet.
+        # Build an explicit preview for the local calendar day and keep the
+        # older snapshot available through /daily/latest and its dated URL.
+        if report is not None and str(report.get("report_date")) == local_today(settings).isoformat():
             return report_for_display(report), False
         return report_for_display(build_daily_report(database, settings)), True
 

@@ -149,7 +149,7 @@ def test_upstream_category_uses_precise_student_facing_label() -> None:
     )
 
     assert job["category"] == "油气上游业主与研究机构"
-    assert job["category_label"] == "油气上游运营单位与研究机构"
+    assert job["category_label"] == "油气勘探开发运营与研究机构"
 
 
 def test_operator_affiliation_uses_employer_before_body_mentions() -> None:

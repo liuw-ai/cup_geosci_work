@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+from datetime import date
 
+import job_hub.app as app_module
 from job_hub.app import create_app
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
@@ -10,6 +12,24 @@ from job_hub.sources import RawPosting
 from job_hub.source_validation import load_source_validation_registry
 
 from conftest import make_settings, source
+
+
+def test_home_uses_today_preview_when_latest_frozen_report_is_stale(
+    tmp_path, monkeypatch
+) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    database.upsert_source(source())
+    monkeypatch.setattr(app_module, "local_today", lambda _settings: date(2026, 9, 23))
+    publish_daily_report(database, settings, date(2026, 9, 18))
+
+    response = app.test_client().get("/")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "2026年9月23日就业日报" in body
+    assert "今天的正式日报将在 20:00 固化发布" in body
 
 
 def test_public_pages_and_verified_import_api(tmp_path) -> None:

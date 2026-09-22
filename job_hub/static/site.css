@@ -212,6 +212,10 @@ small {
   gap: 32px;
 }
 
+.report-heading > div {
+  min-width: 0;
+}
+
 .report-band h1,
 .report-band .lede,
 .report-band .eyebrow {
@@ -227,6 +231,7 @@ small {
   margin-bottom: 0;
   color: var(--muted);
   font-size: 17px;
+  overflow-wrap: anywhere;
 }
 
 .eyebrow {

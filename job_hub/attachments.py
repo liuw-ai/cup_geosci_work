@@ -29,7 +29,13 @@ from bs4 import BeautifulSoup
 from job_hub.config import Settings
 from job_hub.contracts import is_http_url
 from job_hub.db import Database
-from job_hub.matching import extract_degree_levels, extract_major_tags, score_relevance
+from job_hub.matching import (
+    extract_deadline,
+    extract_degree_levels,
+    extract_major_tags,
+    extract_published_date,
+    score_relevance,
+)
 from job_hub.transport import configure_session, create_session
 
 
@@ -39,6 +45,7 @@ PARSER_VERSION = "attachments-v1"
 SUPPORTED_SUFFIXES = {
     ".pdf",
     ".csv",
+    ".xls",
     ".xlsx",
     ".xlsm",
     ".docx",
@@ -137,8 +144,24 @@ class OfficialAttachmentProcessor:
                 raise AttachmentSkipped("Announcement page exceeds the discovery size limit")
             self._assert_official_hosts(source, parent_url, response.url)
             self._robots_allowed(response.url)
-            html = response.content.decode(response.encoding or "utf-8", errors="replace")
+            encoding = response.encoding
+            if (
+                not encoding
+                or encoding.lower() in {"iso-8859-1", "ascii"}
+            ) and response.apparent_encoding:
+                encoding = response.apparent_encoding
+            html = response.content.decode(encoding or "utf-8", errors="replace")
         soup = BeautifulSoup(html, "html.parser")
+        page_text = " ".join(soup.get_text(" ", strip=True).split())
+        page_metadata = {
+            "employer": str(source.get("publisher") or ""),
+            "category": str(source.get("category") or ""),
+            "published_date": extract_published_date(page_text),
+            "deadline_date": extract_deadline(page_text),
+            "official_notice_title": (
+                soup.title.get_text(" ", strip=True) if soup.title else ""
+            ),
+        }
         discovered: list[dict[str, object]] = []
         seen: set[str] = set()
         from urllib.parse import urljoin
@@ -177,6 +200,7 @@ class OfficialAttachmentProcessor:
                             "discovered_from": parent_url,
                             "discovered_at": _utc_now(),
                             "discovery_only": True,
+                            **page_metadata,
                         },
                     }
                 )
@@ -334,6 +358,8 @@ class OfficialAttachmentProcessor:
         suffix = Path(path).suffix.lower()
         if suffix == ".pdf":
             return self._extract_pdf(path)
+        if suffix == ".xls":
+            return self._extract_legacy_workbook(path)
         if suffix in {".xlsx", ".xlsm"}:
             return self._extract_workbook(path)
         if suffix == ".csv":
@@ -387,7 +413,16 @@ class OfficialAttachmentProcessor:
         except ImportError as error:
             raise AttachmentSkipped("Excel parser openpyxl is not installed") from error
         try:
-            workbook = load_workbook(filename=path, read_only=True, data_only=True)
+            workbook_input = (
+                io.BytesIO(path.read_bytes())
+                if path.suffix.lower() == ".xls"
+                else path
+            )
+            workbook = load_workbook(
+                filename=workbook_input,
+                read_only=True,
+                data_only=True,
+            )
         except Exception as error:
             raise AttachmentProcessingError(f"Excel extraction failed: {error}") from error
         rows: list[dict[str, object]] = []
@@ -404,9 +439,14 @@ class OfficialAttachmentProcessor:
                         break
                 if not raw_rows:
                     continue
-                header = self._workbook_header(raw_rows[0])
-                data_rows = raw_rows[1:] if header else raw_rows
-                for offset, values in enumerate(data_rows, start=2 if header else 1):
+                header, data_start = self._workbook_header_info(raw_rows)
+                data_rows = raw_rows[data_start:] if header else raw_rows
+                carry: dict[int, str] = {}
+                for offset, values in enumerate(
+                    data_rows,
+                    start=data_start + 1 if header else 1,
+                ):
+                    values = self._expand_merged_values(values, header, carry)
                     cells = {
                         (header[index] if header and index < len(header) and header[index] else f"列{index + 1}"): value
                         for index, value in enumerate(values)
@@ -438,6 +478,103 @@ class OfficialAttachmentProcessor:
                 "row_count": len(rows),
                 "extraction_mode": "workbook_rows",
                 "extraction_note": "表格行已保存为私有待核验记录",
+            },
+        }
+
+    def _extract_legacy_workbook(self, path: Path) -> dict[str, object]:
+        """Extract legacy BIFF ``.xls`` files used by government portals.
+
+        A large share of provincial recruitment tables still uses the binary
+        Excel format.  Keep it on the same private review path as XLSX: rows
+        are evidence candidates, not automatically published vacancies.
+        """
+        # A number of government CMS instances keep an ``.xls`` display name
+        # while serving an OOXML workbook.  Detect the ZIP signature before
+        # handing the bytes to xlrd, otherwise a valid table is reported as a
+        # parser failure.
+        if path.read_bytes()[:2] == b"PK":
+            extracted = self._extract_workbook(path)
+            metadata = dict(extracted["metadata"])
+            metadata["parser"] = "openpyxl (mislabelled .xls)"
+            metadata["extraction_note"] = (
+                "文件扩展名为 .xls，但内容为 OOXML；已用 openpyxl 提取并保留原始哈希"
+            )
+            extracted["metadata"] = metadata
+            return extracted
+        try:
+            import xlrd
+        except ImportError as error:
+            raise AttachmentSkipped("Legacy Excel parser xlrd is not installed") from error
+        try:
+            workbook = xlrd.open_workbook(filename=str(path), on_demand=True)
+        except Exception as error:
+            raise AttachmentProcessingError(
+                f"Legacy Excel extraction failed: {error}"
+            ) from error
+        rows: list[dict[str, object]] = []
+        sheet_count = 0
+        try:
+            for sheet in workbook.sheets():
+                sheet_count += 1
+                raw_rows: list[list[str]] = []
+                for row_number in range(sheet.nrows):
+                    values = [
+                        self._cell_text(sheet.cell_value(row_number, column))
+                        for column in range(sheet.ncols)
+                    ]
+                    if any(values):
+                        raw_rows.append(values)
+                    if len(raw_rows) >= self.settings.attachment_max_rows + 1:
+                        break
+                if not raw_rows:
+                    continue
+                header, data_start = self._workbook_header_info(raw_rows)
+                data_rows = raw_rows[data_start:] if header else raw_rows
+                carry: dict[int, str] = {}
+                for offset, values in enumerate(
+                    data_rows,
+                    start=data_start + 1 if header else 1,
+                ):
+                    values = self._expand_merged_values(values, header, carry)
+                    cells = {
+                        (
+                            header[index]
+                            if header and index < len(header) and header[index]
+                            else f"列{index + 1}"
+                        ): value
+                        for index, value in enumerate(values)
+                        if value
+                    }
+                    if not cells:
+                        continue
+                    rows.append(
+                        {
+                            "sheet_name": sheet.name,
+                            "row_number": offset,
+                            "row_kind": "tabular",
+                            "cells": cells,
+                            "row_text": "；".join(
+                                f"{key}：{value}" for key, value in cells.items()
+                            ),
+                            "extraction_confidence": "high",
+                        }
+                    )
+                    if len(rows) >= self.settings.attachment_max_rows:
+                        break
+                if len(rows) >= self.settings.attachment_max_rows:
+                    break
+        finally:
+            release = getattr(workbook, "release_resources", None)
+            if callable(release):
+                release()
+        return {
+            "rows": rows,
+            "metadata": {
+                "parser": "xlrd",
+                "sheet_count": sheet_count,
+                "row_count": len(rows),
+                "extraction_mode": "workbook_rows",
+                "extraction_note": "XLS 表格行已保存为私有待核验记录",
             },
         }
 
@@ -551,10 +688,20 @@ class OfficialAttachmentProcessor:
                 if len(line.strip()) >= 4 and any(word in line for word in ("招聘", "岗位", "工程师", "研究员", "教师")):
                     title = line.strip()[:160]
                     break
+        if title and major and title in {"专业技术", "专业技术岗", "专业技术岗位"}:
+            title = f"{title}（{major[:100]}）"
         relevant_text = " ".join(filter(None, (title, major, degree, text)))
         if not title or not (extract_major_tags(relevant_text) or extract_degree_levels(relevant_text)):
             return None
-        employer = employer or str(artifact.get("metadata", {}).get("employer") or "官方公告单位")
+        metadata = artifact.get("metadata") or {}
+        source = self.database.get_source(str(artifact.get("source_id") or "")) or {}
+        employer = employer or str(
+            metadata.get("employer")
+            or source.get("publisher")
+            or "官方公告单位"
+        )
+        published = published or str(metadata.get("published_date") or "") or None
+        deadline = deadline or str(metadata.get("deadline_date") or "") or None
         score, _, major_tags = score_relevance(
             relevant_text,
             "A",
@@ -622,6 +769,58 @@ class OfficialAttachmentProcessor:
         if score < 1:
             return []
         return [cell or f"列{index + 1}" for index, cell in enumerate(row)]
+
+    @classmethod
+    def _workbook_header_info(cls, rows: list[list[str]]) -> tuple[list[str], int]:
+        """Find a possibly multi-row header and return its first data index."""
+        for index, row in enumerate(rows[:8]):
+            header = cls._workbook_header(row)
+            if not header:
+                continue
+            end = index + 1
+            while end < len(rows):
+                candidate = rows[end]
+                score = sum(
+                    any(
+                        keyword in cell
+                        for keyword in ("岗位", "职位", "单位", "专业", "学历", "地点", "报名", "截止", "学位")
+                    )
+                    for cell in candidate
+                    if cell
+                )
+                # A data row can contain the word “专业”; continuation rows
+                # usually expose at least two field labels and no job code.
+                has_code = any(re.search(r"20\d{2}\d+", cell) for cell in candidate if cell)
+                if score < 2 or has_code:
+                    break
+                for column, value in enumerate(candidate):
+                    if not value:
+                        continue
+                    parent = header[column] if column < len(header) else ""
+                    if not parent or parent.startswith("列"):
+                        header[column] = value
+                    elif value not in parent:
+                        header[column] = value
+                end += 1
+            return header, end
+        return [], 0
+
+    @staticmethod
+    def _expand_merged_values(
+        values: list[str],
+        header: list[str],
+        carry: dict[int, str],
+    ) -> list[str]:
+        """Forward-fill only organizational columns merged in official tables."""
+        expanded = list(values)
+        carry_columns = {"主管部门", "招聘单位", "用人单位", "招聘机构", "单位名称"}
+        for index, value in enumerate(expanded):
+            label = header[index] if index < len(header) else ""
+            if value:
+                carry[index] = value
+            elif label in carry_columns and index in carry:
+                expanded[index] = carry[index]
+        return expanded
 
     @staticmethod
     def _cell_text(value: object) -> str:

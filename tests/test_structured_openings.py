@@ -114,3 +114,95 @@ def test_structured_source_contract_requires_field_selectors() -> None:
 
     with pytest.raises(ContractValidationError, match="opening_title_selector"):
         validate_source_registry([source])
+
+
+def test_official_role_split_notice_creates_one_record_per_matching_role(
+    tmp_path, monkeypatch
+) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = next(
+        item
+        for item in json.loads(
+            (PROJECT_ROOT / "data" / "sources.json").read_text(encoding="utf-8")
+        )
+        if item["id"] == "cmgb-geoexp-recruitment"
+    )
+    fixture = (
+        PROJECT_ROOT / "tests" / "fixtures" / "domestic" / "geoexp_recruitment.html"
+    ).read_text(encoding="utf-8")
+    listing_url = source["config"]["listing_urls"][0]
+    listing_calls = 0
+
+    def get(url: str, _source: dict[str, object]) -> FakeResponse:
+        nonlocal listing_calls
+        if url == listing_url:
+            listing_calls += 1
+            if listing_calls == 1:
+                return FakeResponse(
+                    '<a href="https://www.geoexp.cn/contact/view_272.html">人才招聘</a>',
+                    listing_url,
+                )
+        return FakeResponse(fixture, "https://www.geoexp.cn/contact/view_272.html")
+
+    monkeypatch.setattr(collector, "_get", get)
+    monkeypatch.setattr(collector, "_wait", lambda _source: None)
+
+    postings = collector.collect(source)
+
+    assert len(postings) == 5
+    assert [posting.title for posting in postings] == [
+        "工程技术员（物探偏航重磁、航电方向、地震专业、矿床地质专业、地质大数据专业）",
+        "工程技术员（遥感地质相关专业）",
+        "工程技术员（测绘工程相关专业）",
+        "工程技术员（测绘工程、地理信息相关专业）",
+        "工程技术员（物探相关专业）",
+    ]
+    assert all(posting.official_evidence_url == postings[0].source_url for posting in postings)
+    assert all("市场专员" not in posting.title for posting in postings)
+    assert all("本科" in posting.text or "研究生" in posting.text for posting in postings)
+    assert all("资源勘查分公司" in posting.employer or "城市治理分公司" in posting.employer for posting in postings)
+    assert postings[-1].employer == "中国冶金地质总局地球物理勘查院 - 城市治理分公司"
+    assert len({posting.external_id for posting in postings}) == 5
+
+
+def test_html_notice_body_hiring_phrase_does_not_hide_a_real_vacancy(
+    tmp_path, monkeypatch
+) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "html-body-phrase",
+        "name": "正文短语回归来源",
+        "publisher": "官方地质单位",
+        "homepage_url": "https://official.example/jobs/",
+        "source_type": "html_notice",
+        "category": "自然资源、地调与地勘",
+        "source_tier": "A",
+        "config": {
+            "listing_urls": ["https://official.example/jobs/"],
+            "allowed_hosts": ["official.example"],
+            "listing_selector": "a",
+            "detail_path_patterns": ["/jobs/\\d+"],
+            "title_selector": "h1",
+            "content_selector": "article",
+            "require_recruitment_word": True,
+            "require_major_match": True,
+            "exclude_patterns": ["拟录用|采购"],
+            "minimum_relevance": 0,
+            "max_items": 4,
+            "request_interval_seconds": 0,
+        },
+    }
+    listing = '<a href="https://official.example/jobs/1">地质工程师公开招聘公告</a>'
+    detail = (
+        "<h1>地质工程师公开招聘公告</h1>"
+        "<article>地质工程专业，硕士及以上。招聘流程完成后将公示拟录用人员。</article>"
+    )
+
+    def get(url: str, _source: dict[str, object]) -> FakeResponse:
+        return FakeResponse(listing if url.endswith("/jobs/") else detail, url)
+
+    monkeypatch.setattr(collector, "_get", get)
+    postings = collector.collect(source)
+
+    assert len(postings) == 1
+    assert postings[0].title == "地质工程师公开招聘公告"

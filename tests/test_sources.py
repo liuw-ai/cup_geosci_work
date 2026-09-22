@@ -78,6 +78,56 @@ def test_cupb_adapter_keeps_vacancies_and_skips_recruitment_events(tmp_path, mon
     assert postings[0].deadline_date == "2026-12-10"
 
 
+def test_cupb_adapter_scans_past_irrelevant_listing_cards(tmp_path, monkeypatch) -> None:
+    settings = make_settings(tmp_path)
+    collector = OfficialSourceCollector(settings)
+    source = {
+        "id": "cupb-career",
+        "name": "中国石油大学（北京）就业信息网",
+        "publisher": "中国石油大学（北京）",
+        "homepage_url": "https://career.cup.edu.cn/",
+        "source_type": "cupb_career",
+        "category": "能源、工程与地学拓展",
+        "source_tier": "B",
+        "config": {
+            "detail_path_patterns": ["/campus/view/id/"],
+            "exclude_patterns": ["招聘会", "宣讲会"],
+            "max_items": 1,
+            "candidate_limit": 4,
+            "request_interval_seconds": 0,
+        },
+    }
+    homepage = "https://career.cup.edu.cn/"
+    irrelevant_url = "https://career.cup.edu.cn/campus/view/id/110"
+    relevant_url = "https://career.cup.edu.cn/campus/view/id/111"
+    responses = {
+        homepage: FakeResponse(
+            text=(
+                f'<a href="{irrelevant_url}">某企业岗位</a>'
+                f'<a href="{relevant_url}">某地勘单位招聘</a>'
+            ),
+            url=homepage,
+        ),
+        irrelevant_url: FakeResponse(
+            text='<div class="details-title"><h5>某企业岗位</h5></div>'
+            '<main class="zp-details">公司介绍和福利信息。</main>',
+            url=irrelevant_url,
+        ),
+        relevant_url: FakeResponse(
+            text='<div class="details-title"><h5>某地勘单位招聘</h5></div>'
+            '<main class="zp-details">招聘地质工程、资源勘查工程硕士毕业生。</main>',
+            url=relevant_url,
+        ),
+    }
+
+    monkeypatch.setattr(collector, "_get", lambda url, _source: responses[url])
+
+    postings = collector.collect(source)
+
+    assert len(postings) == 1
+    assert postings[0].source_url == relevant_url
+
+
 def test_cupb_adapter_uses_structured_job_table_as_matching_evidence(tmp_path, monkeypatch) -> None:
     settings = make_settings(tmp_path)
     collector = OfficialSourceCollector(settings)
@@ -176,6 +226,47 @@ def test_cupb_adapter_decodes_public_embedded_announcement_content(tmp_path) -> 
     assert posting.application_url == "https://official.example.cn/apply"
     assert "资源勘查工程" in (posting.match_text or "")
     assert "硕士" in posting.text
+
+
+def test_cupb_adapter_keeps_free_form_major_evidence_and_real_employer(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    collector = OfficialSourceCollector(settings)
+    source = {
+        "id": "cupb-career",
+        "name": "中国石油大学（北京）就业信息网",
+        "publisher": "中国石油大学（北京）",
+        "homepage_url": "https://career.cup.edu.cn/",
+        "source_type": "cupb_career",
+        "category": "能源、工程与地学拓展",
+        "source_tier": "B",
+        "config": {
+            "exclude_patterns": ["招聘会", "宣讲会", "通知"],
+            "request_interval_seconds": 0,
+        },
+    }
+    document = (
+        '<title>赣南实验室2026年招聘公告</title>'
+        '<div class="title-message"><span class="name">北京南方国际人力资源顾问有限公司</span></div>'
+        '<div class="common-view">发布时间：2026年09月20日 过期时间：2026年12月19日</div>'
+        '<main class="zp-details">'
+        '赣南实验室面向关键矿产开发招聘。'
+        '关键矿产安全高效开采团队要求地质工程、岩土工程相关博士学位。'
+        '工作地点：江西省赣州市 培养机制：项目博士后。'
+        '</main>'
+    )
+
+    posting = collector._extract_cupb_detail(
+        document,
+        "https://career.cup.edu.cn/campus/view/id/104",
+        source,
+        "赣南实验室2026年招聘公告",
+    )
+
+    assert posting is not None
+    assert posting.employer == "赣南实验室"
+    assert posting.deadline_date == "2026-12-19"
+    assert posting.location == "江西省赣州市"
+    assert "地质工程" in (posting.match_text or "")
 
 
 def test_cas_adapter_reads_employer_location_and_detail_fields(tmp_path, monkeypatch) -> None:

@@ -321,6 +321,39 @@ def test_audit_accepts_official_host_and_rejects_no_integrity_issues(tmp_path) -
     assert result["issues"] == []
 
 
+def test_audit_allows_explicit_multi_role_notice_but_not_implicit_duplicates(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    multi_role_source = source()
+    multi_role_source["config"] = {
+        **multi_role_source["config"],
+        "allow_shared_source_url": True,
+    }
+    database.upsert_source(multi_role_source)
+    pipeline = JobPipeline(settings, database)
+
+    for index, title in enumerate(("地质工程师 A", "地质工程师 B"), start=1):
+        posting = RawPosting(
+            title=title,
+            employer="测试能源集团",
+            source_url="https://careers.example.edu.cn/jobs/one-notice",
+            application_url=None,
+            text="面向地质工程硕士的官方招聘岗位。",
+            summary="同一公告中的两个独立岗位。",
+            published_date=None,
+            deadline_date="2099-12-31",
+            location="北京",
+            external_id=f"notice-role-{index}",
+        )
+        database.save_job(pipeline.normalize_posting(posting, multi_role_source))
+
+    result = audit_database(database, settings, date(2026, 9, 18))
+
+    assert result["ok"] is True
+    assert result["issues"] == []
+
+
 def test_unexpected_source_error_is_recorded_as_a_failed_run(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)

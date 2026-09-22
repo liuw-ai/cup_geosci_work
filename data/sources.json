@@ -41,8 +41,28 @@
         "招标",
         "中标"
       ],
+      "listing_exclude_patterns": [
+        "招聘会",
+        "宣讲会",
+        "双选会",
+        "双选",
+        "邀请函",
+        "活动",
+        "讲座",
+        "就业补贴",
+        "生涯",
+        "就业指导",
+        "签约",
+        "调查",
+        "征集",
+        "采购",
+        "招标",
+        "中标"
+      ],
+      "detail_exclude_patterns": ["采购", "招标", "中标"],
       "minimum_relevance": 38,
       "max_items": 28,
+      "candidate_limit": 120,
       "undated_open_window_days": 45,
       "require_detail_content": true,
       "minimum_detail_characters": 80,
@@ -607,6 +627,44 @@
       "request_interval_seconds": 1.2,
       "allowed_hosts": ["join.zjky.cn"],
       "note": "紫金矿业官网链接的官方校园招聘门户；仅采集公开岗位，不提交申请。"
+    }
+  },
+  {
+    "id": "cmgb-geoexp-recruitment",
+    "name": "中国冶金地质总局地球物理勘查院人才招聘",
+    "publisher": "中国冶金地质总局地球物理勘查院",
+    "homepage_url": "https://www.geoexp.cn/contact/view_272.html",
+    "source_type": "html_notice",
+    "category": "自然资源、地调与地勘",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "listing_urls": [
+        "https://www.geoexp.cn/contact/view_272.html"
+      ],
+      "allowed_hosts": ["www.geoexp.cn", "geoexp.cn"],
+      "listing_selector": "a[href*='/contact/view_272.html']",
+      "detail_path_patterns": ["/contact/view_272\\.html"],
+      "title_selector": "h1, title",
+      "content_selector": ".content",
+      "role_content_selector": ".content",
+      "role_block_selector": "p",
+      "split_role_blocks": true,
+      "role_title_pattern": "^(?:\\d+[、.．)]\\s*)?(?:工程技术员|市场专员|市场区域经理|分析检测员|质控员)",
+      "role_title_prefix_pattern": "^\\s*\\d+[、.．)]\\s*",
+      "role_include_patterns": [
+        "地质|物探|遥感|测绘|地理信息|地球物理|勘探|资源|矿床"
+      ],
+      "allow_shared_source_url": true,
+      "employer_hint": "中国冶金地质总局地球物理勘查院",
+      "append_unit_to_employer": true,
+      "require_recruitment_word": true,
+      "require_major_match": false,
+      "minimum_relevance": 38,
+      "max_items": 12,
+      "request_interval_seconds": 1.2,
+      "undated_open_window_days": null,
+      "note": "中国冶金地质总局地球物理勘查院官方人才招聘页。页面将多个工程技术岗位写在同一公告中，适配器只按明确的岗位段落拆分；市场、化学检测和质控岗位因专业不匹配不会发布。页面未给出统一截止日期，保留官方原文并由管理员定期复核。"
     }
   },
   {

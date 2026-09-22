@@ -801,19 +801,182 @@ class OfficialSourceCollector:
         for title_hint, detail_url in links:
             try:
                 detail_response = self._get(detail_url, source)
-                posting = self._extract_html_detail(
-                    detail_response.text,
-                    detail_response.url,
-                    source,
-                    title_hint,
-                )
-                if posting:
-                    postings.append(posting)
+                if source["config"].get("split_role_blocks"):
+                    postings.extend(
+                        self._extract_role_split_details(
+                            detail_response.text,
+                            detail_response.url,
+                            source,
+                            title_hint,
+                        )
+                    )
+                else:
+                    posting = self._extract_html_detail(
+                        detail_response.text,
+                        detail_response.url,
+                        source,
+                        title_hint,
+                    )
+                    if posting:
+                        postings.append(posting)
             except SourceSkipped:
                 continue
             except (requests.RequestException, SourceCollectionError):
                 continue
             self._wait(source)
+        return postings
+
+    def _extract_role_split_details(
+        self,
+        document: str,
+        source_url: str,
+        source: dict[str, Any],
+        title_hint: str,
+    ) -> list[RawPosting]:
+        """Split one official notice into independently searchable vacancies.
+
+        Many state-owned units publish a single HTML notice containing a list of
+        roles instead of one page per role.  Treating that page as one vacancy
+        loses the unit, degree and major evidence for every other role.  This
+        adapter only splits explicitly configured paragraph blocks; it does not
+        guess rows from arbitrary prose.  A source is enabled only after its
+        selectors and role-heading pattern have been verified against a fixture.
+        """
+        soup = BeautifulSoup(document, "html.parser")
+        config = source["config"]
+        content_selector = str(
+            config.get("role_content_selector")
+            or config.get("content_selector")
+            or "article, main, body"
+        )
+        content_node = self._select_first(soup, content_selector)
+        if content_node is None:
+            raise SourceCollectionError(
+                "Role-split notice has no configured content container"
+            )
+        for selector in config.get("remove_selectors", []):
+            for node in content_node.select(selector):
+                node.decompose()
+
+        block_selector = str(config.get("role_block_selector") or "p")
+        blocks = [
+            clean_text(node.get_text(" ", strip=True))
+            for node in content_node.select(block_selector)
+        ]
+        blocks = [block for block in blocks if block]
+        if not blocks:
+            raise SourceCollectionError(
+                "Role-split notice exposed no non-empty configured blocks"
+            )
+
+        role_pattern = str(config.get("role_title_pattern") or "").strip()
+        if not role_pattern:
+            raise SourceCollectionError("Role-split notice requires role_title_pattern")
+        try:
+            role_heading = re.compile(role_pattern, re.IGNORECASE)
+        except re.error as error:
+            raise SourceCollectionError(
+                f"Invalid role_title_pattern: {error}"
+            ) from error
+        role_indexes = [
+            index for index, block in enumerate(blocks) if role_heading.search(block)
+        ]
+        if not role_indexes:
+            raise SourceCollectionError(
+                "Role-split notice exposed no matching role headings"
+            )
+
+        page_text = clean_text(" ".join(blocks))
+        page_title_node = self._select_first(
+            soup,
+            str(config.get("title_selector") or "h1, title"),
+        )
+        page_title = clean_text(
+            page_title_node.get_text(" ", strip=True)
+            if page_title_node is not None
+            else title_hint
+        )
+        published_date = self._published_date_from_meta(soup) or extract_published_date(
+            page_text
+        )
+        source_url = normalize_url(source_url)
+        include_patterns = [
+            str(pattern).strip()
+            for pattern in config.get("role_include_patterns", [])
+            if str(pattern).strip()
+        ]
+        postings: list[RawPosting] = []
+        for position, start in enumerate(role_indexes, start=1):
+            end = role_indexes[position] if position < len(role_indexes) else len(blocks)
+            role_blocks = blocks[start:end]
+            role_heading_text = role_blocks[0]
+            role_text = clean_text(" ".join(role_blocks))
+            if include_patterns and not any(
+                re.search(pattern, role_text, re.IGNORECASE)
+                for pattern in include_patterns
+            ):
+                continue
+            combined = clean_text(f"{page_title} {role_text}")
+            if not self._accept_candidate(combined, source):
+                continue
+            title = re.sub(
+                str(config.get("role_title_prefix_pattern") or r"^\s*\d+[、.．)]\s*"),
+                "",
+                role_heading_text,
+            ).strip()
+            if not title:
+                title = role_heading_text
+            unit = ""
+            for role_block in role_blocks:
+                if "工作单位" not in role_block:
+                    continue
+                unit = clean_text(
+                    re.sub(r"^.*?工作单位\s*[:：]\s*", "", role_block)
+                )
+                # Some government CMS pages concatenate the next section into
+                # the same paragraph. Keep only the value of the labelled
+                # field; otherwise salary/benefit prose becomes part of the
+                # employer name shown to students.
+                unit = re.split(
+                    r"\s*(?:[一二三四五六七八九十]+、|\d+[、.．)]\s*)?"
+                    r"(?:薪资待遇|福利待遇|报名方式|联系方式|招聘程序)\b",
+                    unit,
+                    maxsplit=1,
+                )[0].strip(" ：:；;")
+                break
+            employer = clean_text(
+                str(config.get("employer_hint") or source["publisher"])
+            )
+            if unit and config.get("append_unit_to_employer", True):
+                employer = f"{employer} - {unit}"
+            location = config.get("location_hint")
+            if not location:
+                location = self._label_value(
+                    role_text,
+                    "工作地点",
+                    ("岗位职责", "任职要求", "学历要求", "工作单位", "报名"),
+                )
+            postings.append(
+                RawPosting(
+                    title=title,
+                    employer=employer,
+                    source_url=source_url,
+                    application_url=self._find_application_url(soup, source_url),
+                    text=combined,
+                    summary=role_text[:420],
+                    published_date=published_date,
+                    deadline_date=extract_deadline(role_text),
+                    location=clean_text(str(location or "")) or None,
+                    external_id=(
+                        f"{self._external_id_from_url(source_url)}#role-{position}-"
+                        f"{stable_hash(title)[:16]}"
+                    ),
+                    match_text=role_text,
+                    official_evidence_url=source_url,
+                )
+            )
+            if len(postings) >= self._item_limit(source):
+                break
         return postings
 
     def _collect_cupb_career(self, source: dict[str, Any]) -> list[RawPosting]:
@@ -825,6 +988,18 @@ class OfficialSourceCollector:
             [r"/(?:campus|job)/view/", r"/news/view/.+tag/xwzp"],
         )
         item_limit = self._item_limit(source)
+        # A listing page is usually ordered by publication time, not by
+        # relevance to geoscience.  Do not stop after the first few cards: the
+        # first page can contain banking, teaching, events and energy postings
+        # in an arbitrary mix.  Collect a bounded candidate window, then apply
+        # the professional/official-content gates on each detail page.
+        try:
+            candidate_limit = max(
+                item_limit,
+                min(int(config.get("candidate_limit", item_limit * 4)), 200),
+            )
+        except (TypeError, ValueError):
+            candidate_limit = min(max(item_limit, item_limit * 4), 200)
         candidates: list[tuple[str, str]] = []
         seen: set[str] = set()
 
@@ -848,15 +1023,25 @@ class OfficialSourceCollector:
                     for pattern in detail_patterns
                 ):
                     continue
-                if not self._accept_candidate(title, source):
+                # Listing titles are discovery hints only.  Apply configured
+                # exclusions here to skip obvious events, but do not require a
+                # major keyword until the detail body/table has been read.
+                listing_excludes = config.get(
+                    "listing_exclude_patterns",
+                    config.get("exclude_patterns", []),
+                )
+                if self._is_non_vacancy_notice_title(title) or any(
+                    re.search(pattern, title, re.IGNORECASE)
+                    for pattern in listing_excludes
+                ):
                     continue
                 if detail_url in seen:
                     continue
                 seen.add(detail_url)
                 candidates.append((title, detail_url))
-                if len(candidates) >= item_limit:
+                if len(candidates) >= candidate_limit:
                     break
-            if len(candidates) >= item_limit:
+            if len(candidates) >= candidate_limit:
                 break
 
         postings: list[RawPosting] = []
@@ -871,6 +1056,8 @@ class OfficialSourceCollector:
                 )
                 if posting:
                     postings.append(posting)
+                    if len(postings) >= item_limit:
+                        break
             except SourceSkipped:
                 continue
             except (requests.RequestException, SourceCollectionError):
@@ -2065,11 +2252,21 @@ class OfficialSourceCollector:
             content_node.get_text(" ", strip=True) if content_node else document
         )
         combined = f"{title} {body_text}"
-        if not self._accept_candidate(
-            combined,
-            source,
-            exclude_patterns=config.get("detail_exclude_patterns"),
+        # Exclusion phrases such as “拟录用” and “采购” are reliable for a
+        # listing title, but they routinely occur in the explanatory body of a
+        # genuine vacancy (for example, the sentence describing the final
+        # hiring step).  Apply them to the title only and keep full-body text
+        # for professional relevance evidence.
+        detail_exclude_patterns = config.get(
+            "detail_exclude_patterns",
+            config.get("exclude_patterns", []),
+        )
+        if any(
+            re.search(str(pattern), title, re.IGNORECASE)
+            for pattern in detail_exclude_patterns
         ):
+            return None
+        if not self._accept_candidate(combined, source, exclude_patterns=[]):
             return None
         application_url = self._find_application_url(soup, source_url)
         published_date = self._published_date_from_meta(soup) or extract_published_date(
@@ -2116,13 +2313,24 @@ class OfficialSourceCollector:
             ".details-title h5, .title-message h5, h1, h2"
         )
         title = clean_text(
-            title_node.get_text(" ", strip=True) if title_node else title_hint
+            title_node.get_text(" ", strip=True)
+            if title_node
+            else (soup.title.get_text(" ", strip=True) if soup.title else title_hint)
         )
         embedded_html = self._decode_cupb_embedded_content(document)
         content_soup = BeautifulSoup(embedded_html or document, "html.parser")
-        content_node = content_soup.select_one(
+        content_candidates = content_soup.select(
             ".aContent, .zp-details, .common-view, main, article"
-        ) or content_soup
+        )
+        # Portal templates often render a short metadata block before the real
+        # article body.  ``select_one`` would choose that first block and lose
+        # the professional qualification and location evidence.  Choose the
+        # substantive candidate while retaining the same allowed selectors.
+        content_node = max(
+            content_candidates,
+            key=lambda node: len(node.get_text(" ", strip=True)),
+            default=content_soup,
+        )
         if content_node:
             for selector in (
                 ".common-view-tips",
@@ -2143,7 +2351,22 @@ class OfficialSourceCollector:
         # Keep it for dates, but do not let those unrelated words reject a genuine
         # job notice through source-level exclusion patterns.
         combined = clean_text(f"{title} {body_text}")
-        if not self._accept_candidate(combined, source):
+        listing_excludes = source["config"].get(
+            "listing_exclude_patterns",
+            source["config"].get("exclude_patterns", []),
+        )
+        if self._is_non_vacancy_notice_title(title) or any(
+            re.search(pattern, title, re.IGNORECASE) for pattern in listing_excludes
+        ):
+            return None
+        # Detail-level exclusions are intentionally narrower than discovery
+        # exclusions.  Words such as “通知” and “活动” occur in the portal's
+        # shared header and must not erase a valid official announcement.
+        if not self._accept_candidate(
+            combined,
+            source,
+            exclude_patterns=source["config"].get("detail_exclude_patterns", []),
+        ):
             return None
         if (
             source["config"].get("require_detail_content")
@@ -2154,19 +2377,35 @@ class OfficialSourceCollector:
             # public detail page exposes substantive recruitment content.
             return None
         employer_node = soup.select_one(".title-message .name")
-        employer = clean_text(
+        employer_candidate = clean_text(
             employer_node.get_text(" ", strip=True) if employer_node else ""
-        ) or self._employer_from_title(title, source["publisher"])
+        )
+        # The CUPB portal may display the posting account (for example a
+        # third-party HR service) in this field rather than the hiring unit.
+        # Prefer the unit named in the official title when the account clearly
+        # looks like an intermediary; never expose the intermediary as the
+        # employer merely because it owns the portal account.
+        intermediary_markers = ("人力资源", "招聘服务", "就业服务", "人才服务")
+        if not employer_candidate or any(
+            marker in employer_candidate for marker in intermediary_markers
+        ):
+            employer_candidate = self._employer_from_title(title, source["publisher"])
+        employer = employer_candidate or source["publisher"]
         fields = self._cupb_table_fields(content_soup)
         matching_fields = " ".join(
             value
             for key, value in fields.items()
             if key in {"岗位", "专业范围", "面向对象", "学历要求"}
         )
+        major_evidence = self._cupb_major_evidence(body_text)
         # CUPB notices often start with a long employer introduction. When their
         # structured job table is present, use it as matching evidence so a unit's
         # industry description cannot masquerade as a candidate's qualification.
-        match_text = clean_text(f"{title} {matching_fields}") or combined
+        # If a notice has no table, retain only bounded sentences that explicitly
+        # mention a recognized geoscience major/degree instead of the entire
+        # employer introduction.
+        match_evidence = matching_fields or major_evidence
+        match_text = clean_text(f"{title} {match_evidence}") or combined
         summary_fields = [
             f"{key}：{value}"
             for key, value in fields.items()
@@ -2186,8 +2425,30 @@ class OfficialSourceCollector:
                 extract_published_date(metadata_text)
                 or extract_published_date(body_text)
             ),
-            deadline_date=extract_deadline(body_text),
-            location=fields.get("工作地点"),
+            deadline_date=extract_deadline(clean_text(f"{metadata_text} {body_text}")),
+            location=(
+                fields.get("工作地点")
+                or self._label_value(
+                    body_text,
+                    "工作地点",
+                    (
+                        "岗位职责",
+                        "任职要求",
+                        "学历要求",
+                        "招聘人数",
+                        "薪酬",
+                        "报名",
+                        "报名方式",
+                        "栏目分类",
+                        "需求学科",
+                        "截止",
+                        "联系",
+                        "培养机制",
+                        "员工福利",
+                        "福利待遇",
+                    ),
+                )
+            ) or self._cupb_location_evidence(body_text),
             external_id=self._external_id_from_url(source_url),
             match_text=match_text,
         )
@@ -2248,6 +2509,36 @@ class OfficialSourceCollector:
             if value:
                 fields[label] = value
         return fields
+
+    @staticmethod
+    def _cupb_major_evidence(text: str) -> str:
+        """Keep only explicit qualification snippets from a free-form notice."""
+        segments = [
+            clean_text(segment)
+            for segment in re.split(r"[。！？；;\n]", text)
+            if clean_text(segment)
+        ]
+        selected = [segment for segment in segments if extract_major_tags(segment)]
+        if not selected:
+            return ""
+        return clean_text("；".join(selected))[:1800]
+
+    @staticmethod
+    def _cupb_location_evidence(text: str) -> str | None:
+        """Extract an explicitly stated institution/work location from prose."""
+        patterns = (
+            r"(?:注册在|位于|坐落于|驻地为|工作地点为|工作地点是)\s*"
+            r"([^，。；;\n]{2,40})",
+        )
+        for pattern in patterns:
+            match = re.search(pattern, text)
+            if match:
+                value = clean_text(match.group(1)).strip(" ：:")
+                # Do not treat a following process sentence as a location.
+                value = re.split(r"\s+(?:5年|招聘|培养|员工|岗位|报名)", value, maxsplit=1)[0]
+                if value:
+                    return value[:80]
+        return None
 
     def _extract_cas_job_detail(
         self,

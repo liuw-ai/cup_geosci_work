@@ -36,7 +36,7 @@ CATEGORY_ORDER = (
 # Keep the historical storage/filter key stable while using precise language
 # in the student-facing UI.  Existing URLs and SQLite rows remain compatible.
 CATEGORY_DISPLAY_NAMES = {
-    "油气上游业主与研究机构": "油气上游运营单位与研究机构",
+    "油气上游业主与研究机构": "油气勘探开发运营与研究机构",
 }
 
 CATEGORY_DESCRIPTIONS = {

@@ -837,6 +837,32 @@
       ]
     },
     {
+      "id": "cmgb-geoexp",
+      "canonical_name": "中国冶金地质总局地球物理勘查院",
+      "parent_id": "cmgb",
+      "parent_name": "中国冶金地质总局",
+      "organization_role": "research_institute",
+      "industry_path": "中央地勘系统地球物理与资源勘查研究",
+      "affiliation": "中国冶金地质总局体系",
+      "aliases": ["物勘院", "国冶地球物理", "中勘地球物理有限责任公司"],
+      "official_domains": ["geoexp.cn", "www.geoexp.cn"],
+      "channels": [
+        {
+          "id": "cmgb-geoexp-recruitment",
+          "channel_type": "social_recruitment",
+          "official_url": "https://www.geoexp.cn/contact/view_272.html",
+          "backup_urls": [
+            "https://www.geoexp.cn/",
+            "https://www.cmgb.com.cn/category/zpxx.html"
+          ],
+          "source_id": "cmgb-geoexp-recruitment",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "地球物理勘查院官方人才招聘页；公告按岗位段落拆分，学生端保留同一官方原文证据链接。"
+        }
+      ]
+    },
+    {
       "id": "zijin",
       "canonical_name": "紫金矿业集团股份有限公司",
       "parent_id": null,

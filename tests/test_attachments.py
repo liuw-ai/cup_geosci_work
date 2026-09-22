@@ -147,6 +147,47 @@ def test_excel_attachment_is_hashed_extracted_and_idempotent(tmp_path) -> None:
     assert len(database.list_artifact_job_candidates(artifact_id=artifact["id"])) == 1
 
 
+def test_mislabelled_xls_with_ooxml_content_uses_excel_parser(tmp_path) -> None:
+    """Government portals sometimes serve an XLSX workbook under a .xls name."""
+    settings, database, _, processor = _registered_artifact(
+        tmp_path, session=FakeSession(_xlsx_bytes())
+    )
+    path = settings.managed_artifact_dir() / "mislabelled.xls"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(_xlsx_bytes())
+
+    extracted = processor._extract_legacy_workbook(path)
+
+    assert extracted["metadata"]["parser"] == "openpyxl (mislabelled .xls)"
+    assert extracted["metadata"]["extraction_mode"] == "workbook_rows"
+    assert len(extracted["rows"]) == 1
+    assert extracted["rows"][0]["cells"]["岗位名称"] == "地质工程师"
+
+
+def test_discovery_carries_official_notice_dates_into_xls_artifact(tmp_path) -> None:
+    session = FakeSession(_xlsx_bytes())
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    processor = OfficialAttachmentProcessor(settings, database, session=session)
+
+    discovered = processor.discover_from_page(
+        "official-test-source",
+        "https://careers.example.edu.cn/notice/1",
+        html=(
+            "<html><head><title>2026年公开招聘公告</title></head><body>"
+            "发布时间：2026-09-01 报名截止日期：2026年10月31日"
+            "<a href='/files/positions.xls'>岗位表</a></body></html>"
+        ),
+    )
+
+    assert len(discovered) == 1
+    assert discovered[0]["metadata"]["published_date"] == "2026-09-01"
+    assert discovered[0]["metadata"]["deadline_date"] == "2026-10-31"
+    assert discovered[0]["metadata"]["official_notice_title"] == "2026年公开招聘公告"
+
+
 def test_attachment_candidate_requires_review_then_publishes_with_evidence(tmp_path) -> None:
     session = FakeSession(_xlsx_bytes())
     settings, database, artifact, processor = _registered_artifact(

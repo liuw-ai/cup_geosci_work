@@ -756,6 +756,7 @@
       "excluded_title_patterns": ["资格条件变更|补充公告"],
       "exclude_patterns": ["拟聘|拟录用|录用公示|进入面试范围|面试名单|递补|资格审查|资格复审|笔试|考试通知|取消招聘|核减招聘|体检|考察|采购|招标|中标|职称"],
       "detail_exclude_patterns": [],
+      "allow_shared_source_url": true,
       "minimum_relevance": 40,
       "max_items": 24,
       "undated_open_window_days": 45,
