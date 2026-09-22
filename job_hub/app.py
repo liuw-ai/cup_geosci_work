@@ -11,7 +11,12 @@ from flask import Flask, abort, jsonify, render_template, request, url_for
 from job_hub.audit import audit_database
 from job_hub.attachments import AttachmentProcessingError, OfficialAttachmentProcessor
 from job_hub.config import Settings
-from job_hub.contracts import ORGANIZATION_ROLES, SOURCE_VALIDATION_STAGES, is_http_url
+from job_hub.contracts import (
+    NATIONAL_RUNTIME_STATUSES,
+    ORGANIZATION_ROLES,
+    SOURCE_VALIDATION_STAGES,
+    is_http_url,
+)
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
 from job_hub.discovery import (
@@ -31,6 +36,11 @@ from job_hub.organizations import (
     load_organization_registry,
     organization_matrix_rows,
     organization_matrix_summary,
+)
+from job_hub.national_sources import (
+    load_national_source_matrix,
+    national_source_matrix_rows,
+    national_source_matrix_summary,
 )
 from job_hub.pipeline import JobPipeline
 from job_hub.profiles import (
@@ -470,6 +480,51 @@ def create_app(settings: Settings | None = None) -> Flask:
                 "filters": {
                     "organization_role": organization_role,
                     "affiliation": affiliation,
+                },
+                "items": rows,
+            }
+        )
+
+    @app.get("/api/admin/national-source-matrix")
+    @require_admin
+    def national_source_matrix_api() -> Any:
+        """Show national-energy acquisition decisions to administrators only."""
+        affiliation = request.args.get("affiliation", "").strip() or None
+        organization_role = request.args.get("organization_role", "").strip() or None
+        runtime_status = request.args.get("runtime_status", "").strip() or None
+        if organization_role and organization_role not in ORGANIZATION_ROLES:
+            return jsonify({"error": "Unsupported organization_role."}), 400
+        if runtime_status and runtime_status not in NATIONAL_RUNTIME_STATUSES:
+            return jsonify({"error": "Unsupported runtime_status."}), 400
+
+        matrix = load_national_source_matrix()
+        registry = load_organization_registry()
+        sources = database.list_sources()
+        source_health = database.list_source_health()
+        latest_runs = database.list_latest_crawl_runs()
+        rows = national_source_matrix_rows(
+            matrix,
+            organization_registry=registry,
+            source_records=sources,
+            source_health=source_health,
+            latest_runs=latest_runs,
+            affiliation=affiliation,
+            organization_role=organization_role,
+            runtime_status=runtime_status,
+        )
+        return jsonify(
+            {
+                "summary": national_source_matrix_summary(
+                    matrix,
+                    organization_registry=registry,
+                    source_records=sources,
+                    source_health=source_health,
+                    latest_runs=latest_runs,
+                ),
+                "filters": {
+                    "affiliation": affiliation,
+                    "organization_role": organization_role,
+                    "runtime_status": runtime_status,
                 },
                 "items": rows,
             }

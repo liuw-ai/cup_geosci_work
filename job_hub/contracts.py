@@ -116,6 +116,52 @@ ORGANIZATION_CHANNEL_STATUSES = frozenset(
     {"automation_ready", "official_confirmed", "candidate", "blocked", "unlocated"}
 )
 
+# Phase 6 keeps the acquisition decision explicit for every national-energy
+# entrance.  A registered official URL is not automatically a crawlable
+# source, and a failed probe must never be represented as "no matching jobs".
+NATIONAL_ACQUISITION_MODES = frozenset(
+    {
+        "official_homepage_manual",
+        "official_recruitment_portal",
+        "public_dynamic_portal",
+        "public_html_listing",
+        "official_api",
+        "official_attachment",
+        "manual_verified_import",
+        "unavailable",
+    }
+)
+NATIONAL_RUNTIME_STATUSES = frozenset(
+    {
+        "verified_public",
+        "accessible_structure_unverified",
+        "source_registered_disabled",
+        "access_limited",
+        "manual_only",
+        "not_yet_verified",
+        "blocked",
+    }
+)
+NATIONAL_SCAN_CONCLUSIONS = frozenset(
+    {
+        "not_scanned",
+        "scan_success_no_match",
+        "source_unavailable",
+        "structure_needs_adapter",
+        "manual_review_required",
+        "candidate_source",
+    }
+)
+NATIONAL_FIELD_KEYS = (
+    "title",
+    "employer",
+    "degree",
+    "major",
+    "location",
+    "deadline",
+    "application_url",
+)
+
 ARTIFACT_KINDS = frozenset(
     {
         "announcement_attachment",
@@ -672,6 +718,224 @@ def validate_organization_registry(
         "version": version,
         "description": (description or "").strip(),
         "organizations": normalized,
+    }
+
+
+def validate_national_source_matrix(
+    payload: Any,
+    *,
+    source_ids: set[str] | None = None,
+) -> dict[str, Any]:
+    """Validate the acquisition decision ledger for national-energy sources.
+
+    The matrix is intentionally separate from ``sources.json``.  It records
+    what an operator knows about an official entrance, while the source
+    registry controls whether a collector may actually run.  This prevents a
+    URL being silently promoted to an active crawler merely because it appears
+    in an organization hierarchy.
+    """
+    if not isinstance(payload, Mapping):
+        raise ContractValidationError("national source matrix must be an object")
+    version = payload.get("version", 1)
+    if isinstance(version, bool) or not isinstance(version, int) or version < 1:
+        raise ContractValidationError(
+            "national source matrix version must be a positive integer"
+        )
+    as_of = _validate_iso_date(payload.get("as_of"), "national source matrix as_of")
+    affiliations = payload.get("target_affiliations")
+    if not isinstance(affiliations, list) or not affiliations:
+        raise ContractValidationError(
+            "national source matrix target_affiliations must be a non-empty list"
+        )
+    normalized_affiliations = [
+        _required_text(value, "national source matrix target_affiliation")
+        for value in affiliations
+    ]
+    channel_types = payload.get("target_channel_types")
+    if not isinstance(channel_types, list) or not channel_types:
+        raise ContractValidationError(
+            "national source matrix target_channel_types must be a non-empty list"
+        )
+    normalized_channel_types: list[str] = []
+    for value in channel_types:
+        channel_type = _required_text(value, "national source matrix channel_type")
+        if channel_type not in ORGANIZATION_CHANNEL_TYPES:
+            raise ContractValidationError(
+                f"national source matrix has unsupported channel_type: {channel_type}"
+            )
+        if channel_type not in normalized_channel_types:
+            normalized_channel_types.append(channel_type)
+
+    assessments = payload.get("source_assessments")
+    if not isinstance(assessments, list) or not assessments:
+        raise ContractValidationError(
+            "national source matrix source_assessments must be a non-empty list"
+        )
+    normalized_assessments: list[dict[str, Any]] = []
+    assessment_ids: set[str] = set()
+    for index, value in enumerate(assessments):
+        context = f"National source assessment at index {index}"
+        assessment = _mapping_copy(value, context)
+        for field_name in (
+            "source_id",
+            "official_url",
+            "backup_urls",
+            "acquisition_mode",
+            "runtime_status",
+            "scan_conclusion",
+            "observed_on",
+            "observed_error_class",
+            "field_validation",
+            "note",
+        ):
+            if field_name not in assessment:
+                raise ContractValidationError(f"{context} is missing: {field_name}")
+        source_id = _required_text(assessment["source_id"], f"{context} source_id")
+        if source_id in assessment_ids:
+            raise ContractValidationError(f"Duplicate national source_id: {source_id}")
+        assessment_ids.add(source_id)
+        if source_ids is not None and source_id not in source_ids:
+            raise ContractValidationError(
+                f"{context} references unknown source_id: {source_id}"
+            )
+        assessment["source_id"] = source_id
+        assessment["official_url"] = validate_http_url(
+            assessment["official_url"], f"{context} official_url"
+        )
+        backups = assessment["backup_urls"]
+        if not isinstance(backups, list):
+            raise ContractValidationError(f"{context} backup_urls must be a list")
+        assessment["backup_urls"] = [
+            validate_http_url(item, f"{context} backup_url") for item in backups
+        ]
+        assessment["acquisition_mode"] = _required_text(
+            assessment["acquisition_mode"], f"{context} acquisition_mode"
+        )
+        if assessment["acquisition_mode"] not in NATIONAL_ACQUISITION_MODES:
+            raise ContractValidationError(
+                f"{context} has unsupported acquisition_mode: "
+                f"{assessment['acquisition_mode']}"
+            )
+        assessment["runtime_status"] = _required_text(
+            assessment["runtime_status"], f"{context} runtime_status"
+        )
+        if assessment["runtime_status"] not in NATIONAL_RUNTIME_STATUSES:
+            raise ContractValidationError(
+                f"{context} has unsupported runtime_status: "
+                f"{assessment['runtime_status']}"
+            )
+        assessment["scan_conclusion"] = _required_text(
+            assessment["scan_conclusion"], f"{context} scan_conclusion"
+        )
+        if assessment["scan_conclusion"] not in NATIONAL_SCAN_CONCLUSIONS:
+            raise ContractValidationError(
+                f"{context} has unsupported scan_conclusion: "
+                f"{assessment['scan_conclusion']}"
+            )
+        if (
+            assessment["runtime_status"] in {"access_limited", "blocked"}
+            and assessment["scan_conclusion"] == "scan_success_no_match"
+        ):
+            raise ContractValidationError(
+                f"{context} cannot report scan_success_no_match while access is limited"
+            )
+        assessment["observed_on"] = _validate_iso_date(
+            assessment["observed_on"], f"{context} observed_on"
+        )
+        observed_status = assessment.get("observed_http_status")
+        if observed_status is not None and (
+            isinstance(observed_status, bool) or not isinstance(observed_status, int)
+        ):
+            raise ContractValidationError(
+                f"{context} observed_http_status must be an integer or null"
+            )
+        assessment["observed_http_status"] = observed_status
+        assessment["observed_error_class"] = _required_text(
+            assessment["observed_error_class"], f"{context} observed_error_class"
+        )
+        field_validation = assessment["field_validation"]
+        if not isinstance(field_validation, Mapping):
+            raise ContractValidationError(f"{context} field_validation must be an object")
+        normalized_fields: dict[str, bool] = {}
+        for field_name in NATIONAL_FIELD_KEYS:
+            value = field_validation.get(field_name)
+            if not isinstance(value, bool):
+                raise ContractValidationError(
+                    f"{context} field_validation.{field_name} must be true or false"
+                )
+            normalized_fields[field_name] = value
+        assessment["field_validation"] = normalized_fields
+        assessment["sample_announcement_url"] = (
+            validate_http_url(
+                assessment["sample_announcement_url"],
+                f"{context} sample_announcement_url",
+            )
+            if assessment.get("sample_announcement_url")
+            else None
+        )
+        assessment["note"] = _required_text(assessment["note"], f"{context} note")
+        normalized_assessments.append(assessment)
+
+    defaults = payload.get("channel_defaults")
+    if not isinstance(defaults, Mapping):
+        raise ContractValidationError("national source matrix channel_defaults must be an object")
+    normalized_defaults: dict[str, dict[str, Any]] = {}
+    for channel_type in normalized_channel_types:
+        if channel_type not in defaults:
+            raise ContractValidationError(
+                f"national source matrix channel_defaults is missing: {channel_type}"
+            )
+        policy = _mapping_copy(
+            defaults[channel_type],
+            f"National channel default {channel_type}",
+        )
+        for field_name in (
+            "acquisition_mode",
+            "runtime_status",
+            "scan_conclusion",
+            "note",
+        ):
+            if field_name not in policy:
+                raise ContractValidationError(
+                    f"National channel default {channel_type} is missing: {field_name}"
+                )
+        policy["acquisition_mode"] = _required_text(
+            policy["acquisition_mode"],
+            f"National channel default {channel_type} acquisition_mode",
+        )
+        if policy["acquisition_mode"] not in NATIONAL_ACQUISITION_MODES:
+            raise ContractValidationError(
+                f"National channel default {channel_type} has unsupported acquisition_mode"
+            )
+        policy["runtime_status"] = _required_text(
+            policy["runtime_status"],
+            f"National channel default {channel_type} runtime_status",
+        )
+        if policy["runtime_status"] not in NATIONAL_RUNTIME_STATUSES:
+            raise ContractValidationError(
+                f"National channel default {channel_type} has unsupported runtime_status"
+            )
+        policy["scan_conclusion"] = _required_text(
+            policy["scan_conclusion"],
+            f"National channel default {channel_type} scan_conclusion",
+        )
+        if policy["scan_conclusion"] not in NATIONAL_SCAN_CONCLUSIONS:
+            raise ContractValidationError(
+                f"National channel default {channel_type} has unsupported scan_conclusion"
+            )
+        policy["note"] = _required_text(
+            policy["note"], f"National channel default {channel_type} note"
+        )
+        normalized_defaults[channel_type] = policy
+
+    return {
+        "version": version,
+        "as_of": as_of,
+        "description": _optional_text(payload.get("description")) or "",
+        "target_affiliations": normalized_affiliations,
+        "target_channel_types": normalized_channel_types,
+        "source_assessments": normalized_assessments,
+        "channel_defaults": normalized_defaults,
     }
 
 

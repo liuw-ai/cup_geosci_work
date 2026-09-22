@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "as_of": "2026-09-22",
+  "description": "国家能源体系正式招聘入口采集准入矩阵。覆盖中国石油、中国石化、中国海油、国家管网及其研究院、油田和集团内技术服务单位。入口登记、网络可访问、页面结构可解析、岗位扫描成功和学生端发布是不同状态。",
+  "target_affiliations": [
+    "中国石油体系",
+    "中国石化体系",
+    "中国海油体系",
+    "国家管网体系"
+  ],
+  "target_channel_types": [
+    "official_homepage",
+    "campus_recruitment"
+  ],
+  "source_assessments": [
+    {
+      "source_id": "cnpc-career",
+      "official_url": "https://zhaopin.cnpc.com.cn/",
+      "backup_urls": [
+        "https://www.cnpc.com.cn/zh/rczp/"
+      ],
+      "acquisition_mode": "official_recruitment_portal",
+      "runtime_status": "access_limited",
+      "scan_conclusion": "source_unavailable",
+      "observed_on": "2026-09-22",
+      "observed_http_status": null,
+      "observed_error_class": "tls_or_policy_block",
+      "sample_announcement_url": null,
+      "field_validation": {
+        "title": false,
+        "employer": false,
+        "degree": false,
+        "major": false,
+        "location": false,
+        "deadline": false,
+        "application_url": false
+      },
+      "note": "当前网络只读请求出现 TLS EOF；不能据此判断中国石油没有岗位。需在服务器环境重新核验公开页面、robots、官方职位表或授权公开接口。"
+    },
+    {
+      "source_id": "sinopec-career",
+      "official_url": "https://job.sinopec.com/",
+      "backup_urls": [
+        "https://www.sinopecgroup.com/"
+      ],
+      "acquisition_mode": "official_recruitment_portal",
+      "runtime_status": "access_limited",
+      "scan_conclusion": "source_unavailable",
+      "observed_on": "2026-09-22",
+      "observed_http_status": null,
+      "observed_error_class": "tls_or_policy_block",
+      "sample_announcement_url": null,
+      "field_validation": {
+        "title": false,
+        "employer": false,
+        "degree": false,
+        "major": false,
+        "location": false,
+        "deadline": false,
+        "application_url": false
+      },
+      "note": "当前网络只读请求出现 TLS EOF；不绕过访问策略，不将失败写成无匹配。需定位当年度正式公告或官方职位表后再接入。"
+    },
+    {
+      "source_id": "cnooc-career",
+      "official_url": "https://cnooc.zhaopin.com/",
+      "backup_urls": [
+        "https://www.cnooc.com.cn/"
+      ],
+      "acquisition_mode": "public_dynamic_portal",
+      "runtime_status": "accessible_structure_unverified",
+      "scan_conclusion": "structure_needs_adapter",
+      "observed_on": "2026-09-22",
+      "observed_http_status": 200,
+      "observed_error_class": "dynamic_html_shell",
+      "sample_announcement_url": null,
+      "field_validation": {
+        "title": false,
+        "employer": false,
+        "degree": false,
+        "major": false,
+        "location": false,
+        "deadline": false,
+        "application_url": false
+      },
+      "note": "入口返回 200，但页面仅有动态脚本壳、无岗位链接；尚未确认公开 JSON 接口或附件。需要逐项记录公开脚本配置和合规访问规则后开发专用适配器。"
+    },
+    {
+      "source_id": "pipechina-career",
+      "official_url": "https://zhaopin.pipechina.com.cn/",
+      "backup_urls": [
+        "https://www.pipechina.com.cn/"
+      ],
+      "acquisition_mode": "official_recruitment_portal",
+      "runtime_status": "access_limited",
+      "scan_conclusion": "source_unavailable",
+      "observed_on": "2026-09-22",
+      "observed_http_status": null,
+      "observed_error_class": "tls_or_policy_block",
+      "sample_announcement_url": null,
+      "field_validation": {
+        "title": false,
+        "employer": false,
+        "degree": false,
+        "major": false,
+        "location": false,
+        "deadline": false,
+        "application_url": false
+      },
+      "note": "当前网络只读请求出现 TLS EOF，历史健康记录还出现 robots 403；需在部署环境重新核验，不能将来源故障解释为无岗位。"
+    }
+  ],
+  "channel_defaults": {
+    "official_homepage": {
+      "acquisition_mode": "official_homepage_manual",
+      "runtime_status": "manual_only",
+      "scan_conclusion": "manual_review_required",
+      "note": "单位官网用于确认主体、招聘栏目和备用入口；没有经过岗位列表/公告核验前，不作为自动岗位采集器。"
+    },
+    "campus_recruitment": {
+      "acquisition_mode": "manual_verified_import",
+      "runtime_status": "not_yet_verified",
+      "scan_conclusion": "candidate_source",
+      "note": "统一招聘入口或单位校招频道必须以年度官方公告、职位表或公开 ATS 结构核验后再绑定采集器；未绑定时只能人工导入已核验原文。"
+    }
+  }
+}

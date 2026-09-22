@@ -14,6 +14,7 @@ from job_hub.attachments import (
 )
 from job_hub.config import Settings
 from job_hub.contracts import (
+    NATIONAL_RUNTIME_STATUSES,
     ORGANIZATION_ROLES,
     SOURCE_VALIDATION_STAGES,
     is_http_url,
@@ -33,6 +34,11 @@ from job_hub.organizations import (
     load_organization_registry,
     organization_matrix_rows,
     organization_matrix_summary,
+)
+from job_hub.national_sources import (
+    load_national_source_matrix,
+    national_source_matrix_rows,
+    national_source_matrix_summary,
 )
 from job_hub.reports import publish_daily_report
 from job_hub.simulation import simulate_cohort
@@ -194,6 +200,29 @@ def main() -> None:
         help="可选：按所属体系精确筛选",
     )
     organization_matrix_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整 JSON 写入指定文件",
+    )
+    national_matrix_parser = subparsers.add_parser(
+        "national-source-matrix",
+        help="输出三桶油、国家管网及其重点单位的入口采集准入矩阵",
+    )
+    national_matrix_parser.add_argument(
+        "--affiliation",
+        help="可选：按所属体系筛选",
+    )
+    national_matrix_parser.add_argument(
+        "--organization-role",
+        choices=sorted(ORGANIZATION_ROLES),
+        help="可选：按组织角色筛选",
+    )
+    national_matrix_parser.add_argument(
+        "--runtime-status",
+        choices=sorted(NATIONAL_RUNTIME_STATUSES),
+        help="可选：按当前采集状态筛选",
+    )
+    national_matrix_parser.add_argument(
         "--output",
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
@@ -399,6 +428,45 @@ def main() -> None:
             "filters": {
                 "organization_role": args.organization_role,
                 "affiliation": args.affiliation,
+            },
+            "items": rows,
+        }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "national-source-matrix":
+        matrix = load_national_source_matrix()
+        registry = load_organization_registry()
+        sources = database.list_sources()
+        source_health = database.list_source_health()
+        latest_runs = database.list_latest_crawl_runs()
+        rows = national_source_matrix_rows(
+            matrix,
+            organization_registry=registry,
+            source_records=sources,
+            source_health=source_health,
+            latest_runs=latest_runs,
+            affiliation=args.affiliation,
+            organization_role=args.organization_role,
+            runtime_status=args.runtime_status,
+        )
+        result = {
+            "summary": national_source_matrix_summary(
+                matrix,
+                organization_registry=registry,
+                source_records=sources,
+                source_health=source_health,
+                latest_runs=latest_runs,
+            ),
+            "filters": {
+                "affiliation": args.affiliation,
+                "organization_role": args.organization_role,
+                "runtime_status": args.runtime_status,
             },
             "items": rows,
         }
