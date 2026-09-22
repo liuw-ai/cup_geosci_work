@@ -67,6 +67,13 @@ candidate_leads（规范化 URL 指纹） --多渠道 mentions--> 官网定位
         +--> 业务错误、结构异常、访问故障（不计为无岗位）
         +--> 公开岗位字段完整 -> 适配器候选 -> 原文审计
 
+国家能源官方入口探测器
+        |
+        +--> 主入口 + 备用官方入口逐一检查 robots/跳转/HTML
+        +--> 有界重试（仅临时网络错误）
+        +--> TLS、访问策略、动态壳、软 404 分开记录
+        +--> 招聘链接候选只进入管理员证据，不直接抓取或发布岗位
+
 已核验官方公告页
         |
         v
@@ -98,6 +105,8 @@ Phase 5 新增的 `data/discovery_sources.json` 与正式来源白名单严格�
 Phase 6 新增的 `data/national_source_matrix.json` 与组织层级台账分工：组织台账记录单位和官方频道，采集矩阵记录每个频道当前可采用的获取方式、运行状态、字段验证和扫描结论。`source_unavailable`、`structure_needs_adapter` 与 `scan_success_no_match` 是三个不同结论，前两者绝不能在日报中被解释成“没有岗位”。管理员可通过 `/api/admin/national-source-matrix` 或 CLI 查看；学生端只看到最终通过证据审计的岗位。
 
 Phase 7 新增的 `zhaopin_campus` 适配器只读取公开校招页面及其前端调用的只读岗位接口。`data/national_source_probes.json` 保存入口、API、HTTP/业务状态和字段证据；`adapter_probe_failed` 表示适配器已具备但当前公开接口异常，不能转化为“扫描成功无匹配”。探测证据只在管理员 CLI/API 返回，不进入学生端。
+
+Phase 8 新增的 `data/national_entry_targets.json` 和 `job_hub/entry_probes.py` 负责四大能源体系的入口级探测。它借鉴参考项目的有限重试和状态机思想，但只执行登记 URL 的公开 GET 与 robots 检查；`data/national_entry_probe_runs.json` 记录每个主/备用入口的实际分类。`accessible_html` 或 `accessible_dynamic_shell` 只表示页面层可达，仍需独立字段适配器和官方原文审核；`source_unavailable`、`access_policy_block`、`robots_blocked` 均不能解释成无岗位。管理员可通过 `/api/admin/national-entry-probes` 或 `national-entry-probe` CLI 查看，学生端不暴露探测细节。
 
 官方链接未命中已登记来源时，线索只能停留在 `official_url_found` 或 `need_review`。管理员必须显式设置 `official_domain_status=manual_review_approved` 并留下核验说明，才能进入 `official_content_verified`；域名不匹配且未获人工批准的线索不能发布。该机制用于容纳确实存在但尚未完成来源注册的政府/高校正式公告，不把第三方平台自身链接当成官方证据。
 
@@ -218,4 +227,4 @@ Docker Compose 运行两个无 root 服务，共享本地 Docker named volume �
 
 ## 仍需人工维护的部分
 
-中国石油、中国石化、中国海油是上游业主/运营主体；东方物探、长城钻探、川庆钻探、渤海钻探、石化石油工程技术服务、中海油服、中海油能源发展是相应体系内的工程技术服务单位；杰瑞、安东、中曼、海隆、贝肯、通源是独立或民营油服；SLB、Halliburton、Baker Hughes、Weatherford 是国际油服。系统在展示和分类时保持这些产业链角色分离。SLB 当前通过官网公开职位检索和详情页适配器接入；Baker Hughes 和 Weatherford 仍因自动访问保护或网络限制保持待核验。中国海油当前使用已核验的 `cnooc.zhaopin.com` 官方年度站，但岗位列表处于暂无数据状态，不会凭空生成职位。国家管网、国考和各地人社平台等重点入口已登记，但不少存在 robots 限制、动态验证、登录要求或年度变化。系统不会绕过这些限制。只有确认公开访问规则、稳定解析字段并在本地审核候选结果后，才应新增专用自动采集器；无法自动接入但具备单位官网原文的岗位可以通过人工核验入口补录。
+中国石油、中国石化、中国海油是上游业主/运营主体；东方物探、长城钻探、川庆钻探、渤海钻探、石化石油工程技术服务、中海油服、中海油能源发展是相应体系内的工程技术服务单位；杰瑞、安东、中曼、海隆、贝肯、通源是独立或民营油服；SLB、Halliburton、Baker Hughes、Weatherford 是国际油服。系统在展示和分类时保持这些产业链角色分离。SLB 当前通过官网公开职位检索和详情页适配器接入；Baker Hughes 和 Weatherford 仍因自动访问保护或网络限制保持待核验。中国海油当前年度公开岗位接口返回业务错误，不能解释为暂无岗位，来源保持停用。国家管网、国考和各地人社平台等重点入口已登记，但不少存在 robots 限制、动态验证、登录要求或年度变化。系统不会绕过这些限制。只有确认公开访问规则、稳定解析字段并在本地审核候选结果后，才应新增专用自动采集器；无法自动接入但具备单位官网原文的岗位可以通过人工核验入口补录。

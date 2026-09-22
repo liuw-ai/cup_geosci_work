@@ -46,6 +46,11 @@ from job_hub.national_probes import (
     load_national_source_probes,
     national_source_probe_summary,
 )
+from job_hub.entry_probes import (
+    load_national_entry_probe_run,
+    load_national_entry_targets,
+    national_entry_probe_summary,
+)
 from job_hub.pipeline import JobPipeline
 from job_hub.profiles import (
     StudentProfile,
@@ -543,6 +548,26 @@ def create_app(settings: Settings | None = None) -> Flask:
             {
                 "summary": national_source_probe_summary(probes),
                 "items": probes["probes"],
+            }
+        )
+
+    @app.get("/api/admin/national-entry-probes")
+    @require_admin
+    def national_entry_probes_api() -> Any:
+        """Show official entry targets and the latest private probe run."""
+        targets = load_national_entry_targets()
+        run = None
+        run_error = None
+        try:
+            run = load_national_entry_probe_run()
+        except ValueError as error:
+            run_error = str(error)
+        return jsonify(
+            {
+                "targets": targets["systems"],
+                "run": run,
+                "summary": national_entry_probe_summary(run) if run else None,
+                "run_error": run_error,
             }
         )
 

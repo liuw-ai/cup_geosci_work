@@ -232,7 +232,7 @@
       "employer_hint": "中国石油天然气集团有限公司",
       "allowed_hosts": ["zhaopin.cnpc.com.cn"],
       "minimum_relevance": 20,
-      "note": "当前公开请求返回 HTTP 412。待取得合规公开接口或专用适配器后再启用，不绕过访问限制。"
+      "note": "此前曾观察到 HTTP 412；2026-09-22 本地网络探测 robots 时为 TLS EOF，当前无法完成公开入口核验。待取得合规公开接口或专用适配器后再启用，不绕过访问限制，也不能解释为无岗位。"
     }
   },
   {
@@ -248,7 +248,7 @@
       "employer_hint": "中国石油化工集团有限公司",
       "allowed_hosts": ["job.sinopec.com"],
       "minimum_relevance": 20,
-      "note": "当前 robots.txt 访问返回 HTTP 403。待网站公开规则和稳定入口核验后接入。"
+      "note": "此前曾观察到 robots.txt HTTP 403；2026-09-22 本地网络探测时为 TLS EOF，当前无法完成公开入口核验。待网站公开规则和稳定入口核验后接入，不能解释为无岗位。"
     }
   },
   {
@@ -300,7 +300,7 @@
       "employer_hint": "国家石油天然气管网集团有限公司",
       "allowed_hosts": ["zhaopin.pipechina.com.cn"],
       "minimum_relevance": 20,
-      "note": "当前 robots.txt 访问返回 HTTP 403。待公开接口或专用适配器核验后接入。"
+      "note": "此前曾观察到 robots.txt HTTP 403；2026-09-22 本地网络探测时为 TLS EOF，当前无法完成公开入口核验。待公开接口或专用适配器核验后接入，不能解释为无岗位。"
     }
   },
   {

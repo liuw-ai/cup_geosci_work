@@ -171,6 +171,29 @@ NATIONAL_PROBE_RESULTS = frozenset(
         "manual_review_required",
     }
 )
+NATIONAL_ENTRY_ROLES = frozenset(
+    {"primary_recruitment", "backup_recruitment", "official_homepage"}
+)
+NATIONAL_ENTRY_PROBE_CLASSES = frozenset(
+    {
+        "accessible_html",
+        "accessible_dynamic_shell",
+        "access_policy_block",
+        "robots_blocked",
+        "source_unavailable",
+        "soft_not_found",
+        "redirected_outside_entry",
+        "non_html",
+    }
+)
+NATIONAL_ENTRY_PROBE_STATUSES = frozenset(
+    {
+        "accessible_structure_unverified",
+        "access_limited",
+        "source_unavailable",
+        "manual_review_required",
+    }
+)
 
 ARTIFACT_KINDS = frozenset(
     {
@@ -1052,6 +1075,366 @@ def validate_national_source_probes(
         "as_of": as_of,
         "description": _optional_text(payload.get("description")) or "",
         "probes": normalized,
+    }
+
+
+def validate_national_entry_targets(
+    payload: Any,
+    *,
+    source_ids: set[str] | None = None,
+) -> dict[str, Any]:
+    """Validate candidate public entries used by the probe runner.
+
+    Targets are operations metadata, not vacancies. A failed probe therefore
+    remains visible without making anything eligible for the public job corpus.
+    """
+    if not isinstance(payload, Mapping):
+        raise ContractValidationError("national entry targets must be an object")
+    version = payload.get("version", 1)
+    if isinstance(version, bool) or not isinstance(version, int) or version < 1:
+        raise ContractValidationError("national entry targets version must be positive")
+    as_of = _validate_iso_date(payload.get("as_of"), "national entry targets as_of")
+    systems = payload.get("systems")
+    if not isinstance(systems, list) or not systems:
+        raise ContractValidationError("national entry targets must contain systems")
+
+    normalized: list[dict[str, Any]] = []
+    seen_systems: set[str] = set()
+    seen_entries: set[str] = set()
+    for index, value in enumerate(systems):
+        context = f"National entry target at index {index}"
+        system = _mapping_copy(value, context)
+        for field_name in (
+            "system_id",
+            "affiliation",
+            "source_id",
+            "name",
+            "entries",
+            "recruitment_keywords",
+            "max_links",
+        ):
+            if field_name not in system:
+                raise ContractValidationError(f"{context} is missing: {field_name}")
+        system_id = _required_text(system["system_id"], f"{context} system_id")
+        if system_id in seen_systems:
+            raise ContractValidationError(f"Duplicate national entry system: {system_id}")
+        seen_systems.add(system_id)
+        system["system_id"] = system_id
+        system["affiliation"] = _required_text(
+            system["affiliation"], f"{context} affiliation"
+        )
+        source_id = _required_text(system["source_id"], f"{context} source_id")
+        if source_ids is not None and source_id not in source_ids:
+            raise ContractValidationError(
+                f"{context} references unknown source_id: {source_id}"
+            )
+        system["source_id"] = source_id
+        system["name"] = _required_text(system["name"], f"{context} name")
+
+        entries = system["entries"]
+        if not isinstance(entries, list) or not entries:
+            raise ContractValidationError(f"{context} entries must be non-empty")
+        normalized_entries: list[dict[str, Any]] = []
+        primary_count = 0
+        for entry_index, entry_value in enumerate(entries):
+            entry_context = f"{context} entry at index {entry_index}"
+            entry = _mapping_copy(entry_value, entry_context)
+            for field_name in ("entry_id", "role", "url", "official_hosts"):
+                if field_name not in entry:
+                    raise ContractValidationError(
+                        f"{entry_context} is missing: {field_name}"
+                    )
+            entry_id = _required_text(entry["entry_id"], f"{entry_context} entry_id")
+            if entry_id in seen_entries:
+                raise ContractValidationError(f"Duplicate national entry id: {entry_id}")
+            seen_entries.add(entry_id)
+            entry["entry_id"] = entry_id
+            role = _required_text(entry["role"], f"{entry_context} role")
+            if role not in NATIONAL_ENTRY_ROLES:
+                raise ContractValidationError(
+                    f"{entry_context} has unsupported role: {role}"
+                )
+            if role == "primary_recruitment":
+                primary_count += 1
+            entry["role"] = role
+            entry["url"] = validate_http_url(entry["url"], f"{entry_context} url")
+            hosts = entry["official_hosts"]
+            if not isinstance(hosts, list) or not hosts:
+                raise ContractValidationError(
+                    f"{entry_context} official_hosts must be non-empty"
+                )
+            normalized_hosts: list[str] = []
+            for host in hosts:
+                host_text = _required_text(
+                    host, f"{entry_context} official_host"
+                ).lower()
+                if "/" in host_text or "://" in host_text:
+                    raise ContractValidationError(
+                        f"{entry_context} official_hosts must contain hostnames"
+                    )
+                normalized_hosts.append(host_text)
+            entry["official_hosts"] = sorted(set(normalized_hosts))
+            entry["note"] = _optional_text(entry.get("note")) or ""
+            normalized_entries.append(entry)
+        if primary_count != 1:
+            raise ContractValidationError(
+                f"{context} must contain exactly one primary_recruitment entry"
+            )
+
+        keywords = system["recruitment_keywords"]
+        if not isinstance(keywords, list) or not keywords:
+            raise ContractValidationError(
+                f"{context} recruitment_keywords must be non-empty"
+            )
+        system["recruitment_keywords"] = [
+            _required_text(item, f"{context} recruitment_keyword")
+            for item in keywords
+        ]
+        max_links = system["max_links"]
+        if (
+            isinstance(max_links, bool)
+            or not isinstance(max_links, int)
+            or not 1 <= max_links <= 100
+        ):
+            raise ContractValidationError(
+                f"{context} max_links must be an integer between 1 and 100"
+            )
+        system["max_links"] = max_links
+        system["entries"] = normalized_entries
+        system["note"] = _optional_text(system.get("note")) or ""
+        normalized.append(system)
+
+    return {
+        "version": version,
+        "as_of": as_of,
+        "description": _optional_text(payload.get("description")) or "",
+        "systems": normalized,
+    }
+
+
+def validate_national_entry_probe_run(
+    payload: Any,
+    *,
+    source_ids: set[str] | None = None,
+) -> dict[str, Any]:
+    """Validate read-only public-entry probe output, never job records."""
+    if not isinstance(payload, Mapping):
+        raise ContractValidationError("national entry probe run must be an object")
+    version = payload.get("version", 1)
+    if isinstance(version, bool) or not isinstance(version, int) or version < 1:
+        raise ContractValidationError("national entry probe run version must be positive")
+    observed_on = _validate_iso_date(
+        payload.get("observed_on"), "national entry probe run observed_on"
+    )
+    environment = _required_text(
+        payload.get("environment"), "national entry probe run environment"
+    )
+    systems = payload.get("systems")
+    attempts = payload.get("attempts")
+    if not isinstance(systems, list) or not systems:
+        raise ContractValidationError(
+            "national entry probe run systems must be non-empty"
+        )
+    if not isinstance(attempts, list) or not attempts:
+        raise ContractValidationError(
+            "national entry probe run attempts must be non-empty"
+        )
+
+    normalized_systems: list[dict[str, Any]] = []
+    system_ids: set[str] = set()
+    system_source_ids: dict[str, str] = {}
+    for index, value in enumerate(systems):
+        context = f"National entry probe system at index {index}"
+        system = _mapping_copy(value, context)
+        for field_name in (
+            "system_id",
+            "source_id",
+            "status",
+            "scan_conclusion",
+            "attempt_count",
+            "recruitment_links",
+        ):
+            if field_name not in system:
+                raise ContractValidationError(f"{context} is missing: {field_name}")
+        system_id = _required_text(system["system_id"], f"{context} system_id")
+        if system_id in system_ids:
+            raise ContractValidationError(f"Duplicate probe system: {system_id}")
+        system_ids.add(system_id)
+        source_id = _required_text(system["source_id"], f"{context} source_id")
+        if source_ids is not None and source_id not in source_ids:
+            raise ContractValidationError(
+                f"{context} references unknown source_id: {source_id}"
+            )
+        if source_id in system_source_ids.values():
+            raise ContractValidationError(
+                f"{context} reuses source_id across probe systems: {source_id}"
+            )
+        system_source_ids[system_id] = source_id
+        system["source_id"] = source_id
+        status = _required_text(system["status"], f"{context} status")
+        if status not in NATIONAL_ENTRY_PROBE_STATUSES:
+            raise ContractValidationError(f"{context} has unsupported status: {status}")
+        system["status"] = status
+        conclusion = _required_text(
+            system["scan_conclusion"], f"{context} scan_conclusion"
+        )
+        if conclusion not in NATIONAL_SCAN_CONCLUSIONS:
+            raise ContractValidationError(
+                f"{context} has unsupported scan_conclusion: {conclusion}"
+            )
+        system["scan_conclusion"] = conclusion
+        count = system["attempt_count"]
+        if isinstance(count, bool) or not isinstance(count, int) or count < 1:
+            raise ContractValidationError(
+                f"{context} attempt_count must be positive"
+            )
+        system["attempt_count"] = count
+        usable = system.get("usable_entry_url")
+        system["usable_entry_url"] = (
+            validate_http_url(usable, f"{context} usable_entry_url")
+            if usable
+            else None
+        )
+        links = system["recruitment_links"]
+        if not isinstance(links, list):
+            raise ContractValidationError(
+                f"{context} recruitment_links must be a list"
+            )
+        system["recruitment_links"] = [
+            validate_http_url(link, f"{context} recruitment_link")
+            for link in links
+        ]
+        system["note"] = _optional_text(system.get("note")) or ""
+        normalized_systems.append(system)
+
+    normalized_attempts: list[dict[str, Any]] = []
+    seen_attempts: set[tuple[str, str]] = set()
+    for index, value in enumerate(attempts):
+        context = f"National entry probe attempt at index {index}"
+        attempt = _mapping_copy(value, context)
+        for field_name in (
+            "system_id",
+            "source_id",
+            "entry_id",
+            "url",
+            "robots_url",
+            "classification",
+            "discovered_links",
+            "recruitment_links",
+            "retries",
+        ):
+            if field_name not in attempt:
+                raise ContractValidationError(f"{context} is missing: {field_name}")
+        system_id = _required_text(attempt["system_id"], f"{context} system_id")
+        source_id = _required_text(attempt["source_id"], f"{context} source_id")
+        if system_id not in system_ids:
+            raise ContractValidationError(
+                f"{context} references unknown system_id: {system_id}"
+            )
+        if source_ids is not None and source_id not in source_ids:
+            raise ContractValidationError(
+                f"{context} references unknown source_id: {source_id}"
+            )
+        expected_source_id = system_source_ids[system_id]
+        if source_id != expected_source_id:
+            raise ContractValidationError(
+                f"{context} source_id does not match its system: {source_id}"
+            )
+        entry_id = _required_text(attempt["entry_id"], f"{context} entry_id")
+        key = (system_id, entry_id)
+        if key in seen_attempts:
+            raise ContractValidationError(
+                f"Duplicate probe attempt: {system_id}/{entry_id}"
+            )
+        seen_attempts.add(key)
+        attempt["system_id"] = system_id
+        attempt["source_id"] = source_id
+        attempt["entry_id"] = entry_id
+        attempt["url"] = validate_http_url(attempt["url"], f"{context} url")
+        robots_url = attempt["robots_url"]
+        attempt["robots_url"] = (
+            validate_http_url(robots_url, f"{context} robots_url")
+            if robots_url
+            else None
+        )
+        final_url = attempt.get("final_url")
+        attempt["final_url"] = (
+            validate_http_url(final_url, f"{context} final_url")
+            if final_url
+            else None
+        )
+        for field_name in ("robots_http_status", "http_status"):
+            status = attempt.get(field_name)
+            if status is not None and (
+                isinstance(status, bool) or not isinstance(status, int)
+            ):
+                raise ContractValidationError(
+                    f"{context} {field_name} must be an integer or null"
+                )
+            attempt[field_name] = status
+        robots_allowed = attempt.get("robots_allowed")
+        if robots_allowed is not None and not isinstance(robots_allowed, bool):
+            raise ContractValidationError(
+                f"{context} robots_allowed must be boolean or null"
+            )
+        attempt["robots_allowed"] = robots_allowed
+        classification = _required_text(
+            attempt["classification"], f"{context} classification"
+        )
+        if classification not in NATIONAL_ENTRY_PROBE_CLASSES:
+            raise ContractValidationError(
+                f"{context} has unsupported classification: {classification}"
+            )
+        attempt["classification"] = classification
+        for field_name in (
+            "content_type",
+            "title",
+            "error_class",
+            "error_detail",
+            "text_excerpt",
+        ):
+            attempt[field_name] = _optional_text(attempt.get(field_name)) or ""
+        for field_name in ("discovered_links", "recruitment_links"):
+            links = attempt[field_name]
+            if not isinstance(links, list):
+                raise ContractValidationError(
+                    f"{context} {field_name} must be a list"
+                )
+            attempt[field_name] = [
+                validate_http_url(
+                    link, f"{context} {field_name[:-1]}",
+                )
+                for link in links
+            ]
+        retries = attempt["retries"]
+        if isinstance(retries, bool) or not isinstance(retries, int) or retries < 0:
+            raise ContractValidationError(
+                f"{context} retries must be a non-negative integer"
+            )
+        attempt["retries"] = retries
+        normalized_attempts.append(attempt)
+
+    attempt_counts: dict[str, int] = {}
+    for attempt in normalized_attempts:
+        attempt_counts[attempt["system_id"]] = (
+            attempt_counts.get(attempt["system_id"], 0) + 1
+        )
+    for system in normalized_systems:
+        system_id = system["system_id"]
+        actual_count = attempt_counts.get(system_id, 0)
+        if actual_count != system["attempt_count"]:
+            raise ContractValidationError(
+                f"National entry probe system {system_id} attempt_count "
+                f"does not match attempts: {system['attempt_count']} != {actual_count}"
+            )
+
+    return {
+        "version": version,
+        "observed_on": observed_on,
+        "environment": environment,
+        "description": _optional_text(payload.get("description")) or "",
+        "systems": normalized_systems,
+        "attempts": normalized_attempts,
     }
 
 

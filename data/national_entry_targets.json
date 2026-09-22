@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "as_of": "2026-09-22",
+  "description": "国家能源四大体系公开入口探测目标。候选入口只用于检查官方页面、robots和公开招聘链接，不代表已存在岗位或允许自动采集。",
+  "systems": [
+    {
+      "system_id": "cnpc",
+      "affiliation": "中国石油体系",
+      "source_id": "cnpc-career",
+      "name": "中国石油天然气集团有限公司",
+      "entries": [
+        {
+          "entry_id": "cnpc-campus-portal",
+          "role": "primary_recruitment",
+          "url": "https://zhaopin.cnpc.com.cn/",
+          "official_hosts": [
+            "zhaopin.cnpc.com.cn"
+          ],
+          "note": "集团高校毕业生统一招聘平台。"
+        },
+        {
+          "entry_id": "cnpc-recruitment-backup",
+          "role": "backup_recruitment",
+          "url": "https://www.cnpc.com.cn/zh/rczp/",
+          "official_hosts": [
+            "www.cnpc.com.cn",
+            "cnpc.com.cn"
+          ],
+          "note": "中国石油集团官网人才招聘栏目备用入口。"
+        }
+      ],
+      "recruitment_keywords": [
+        "招聘",
+        "人才",
+        "校招",
+        "校园",
+        "职位",
+        "招聘公告",
+        "career",
+        "jobs"
+      ],
+      "max_links": 20,
+      "note": "本地网络曾出现 TLS EOF；探测失败不能解释为无岗位。"
+    },
+    {
+      "system_id": "sinopec",
+      "affiliation": "中国石化体系",
+      "source_id": "sinopec-career",
+      "name": "中国石油化工集团有限公司",
+      "entries": [
+        {
+          "entry_id": "sinopec-campus-portal",
+          "role": "primary_recruitment",
+          "url": "https://job.sinopec.com/",
+          "official_hosts": [
+            "job.sinopec.com"
+          ],
+          "note": "中国石化统一人才招聘网站。"
+        },
+        {
+          "entry_id": "sinopec-recruitment-backup",
+          "role": "backup_recruitment",
+          "url": "https://www.sinopecgroup.com/",
+          "official_hosts": [
+            "www.sinopecgroup.com",
+            "sinopecgroup.com"
+          ],
+          "note": "中国石化集团官网备用入口，需从页面重新定位当前招聘栏目。"
+        }
+      ],
+      "recruitment_keywords": [
+        "招聘",
+        "人才",
+        "校招",
+        "校园",
+        "职位",
+        "招聘公告",
+        "career",
+        "jobs"
+      ],
+      "max_links": 20,
+      "note": "本地网络曾出现 TLS EOF或robots限制；不据此判断岗位为空。"
+    },
+    {
+      "system_id": "cnooc",
+      "affiliation": "中国海油体系",
+      "source_id": "cnooc-career",
+      "name": "中国海洋石油集团有限公司",
+      "entries": [
+        {
+          "entry_id": "cnooc-campus-portal",
+          "role": "primary_recruitment",
+          "url": "https://cnooc.zhaopin.com/job/index.html",
+          "official_hosts": [
+            "cnooc.zhaopin.com"
+          ],
+          "note": "2026届公开校园招聘页面；岗位接口由专用适配器另行核验。"
+        },
+        {
+          "entry_id": "cnooc-group-homepage",
+          "role": "official_homepage",
+          "url": "https://www.cnooc.com.cn/",
+          "official_hosts": [
+            "www.cnooc.com.cn",
+            "cnooc.com.cn"
+          ],
+          "note": "中国海油集团官网，用于定位年度公告或招聘栏目。"
+        }
+      ],
+      "recruitment_keywords": [
+        "招聘",
+        "人才",
+        "校招",
+        "校园",
+        "职位",
+        "招聘公告",
+        "career",
+        "jobs"
+      ],
+      "max_links": 20,
+      "note": "岗位公开接口当前返回业务错误，入口探测不能替代岗位接口核验。"
+    },
+    {
+      "system_id": "pipechina",
+      "affiliation": "国家管网体系",
+      "source_id": "pipechina-career",
+      "name": "国家石油天然气管网集团有限公司",
+      "entries": [
+        {
+          "entry_id": "pipechina-campus-portal",
+          "role": "primary_recruitment",
+          "url": "https://zhaopin.pipechina.com.cn/",
+          "official_hosts": [
+            "zhaopin.pipechina.com.cn"
+          ],
+          "note": "国家管网集团招聘平台。"
+        },
+        {
+          "entry_id": "pipechina-group-homepage",
+          "role": "official_homepage",
+          "url": "https://www.pipechina.com.cn/",
+          "official_hosts": [
+            "www.pipechina.com.cn",
+            "pipechina.com.cn"
+          ],
+          "note": "国家管网集团官网，用于定位当前招聘公告或职位表。"
+        }
+      ],
+      "recruitment_keywords": [
+        "招聘",
+        "人才",
+        "校招",
+        "校园",
+        "职位",
+        "招聘公告",
+        "career",
+        "jobs"
+      ],
+      "max_links": 20,
+      "note": "本地网络曾出现 TLS EOF和robots 403；不据此判断岗位为空。"
+    }
+  ]
+}

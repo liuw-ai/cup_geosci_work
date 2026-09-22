@@ -27,6 +27,11 @@ from job_hub.discovery import (
     discovery_source_summary,
     load_discovery_source_registry,
 )
+from job_hub.entry_probes import (
+    PublicEntryProbeRunner,
+    load_national_entry_targets,
+    national_entry_probe_summary,
+)
 from job_hub.emailer import Mailer
 from job_hub.locations import PROVINCES
 from job_hub.pipeline import JobPipeline
@@ -240,6 +245,36 @@ def main() -> None:
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
     )
+    entry_probe_parser = subparsers.add_parser(
+        "national-entry-probe",
+        help="只读探测国家能源体系官方招聘入口及备用入口",
+    )
+    entry_probe_parser.add_argument(
+        "--system",
+        help="可选：只探测 cnpc、sinopec、cnooc 或 pipechina",
+    )
+    entry_probe_parser.add_argument(
+        "--timeout",
+        type=int,
+        default=10,
+        help="单次请求超时秒数（默认 10）",
+    )
+    entry_probe_parser.add_argument(
+        "--retries",
+        type=int,
+        default=1,
+        help="临时网络错误最大重试次数（默认 1）",
+    )
+    entry_probe_parser.add_argument(
+        "--environment",
+        default="local-network",
+        help="探测环境标签，例如 local-network 或 production-server",
+    )
+    entry_probe_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整探测结果写入指定 JSON 文件",
+    )
     source_validation_parser = subparsers.add_parser(
         "source-validation-matrix",
         help="输出省级官方来源的样例、字段证据、备用入口和运行状态",
@@ -402,6 +437,37 @@ def main() -> None:
         print(json.dumps(result, ensure_ascii=False, indent=2))
         if not result["ok"]:
             raise SystemExit(1)
+        return
+    if args.command == "national-entry-probe":
+        if args.timeout < 1:
+            parser.error("--timeout 必须大于 0")
+        if args.retries < 0 or args.retries > 4:
+            parser.error("--retries 必须在 0 到 4 之间")
+        targets = load_national_entry_targets()
+        result = PublicEntryProbeRunner(
+            timeout_seconds=args.timeout,
+            retries=args.retries,
+        ).run(
+            targets,
+            system_id=args.system,
+            environment=args.environment,
+        )
+        output = {
+            "summary": national_entry_probe_summary(result),
+            "systems": result["systems"],
+            "attempts": result["attempts"],
+            "observed_on": result["observed_on"],
+            "environment": result["environment"],
+        }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        # Console encodings on Windows may not represent arbitrary upstream
+        # error text; the JSON file remains UTF-8 with native Chinese text.
+        print(json.dumps(output, ensure_ascii=True, indent=2))
         return
 
     settings, database, pipeline = services()
