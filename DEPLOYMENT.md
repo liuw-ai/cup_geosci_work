@@ -31,7 +31,10 @@ SMTP_PASSWORD=邮箱服务商生成的授权码
 SMTP_FROM=jobs@example.com
 SMTP_TO=管理员邮箱@example.com
 SMTP_USE_SSL=true
+HTTP_TRANSPORT_MODE=direct
 ```
+
+`HTTP_TRANSPORT_MODE` 默认是 `environment`，会遵循服务器进程环境中的代理变量。只有服务器具备组织允许的稳定直连公网出口时才设置为 `direct`；它的作用是避免把本机/容器代理握手失败误判为“无岗位”，不是绕过目标站点的 403、412、验证码或 robots 规则。两种模式都保留 TLS 证书校验。
 
 `APP_BASE_URL` 必须是学生在微信中实际打开的 HTTPS 地址；不能填写 `127.0.0.1`、`localhost` 或服务器内网地址，否则日报邮件中的链接会指向错误位置。
 
@@ -43,6 +46,18 @@ docker compose up -d --build
 docker compose ps
 docker compose logs --tail=100 worker
 ```
+
+上线前建议在服务器执行一次国家能源入口的只读直连诊断，并把结果保存到运行目录：
+
+```bash
+docker compose run --rm \
+  -e HTTP_TRANSPORT_MODE=direct web \
+  python -m job_hub.cli national-entry-probe \
+  --transport direct --environment production-server \
+  --output /var/lib/job-hub/national-entry-probe-direct.json
+```
+
+诊断只检查 `robots.txt` 和登记的公开入口。`access_policy_block`、`robots_blocked`、`source_unavailable` 都表示不能自动采集，不能在日报中写成“当地无岗位”。
 
 Compose 启动时 worker 会自动注册来源并执行同步。需要手动初始化或排查时，可在共享卷中执行：
 

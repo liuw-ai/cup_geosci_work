@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -58,6 +59,7 @@ from job_hub.source_validation import (
     source_validation_summary,
 )
 from job_hub.sources import RawPosting, SourceHealthProbe
+from job_hub.transport import TRANSPORT_MODES, validate_transport_mode
 from job_hub.worker import main as worker_main
 
 
@@ -271,6 +273,12 @@ def main() -> None:
         help="探测环境标签，例如 local-network 或 production-server",
     )
     entry_probe_parser.add_argument(
+        "--transport",
+        choices=sorted(TRANSPORT_MODES),
+        default=None,
+        help="HTTP 出站模式；默认读取 HTTP_TRANSPORT_MODE（否则 environment）",
+    )
+    entry_probe_parser.add_argument(
         "--output",
         type=Path,
         help="可选：将完整探测结果写入指定 JSON 文件",
@@ -443,10 +451,17 @@ def main() -> None:
             parser.error("--timeout 必须大于 0")
         if args.retries < 0 or args.retries > 4:
             parser.error("--retries 必须在 0 到 4 之间")
+        try:
+            transport_mode = validate_transport_mode(
+                args.transport or os.getenv("HTTP_TRANSPORT_MODE", "environment")
+            )
+        except ValueError as error:
+            parser.error(str(error))
         targets = load_national_entry_targets()
         result = PublicEntryProbeRunner(
             timeout_seconds=args.timeout,
             retries=args.retries,
+            transport_mode=transport_mode,
         ).run(
             targets,
             system_id=args.system,
@@ -458,6 +473,8 @@ def main() -> None:
             "attempts": result["attempts"],
             "observed_on": result["observed_on"],
             "environment": result["environment"],
+            "transport_mode": result["transport_mode"],
+            "proxy_environment_present": result["proxy_environment_present"],
         }
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)

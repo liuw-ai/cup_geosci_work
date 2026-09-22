@@ -194,6 +194,7 @@ NATIONAL_ENTRY_PROBE_STATUSES = frozenset(
         "manual_review_required",
     }
 )
+NATIONAL_ENTRY_TRANSPORT_MODES = frozenset({"environment", "direct", "unknown"})
 
 ARTIFACT_KINDS = frozenset(
     {
@@ -1229,6 +1230,18 @@ def validate_national_entry_probe_run(
     environment = _required_text(
         payload.get("environment"), "national entry probe run environment"
     )
+    transport_mode = _optional_text(payload.get("transport_mode")) or "unknown"
+    if transport_mode not in NATIONAL_ENTRY_TRANSPORT_MODES:
+        raise ContractValidationError(
+            "national entry probe run has unsupported transport_mode"
+        )
+    proxy_environment_present = payload.get("proxy_environment_present")
+    if proxy_environment_present is not None and not isinstance(
+        proxy_environment_present, bool
+    ):
+        raise ContractValidationError(
+            "national entry probe run proxy_environment_present must be boolean or null"
+        )
     systems = payload.get("systems")
     attempts = payload.get("attempts")
     if not isinstance(systems, list) or not systems:
@@ -1432,6 +1445,8 @@ def validate_national_entry_probe_run(
         "version": version,
         "observed_on": observed_on,
         "environment": environment,
+        "transport_mode": transport_mode,
+        "proxy_environment_present": proxy_environment_present,
         "description": _optional_text(payload.get("description")) or "",
         "systems": normalized_systems,
         "attempts": normalized_attempts,

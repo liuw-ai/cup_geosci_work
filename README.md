@@ -24,6 +24,8 @@
 
 当前待审阅的 Phase 8 国家能源公开入口探测见 [docs/phase-8/README.md](docs/phase-8/README.md)。它对中国石油、中国石化、中国海油和国家管网的主入口、备用官方入口及 robots 进行只读探测，记录 TLS、访问策略、动态页面和可发现招聘链接；探测结果不是岗位数据。
 
+当前待审阅的 Phase 9 传输诊断与采集梯子见 [docs/phase-9/README.md](docs/phase-9/README.md)。它显式区分本机代理环境与服务器直连出口，把传输上下文写入探测证据；直连只用于合规诊断，不绕过 403、412、验证码或 robots 限制。
+
 ## 已实现的能力
 
 - 官方来源白名单：单位官网、官方招聘系统、政府公开招聘平台、高校就业网优先。
@@ -41,6 +43,7 @@
 - 发布前审计：日报会检查岗位来源域名、相关度阈值、招聘会/采购噪声、来源启停状态和过期状态；存在数据完整性问题时拒绝固化日报。
 - 运行健康：worker 会把最近心跳写入 SQLite；Docker Compose 分别检查 Web 接口和 worker 心跳，便于发现定时任务停止。
 - 来源健康：入口可访问性与抓取运行结果分开记录；最近一次 `crawl_run` 单独保存候选数和开放匹配数，栏目退化、访问受限和网络/解析异常绝不能显示成“无岗位”。
+- 传输诊断：所有公开来源请求都使用统一的 `HTTP_TRANSPORT_MODE`（`environment` 或 `direct`）；探测记录代理环境是否存在，便于区分本机代理 TLS 故障、目标访问策略和真正的扫描结果。
 - 招聘流程过滤：标题级规则统一排除进入面试、面试名单、递补、资格审查、成绩、体检、考察、拟聘和拟录用等后续流程通知；它们不是新的可投岗位。
 - 扩源矩阵：`data/source_targets.json` 按 31 个省和五类官方角色记录已核验、候选和待定位入口。候选入口只进入扩源排期，不会被 worker 抓取或在学生端显示。
 - 组织与入口矩阵：`data/organization_registry.json` 将集团、油田/区域运营单位、研究院、集团内技术服务、独立/国际油服、中央地勘、矿业、重点高校和政府招聘系统分层登记。每个频道独立记录正式入口、备用官方入口、来源绑定和验证状态；`official_confirmed` 不等于可抓取，只有 `automation_ready` 且来源健康的频道才可能进入自动同步。
@@ -67,6 +70,7 @@ job_hub/
   national_sources.py 国家能源体系入口采集准入矩阵和状态汇总
   national_probes.py 国家能源体系公开入口/API探测证据与状态汇总
   entry_probes.py 国家能源体系官方入口/备用入口只读探测与状态机
+  transport.py    统一 HTTP 出站模式与非敏感传输证据
   coverage.py     省份来源覆盖、字段完整率和集中度检查
   matching.py     专业匹配、分类和日期提取
   profiles.py     地球科学学院学历×专业画像与可解释匹配
@@ -83,6 +87,7 @@ data/national_source_matrix.json 国家能源体系正式入口采集准入矩�
 data/national_source_probes.json 国家能源体系公开入口/API探测证据（管理员）
 data/national_entry_targets.json 国家能源体系主入口与备用入口探测目标
 data/national_entry_probe_runs.json 最近一次入口探测运行证据（管理员）
+data/national_entry_probe_runs_direct_diagnostic.json 直连诊断证据（管理员）
 data/employer_registry.json 可审计的高价值单位标准名与体系关系
 data/organization_registry.json 组织层级、正式招聘频道、备用入口与来源绑定
 examples/         人工补录模板

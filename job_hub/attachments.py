@@ -30,6 +30,7 @@ from job_hub.config import Settings
 from job_hub.contracts import is_http_url
 from job_hub.db import Database
 from job_hub.matching import extract_degree_levels, extract_major_tags, score_relevance
+from job_hub.transport import configure_session, create_session
 
 
 USER_AGENT = "cupb-geoscience-job-hub-attachment-fetcher/0.1 (+official-public-source)"
@@ -84,8 +85,13 @@ class OfficialAttachmentProcessor:
     ) -> None:
         self.settings = settings
         self.database = database
-        self.session = session or requests.Session()
-        self.session.headers.update({"User-Agent": USER_AGENT, "Accept": "*/*"})
+        headers = {"User-Agent": USER_AGENT, "Accept": "*/*"}
+        self.session = session or create_session(
+            settings.http_transport_mode,
+            headers=headers,
+        )
+        if session is not None:
+            configure_session(session, settings.http_transport_mode, headers=headers)
         self._robots: dict[str, RobotFileParser] = {}
 
     def discover_from_page(

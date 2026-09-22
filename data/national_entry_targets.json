@@ -24,7 +24,8 @@
           "url": "https://www.cnpc.com.cn/zh/rczp/",
           "official_hosts": [
             "www.cnpc.com.cn",
-            "cnpc.com.cn"
+            "cnpc.com.cn",
+            "zhaopin.cnpc.com.cn"
           ],
           "note": "中国石油集团官网人才招聘栏目备用入口。"
         }
@@ -63,7 +64,8 @@
           "url": "https://www.sinopecgroup.com/",
           "official_hosts": [
             "www.sinopecgroup.com",
-            "sinopecgroup.com"
+            "sinopecgroup.com",
+            "job.sinopec.com"
           ],
           "note": "中国石化集团官网备用入口，需从页面重新定位当前招聘栏目。"
         }
@@ -102,7 +104,8 @@
           "url": "https://www.cnooc.com.cn/",
           "official_hosts": [
             "www.cnooc.com.cn",
-            "cnooc.com.cn"
+            "cnooc.com.cn",
+            "cnooc.zhaopin.com"
           ],
           "note": "中国海油集团官网，用于定位年度公告或招聘栏目。"
         }
@@ -141,7 +144,8 @@
           "url": "https://www.pipechina.com.cn/",
           "official_hosts": [
             "www.pipechina.com.cn",
-            "pipechina.com.cn"
+            "pipechina.com.cn",
+            "zhaopin.pipechina.com.cn"
           ],
           "note": "国家管网集团官网，用于定位当前招聘公告或职位表。"
         }

@@ -5,6 +5,8 @@ __pycache__/
 .pytest_cache/
 runtime/
 instance/
+# Local reference repositories are study material, not application source.
+参考工具/
 *.sqlite3
 *.sqlite3-*
 *.log

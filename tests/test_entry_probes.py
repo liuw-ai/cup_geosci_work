@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+from pathlib import Path
 import sys
 
 import pytest
@@ -16,6 +17,7 @@ from job_hub.contracts import (
 )
 from job_hub.entry_probes import (
     PublicEntryProbeRunner,
+    load_national_entry_probe_run,
     load_national_entry_targets,
     national_entry_probe_summary,
 )
@@ -106,6 +108,35 @@ def test_real_national_entry_target_registry_is_valid() -> None:
     assert all(len(system["entries"]) >= 2 for system in targets["systems"])
 
 
+def test_real_probe_run_records_transport_context() -> None:
+    run = load_national_entry_probe_run(source_ids={
+        "cnpc-career",
+        "sinopec-career",
+        "cnooc-career",
+        "pipechina-career",
+    })
+    assert run["transport_mode"] == "environment"
+    assert run["proxy_environment_present"] is True
+
+
+def test_direct_diagnostic_run_is_contract_validated() -> None:
+    run = load_national_entry_probe_run(
+        Path("data/national_entry_probe_runs_direct_diagnostic.json"),
+        source_ids={
+            "cnpc-career",
+            "sinopec-career",
+            "cnooc-career",
+            "pipechina-career",
+        },
+    )
+    assert run["transport_mode"] == "direct"
+    assert run["environment"] == "local-direct-diagnostic"
+    assert any(
+        attempt["classification"] == "access_policy_block"
+        for attempt in run["attempts"]
+    )
+
+
 def test_target_contract_requires_one_primary_entry() -> None:
     payload = _targets()
     payload["systems"][0]["entries"][1]["role"] = "primary_recruitment"  # type: ignore[index]
@@ -172,6 +203,7 @@ def test_probe_discovers_official_recruitment_link() -> None:
         "https://careers.example.test/jobs/geology"
     ]
     assert result["attempts"][0]["classification"] == "accessible_html"
+    assert result["transport_mode"] == "environment"
 
 
 def test_probe_uses_backup_after_transient_primary_failure() -> None:
@@ -186,7 +218,7 @@ def test_probe_uses_backup_after_transient_primary_failure() -> None:
         }
     )
     result = PublicEntryProbeRunner(
-        session=session, retries=1, backoff_seconds=0
+        session=session, retries=1, backoff_seconds=0, transport_mode="direct"
     ).run(targets, observed_on="2026-09-22")
 
     assert result["systems"][0]["usable_entry_url"] == "https://www.example.test/"
@@ -194,6 +226,7 @@ def test_probe_uses_backup_after_transient_primary_failure() -> None:
     assert result["attempts"][0]["classification"] == "source_unavailable"
     assert result["attempts"][0]["error_class"] == "tls_or_policy_block"
     assert result["attempts"][0]["retries"] == 1
+    assert result["transport_mode"] == "direct"
 
 
 def test_probe_preserves_robots_block_without_fetching_page() -> None:

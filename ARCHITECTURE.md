@@ -108,6 +108,8 @@ Phase 7 新增的 `zhaopin_campus` 适配器只读取公开校招页面及其前
 
 Phase 8 新增的 `data/national_entry_targets.json` 和 `job_hub/entry_probes.py` 负责四大能源体系的入口级探测。它借鉴参考项目的有限重试和状态机思想，但只执行登记 URL 的公开 GET 与 robots 检查；`data/national_entry_probe_runs.json` 记录每个主/备用入口的实际分类。`accessible_html` 或 `accessible_dynamic_shell` 只表示页面层可达，仍需独立字段适配器和官方原文审核；`source_unavailable`、`access_policy_block`、`robots_blocked` 均不能解释成无岗位。管理员可通过 `/api/admin/national-entry-probes` 或 `national-entry-probe` CLI 查看，学生端不暴露探测细节。
 
+Phase 9 新增的 `job_hub/transport.py` 将所有公开请求的出站策略显式化。`HTTP_TRANSPORT_MODE=environment` 遵循本地代理变量，`direct` 对单个 Session 设置 `trust_env=False`，用于服务器直连出口诊断；两者都保留 TLS 校验，也都不绕过访问控制。入口运行证据增加 `transport_mode` 和 `proxy_environment_present`，因此同一 URL 在不同网络环境下的结果可以审计比较。直连诊断仍必须经过 robots、条款、字段、详情页和附件证据门禁，不能直接产生岗位。
+
 官方链接未命中已登记来源时，线索只能停留在 `official_url_found` 或 `need_review`。管理员必须显式设置 `official_domain_status=manual_review_approved` 并留下核验说明，才能进入 `official_content_verified`；域名不匹配且未获人工批准的线索不能发布。该机制用于容纳确实存在但尚未完成来源注册的政府/高校正式公告，不把第三方平台自身链接当成官方证据。
 
 ## 来源健康与省份覆盖

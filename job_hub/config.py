@@ -4,6 +4,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from job_hub.transport import validate_transport_mode
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -53,6 +55,7 @@ class Settings:
     attachment_ocr_enabled: bool = False
     attachment_ocr_language: str = "chi_sim+eng"
     attachment_ocr_max_pages: int = 12
+    http_transport_mode: str = "environment"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -108,6 +111,9 @@ class Settings:
             attachment_ocr_enabled=_env_bool("ATTACHMENT_OCR_ENABLED"),
             attachment_ocr_language=os.getenv("ATTACHMENT_OCR_LANGUAGE", "chi_sim+eng"),
             attachment_ocr_max_pages=_env_int("ATTACHMENT_OCR_MAX_PAGES", 12),
+            http_transport_mode=validate_transport_mode(
+                os.getenv("HTTP_TRANSPORT_MODE", "environment")
+            ),
         )
 
     def ensure_runtime_paths(self) -> None:

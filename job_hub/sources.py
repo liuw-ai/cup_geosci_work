@@ -35,6 +35,7 @@ from job_hub.matching import (
     normalize_url,
     parse_date_value,
 )
+from job_hub.transport import configure_session, create_session
 
 
 USER_AGENT = (
@@ -91,8 +92,16 @@ class SourceHealthProbe:
         session: requests.Session | None = None,
     ) -> None:
         self.settings = settings
-        self.session = session or requests.Session()
-        self.session.headers.update({"User-Agent": USER_AGENT})
+        self.session = session or create_session(
+            settings.http_transport_mode,
+            headers={"User-Agent": USER_AGENT},
+        )
+        if session is not None:
+            configure_session(
+                session,
+                settings.http_transport_mode,
+                headers={"User-Agent": USER_AGENT},
+            )
 
     def check(self, source: dict[str, Any]) -> SourceHealthResult:
         if source.get("source_type") == "manual":
@@ -240,15 +249,18 @@ class OfficialSourceCollector:
         session: requests.Session | None = None,
     ) -> None:
         self.settings = settings
-        self.session = session or requests.Session()
-        self.session.headers.update(
-            {
-                "User-Agent": USER_AGENT,
-                "Accept": "text/html,application/xhtml+xml,application/xml,"
-                "application/json;q=0.9,*/*;q=0.5",
-                "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.6",
-            }
+        headers = {
+            "User-Agent": USER_AGENT,
+            "Accept": "text/html,application/xhtml+xml,application/xml,"
+            "application/json;q=0.9,*/*;q=0.5",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.6",
+        }
+        self.session = session or create_session(
+            settings.http_transport_mode,
+            headers=headers,
         )
+        if session is not None:
+            configure_session(session, settings.http_transport_mode, headers=headers)
         self._robots_cache: dict[str, RobotFileParser] = {}
 
     def collect(self, source: dict[str, Any]) -> list[RawPosting]:

@@ -28,6 +28,12 @@ from job_hub.contracts import (
     validate_national_entry_targets,
 )
 from job_hub.sources import USER_AGENT, load_source_registries
+from job_hub.transport import (
+    configure_session,
+    create_session,
+    transport_metadata,
+    validate_transport_mode,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -120,6 +126,8 @@ def national_entry_probe_summary(run: dict[str, Any] | None = None) -> dict[str,
     return {
         "observed_on": payload["observed_on"],
         "environment": payload["environment"],
+        "transport_mode": payload.get("transport_mode", "unknown"),
+        "proxy_environment_present": payload.get("proxy_environment_present"),
         "system_count": len(systems),
         "attempt_count": len(attempts),
         "systems_with_recruitment_links": sum(
@@ -143,6 +151,7 @@ class PublicEntryProbeRunner:
         timeout_seconds: int = 10,
         retries: int = 1,
         backoff_seconds: float = 0.25,
+        transport_mode: str = "environment",
     ) -> None:
         if timeout_seconds < 1:
             raise ValueError("timeout_seconds must be positive")
@@ -150,14 +159,26 @@ class PublicEntryProbeRunner:
             raise ValueError("retries must be between 0 and 4")
         if backoff_seconds < 0:
             raise ValueError("backoff_seconds must be non-negative")
-        self.session = session or requests.Session()
-        self.session.headers.update(
-            {
-                "User-Agent": USER_AGENT,
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.5",
-                "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.6",
-            }
-        )
+        self.transport_mode = validate_transport_mode(transport_mode)
+        if session is None:
+            self.session = create_session(
+                self.transport_mode,
+                headers={
+                    "User-Agent": USER_AGENT,
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.5",
+                    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.6",
+                },
+            )
+        else:
+            self.session = configure_session(
+                session,
+                self.transport_mode,
+                headers={
+                    "User-Agent": USER_AGENT,
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.5",
+                    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.6",
+                },
+            )
         self.timeout_seconds = timeout_seconds
         self.retries = retries
         self.backoff_seconds = backoff_seconds
@@ -190,6 +211,7 @@ class PublicEntryProbeRunner:
             "version": 1,
             "observed_on": date_value,
             "environment": environment,
+            **transport_metadata(self.transport_mode),
             "description": (
                 "只读探测结果。入口可访问、动态、受限或故障均不等于岗位数量；"
                 "岗位必须经过独立的官方原文采集和证据审计。"
