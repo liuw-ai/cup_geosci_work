@@ -33,6 +33,7 @@ SOURCE_TYPES = frozenset(
         "mnr_recruitment",
         "slb_coveo_search",
         "html_notice",
+        "structured_opening_page",
         "landing_page",
     }
 )
@@ -150,6 +151,7 @@ NATIONAL_SCAN_CONCLUSIONS = frozenset(
         "source_unavailable",
         "structure_needs_adapter",
         "adapter_probe_failed",
+        "scan_success_with_open_matches",
         "manual_review_required",
         "candidate_source",
     }
@@ -457,6 +459,27 @@ def validate_source_record(value: Any, *, context: str = "Source") -> dict[str, 
     if not isinstance(config, dict):
         raise ContractValidationError(f"{context} config must be an object")
     source["config"] = dict(config)
+    if source["source_type"] == "structured_opening_page":
+        for field_name in (
+            "opening_title_selector",
+            "opening_content_selector",
+            "opening_title_field_label",
+            "opening_location_field_label",
+            "opening_date_field_label",
+        ):
+            _required_text(
+                source["config"].get(field_name),
+                f"{context} config {field_name}",
+            )
+        allowed_hosts = source["config"].get("allowed_hosts")
+        if not isinstance(allowed_hosts, list) or not allowed_hosts:
+            raise ContractValidationError(
+                f"{context} config allowed_hosts must be a non-empty list"
+            )
+        source["config"]["allowed_hosts"] = _validate_domains(
+            allowed_hosts,
+            f"{context} config allowed_hosts",
+        )
     enabled = source.get("enabled", True)
     if not isinstance(enabled, bool):
         raise ContractValidationError(f"{context} enabled must be true or false")

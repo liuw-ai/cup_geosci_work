@@ -110,6 +110,8 @@ Phase 8 新增的 `data/national_entry_targets.json` 和 `job_hub/entry_probes.p
 
 Phase 9 新增的 `job_hub/transport.py` 将所有公开请求的出站策略显式化。`HTTP_TRANSPORT_MODE=environment` 遵循本地代理变量，`direct` 对单个 Session 设置 `trust_env=False`，用于服务器直连出口诊断；两者都保留 TLS 校验，也都不绕过访问控制。入口运行证据增加 `transport_mode` 和 `proxy_environment_present`，因此同一 URL 在不同网络环境下的结果可以审计比较。直连诊断仍必须经过 robots、条款、字段、详情页和附件证据门禁，不能直接产生岗位。
 
+Phase 10 新增的 `structured_opening_page` 适配器用于少量已核验、字段标签稳定的单位公开招聘页。它要求标题块和非空内容块一一配对，最终跳转必须留在登记的官方域名内；职位、地点和发布日期从页面标签读取，并为同一页面中的每个职位生成独立 `external_id`。页面结构变化、字段缺失或配对数量不一致会使该来源本次采集失败，而不是把可能错配的数据发布给学生。中国石油东方物探（BGP）是首个实际接入的案例；其官方页面证据、离线夹具和运行边界见 `docs/phase-10/`。
+
 官方链接未命中已登记来源时，线索只能停留在 `official_url_found` 或 `need_review`。管理员必须显式设置 `official_domain_status=manual_review_approved` 并留下核验说明，才能进入 `official_content_verified`；域名不匹配且未获人工批准的线索不能发布。该机制用于容纳确实存在但尚未完成来源注册的政府/高校正式公告，不把第三方平台自身链接当成官方证据。
 
 ## 来源健康与省份覆盖

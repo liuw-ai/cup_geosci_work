@@ -34,6 +34,7 @@ from job_hub.matching import (
     looks_like_recruitment,
     normalize_url,
     parse_date_value,
+    stable_hash,
 )
 from job_hub.transport import configure_session, create_session
 
@@ -285,6 +286,8 @@ class OfficialSourceCollector:
             return self._collect_mnr_recruitment(source)
         if source_type == "slb_coveo_search":
             return self._collect_slb_coveo_search(source)
+        if source_type == "structured_opening_page":
+            return self._collect_structured_opening_page(source)
         if source_type in {"html_notice", "landing_page"}:
             return self._collect_html_notice(source)
         raise SourceCollectionError(f"Unsupported source type: {source_type}")
@@ -1173,6 +1176,205 @@ class OfficialSourceCollector:
             if len(postings) >= self._item_limit(source):
                 break
         return postings
+
+    def _collect_structured_opening_page(
+        self, source: dict[str, Any]
+    ) -> list[RawPosting]:
+        """Read one public page whose opening blocks have stable field labels.
+
+        This adapter is intentionally strict.  A page with several opening
+        headings must expose the same number of non-empty content blocks; a
+        positional mismatch could attach one unit's location or qualification
+        text to another unit's title and is therefore a collection failure.
+        """
+        config = source["config"]
+        opening_url = normalize_url(
+            str(config.get("opening_url") or source["homepage_url"])
+        )
+        response = self._get(opening_url, source)
+        allowed_hosts = {
+            str(host).strip().lower().rstrip(".")
+            for host in config.get("allowed_hosts", [])
+            if str(host).strip()
+        }
+        final_host = (urlparse(response.url).hostname or "").lower().rstrip(".")
+        if allowed_hosts and not any(
+            final_host == host or final_host.endswith(f".{host}")
+            for host in allowed_hosts
+        ):
+            raise SourceCollectionError(
+                f"Structured opening page redirected outside official hosts: {final_host}"
+            )
+
+        title_selector = str(config.get("opening_title_selector") or "").strip()
+        content_selector = str(config.get("opening_content_selector") or "").strip()
+        if not title_selector or not content_selector:
+            raise SourceCollectionError(
+                "structured_opening_page requires opening title and content selectors"
+            )
+        try:
+            soup = BeautifulSoup(response.text, "html.parser")
+            title_pattern = str(config.get("opening_title_pattern") or "").strip()
+            title_nodes = [
+                node
+                for node in soup.select(title_selector)
+                if not title_pattern
+                or re.search(
+                    title_pattern,
+                    clean_text(node.get_text(" ", strip=True)),
+                    re.IGNORECASE,
+                )
+            ]
+            content_nodes = []
+            seen_nodes: set[int] = set()
+            for node in soup.select(content_selector):
+                marker = id(node)
+                if marker in seen_nodes or not clean_text(node.get_text(" ", strip=True)):
+                    continue
+                seen_nodes.add(marker)
+                content_nodes.append(node)
+        except re.error as error:
+            raise SourceCollectionError(
+                f"Invalid structured opening title pattern: {error}"
+            ) from error
+
+        if not title_nodes:
+            raise SourceCollectionError(
+                "Structured opening page exposed no matching opening title"
+            )
+        if len(title_nodes) != len(content_nodes):
+            raise SourceCollectionError(
+                "Structured opening title/content block count mismatch: "
+                f"{len(title_nodes)} titles versus {len(content_nodes)} non-empty contents"
+            )
+
+        labels = tuple(
+            str(label).strip()
+            for label in (
+                config.get("opening_field_labels")
+                or (
+                    "Job Title",
+                    "Quantity",
+                    "Work Location",
+                    "Job Type",
+                    "Job Responsibilities",
+                    "Job Requirements",
+                    "How to Apply",
+                    "Date",
+                )
+            )
+            if str(label).strip()
+        )
+        title_label = str(config.get("opening_title_field_label") or "").strip()
+        location_label = str(config.get("opening_location_field_label") or "").strip()
+        date_label = str(config.get("opening_date_field_label") or "").strip()
+        required_fields = {
+            str(field).strip()
+            for field in config.get("required_opening_fields", [])
+            if str(field).strip()
+        }
+        postings: list[RawPosting] = []
+        for index, (title_node, content_node) in enumerate(
+            zip(title_nodes, content_nodes, strict=True),
+            start=1,
+        ):
+            heading = clean_text(title_node.get_text(" ", strip=True))
+            lines = self._structured_opening_lines(content_node)
+            body_text = clean_text(content_node.get_text(" ", strip=True))
+            title = self._structured_opening_field(lines, title_label, labels)
+            if not title:
+                title = re.sub(
+                    str(config.get("opening_title_prefix_pattern") or r"^Job Opening\s*:\s*"),
+                    "",
+                    heading,
+                    flags=re.IGNORECASE,
+                ).strip()
+            location = self._structured_opening_field(lines, location_label, labels)
+            published_date = parse_date_value(
+                self._structured_opening_field(lines, date_label, labels)
+            ) or extract_published_date(body_text)
+            combined = clean_text(f"{heading} {title} {body_text}")
+            if not self._accept_candidate(combined, source):
+                continue
+            missing = {
+                field
+                for field, value in (("title", title), ("location", location))
+                if field in required_fields and not value
+            }
+            if missing:
+                raise SourceCollectionError(
+                    "Structured opening is missing required fields: "
+                    + ", ".join(sorted(missing))
+                )
+            source_url = normalize_url(response.url)
+            postings.append(
+                RawPosting(
+                    title=title or heading,
+                    employer=clean_text(
+                        str(config.get("employer_hint") or source["publisher"])
+                    ),
+                    source_url=source_url,
+                    application_url=self._find_application_url(
+                        soup, source_url
+                    ),
+                    text=combined,
+                    summary=clean_text(
+                        "; ".join(
+                            f"{label}: {value}"
+                            for label, value in (
+                                (title_label, title),
+                                (location_label, location),
+                            )
+                            if label and value
+                        )
+                    )[:420]
+                    or body_text[:420],
+                    published_date=published_date,
+                    deadline_date=extract_deadline(body_text),
+                    location=location,
+                    external_id=(
+                        f"{self._external_id_from_url(source_url)}#opening-"
+                        f"{index}-{stable_hash(title or heading)[:16]}"
+                    ),
+                    match_text=clean_text(f"{title or heading} {body_text}"),
+                    official_evidence_url=source_url,
+                )
+            )
+        return postings
+
+    @staticmethod
+    def _structured_opening_lines(node: Any) -> list[str]:
+        return [
+            clean_text(line)
+            for line in node.get_text("\n", strip=True).splitlines()
+            if clean_text(line)
+        ]
+
+    @staticmethod
+    def _structured_opening_field(
+        lines: list[str], label: str, labels: tuple[str, ...]
+    ) -> str | None:
+        if not label:
+            return None
+        normalized_label = label.rstrip("：:").strip().casefold()
+        normalized_labels = {
+            item.rstrip("：:").strip().casefold() for item in labels
+        }
+        for index, line in enumerate(lines):
+            inline = re.match(
+                rf"^{re.escape(label)}\s*[:：]\s*(.+)$", line, re.IGNORECASE
+            )
+            if inline:
+                return clean_text(inline.group(1)) or None
+            if line.rstrip("：:").strip().casefold() != normalized_label:
+                continue
+            values: list[str] = []
+            for following in lines[index + 1 :]:
+                if following.rstrip("：:").strip().casefold() in normalized_labels:
+                    break
+                values.append(following)
+            return clean_text(" ".join(values)) or None
+        return None
 
     def _collect_zhaopin_campus(self, source: dict[str, Any]) -> list[RawPosting]:
         """Collect a public Zhaopin campus campaign without login or writes.

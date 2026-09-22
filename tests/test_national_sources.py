@@ -21,10 +21,16 @@ from conftest import make_settings
 def test_national_matrix_expands_every_target_channel() -> None:
     matrix = load_national_source_matrix()
     rows = national_source_matrix_rows(matrix)
-    assert len(rows) == 37
+    assert len(rows) == 38
     assert {row["affiliation"] for row in rows} == set(matrix["target_affiliations"])
     assert all(row["backup_urls"] for row in rows)
     assert not [row for row in rows if row["source_id"] and not row["assessment_source_id"]]
+    bgp = next(row for row in rows if row["source_id"] == "cnpc-bgp-recruitment")
+    assert bgp["runtime_status"] == "verified_public"
+    assert bgp["scan_conclusion"] == "scan_success_with_open_matches"
+    assert bgp["sample_announcement_url"].endswith(
+        "/bgpen/Recruitment/first_common2023hr.shtml"
+    )
 
 
 def test_access_limited_sources_cannot_claim_successful_no_match() -> None:
@@ -69,7 +75,7 @@ def test_national_matrix_cli_runs_with_isolated_database(tmp_path, monkeypatch, 
     )
     cli_main()
     payload = json.loads(capsys.readouterr().out)
-    assert payload["summary"]["channel_count"] == 37
+    assert payload["summary"]["channel_count"] == 38
     assert payload["items"]
     assert all(item["runtime_status"] == "access_limited" for item in payload["items"])
 
@@ -85,6 +91,6 @@ def test_national_matrix_admin_endpoint_is_private(tmp_path) -> None:
     )
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["summary"]["channel_count"] == 37
+    assert payload["summary"]["channel_count"] == 38
     assert payload["items"]
     assert all(item["runtime_status"] == "access_limited" for item in payload["items"])

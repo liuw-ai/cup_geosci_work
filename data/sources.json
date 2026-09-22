@@ -610,6 +610,47 @@
     }
   },
   {
+    "id": "cnpc-bgp-recruitment",
+    "name": "中国石油集团东方地球物理勘探有限责任公司公开招聘",
+    "publisher": "中国石油集团东方地球物理勘探有限责任公司",
+    "homepage_url": "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml",
+    "source_type": "structured_opening_page",
+    "category": "油气工程技术服务",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "opening_url": "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml",
+      "healthcheck_url": "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml",
+      "allowed_hosts": ["www.bgp.com.cn", "bgp.com.cn"],
+      "fallback_entry_urls": ["https://www.bgp.com.cn/"],
+      "opening_title_selector": "h3",
+      "opening_title_pattern": "^Job Opening\\s*:",
+      "opening_title_prefix_pattern": "^Job Opening\\s*:\\s*",
+      "opening_content_selector": "td[height='48'][valign='top']",
+      "opening_field_labels": [
+        "Job Title",
+        "Quantity",
+        "Work Location",
+        "Job Type",
+        "Job Responsibilities",
+        "Job Requirements",
+        "How to Apply",
+        "Date"
+      ],
+      "opening_title_field_label": "Job Title",
+      "opening_location_field_label": "Work Location",
+      "opening_date_field_label": "Date",
+      "required_opening_fields": ["title", "location"],
+      "require_recruitment_word": true,
+      "require_major_match": true,
+      "minimum_relevance": 40,
+      "max_items": 4,
+      "undated_open_window_days": 120,
+      "request_interval_seconds": 1.2,
+      "note": "2026-09-22 直连核验的中国石油集团东方地球物理勘探有限责任公司公开招聘页。页面原文含 Job Title、Work Location、学历与地学专业要求及 Date；未发布固定截止日时按 120 天窗口管理，不把静态旧页面永久标成在招。"
+    }
+  },
+  {
     "id": "official-manual-import",
     "name": "人工核验的官方公告",
     "publisher": "项目管理员",

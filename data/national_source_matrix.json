@@ -10,7 +10,8 @@
   ],
   "target_channel_types": [
     "official_homepage",
-    "campus_recruitment"
+    "campus_recruitment",
+    "official_announcement"
   ],
   "source_assessments": [
     {
@@ -108,6 +109,31 @@
         "application_url": false
       },
       "note": "当前网络只读请求出现 TLS EOF，历史健康记录还出现 robots 403；需在部署环境重新核验，不能将来源故障解释为无岗位。"
+    },
+    {
+      "source_id": "cnpc-bgp-recruitment",
+      "official_url": "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml",
+      "backup_urls": [
+        "https://www.bgp.com.cn/",
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "acquisition_mode": "public_html_listing",
+      "runtime_status": "verified_public",
+      "scan_conclusion": "scan_success_with_open_matches",
+      "observed_on": "2026-09-22",
+      "observed_http_status": 200,
+      "observed_error_class": "not_applicable",
+      "sample_announcement_url": "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml",
+      "field_validation": {
+        "title": true,
+        "employer": true,
+        "degree": true,
+        "major": true,
+        "location": true,
+        "deadline": false,
+        "application_url": false
+      },
+      "note": "BGP 官方公开招聘页已直连取得 200；页面原文提供职位、单位、地点、学历/专业要求和 Date，并明确官方招聘邮箱。页面未提供固定截止日期或独立报名 URL，因此这两项不作完整率承诺；岗位作为中国石油体系内油气工程技术服务机会发布。"
     }
   ],
   "channel_defaults": {
@@ -122,6 +148,12 @@
       "runtime_status": "not_yet_verified",
       "scan_conclusion": "candidate_source",
       "note": "统一招聘入口或单位校招频道必须以年度官方公告、职位表或公开 ATS 结构核验后再绑定采集器；未绑定时只能人工导入已核验原文。"
+    },
+    "official_announcement": {
+      "acquisition_mode": "official_homepage_manual",
+      "runtime_status": "manual_only",
+      "scan_conclusion": "manual_review_required",
+      "note": "单位官网公开公告页默认只用于主体和原文证据；只有已完成字段适配器、回归夹具和访问复测的来源才会覆盖该默认状态。"
     }
   }
 }

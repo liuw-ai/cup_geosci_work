@@ -110,6 +110,16 @@
           "source_id": "cnpc-career",
           "verification_status": "official_confirmed",
           "evidence_note": "统一校招入口；具体岗位单位以公告职位表为准。"
+        },
+        {
+          "id": "cnpc-bgp-recruitment",
+          "channel_type": "official_announcement",
+          "official_url": "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml",
+          "backup_urls": ["https://www.bgp.com.cn/", "https://zhaopin.cnpc.com.cn/"],
+          "source_id": "cnpc-bgp-recruitment",
+          "verification_status": "automation_ready",
+          "is_primary": false,
+          "evidence_note": "BGP 官方公开招聘页已在 2026-09-22 直连核验；该单位属于中国石油体系内油气工程技术服务单位，不与油田运营主体混称。"
         }
       ]
     },
