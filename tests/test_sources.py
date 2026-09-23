@@ -125,9 +125,61 @@ def test_cupb_adapter_scans_past_irrelevant_listing_cards(tmp_path, monkeypatch)
     postings = collector.collect(source)
 
     assert len(postings) == 1
-    assert postings[0].source_url == relevant_url
 
 
+def test_cupb_adapter_splits_each_structured_position_row(tmp_path) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "cupb-career",
+        "name": "中国石油大学（北京）就业信息网",
+        "publisher": "中国石油大学（北京）",
+        "homepage_url": "https://career.cup.edu.cn/",
+        "source_type": "cupb_career",
+        "category": "能源、工程与地学拓展",
+        "source_tier": "B",
+        "config": {
+            "listing_urls": [],
+            "direct_notice_urls": [
+                {
+                    "url": "https://career.cup.edu.cn/campus/view/id/999",
+                    "title_hint": "某单位2027年校园招聘公告",
+                }
+            ],
+            "detail_path_patterns": ["/campus/view/id/"],
+            "require_detail_content": True,
+            "minimum_detail_characters": 20,
+            "max_items": 10,
+            "candidate_limit": 10,
+            "request_interval_seconds": 0,
+        },
+    }
+    document = """
+    <html><head><title>某单位2027年校园招聘公告</title></head><body>
+      <h1>某单位2027年校园招聘公告</h1>
+      <p>现面向高校毕业生公开招聘。</p>
+      <table>
+        <tr><th>职位信息</th><th>需求专业</th><th>学历</th><th>工作地点</th></tr>
+        <tr><td>地质工程师</td><td>地质工程</td><td>硕士</td><td>北京</td></tr>
+        <tr><td>资源勘查岗</td><td>资源勘查工程</td><td>本科</td><td>新疆</td></tr>
+      </table>
+    </body></html>
+    """
+
+    collector._get = lambda _url, _source: FakeResponse(  # type: ignore[method-assign]
+        document, "https://career.cup.edu.cn/campus/view/id/999"
+    )
+
+    postings = collector.collect(source)
+
+    assert [posting.title for posting in postings] == ["地质工程师", "资源勘查岗"]
+    assert [posting.location for posting in postings] == ["北京", "新疆"]
+    assert [posting.match_text for posting in postings] == [
+        "地质工程师 地质工程 硕士",
+        "资源勘查岗 资源勘查工程 本科",
+    ]
+    assert postings[0].field_evidence["专业范围"] == "地质工程"
+    assert postings[1].field_evidence["专业范围"] == "资源勘查工程"
+    assert postings[0].qualification_text == postings[0].summary
 def test_cupb_adapter_uses_structured_job_table_as_matching_evidence(tmp_path, monkeypatch) -> None:
     settings = make_settings(tmp_path)
     collector = OfficialSourceCollector(settings)

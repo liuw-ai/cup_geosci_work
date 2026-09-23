@@ -34,6 +34,7 @@ def job_card(job: dict[str, Any]) -> dict[str, Any]:
         "deadline_date": job.get("deadline_date"),
         "degree_levels": job.get("degree_levels", []),
         "major_tags": job.get("major_tags", []),
+        "field_evidence": job.get("field_evidence", {}),
         "relevance_score": job["relevance_score"],
         "relevance_band": job["relevance_band"],
         "source_name": job["source_name"],

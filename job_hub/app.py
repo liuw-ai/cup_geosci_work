@@ -173,7 +173,9 @@ def create_app(settings: Settings | None = None) -> Flask:
         # older snapshot available through /daily/latest and its dated URL.
         if report is not None and str(report.get("report_date")) == local_today(settings).isoformat():
             return report_for_display(report), False
-        return report_for_display(build_daily_report(database, settings)), True
+        return report_for_display(
+            build_daily_report(database, settings, local_today(settings))
+        ), True
 
     def requested_profile() -> StudentProfile | None:
         profile_id = request.args.get("profile", "").strip()

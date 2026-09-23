@@ -280,7 +280,8 @@ class JobPipeline:
             source["source_tier"],
             category,
         )
-        degree_levels = extract_degree_levels(text)
+        qualification_text = posting.qualification_text or text
+        degree_levels = extract_degree_levels(qualification_text)
         today = datetime.now(self.timezone).date()
         status = self._job_status(
             posting.deadline_date,
@@ -336,6 +337,7 @@ class JobPipeline:
             "deadline_date": posting.deadline_date,
             "degree_levels": degree_levels,
             "major_tags": major_tags,
+            "field_evidence": posting.field_evidence or {},
             "summary": posting.summary,
             "description": posting.text[:12000],
             "relevance_score": relevance_score,

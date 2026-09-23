@@ -52,6 +52,7 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
         published_date="2026-09-17",
         deadline_date="2026-12-20",
         location="北京",
+        field_evidence={"专业范围": "地质工程", "学历要求": "硕士"},
     )
     job_id, _ = database.save_job(
         pipeline.normalize_posting(posting, database.get_source("official-test-source"))
@@ -61,7 +62,9 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     client = app.test_client()
     assert client.get("/").status_code == 200
     assert client.get("/jobs").status_code == 200
-    assert client.get(f"/jobs/{job_id}").status_code == 200
+    detail_response = client.get(f"/jobs/{job_id}")
+    assert detail_response.status_code == 200
+    assert "专业要求原文" in detail_response.get_data(as_text=True)
     assert client.get(f"/daily/{report['report_date']}").status_code == 200
     assert client.get("/api/jobs").get_json()["total"] == 1
     assert client.get("/jobs?province=北京").status_code == 200

@@ -84,10 +84,14 @@ def test_coverage_distinguishes_successful_no_match_from_source_failure(tmp_path
         application_url=None,
         text="面向资源勘查工程本科、地质工程硕士毕业生，报名截止时间为2026年12月31日。",
         summary="山东地学岗位。",
-        published_date="2026-09-18",
-        deadline_date="2026-12-31",
-        location="山东省东营市",
-    )
+            published_date="2026-09-18",
+            deadline_date="2026-12-31",
+            location="山东省东营市",
+            field_evidence={
+                "专业范围": "资源勘查工程本科、地质工程硕士",
+                "学历要求": "本科、硕士",
+            },
+        )
     database.save_job(
         pipeline.normalize_posting(posting, database.get_source("official-test-source"))
     )

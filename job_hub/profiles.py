@@ -45,7 +45,7 @@ STUDENT_PROFILES = (
         id="undergraduate-resource-exploration",
         degree="本科",
         major="资源勘查工程",
-        exact_major_terms=("资源勘查工程", "资源勘探工程", "资源勘探", "勘查技术与工程", "矿产普查与勘探"),
+        exact_major_terms=("资源勘查工程", "资源勘探工程", "勘查技术与工程", "矿产普查与勘探"),
         english_exact_major_terms=("resource exploration engineering", "mineral exploration"),
     ),
     StudentProfile(
@@ -66,7 +66,7 @@ STUDENT_PROFILES = (
         id="master-geological-resources-engineering",
         degree="硕士",
         major="地质资源与地质工程",
-        exact_major_terms=("地质资源与地质工程", "地质资源"),
+        exact_major_terms=("地质资源与地质工程",),
         english_exact_major_terms=("geological resources and engineering",),
     ),
     StudentProfile(
@@ -87,7 +87,7 @@ STUDENT_PROFILES = (
         id="doctoral-geological-resources-engineering",
         degree="博士",
         major="地质资源与地质工程",
-        exact_major_terms=("地质资源与地质工程", "地质资源"),
+        exact_major_terms=("地质资源与地质工程",),
         english_exact_major_terms=("geological resources and engineering",),
     ),
 )
@@ -168,10 +168,18 @@ def _major_status(
 ) -> tuple[str, str]:
     tags = [clean_text(str(item)) for item in job.get("major_tags", []) if item]
     lowered_tags = {tag.lower() for tag in tags}
+    field_evidence = job.get("field_evidence") or {}
+    qualification_text = clean_text(
+        " ".join(
+            str(field_evidence.get(key) or "")
+            for key in ("专业范围", "岗位", "面向对象", "学历要求")
+        )
+    ).lower()
     exact = [
         term
         for term in profile.exact_major_terms
         if term.lower() in lowered_tags
+        and term.lower() in qualification_text
     ]
     if exact:
         return "explicit", f"专业范围明确包含“{exact[0]}”"

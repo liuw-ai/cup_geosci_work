@@ -49,6 +49,26 @@
           {% endfor %}
         </div>
       {% endif %}
+      {% if job.field_evidence %}
+        <h2>岗位级公告要求</h2>
+        <dl class="detail-grid evidence-grid">
+          {% if job.field_evidence.get("岗位") %}
+            <div><dt>岗位原文</dt><dd>{{ job.field_evidence.get("岗位") }}</dd></div>
+          {% endif %}
+          {% if job.field_evidence.get("专业范围") %}
+            <div><dt>专业要求原文</dt><dd>{{ job.field_evidence.get("专业范围") }}</dd></div>
+          {% endif %}
+          {% if job.field_evidence.get("面向对象") or job.field_evidence.get("学历要求") %}
+            <div><dt>学历/面向对象原文</dt><dd>{{ job.field_evidence.get("面向对象") or job.field_evidence.get("学历要求") }}</dd></div>
+          {% endif %}
+          {% if job.field_evidence.get("工作地点") %}
+            <div><dt>地点原文</dt><dd>{{ job.field_evidence.get("工作地点") }}</dd></div>
+          {% endif %}
+          {% if job.field_evidence.get("table_row") %}
+            <div><dt>证据位置</dt><dd>官方职位表第 {{ job.field_evidence.get("table_row") }} 行</dd></div>
+          {% endif %}
+        </dl>
+      {% endif %}
       {% if job.profile_match %}
         <h2>与 {{ profile.label }} 的匹配</h2>
         <div class="profile-match profile-match-{{ job.profile_match.level }} detail-profile-match">

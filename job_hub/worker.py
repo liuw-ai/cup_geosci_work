@@ -8,6 +8,7 @@ from threading import Event
 from zoneinfo import ZoneInfo
 
 from job_hub.audit import audit_database
+from job_hub.attachments import AttachmentProcessingError, OfficialAttachmentProcessor
 from job_hub.config import Settings
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
@@ -26,6 +27,7 @@ class DailyWorker:
         self.database = Database(settings.database_path)
         self.database.initialize()
         self.pipeline = JobPipeline(settings, self.database)
+        self.attachment_processor = OfficialAttachmentProcessor(settings, self.database)
         self.mailer = Mailer(settings)
         self.stop_event = Event()
         self.timezone = ZoneInfo(settings.timezone)
@@ -67,6 +69,7 @@ class DailyWorker:
         self._heartbeat("syncing")
         try:
             summary = self.pipeline.sync_all()
+            attachment_summary = self._process_registered_attachments()
             snapshot_date = datetime.now(self.timezone).date().isoformat()
             self.database.save_coverage_snapshot(
                 snapshot_date,
@@ -75,7 +78,7 @@ class DailyWorker:
             self.last_sync_monotonic = time.monotonic()
             LOGGER.info(
                 "Source synchronization complete: %s; coverage snapshot recorded for %s.",
-                summary.as_dict(),
+                {"sources": summary.as_dict(), "attachments": attachment_summary},
                 snapshot_date,
             )
             if summary.failed:
@@ -89,6 +92,29 @@ class DailyWorker:
             LOGGER.exception("Source synchronization failed")
             self._heartbeat("degraded", "source synchronization failed")
             self._send_failure_safely("官方来源同步失败", str(error))
+
+    def _process_registered_attachments(self) -> dict[str, int]:
+        """Advance discovered official files without publishing unreviewed rows."""
+        processed = 0
+        extracted = 0
+        failed = 0
+        for artifact in self.database.list_source_artifacts():
+            if str(artifact.get("extraction_status")) != "registered":
+                continue
+            processed += 1
+            try:
+                result = self.attachment_processor.process(int(artifact["id"]))
+                if result.status == "extracted":
+                    extracted += 1
+                elif result.status in {"failed", "skipped"}:
+                    failed += 1
+            except (AttachmentProcessingError, ValueError):
+                failed += 1
+                LOGGER.exception(
+                    "Official attachment processing failed for artifact %s.",
+                    artifact.get("id"),
+                )
+        return {"processed": processed, "extracted": extracted, "failed": failed}
 
     def _publish_with_alert(self, report_date: str) -> None:
         LOGGER.info("Publishing daily report for %s.", report_date)

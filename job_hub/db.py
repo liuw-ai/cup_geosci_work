@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     deadline_date TEXT,
     degree_levels_json TEXT NOT NULL DEFAULT '[]',
     major_tags_json TEXT NOT NULL DEFAULT '[]',
+    field_evidence_json TEXT NOT NULL DEFAULT '{}',
     summary TEXT NOT NULL DEFAULT '',
     description TEXT NOT NULL DEFAULT '',
     relevance_score INTEGER NOT NULL DEFAULT 0,
@@ -396,6 +397,7 @@ class Database:
             "location_evidence": "TEXT",
             "verification_status": "TEXT NOT NULL DEFAULT 'published_official'",
             "official_evidence_url": "TEXT",
+            "field_evidence_json": "TEXT NOT NULL DEFAULT '{}'",
         }
         added_official_evidence_url = False
         for name, definition in additions.items():
@@ -973,6 +975,9 @@ class Database:
                 job.get("degree_levels", []), ensure_ascii=False
             ),
             "major_tags_json": json.dumps(job.get("major_tags", []), ensure_ascii=False),
+            "field_evidence_json": json.dumps(
+                job.get("field_evidence", {}), ensure_ascii=False
+            ),
         }
         with self.transaction() as connection:
             existing = connection.execute(
@@ -990,11 +995,12 @@ class Database:
                         parent_employer_name, province, city, country_or_region,
                         location_confidence, location_evidence, verification_status,
                         official_evidence_url, published_date,
-                        deadline_date, degree_levels_json, major_tags_json, summary,
+                         deadline_date, degree_levels_json, major_tags_json,
+                         field_evidence_json, summary,
                         description, relevance_score, relevance_band, status,
                         first_seen_at, last_seen_at, created_at, updated_at
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         job.get("source_id"),
@@ -1024,6 +1030,7 @@ class Database:
                         job.get("deadline_date"),
                         json_fields["degree_levels_json"],
                         json_fields["major_tags_json"],
+                        json_fields["field_evidence_json"],
                         job.get("summary", ""),
                         job.get("description", ""),
                         job["relevance_score"],
@@ -1060,7 +1067,8 @@ class Database:
                         location_evidence = ?, verification_status = ?,
                         official_evidence_url = ?,
                         published_date = ?, deadline_date = ?, degree_levels_json = ?,
-                        major_tags_json = ?, summary = ?, description = ?,
+                         major_tags_json = ?, field_evidence_json = ?,
+                         summary = ?, description = ?,
                         relevance_score = ?, relevance_band = ?, status = ?,
                         last_seen_at = ?
                     WHERE id = ?
@@ -1090,6 +1098,7 @@ class Database:
                         job.get("deadline_date"),
                         json_fields["degree_levels_json"],
                         json_fields["major_tags_json"],
+                        json_fields["field_evidence_json"],
                         job.get("summary", ""),
                         job.get("description", ""),
                         job["relevance_score"],
@@ -1114,7 +1123,8 @@ class Database:
                     location_evidence = ?, verification_status = ?,
                     official_evidence_url = ?,
                     published_date = ?, deadline_date = ?, degree_levels_json = ?,
-                    major_tags_json = ?, summary = ?, description = ?,
+                     major_tags_json = ?, field_evidence_json = ?,
+                     summary = ?, description = ?,
                     relevance_score = ?, relevance_band = ?, status = ?,
                     last_seen_at = ?, updated_at = ?
                 WHERE id = ?
@@ -1145,6 +1155,7 @@ class Database:
                     job.get("deadline_date"),
                     json_fields["degree_levels_json"],
                     json_fields["major_tags_json"],
+                    json_fields["field_evidence_json"],
                     job.get("summary", ""),
                     job.get("description", ""),
                     job["relevance_score"],
@@ -3150,4 +3161,5 @@ class Database:
         item = dict(row)
         item["degree_levels"] = json.loads(item.pop("degree_levels_json"))
         item["major_tags"] = json.loads(item.pop("major_tags_json"))
+        item["field_evidence"] = json.loads(item.pop("field_evidence_json", "{}"))
         return enrich_job(item)

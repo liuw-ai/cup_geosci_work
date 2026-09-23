@@ -262,6 +262,8 @@ class RawPosting:
     external_id: str | None = None
     match_text: str | None = None
     official_evidence_url: str | None = None
+    field_evidence: dict[str, str] | None = None
+    qualification_text: str | None = None
 
 
 class OfficialSourceCollector:
@@ -1789,16 +1791,18 @@ class OfficialSourceCollector:
         for title_hint, detail_url in candidates:
             try:
                 response = self._get(detail_url, source)
-                posting = self._extract_cupb_detail(
+                postings_for_notice = self._extract_cupb_details(
                     response.text,
                     response.url,
                     source,
                     title_hint,
                 )
-                if posting:
+                for posting in postings_for_notice:
                     postings.append(posting)
                     if len(postings) >= item_limit:
                         break
+                if len(postings) >= item_limit:
+                    break
             except SourceSkipped:
                 continue
             except (*REQUEST_ERRORS, SourceCollectionError):
@@ -3148,13 +3152,13 @@ class OfficialSourceCollector:
             location=location,
         )
 
-    def _extract_cupb_detail(
+    def _extract_cupb_details(
         self,
         document: str,
         source_url: str,
         source: dict[str, Any],
         title_hint: str,
-    ) -> RawPosting | None:
+    ) -> list[RawPosting]:
         soup = BeautifulSoup(document, "html.parser")
         title_node = soup.select_one(
             ".details-title h5, .title-message h5, h1, h2"
@@ -3205,7 +3209,7 @@ class OfficialSourceCollector:
         if self._is_non_vacancy_notice_title(title) or any(
             re.search(pattern, title, re.IGNORECASE) for pattern in listing_excludes
         ):
-            return None
+            return []
         # Detail-level exclusions are intentionally narrower than discovery
         # exclusions.  Words such as “通知” and “活动” occur in the portal's
         # shared header and must not erase a valid official announcement.
@@ -3214,7 +3218,7 @@ class OfficialSourceCollector:
             source,
             exclude_patterns=source["config"].get("detail_exclude_patterns", []),
         ):
-            return None
+            return []
         if (
             source["config"].get("require_detail_content")
             and len(body_text) < int(source["config"].get("minimum_detail_characters", 80))
@@ -3222,7 +3226,7 @@ class OfficialSourceCollector:
             # A listing title alone cannot establish the target major, degree,
             # deadline or official application route. Keep it out until its
             # public detail page exposes substantive recruitment content.
-            return None
+            return []
         employer_node = soup.select_one(".title-message .name")
         employer_candidate = clean_text(
             employer_node.get_text(" ", strip=True) if employer_node else ""
@@ -3264,7 +3268,18 @@ class OfficialSourceCollector:
             for key, value in fields.items()
             if key in {"岗位", "专业范围", "面向对象", "学历要求"}
         )
-        major_evidence = self._cupb_major_evidence(body_text)
+        records = self._cupb_table_records(content_soup)
+        outer_records = self._cupb_table_records(soup)
+        if len(outer_records) > len(records):
+            records = outer_records
+        # For a multi-row table, only the current row can establish a
+        # qualification.  A single-row notice may still put the precise major
+        # in the prose body, so retain its bounded evidence as a supplement.
+        major_evidence = (
+            self._cupb_major_evidence(body_text)
+            if len(records) <= 1
+            else ""
+        )
         # CUPB notices often start with a long employer introduction. When their
         # structured job table is present, use it as matching evidence so a unit's
         # industry description cannot masquerade as a candidate's qualification.
@@ -3282,7 +3297,7 @@ class OfficialSourceCollector:
             for key, value in fields.items()
             if key in {"岗位", "专业范围", "面向对象", "工作地点"}
         ]
-        return RawPosting(
+        base_posting = RawPosting(
             title=title,
             employer=employer,
             source_url=normalize_url(source_url),
@@ -3326,7 +3341,78 @@ class OfficialSourceCollector:
             ),
             external_id=self._external_id_from_url(source_url),
             match_text=match_text,
+            qualification_text=match_evidence,
+            field_evidence={
+                key: value
+                for key, value in fields.items()
+                if key in {"岗位", "专业范围", "面向对象", "学历要求", "工作地点"}
+            },
         )
+        if len(records) <= 1:
+            return [base_posting]
+
+        # A structured table is authoritative at row level.  Do not reuse the
+        # whole announcement body for every row: that would attach another
+        # position's major and degree requirements to this one.
+        row_postings: list[RawPosting] = []
+        for row_number, record in enumerate(records, start=1):
+            row_title = record.get("岗位") or title
+            row_major = record.get("专业范围", "")
+            row_degree = record.get("学历要求", "") or record.get("面向对象", "")
+            row_location = record.get("工作地点", "") or fields.get("工作地点", "")
+            row_evidence = clean_text(
+                "；".join(
+                    part
+                    for part in (
+                        f"岗位：{row_title}" if row_title else "",
+                        f"专业范围：{row_major}" if row_major else "",
+                        f"学历要求：{row_degree}" if row_degree else "",
+                        f"工作地点：{row_location}" if row_location else "",
+                    )
+                    if part
+                )
+            )
+            row_postings.append(
+                RawPosting(
+                    title=(
+                        row_title
+                        if row_title != title
+                        else f"{title}（第{row_number}项）"
+                    ),
+                    employer=base_posting.employer,
+                    source_url=base_posting.source_url,
+                    application_url=base_posting.application_url,
+                    text=row_evidence,
+                    summary=row_evidence[:420] or base_posting.summary,
+                    published_date=base_posting.published_date,
+                    deadline_date=base_posting.deadline_date,
+                    location=row_location or base_posting.location,
+                    external_id=f"{base_posting.external_id or self._external_id_from_url(source_url)}#row-{row_number}",
+                    match_text=clean_text(f"{row_title} {row_major} {row_degree}"),
+                    qualification_text=row_evidence,
+                    official_evidence_url=base_posting.official_evidence_url,
+                    field_evidence={
+                        "table_row": str(row_number),
+                        **{
+                            key: value
+                            for key, value in record.items()
+                            if key in {"岗位", "专业范围", "面向对象", "学历要求", "工作地点"}
+                        },
+                    },
+                )
+            )
+        return row_postings
+
+    def _extract_cupb_detail(
+        self,
+        document: str,
+        source_url: str,
+        source: dict[str, Any],
+        title_hint: str,
+    ) -> RawPosting | None:
+        """Backward-compatible single-notice helper used by existing callers."""
+        postings = self._extract_cupb_details(document, source_url, source, title_hint)
+        return postings[0] if postings else None
 
     @staticmethod
     def _decode_cupb_embedded_content(document: str) -> str | None:
@@ -3360,6 +3446,12 @@ class OfficialSourceCollector:
     @staticmethod
     def _cupb_table_fields(soup: BeautifulSoup) -> dict[str, str]:
         """Read label/value rows from public CUPB recruitment-announcement tables."""
+        records = OfficialSourceCollector._cupb_table_records(soup)
+        return records[0] if records else {}
+
+    @staticmethod
+    def _cupb_table_records(soup: BeautifulSoup) -> list[dict[str, str]]:
+        """Return every structured CUPB table row as an independent record."""
         aliases = {
             "岗位": "岗位",
             "岗位需求": "岗位",
@@ -3371,7 +3463,7 @@ class OfficialSourceCollector:
             "学历要求": "学历要求",
             "工作地点": "工作地点",
         }
-        fields: dict[str, str] = {}
+        label_fields: dict[str, str] = {}
         for row in soup.select("table tr"):
             cells = [clean_text(cell.get_text(" ", strip=True)) for cell in row.select("th, td")]
             cells = [cell for cell in cells if cell]
@@ -3382,7 +3474,7 @@ class OfficialSourceCollector:
                 continue
             value = clean_text(" ".join(cells[1:]))
             if value:
-                fields[label] = value
+                label_fields[label] = value
         # Job-board announcements also use a conventional header row followed
         # by one or more records (序号 / 职位信息 / 需求专业 / ...), rather than
         # label-value rows.  Read the first complete record without guessing
@@ -3393,6 +3485,7 @@ class OfficialSourceCollector:
             "学历要求": ("学历要求", "学历", "学位"),
             "工作地点": ("工作地点", "工作城市", "工作地区", "地点"),
         }
+        records: list[dict[str, str]] = []
         for table in soup.select("table"):
             rows: list[list[str]] = []
             for row in table.select("tr"):
@@ -3415,11 +3508,8 @@ class OfficialSourceCollector:
             if header_index is None:
                 continue
             header = rows[header_index]
-            data_row = rows[header_index + 1]
-            for field, aliases in column_aliases.items():
-                if field in fields:
-                    continue
-                index = next(
+            indexes = {
+                field: next(
                     (
                         column
                         for column, cell in enumerate(header)
@@ -3427,10 +3517,39 @@ class OfficialSourceCollector:
                     ),
                     None,
                 )
-                if index is not None and index < len(data_row) and data_row[index]:
-                    fields[field] = clean_text(data_row[index])
-            if fields:
+                for field, aliases in column_aliases.items()
+            }
+            for data_row in rows[header_index + 1 :]:
+                record = {
+                    field: clean_text(data_row[index])
+                    for field, index in indexes.items()
+                    if index is not None and index < len(data_row) and data_row[index]
+                }
+                if record.get("岗位") or record.get("专业范围"):
+                    records.append(record)
+            if records:
                 break
+        if records:
+            for record in records:
+                inline_job = record.get("岗位", "")
+                if inline_job and "学历要求" not in record:
+                    degree_match = re.search(
+                        r"(?P<degree>大专|本科|硕士|博士)(?:研究生)?(?:及以上)?",
+                        inline_job,
+                    )
+                    if degree_match:
+                        record["学历要求"] = degree_match.group("degree")
+                if inline_job and "工作地点" not in record:
+                    location_match = re.search(
+                        r"(?:\d[\d,]*(?:\.\d+)?\s*(?:[-~至]\s*\d[\d,]*(?:\.\d+)?)?\s*)"
+                        r"(?P<location>[^\s]+(?:市|区|县|省|自治区|特别行政区))\s*"
+                        r"(?:全职|实习|兼职)",
+                        inline_job,
+                    )
+                    if location_match:
+                        record["工作地点"] = clean_text(location_match.group("location"))
+            return records
+        fields = dict(label_fields)
         inline_job = fields.get("岗位", "")
         if inline_job:
             if "学历要求" not in fields:
@@ -3451,7 +3570,7 @@ class OfficialSourceCollector:
                 )
                 if location_match:
                     fields["工作地点"] = clean_text(location_match.group("location"))
-        return fields
+        return [fields] if fields else []
 
     @staticmethod
     def _cupb_major_evidence(text: str) -> str:

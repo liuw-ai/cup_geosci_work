@@ -13,6 +13,7 @@ def job(**overrides: object) -> dict[str, object]:
         "description": "专业范围：地质工程。学历要求：硕士。",
         "degree_levels": ["硕士"],
         "major_tags": ["地质工程", "油气地质"],
+        "field_evidence": {"专业范围": "地质工程", "学历要求": "硕士"},
         "category": "三桶油与油服",
         "relevance_score": 88,
     }
@@ -69,6 +70,7 @@ def test_profile_match_translates_explicit_english_degree_and_major_evidence() -
             title="Geologist",
             degree_levels=["本科", "硕士"],
             major_tags=["geology", "geophysics"],
+            field_evidence={"专业范围": "Geology, Geophysics", "学历要求": "Master's"},
             description=(
                 "Requirements: Bachelor's or Master's degree in Geology, "
                 "Geophysics, or a related discipline."
