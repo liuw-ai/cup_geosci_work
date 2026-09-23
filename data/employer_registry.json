@@ -352,6 +352,39 @@
     "official_domains": ["cmgb.com.cn"]
   },
   {
+    "id": "cmgb-geoexp",
+    "canonical_name": "中国冶金地质总局地球物理勘查院",
+    "parent_id": "cmgb",
+    "parent_name": "中国冶金地质总局",
+    "category": "自然资源、地调与地勘",
+    "employer_type": "中央地勘技术单位",
+    "affiliation": "中国冶金地质总局体系",
+    "aliases": ["中国冶金地质总局地球物理勘查院", "地球物理勘查院", "物勘院", "Geoexp"],
+    "official_domains": ["geoexp.cn", "www.geoexp.cn"]
+  },
+  {
+    "id": "cmgb-second-geology-institute",
+    "canonical_name": "中国冶金地质总局第二地质勘查院",
+    "parent_id": "cmgb",
+    "parent_name": "中国冶金地质总局",
+    "category": "自然资源、地调与地勘",
+    "employer_type": "中央地勘技术单位",
+    "affiliation": "中国冶金地质总局体系",
+    "aliases": ["中国冶金地质总局第二地质勘查院", "第二地质勘查院", "中国冶金地质总局二局"],
+    "official_domains": ["chinayjdzej.cn", "www.chinayjdzej.cn"]
+  },
+  {
+    "id": "cmgb-inner-mongolia-geology-institute",
+    "canonical_name": "中国冶金地质总局内蒙古地质勘查院",
+    "parent_id": "cmgb",
+    "parent_name": "中国冶金地质总局",
+    "category": "自然资源、地调与地勘",
+    "employer_type": "中央地勘技术单位",
+    "affiliation": "中国冶金地质总局体系",
+    "aliases": ["中国冶金地质总局内蒙古地质勘查院", "内蒙古地质勘查院", "内蒙古地勘院"],
+    "official_domains": ["cmgb3.cn", "www.cmgb3.cn"]
+  },
+  {
     "id": "zijin",
     "canonical_name": "紫金矿业集团股份有限公司",
     "parent_id": null,

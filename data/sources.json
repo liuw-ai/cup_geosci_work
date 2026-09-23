@@ -11,10 +11,28 @@
     "config": {
       "allowed_hosts": ["career.cup.edu.cn"],
       "listing_urls": [
-        "https://career.cup.edu.cn/",
         "https://career.cup.edu.cn/campus",
         "https://career.cup.edu.cn/news/index/tag/xwzp",
-        "https://career.cup.edu.cn/job/search/d_category/0"
+        "https://career.cup.edu.cn/job/search/d_category/0",
+        "https://career.cup.edu.cn/"
+      ],
+      "direct_notice_urls": [
+        {
+          "url": "https://career.cup.edu.cn/campus/view/id/460523",
+          "title_hint": "广西北部湾投资集团2027届高校毕业生校园招聘公告"
+        },
+        {
+          "url": "https://career.cup.edu.cn/campus/view/id/460487",
+          "title_hint": "赣南实验室2026年招聘公告"
+        },
+        {
+          "url": "https://career.cup.edu.cn/campus/view/id/460426",
+          "title_hint": "桂林理工大学2026年招聘公告"
+        },
+        {
+          "url": "https://career.cup.edu.cn/news/view/aid/95612/tag/xwzp",
+          "title_hint": "福建省能源石化创新研究院有限责任公司"
+        }
       ],
       "detail_path_patterns": [
         "/campus/view/id/",
@@ -60,14 +78,16 @@
         "中标"
       ],
       "detail_exclude_patterns": ["采购", "招标", "中标"],
-      "minimum_relevance": 38,
-      "max_items": 28,
-      "candidate_limit": 120,
+      "minimum_relevance": 37,
+      "max_items": 80,
+      "candidate_limit": 400,
+      "listing_page_limit": 6,
+      "deduplicate_by_title": true,
       "undated_open_window_days": 45,
       "require_detail_content": true,
       "minimum_detail_characters": 80,
       "request_interval_seconds": 1.0,
-      "note": "公开栏目包含学院发布、招聘公告、全职和实习岗位；仅采集其中的具体岗位和招聘公告。适配器优先读取公告表格中的专业范围、学历、面向对象和地点，不把招聘会、宣讲会、就业通知或活动发布为岗位。"
+      "note": "公开栏目包含学院发布、招聘公告、全职和实习岗位；仅采集其中的具体岗位和招聘公告。适配器优先读取公告表格中的专业范围、学历、面向对象和地点，不把招聘会、宣讲会、就业通知或活动发布为岗位。direct_notice_urls 仅登记管理员已核验的官方高价值公告，作为首页改版或分页变化时的备用入口。"
     }
   },
   {
@@ -269,6 +289,54 @@
       "allowed_hosts": ["job.sinopec.com"],
       "minimum_relevance": 20,
       "note": "此前曾观察到 robots.txt HTTP 403；2026-09-22 本地网络探测时为 TLS EOF，当前无法完成公开入口核验。待网站公开规则和稳定入口核验后接入，不能解释为无岗位。"
+    }
+  },
+  {
+    "id": "sinopec-pepris-recruitment",
+    "name": "中国石化石油勘探开发研究院2026年校园招聘公告",
+    "publisher": "中国石化石油勘探开发研究院有限公司",
+    "homepage_url": "http://pepris.sinopec.com/pepris/careers/rwzl/2026/6/I1519026538069098496.shtml",
+    "source_type": "official_table_rows",
+    "category": "油气上游业主与研究机构",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "direct_notice_urls": [
+        "http://pepris.sinopec.com/pepris/careers/rwzl/2026/6/I1519026538069098496.shtml"
+      ],
+      "direct_only": true,
+      "allowed_hosts": ["pepris.sinopec.com"],
+      "title_selector": "h1, title",
+      "content_selector": "article, .article-content, .content, main, body",
+      "table_selector": "table",
+      "table_contexts": [
+        {
+          "table_index": 1,
+          "employer": "中国石化石油勘探开发研究院有限公司",
+          "location": "北京"
+        },
+        {
+          "table_index": 2,
+          "employer": "中国石化石油勘探开发研究院有限公司",
+          "location": "无锡"
+        }
+      ],
+      "row_include_patterns": [
+        "油气|油田|石油地质|地球物理|测井|岩石物理|勘探|开发地质|油气藏|储气库|采收率|海洋石油|地热|沉积|储层|地面工程|非常规|地质"
+      ],
+      "row_exclude_patterns": ["人工智能|项目管理|软件开发|计算机"],
+      "employer_hint": "中国石化石油勘探开发研究院有限公司",
+      "published_date": "2025-10-11",
+      "deadline_date": "2025-11-15",
+      "require_page_recruitment_word": true,
+      "require_recruitment_word": false,
+      "require_major_match": true,
+      "minimum_relevance": 40,
+      "max_items": 40,
+      "request_interval_seconds": 1.0,
+      "undated_open_window_days": null,
+      "allow_shared_source_url": true,
+      "note": "石勘院官方公告页含北京总院和无锡石油地质研究所两张岗位表。岗位行按官方原文逐行解析，专业白名单和排除词均为人工核验配置。公告报名截止时间为2025-11-15，当前只作为历史解析证据，不计入在招数量；后续年度公告应新增并复核 direct_notice_urls。"
     }
   },
   {
@@ -665,6 +733,73 @@
       "request_interval_seconds": 1.2,
       "undated_open_window_days": null,
       "note": "中国冶金地质总局地球物理勘查院官方人才招聘页。页面将多个工程技术岗位写在同一公告中，适配器只按明确的岗位段落拆分；市场、化学检测和质控岗位因专业不匹配不会发布。页面未给出统一截止日期，保留官方原文并由管理员定期复核。"
+    }
+  },
+  {
+    "id": "cmgb-second-geology-recruitment",
+    "name": "中国冶金地质总局第二地质勘查院2026年社会招聘公告",
+    "publisher": "中国冶金地质总局第二地质勘查院",
+    "homepage_url": "http://www.chinayjdzej.cn/index.php?mod=article&act=view&id=14514",
+    "source_type": "html_notice",
+    "category": "自然资源、地调与地勘",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "direct_notice_urls": [
+        "http://www.chinayjdzej.cn/index.php?mod=article&act=view&id=14514"
+      ],
+      "direct_only": true,
+      "allowed_hosts": ["www.chinayjdzej.cn", "chinayjdzej.cn"],
+      "title_selector": "h1, .article-title",
+      "content_selector": "#easysiteText, .xxy_con",
+      "role_content_selector": "#easysiteText, .xxy_con",
+      "split_role_lines": true,
+      "role_line_pattern": "^\\s*\\d+[、.．)]\\s*地质专业技术人员",
+      "role_line_prefix_pattern": "^\\s*\\d+[、.．)]\\s*",
+      "role_section_end_pattern": "(?!)",
+      "role_include_patterns": ["地质|矿产|资源勘查|物探|地球物理"],
+      "employer_hint": "中国冶金地质总局第二地质勘查院",
+      "published_date": "2026-09-17",
+      "require_recruitment_word": false,
+      "require_major_match": true,
+      "minimum_relevance": 40,
+      "max_items": 4,
+      "request_interval_seconds": 1.0,
+      "undated_open_window_days": 45,
+      "allow_shared_source_url": true,
+      "note": "官方单页公告。仅按明确的编号岗位行拆分；地质岗位报名期限为2026-09-27，环境工程岗位不符合地球科学学院专业边界，因此不会发布。"
+    }
+  },
+  {
+    "id": "cmgb-inner-mongolia-geology-recruitment",
+    "name": "中国冶金地质总局内蒙古地质勘查院2026年公开招聘",
+    "publisher": "中国冶金地质总局内蒙古地质勘查院",
+    "homepage_url": "https://www.cmgb3.cn/xinxigongkai/2084549051875430401.html",
+    "source_type": "official_xlsx_rows",
+    "category": "自然资源、地调与地勘",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "notice_url": "https://www.cmgb3.cn/xinxigongkai/2084549051875430401.html",
+      "attachment_url": "https://www.cmgb3.cn/upload/1/cms/content/editor/2084804055970451456.xlsx",
+      "sha256": "2d569cdcbde42bcc332f73a061b6ba31506a04cb2bdba949a5fc9000912b9e28",
+      "verified_rows": [3, 4, 5],
+      "sheet_name": "岗位表",
+      "title_column": 2,
+      "duties_column": 3,
+      "requirements_column": 4,
+      "quantity_column": 5,
+      "allowed_hosts": ["www.cmgb3.cn", "cmgb3.cn"],
+      "employer_hint": "中国冶金地质总局内蒙古地质勘查院",
+      "published_date": "2026-08-04",
+      "require_recruitment_word": false,
+      "require_major_match": true,
+      "minimum_relevance": 40,
+      "max_items": 6,
+      "request_interval_seconds": 1.0,
+      "undated_open_window_days": null,
+      "allow_shared_source_url": true,
+      "note": "官方公告明确报名自发布日起至招满为止。岗位表哈希和已人工核验行号均锁定；文件变化时采集失败并要求重新复核，办公室/财务等非地学行不进入学生端。"
     }
   },
   {

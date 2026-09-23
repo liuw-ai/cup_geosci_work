@@ -317,6 +317,15 @@ def main() -> None:
         action="store_true",
         help="明确检查停用来源；未提供时只检查已启用来源",
     )
+    source_tasks_parser = subparsers.add_parser(
+        "source-tasks",
+        help="查看来源队列的待执行、失败、阻断和租约状态",
+    )
+    source_tasks_parser.add_argument(
+        "--due-only",
+        action="store_true",
+        help="只显示当前到期且未被其他 worker 租用的任务",
+    )
     subparsers.add_parser(
         "reindex-jobs",
         help="按当前分类和专业匹配规则重算历史岗位的派生字段",
@@ -846,6 +855,27 @@ def main() -> None:
                         discovery_source_id=args.discovery_source_id,
                         province=args.province,
                     )
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if args.command == "source-tasks":
+        tasks = database.list_source_tasks(due_only=args.due_only)
+        counts: dict[str, int] = {}
+        for task in tasks:
+            status = str(task.get("status") or "unknown")
+            counts[status] = counts.get(status, 0) + 1
+        print(
+            json.dumps(
+                {
+                    "summary": {
+                        "count": len(tasks),
+                        "by_status": counts,
+                        "due_only": bool(args.due_only),
+                    },
+                    "items": tasks,
                 },
                 ensure_ascii=False,
                 indent=2,

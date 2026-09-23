@@ -36,11 +36,17 @@ from job_hub.matching import (
     extract_published_date,
     score_relevance,
 )
-from job_hub.transport import configure_session, create_session
+from job_hub.transport import (
+    RequestPolicy,
+    configure_session,
+    create_session,
+    request_exception_types,
+)
 
 
 USER_AGENT = "cupb-geoscience-job-hub-attachment-fetcher/0.1 (+official-public-source)"
 PARSER_VERSION = "attachments-v1"
+REQUEST_ERRORS = request_exception_types()
 
 SUPPORTED_SUFFIXES = {
     ".pdf",
@@ -96,9 +102,19 @@ class OfficialAttachmentProcessor:
         self.session = session or create_session(
             settings.http_transport_mode,
             headers=headers,
+            client=settings.http_client,
         )
         if session is not None:
             configure_session(session, settings.http_transport_mode, headers=headers)
+        self.request_policy = RequestPolicy(
+            self.session,
+            timeout=settings.request_timeout_seconds,
+            retries=settings.http_retry_attempts,
+            backoff_seconds=settings.http_backoff_seconds,
+            max_backoff_seconds=settings.http_max_backoff_seconds,
+            jitter_seconds=settings.http_jitter_seconds,
+            transport_mode=settings.http_transport_mode,
+        )
         self._robots: dict[str, RobotFileParser] = {}
 
     def discover_from_page(
@@ -123,12 +139,13 @@ class OfficialAttachmentProcessor:
         self._robots_allowed(parent_url)
         if html is None:
             try:
-                response = self.session.get(
+                response = self.request_policy.request(
+                    "GET",
                     parent_url,
                     timeout=self.settings.request_timeout_seconds,
                     allow_redirects=True,
                 )
-            except requests.RequestException as error:
+            except REQUEST_ERRORS as error:
                 raise AttachmentProcessingError(
                     f"Announcement page request failed: {error}"
                 ) from error
@@ -276,13 +293,14 @@ class OfficialAttachmentProcessor:
         self._robots_allowed(parent_url)
         self._robots_allowed(url)
         try:
-            response = self.session.get(
+            response = self.request_policy.request(
+                "GET",
                 url,
                 stream=True,
                 allow_redirects=True,
                 timeout=self.settings.request_timeout_seconds,
             )
-        except requests.RequestException as error:
+        except REQUEST_ERRORS as error:
             raise AttachmentProcessingError(f"Attachment request failed: {error}") from error
         try:
             if response.status_code in {401, 403, 407, 429}:
@@ -943,12 +961,13 @@ class OfficialAttachmentProcessor:
             parser = RobotFileParser()
             robots_url = f"{root}/robots.txt"
             try:
-                response = self.session.get(
+                response = self.request_policy.request(
+                    "GET",
                     robots_url,
                     timeout=min(self.settings.request_timeout_seconds, 10),
                     allow_redirects=True,
                 )
-            except requests.RequestException as error:
+            except REQUEST_ERRORS as error:
                 raise AttachmentSkipped(f"Unable to verify robots.txt for {root}: {error}") from error
             if response.status_code == 404:
                 parser.parse([])

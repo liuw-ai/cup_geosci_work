@@ -173,6 +173,21 @@ def test_source_validation_matrix_is_admin_only_and_keeps_evidence_private(tmp_p
     ]
 
 
+def test_source_task_queue_is_admin_only(tmp_path) -> None:
+    app = create_app(make_settings(tmp_path))
+    client = app.test_client()
+
+    assert client.get("/api/admin/source-tasks").status_code == 403
+    response = client.get(
+        "/api/admin/source-tasks?due_only=true",
+        headers={"X-Admin-Token": "test-admin-token"},
+    )
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["summary"]["due_only"] is True
+    assert isinstance(payload["summary"]["by_status"], dict)
+
+
 def test_admin_import_rejects_invalid_token(tmp_path) -> None:
     settings = make_settings(tmp_path)
     app = create_app(settings)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sqlite3
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -242,6 +243,27 @@ CREATE TABLE IF NOT EXISTS source_health (
 
 CREATE INDEX IF NOT EXISTS idx_source_health_status
 ON source_health(status, checked_at DESC);
+
+-- A durable per-source queue keeps one slow or blocked domain from stopping
+-- the rest of the nationwide scan.  The queue is operational state, not job
+-- content, and can be rebuilt from the versioned source registry.
+CREATE TABLE IF NOT EXISTS source_tasks (
+    source_id TEXT PRIMARY KEY REFERENCES sources(id) ON DELETE CASCADE,
+    priority INTEGER NOT NULL DEFAULT 100,
+    status TEXT NOT NULL DEFAULT 'pending',
+    attempts INTEGER NOT NULL DEFAULT 0,
+    next_attempt_at TEXT NOT NULL,
+    lease_until TEXT,
+    last_started_at TEXT,
+    last_finished_at TEXT,
+    last_error TEXT,
+    last_error_class TEXT,
+    last_run_id INTEGER,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_source_tasks_due
+ON source_tasks(status, next_attempt_at, priority);
 
 CREATE TABLE IF NOT EXISTS coverage_snapshots (
     snapshot_date TEXT PRIMARY KEY,
@@ -532,6 +554,151 @@ class Database:
                 "SELECT * FROM sources WHERE id = ?", (source_id,)
             ).fetchone()
         return self._source_row(row) if row else None
+
+    def ensure_source_tasks(
+        self,
+        sources: list[dict[str, Any]],
+        *,
+        initial_delay_seconds: int = 0,
+    ) -> None:
+        """Register enabled sources without resetting their durable queue state."""
+        now = datetime.now(timezone.utc)
+        first_attempt = (now + timedelta(seconds=max(0, initial_delay_seconds))).replace(
+            microsecond=0
+        ).isoformat().replace("+00:00", "Z")
+        with self.transaction() as connection:
+            for source in sources:
+                priority = int(source.get("config", {}).get("queue_priority", 100))
+                connection.execute(
+                    """
+                    INSERT INTO source_tasks (
+                        source_id, priority, status, attempts, next_attempt_at, updated_at
+                    ) VALUES (?, ?, 'pending', 0, ?, ?)
+                    ON CONFLICT(source_id) DO UPDATE SET
+                        priority=excluded.priority,
+                        updated_at=excluded.updated_at
+                    """,
+                    (source["id"], priority, first_attempt, utc_now()),
+                )
+
+    def get_source_task(self, source_id: str) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT * FROM source_tasks WHERE source_id = ?", (source_id,)
+            ).fetchone()
+        return dict(row) if row else None
+
+    def list_source_tasks(self, *, due_only: bool = False) -> list[dict[str, Any]]:
+        query = "SELECT * FROM source_tasks"
+        values: list[Any] = []
+        if due_only:
+            query += " WHERE next_attempt_at <= ? AND (lease_until IS NULL OR lease_until < ?)"
+            now = utc_now()
+            values.extend((now, now))
+        query += " ORDER BY priority ASC, next_attempt_at ASC, source_id ASC"
+        with self.connect() as connection:
+            rows = connection.execute(query, values).fetchall()
+        return [dict(row) for row in rows]
+
+    def claim_source_task(
+        self,
+        source_id: str,
+        *,
+        lease_seconds: int = 1_800,
+    ) -> dict[str, Any] | None:
+        """Atomically claim a due task so a second worker cannot duplicate it."""
+        now_dt = datetime.now(timezone.utc).replace(microsecond=0)
+        now = now_dt.isoformat().replace("+00:00", "Z")
+        lease = (now_dt + timedelta(seconds=max(1, lease_seconds))).isoformat().replace(
+            "+00:00", "Z"
+        )
+        with self.transaction() as connection:
+            row = connection.execute(
+                """
+                SELECT * FROM source_tasks
+                WHERE source_id = ?
+                  AND next_attempt_at <= ?
+                  AND (lease_until IS NULL OR lease_until < ?)
+                  AND status IN ('pending', 'failed', 'blocked', 'succeeded')
+                """,
+                (source_id, now, now),
+            ).fetchone()
+            if row is None:
+                return None
+            connection.execute(
+                """
+                UPDATE source_tasks
+                SET status='running', attempts=attempts + 1,
+                    lease_until=?, last_started_at=?, last_run_id=NULL,
+                    last_error=NULL, last_error_class=NULL, updated_at=?
+                WHERE source_id=?
+                """,
+                (lease, now, now, source_id),
+            )
+            claimed = connection.execute(
+                "SELECT * FROM source_tasks WHERE source_id = ?", (source_id,)
+            ).fetchone()
+        return dict(claimed) if claimed else None
+
+    def complete_source_task(
+        self,
+        source_id: str,
+        *,
+        next_attempt_seconds: int,
+        run_id: int | None = None,
+    ) -> None:
+        now_dt = datetime.now(timezone.utc).replace(microsecond=0)
+        next_attempt = (
+            now_dt + timedelta(seconds=max(0, next_attempt_seconds))
+        ).isoformat().replace("+00:00", "Z")
+        now = now_dt.isoformat().replace("+00:00", "Z")
+        with self.transaction() as connection:
+            connection.execute(
+                """
+                UPDATE source_tasks
+                SET status='succeeded', next_attempt_at=?, lease_until=NULL,
+                    last_finished_at=?, last_run_id=COALESCE(?, last_run_id),
+                    last_error=NULL, last_error_class=NULL, updated_at=?
+                WHERE source_id=?
+                """,
+                (next_attempt, now, run_id, now, source_id),
+            )
+
+    def fail_source_task(
+        self,
+        source_id: str,
+        *,
+        error: str,
+        error_class: str,
+        retry_after_seconds: int,
+        blocked: bool = False,
+        run_id: int | None = None,
+    ) -> None:
+        now_dt = datetime.now(timezone.utc).replace(microsecond=0)
+        next_attempt = (
+            now_dt + timedelta(seconds=max(1, retry_after_seconds))
+        ).isoformat().replace("+00:00", "Z")
+        now = now_dt.isoformat().replace("+00:00", "Z")
+        with self.transaction() as connection:
+            connection.execute(
+                """
+                UPDATE source_tasks
+                SET status=?, next_attempt_at=?, lease_until=NULL,
+                    last_finished_at=?, last_run_id=COALESCE(?, last_run_id),
+                    last_error=?, last_error_class=?, updated_at=?
+                WHERE source_id=?
+                """,
+                (
+                    "blocked" if blocked else "failed",
+                    next_attempt,
+                    now,
+                    run_id,
+                    str(error)[:1500],
+                    str(error_class)[:120],
+                    now,
+                    source_id,
+                ),
+            )
 
     def record_source_health(
         self,
@@ -997,6 +1164,74 @@ class Database:
             )
             self._ensure_official_page_evidence(connection, job_id, job)
             return job_id, "updated"
+
+    def supersede_duplicate_jobs(self, source_id: str) -> int:
+        """Hide same-source title duplicates while preserving their history.
+
+        Some official portals expose one announcement through several public
+        routes (for example an announcement page and a position-page mirror).
+        The lower-priority record is retained for audit history but marked
+        ``superseded`` so the student-facing open count is not inflated.
+        """
+        with self.transaction() as connection:
+            rows = connection.execute(
+                """
+                SELECT id, title, source_url, updated_at
+                FROM jobs
+                WHERE source_id = ? AND status = 'open'
+                ORDER BY updated_at DESC, id DESC
+                """,
+                (source_id,),
+            ).fetchall()
+            selected: dict[str, sqlite3.Row] = {}
+            duplicate_ids: list[tuple[int, int]] = []
+
+            def key(value: str) -> str:
+                return re.sub(r"\s+", "", str(value or "")).casefold()
+
+            def rank(url: str) -> int:
+                parsed = urlparse(str(url or ""))
+                if "/campus/view/" in parsed.path:
+                    return 0
+                if "/news/view/" in parsed.path:
+                    return 1
+                if "/job/view/" in parsed.path:
+                    return 2
+                return 3
+
+            for row in rows:
+                title_key = key(row["title"])
+                previous = selected.get(title_key)
+                if previous is None:
+                    selected[title_key] = row
+                    continue
+                if rank(row["source_url"]) < rank(previous["source_url"]):
+                    duplicate_ids.append((int(previous["id"]), int(row["id"])))
+                    selected[title_key] = row
+                else:
+                    duplicate_ids.append((int(row["id"]), int(previous["id"])))
+
+            now = utc_now()
+            for duplicate_id, winner_id in duplicate_ids:
+                connection.execute(
+                    "UPDATE jobs SET status = 'superseded', updated_at = ? WHERE id = ?",
+                    (now, duplicate_id),
+                )
+                connection.execute(
+                    """
+                    INSERT INTO job_events (job_id, event_type, occurred_at, payload_json)
+                    VALUES (?, 'superseded', ?, ?)
+                    """,
+                    (
+                        duplicate_id,
+                        now,
+                        json.dumps(
+                            {"source_id": source_id, "winner_job_id": winner_id},
+                            ensure_ascii=False,
+                        ),
+                    ),
+                )
+            return len(duplicate_ids)
 
     def upsert_source_artifact(self, artifact: dict[str, Any]) -> dict[str, Any]:
         """Register one attachment whose parent page and file URL are official."""

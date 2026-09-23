@@ -630,6 +630,31 @@ def create_app(settings: Settings | None = None) -> Flask:
             }
         )
 
+    @app.get("/api/admin/source-tasks")
+    @require_admin
+    def source_tasks_api() -> Any:
+        """Expose durable source queue state to the administrator only."""
+        due_only = request.args.get("due_only", "").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+        }
+        tasks = database.list_source_tasks(due_only=due_only)
+        by_status: dict[str, int] = {}
+        for task in tasks:
+            status = str(task.get("status") or "unknown")
+            by_status[status] = by_status.get(status, 0) + 1
+        return jsonify(
+            {
+                "summary": {
+                    "count": len(tasks),
+                    "by_status": by_status,
+                    "due_only": due_only,
+                },
+                "items": tasks,
+            }
+        )
+
     @app.post("/api/admin/jobs")
     @require_admin
     def import_verified_job() -> Any:

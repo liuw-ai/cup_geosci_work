@@ -33,6 +33,8 @@ SOURCE_TYPES = frozenset(
         "mnr_recruitment",
         "slb_coveo_search",
         "html_notice",
+        "official_table_rows",
+        "official_xlsx_rows",
         "structured_opening_page",
         "landing_page",
     }
@@ -480,6 +482,73 @@ def validate_source_record(value: Any, *, context: str = "Source") -> dict[str, 
             allowed_hosts,
             f"{context} config allowed_hosts",
         )
+    if source["source_type"] == "official_xlsx_rows":
+        for field_name in ("notice_url", "attachment_url", "sha256", "verified_rows"):
+            if field_name not in source["config"]:
+                raise ContractValidationError(
+                    f"{context} config {field_name} is required for hash-locked XLSX rows"
+                )
+        source["config"]["notice_url"] = validate_http_url(
+            source["config"]["notice_url"], f"{context} config notice_url"
+        )
+        source["config"]["attachment_url"] = validate_http_url(
+            source["config"]["attachment_url"], f"{context} config attachment_url"
+        )
+        digest = str(source["config"]["sha256"]).strip().lower()
+        if not re.fullmatch(r"[0-9a-f]{64}", digest):
+            raise ContractValidationError(
+                f"{context} config sha256 must be a 64-character hexadecimal digest"
+            )
+        if not isinstance(source["config"]["verified_rows"], list) or not source["config"]["verified_rows"]:
+            raise ContractValidationError(
+                f"{context} config verified_rows must be a non-empty list"
+            )
+        source["config"]["sha256"] = digest
+        try:
+            verified_rows = [int(value) for value in source["config"]["verified_rows"]]
+        except (TypeError, ValueError) as error:
+            raise ContractValidationError(
+                f"{context} config verified_rows must contain positive integers"
+            ) from error
+        if any(value < 1 for value in verified_rows):
+            raise ContractValidationError(
+                f"{context} config verified_rows must contain positive integers"
+            )
+        source["config"]["verified_rows"] = sorted(set(verified_rows))
+        allowed_hosts = source["config"].get("allowed_hosts")
+        if not isinstance(allowed_hosts, list) or not allowed_hosts:
+            raise ContractValidationError(
+                f"{context} config allowed_hosts must be a non-empty list"
+            )
+        source["config"]["allowed_hosts"] = _validate_domains(
+            allowed_hosts,
+            f"{context} config allowed_hosts",
+        )
+    if source["source_type"] == "official_table_rows":
+        allowed_hosts = source["config"].get("allowed_hosts")
+        if not isinstance(allowed_hosts, list) or not allowed_hosts:
+            raise ContractValidationError(
+                f"{context} config allowed_hosts must be a non-empty list"
+            )
+        source["config"]["allowed_hosts"] = _validate_domains(
+            allowed_hosts,
+            f"{context} config allowed_hosts",
+        )
+        direct_urls = source["config"].get("direct_notice_urls") or []
+        listing_urls = source["config"].get("listing_urls") or []
+        if not isinstance(direct_urls, list) or not isinstance(listing_urls, list):
+            raise ContractValidationError(
+                f"{context} table source direct_notice_urls/listing_urls must be lists"
+            )
+        if not direct_urls and not listing_urls:
+            raise ContractValidationError(
+                f"{context} table source needs an explicit notice or listing URL"
+            )
+        for field_name in ("direct_notice_urls", "listing_urls"):
+            source["config"][field_name] = [
+                validate_http_url(value, f"{context} config {field_name}")
+                for value in source["config"].get(field_name, [])
+            ]
     enabled = source.get("enabled", True)
     if not isinstance(enabled, bool):
         raise ContractValidationError(f"{context} enabled must be true or false")

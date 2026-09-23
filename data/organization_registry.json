@@ -321,6 +321,18 @@
           "verification_status": "official_confirmed",
           "is_primary": true,
           "evidence_note": "研究院官方域名；招聘公告需逐条查验。"
+        },
+        {
+          "id": "sinopec-pepris-2026-recruitment",
+          "channel_type": "official_announcement",
+          "official_url": "http://pepris.sinopec.com/pepris/careers/rwzl/2026/6/I1519026538069098496.shtml",
+          "backup_urls": [
+            "https://pepris.sinopec.com/"
+          ],
+          "verification_status": "official_confirmed",
+          "source_id": "sinopec-pepris-recruitment",
+          "is_primary": false,
+          "evidence_note": "石勘院官网公开招聘公告页；公告岗位表已逐行核验，报名截止时间为2025-11-15，当前作为历史解析证据。"
         }
       ]
     },
@@ -859,6 +871,58 @@
           "verification_status": "automation_ready",
           "is_primary": true,
           "evidence_note": "地球物理勘查院官方人才招聘页；公告按岗位段落拆分，学生端保留同一官方原文证据链接。"
+        }
+      ]
+    },
+    {
+      "id": "cmgb-second-geology-institute",
+      "canonical_name": "中国冶金地质总局第二地质勘查院",
+      "parent_id": "cmgb",
+      "parent_name": "中国冶金地质总局",
+      "organization_role": "geology_survey",
+      "industry_path": "中央地勘系统地质勘查单位",
+      "affiliation": "中国冶金地质总局体系",
+      "aliases": ["中国冶金地质总局二局", "第二地质勘查院"],
+      "official_domains": ["chinayjdzej.cn", "www.chinayjdzej.cn"],
+      "channels": [
+        {
+          "id": "cmgb-second-geology-recruitment",
+          "channel_type": "social_recruitment",
+          "official_url": "http://www.chinayjdzej.cn/index.php?mod=article&act=view&id=14514",
+          "backup_urls": [
+            "http://www.chinayjdzej.cn/index.php?mod=article&act=list&cid=794",
+            "https://www.cmgb.com.cn/category/zpxx.html"
+          ],
+          "source_id": "cmgb-second-geology-recruitment",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "2026-09-17 官方社会招聘公告；地质专业技术人员报名截止 2026-09-27，环境工程岗位不纳入地学专业推荐。"
+        }
+      ]
+    },
+    {
+      "id": "cmgb-inner-mongolia-geology-institute",
+      "canonical_name": "中国冶金地质总局内蒙古地质勘查院",
+      "parent_id": "cmgb",
+      "parent_name": "中国冶金地质总局",
+      "organization_role": "geology_survey",
+      "industry_path": "中央地勘系统地质勘查单位",
+      "affiliation": "中国冶金地质总局体系",
+      "aliases": ["内蒙古地质勘查院", "内蒙古地勘院"],
+      "official_domains": ["cmgb3.cn", "www.cmgb3.cn"],
+      "channels": [
+        {
+          "id": "cmgb-inner-mongolia-geology-recruitment",
+          "channel_type": "social_recruitment",
+          "official_url": "https://www.cmgb3.cn/xinxigongkai/2084549051875430401.html",
+          "backup_urls": [
+            "https://www.cmgb3.cn/",
+            "https://www.cmgb.com.cn/category/zpxx.html"
+          ],
+          "source_id": "cmgb-inner-mongolia-geology-recruitment",
+          "verification_status": "automation_ready",
+          "is_primary": true,
+          "evidence_note": "官方公告及 XLSX 职位表；哈希锁定并只发布人工核验的地质勘查相关行，文件变化时自动阻断。"
         }
       ]
     },

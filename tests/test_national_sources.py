@@ -21,7 +21,10 @@ from conftest import make_settings
 def test_national_matrix_expands_every_target_channel() -> None:
     matrix = load_national_source_matrix()
     rows = national_source_matrix_rows(matrix)
-    assert len(rows) == 38
+    # The Phase 12 registry adds the BGP channel as a separately assessed
+    # official technical-unit entry; keep the matrix count explicit so an
+    # accidental source deletion is still caught by the contract test.
+    assert len(rows) == 39
     assert {row["affiliation"] for row in rows} == set(matrix["target_affiliations"])
     assert all(row["backup_urls"] for row in rows)
     assert not [row for row in rows if row["source_id"] and not row["assessment_source_id"]]
@@ -37,7 +40,13 @@ def test_access_limited_sources_cannot_claim_successful_no_match() -> None:
     matrix = load_national_source_matrix()
     summary = national_source_matrix_summary(matrix)
     assert summary["source_unavailable_channels"] > 0
-    assert summary["successful_no_match_channels"] == 0
+    assert summary["successful_no_match_channels"] == 1
+    assert not [
+        row
+        for row in national_source_matrix_rows(matrix)
+        if row["runtime_status"] in {"access_limited", "blocked"}
+        and row["scan_conclusion"] == "scan_success_no_match"
+    ]
     cnooc = next(
         item
         for item in matrix["source_assessments"]
@@ -75,7 +84,7 @@ def test_national_matrix_cli_runs_with_isolated_database(tmp_path, monkeypatch, 
     )
     cli_main()
     payload = json.loads(capsys.readouterr().out)
-    assert payload["summary"]["channel_count"] == 38
+    assert payload["summary"]["channel_count"] == 39
     assert payload["items"]
     assert all(item["runtime_status"] == "access_limited" for item in payload["items"])
 
@@ -91,6 +100,6 @@ def test_national_matrix_admin_endpoint_is_private(tmp_path) -> None:
     )
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["summary"]["channel_count"] == 38
+    assert payload["summary"]["channel_count"] == 39
     assert payload["items"]
     assert all(item["runtime_status"] == "access_limited" for item in payload["items"])

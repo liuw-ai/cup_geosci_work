@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from job_hub.transport import validate_transport_mode
+from job_hub.transport import validate_http_client, validate_transport_mode
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -56,6 +56,13 @@ class Settings:
     attachment_ocr_language: str = "chi_sim+eng"
     attachment_ocr_max_pages: int = 12
     http_transport_mode: str = "environment"
+    http_client: str = "requests"
+    http_retry_attempts: int = 2
+    http_backoff_seconds: float = 0.75
+    http_max_backoff_seconds: float = 30.0
+    http_jitter_seconds: float = 0.15
+    http_cache_enabled: bool = True
+    http_cache_max_entries: int = 2_000
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -85,7 +92,7 @@ class Settings:
             source_sync_interval_minutes=_env_int(
                 "SOURCE_SYNC_INTERVAL_MINUTES", 180
             ),
-            max_source_items=_env_int("MAX_SOURCE_ITEMS", 40),
+            max_source_items=_env_int("MAX_SOURCE_ITEMS", 80),
             request_timeout_seconds=_env_int("REQUEST_TIMEOUT_SECONDS", 20),
             admin_token=os.getenv("ADMIN_TOKEN", ""),
             mail_enabled=_env_bool("MAIL_ENABLED"),
@@ -114,6 +121,18 @@ class Settings:
             http_transport_mode=validate_transport_mode(
                 os.getenv("HTTP_TRANSPORT_MODE", "environment")
             ),
+            http_client=validate_http_client(
+                os.getenv("HTTP_CLIENT", "requests")
+            ),
+            http_retry_attempts=_env_int("HTTP_RETRY_ATTEMPTS", 2),
+            http_backoff_seconds=float(os.getenv("HTTP_BACKOFF_SECONDS", "0.75")),
+            http_max_backoff_seconds=float(
+                os.getenv("HTTP_MAX_BACKOFF_SECONDS", "30"
+                )
+            ),
+            http_jitter_seconds=float(os.getenv("HTTP_JITTER_SECONDS", "0.15")),
+            http_cache_enabled=_env_bool("HTTP_CACHE_ENABLED", True),
+            http_cache_max_entries=_env_int("HTTP_CACHE_MAX_ENTRIES", 2_000),
         )
 
     def ensure_runtime_paths(self) -> None:

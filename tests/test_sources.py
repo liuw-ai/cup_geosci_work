@@ -228,6 +228,74 @@ def test_cupb_adapter_decodes_public_embedded_announcement_content(tmp_path) -> 
     assert "硕士" in posting.text
 
 
+def test_cupb_adapter_decodes_listing_and_follows_next_page(tmp_path, monkeypatch) -> None:
+    settings = make_settings(tmp_path)
+    collector = OfficialSourceCollector(settings)
+    source = {
+        "id": "cupb-career",
+        "name": "中国石油大学（北京）就业信息网",
+        "publisher": "中国石油大学（北京）",
+        "homepage_url": "https://career.cup.edu.cn/",
+        "source_type": "cupb_career",
+        "category": "能源、工程与地学拓展",
+        "source_tier": "B",
+        "config": {
+            "listing_urls": ["https://career.cup.edu.cn/campus"],
+            "detail_path_patterns": ["/campus/view/id/"],
+            "max_items": 1,
+            "candidate_limit": 4,
+            "listing_page_limit": 2,
+            "request_interval_seconds": 0,
+        },
+    }
+    page_one = "https://career.cup.edu.cn/campus"
+    page_two = "https://career.cup.edu.cn/campus/index/domain/cup/city//page/2"
+    irrelevant_url = "https://career.cup.edu.cn/campus/view/id/201"
+    relevant_url = "https://career.cup.edu.cn/campus/view/id/202"
+
+    def encoded(fragment: str) -> str:
+        inner = base64.b64encode(f"view1d {fragment}".encode("utf-8")).decode("ascii")
+        payload = base64.b64encode(zlib.compress(f"view2d {inner}".encode("utf-8"))).decode(
+            "ascii"
+        )
+        return f'<script>Base64.decode(unzip("{payload}"))</script>'
+
+    responses = {
+        page_one: FakeResponse(
+            text=encoded(
+                f'<a href="{irrelevant_url}">普通企业岗位</a>'
+                f'<a href="{page_two}">下一页</a>'
+            ),
+            url=page_one,
+        ),
+        page_two: FakeResponse(
+            text=encoded(f'<a href="{relevant_url}">地勘单位招聘</a>'),
+            url=page_two,
+        ),
+        irrelevant_url: FakeResponse(
+            text=(
+                '<div class="details-title"><h5>普通企业岗位</h5></div>'
+                '<main class="zp-details">公司介绍和福利信息。</main>'
+            ),
+            url=irrelevant_url,
+        ),
+        relevant_url: FakeResponse(
+            text=(
+                '<div class="details-title"><h5>地勘单位招聘</h5></div>'
+                '<main class="zp-details">招聘地质工程、资源勘查工程硕士毕业生。</main>'
+            ),
+            url=relevant_url,
+        ),
+    }
+
+    monkeypatch.setattr(collector, "_get", lambda url, _source: responses[url])
+
+    postings = collector.collect(source)
+
+    assert len(postings) == 1
+    assert postings[0].source_url == relevant_url
+
+
 def test_cupb_adapter_keeps_free_form_major_evidence_and_real_employer(tmp_path) -> None:
     settings = make_settings(tmp_path)
     collector = OfficialSourceCollector(settings)
@@ -246,7 +314,7 @@ def test_cupb_adapter_keeps_free_form_major_evidence_and_real_employer(tmp_path)
     }
     document = (
         '<title>赣南实验室2026年招聘公告</title>'
-        '<div class="title-message"><span class="name">北京南方国际人力资源顾问有限公司</span></div>'
+        '<div class="title-message"><span class="name">前锦网络信息技术（上海）有限公司</span></div>'
         '<div class="common-view">发布时间：2026年09月20日 过期时间：2026年12月19日</div>'
         '<main class="zp-details">'
         '赣南实验室面向关键矿产开发招聘。'
@@ -267,6 +335,50 @@ def test_cupb_adapter_keeps_free_form_major_evidence_and_real_employer(tmp_path)
     assert posting.deadline_date == "2026-12-19"
     assert posting.location == "江西省赣州市"
     assert "地质工程" in (posting.match_text or "")
+
+
+def test_cupb_adapter_prefers_announcement_over_position_duplicate() -> None:
+    candidates = [
+        ("中国石油集团经济技术研究院2026年招聘公告", "https://career.cup.edu.cn/job/view/id/1"),
+        ("中国石油集团经济技术研究院2026年招聘公告", "https://career.cup.edu.cn/campus/view/id/2"),
+    ]
+    assert OfficialSourceCollector._cupb_deduplicate_candidates(candidates) == [candidates[1]]
+
+
+def test_cupb_adapter_infers_unit_when_portal_account_is_relay() -> None:
+    assert (
+        OfficialSourceCollector._cupb_employer_from_title(
+            "福建省能源石化创新研究院有限责任公司"
+        )
+        == "福建省能源石化创新研究院有限责任公司"
+    )
+    assert (
+        OfficialSourceCollector._cupb_employer_from_title(
+            "赣南实验室2026年招聘公告"
+        )
+        == "赣南实验室"
+    )
+
+
+def test_cupb_location_evidence_prefers_official_address_over_portal_default() -> None:
+    assert (
+        OfficialSourceCollector._cupb_location_evidence(
+            "桂林理工大学坐落于世界著名山水旅游名城、中国历史文化名城——桂林。"
+        )
+        == "桂林"
+    )
+    assert (
+        OfficialSourceCollector._cupb_location_evidence(
+            "通讯地址：广西桂林市建干路12号，桂林理工大学人事处"
+        )
+        == "广西桂林市"
+    )
+    assert (
+        OfficialSourceCollector._cupb_location_evidence(
+            "赣南实验室注册在江西省赣州市。"
+        )
+        == "江西省赣州市"
+    )
 
 
 def test_cas_adapter_reads_employer_location_and_detail_fields(tmp_path, monkeypatch) -> None:

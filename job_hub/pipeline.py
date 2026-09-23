@@ -35,6 +35,7 @@ class SourceSyncResult:
     updated: int = 0
     skipped: int = 0
     error: str | None = None
+    run_id: int | None = None
 
 
 @dataclass
@@ -63,6 +64,14 @@ class SyncSummary:
     def failed(self) -> int:
         return sum(1 for item in self.source_results if item.status == "failed")
 
+    @property
+    def blocked(self) -> int:
+        return sum(
+            1
+            for item in self.source_results
+            if item.status == "skipped" and item.error
+        )
+
     def as_dict(self) -> dict[str, Any]:
         return {
             "discovered": self.discovered,
@@ -72,6 +81,7 @@ class SyncSummary:
             "expired": self.expired,
             "recovered_crawl_runs": self.recovered_crawl_runs,
             "failed": self.failed,
+            "blocked": self.blocked,
             "sources": [asdict(item) for item in self.source_results],
         }
 
@@ -98,13 +108,55 @@ class JobPipeline:
         sources = load_source_registries(registry_paths)
         for source in sources:
             self.database.upsert_source(source)
+        self.database.ensure_source_tasks(
+            [source for source in sources if source.get("enabled", True)]
+        )
         return len(sources)
 
     def sync_all(self) -> SyncSummary:
         recovered = self.database.recover_stale_crawl_runs(
             self.settings.crawl_run_stale_seconds
         )
-        results = [self.sync_source(source) for source in self.database.list_sources(True)]
+        sources = self.database.list_sources(True)
+        self.database.ensure_source_tasks(sources)
+        results: list[SourceSyncResult] = []
+        for source in sources:
+            task = self.database.claim_source_task(
+                source["id"],
+                lease_seconds=self.settings.crawl_run_stale_seconds,
+            )
+            if task is None:
+                results.append(
+                    SourceSyncResult(
+                        source_id=source["id"],
+                        status="deferred",
+                        error="source task is not due yet",
+                    )
+                )
+                continue
+            result = self.sync_source(source)
+            results.append(result)
+            if result.status == "finished":
+                self.database.complete_source_task(
+                    source["id"],
+                    next_attempt_seconds=self.settings.source_sync_interval_minutes * 60,
+                    run_id=result.run_id,
+                )
+            else:
+                blocked = result.status == "skipped" or self._is_policy_error(result.error)
+                retry_after = (
+                    max(3600, self.settings.source_sync_interval_minutes * 60)
+                    if blocked
+                    else max(60, min(1800, self.settings.source_sync_interval_minutes * 60))
+                )
+                self.database.fail_source_task(
+                    source["id"],
+                    error=result.error or "source task failed",
+                    error_class="access_policy" if blocked else "collector_error",
+                    retry_after_seconds=retry_after,
+                    blocked=blocked,
+                    run_id=result.run_id,
+                )
         today = datetime.now(self.timezone).date().isoformat()
         expired = self.database.expire_jobs_before(today)
         return SyncSummary(results, expired, len(recovered))
@@ -115,9 +167,14 @@ class JobPipeline:
             source["id"],
         )
         run_id = self.database.record_crawl_start(source["id"])
-        result = SourceSyncResult(source_id=source["id"], status="finished")
+        result = SourceSyncResult(source_id=source["id"], status="finished", run_id=run_id)
         try:
-            postings = self.collector.collect(source)
+            collect = getattr(self.collector, "collect_with_fallback", None)
+            postings = (
+                collect(source)
+                if callable(collect)
+                else self.collector.collect(source)
+            )
             result.discovered = len(postings)
             for posting in postings:
                 normalized = self.normalize_posting(posting, source)
@@ -132,6 +189,8 @@ class JobPipeline:
                     result.created += 1
                 elif outcome == "updated":
                     result.updated += 1
+            if source["config"].get("deduplicate_by_title"):
+                self.database.supersede_duplicate_jobs(source["id"])
             self.database.mark_source_synced(source["id"])
             self.database.record_source_health(
                 source["id"],
@@ -179,6 +238,23 @@ class JobPipeline:
                 error_message=result.error[:1500],
             )
         return result
+
+    @staticmethod
+    def _is_policy_error(error: str | None) -> bool:
+        normalized = str(error or "").lower()
+        return any(
+            marker in normalized
+            for marker in (
+                "robots",
+                "http 401",
+                "http 403",
+                "http 407",
+                "http 412",
+                "access policy",
+                "not permit",
+                "captcha",
+            )
+        )
 
     def normalize_posting(
         self,

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import base64
 import binascii
+import hashlib
+import io
 import json
 import re
 import time
@@ -36,7 +38,16 @@ from job_hub.matching import (
     parse_date_value,
     stable_hash,
 )
-from job_hub.transport import configure_session, create_session
+from job_hub.transport import (
+    RequestPolicy,
+    ResponseCache,
+    configure_session,
+    create_session,
+    request_exception_types,
+)
+
+
+REQUEST_ERRORS = request_exception_types()
 
 
 USER_AGENT = (
@@ -96,6 +107,7 @@ class SourceHealthProbe:
         self.session = session or create_session(
             settings.http_transport_mode,
             headers={"User-Agent": USER_AGENT},
+            client=settings.http_client,
         )
         if session is not None:
             configure_session(
@@ -103,6 +115,15 @@ class SourceHealthProbe:
                 settings.http_transport_mode,
                 headers={"User-Agent": USER_AGENT},
             )
+        self.request_policy = RequestPolicy(
+            self.session,
+            timeout=settings.request_timeout_seconds,
+            retries=settings.http_retry_attempts,
+            backoff_seconds=settings.http_backoff_seconds,
+            max_backoff_seconds=settings.http_max_backoff_seconds,
+            jitter_seconds=settings.http_jitter_seconds,
+            transport_mode=settings.http_transport_mode,
+        )
 
     def check(self, source: dict[str, Any]) -> SourceHealthResult:
         if source.get("source_type") == "manual":
@@ -115,12 +136,13 @@ class SourceHealthProbe:
         root = f"{parsed.scheme}://{parsed.netloc}"
         robots_url = urljoin(root, "/robots.txt")
         try:
-            robots_response = self.session.get(
+            robots_response = self.request_policy.request(
+                "GET",
                 robots_url,
                 timeout=min(self.settings.request_timeout_seconds, 10),
                 allow_redirects=True,
             )
-        except requests.RequestException as error:
+        except REQUEST_ERRORS as error:
             return SourceHealthResult("source_degraded", f"robots.txt 无法核验：{error}")
 
         if robots_response.status_code == 404:
@@ -143,12 +165,13 @@ class SourceHealthProbe:
             )
 
         try:
-            response = self.session.get(
+            response = self.request_policy.request(
+                "GET",
                 entry_url,
                 timeout=self.settings.request_timeout_seconds,
                 allow_redirects=True,
             )
-        except requests.RequestException as error:
+        except REQUEST_ERRORS as error:
             return SourceHealthResult("source_error", f"公开入口请求失败：{error}")
         if response.ok and self._is_soft_not_found(response):
             return SourceHealthResult(
@@ -259,9 +282,26 @@ class OfficialSourceCollector:
         self.session = session or create_session(
             settings.http_transport_mode,
             headers=headers,
+            client=settings.http_client,
         )
         if session is not None:
             configure_session(session, settings.http_transport_mode, headers=headers)
+        cache = None
+        if settings.http_cache_enabled:
+            cache = ResponseCache(
+                settings.data_dir / "http-cache",
+                max_entries=settings.http_cache_max_entries,
+            )
+        self.request_policy = RequestPolicy(
+            self.session,
+            timeout=settings.request_timeout_seconds,
+            retries=settings.http_retry_attempts,
+            backoff_seconds=settings.http_backoff_seconds,
+            max_backoff_seconds=settings.http_max_backoff_seconds,
+            jitter_seconds=settings.http_jitter_seconds,
+            cache=cache,
+            transport_mode=settings.http_transport_mode,
+        )
         self._robots_cache: dict[str, RobotFileParser] = {}
 
     def collect(self, source: dict[str, Any]) -> list[RawPosting]:
@@ -288,9 +328,63 @@ class OfficialSourceCollector:
             return self._collect_slb_coveo_search(source)
         if source_type == "structured_opening_page":
             return self._collect_structured_opening_page(source)
+        if source_type == "official_xlsx_rows":
+            return self._collect_official_xlsx_rows(source)
+        if source_type == "official_table_rows":
+            return self._collect_official_table_rows(source)
         if source_type in {"html_notice", "landing_page"}:
             return self._collect_html_notice(source)
         raise SourceCollectionError(f"Unsupported source type: {source_type}")
+
+    def collect_with_fallback(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Try the registered official ladder for one source.
+
+        A fallback is only a URL/configuration explicitly registered by the
+        administrator.  It may be a unit's own announcement page or an
+        official attachment route; arbitrary search results are never promoted
+        into the ladder.  A successful empty scan is preserved as such unless
+        ``fallback_on_empty`` is enabled for that source.
+        """
+        config = source.get("config", {})
+        fallback_items = config.get("fallback_sources", []) or []
+        candidates: list[dict[str, Any]] = [source]
+        for item in fallback_items:
+            if not isinstance(item, dict):
+                continue
+            url = str(item.get("url") or item.get("homepage_url") or "").strip()
+            if not url:
+                continue
+            candidate = dict(source)
+            candidate_config = dict(config)
+            candidate_config.update(item.get("config", {}))
+            candidate["homepage_url"] = url
+            candidate["source_type"] = str(item.get("source_type") or source["source_type"])
+            candidate["config"] = candidate_config
+            candidates.append(candidate)
+
+        failures: list[str] = []
+        first_blocked: SourceSkipped | None = None
+        for index, candidate in enumerate(candidates):
+            try:
+                postings = self.collect(candidate)
+                if postings or index == 0 and not config.get("fallback_on_empty"):
+                    return postings
+                # A configured empty-scan ladder can still inspect a registered
+                # alternate official page before concluding there are no matches.
+                if index == len(candidates) - 1:
+                    return postings
+            except SourceSkipped as error:
+                first_blocked = first_blocked or error
+                failures.append(str(error))
+            except SourceCollectionError as error:
+                failures.append(str(error))
+        if first_blocked is not None and all(
+            "robots" in failure.lower() or "permit" in failure.lower()
+            for failure in failures
+        ):
+            raise first_blocked
+        detail = "; ".join(failures[-4:]) or "no registered official fallback succeeded"
+        raise SourceCollectionError(f"Official source ladder exhausted: {detail}")
 
     def _collect_mnr_recruitment(self, source: dict[str, Any]) -> list[RawPosting]:
         """Collect public MNR recruitment rows through its own exposed API.
@@ -782,26 +876,46 @@ class OfficialSourceCollector:
         links: list[tuple[str, str]] = []
         seen_links: set[str] = set()
         item_limit = self._item_limit(source)
-        for listing_url in listing_urls:
-            response = self._get(listing_url, source)
-            soup = BeautifulSoup(response.text, "html.parser")
-            for title_hint, detail_url in self._notice_links(
-                soup, response.url, source
-            ):
-                if detail_url in seen_links:
-                    continue
-                seen_links.add(detail_url)
-                links.append((title_hint, detail_url))
+
+        # Some official units publish a single announcement page without a
+        # listing page.  The URL is explicitly registered by an administrator;
+        # it is never discovered from a search engine or a third-party index.
+        for direct_url in config.get("direct_notice_urls", []) or []:
+            normalized = normalize_url(str(direct_url))
+            if normalized and normalized not in seen_links:
+                seen_links.add(normalized)
+                links.append((str(config.get("direct_title_hint") or ""), normalized))
+
+        if not config.get("direct_only"):
+            for listing_url in listing_urls:
+                response = self._get(listing_url, source)
+                soup = BeautifulSoup(response.text, "html.parser")
+                for title_hint, detail_url in self._notice_links(
+                    soup, response.url, source
+                ):
+                    if detail_url in seen_links:
+                        continue
+                    seen_links.add(detail_url)
+                    links.append((title_hint, detail_url))
+                    if len(links) >= item_limit:
+                        break
                 if len(links) >= item_limit:
                     break
-            if len(links) >= item_limit:
-                break
 
         postings: list[RawPosting] = []
         for title_hint, detail_url in links:
             try:
                 detail_response = self._get(detail_url, source)
-                if source["config"].get("split_role_blocks"):
+                if source["config"].get("split_role_lines"):
+                    postings.extend(
+                        self._extract_line_split_details(
+                            detail_response.text,
+                            detail_response.url,
+                            source,
+                            title_hint,
+                        )
+                    )
+                elif source["config"].get("split_role_blocks"):
                     postings.extend(
                         self._extract_role_split_details(
                             detail_response.text,
@@ -821,10 +935,553 @@ class OfficialSourceCollector:
                         postings.append(posting)
             except SourceSkipped:
                 continue
-            except (requests.RequestException, SourceCollectionError):
+            except (*REQUEST_ERRORS, SourceCollectionError):
                 continue
             self._wait(source)
         return postings
+
+    def _extract_line_split_details(
+        self,
+        document: str,
+        source_url: str,
+        source: dict[str, Any],
+        title_hint: str,
+    ) -> list[RawPosting]:
+        """Split a verified announcement whose roles are separated by ``<br>``.
+
+        A number of government CMS pages do not use table rows or paragraphs:
+        the whole notice is one text container with numbered role headings.  A
+        configured heading expression is required, and each resulting record
+        keeps the complete section text as its professional evidence.  This is
+        deliberately stricter than guessing every line containing “岗位”.
+        """
+        config = source["config"]
+        soup = BeautifulSoup(document, "html.parser")
+        content_node = self._select_first(
+            soup,
+            str(config.get("role_content_selector") or config.get("content_selector") or "body"),
+        )
+        if content_node is None:
+            raise SourceCollectionError("Line-split notice has no configured content container")
+        for selector in config.get("remove_selectors", []):
+            for node in content_node.select(selector):
+                node.decompose()
+        lines = [clean_text(line) for line in content_node.get_text("\n", strip=True).splitlines()]
+        lines = [line for line in lines if line]
+        role_pattern = str(config.get("role_line_pattern") or "").strip()
+        if not role_pattern:
+            raise SourceCollectionError("Line-split notice requires role_line_pattern")
+        try:
+            heading = re.compile(role_pattern, re.IGNORECASE)
+        except re.error as error:
+            raise SourceCollectionError(f"Invalid role_line_pattern: {error}") from error
+        role_indexes = [index for index, line in enumerate(lines) if heading.search(line)]
+        if not role_indexes:
+            raise SourceCollectionError("Line-split notice exposed no matching role headings")
+
+        title_node = self._select_first(soup, str(config.get("title_selector") or "h1, title"))
+        page_title = clean_text(
+            title_node.get_text(" ", strip=True) if title_node is not None else title_hint
+        )
+        page_text = clean_text(" ".join(lines))
+        published_date = (
+            str(config.get("published_date") or "").strip()
+            or self._published_date_from_meta(soup)
+            or extract_published_date(page_text)
+        )
+        source_url = normalize_url(source_url)
+        postings: list[RawPosting] = []
+        section_end_pattern = str(
+            config.get("role_section_end_pattern") or r"^\s*[一二三四五六七八九十]+、"
+        )
+        try:
+            section_heading = re.compile(section_end_pattern)
+        except re.error as error:
+            raise SourceCollectionError(
+                f"Invalid role_section_end_pattern: {error}"
+            ) from error
+        for position, start in enumerate(role_indexes, start=1):
+            end = role_indexes[position] if position < len(role_indexes) else len(lines)
+            for candidate in range(start + 1, end):
+                if section_heading.search(lines[candidate]):
+                    end = candidate
+                    break
+            role_lines = lines[start:end]
+            role_text = clean_text(" ".join(role_lines))
+            role_excludes = [
+                str(pattern).strip()
+                for pattern in config.get("role_exclude_patterns", [])
+                if str(pattern).strip()
+            ]
+            if any(re.search(pattern, role_text, re.IGNORECASE) for pattern in role_excludes):
+                continue
+            role_includes = [
+                str(pattern).strip()
+                for pattern in config.get("role_include_patterns", [])
+                if str(pattern).strip()
+            ]
+            if role_includes and not any(
+                re.search(pattern, role_text, re.IGNORECASE)
+                for pattern in role_includes
+            ):
+                continue
+            if not self._accept_candidate(role_text, source):
+                continue
+            raw_title = role_lines[0]
+            title = re.sub(
+                str(config.get("role_line_prefix_pattern") or r"^\s*\d+[、.．)]\s*"),
+                "",
+                raw_title,
+            ).strip()
+            postings.append(
+                RawPosting(
+                    title=title or raw_title,
+                    employer=clean_text(str(config.get("employer_hint") or source["publisher"])),
+                    source_url=source_url,
+                    application_url=self._find_application_url(soup, source_url),
+                    text=clean_text(f"{page_title} {role_text}"),
+                    summary=role_text[:420],
+                    published_date=published_date,
+                    deadline_date=extract_deadline(page_text),
+                    location=clean_text(str(config.get("location_hint") or "")) or None,
+                    external_id=(
+                        f"{self._external_id_from_url(source_url)}#role-{position}-"
+                        f"{stable_hash(title or raw_title)[:16]}"
+                    ),
+                    match_text=role_text,
+                    official_evidence_url=source_url,
+                )
+            )
+            if len(postings) >= self._item_limit(source):
+                break
+        return postings
+
+    def _collect_official_xlsx_rows(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Read reviewed rows from an official XLSX or legacy XLS file.
+
+        This adapter is intentionally hash-locked and row-allowlisted.  It is
+        not a general spreadsheet importer: if the official file changes, the
+        source fails closed until its hash and reviewed row list are updated.
+        OOXML workbooks use ``openpyxl``; legacy BIFF workbooks use ``xlrd``.
+        """
+        config = source["config"]
+        page_url = normalize_url(str(config.get("notice_url") or source["homepage_url"]))
+        attachment_url = normalize_url(str(config.get("attachment_url") or ""))
+        if not attachment_url:
+            raise SourceCollectionError("official_xlsx_rows requires attachment_url")
+        response = self._get(attachment_url, source)
+        content = bytes(getattr(response, "content", b""))
+        expected_hash = str(config.get("sha256") or "").strip().lower()
+        actual_hash = hashlib.sha256(content).hexdigest()
+        if expected_hash and actual_hash != expected_hash:
+            raise SourceCollectionError(
+                "Official attachment hash changed; review the new file before enabling rows"
+            )
+        allowed_rows = {
+            int(value)
+            for value in (config.get("verified_rows") or [])
+            if str(value).strip().isdigit()
+        }
+        if not allowed_rows:
+            raise SourceCollectionError("official_xlsx_rows requires verified_rows")
+        sheet_name = str(config.get("sheet_name") or "").strip()
+
+        workbook = None
+        worksheet = None
+        legacy_book = None
+        legacy_sheet = None
+        row_iterator: Any
+        try:
+            try:
+                from openpyxl import load_workbook
+
+                workbook = load_workbook(
+                    io.BytesIO(content), read_only=True, data_only=True
+                )
+                worksheet = (
+                    workbook[sheet_name]
+                    if sheet_name and sheet_name in workbook.sheetnames
+                    else workbook.active
+                )
+                row_iterator = worksheet.iter_rows(values_only=True)
+            except Exception as openpyxl_error:
+                # A number of government portals label BIFF8 workbooks as
+                # .xlsx or expose them with an .xls suffix.  Fall back only
+                # after the OOXML reader rejects the bytes; never reinterpret
+                # an arbitrary HTML error page as a spreadsheet.
+                try:
+                    import xlrd
+
+                    legacy_book = xlrd.open_workbook(
+                        file_contents=content,
+                        on_demand=True,
+                    )
+                    if sheet_name and sheet_name in legacy_book.sheet_names():
+                        legacy_sheet = legacy_book.sheet_by_name(sheet_name)
+                    else:
+                        legacy_sheet = legacy_book.sheet_by_index(0)
+                    row_iterator = (
+                        legacy_sheet.row_values(row_number)
+                        for row_number in range(legacy_sheet.nrows)
+                    )
+                except ImportError as error:
+                    raise SourceCollectionError(
+                        "official_xlsx_rows requires openpyxl or xlrd"
+                    ) from error
+                except Exception as legacy_error:
+                    raise SourceCollectionError(
+                        "Official spreadsheet extraction failed: "
+                        f"OOXML={openpyxl_error}; legacy={legacy_error}"
+                    ) from legacy_error
+        except SourceCollectionError:
+            raise
+        except Exception as error:
+            raise SourceCollectionError(
+                f"Official spreadsheet extraction failed: {error}"
+            ) from error
+
+        postings: list[RawPosting] = []
+        try:
+            for row_number, values in enumerate(row_iterator, start=1):
+                if row_number not in allowed_rows:
+                    continue
+                cells = [clean_text(str(value)) if value is not None else "" for value in values]
+                # The reviewed row contract is positional and versioned with
+                # the file hash, so a column shift cannot silently publish data.
+                title_index = int(config.get("title_column", 2))
+                duties_index = int(config.get("duties_column", 3))
+                requirements_index = int(config.get("requirements_column", 4))
+                quantity_index = int(config.get("quantity_column", 5))
+                employer_index = int(config.get("employer_column", 0))
+                location_index = int(config.get("location_column", 0))
+                title = cells[title_index - 1] if len(cells) >= title_index else ""
+                duties = cells[duties_index - 1] if len(cells) >= duties_index else ""
+                requirements = cells[requirements_index - 1] if len(cells) >= requirements_index else ""
+                quantity = cells[quantity_index - 1] if len(cells) >= quantity_index else ""
+                employer = (
+                    cells[employer_index - 1]
+                    if employer_index > 0 and len(cells) >= employer_index
+                    else ""
+                )
+                location = (
+                    cells[location_index - 1]
+                    if location_index > 0 and len(cells) >= location_index
+                    else ""
+                )
+                evidence_text = clean_text(" ".join(filter(None, (title, duties, requirements))))
+                if not title or not self._accept_candidate(evidence_text, source):
+                    continue
+                postings.append(
+                    RawPosting(
+                        title=title,
+                        employer=clean_text(
+                            employer
+                            or str(config.get("employer_hint") or source["publisher"])
+                        ),
+                        source_url=page_url,
+                        application_url=None,
+                        text=clean_text(
+                            f"{evidence_text} 招聘人数：{quantity}；官方附件：{attachment_url}"
+                        ),
+                        summary=evidence_text[:420],
+                        published_date=str(config.get("published_date") or "") or None,
+                        deadline_date=str(config.get("deadline_date") or "") or None,
+                        location=clean_text(
+                            location or str(config.get("location_hint") or "")
+                        ) or None,
+                        external_id=f"{self._external_id_from_url(attachment_url)}#row-{row_number}",
+                        match_text=evidence_text,
+                        official_evidence_url=attachment_url,
+                    )
+                )
+                if len(postings) >= self._item_limit(source):
+                    break
+        finally:
+            if workbook is not None:
+                workbook.close()
+            if legacy_book is not None:
+                legacy_book.release_resources()
+        return postings
+
+    def _collect_official_table_rows(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Publish explicitly evidenced rows from an official HTML table.
+
+        State-owned research institutes frequently publish a single official
+        announcement containing several tables of positions.  Treating that
+        page as one vacancy loses the degree, location and role evidence for
+        every row.  This adapter is deliberately configuration-driven: it
+        visits only registered notice pages, maps named header columns, and
+        requires professional evidence in each row before creating a posting.
+        It never guesses rows from arbitrary prose or from a search result.
+        """
+        config = source["config"]
+        item_limit = self._item_limit(source)
+        links: list[tuple[str, str]] = []
+        seen_links: set[str] = set()
+        for raw_url in config.get("direct_notice_urls", []) or []:
+            detail_url = normalize_url(str(raw_url))
+            if detail_url and detail_url not in seen_links:
+                seen_links.add(detail_url)
+                links.append((str(config.get("direct_title_hint") or ""), detail_url))
+
+        if not config.get("direct_only"):
+            for listing_url in config.get("listing_urls", []) or []:
+                response = self._get(str(listing_url), source)
+                soup = BeautifulSoup(response.text, "html.parser")
+                for title_hint, detail_url in self._notice_links(
+                    soup, response.url, source
+                ):
+                    if detail_url in seen_links:
+                        continue
+                    seen_links.add(detail_url)
+                    links.append((title_hint, detail_url))
+                    if len(links) >= int(config.get("max_notice_pages", 20)):
+                        break
+                if len(links) >= int(config.get("max_notice_pages", 20)):
+                    break
+
+        postings: list[RawPosting] = []
+        for title_hint, detail_url in links:
+            try:
+                response = self._get(detail_url, source)
+                postings.extend(
+                    self._extract_official_table_rows(
+                        response.text,
+                        response.url,
+                        source,
+                        title_hint,
+                    )
+                )
+            except SourceSkipped:
+                continue
+            except (*REQUEST_ERRORS, SourceCollectionError):
+                continue
+            if len(postings) >= item_limit:
+                return postings[:item_limit]
+            self._wait(source)
+        return postings[:item_limit]
+
+    def _extract_official_table_rows(
+        self,
+        document: str,
+        source_url: str,
+        source: dict[str, Any],
+        title_hint: str,
+    ) -> list[RawPosting]:
+        config = source["config"]
+        soup = BeautifulSoup(document, "html.parser")
+        title_node = self._select_first(
+            soup,
+            str(config.get("title_selector") or "h1, title"),
+        )
+        page_title = clean_text(
+            title_node.get_text(" ", strip=True)
+            if title_node is not None
+            else title_hint
+        )
+        if self._is_non_vacancy_notice_title(page_title):
+            return []
+        content_node = self._select_first(
+            soup,
+            str(config.get("content_selector") or "article, main, body"),
+        ) or soup
+        for selector in config.get("remove_selectors", []):
+            for node in content_node.select(str(selector)):
+                node.decompose()
+        page_text = clean_text(content_node.get_text(" ", strip=True))
+        if not self._accept_candidate(
+            f"{page_title} {page_text}",
+            source,
+            exclude_patterns=[],
+            require_recruitment_word=False,
+        ) and config.get("require_page_recruitment_word", True):
+            raise SourceCollectionError(
+                "Official table page does not contain recruitment evidence"
+            )
+        published_date = (
+            str(config.get("published_date") or "").strip()
+            or self._published_date_from_meta(soup)
+            or extract_published_date(page_text)
+        )
+        deadline_date = (
+            str(config.get("deadline_date") or "").strip()
+            or extract_deadline(page_text)
+        )
+        contexts: dict[int, dict[str, str]] = {}
+        for item in config.get("table_contexts", []) or []:
+            if not isinstance(item, dict):
+                continue
+            try:
+                index = int(item.get("table_index"))
+            except (TypeError, ValueError):
+                continue
+            contexts[index] = {
+                "employer": clean_text(str(item.get("employer") or "")),
+                "location": clean_text(str(item.get("location") or "")),
+            }
+
+        aliases = {
+            "title": ("招聘岗位", "需求岗位", "岗位名称", "岗位", "职位"),
+            "quantity": ("招聘人数", "需求人数", "人数", "数量"),
+            "degree": ("学历要求", "学历", "学位"),
+            "major": ("需求专业", "专业要求", "专业", "专业方向"),
+            "location": ("工作地点", "工作城市", "工作地区", "地点"),
+            "employer": ("招聘单位", "用人单位", "单位", "需求单位"),
+        }
+        configured_aliases = config.get("column_aliases", {})
+        for field, values in configured_aliases.items():
+            if isinstance(values, list) and values:
+                aliases[str(field)] = tuple(clean_text(str(value)) for value in values)
+
+        tables = content_node.select(str(config.get("table_selector") or "table"))
+        if not tables:
+            raise SourceCollectionError("Official table page exposes no configured tables")
+        postings: list[RawPosting] = []
+        for table_index, table in enumerate(tables, start=1):
+            rows: list[list[str]] = []
+            for row in table.select("tr"):
+                cells = [clean_text(cell.get_text(" ", strip=True)) for cell in row.select("th, td")]
+                if any(cells):
+                    rows.append(cells)
+            if len(rows) < 2:
+                continue
+            header_index = self._table_header_index(rows, aliases)
+            if header_index is None:
+                continue
+            header = rows[header_index]
+            column_indexes = self._table_column_indexes(header, aliases)
+            context = contexts.get(table_index, {})
+            for row_number, cells in enumerate(rows[header_index + 1 :], start=header_index + 2):
+                fields = {
+                    field: self._table_cell(cells, index)
+                    for field, index in column_indexes.items()
+                }
+                title = clean_text(fields.get("title", ""))
+                if not title or self._is_non_vacancy_notice_title(title):
+                    continue
+                row_evidence = clean_text(
+                    " ".join(
+                        value
+                        for value in (
+                            title,
+                            fields.get("major", ""),
+                            fields.get("degree", ""),
+                            fields.get("location", ""),
+                        )
+                        if value
+                    )
+                )
+                row_include_patterns = [
+                    str(pattern).strip()
+                    for pattern in config.get("row_include_patterns", [])
+                    if str(pattern).strip()
+                ]
+                row_exclude_patterns = [
+                    str(pattern).strip()
+                    for pattern in config.get("row_exclude_patterns", [])
+                    if str(pattern).strip()
+                ]
+                if any(
+                    re.search(pattern, row_evidence, re.IGNORECASE)
+                    for pattern in row_exclude_patterns
+                ):
+                    continue
+                explicit_major_match = bool(
+                    row_include_patterns
+                    and any(
+                        re.search(pattern, row_evidence, re.IGNORECASE)
+                        for pattern in row_include_patterns
+                    )
+                )
+                if (
+                    config.get("require_major_match", True)
+                    and not extract_major_tags(row_evidence)
+                    and not explicit_major_match
+                ):
+                    continue
+                if not self._accept_candidate(
+                    clean_text(f"{page_title} 招聘 {row_evidence}"),
+                    source,
+                    exclude_patterns=[],
+                    require_recruitment_word=False,
+                    require_major_match=(
+                        bool(config.get("require_major_match", True))
+                        and not explicit_major_match
+                    ),
+                ):
+                    continue
+                employer = clean_text(fields.get("employer", "")) or context.get("employer")
+                employer = employer or clean_text(
+                    str(config.get("employer_hint") or source["publisher"])
+                )
+                location = clean_text(fields.get("location", "")) or context.get("location")
+                evidence_text = clean_text(
+                    "；".join(
+                        part
+                        for part in (
+                            f"岗位：{title}",
+                            f"人数：{fields.get('quantity')}" if fields.get("quantity") else "",
+                            f"学历：{fields.get('degree')}" if fields.get("degree") else "",
+                            f"专业：{fields.get('major')}" if fields.get("major") else "",
+                            f"地点：{location}" if location else "",
+                        )
+                        if part
+                    )
+                )
+                postings.append(
+                    RawPosting(
+                        title=title,
+                        employer=employer,
+                        source_url=normalize_url(source_url),
+                        application_url=self._find_application_url(soup, source_url),
+                        text=clean_text(f"{page_title} {evidence_text} {page_text}"),
+                        summary=evidence_text[:420],
+                        published_date=published_date,
+                        deadline_date=deadline_date,
+                        location=location or None,
+                        external_id=(
+                            f"{self._external_id_from_url(source_url)}"
+                            f"#table-{table_index}-row-{row_number}"
+                        ),
+                        match_text=clean_text(f"{title} {fields.get('major', '')} {fields.get('degree', '')}"),
+                        official_evidence_url=normalize_url(source_url),
+                    )
+                )
+        return postings
+
+    @staticmethod
+    def _table_header_index(
+        rows: list[list[str]],
+        aliases: dict[str, tuple[str, ...]],
+    ) -> int | None:
+        required = ("title",)
+        for index, row in enumerate(rows[:4]):
+            joined = " ".join(row)
+            if all(
+                any(alias in joined for alias in aliases[field])
+                for field in required
+            ):
+                return index
+        return None
+
+    @staticmethod
+    def _table_column_indexes(
+        header: list[str],
+        aliases: dict[str, tuple[str, ...]],
+    ) -> dict[str, int]:
+        indexes: dict[str, int] = {}
+        for field, names in aliases.items():
+            for index, cell in enumerate(header):
+                if any(name in cell for name in names):
+                    indexes[field] = index
+                    break
+        return indexes
+
+    @staticmethod
+    def _table_cell(cells: list[str], index: int | None) -> str:
+        if index is None or index < 0 or index >= len(cells):
+            return ""
+        return clean_text(cells[index])
 
     def _extract_role_split_details(
         self,
@@ -996,53 +1653,137 @@ class OfficialSourceCollector:
         try:
             candidate_limit = max(
                 item_limit,
-                min(int(config.get("candidate_limit", item_limit * 4)), 200),
+                min(int(config.get("candidate_limit", item_limit * 4)), 600),
             )
         except (TypeError, ValueError):
-            candidate_limit = min(max(item_limit, item_limit * 4), 200)
+            candidate_limit = min(max(item_limit, item_limit * 4), 600)
         candidates: list[tuple[str, str]] = []
         seen: set[str] = set()
 
-        for listing_url in listing_urls:
-            response = self._get(listing_url, source)
-            soup = BeautifulSoup(response.text, "html.parser")
-            for anchor in soup.find_all("a"):
-                href = anchor.get("href")
-                title = clean_text(
-                    anchor.get("title") or anchor.get_text(" ", strip=True)
-                )
-                if not href or not title:
-                    continue
-                detail_url = normalize_url(urljoin(response.url, href))
-                parsed = urlparse(detail_url)
-                path_and_query = f"{parsed.path}?{parsed.query}"
-                if parsed.hostname != "career.cup.edu.cn":
-                    continue
-                if not any(
-                    re.search(pattern, path_and_query, re.IGNORECASE)
-                    for pattern in detail_patterns
-                ):
-                    continue
-                # Listing titles are discovery hints only.  Apply configured
-                # exclusions here to skip obvious events, but do not require a
-                # major keyword until the detail body/table has been read.
-                listing_excludes = config.get(
-                    "listing_exclude_patterns",
-                    config.get("exclude_patterns", []),
-                )
-                if self._is_non_vacancy_notice_title(title) or any(
-                    re.search(pattern, title, re.IGNORECASE)
-                    for pattern in listing_excludes
-                ):
-                    continue
-                if detail_url in seen:
-                    continue
+        # Keep a small, administrator-reviewed set of high-value official
+        # detail pages as a resilience layer.  The portal homepage is still
+        # the primary discovery route; these URLs prevent a homepage redesign
+        # or short pagination window from hiding a known official notice.
+        for item in config.get("direct_notice_urls", []) or []:
+            if isinstance(item, dict):
+                raw_url = str(item.get("url") or "").strip()
+                title_hint = clean_text(str(item.get("title_hint") or ""))
+            else:
+                raw_url = str(item).strip()
+                title_hint = ""
+            if not raw_url:
+                continue
+            detail_url = normalize_url(raw_url)
+            parsed = urlparse(detail_url)
+            path_and_query = f"{parsed.path}?{parsed.query}"
+            if parsed.hostname != "career.cup.edu.cn":
+                continue
+            if not any(
+                re.search(pattern, path_and_query, re.IGNORECASE)
+                for pattern in detail_patterns
+            ):
+                continue
+            if detail_url not in seen:
                 seen.add(detail_url)
-                candidates.append((title, detail_url))
+                candidates.append((title_hint, detail_url))
                 if len(candidates) >= candidate_limit:
                     break
-            if len(candidates) >= candidate_limit:
-                break
+
+        # CUPB renders each listing body in the same compressed JavaScript
+        # fragment used by detail pages.  The outer HTML contains the shell and
+        # form only, so parse both documents and follow the rendered "next page"
+        # link.  Pagination is deliberately bounded: the source is a discovery
+        # channel, not a licence to crawl its entire historical archive.
+        listing_page_limit = max(1, min(int(config.get("listing_page_limit", 6)), 20))
+        listing_excludes = config.get(
+            "listing_exclude_patterns",
+            config.get("exclude_patterns", []),
+        )
+        listing_queue = [str(url).strip() for url in listing_urls if str(url).strip()]
+        seen_listing_urls: set[str] = set()
+        while listing_queue and len(candidates) < candidate_limit:
+            listing_url = listing_queue.pop(0)
+            # The portal's pagination router distinguishes the documented
+            # ``//page/N`` path from a collapsed ``/page/N`` path.  Preserve
+            # that public URL spelling for listing requests; detail URLs still
+            # use the normal canonicalizer below.
+            normalized_listing_url = self._cupb_listing_url(listing_url)
+            if normalized_listing_url in seen_listing_urls:
+                continue
+            parsed_listing = urlparse(normalized_listing_url)
+            if parsed_listing.hostname != "career.cup.edu.cn":
+                continue
+            # Keep a per-entry page budget.  The URL itself is the stable key;
+            # page links generated by the portal retain a path prefix.
+            entry_root = self._cupb_listing_root(normalized_listing_url)
+            pages_seen_for_entry = sum(
+                1
+                for value in seen_listing_urls
+                if self._cupb_listing_root(value) == entry_root
+            )
+            if pages_seen_for_entry >= listing_page_limit:
+                continue
+            seen_listing_urls.add(normalized_listing_url)
+            try:
+                response = self._get(normalized_listing_url, source)
+            except (SourceSkipped, *REQUEST_ERRORS, SourceCollectionError):
+                continue
+            outer_soup = BeautifulSoup(response.text, "html.parser")
+            decoded = self._decode_cupb_embedded_content(response.text)
+            soups = [outer_soup]
+            if decoded:
+                soups.append(BeautifulSoup(decoded, "html.parser"))
+            next_urls: list[str] = []
+            for soup in soups:
+                for anchor in soup.find_all("a"):
+                    href = anchor.get("href")
+                    title = clean_text(
+                        anchor.get("title") or anchor.get_text(" ", strip=True)
+                    )
+                    if not href or not title:
+                        continue
+                    detail_url = normalize_url(urljoin(response.url, href))
+                    parsed = urlparse(detail_url)
+                    path_and_query = f"{parsed.path}?{parsed.query}"
+                    if parsed.hostname != "career.cup.edu.cn":
+                        continue
+                    if any(
+                        re.search(pattern, path_and_query, re.IGNORECASE)
+                        for pattern in detail_patterns
+                    ):
+                        # Listing titles are discovery hints only.  Apply
+                        # exclusions here, then require professional evidence
+                        # on the detail page itself.
+                        if self._is_non_vacancy_notice_title(title) or any(
+                            re.search(pattern, title, re.IGNORECASE)
+                            for pattern in listing_excludes
+                        ):
+                            continue
+                        if detail_url not in seen:
+                            seen.add(detail_url)
+                            candidates.append((title, detail_url))
+                            if len(candidates) >= candidate_limit:
+                                break
+                    elif self._cupb_is_next_page_anchor(anchor):
+                        next_url = self._cupb_listing_url(urljoin(response.url, href))
+                        if next_url not in seen_listing_urls and next_url not in next_urls:
+                            next_urls.append(next_url)
+                if len(candidates) >= candidate_limit:
+                    break
+            # Only follow the first next-page link.  This preserves the source's
+            # publication order and avoids multiplying requests through page
+            # number links that all point to the same archive.
+            if len(candidates) < candidate_limit and next_urls:
+                listing_queue.append(next_urls[0])
+            self._wait(source)
+
+        # The portal mixes banks, general employers and energy/geoscience
+        # notices in one feed.  Sort discovery candidates by an explicit title
+        # hint before opening detail pages so a bounded run spends its detail
+        # budget on the target sector, while still retaining generic notices
+        # as a lower-priority fallback.
+        candidates = self._cupb_deduplicate_candidates(candidates)
+        candidates.sort(key=lambda item: self._cupb_candidate_priority(item[0]))
 
         postings: list[RawPosting] = []
         for title_hint, detail_url in candidates:
@@ -1060,7 +1801,7 @@ class OfficialSourceCollector:
                         break
             except SourceSkipped:
                 continue
-            except (requests.RequestException, SourceCollectionError):
+            except (*REQUEST_ERRORS, SourceCollectionError):
                 continue
             self._wait(source)
         return postings
@@ -1116,7 +1857,7 @@ class OfficialSourceCollector:
                 postings.append(posting)
             except SourceSkipped:
                 continue
-            except (requests.RequestException, SourceCollectionError):
+            except (*REQUEST_ERRORS, SourceCollectionError):
                 continue
             self._wait(source)
         return postings
@@ -1363,6 +2104,112 @@ class OfficialSourceCollector:
             if len(postings) >= self._item_limit(source):
                 break
         return postings
+
+    @staticmethod
+    def _cupb_listing_root(url: str) -> str:
+        """Return a stable root for bounding one CUPB listing's pagination."""
+        parsed = urlparse(url)
+        path = parsed.path
+        if path.startswith("/campus"):
+            path = "/campus"
+        elif path.startswith("/news/index/tag/xwzp") or (
+            path.startswith("/news/index/domain/") and "/tag/xwzp" in path
+        ):
+            path = "/news/index/tag/xwzp"
+        elif path.startswith("/job/search"):
+            path = "/job/search"
+        else:
+            path = re.sub(r"/page/\d+/?$", "", path)
+        return f"{parsed.scheme}://{parsed.netloc}{path}?{parsed.query}"
+
+    @staticmethod
+    def _cupb_listing_url(url: str) -> str:
+        """Canonicalize a listing URL without collapsing meaningful slashes."""
+        parsed = urlparse(str(url).strip())
+        query = f"?{parsed.query}" if parsed.query else ""
+        return f"{parsed.scheme.lower()}://{parsed.netloc.lower()}{parsed.path}{query}"
+
+    @staticmethod
+    def _cupb_is_next_page_anchor(anchor: Any) -> bool:
+        text = clean_text(anchor.get_text(" ", strip=True))
+        if "下一页" in text or text.lower() in {"next", "next page"}:
+            return True
+        href = str(anchor.get("href") or "")
+        return bool(re.search(r"/page/2(?:/|$)", href)) and not text.isdigit()
+
+    @staticmethod
+    def _cupb_candidate_priority(title: str) -> tuple[int, int]:
+        """Prioritize target-sector notices without filtering broad employers."""
+        target_terms = (
+            "中国石油",
+            "中国石化",
+            "中国海油",
+            "国家管网",
+            "油田",
+            "石油",
+            "石化",
+            "油气",
+            "地质",
+            "地球物理",
+            "勘探",
+            "勘查",
+            "矿产",
+            "地勘",
+            "地调",
+            "自然资源",
+            "测绘",
+            "水文",
+            "能源",
+            "研究院",
+            "地理信息",
+        )
+        normalized = clean_text(title)
+        return (0 if any(term in normalized for term in target_terms) else 1, len(normalized))
+
+    @staticmethod
+    def _cupb_employer_from_title(title: str) -> str | None:
+        """Infer a real unit from a CUPB title when the portal account is a relay."""
+        normalized = clean_text(title).strip("\u200b \t\r\n")
+        if not normalized:
+            return None
+        normalized = re.sub(
+            r"(?:20\d{2}(?:年|届)?|招聘公告|招聘简章|招聘启事|校园招聘|高校毕业生招聘|秋季招聘|春季招聘).*$",
+            "",
+            normalized,
+            flags=re.IGNORECASE,
+        ).strip(" -|丨：:，,。. ")
+        if not re.search(
+            r"(?:有限公司|有限责任公司|集团|油田|研究院|实验室|大学|学院|银行|医院|矿业|地质局)$",
+            normalized,
+        ):
+            return None
+        return normalized if len(normalized) >= 3 else None
+
+    @staticmethod
+    def _cupb_deduplicate_candidates(
+        candidates: list[tuple[str, str]],
+    ) -> list[tuple[str, str]]:
+        """Collapse the portal's announcement/position-page duplicates."""
+        selected: dict[str, tuple[str, str]] = {}
+        for title, url in candidates:
+            key = re.sub(r"\s+", "", clean_text(title)).casefold()
+            if not key:
+                continue
+            existing = selected.get(key)
+            if existing is None or OfficialSourceCollector._cupb_url_rank(url) < OfficialSourceCollector._cupb_url_rank(existing[1]):
+                selected[key] = (title, url)
+        return list(selected.values())
+
+    @staticmethod
+    def _cupb_url_rank(url: str) -> int:
+        parsed = urlparse(url)
+        if "/job/view/" in parsed.path:
+            return 2
+        if "/campus/view/" in parsed.path:
+            return 0
+        if "/news/view/" in parsed.path:
+            return 1
+        return 3
 
     def _collect_structured_opening_page(
         self, source: dict[str, Any]
@@ -2385,13 +3232,33 @@ class OfficialSourceCollector:
         # Prefer the unit named in the official title when the account clearly
         # looks like an intermediary; never expose the intermediary as the
         # employer merely because it owns the portal account.
-        intermediary_markers = ("人力资源", "招聘服务", "就业服务", "人才服务")
+        intermediary_markers = (
+            "人力资源",
+            "招聘服务",
+            "就业服务",
+            "人才服务",
+            "前锦",
+            "智联",
+            "同道",
+            "猎聘",
+            "网络信息技术",
+            "月生信息技术",
+        )
         if not employer_candidate or any(
             marker in employer_candidate for marker in intermediary_markers
         ):
-            employer_candidate = self._employer_from_title(title, source["publisher"])
+            employer_candidate = (
+                self._cupb_employer_from_title(title)
+                or self._employer_from_title(title, source["publisher"])
+            )
         employer = employer_candidate or source["publisher"]
         fields = self._cupb_table_fields(content_soup)
+        # The portal keeps the job-list table in the outer document while the
+        # long announcement body is embedded in a compressed fragment.  Read
+        # both public fragments so that a valid major/degree/location row is
+        # not lost when the article body is decoded.
+        for key, value in self._cupb_table_fields(soup).items():
+            fields.setdefault(key, value)
         matching_fields = " ".join(
             value
             for key, value in fields.items()
@@ -2404,7 +3271,11 @@ class OfficialSourceCollector:
         # If a notice has no table, retain only bounded sentences that explicitly
         # mention a recognized geoscience major/degree instead of the entire
         # employer introduction.
-        match_evidence = matching_fields or major_evidence
+        # Keep both sources of evidence.  The compact job table may describe
+        # only a broad discipline while the official announcement body lists
+        # the precise geoscience majors; dropping either side creates false
+        # negatives for otherwise eligible students.
+        match_evidence = clean_text(" ".join(filter(None, (matching_fields, major_evidence))))
         match_text = clean_text(f"{title} {match_evidence}") or combined
         summary_fields = [
             f"{key}：{value}"
@@ -2427,8 +3298,7 @@ class OfficialSourceCollector:
             ),
             deadline_date=extract_deadline(clean_text(f"{metadata_text} {body_text}")),
             location=(
-                fields.get("工作地点")
-                or self._label_value(
+                self._label_value(
                     body_text,
                     "工作地点",
                     (
@@ -2448,7 +3318,12 @@ class OfficialSourceCollector:
                         "福利待遇",
                     ),
                 )
-            ) or self._cupb_location_evidence(body_text),
+                # The outer job-board table may contain the publisher's
+                # default city rather than the hiring unit's location. Prefer
+                # an explicit address/location statement in the notice body.
+                or self._cupb_location_evidence(body_text)
+                or fields.get("工作地点")
+            ),
             external_id=self._external_id_from_url(source_url),
             match_text=match_text,
         )
@@ -2508,6 +3383,74 @@ class OfficialSourceCollector:
             value = clean_text(" ".join(cells[1:]))
             if value:
                 fields[label] = value
+        # Job-board announcements also use a conventional header row followed
+        # by one or more records (序号 / 职位信息 / 需求专业 / ...), rather than
+        # label-value rows.  Read the first complete record without guessing
+        # beyond the table's named columns.
+        column_aliases = {
+            "岗位": ("职位信息", "岗位名称", "岗位", "职位"),
+            "专业范围": ("需求专业", "专业要求", "专业范围"),
+            "学历要求": ("学历要求", "学历", "学位"),
+            "工作地点": ("工作地点", "工作城市", "工作地区", "地点"),
+        }
+        for table in soup.select("table"):
+            rows: list[list[str]] = []
+            for row in table.select("tr"):
+                cells = [
+                    clean_text(cell.get_text(" ", strip=True))
+                    for cell in row.select("th, td")
+                ]
+                if any(cells):
+                    rows.append(cells)
+            if len(rows) < 2:
+                continue
+            header_index = next(
+                (
+                    index
+                    for index, row in enumerate(rows[:3])
+                    if any("职位信息" in cell or "岗位名称" in cell for cell in row)
+                ),
+                None,
+            )
+            if header_index is None:
+                continue
+            header = rows[header_index]
+            data_row = rows[header_index + 1]
+            for field, aliases in column_aliases.items():
+                if field in fields:
+                    continue
+                index = next(
+                    (
+                        column
+                        for column, cell in enumerate(header)
+                        if any(alias in cell for alias in aliases)
+                    ),
+                    None,
+                )
+                if index is not None and index < len(data_row) and data_row[index]:
+                    fields[field] = clean_text(data_row[index])
+            if fields:
+                break
+        inline_job = fields.get("岗位", "")
+        if inline_job:
+            if "学历要求" not in fields:
+                degree_match = re.search(
+                    r"(?P<degree>大专|本科|硕士|博士)(?:研究生)?(?:及以上)?",
+                    inline_job,
+                )
+                if degree_match:
+                    fields["学历要求"] = degree_match.group("degree")
+            if "工作地点" not in fields:
+                # CUPB's compact job row is commonly formatted as:
+                # title + salary + city + employment type + degree.
+                location_match = re.search(
+                    r"(?:\d[\d,]*(?:\.\d+)?\s*(?:[-~至]\s*\d[\d,]*(?:\.\d+)?)?\s*)"
+                    r"(?P<location>[^\s]+(?:市|区|县|省|自治区|特别行政区))\s*"
+                    r"(?:全职|实习|兼职)",
+                    inline_job,
+                )
+                if location_match:
+                    fields["工作地点"] = clean_text(location_match.group("location"))
         return fields
 
     @staticmethod
@@ -2518,7 +3461,19 @@ class OfficialSourceCollector:
             for segment in re.split(r"[。！？；;\n]", text)
             if clean_text(segment)
         ]
-        selected = [segment for segment in segments if extract_major_tags(segment)]
+        selected = []
+        for segment in segments:
+            if not extract_major_tags(segment):
+                continue
+            # Unit introductions often mention geophysics, resources or
+            # energy as business context.  They are not qualification
+            # evidence unless the same sentence carries a hiring/eligibility
+            # marker.
+            if re.search(r"单位|公司|企业|业务范围|主营|成立于|简介", segment) and not re.search(
+                r"专业|要求|学历|学位|岗位|招聘|应聘|博士后|毕业生", segment
+            ):
+                continue
+            selected.append(segment)
         if not selected:
             return ""
         return clean_text("；".join(selected))[:1800]
@@ -2527,15 +3482,30 @@ class OfficialSourceCollector:
     def _cupb_location_evidence(text: str) -> str | None:
         """Extract an explicitly stated institution/work location from prose."""
         patterns = (
+            r"(?:注册在|位于|坐落于)\s*[^，。；;\n]{0,120}?[—-]\s*"
+            r"([^，。；;\n]{2,20})",
             r"(?:注册在|位于|坐落于|驻地为|工作地点为|工作地点是)\s*"
             r"([^，。；;\n]{2,40})",
+            r"(?:通讯地址|通信地址|办公地址|联系地址|地址)\s*[：:]\s*"
+            r"([^，。；;\n]{2,80})",
         )
         for pattern in patterns:
             match = re.search(pattern, text)
             if match:
-                value = clean_text(match.group(1)).strip(" ：:")
+                value = clean_text(match.group(1)).strip(" ：:—-")
                 # Do not treat a following process sentence as a location.
                 value = re.split(r"\s+(?:5年|招聘|培养|员工|岗位|报名)", value, maxsplit=1)[0]
+                # Address evidence often continues with a street, postal code,
+                # or institution name. Keep the city/province prefix so the
+                # public listing remains concise and filterable.
+                city_match = re.search(
+                    r"((?:北京|上海|天津|重庆|香港|澳门)[市区]?|"
+                    r"[^，。；;\s]{2,12}(?:省|自治区|特别行政区)?"
+                    r"[^，。；;\s]{2,12}(?:市|州|盟|县|区))",
+                    value,
+                )
+                if city_match:
+                    value = city_match.group(1)
                 if value:
                     return value[:80]
         return None
@@ -2617,11 +3587,21 @@ class OfficialSourceCollector:
         )
 
     def _get(self, url: str, source: dict[str, Any]) -> requests.Response:
-        normalized = normalize_url(url)
+        # CUPB's public router uses the documented ``//page/N`` spelling for
+        # pagination.  Its path is semantically significant, so preserve it
+        # only for this source and this route; all other requests retain the
+        # normal canonical URL policy.
+        if source.get("source_type") == "cupb_career" and re.search(
+            r"//page/\d+(?:/|$)", str(url)
+        ):
+            normalized = self._cupb_listing_url(url)
+        else:
+            normalized = normalize_url(url)
         if not self._robots_allowed(normalized):
             raise SourceSkipped(f"robots.txt does not permit collection: {normalized}")
         try:
-            response = self.session.get(
+            response = self.request_policy.request(
+                "GET",
                 normalized,
                 timeout=self.settings.request_timeout_seconds,
                 allow_redirects=True,
@@ -2633,7 +3613,7 @@ class OfficialSourceCollector:
             ) and response.apparent_encoding:
                 response.encoding = response.apparent_encoding
             return response
-        except requests.RequestException as error:
+        except REQUEST_ERRORS as error:
             raise SourceCollectionError(f"Request failed for {normalized}: {error}") from error
 
     def _post_json(
@@ -2647,7 +3627,8 @@ class OfficialSourceCollector:
         if not self._robots_allowed(normalized):
             raise SourceSkipped(f"robots.txt does not permit collection: {normalized}")
         try:
-            response = self.session.post(
+            response = self.request_policy.request(
+                "POST",
                 normalized,
                 json=payload,
                 headers=headers,
@@ -2656,7 +3637,7 @@ class OfficialSourceCollector:
             )
             response.raise_for_status()
             return response
-        except requests.RequestException as error:
+        except REQUEST_ERRORS as error:
             raise SourceCollectionError(f"Request failed for {normalized}: {error}") from error
 
     def _robots_allowed(self, url: str) -> bool:
@@ -2667,7 +3648,8 @@ class OfficialSourceCollector:
             parser = RobotFileParser()
             robots_url = urljoin(root, "/robots.txt")
             try:
-                response = self.session.get(
+                response = self.request_policy.request(
+                    "GET",
                     robots_url,
                     timeout=min(self.settings.request_timeout_seconds, 10),
                     allow_redirects=True,
@@ -2680,7 +3662,7 @@ class OfficialSourceCollector:
                     raise SourceSkipped(
                         f"Unable to verify robots.txt for {root}: HTTP {response.status_code}"
                     )
-            except requests.RequestException as error:
+            except REQUEST_ERRORS as error:
                 raise SourceSkipped(
                     f"Unable to verify robots.txt for {root}: {error}"
                 ) from error
@@ -2731,6 +3713,8 @@ class OfficialSourceCollector:
         source: dict[str, Any],
         *,
         exclude_patterns: list[str] | None = None,
+        require_recruitment_word: bool | None = None,
+        require_major_match: bool | None = None,
     ) -> bool:
         config = source["config"]
         if config.get("accept_all_entries"):
@@ -2745,9 +3729,19 @@ class OfficialSourceCollector:
             return False
         has_recruitment_word = looks_like_recruitment(normalized)
         has_major_match = bool(extract_major_tags(normalized))
-        if config.get("require_recruitment_word") and not has_recruitment_word:
+        recruitment_required = (
+            config.get("require_recruitment_word")
+            if require_recruitment_word is None
+            else require_recruitment_word
+        )
+        major_required = (
+            config.get("require_major_match")
+            if require_major_match is None
+            else require_major_match
+        )
+        if recruitment_required and not has_recruitment_word:
             return False
-        if config.get("require_major_match") and not has_major_match:
+        if major_required and not has_major_match:
             return False
         include_keywords = config.get("include_keywords", [])
         if include_keywords and not any(
@@ -2856,6 +3850,11 @@ class OfficialSourceCollector:
             ):
                 continue
             candidate_url = normalize_url(urljoin(base_url, href))
+            if urlparse(candidate_url).scheme not in {"http", "https"}:
+                # Government CMS templates often expose a ``javascript:;``
+                # placeholder next to the real announcement.  Never expose
+                # it as an application link in the public record.
+                continue
             # An application form or job-list attachment is supporting evidence,
             # not a live application route. The original announcement remains the
             # authoritative link when a public page only provides attachments.
