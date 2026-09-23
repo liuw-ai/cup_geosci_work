@@ -844,6 +844,23 @@
     }
   },
   {
+    "id": "cosl-career",
+    "name": "中海油田服务股份有限公司官方招聘入口",
+    "publisher": "中海油田服务股份有限公司",
+    "homepage_url": "http://cosl.zhiye.com/",
+    "source_type": "landing_page",
+    "category": "油气工程技术服务",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "official_referrer_url": "https://www.cosl.com.cn/",
+      "allowed_hosts": ["cosl.zhiye.com"],
+      "fallback_entry_urls": ["https://www.cosl.com.cn/"],
+      "automation_status": "official_link_confirmed_access_unverified",
+      "note": "中海油服官网首页公开链接到该招聘系统；当前网络对 ATS 返回 502/TLS 失败，不能解释为无岗位。启用前需在服务器直连复测并核验公开列表、详情和专业字段。"
+    }
+  },
+  {
     "id": "official-manual-import",
     "name": "人工核验的官方公告",
     "publisher": "项目管理员",

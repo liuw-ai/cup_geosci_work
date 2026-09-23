@@ -21,10 +21,10 @@ from conftest import make_settings
 def test_national_matrix_expands_every_target_channel() -> None:
     matrix = load_national_source_matrix()
     rows = national_source_matrix_rows(matrix)
-    # The Phase 12 registry adds the BGP channel as a separately assessed
-    # official technical-unit entry; keep the matrix count explicit so an
-    # accidental source deletion is still caught by the contract test.
-    assert len(rows) == 39
+    # The matrix includes separately assessed official technical-unit entries
+    # such as BGP and the newly registered COSL ATS; keep the count explicit
+    # so an accidental source deletion is still caught by the contract test.
+    assert len(rows) == 40
     assert {row["affiliation"] for row in rows} == set(matrix["target_affiliations"])
     assert all(row["backup_urls"] for row in rows)
     assert not [row for row in rows if row["source_id"] and not row["assessment_source_id"]]
@@ -84,7 +84,7 @@ def test_national_matrix_cli_runs_with_isolated_database(tmp_path, monkeypatch, 
     )
     cli_main()
     payload = json.loads(capsys.readouterr().out)
-    assert payload["summary"]["channel_count"] == 39
+    assert payload["summary"]["channel_count"] == 40
     assert payload["items"]
     assert all(item["runtime_status"] == "access_limited" for item in payload["items"])
 
@@ -100,6 +100,6 @@ def test_national_matrix_admin_endpoint_is_private(tmp_path) -> None:
     )
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["summary"]["channel_count"] == 39
+    assert payload["summary"]["channel_count"] == 40
     assert payload["items"]
     assert all(item["runtime_status"] == "access_limited" for item in payload["items"])

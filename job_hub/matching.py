@@ -56,7 +56,6 @@ CORE_MAJOR_KEYWORDS = {
     "地质专业": 22,
     "地质相关专业": 22,
     "地质资源与地质工程": 35,
-    "地质资源": 28,
     "石油地质": 30,
     "油气地质": 30,
     "地球物理": 24,
@@ -129,6 +128,14 @@ CORE_MAJOR_KEYWORDS = {
     "mining engineering": 18,
     "remote sensing": 16,
     "geospatial": 16,
+}
+
+# A shorter label must not be emitted as a separate major when it only occurs
+# inside an official first-level discipline name.  Otherwise
+# ``地质资源与地质工程`` would incorrectly look like an explicit ``地质工程``
+# requirement for the narrower student profile.
+MAJOR_TERM_SHADOWS = {
+    "地质工程": "地质资源与地质工程",
 }
 
 OIL_AND_ENERGY_KEYWORDS = (
@@ -209,11 +216,14 @@ def extract_degree_levels(text: str) -> list[str]:
 
 def extract_major_tags(text: str) -> list[str]:
     lowered = clean_text(text).lower()
-    found = [
-        keyword
-        for keyword in CORE_MAJOR_KEYWORDS
-        if keyword.lower() in lowered
-    ]
+    found = []
+    for keyword in CORE_MAJOR_KEYWORDS:
+        lowered_keyword = keyword.lower()
+        shadow = MAJOR_TERM_SHADOWS.get(keyword)
+        if shadow and shadow.lower() in lowered and lowered_keyword != shadow.lower():
+            continue
+        if lowered_keyword in lowered:
+            found.append(keyword)
     return found[:8]
 
 

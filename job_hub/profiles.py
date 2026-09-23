@@ -5,6 +5,12 @@ import re
 from typing import Any
 
 from job_hub.matching import clean_text
+from job_hub.major_taxonomy import (
+    english_exact_terms_for_profile,
+    exact_terms_for_profile,
+    profile_major_definition,
+    related_terms_for_profile,
+)
 
 
 DEGREE_ORDER = ("本科", "硕士", "博士")
@@ -20,6 +26,8 @@ class StudentProfile:
     major: str
     exact_major_terms: tuple[str, ...]
     english_exact_major_terms: tuple[str, ...] = ()
+    related_major_terms: tuple[str, ...] = ()
+    taxonomy_id: str = ""
 
     @property
     def label(self) -> str:
@@ -40,56 +48,27 @@ class ProfileMatch:
 # These seven profiles mirror the programs specified for CUPB Geoscience School.
 # The aliases only make an announcement easier to recognize; they never create a
 # claim that a student is eligible when the original notice says otherwise.
+def _profile(profile_id: str, degree: str, major: str) -> StudentProfile:
+    """Build a profile from the versioned taxonomy instead of local aliases."""
+    return StudentProfile(
+        id=profile_id,
+        degree=degree,
+        major=major,
+        exact_major_terms=exact_terms_for_profile(profile_id),
+        english_exact_major_terms=english_exact_terms_for_profile(profile_id),
+        related_major_terms=related_terms_for_profile(profile_id),
+        taxonomy_id=profile_major_definition(profile_id).id,
+    )
+
+
 STUDENT_PROFILES = (
-    StudentProfile(
-        id="undergraduate-resource-exploration",
-        degree="本科",
-        major="资源勘查工程",
-        exact_major_terms=("资源勘查工程", "资源勘探工程", "勘查技术与工程", "矿产普查与勘探"),
-        english_exact_major_terms=("resource exploration engineering", "mineral exploration"),
-    ),
-    StudentProfile(
-        id="master-geology",
-        degree="硕士",
-        major="地质学",
-        exact_major_terms=("地质学",),
-        english_exact_major_terms=("geology", "geological science", "geological sciences"),
-    ),
-    StudentProfile(
-        id="master-geological-engineering",
-        degree="硕士",
-        major="地质工程",
-        exact_major_terms=("地质工程",),
-        english_exact_major_terms=("geological engineering",),
-    ),
-    StudentProfile(
-        id="master-geological-resources-engineering",
-        degree="硕士",
-        major="地质资源与地质工程",
-        exact_major_terms=("地质资源与地质工程",),
-        english_exact_major_terms=("geological resources and engineering",),
-    ),
-    StudentProfile(
-        id="doctoral-geology",
-        degree="博士",
-        major="地质学",
-        exact_major_terms=("地质学",),
-        english_exact_major_terms=("geology", "geological science", "geological sciences"),
-    ),
-    StudentProfile(
-        id="doctoral-geological-engineering",
-        degree="博士",
-        major="地质工程",
-        exact_major_terms=("地质工程",),
-        english_exact_major_terms=("geological engineering",),
-    ),
-    StudentProfile(
-        id="doctoral-geological-resources-engineering",
-        degree="博士",
-        major="地质资源与地质工程",
-        exact_major_terms=("地质资源与地质工程",),
-        english_exact_major_terms=("geological resources and engineering",),
-    ),
+    _profile("undergraduate-resource-exploration", "本科", "资源勘查工程"),
+    _profile("master-geology", "硕士", "地质学"),
+    _profile("master-geological-engineering", "硕士", "地质工程"),
+    _profile("master-geological-resources-engineering", "硕士", "地质资源与地质工程"),
+    _profile("doctoral-geology", "博士", "地质学"),
+    _profile("doctoral-geological-engineering", "博士", "地质工程"),
+    _profile("doctoral-geological-resources-engineering", "博士", "地质资源与地质工程"),
 )
 
 

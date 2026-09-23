@@ -205,6 +205,7 @@ Phase 10 新增的 `structured_opening_page` 适配器用于少量已核验、�
 | `source_validation.py` | 交叉验证省级目标、来源注册表、官方样例、字段证据和离线夹具；生成公开聚合与管理员明细 |
 | `coverage.py` | 来源健康、省份覆盖、字段完整率和集中度指标 |
 | `matching.py` | 通用地学词表、类别和日期提取 |
+| `major_taxonomy.py` | 教育部目录边界、精确专业名称与相邻发现词的版本化注册表 |
 | `employers.py` | 就业路径分类和可审计单位标准名/母体单位解析 |
 | `profiles.py` | CUPB 地球科学学院画像与可解释匹配 |
 | `simulation.py` | 匿名 100 人覆盖检查 |

@@ -61,6 +61,23 @@ def test_profile_match_marks_related_or_missing_fields_for_original_notice_revie
     assert result.label == "需核验原公告"
 
 
+def test_first_level_discipline_does_not_become_narrow_geological_engineering_match() -> None:
+    profile = get_student_profile("master-geological-engineering")
+    assert profile is not None
+
+    result = evaluate_profile_match(
+        job(
+            major_tags=["地质资源与地质工程"],
+            field_evidence={"专业范围": "地质资源与地质工程", "学历要求": "硕士"},
+            description="专业范围：地质资源与地质工程；学历要求：硕士。",
+        ),
+        profile,
+    )
+
+    assert result.level == "review"
+    assert result.label == "需核验原公告"
+
+
 def test_profile_match_translates_explicit_english_degree_and_major_evidence() -> None:
     profile = get_student_profile("master-geology")
     assert profile is not None

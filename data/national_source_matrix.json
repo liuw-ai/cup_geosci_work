@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "as_of": "2026-09-22",
+  "as_of": "2026-09-24",
   "description": "国家能源体系正式招聘入口采集准入矩阵。覆盖中国石油、中国石化、中国海油、国家管网及其研究院、油田和集团内技术服务单位。入口登记、网络可访问、页面结构可解析、岗位扫描成功和学生端发布是不同状态。",
   "target_affiliations": [
     "中国石油体系",
@@ -158,6 +158,31 @@
         "application_url": false
       },
       "note": "中国石化石油勘探开发研究院官网公告页和岗位表均可公开读取，字段逐行核验通过；本条公告报名截止 2025-11-15，当前仅保留历史证据，不计入 2026-09-23 在招数量。"
+    },
+    {
+      "source_id": "cosl-career",
+      "official_url": "http://cosl.zhiye.com/",
+      "backup_urls": [
+        "https://www.cosl.com.cn/",
+        "https://cnooc.zhaopin.com/"
+      ],
+      "acquisition_mode": "official_recruitment_portal",
+      "runtime_status": "access_limited",
+      "scan_conclusion": "source_unavailable",
+      "observed_on": "2026-09-24",
+      "observed_http_status": 502,
+      "observed_error_class": "tls_or_gateway_failure",
+      "sample_announcement_url": null,
+      "field_validation": {
+        "title": false,
+        "employer": false,
+        "degree": false,
+        "major": false,
+        "location": false,
+        "deadline": false,
+        "application_url": false
+      },
+      "note": "中海油服官网首页公开链接到该 ATS；当前网络请求返回 502/TLS 失败，不能解释为无岗位。待服务器直连复测并确认公开详情字段后再启用。"
     }
   ],
   "channel_defaults": {

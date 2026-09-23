@@ -539,6 +539,19 @@
           "evidence_note": "中海油体系内油服乙方单位，与海上油气运营主体分列。"
         },
         {
+          "id": "cosl-official-ats",
+          "channel_type": "campus_recruitment",
+          "official_url": "http://cosl.zhiye.com/",
+          "backup_urls": [
+            "https://www.cosl.com.cn/",
+            "https://cnooc.zhaopin.com/"
+          ],
+          "source_id": "cosl-career",
+          "verification_status": "official_confirmed",
+          "is_primary": false,
+          "evidence_note": "中海油服官网首页公开招聘链接；ATS 当前网络访问失败，保留为待服务器复测入口，不计入活跃来源。"
+        },
+        {
           "id": "cosl-campus",
           "channel_type": "campus_recruitment",
           "official_url": "https://cnooc.zhaopin.com/",

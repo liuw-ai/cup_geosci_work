@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "as_of": "2026-09-24",
+  "scope": "中国石油大学（北京）地球科学学院学生画像与岗位专业证据",
+  "authority_note": "目录代码用于专业归类和证据解释，不替代具体公告的报考资格；岗位是否可报以官方原文为准。",
+  "majors": [
+    {
+      "id": "resource-exploration-engineering",
+      "name": "资源勘查工程",
+      "student_levels": ["本科"],
+      "classification": {
+        "discipline_category": "工学",
+        "undergraduate_category": "地质类",
+        "undergraduate_code": "081403",
+        "graduate_reference_discipline": "地质资源与地质工程",
+        "graduate_reference_code": "0818"
+      },
+      "exact_terms": ["资源勘查工程", "资源勘探工程"],
+      "english_exact_terms": ["resource exploration engineering"],
+      "related_terms": ["勘查技术与工程", "矿产普查与勘探", "矿产勘查"]
+    },
+    {
+      "id": "geology",
+      "name": "地质学",
+      "student_levels": ["硕士", "博士"],
+      "classification": {
+        "discipline_category": "理学",
+        "undergraduate_category": "地质学类",
+        "undergraduate_code": "070901",
+        "graduate_first_level_discipline": "地质学",
+        "graduate_code": "0709"
+      },
+      "exact_terms": ["地质学"],
+      "english_exact_terms": ["geology", "geological science", "geological sciences"],
+      "related_terms": ["石油地质", "地球科学", "地质调查", "沉积学", "矿物学"]
+    },
+    {
+      "id": "geological-engineering",
+      "name": "地质工程",
+      "student_levels": ["硕士", "博士"],
+      "classification": {
+        "discipline_category": "工学",
+        "undergraduate_category": "地质类",
+        "undergraduate_code": "081401",
+        "graduate_reference_discipline": "地质资源与地质工程",
+        "graduate_academic_code": "0818",
+        "graduate_professional_degree": "资源与环境（地质工程方向）",
+        "graduate_professional_code": "085703"
+      },
+      "exact_terms": ["地质工程"],
+      "english_exact_terms": ["geological engineering"],
+      "related_terms": ["工程地质", "水文地质", "环境地质", "地质灾害"]
+    },
+    {
+      "id": "geological-resources-and-engineering",
+      "name": "地质资源与地质工程",
+      "student_levels": ["硕士", "博士"],
+      "classification": {
+        "discipline_category": "工学",
+        "graduate_first_level_discipline": "地质资源与地质工程",
+        "graduate_code": "0818",
+        "common_directions": ["矿产普查与勘探", "地球探测与信息技术", "地质工程"]
+      },
+      "exact_terms": ["地质资源与地质工程"],
+      "english_exact_terms": ["geological resources and engineering"],
+      "related_terms": ["矿产普查与勘探", "地球探测与信息技术", "资源勘查", "地质工程"]
+    }
+  ]
+}
