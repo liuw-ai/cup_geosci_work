@@ -1,5 +1,16 @@
 [
   {
+    "id": "cnpc-hohhot-petrochemical",
+    "canonical_name": "中国石油天然气股份有限公司呼和浩特石化分公司",
+    "parent_id": "cnpc",
+    "parent_name": "中国石油天然气集团有限公司",
+    "category": "管网、炼化与综合能源",
+    "employer_type": "炼化与化工一体化单位",
+    "affiliation": "中国石油体系",
+    "aliases": ["呼和浩特石化", "呼和浩特石化分公司", "中国石油呼和浩特石化"],
+    "official_domains": ["hhhtsh.cnpc.com.cn", "cnpc.com.cn"]
+  },
+  {
     "id": "cnpc",
     "canonical_name": "中国石油天然气集团有限公司",
     "parent_id": null,

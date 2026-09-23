@@ -83,6 +83,7 @@
       "candidate_limit": 400,
       "listing_page_limit": 6,
       "deduplicate_by_title": true,
+      "allow_shared_source_url": true,
       "undated_open_window_days": 45,
       "require_detail_content": true,
       "minimum_detail_characters": 80,

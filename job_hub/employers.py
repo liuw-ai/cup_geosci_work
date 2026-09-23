@@ -274,14 +274,32 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
     )
     identity_values = (job.get("title"), job.get("employer"))
     identity = resolve_employer(str(job.get("employer") or ""))
+    field_evidence = job.get("field_evidence") or {}
+    evidence_values = [
+        field_evidence.get(key)
+        for key in ("岗位", "专业范围", "面向对象", "学历要求", "工作地点")
+        if field_evidence.get(key)
+    ]
+    nested_fields = field_evidence.get("fields")
+    major_evidence = field_evidence.get("专业范围") or (
+        nested_fields.get("major")
+        if isinstance(nested_fields, dict)
+        else None
+    )
+    enriched["qualification_evidence_status"] = (
+        "explicit" if major_evidence else "missing"
+    )
+    # Display classification must use the job identity and bounded row
+    # evidence.  The full notice often contains employer introductions,
+    # contest names, and customer references unrelated to this position.
     profile = classify_employment(
         " ".join(
             str(value)
             for value in (
                 *identity_values,
                 job.get("group_name"),
-                job.get("description"),
                 job.get("summary"),
+                *evidence_values,
             )
             if value
         ),

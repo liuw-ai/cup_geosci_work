@@ -111,6 +111,13 @@ def import_verified_jobs(
             location=str(item.get("location", "")).strip() or None,
             external_id=str(item.get("external_id", "")).strip() or None,
             official_evidence_url=official_evidence_url or None,
+            match_text=str(item.get("match_text", "")).strip() or None,
+            qualification_text=str(item.get("qualification_text", "")).strip() or None,
+            field_evidence=(
+                item.get("field_evidence")
+                if isinstance(item.get("field_evidence"), dict)
+                else None
+            ),
         )
         _, outcome = database.save_job(pipeline.normalize_posting(posting, source))
         results[outcome] += 1

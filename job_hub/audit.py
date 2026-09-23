@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 
 from job_hub.config import Settings
 from job_hub.db import Database
+from job_hub.matching import has_major_qualification_evidence
 
 
 FORBIDDEN_JOB_TEXT = (
@@ -50,7 +51,7 @@ def audit_database(
         only_open=False,
     )
     issues: list[dict[str, Any]] = []
-    source_urls: dict[str, list[tuple[int, str]]] = defaultdict(list)
+    source_urls: dict[str, list[tuple[int, str, str]]] = defaultdict(list)
     verified_evidence_job_ids = database.verified_official_evidence_job_ids()
 
     for job in jobs:
@@ -69,7 +70,10 @@ def audit_database(
             continue
 
         source_url = str(job.get("source_url") or "")
-        source_urls[source_url].append((job_id, source_id))
+        if job.get("status") == "open":
+            source_urls[source_url].append(
+                (job_id, source_id, str(job.get("external_id") or ""))
+            )
         if job.get("verification_status") != "published_official":
             issues.append(
                 {
@@ -77,6 +81,19 @@ def audit_database(
                     "job_id": job_id,
                     "source_id": source_id,
                     "message": "候选线索或未完成核验记录不能进入公开岗位库。",
+                }
+            )
+        if (
+            job.get("status") == "open"
+            and job.get("relevance_band") == "强相关"
+            and not has_major_qualification_evidence(job.get("field_evidence"))
+        ):
+            issues.append(
+                {
+                    "code": "strong_match_without_major_evidence",
+                    "job_id": job_id,
+                    "source_id": source_id,
+                    "message": "强相关岗位缺少岗位级专业要求证据。",
                 }
             )
         official_evidence_url = str(job.get("official_evidence_url") or "")
@@ -164,7 +181,7 @@ def audit_database(
                     "message": "来源 minimum_relevance 不是整数。",
                 }
             )
-        if int(job.get("relevance_score", 0)) < minimum:
+        if job.get("status") == "open" and int(job.get("relevance_score", 0)) < minimum:
             issues.append(
                 {
                     "code": "below_source_threshold",
@@ -232,12 +249,19 @@ def audit_database(
                     )
 
     for source_url, job_entries in source_urls.items():
-        source_ids = {source_id for _, source_id in job_entries}
+        source_ids = {source_id for _, source_id, _ in job_entries}
         shared_url_allowed = all(
             bool(sources.get(source_id, {}).get("config", {}).get("allow_shared_source_url"))
             for source_id in source_ids
         )
-        if source_url and len(job_entries) > 1 and not shared_url_allowed:
+        external_ids = {external_id for _, _, external_id in job_entries}
+        row_level_records = len(external_ids) == len(job_entries) and all(external_ids)
+        if (
+            source_url
+            and len(job_entries) > 1
+            and not shared_url_allowed
+            and not row_level_records
+        ):
             issues.append(
                 {
                     "code": "duplicate_source_url",

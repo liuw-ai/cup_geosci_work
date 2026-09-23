@@ -3455,13 +3455,22 @@ class OfficialSourceCollector:
         aliases = {
             "岗位": "岗位",
             "岗位需求": "岗位",
+            "招聘岗位": "岗位",
+            "招聘岗位名称": "岗位",
             "职位": "岗位",
             "专业范围": "专业范围",
             "专业要求": "专业范围",
             "需求专业": "专业范围",
+            "首选专业": "专业范围",
+            "专业": "专业范围",
             "面向对象": "面向对象",
             "学历要求": "学历要求",
+            "学历": "学历要求",
+            "学位": "学历要求",
             "工作地点": "工作地点",
+            "工作城市": "工作地点",
+            "工作地区": "工作地点",
+            "地点": "工作地点",
         }
         label_fields: dict[str, str] = {}
         for row in soup.select("table tr"):
@@ -3480,12 +3489,18 @@ class OfficialSourceCollector:
         # label-value rows.  Read the first complete record without guessing
         # beyond the table's named columns.
         column_aliases = {
-            "岗位": ("职位信息", "岗位名称", "岗位", "职位"),
-            "专业范围": ("需求专业", "专业要求", "专业范围"),
+            "岗位": ("职位信息", "岗位名称", "招聘岗位", "岗位", "职位"),
+            "专业范围": (
+                "需求专业",
+                "专业要求",
+                "专业范围",
+                "首选专业",
+                "专业",
+            ),
             "学历要求": ("学历要求", "学历", "学位"),
             "工作地点": ("工作地点", "工作城市", "工作地区", "地点"),
         }
-        records: list[dict[str, str]] = []
+        candidates: list[tuple[int, int, list[dict[str, str]]]] = []
         for table in soup.select("table"):
             rows: list[list[str]] = []
             for row in table.select("tr"):
@@ -3500,8 +3515,15 @@ class OfficialSourceCollector:
             header_index = next(
                 (
                     index
-                    for index, row in enumerate(rows[:3])
-                    if any("职位信息" in cell or "岗位名称" in cell for cell in row)
+                    for index, row in enumerate(rows[:5])
+                    if sum(
+                        any(
+                            any(alias in cell for alias in aliases)
+                            for cell in row
+                        )
+                        for aliases in column_aliases.values()
+                    )
+                    >= 2
                 ),
                 None,
             )
@@ -3509,26 +3531,50 @@ class OfficialSourceCollector:
                 continue
             header = rows[header_index]
             indexes = {
-                field: next(
-                    (
-                        column
-                        for column, cell in enumerate(header)
-                        if any(alias in cell for alias in aliases)
-                    ),
-                    None,
-                )
+                field: [
+                    column
+                    for column, cell in enumerate(header)
+                    if any(alias in cell for alias in aliases)
+                ]
                 for field, aliases in column_aliases.items()
             }
+            table_records: list[dict[str, str]] = []
             for data_row in rows[header_index + 1 :]:
-                record = {
-                    field: clean_text(data_row[index])
-                    for field, index in indexes.items()
-                    if index is not None and index < len(data_row) and data_row[index]
-                }
+                record: dict[str, str] = {}
+                for field, columns in indexes.items():
+                    values = [
+                        clean_text(data_row[index])
+                        for index in columns
+                        if index < len(data_row) and data_row[index]
+                    ]
+                    if values:
+                        record[field] = clean_text("；".join(dict.fromkeys(values)))
                 if record.get("岗位") or record.get("专业范围"):
-                    records.append(record)
-            if records:
-                break
+                    table_records.append(record)
+            if table_records:
+                header_text = " ".join(header)
+                header_score = sum(
+                    [
+                        3
+                        if any(alias in header_text for alias in column_aliases["岗位"])
+                        else 0,
+                        2
+                        if any(alias in header_text for alias in column_aliases["专业范围"])
+                        else 0,
+                        2
+                        if any(alias in header_text for alias in column_aliases["学历要求"])
+                        else 0,
+                        1
+                        if any(alias in header_text for alias in column_aliases["工作地点"])
+                        else 0,
+                    ]
+                )
+                # Prefer the table carrying the full qualification schema; use
+                # row count only as a stable tie-breaker.
+                candidates.append((header_score, len(table_records), table_records))
+        records: list[dict[str, str]] = []
+        if candidates:
+            _, _, records = max(candidates, key=lambda item: (item[0], item[1]))
         if records:
             for record in records:
                 inline_job = record.get("岗位", "")
@@ -3583,6 +3629,13 @@ class OfficialSourceCollector:
         selected = []
         for segment in segments:
             if not extract_major_tags(segment):
+                continue
+            # Awards, competitions and student-honour clauses are common in
+            # campus notices.  Their discipline words describe an achievement
+            # rather than the vacancy's required major.
+            if re.search(r"大赛|竞赛|奖学金|三好学生|优秀学生干部|英才奖", segment) and not re.search(
+                r"专业范围|需求专业|专业要求|所学专业|专业为", segment
+            ):
                 continue
             # Unit introductions often mention geophysics, resources or
             # energy as business context.  They are not qualification

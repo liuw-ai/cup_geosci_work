@@ -12,9 +12,12 @@ from job_hub.locations import extract_location_hint, normalize_location
 from job_hub.matching import (
     classify_category,
     extract_degree_levels,
+    has_major_qualification_evidence,
     is_expired,
+    qualification_evidence_text,
     score_relevance,
     stable_hash,
+    structured_evidence_text,
 )
 from job_hub.sources import (
     OfficialSourceCollector,
@@ -262,7 +265,15 @@ class JobPipeline:
         source: dict[str, Any],
     ) -> dict[str, Any]:
         text = f"{posting.title} {posting.employer} {posting.text}"
-        matching_text = posting.match_text or text
+        evidence_text = qualification_evidence_text(posting.field_evidence)
+        matching_text = posting.match_text or " ".join(
+            value
+            for value in (posting.title, posting.employer, posting.summary, evidence_text)
+            if value
+        )
+        has_qualification_evidence = has_major_qualification_evidence(
+            posting.field_evidence
+        )
         employer_identity = resolve_employer(posting.employer)
         category = (
             employer_identity["category"]
@@ -279,8 +290,14 @@ class JobPipeline:
             matching_text,
             source["source_tier"],
             category,
+            qualification_evidence=has_qualification_evidence,
         )
-        qualification_text = posting.qualification_text or text
+        qualification_text = (
+            posting.qualification_text
+            or structured_evidence_text(posting.field_evidence)
+            or posting.summary
+            or posting.title
+        )
         degree_levels = extract_degree_levels(qualification_text)
         today = datetime.now(self.timezone).date()
         status = self._job_status(
@@ -396,14 +413,19 @@ class JobPipeline:
                 source["source_tier"] if source else str(job["source_tier"])
             )
             source_category = source["category"] if source else job.get("category")
+            evidence_text = qualification_evidence_text(job.get("field_evidence"))
             matching_text = " ".join(
                 str(value)
                 for value in (
                     job.get("title"),
                     job.get("employer"),
-                    job.get("description"),
+                    job.get("summary"),
+                    evidence_text,
                 )
                 if value
+            )
+            has_qualification_evidence = has_major_qualification_evidence(
+                job.get("field_evidence")
             )
             employer_identity = resolve_employer(str(job.get("employer") or ""))
             category = (
@@ -419,8 +441,19 @@ class JobPipeline:
                 matching_text,
                 source_tier,
                 category,
+                qualification_evidence=has_qualification_evidence,
             )
-            degree_levels = extract_degree_levels(matching_text)
+            degree_levels = extract_degree_levels(
+                " ".join(
+                    value
+                    for value in (
+                        structured_evidence_text(job.get("field_evidence")),
+                        job.get("summary"),
+                        job.get("title"),
+                    )
+                    if value
+                )
+            )
             status = self._job_status(
                 str(job.get("deadline_date") or "") or None,
                 published_date=str(job.get("published_date") or "") or None,

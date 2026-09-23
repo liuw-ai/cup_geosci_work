@@ -692,6 +692,13 @@ def create_app(settings: Settings | None = None) -> Flask:
             location=str(payload.get("location", "")).strip() or None,
             external_id=str(payload.get("external_id", "")).strip() or None,
             official_evidence_url=official_evidence_url or None,
+            match_text=str(payload.get("match_text", "")).strip() or None,
+            qualification_text=str(payload.get("qualification_text", "")).strip() or None,
+            field_evidence=(
+                payload.get("field_evidence")
+                if isinstance(payload.get("field_evidence"), dict)
+                else None
+            ),
         )
         normalized = pipeline.normalize_posting(raw, source)
         job_id, outcome = database.save_job(normalized)

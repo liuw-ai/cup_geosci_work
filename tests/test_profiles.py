@@ -44,6 +44,26 @@ def test_profile_match_requires_both_explicit_major_and_degree_evidence() -> Non
     assert "硕士" in result.reason
 
 
+def test_profile_match_does_not_trust_unstructured_major_tags() -> None:
+    profile = get_student_profile("master-geology")
+    assert profile is not None
+
+    result = evaluate_profile_match(
+        job(
+            title="中国石油炼化设备技术招聘公告",
+            summary="招聘标准提到全国油气地质大赛。",
+            description="招聘岗位专业为机械工程、化工过程机械。",
+            major_tags=["油气地质", "地球物理"],
+            degree_levels=["本科"],
+            field_evidence={},
+            relevance_score=100,
+        ),
+        profile,
+    )
+
+    assert result.level == "not_recommended"
+
+
 def test_profile_match_marks_related_or_missing_fields_for_original_notice_review() -> None:
     profile = get_student_profile("doctoral-geology")
     assert profile is not None

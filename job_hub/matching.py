@@ -158,6 +158,21 @@ OIL_AND_ENERGY_KEYWORDS = (
     "carbon storage",
 )
 
+# These fields are the only structured evidence that can support a precise
+# professional recommendation.  Title/body keywords remain useful for
+# discovery, but they must not upgrade a record to "strongly relevant".
+MAJOR_EVIDENCE_KEYS = frozenset(
+    {
+        "专业范围",
+        "专业要求",
+        "需求专业",
+        "专业",
+        "major",
+        "majors",
+        "major_requirement",
+    }
+)
+
 
 def clean_text(value: str | None) -> str:
     if not value:
@@ -227,6 +242,46 @@ def extract_major_tags(text: str) -> list[str]:
     return found[:8]
 
 
+def qualification_evidence_text(field_evidence: object) -> str:
+    """Return only explicit major-requirement values from structured evidence.
+
+    Evidence objects from HTML tables use Chinese top-level keys while
+    attachment rows keep a nested ``fields.major`` value.  Deliberately do not
+    inspect ``row_text`` or arbitrary metadata here: those fields may contain
+    employer introductions, contest names, or unrelated notice text.
+    """
+    if not isinstance(field_evidence, dict):
+        return ""
+    values: list[str] = []
+    for key, value in field_evidence.items():
+        if key == "fields" and isinstance(value, dict):
+            values.append(qualification_evidence_text(value))
+            continue
+        if str(key).casefold() not in {item.casefold() for item in MAJOR_EVIDENCE_KEYS}:
+            continue
+        if isinstance(value, (str, int, float)) and str(value).strip():
+            values.append(clean_text(str(value)))
+    return clean_text(" ".join(item for item in values if item))
+
+
+def has_major_qualification_evidence(field_evidence: object) -> bool:
+    """Whether a record has a job-level professional requirement field."""
+    return bool(qualification_evidence_text(field_evidence))
+
+
+def structured_evidence_text(field_evidence: object) -> str:
+    """Flatten bounded structured fields for degree/date/location extraction."""
+    if not isinstance(field_evidence, dict):
+        return ""
+    values: list[str] = []
+    for key, value in field_evidence.items():
+        if key == "fields" and isinstance(value, dict):
+            values.append(structured_evidence_text(value))
+        elif isinstance(value, (str, int, float)) and str(value).strip():
+            values.append(clean_text(str(value)))
+    return clean_text(" ".join(item for item in values if item))
+
+
 def classify_category(
     text: str,
     source_category: str | None = None,
@@ -244,6 +299,8 @@ def score_relevance(
     text: str,
     source_tier: str,
     category: str,
+    *,
+    qualification_evidence: bool = True,
 ) -> tuple[int, str, list[str]]:
     lowered = clean_text(text).lower()
     matched_tags = extract_major_tags(lowered)
@@ -277,6 +334,15 @@ def score_relevance(
 
     if "中国石油大学" in lowered or "石油大学" in lowered:
         score += 8
+
+    # Industry identity and words in an employer introduction can make a
+    # notice look highly relevant even when no job-level major requirement was
+    # extracted.  Keep that opportunity visible, but prevent it from entering
+    # the strong-match lane until a structured requirement is present.
+    if qualification_evidence and matched_tags:
+        score += 10
+    elif not qualification_evidence:
+        score = min(score, 54)
 
     if score >= 55:
         return min(score, 100), "强相关", matched_tags

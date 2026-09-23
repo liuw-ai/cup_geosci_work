@@ -24,6 +24,19 @@ def test_geoscience_oil_and_gas_post_is_strong_match() -> None:
     assert extract_degree_levels(text) == ["本科", "硕士", "博士"]
 
 
+def test_unverified_body_keywords_cannot_be_strong_match() -> None:
+    score, band, tags = score_relevance(
+        "中国石油炼化设备技术招聘，正文提到油气地质大赛和地球物理大赛。",
+        "B",
+        "油气上游业主与研究机构",
+        qualification_evidence=False,
+    )
+
+    assert score < 55
+    assert band != "强相关"
+    assert tags
+
+
 def test_deadline_extraction_understands_chinese_date() -> None:
     text = "请于 2026年10月8日前完成网申，报名截止时间为2026年10月8日。"
 
@@ -163,6 +176,16 @@ def test_operator_affiliation_uses_employer_before_body_mentions() -> None:
 
     assert profile.category == "油气上游业主与研究机构"
     assert profile.affiliation == "中国石油体系"
+
+
+def test_specific_petrochemical_subsidiary_beats_parent_group_alias() -> None:
+    from job_hub.employers import resolve_employer
+
+    resolved = resolve_employer("中国石油天然气股份有限公司呼和浩特石化分公司")
+
+    assert resolved is not None
+    assert resolved["canonical_employer_id"] == "cnpc-hohhot-petrochemical"
+    assert resolved["category"] == "管网、炼化与综合能源"
 
 
 def test_official_source_category_beats_generic_body_keyword() -> None:

@@ -180,6 +180,49 @@ def test_cupb_adapter_splits_each_structured_position_row(tmp_path) -> None:
     assert postings[0].field_evidence["专业范围"] == "地质工程"
     assert postings[1].field_evidence["专业范围"] == "资源勘查工程"
     assert postings[0].qualification_text == postings[0].summary
+
+
+def test_cupb_adapter_chooses_full_recruitment_table_and_ignores_contest_terms(tmp_path) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "cupb-career",
+        "name": "中国石油大学（北京）就业信息网",
+        "publisher": "中国石油大学（北京）",
+        "homepage_url": "https://career.cup.edu.cn/",
+        "source_type": "cupb_career",
+        "category": "能源、工程与地学拓展",
+        "source_tier": "B",
+        "config": {"require_detail_content": True, "minimum_detail_characters": 20},
+    }
+    document = """
+    <html><body>
+      <h1>某石化公司2027年招聘公告</h1>
+      <main class="zp-details">
+        <p>获得全国油气地质大赛、勘探地球物理大赛奖励的毕业生优先。</p>
+        <table>
+          <tr><th>序号</th><th>招聘岗位</th><th>人数</th><th>学历要求</th><th>工作地点</th><th>专业</th></tr>
+          <tr><td>1</td><td>炼化设备技术</td><td>2</td><td>本科、硕士</td><td>呼和浩特市</td><td>机械工程、化工过程机械</td></tr>
+          <tr><td>2</td><td>财务审计</td><td>1</td><td>本科</td><td>呼和浩特市</td><td>会计学、审计学</td></tr>
+        </table>
+        <table>
+          <tr><th>序号</th><th>职位信息</th><th>需求专业</th><th>操作</th></tr>
+          <tr><td>01</td><td>炼化设备技术</td><td>机械工程、化工过程机械</td><td>投递</td></tr>
+        </table>
+      </main>
+    </body></html>
+    """
+
+    postings = collector._extract_cupb_details(
+        document,
+        "https://career.cup.edu.cn/campus/view/id/460401",
+        source,
+        "某石化公司2027年招聘公告",
+    )
+
+    assert [posting.title for posting in postings] == ["炼化设备技术", "财务审计"]
+    assert postings[0].field_evidence["专业范围"] == "机械工程、化工过程机械"
+    assert postings[1].field_evidence["专业范围"] == "会计学、审计学"
+    assert all("油气地质" not in (posting.match_text or "") for posting in postings)
 def test_cupb_adapter_uses_structured_job_table_as_matching_evidence(tmp_path, monkeypatch) -> None:
     settings = make_settings(tmp_path)
     collector = OfficialSourceCollector(settings)

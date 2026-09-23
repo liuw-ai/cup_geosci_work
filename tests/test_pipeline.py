@@ -55,7 +55,10 @@ def test_pipeline_deduplicates_and_creates_daily_change(tmp_path) -> None:
     assert second.updated == 0
     jobs, total = database.list_jobs()
     assert total == 1
-    assert jobs[0]["relevance_band"] == "强相关"
+    # A free-form notice without structured professional evidence remains a
+    # review opportunity; it must not be promoted to a strong match solely by
+    # keywords in the announcement body.
+    assert jobs[0]["relevance_band"] == "相关机会"
 
     report = build_daily_report(database, settings)
     assert report["stats"]["new"] == 1

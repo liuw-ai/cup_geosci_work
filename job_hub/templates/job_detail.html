@@ -43,7 +43,11 @@
         <div><dt>专业匹配</dt><dd>{{ job.relevance_band }}</dd></div>
       </dl>
       {% if job.major_tags %}
-        <div class="tag-row detail-tags" aria-label="专业相关标签">
+        <h2>专业线索{% if job.qualification_evidence_status != "explicit" %}（需核验）{% endif %}</h2>
+        {% if job.qualification_evidence_status != "explicit" %}
+          <p class="muted">这些词来自公告标题或正文线索，不等同于该岗位的专业要求；请以岗位级原文为准。</p>
+        {% endif %}
+        <div class="tag-row detail-tags" aria-label="专业相关线索">
           {% for tag in job.major_tags %}
             <span>{{ tag }}</span>
           {% endfor %}

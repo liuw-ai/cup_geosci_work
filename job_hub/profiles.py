@@ -4,7 +4,10 @@ from dataclasses import asdict, dataclass
 import re
 from typing import Any
 
-from job_hub.matching import clean_text
+from job_hub.matching import (
+    clean_text,
+    has_major_qualification_evidence,
+)
 from job_hub.major_taxonomy import (
     english_exact_terms_for_profile,
     exact_terms_for_profile,
@@ -169,7 +172,10 @@ def _major_status(
     ]
     if explicit_english:
         return "explicit", f"公告学历条件明确包含“{explicit_english[0]}”"
-    if tags:
+    # Tags without a structured major field are discovery hints only.  They may
+    # remain visible as a review opportunity, but can never become an explicit
+    # match without the row-level requirement field above.
+    if tags and int(job.get("relevance_score", 0)) < 55:
         return "related", "公告列出了地学或油气相邻专业，需核对专业范围"
     return "unspecified", "公告未明确列出目标专业"
 
@@ -185,6 +191,8 @@ def _english_major_requirement_is_explicit(
     major requirement.  Only a nearby degree, major, discipline, or field-of-
     study condition can upgrade an English term to an explicit profile match.
     """
+    if not has_major_qualification_evidence(job.get("field_evidence")):
+        return False
     source_text = clean_text(
         " ".join(
             str(job.get(field, ""))
@@ -272,4 +280,10 @@ def _accepts_degree_or_above(text: str, profile_degree: str) -> bool:
 
 
 def _is_domain_aligned(job: dict[str, Any]) -> bool:
-    return int(job.get("relevance_score", 0)) >= 55
+    if not job.get("major_tags") or int(job.get("relevance_score", 0)) < 45:
+        return False
+    if int(job.get("relevance_score", 0)) >= 55 and not has_major_qualification_evidence(
+        job.get("field_evidence")
+    ):
+        return False
+    return True

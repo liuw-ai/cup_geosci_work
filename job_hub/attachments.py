@@ -724,6 +724,7 @@ class OfficialAttachmentProcessor:
             relevant_text,
             "A",
             str(artifact.get("metadata", {}).get("category") or "能源、工程与地学拓展"),
+            qualification_evidence=True,
         )
         field_evidence = {
             "row_locator": f"{row.get('sheet_name')}!{row.get('row_number')}",
