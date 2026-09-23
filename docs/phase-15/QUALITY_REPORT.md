@@ -16,7 +16,7 @@
 |---|---:|
 | Open jobs | 91 |
 | Strong matches | 0 |
-| Open records without field evidence | 90 |
+| Open records without field evidence | 83 |
 | Cohort explicit matches | 0 students |
 | Cohort review opportunities | 100 students |
 
@@ -24,4 +24,4 @@
 
 ## Remaining risk
 
-当前仍有 90 条开放记录缺少岗位级证据，主要来自旧版来源适配器或外文职位详情。下一阶段应优先为这些来源补充详情字段或官方职位表适配器，而不是放宽专业门禁。
+当前仍有 83 条开放记录缺少岗位级证据，主要来自旧版来源适配器或外文职位详情。下一阶段应优先为这些来源补充详情字段或官方职位表适配器，而不是放宽专业门禁。
