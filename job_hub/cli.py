@@ -73,7 +73,16 @@ from job_hub.national_probes import (
 )
 from job_hub.reports import publish_daily_report
 from job_hub.simulation import simulate_cohort
-from job_hub.sinopec import load_sinopec_capture, sinopec_capture_summary
+from job_hub.sinopec import (
+    SinopecCaptureError,
+    load_sinopec_capture,
+    sinopec_capture_summary,
+)
+from job_hub.sinopec_scan import (
+    SinopecScanContractError,
+    build_sinopec_scan_plan,
+    validate_sinopec_scan_result,
+)
 from job_hub.source_targets import REQUIRED_ROLES
 from job_hub.source_validation import (
     load_source_validation_registry,
@@ -396,6 +405,16 @@ def main() -> None:
         "--require-complete",
         action="store_true",
         help="要求捕获文件已包含全部 132 个单位",
+    )
+    sinopec_capture_parser.add_argument(
+        "--require-scan-complete",
+        action="store_true",
+        help="要求 35 个候选单位均有分页完成且无失败行的扫描证据",
+    )
+    sinopec_capture_parser.add_argument(
+        "--plan-output",
+        type=Path,
+        help="可选：导出 132 个单位的浏览器详情扫描计划 JSON",
     )
     browser_capture_parser = subparsers.add_parser(
         "browser-capture-check",
@@ -745,14 +764,47 @@ def main() -> None:
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
     if args.command == "sinopec-capture":
-        payload = load_sinopec_capture(
-            args.path,
-            require_complete_manifest=args.require_complete,
-        )
+        try:
+            payload = load_sinopec_capture(
+                args.path,
+                require_complete_manifest=args.require_complete,
+            )
+            scan_audit = validate_sinopec_scan_result(
+                payload,
+                require_candidate_completion=args.require_scan_complete,
+            )
+        except (SinopecCaptureError, SinopecScanContractError) as error:
+            print(
+                json.dumps(
+                    {"error": str(error), "capture_path": str(args.path)},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        plan = build_sinopec_scan_plan(payload)
+        if args.plan_output:
+            args.plan_output.parent.mkdir(parents=True, exist_ok=True)
+            args.plan_output.write_text(
+                json.dumps(
+                    {
+                        "platform_url": payload["platform_url"],
+                        "captured_at": payload["captured_at"],
+                        "enterprise_total": payload["enterprise_total"],
+                        "candidate_enterprise_total": payload["candidate_enterprise_total"],
+                        "items": plan,
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
         result = {
             "summary": sinopec_capture_summary(payload),
+            "scan_audit": scan_audit,
             "platform_url": payload["platform_url"],
             "captured_at": payload["captured_at"],
+            "plan_output": str(args.plan_output) if args.plan_output else None,
             "source_policy": (
                 "浏览器捕获快照仅在单位清单、岗位详情、专业和学历证据完整后，"
                 "才允许进入学生端发布门禁。"
