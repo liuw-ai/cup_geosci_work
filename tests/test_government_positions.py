@@ -34,6 +34,7 @@ def test_verified_open_row_requires_location_and_deadline() -> None:
         "position_type": "public_institution",
         "province": "安徽",
         "employer": "测试单位",
+        "position_code": "A-1",
         "title": "地质专业技术岗",
         "major_requirement": "地质学",
         "degree_requirement": "博士研究生",
@@ -57,6 +58,7 @@ def test_out_of_scope_rows_can_be_closed_without_student_match() -> None:
         "position_type": "civil_service",
         "province": "全国",
         "employer": "某机关",
+        "position_code": "B-1",
         "title": "综合管理岗",
         "major_requirement": "不限专业",
         "degree_requirement": "本科及以上",
@@ -70,4 +72,3 @@ def test_out_of_scope_rows_can_be_closed_without_student_match() -> None:
         "match_status": "out_of_scope",
     }
     assert validate_position_record(record)["id"] == "test-2"
-

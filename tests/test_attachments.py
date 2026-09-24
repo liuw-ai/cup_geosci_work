@@ -82,10 +82,11 @@ def _xlsx_bytes() -> bytes:
     workbook = openpyxl.Workbook()
     sheet = workbook.active
     sheet.title = "岗位表"
-    sheet.append(["岗位名称", "招聘单位", "工作地点", "学历要求", "专业要求", "报名截止日期"])
+    sheet.append(["岗位名称", "岗位代码", "招聘单位", "工作地点", "学历要求", "专业要求", "报名截止日期"])
     sheet.append(
         [
             "地质工程师",
+            "G-001",
             "测试能源集团",
             "北京",
             "硕士",
@@ -143,6 +144,7 @@ def test_excel_attachment_is_hashed_extracted_and_idempotent(tmp_path) -> None:
     assert candidates[0]["field_evidence"]["岗位"] == "地质工程师"
     assert "地质工程" in candidates[0]["field_evidence"]["专业范围"]
     assert candidates[0]["field_evidence"]["学历要求"] == "硕士"
+    assert candidates[0]["field_evidence"]["职位代码"] == "G-001"
 
     second = processor.process(artifact["id"])
     assert second.rows_extracted == 1

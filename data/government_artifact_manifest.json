@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "as_of": "2026-09-25",
+  "description": "山东、河南、天津已核验政府官网事业单位岗位表附件。当前本机网络无法稳定下载，先登记为服务器受控下载队列；附件行未解析和人工复核前不得发布。",
+  "artifacts": [
+    {
+      "id": "shandong-geology-bureau-2026-position-table",
+      "source_id": "shandong-geology-bureau",
+      "province": "山东",
+      "position_type": "public_institution",
+      "notice_url": "http://dkj.shandong.gov.cn/art/2026/7/17/art_356047_10333801.html",
+      "attachment_url": "http://dkj.shandong.gov.cn/module/download/downfile.jsp?classid=0&filename=732c4f35c08742398d1c946003273bca.xlsx",
+      "artifact_kind": "position_table",
+      "deadline_date": "2026-07-28",
+      "observed_on": "2026-09-25",
+      "status": "historical_closed",
+      "note": "山东省地质矿产勘查开发局所属15家事业单位2026年公开招聘人员公告，附件含72个专业技术岗位。报名期已结束，仍可用于历史岗位和解析回归。"
+    },
+    {
+      "id": "henan-geology-bureau-2026-position-table",
+      "source_id": "henan-geology-bureau",
+      "province": "河南",
+      "position_type": "public_institution",
+      "notice_url": "https://dzj.henan.gov.cn/2026/04-22/8190.html",
+      "attachment_url": "https://dzj.henan.gov.cn/file/file/xlsx/2026/04/22/5ee1f4c87add4b50a0548f717c50977c.xlsx",
+      "artifact_kind": "position_table",
+      "deadline_date": "2026-04-30",
+      "observed_on": "2026-09-25",
+      "status": "historical_closed",
+      "note": "河南省地质局官网转发的2026年事业单位公开招聘联考岗位信息表，报名期已结束；服务器下载后逐行解析并保留历史证据。"
+    },
+    {
+      "id": "tianjin-natural-resources-2026-position-table",
+      "source_id": "tianjin-natural-resources",
+      "province": "天津",
+      "position_type": "public_institution",
+      "notice_url": "https://ghhzrzy.tj.gov.cn/zwgk_143/zfxxgk1/fdzdgknr1/zkly/202602/t20260228_7252855.html",
+      "attachment_url": "https://ghhzrzy.tj.gov.cn/zwgk_143/zfxxgk1/fdzdgknr1/zkly/202602/W020260228691245270225.xls",
+      "artifact_kind": "position_table",
+      "deadline_date": "2026-03-25",
+      "observed_on": "2026-09-25",
+      "status": "historical_closed",
+      "note": "天津市规划和自然资源局所属事业单位2026年公开招聘计划表，报名期已结束；用于职位表解析和来源回归，不计当前在招。"
+    }
+  ]
+}

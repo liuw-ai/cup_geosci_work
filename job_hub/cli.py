@@ -33,6 +33,10 @@ from job_hub.government_positions import (
     government_position_quality_report,
     load_position_registry,
 )
+from job_hub.government_artifacts import (
+    load_government_artifact_manifest,
+    register_government_artifacts,
+)
 from job_hub.domestic_expansion import (
     QUEUE_STATUSES,
     domestic_expansion_rows,
@@ -352,6 +356,16 @@ def main() -> None:
         "--output",
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
+    )
+    government_artifact_parser = subparsers.add_parser(
+        "register-government-artifacts",
+        help="将省级官方职位表附件登记到私有受控下载队列",
+    )
+    government_artifact_parser.add_argument(
+        "--path",
+        type=Path,
+        default=Path("data/government_artifact_manifest.json"),
+        help="政府职位表附件清单 JSON",
     )
     domestic_queue_parser = subparsers.add_parser(
         "domestic-expansion-queue",
@@ -874,6 +888,26 @@ def main() -> None:
                 json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "register-government-artifacts":
+        try:
+            manifest = load_government_artifact_manifest(args.path)
+            registered = register_government_artifacts(database, manifest)
+        except (OSError, ValueError) as error:
+            print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        print(
+            json.dumps(
+                {
+                    "manifest": str(args.path),
+                    "registered": len(registered),
+                    "items": registered,
+                    "next_step": "在服务器运行 process-artifact <artifact_id>；解析结果仍需人工复核后发布。",
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return
     if args.command == "init":
         print(

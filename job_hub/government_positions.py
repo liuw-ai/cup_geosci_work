@@ -35,6 +35,7 @@ REQUIRED_FIELDS = (
     "position_type",
     "province",
     "employer",
+    "position_code",
     "title",
     "major_requirement",
     "degree_requirement",
@@ -100,6 +101,7 @@ def validate_position_record(value: Any, *, context: str = "position") -> dict[s
         "source_id",
         "province",
         "employer",
+        "position_code",
         "title",
         "major_requirement",
         "degree_requirement",
@@ -252,6 +254,7 @@ def government_position_quality_report(
                 ) if records else 0.0,
             }
             for field in (
+                "position_code",
                 "major_requirement",
                 "degree_requirement",
                 "location",

@@ -720,6 +720,10 @@ class OfficialAttachmentProcessor:
             return None
         text = str(row.get("row_text") or "").strip()
         title = self._field(cells, ("岗位名称", "岗位", "职位", "招聘岗位", "岗位名称（岗位）"))
+        position_code = self._field(
+            cells,
+            ("职位代码", "岗位代码", "职位编号", "岗位编号", "代码"),
+        )
         employer = self._field(cells, ("用人单位", "招聘单位", "单位名称", "单位", "招聘机构"))
         location = self._field(cells, ("工作地点", "工作区域", "工作城市", "所在地", "地点"))
         degree = self._field(cells, ("学历", "学历要求", "学位要求", "面向对象"))
@@ -760,6 +764,8 @@ class OfficialAttachmentProcessor:
             row=row,
             row_text=text,
         )
+        if position_code:
+            field_evidence["职位代码"] = position_code
         return {
             "artifact_row_id": row["id"],
             "source_id": artifact["source_id"],
