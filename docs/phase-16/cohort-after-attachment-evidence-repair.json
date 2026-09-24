@@ -1,0 +1,1583 @@
+{
+  "simulation": "CUPB 地球科学学院匿名 100 人岗位覆盖检查",
+  "input_open_jobs": 32,
+  "cohort_size": 100,
+  "distribution": [
+    {
+      "profile_id": "undergraduate-resource-exploration",
+      "count": 40,
+      "label": "本科 · 资源勘查工程"
+    },
+    {
+      "profile_id": "master-geology",
+      "count": 14,
+      "label": "硕士 · 地质学"
+    },
+    {
+      "profile_id": "master-geological-engineering",
+      "count": 14,
+      "label": "硕士 · 地质工程"
+    },
+    {
+      "profile_id": "master-geological-resources-engineering",
+      "count": 14,
+      "label": "硕士 · 地质资源与地质工程"
+    },
+    {
+      "profile_id": "doctoral-geology",
+      "count": 6,
+      "label": "博士 · 地质学"
+    },
+    {
+      "profile_id": "doctoral-geological-engineering",
+      "count": 6,
+      "label": "博士 · 地质工程"
+    },
+    {
+      "profile_id": "doctoral-geological-resources-engineering",
+      "count": 6,
+      "label": "博士 · 地质资源与地质工程"
+    }
+  ],
+  "summary": {
+    "students_with_explicit_match": 100,
+    "students_with_review_only": 0,
+    "students_without_recommendation": 0,
+    "explicit_job_profile_matches": 57,
+    "review_job_profile_matches": 47,
+    "cohort_weighted_explicit_opportunities": 796
+  },
+  "profiles": [
+    {
+      "profile": {
+        "id": "undergraduate-resource-exploration",
+        "label": "本科 · 资源勘查工程",
+        "degree": "本科",
+        "major": "资源勘查工程"
+      },
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "profile": {
+        "id": "master-geology",
+        "label": "硕士 · 地质学",
+        "degree": "硕士",
+        "major": "地质学"
+      },
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "profile": {
+        "id": "master-geological-engineering",
+        "label": "硕士 · 地质工程",
+        "degree": "硕士",
+        "major": "地质工程"
+      },
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "profile": {
+        "id": "master-geological-resources-engineering",
+        "label": "硕士 · 地质资源与地质工程",
+        "degree": "硕士",
+        "major": "地质资源与地质工程"
+      },
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "profile": {
+        "id": "doctoral-geology",
+        "label": "博士 · 地质学",
+        "degree": "博士",
+        "major": "地质学"
+      },
+      "explicit_matches": 4,
+      "review_matches": 6,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "profile": {
+        "id": "doctoral-geological-engineering",
+        "label": "博士 · 地质工程",
+        "degree": "博士",
+        "major": "地质工程"
+      },
+      "explicit_matches": 4,
+      "review_matches": 18,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "profile": {
+        "id": "doctoral-geological-resources-engineering",
+        "label": "博士 · 地质资源与地质工程",
+        "degree": "博士",
+        "major": "地质资源与地质工程"
+      },
+      "explicit_matches": 2,
+      "review_matches": 17,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    }
+  ],
+  "students": [
+    {
+      "student_id": "GS-001",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-002",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-003",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-004",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-005",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-006",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-007",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-008",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-009",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-010",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-011",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-012",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-013",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-014",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-015",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-016",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-017",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-018",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-019",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-020",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-021",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-022",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-023",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-024",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-025",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-026",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-027",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-028",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-029",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-030",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-031",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-032",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-033",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-034",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-035",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-036",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-037",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-038",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-039",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-040",
+      "profile_id": "undergraduate-resource-exploration",
+      "degree": "本科",
+      "major": "资源勘查工程",
+      "explicit_matches": 3,
+      "review_matches": 0,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "能源、工程与地学拓展"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-041",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-042",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-043",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-044",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-045",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-046",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-047",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-048",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-049",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-050",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-051",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-052",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-053",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-054",
+      "profile_id": "master-geology",
+      "degree": "硕士",
+      "major": "地质学",
+      "explicit_matches": 8,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-055",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-056",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-057",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-058",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-059",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-060",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-061",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-062",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-063",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-064",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-065",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-066",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-067",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-068",
+      "profile_id": "master-geological-engineering",
+      "degree": "硕士",
+      "major": "地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-069",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-070",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-071",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-072",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-073",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-074",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-075",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-076",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-077",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-078",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-079",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-080",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-081",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-082",
+      "profile_id": "master-geological-resources-engineering",
+      "degree": "硕士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 18,
+      "review_matches": 2,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-083",
+      "profile_id": "doctoral-geology",
+      "degree": "博士",
+      "major": "地质学",
+      "explicit_matches": 4,
+      "review_matches": 6,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-084",
+      "profile_id": "doctoral-geology",
+      "degree": "博士",
+      "major": "地质学",
+      "explicit_matches": 4,
+      "review_matches": 6,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-085",
+      "profile_id": "doctoral-geology",
+      "degree": "博士",
+      "major": "地质学",
+      "explicit_matches": 4,
+      "review_matches": 6,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-086",
+      "profile_id": "doctoral-geology",
+      "degree": "博士",
+      "major": "地质学",
+      "explicit_matches": 4,
+      "review_matches": 6,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-087",
+      "profile_id": "doctoral-geology",
+      "degree": "博士",
+      "major": "地质学",
+      "explicit_matches": 4,
+      "review_matches": 6,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-088",
+      "profile_id": "doctoral-geology",
+      "degree": "博士",
+      "major": "地质学",
+      "explicit_matches": 4,
+      "review_matches": 6,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-089",
+      "profile_id": "doctoral-geological-engineering",
+      "degree": "博士",
+      "major": "地质工程",
+      "explicit_matches": 4,
+      "review_matches": 18,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-090",
+      "profile_id": "doctoral-geological-engineering",
+      "degree": "博士",
+      "major": "地质工程",
+      "explicit_matches": 4,
+      "review_matches": 18,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-091",
+      "profile_id": "doctoral-geological-engineering",
+      "degree": "博士",
+      "major": "地质工程",
+      "explicit_matches": 4,
+      "review_matches": 18,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-092",
+      "profile_id": "doctoral-geological-engineering",
+      "degree": "博士",
+      "major": "地质工程",
+      "explicit_matches": 4,
+      "review_matches": 18,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-093",
+      "profile_id": "doctoral-geological-engineering",
+      "degree": "博士",
+      "major": "地质工程",
+      "explicit_matches": 4,
+      "review_matches": 18,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-094",
+      "profile_id": "doctoral-geological-engineering",
+      "degree": "博士",
+      "major": "地质工程",
+      "explicit_matches": 4,
+      "review_matches": 18,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "矿产资源与矿业",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-095",
+      "profile_id": "doctoral-geological-resources-engineering",
+      "degree": "博士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 2,
+      "review_matches": 17,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-096",
+      "profile_id": "doctoral-geological-resources-engineering",
+      "degree": "博士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 2,
+      "review_matches": 17,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-097",
+      "profile_id": "doctoral-geological-resources-engineering",
+      "degree": "博士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 2,
+      "review_matches": 17,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-098",
+      "profile_id": "doctoral-geological-resources-engineering",
+      "degree": "博士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 2,
+      "review_matches": 17,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-099",
+      "profile_id": "doctoral-geological-resources-engineering",
+      "degree": "博士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 2,
+      "review_matches": 17,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    },
+    {
+      "student_id": "GS-100",
+      "profile_id": "doctoral-geological-resources-engineering",
+      "degree": "博士",
+      "major": "地质资源与地质工程",
+      "explicit_matches": 2,
+      "review_matches": 17,
+      "category_coverage": [
+        "油气上游业主与研究机构",
+        "油气工程技术服务",
+        "科研院所、高校与博士后",
+        "管网、炼化与综合能源"
+      ],
+      "has_recommendation": true
+    }
+  ]
+}

@@ -139,6 +139,10 @@ def test_excel_attachment_is_hashed_extracted_and_idempotent(tmp_path) -> None:
     assert candidates[0]["review_status"] == "needs_review"
     assert candidates[0]["major_tags"]
     assert candidates[0]["row_sheet_name"] == "岗位表"
+    assert candidates[0]["field_evidence"]["evidence_scope"] == "official_attachment_row"
+    assert candidates[0]["field_evidence"]["岗位"] == "地质工程师"
+    assert "地质工程" in candidates[0]["field_evidence"]["专业范围"]
+    assert candidates[0]["field_evidence"]["学历要求"] == "硕士"
 
     second = processor.process(artifact["id"])
     assert second.rows_extracted == 1
@@ -217,6 +221,10 @@ def test_attachment_candidate_requires_review_then_publishes_with_evidence(tmp_p
     assert response.status_code == 201
     payload = response.get_json()
     assert payload["candidate"]["review_status"] == "published"
+    public_job = database.find_public_job(payload["job_id"])
+    assert public_job is not None
+    assert public_job["publication_status"] == "student_eligible"
+    assert public_job["field_evidence"]["专业范围"] == "地质工程、地质学"
     evidence = database.list_job_evidence(payload["job_id"])
     assert {item["evidence_type"] for item in evidence} == {
         "official_page",

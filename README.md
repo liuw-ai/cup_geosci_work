@@ -26,6 +26,8 @@
 
 当前待审阅的 Phase 9 传输诊断与采集梯子见 [docs/phase-9/README.md](docs/phase-9/README.md)。它显式区分本机代理环境与服务器直连出口，把传输上下文写入探测证据；直连只用于合规诊断，不绕过 403、412、验证码或 robots 限制。
 
+Phase 15/16 的岗位级发布门禁与官方附件证据修复见 [docs/phase-15/README.md](docs/phase-15/README.md) 和 [docs/phase-16/README.md](docs/phase-16/README.md)。附件岗位必须保留官方公告页、岗位表行、专业和学历证据；历史候选迁移不会自动跳过人工审核。
+
 ## 已实现的能力
 
 - 官方来源白名单：单位官网、官方招聘系统、政府公开招聘平台、高校就业网优先。

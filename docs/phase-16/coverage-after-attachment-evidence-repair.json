@@ -1,0 +1,4276 @@
+{
+  "generated_at": "2026-09-24T09:12:19Z",
+  "scope": "公开学生端已发布官方岗位，不含内部候选线索",
+  "open_jobs": 32,
+  "source_health": {
+    "registered_sources": 71,
+    "enabled_sources": 33,
+    "distribution": {
+      "source_active": 7,
+      "source_blocked": 2,
+      "source_degraded": 59,
+      "unknown": 3
+    },
+    "sources_without_health_record": [
+      "cosl-career",
+      "cupb-verified-geoscience-snapshot"
+    ],
+    "enabled_sources_without_health_record": [
+      "cupb-verified-geoscience-snapshot"
+    ],
+    "unhealthy_sources": [
+      {
+        "id": "weatherford-career",
+        "name": "Weatherford Careers",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='jobs.weatherford.com', port=443): Read timed out. (read timeout=10)"
+      },
+      {
+        "id": "shanghai-natural-resources",
+        "name": "上海市规划和自然资源局人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='ghzyj.sh.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "cmgb-inner-mongolia-geology-recruitment",
+        "name": "中国冶金地质总局内蒙古地质勘查院2026年公开招聘",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='www.cmgb3.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "cmgb-geoexp-recruitment",
+        "name": "中国冶金地质总局地球物理勘查院人才招聘",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='www.geoexp.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "cmgb-careers",
+        "name": "中国冶金地质总局招聘信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='www.cmgb.com.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "cmgb-second-geology-recruitment",
+        "name": "中国冶金地质总局第二地质勘查院2026年社会招聘公告",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "cags-notices",
+        "name": "中国地质科学院公开招聘信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='www.cags.ac.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "ccgc-careers",
+        "name": "中国煤炭地质总局人才招聘",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='www.ccgc.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "sinopec-career",
+        "name": "中国石化人才招聘网站",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='job.sinopec.com', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "sinopec-pepris-recruitment",
+        "name": "中国石化石油勘探开发研究院2026年校园招聘公告",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "cnpc-bgp-recruitment",
+        "name": "中国石油集团东方地球物理勘探有限责任公司公开招聘",
+        "status": "source_blocked",
+        "detail": "Unable to verify robots.txt for https://www.bgp.com.cn: HTTPSConnectionPool(host='www.bgp.com.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "cnpc-career",
+        "name": "中国石油高校毕业生招聘平台",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zhaopin.cnpc.com.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "cas-job-board",
+        "name": "中国科学院人才招聘网",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "yunnan-natural-resources",
+        "name": "云南省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "mohrss-notices",
+        "name": "人力资源和社会保障部公开招聘信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='www.mohrss.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "inner-mongolia-natural-resources",
+        "name": "内蒙古自治区自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "beijing-hrss",
+        "name": "北京市人力资源和社会保障局公开招聘",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='rsj.beijing.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "beijing-natural-resources",
+        "name": "北京市规划和自然资源委员会人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='ghzrzyw.beijing.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "jilin-natural-resources",
+        "name": "吉林省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "sichuan-natural-resources",
+        "name": "四川省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='dnr.sc.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "national-civil-service",
+        "name": "国家公务员局考试录用专题",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='bm.scs.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "ncss-career",
+        "name": "国家大学生就业服务平台",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='www.ncss.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "pipechina-career",
+        "name": "国家管网集团招聘平台",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zhaopin.pipechina.com.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "tianjin-natural-resources",
+        "name": "天津市规划和自然资源局招考录用栏目",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='ghhzrzy.tj.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "ningxia-geology-bureau",
+        "name": "宁夏回族自治区地质局人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "ningxia-natural-resources",
+        "name": "宁夏回族自治区自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.nx.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "anhui-geology-bureau",
+        "name": "安徽省地质矿产勘查局通知公告",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='dkj.ah.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "anhui-natural-resources",
+        "name": "安徽省自然资源厅通知公告",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.ah.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "shandong-hrss-exam",
+        "name": "山东人事考试信息网省属事业单位公开招聘",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 403，未访问来源页面。"
+      },
+      {
+        "id": "shandong-hrss",
+        "name": "山东省人力资源和社会保障厅公开招聘",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 403，未访问来源页面。"
+      },
+      {
+        "id": "shandong-geology-bureau",
+        "name": "山东省地质矿产勘查开发局事业单位招聘",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "shandong-natural-resources",
+        "name": "山东省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "shanxi-natural-resources",
+        "name": "山西省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.shanxi.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "guangdong-natural-resources",
+        "name": "广东省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "guangxi-natural-resources",
+        "name": "广西壮族自治区自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "xinjiang-natural-resources",
+        "name": "新疆维吾尔自治区自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "jiangsu-natural-resources",
+        "name": "江苏省自然资源厅公告公示",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzy.jiangsu.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "jiangxi-natural-resources",
+        "name": "江西省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzy.jiangxi.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "hebei-geology-bureau",
+        "name": "河北省地质矿产勘查开发局最新公告",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "hebei-natural-resources",
+        "name": "河北省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "henan-geology-bureau",
+        "name": "河南省地质局通知公告",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 403，未访问来源页面。"
+      },
+      {
+        "id": "henan-natural-resources",
+        "name": "河南省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.henan.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "zhejiang-natural-resources",
+        "name": "浙江省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.zj.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "hainan-natural-resources",
+        "name": "海南省自然资源和规划厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zizhijian.hainan.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "hubei-natural-resources",
+        "name": "湖北省自然资源厅公开栏目",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "hunan-geology-institute",
+        "name": "湖南省地质院通知公告",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "hunan-natural-resources",
+        "name": "湖南省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "gansu-geology-bureau",
+        "name": "甘肃省地质矿产勘查开发局人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "gansu-natural-resources",
+        "name": "甘肃省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzy.gansu.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "fujian-natural-resources",
+        "name": "福建省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.fujian.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "zijin-campus-career",
+        "name": "紫金矿业校园招聘官方门户",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='join.zjky.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "mnr-public-recruitment",
+        "name": "自然资源部所属企事业单位公开招聘平台",
+        "status": "source_blocked",
+        "detail": "Unable to verify robots.txt for https://www.sydwgkzp.cn: HTTPSConnectionPool(host='www.sydwgkzp.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "mnr-notices",
+        "name": "自然资源部招聘与人才公告",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='www.mnr.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "tibet-natural-resources",
+        "name": "西藏自治区自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "guizhou-natural-resources",
+        "name": "贵州省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzy.guizhou.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "liaoning-natural-resources",
+        "name": "辽宁省自然资源厅政府公开栏目",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzy.ln.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "chongqing-natural-resources",
+        "name": "重庆市规划和自然资源局人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='ghzrzyw.cq.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "shaanxi-natural-resources",
+        "name": "陕西省自然资源厅人事信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.shaanxi.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "qinghai-natural-resources",
+        "name": "青海省自然资源厅公开招聘信息",
+        "status": "source_degraded",
+        "detail": "robots.txt 返回 HTTP 502，未访问来源页面。"
+      },
+      {
+        "id": "heilongjiang-natural-resources",
+        "name": "黑龙江省自然资源厅公开栏目",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.hlj.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      },
+      {
+        "id": "cup-east-career",
+        "name": "中国石油大学（华东）智慧就业网",
+        "status": "source_degraded",
+        "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='career.upc.edu.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))"
+      }
+    ]
+  },
+  "source_resilience": {
+    "registered_sources": 71,
+    "sources_with_backup": 45,
+    "coverage_rate": 0.6338,
+    "sources_with_usable_fallback_source": 39,
+    "usable_fallback_source_coverage_rate": 0.5493,
+    "sources_without_backup": [
+      {
+        "id": "baker-hughes-career",
+        "name": "Baker Hughes Careers"
+      },
+      {
+        "id": "halliburton-career",
+        "name": "Halliburton Careers"
+      },
+      {
+        "id": "weatherford-career",
+        "name": "Weatherford Careers"
+      },
+      {
+        "id": "cmgb-inner-mongolia-geology-recruitment",
+        "name": "中国冶金地质总局内蒙古地质勘查院2026年公开招聘"
+      },
+      {
+        "id": "cmgb-geoexp-recruitment",
+        "name": "中国冶金地质总局地球物理勘查院人才招聘"
+      },
+      {
+        "id": "cmgb-careers",
+        "name": "中国冶金地质总局招聘信息"
+      },
+      {
+        "id": "cmgb-second-geology-recruitment",
+        "name": "中国冶金地质总局第二地质勘查院2026年社会招聘公告"
+      },
+      {
+        "id": "cags-notices",
+        "name": "中国地质科学院公开招聘信息"
+      },
+      {
+        "id": "cgs-notices",
+        "name": "中国地质调查局招聘与人才公告"
+      },
+      {
+        "id": "ccgc-careers",
+        "name": "中国煤炭地质总局人才招聘"
+      },
+      {
+        "id": "sinopec-career",
+        "name": "中国石化人才招聘网站"
+      },
+      {
+        "id": "sinopec-pepris-recruitment",
+        "name": "中国石化石油勘探开发研究院2026年校园招聘公告"
+      },
+      {
+        "id": "cnpc-career",
+        "name": "中国石油高校毕业生招聘平台"
+      },
+      {
+        "id": "cas-job-board",
+        "name": "中国科学院人才招聘网"
+      },
+      {
+        "id": "mohrss-notices",
+        "name": "人力资源和社会保障部公开招聘信息"
+      },
+      {
+        "id": "official-manual-import",
+        "name": "人工核验的官方公告"
+      },
+      {
+        "id": "national-civil-service",
+        "name": "国家公务员局考试录用专题"
+      },
+      {
+        "id": "ncss-career",
+        "name": "国家大学生就业服务平台"
+      },
+      {
+        "id": "pipechina-career",
+        "name": "国家管网集团招聘平台"
+      },
+      {
+        "id": "shandong-hrss",
+        "name": "山东省人力资源和社会保障厅公开招聘"
+      },
+      {
+        "id": "zijin-campus-career",
+        "name": "紫金矿业校园招聘官方门户"
+      },
+      {
+        "id": "zijin-social-career",
+        "name": "紫金矿业社会招聘官方门户"
+      },
+      {
+        "id": "mnr-public-recruitment",
+        "name": "自然资源部所属企事业单位公开招聘平台"
+      },
+      {
+        "id": "mnr-notices",
+        "name": "自然资源部招聘与人才公告"
+      },
+      {
+        "id": "cupb-verified-geoscience-snapshot",
+        "name": "中国石油大学（北京）就业网地学岗位核验快照"
+      },
+      {
+        "id": "cup-east-career",
+        "name": "中国石油大学（华东）智慧就业网"
+      }
+    ],
+    "details": [
+      {
+        "id": "baker-hughes-career",
+        "name": "Baker Hughes Careers",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "halliburton-career",
+        "name": "Halliburton Careers",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "slb-career",
+        "name": "SLB Careers",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "weatherford-career",
+        "name": "Weatherford Careers",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "shanghai-natural-resources",
+        "name": "上海市规划和自然资源局人事信息",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "cmgb-inner-mongolia-geology-recruitment",
+        "name": "中国冶金地质总局内蒙古地质勘查院2026年公开招聘",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cmgb-geoexp-recruitment",
+        "name": "中国冶金地质总局地球物理勘查院人才招聘",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cmgb-careers",
+        "name": "中国冶金地质总局招聘信息",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cmgb-second-geology-recruitment",
+        "name": "中国冶金地质总局第二地质勘查院2026年社会招聘公告",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cags-notices",
+        "name": "中国地质科学院公开招聘信息",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cgs-notices",
+        "name": "中国地质调查局招聘与人才公告",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cnooc-career",
+        "name": "中国海油招聘平台",
+        "has_backup": true,
+        "backup_entry_count": 2,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "ccgc-careers",
+        "name": "中国煤炭地质总局人才招聘",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "sinopec-career",
+        "name": "中国石化人才招聘网站",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "sinopec-pepris-recruitment",
+        "name": "中国石化石油勘探开发研究院2026年校园招聘公告",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cnpc-bgp-recruitment",
+        "name": "中国石油集团东方地球物理勘探有限责任公司公开招聘",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cnpc-career",
+        "name": "中国石油高校毕业生招聘平台",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cas-job-board",
+        "name": "中国科学院人才招聘网",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cosl-career",
+        "name": "中海油田服务股份有限公司官方招聘入口",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "yunnan-natural-resources",
+        "name": "云南省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "mohrss-notices",
+        "name": "人力资源和社会保障部公开招聘信息",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "official-manual-import",
+        "name": "人工核验的官方公告",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "inner-mongolia-natural-resources",
+        "name": "内蒙古自治区自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "beijing-hrss",
+        "name": "北京市人力资源和社会保障局公开招聘",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "beijing-natural-resources",
+        "name": "北京市规划和自然资源委员会人事信息",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "jilin-natural-resources",
+        "name": "吉林省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "sichuan-natural-resources",
+        "name": "四川省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "national-civil-service",
+        "name": "国家公务员局考试录用专题",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "ncss-career",
+        "name": "国家大学生就业服务平台",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "pipechina-career",
+        "name": "国家管网集团招聘平台",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "tianjin-natural-resources",
+        "name": "天津市规划和自然资源局招考录用栏目",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "ningxia-geology-bureau",
+        "name": "宁夏回族自治区地质局人事信息",
+        "has_backup": true,
+        "backup_entry_count": 2,
+        "backup_source_count": 3,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "ningxia-natural-resources",
+        "name": "宁夏回族自治区自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "anhui-geology-bureau",
+        "name": "安徽省地质矿产勘查局通知公告",
+        "has_backup": true,
+        "backup_entry_count": 2,
+        "backup_source_count": 3,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "anhui-natural-resources",
+        "name": "安徽省自然资源厅通知公告",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "shandong-hrss-exam",
+        "name": "山东人事考试信息网省属事业单位公开招聘",
+        "has_backup": true,
+        "backup_entry_count": 2,
+        "backup_source_count": 3,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "shandong-hrss",
+        "name": "山东省人力资源和社会保障厅公开招聘",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "shandong-geology-bureau",
+        "name": "山东省地质矿产勘查开发局事业单位招聘",
+        "has_backup": true,
+        "backup_entry_count": 2,
+        "backup_source_count": 3,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "shandong-natural-resources",
+        "name": "山东省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "shanxi-natural-resources",
+        "name": "山西省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "guangdong-natural-resources",
+        "name": "广东省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "guangxi-natural-resources",
+        "name": "广西壮族自治区自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "xinjiang-natural-resources",
+        "name": "新疆维吾尔自治区自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "jiangsu-natural-resources",
+        "name": "江苏省自然资源厅公告公示",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "jiangxi-natural-resources",
+        "name": "江西省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "hebei-geology-bureau",
+        "name": "河北省地质矿产勘查开发局最新公告",
+        "has_backup": true,
+        "backup_entry_count": 2,
+        "backup_source_count": 3,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "hebei-natural-resources",
+        "name": "河北省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "henan-geology-bureau",
+        "name": "河南省地质局通知公告",
+        "has_backup": true,
+        "backup_entry_count": 2,
+        "backup_source_count": 3,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "henan-natural-resources",
+        "name": "河南省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "zhejiang-natural-resources",
+        "name": "浙江省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "hainan-natural-resources",
+        "name": "海南省自然资源和规划厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "hubei-natural-resources",
+        "name": "湖北省自然资源厅公开栏目",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "hunan-geology-institute",
+        "name": "湖南省地质院通知公告",
+        "has_backup": true,
+        "backup_entry_count": 2,
+        "backup_source_count": 3,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "hunan-natural-resources",
+        "name": "湖南省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "gansu-geology-bureau",
+        "name": "甘肃省地质矿产勘查开发局人事信息",
+        "has_backup": true,
+        "backup_entry_count": 2,
+        "backup_source_count": 3,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "gansu-natural-resources",
+        "name": "甘肃省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "fujian-natural-resources",
+        "name": "福建省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 1,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "zijin-campus-career",
+        "name": "紫金矿业校园招聘官方门户",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "zijin-social-career",
+        "name": "紫金矿业社会招聘官方门户",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "mnr-public-recruitment",
+        "name": "自然资源部所属企事业单位公开招聘平台",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "mnr-notices",
+        "name": "自然资源部招聘与人才公告",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "tibet-natural-resources",
+        "name": "西藏自治区自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "guizhou-natural-resources",
+        "name": "贵州省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "liaoning-natural-resources",
+        "name": "辽宁省自然资源厅政府公开栏目",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "chongqing-natural-resources",
+        "name": "重庆市规划和自然资源局人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "shaanxi-natural-resources",
+        "name": "陕西省自然资源厅人事信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "qinghai-natural-resources",
+        "name": "青海省自然资源厅公开招聘信息",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "heilongjiang-natural-resources",
+        "name": "黑龙江省自然资源厅公开栏目",
+        "has_backup": true,
+        "backup_entry_count": 0,
+        "backup_source_count": 2,
+        "usable_fallback_source_ids": [
+          "cgs-notices"
+        ]
+      },
+      {
+        "id": "cupb-career",
+        "name": "中国石油大学（北京）就业信息网",
+        "has_backup": true,
+        "backup_entry_count": 3,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cupb-verified-geoscience-snapshot",
+        "name": "中国石油大学（北京）就业网地学岗位核验快照",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      },
+      {
+        "id": "cup-east-career",
+        "name": "中国石油大学（华东）智慧就业网",
+        "has_backup": false,
+        "backup_entry_count": 0,
+        "backup_source_count": 0,
+        "usable_fallback_source_ids": []
+      }
+    ]
+  },
+  "scan_quality": {
+    "sources_with_latest_run": 32,
+    "successful_scan_sources": 4,
+    "sources_with_open_matches": 2,
+    "distribution": {
+      "interrupted": 1,
+      "skipped": 22,
+      "successful_with_open_matches": 4,
+      "successful_without_open_matches": 5
+    }
+  },
+  "province_coverage": [
+    {
+      "province": "北京",
+      "registered_official_sources": 2,
+      "enabled_sources": 2,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "beijing-hrss",
+        "beijing-natural-resources"
+      ],
+      "target_roles_without_usable_scan": [
+        "human_resources_or_exam",
+        "natural_resources"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "beijing-natural-resources",
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 3,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 2
+      },
+      "registered_source_roles": [
+        "human_resources_or_exam",
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "verified",
+        "natural_resources": "verified",
+        "geology_bureau_or_institute": "unlocated",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 2,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 3,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "天津",
+      "registered_official_sources": 1,
+      "enabled_sources": 1,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "tianjin-natural-resources"
+      ],
+      "target_roles_without_usable_scan": [
+        "natural_resources"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "verified",
+        "geology_bureau_or_institute": "unlocated",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 1,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "河北",
+      "registered_official_sources": 2,
+      "enabled_sources": 1,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "hebei-geology-bureau"
+      ],
+      "target_roles_without_usable_scan": [
+        "geology_bureau_or_institute"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "hebei-natural-resources",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 3,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 2
+      },
+      "registered_source_roles": [
+        "geology_bureau_or_institute",
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "verified",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 1,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "山西",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 1,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "内蒙古",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 1,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "辽宁",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "unlocated",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "吉林",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "黑龙江",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "unlocated",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "上海",
+      "registered_official_sources": 1,
+      "enabled_sources": 1,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "shanghai-natural-resources"
+      ],
+      "target_roles_without_usable_scan": [
+        "natural_resources"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "verified",
+        "geology_bureau_or_institute": "unlocated",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 1,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "江苏",
+      "registered_official_sources": 1,
+      "enabled_sources": 1,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "jiangsu-natural-resources"
+      ],
+      "target_roles_without_usable_scan": [
+        "natural_resources"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "verified",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 1,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 1,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "浙江",
+      "registered_official_sources": 1,
+      "enabled_sources": 1,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "zhejiang-natural-resources"
+      ],
+      "target_roles_without_usable_scan": [
+        "natural_resources"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "verified",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 1,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 1,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "安徽",
+      "registered_official_sources": 2,
+      "enabled_sources": 2,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "anhui-geology-bureau",
+        "anhui-natural-resources"
+      ],
+      "target_roles_without_usable_scan": [
+        "natural_resources",
+        "geology_bureau_or_institute"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "anhui-natural-resources",
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 3,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 2
+      },
+      "registered_source_roles": [
+        "geology_bureau_or_institute",
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "verified",
+        "geology_bureau_or_institute": "verified",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 2,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "福建",
+      "registered_official_sources": 1,
+      "enabled_sources": 1,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "fujian-natural-resources"
+      ],
+      "target_roles_without_usable_scan": [
+        "natural_resources"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "verified",
+        "geology_bureau_or_institute": "unlocated",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 1,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 3,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "江西",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 2,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "山东",
+      "registered_official_sources": 3,
+      "enabled_sources": 1,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "shandong-geology-bureau"
+      ],
+      "target_roles_without_usable_scan": [
+        "geology_bureau_or_institute"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment",
+        "shandong-geology-bureau",
+        "shandong-natural-resources"
+      ],
+      "fallback_sources_registered": 4,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 3
+      },
+      "registered_source_roles": [
+        "geology_bureau_or_institute",
+        "human_resources_or_exam",
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "candidate",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "verified",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 1,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "河南",
+      "registered_official_sources": 2,
+      "enabled_sources": 1,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "henan-geology-bureau"
+      ],
+      "target_roles_without_usable_scan": [
+        "geology_bureau_or_institute"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "henan-natural-resources",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 3,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 2
+      },
+      "registered_source_roles": [
+        "geology_bureau_or_institute",
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "verified",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 1,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "湖北",
+      "registered_official_sources": 1,
+      "enabled_sources": 1,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "hubei-natural-resources"
+      ],
+      "target_roles_without_usable_scan": [
+        "natural_resources"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "verified",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 1,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "湖南",
+      "registered_official_sources": 2,
+      "enabled_sources": 1,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "hunan-geology-institute"
+      ],
+      "target_roles_without_usable_scan": [
+        "geology_bureau_or_institute"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "hunan-natural-resources",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 3,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 2
+      },
+      "registered_source_roles": [
+        "geology_bureau_or_institute",
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "verified",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 1,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "广东",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "广西",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 5,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "海南",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "重庆",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "unlocated",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 2,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "四川",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "贵州",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "云南",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 1,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "西藏",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "unlocated",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "陕西",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 1,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "甘肃",
+      "registered_official_sources": 2,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "gansu-natural-resources",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 3,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 2
+      },
+      "registered_source_roles": [
+        "geology_bureau_or_institute",
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 4,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "青海",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "unlocated",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 2,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "宁夏",
+      "registered_official_sources": 2,
+      "enabled_sources": 1,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [
+        "ningxia-geology-bureau"
+      ],
+      "target_roles_without_usable_scan": [
+        "geology_bureau_or_institute"
+      ],
+      "has_unhealthy_enabled_source": true,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment",
+        "ningxia-natural-resources"
+      ],
+      "fallback_sources_registered": 3,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 2
+      },
+      "registered_source_roles": [
+        "geology_bureau_or_institute",
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "verified",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 1,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 1,
+      "scan_interpretation": "至少一个当地来源当前访问异常，不能把零岗位解释为无招聘"
+    },
+    {
+      "province": "新疆",
+      "registered_official_sources": 1,
+      "enabled_sources": 0,
+      "active_official_sources": 0,
+      "target_active_official_sources": 3,
+      "accessible_entry_sources": 0,
+      "accessible_or_scanned_sources": 0,
+      "completed_scan_sources": 0,
+      "sources_with_open_matches": 0,
+      "no_matching_opening_sources": 0,
+      "no_match_is_verified": false,
+      "all_enabled_sources_scanned": false,
+      "all_target_roles_verified": false,
+      "all_verified_target_roles_usable": false,
+      "unready_source_ids": [],
+      "target_roles_without_usable_scan": [],
+      "has_unhealthy_enabled_source": false,
+      "fallback_source_ids": [
+        "cgs-notices",
+        "mnr-public-recruitment"
+      ],
+      "fallback_sources_registered": 2,
+      "fallback_active_sources": 1,
+      "fallback_sources_with_open_matches": 0,
+      "effective_active_sources": 1,
+      "health_statuses": {
+        "source_degraded": 1
+      },
+      "registered_source_roles": [
+        "natural_resources"
+      ],
+      "missing_source_roles": [
+        "human_resources_or_exam",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "target_role_states": {
+        "human_resources_or_exam": "unlocated",
+        "natural_resources": "candidate",
+        "geology_bureau_or_institute": "candidate",
+        "public_institution_recruitment": "unlocated",
+        "civil_service": "unlocated"
+      },
+      "verified_target_sources": 0,
+      "target_source_count": 5,
+      "missing_target_roles": [
+        "human_resources_or_exam",
+        "natural_resources",
+        "geology_bureau_or_institute",
+        "public_institution_recruitment",
+        "civil_service"
+      ],
+      "published_open_jobs": 0,
+      "scan_interpretation": "五类官方入口尚未全部核验，不能把零岗位解释为无招聘"
+    }
+  ],
+  "source_target_matrix": {
+    "required_roles": [
+      "human_resources_or_exam",
+      "natural_resources",
+      "geology_bureau_or_institute",
+      "public_institution_recruitment",
+      "civil_service"
+    ],
+    "role_labels": {
+      "human_resources_or_exam": "人社/考试",
+      "natural_resources": "自然资源",
+      "geology_bureau_or_institute": "地质局/地质院",
+      "public_institution_recruitment": "事业单位",
+      "civil_service": "公务员"
+    },
+    "province_count": 31,
+    "totals": {
+      "targets": 155,
+      "verified": 15,
+      "candidate": 40,
+      "unlocated": 100,
+      "blocked": 0
+    },
+    "provinces": [
+      {
+        "province": "上海",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "verified",
+          "geology_bureau_or_institute": "unlocated",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "natural_resources": "shanghai-natural-resources"
+        },
+        "verified_targets": 1,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "云南",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "内蒙古",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "北京",
+        "role_states": {
+          "human_resources_or_exam": "verified",
+          "natural_resources": "verified",
+          "geology_bureau_or_institute": "unlocated",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "human_resources_or_exam": "beijing-hrss",
+          "natural_resources": "beijing-natural-resources"
+        },
+        "verified_targets": 2,
+        "target_count": 5,
+        "missing_target_roles": [
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "吉林",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "四川",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "天津",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "verified",
+          "geology_bureau_or_institute": "unlocated",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "natural_resources": "tianjin-natural-resources"
+        },
+        "verified_targets": 1,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "宁夏",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "verified",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "geology_bureau_or_institute": "ningxia-geology-bureau"
+        },
+        "verified_targets": 1,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "安徽",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "verified",
+          "geology_bureau_or_institute": "verified",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "natural_resources": "anhui-natural-resources",
+          "geology_bureau_or_institute": "anhui-geology-bureau"
+        },
+        "verified_targets": 2,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "山东",
+        "role_states": {
+          "human_resources_or_exam": "candidate",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "verified",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "geology_bureau_or_institute": "shandong-geology-bureau"
+        },
+        "verified_targets": 1,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "山西",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "广东",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "广西",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "新疆",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "江苏",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "verified",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "natural_resources": "jiangsu-natural-resources"
+        },
+        "verified_targets": 1,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "江西",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "河北",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "verified",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "geology_bureau_or_institute": "hebei-geology-bureau"
+        },
+        "verified_targets": 1,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "河南",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "verified",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "geology_bureau_or_institute": "henan-geology-bureau"
+        },
+        "verified_targets": 1,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "浙江",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "verified",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "natural_resources": "zhejiang-natural-resources"
+        },
+        "verified_targets": 1,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "海南",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "湖北",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "verified",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "natural_resources": "hubei-natural-resources"
+        },
+        "verified_targets": 1,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "湖南",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "verified",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "geology_bureau_or_institute": "hunan-geology-institute"
+        },
+        "verified_targets": 1,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "甘肃",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "福建",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "verified",
+          "geology_bureau_or_institute": "unlocated",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {
+          "natural_resources": "fujian-natural-resources"
+        },
+        "verified_targets": 1,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "西藏",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "unlocated",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "贵州",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "辽宁",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "unlocated",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "重庆",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "unlocated",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "陕西",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "candidate",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "青海",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "unlocated",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      },
+      {
+        "province": "黑龙江",
+        "role_states": {
+          "human_resources_or_exam": "unlocated",
+          "natural_resources": "candidate",
+          "geology_bureau_or_institute": "unlocated",
+          "public_institution_recruitment": "unlocated",
+          "civil_service": "unlocated"
+        },
+        "role_source_ids": {},
+        "verified_targets": 0,
+        "target_count": 5,
+        "missing_target_roles": [
+          "human_resources_or_exam",
+          "natural_resources",
+          "geology_bureau_or_institute",
+          "public_institution_recruitment",
+          "civil_service"
+        ],
+        "missing_target_role_labels": [
+          "人社/考试",
+          "自然资源",
+          "地质局/地质院",
+          "事业单位",
+          "公务员"
+        ]
+      }
+    ]
+  },
+  "provincial_source_validation": {
+    "registry_version": 1,
+    "record_count": 9,
+    "records_by_validation_stage": {
+      "adapter_fixture_verified": 6,
+      "entry_checked_no_recruitment_sample": 3
+    },
+    "adapter_fixture_verified_records": 6,
+    "adapter_fixture_verified_targets": 5,
+    "candidate_targets_with_adapter_fixture": 1,
+    "fixture_verified_role_counts": {
+      "geology_bureau_or_institute": 3,
+      "human_resources_or_exam": 2,
+      "natural_resources": 1
+    },
+    "fixture_verified_province_count": 5,
+    "fixture_backed_records": 6,
+    "fixture_verified_enabled_sources": 5,
+    "records_with_backup": 9,
+    "backup_rate": 1.0,
+    "verified_targets_without_adapter_fixture": 10,
+    "scope_note": "Phase 4 省级官方来源核验台账。它记录当前正式入口、真实公告样例、字段证据、备用入口和离线解析夹具；adapter_fixture_verified 仍不等于来源已启用或本轮存在岗位。"
+  },
+  "organization_registry": {
+    "registry_version": 1,
+    "organization_count": 48,
+    "channel_count": 69,
+    "organization_role_counts": {
+      "geology_research": 2,
+      "geology_survey": 5,
+      "government_recruitment_system": 2,
+      "group": 3,
+      "independent_technical_service": 3,
+      "internal_technical_service": 9,
+      "international_technical_service": 4,
+      "mining_group": 4,
+      "pipeline_operator": 1,
+      "research_institute": 3,
+      "university": 6,
+      "upstream_operator": 6
+    },
+    "affiliation_counts": {
+      "中国冶金地质总局体系": 3,
+      "中国海油体系": 6,
+      "中国石化体系": 5,
+      "中国石油体系": 9,
+      "中国科学院系统": 1,
+      "中央地勘系统": 2,
+      "中央政府招聘与自然资源系统": 1,
+      "中央资源企业": 3,
+      "北京市政府招聘系统": 1,
+      "国家管网体系": 1,
+      "在华国际油服": 4,
+      "地学教育": 1,
+      "独立/民营油服": 3,
+      "石油院校与地学教育": 5,
+      "矿业企业": 1,
+      "自然资源部地质调查系统": 2
+    },
+    "channel_status_counts": {
+      "automation_ready": 16,
+      "official_confirmed": 53
+    },
+    "channels_with_backup": 69,
+    "backup_rate": 1.0,
+    "channels_with_registered_source": 38,
+    "automation_ready_channels": 16,
+    "automation_ready_registered": 16,
+    "automation_ready_enabled_channels": 16,
+    "scope_note": "中国石油大学（北京）地球科学学院就业信息站的组织与官方入口种子矩阵。official_confirmed 只表示官方主体和入口已登记，不表示当前可自动采集；只有 automation_ready 且绑定已注册来源的频道才可进入自动化审查。"
+  },
+  "field_completeness": {
+    "employer": {
+      "complete": 32,
+      "total": 32,
+      "rate": 1.0
+    },
+    "source_url": {
+      "complete": 32,
+      "total": 32,
+      "rate": 1.0
+    },
+    "official_evidence_url": {
+      "complete": 32,
+      "total": 32,
+      "rate": 1.0
+    },
+    "location": {
+      "complete": 30,
+      "total": 32,
+      "rate": 0.9375
+    },
+    "country_or_region": {
+      "complete": 30,
+      "total": 32,
+      "rate": 0.9375
+    },
+    "province": {
+      "complete": 28,
+      "total": 32,
+      "rate": 0.875
+    },
+    "city": {
+      "complete": 14,
+      "total": 32,
+      "rate": 0.4375
+    },
+    "degree_levels": {
+      "complete": 32,
+      "total": 32,
+      "rate": 1.0
+    },
+    "major_tags": {
+      "complete": 31,
+      "total": 32,
+      "rate": 0.9688
+    },
+    "deadline_date": {
+      "complete": 31,
+      "total": 32,
+      "rate": 0.9688
+    }
+  },
+  "location_quality": {
+    "raw_location": {
+      "complete": 30,
+      "total": 32,
+      "rate": 0.9375
+    },
+    "normalized_region": {
+      "complete": 30,
+      "total": 32,
+      "rate": 0.9375
+    },
+    "mainland_province": {
+      "complete": 28,
+      "total": 32,
+      "rate": 0.875
+    },
+    "overseas_or_hong_kong_macao_taiwan": 2
+  },
+  "deadline_quality": {
+    "explicit": {
+      "complete": 31,
+      "total": 32,
+      "rate": 0.9688
+    },
+    "source_policy_or_open_ended": {
+      "complete": 1,
+      "total": 32,
+      "rate": 0.0312
+    },
+    "known_or_policy": {
+      "complete": 32,
+      "total": 32,
+      "rate": 1.0
+    },
+    "unstated": 0
+  },
+  "quality_gate": {
+    "status": "needs_attention",
+    "checks": {
+      "official_evidence_url_complete": true,
+      "major_tags_at_least_90_percent": true,
+      "normalized_location_at_least_90_percent": true,
+      "deadline_explicit_or_policy_at_least_80_percent": true,
+      "explicit_profile_match_exists": true,
+      "source_concentration_below_50_percent": false,
+      "category_concentration_below_70_percent": true,
+      "no_province_marked_verified_during_source_failure": true
+    },
+    "failed_checks": [
+      "source_concentration_below_50_percent"
+    ],
+    "note": "质量门槛用于指导扩源，不会因未达标而伪造或隐藏官方岗位。"
+  },
+  "job_distribution": {
+    "by_province": {
+      "云南": 1,
+      "内蒙古": 1,
+      "北京": 3,
+      "宁夏": 1,
+      "山西": 1,
+      "广西": 5,
+      "未注明": 4,
+      "江苏": 1,
+      "江西": 2,
+      "浙江": 1,
+      "甘肃": 4,
+      "福建": 3,
+      "重庆": 2,
+      "陕西": 1,
+      "青海": 2
+    },
+    "by_country_or_region": {
+      "中国大陆": 28,
+      "海外": 2,
+      "未注明": 2
+    },
+    "by_category": {
+      "管网、炼化与综合能源": 21,
+      "科研院所、高校与博士后": 3,
+      "油气上游业主与研究机构": 3,
+      "矿产资源与矿业": 3,
+      "油气工程技术服务": 1,
+      "能源、工程与地学拓展": 1
+    },
+    "by_source": {
+      "pipechina-career": 21,
+      "cupb-career": 4,
+      "cupb-verified-geoscience-snapshot": 4,
+      "anhui-geology-bureau": 2,
+      "zijin-social-career": 1
+    },
+    "source_concentration": {
+      "top_key": "pipechina-career",
+      "top_count": 21,
+      "top_share": 0.6562,
+      "risk": "high",
+      "top_name": "国家管网集团招聘平台"
+    },
+    "category_concentration": {
+      "top_key": "管网、炼化与综合能源",
+      "top_count": 21,
+      "top_share": 0.6562,
+      "risk": "high"
+    },
+    "category_source_concentration": {
+      "油气上游业主与研究机构": {
+        "top_key": "cupb-career",
+        "top_count": 3,
+        "top_share": 1.0,
+        "risk": "high",
+        "source_count": 1,
+        "top_name": "中国石油大学（北京）就业信息网"
+      },
+      "油气工程技术服务": {
+        "top_key": "cupb-career",
+        "top_count": 1,
+        "top_share": 1.0,
+        "risk": "high",
+        "source_count": 1,
+        "top_name": "中国石油大学（北京）就业信息网"
+      },
+      "管网、炼化与综合能源": {
+        "top_key": "pipechina-career",
+        "top_count": 21,
+        "top_share": 1.0,
+        "risk": "high",
+        "source_count": 1,
+        "top_name": "国家管网集团招聘平台"
+      },
+      "自然资源、地调与地勘": {
+        "top_key": null,
+        "top_count": 0,
+        "top_share": 0.0,
+        "risk": "no_data",
+        "source_count": 0,
+        "top_name": null
+      },
+      "矿产资源与矿业": {
+        "top_key": "cupb-verified-geoscience-snapshot",
+        "top_count": 2,
+        "top_share": 0.6667,
+        "risk": "high",
+        "source_count": 2,
+        "top_name": "中国石油大学（北京）就业网地学岗位核验快照"
+      },
+      "地质工程、环境与基础设施": {
+        "top_key": null,
+        "top_count": 0,
+        "top_share": 0.0,
+        "risk": "no_data",
+        "source_count": 0,
+        "top_name": null
+      },
+      "科研院所、高校与博士后": {
+        "top_key": "anhui-geology-bureau",
+        "top_count": 2,
+        "top_share": 0.6667,
+        "risk": "high",
+        "source_count": 2,
+        "top_name": "安徽省地质矿产勘查局通知公告"
+      },
+      "事业单位与人才引进": {
+        "top_key": null,
+        "top_count": 0,
+        "top_share": 0.0,
+        "risk": "no_data",
+        "source_count": 0,
+        "top_name": null
+      },
+      "公务员与选调": {
+        "top_key": null,
+        "top_count": 0,
+        "top_share": 0.0,
+        "risk": "no_data",
+        "source_count": 0,
+        "top_name": null
+      },
+      "金融与央国企综合机会": {
+        "top_key": null,
+        "top_count": 0,
+        "top_share": 0.0,
+        "risk": "no_data",
+        "source_count": 0,
+        "top_name": null
+      },
+      "能源、工程与地学拓展": {
+        "top_key": "cupb-verified-geoscience-snapshot",
+        "top_count": 1,
+        "top_share": 1.0,
+        "risk": "high",
+        "source_count": 1,
+        "top_name": "中国石油大学（北京）就业网地学岗位核验快照"
+      }
+    }
+  },
+  "profile_match_quality": {
+    "cohort_summary": {
+      "students_with_explicit_match": 100,
+      "students_with_review_only": 0,
+      "students_without_recommendation": 0,
+      "explicit_job_profile_matches": 57,
+      "review_job_profile_matches": 47,
+      "cohort_weighted_explicit_opportunities": 796
+    },
+    "explicit_match_rate": 0.5481,
+    "students_with_explicit_match_rate": 1.0,
+    "profiles": [
+      {
+        "profile_id": "undergraduate-resource-exploration",
+        "label": "本科 · 资源勘查工程",
+        "explicit_matches": 3,
+        "review_matches": 0,
+        "category_coverage": [
+          "油气上游业主与研究机构",
+          "能源、工程与地学拓展"
+        ]
+      },
+      {
+        "profile_id": "master-geology",
+        "label": "硕士 · 地质学",
+        "explicit_matches": 8,
+        "review_matches": 2,
+        "category_coverage": [
+          "油气上游业主与研究机构",
+          "矿产资源与矿业",
+          "科研院所、高校与博士后",
+          "管网、炼化与综合能源"
+        ]
+      },
+      {
+        "profile_id": "master-geological-engineering",
+        "label": "硕士 · 地质工程",
+        "explicit_matches": 18,
+        "review_matches": 2,
+        "category_coverage": [
+          "油气上游业主与研究机构",
+          "油气工程技术服务",
+          "管网、炼化与综合能源"
+        ]
+      },
+      {
+        "profile_id": "master-geological-resources-engineering",
+        "label": "硕士 · 地质资源与地质工程",
+        "explicit_matches": 18,
+        "review_matches": 2,
+        "category_coverage": [
+          "油气上游业主与研究机构",
+          "油气工程技术服务",
+          "科研院所、高校与博士后",
+          "管网、炼化与综合能源"
+        ]
+      },
+      {
+        "profile_id": "doctoral-geology",
+        "label": "博士 · 地质学",
+        "explicit_matches": 4,
+        "review_matches": 6,
+        "category_coverage": [
+          "油气上游业主与研究机构",
+          "矿产资源与矿业",
+          "科研院所、高校与博士后",
+          "管网、炼化与综合能源"
+        ]
+      },
+      {
+        "profile_id": "doctoral-geological-engineering",
+        "label": "博士 · 地质工程",
+        "explicit_matches": 4,
+        "review_matches": 18,
+        "category_coverage": [
+          "油气上游业主与研究机构",
+          "油气工程技术服务",
+          "矿产资源与矿业",
+          "科研院所、高校与博士后",
+          "管网、炼化与综合能源"
+        ]
+      },
+      {
+        "profile_id": "doctoral-geological-resources-engineering",
+        "label": "博士 · 地质资源与地质工程",
+        "explicit_matches": 2,
+        "review_matches": 17,
+        "category_coverage": [
+          "油气上游业主与研究机构",
+          "油气工程技术服务",
+          "科研院所、高校与博士后",
+          "管网、炼化与综合能源"
+        ]
+      }
+    ],
+    "trend": {
+      "available": true,
+      "baseline_snapshot_date": "2026-09-23",
+      "explicit_job_profile_matches_change": -4,
+      "review_job_profile_matches_change": -462,
+      "students_with_explicit_match_change": 0
+    }
+  },
+  "trend_since_last_snapshot": {
+    "available": true,
+    "baseline_snapshot_date": "2026-09-23",
+    "open_jobs_change": -58,
+    "explicit_job_profile_matches_change": -4,
+    "review_job_profile_matches_change": -462,
+    "students_with_explicit_match_change": 0,
+    "successful_scan_sources_change": -3,
+    "sources_with_open_matches_change": -1,
+    "source_top_share_change": 0.3118,
+    "category_top_share_change": 0.134
+  },
+  "snapshot_recorded": "2026-09-24"
+}

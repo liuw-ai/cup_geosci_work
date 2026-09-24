@@ -12,6 +12,7 @@ from job_hub.audit import audit_database
 from job_hub.attachments import (
     AttachmentProcessingError,
     OfficialAttachmentProcessor,
+    build_attachment_field_evidence,
 )
 from job_hub.config import Settings
 from job_hub.contracts import (
@@ -456,6 +457,10 @@ def main() -> None:
     )
     artifact_candidate_parser.add_argument("--artifact-id", type=int)
     artifact_candidate_parser.add_argument("--status")
+    subparsers.add_parser(
+        "repair-attachment-evidence",
+        help="把历史附件候选迁移到统一岗位级证据格式并重算发布门禁",
+    )
 
     args = parser.parse_args()
     if args.command == "worker":
@@ -882,6 +887,51 @@ def main() -> None:
                         discovery_source_id=args.discovery_source_id,
                         province=args.province,
                     )
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if args.command == "repair-attachment-evidence":
+        candidates = database.list_artifact_job_candidates(limit=500)
+        candidate_updates = 0
+        job_updates = 0
+        for candidate in candidates:
+            existing = candidate.get("field_evidence") or {}
+            if not isinstance(existing, dict):
+                existing = {}
+            nested = existing.get("fields")
+            if not isinstance(nested, dict):
+                nested = {}
+            evidence = build_attachment_field_evidence(
+                title=str(candidate.get("title") or ""),
+                major=str(existing.get("专业范围") or nested.get("major") or "") or None,
+                degree=str(existing.get("学历要求") or nested.get("degree") or "") or None,
+                location=str(candidate.get("location") or "").strip() or None,
+                artifact=candidate,
+                row={
+                    "sheet_name": candidate.get("row_sheet_name"),
+                    "row_number": candidate.get("row_number"),
+                },
+                row_text=str(candidate.get("row_text") or ""),
+            )
+            if database.update_artifact_candidate_field_evidence(
+                int(candidate["id"]), evidence
+            ):
+                candidate_updates += 1
+            published_job_id = candidate.get("published_job_id")
+            if published_job_id and database.update_job_field_evidence(
+                int(published_job_id), evidence
+            ):
+                job_updates += 1
+        reindex = pipeline.reindex_jobs()
+        print(
+            json.dumps(
+                {
+                    "candidate_updates": candidate_updates,
+                    "job_updates": job_updates,
+                    "reindex": reindex,
                 },
                 ensure_ascii=False,
                 indent=2,

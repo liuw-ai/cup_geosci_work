@@ -59,6 +59,31 @@ SUPPORTED_SUFFIXES = {
 HTML_MARKERS = (b"<html", b"<!doctype html", b"<head", b"<script")
 
 
+def build_attachment_field_evidence(
+    *,
+    title: str,
+    major: str | None,
+    degree: str | None,
+    location: str | None,
+    artifact: dict[str, object],
+    row: dict[str, object],
+    row_text: str,
+) -> dict[str, str]:
+    """Normalize one official table row to the shared publication schema."""
+    evidence: dict[str, str] = {
+        "evidence_scope": "official_attachment_row",
+        "岗位": title,
+        "专业范围": str(major or "").strip(),
+        "学历要求": str(degree or "").strip(),
+        "table_row": f"{row.get('sheet_name')}!{row.get('row_number')}",
+        "artifact_url": str(artifact.get("artifact_url") or "").strip(),
+        "row_text": row_text[:2000],
+    }
+    if location:
+        evidence["工作地点"] = location
+    return {key: value for key, value in evidence.items() if value}
+
+
 class AttachmentProcessingError(RuntimeError):
     """A compliant attachment could not be downloaded or parsed."""
 
@@ -726,24 +751,15 @@ class OfficialAttachmentProcessor:
             str(artifact.get("metadata", {}).get("category") or "能源、工程与地学拓展"),
             qualification_evidence=True,
         )
-        field_evidence = {
-            "row_locator": f"{row.get('sheet_name')}!{row.get('row_number')}",
-            "artifact_url": artifact["artifact_url"],
-            "row_text": text[:2000],
-            "fields": {
-                key: value
-                for key, value in {
-                    "title": title,
-                    "employer": employer,
-                    "location": location,
-                    "degree": degree,
-                    "major": major,
-                    "published_date": published,
-                    "deadline_date": deadline,
-                }.items()
-                if value
-            },
-        }
+        field_evidence = build_attachment_field_evidence(
+            title=title,
+            major=major,
+            degree=degree,
+            location=location,
+            artifact=artifact,
+            row=row,
+            row_text=text,
+        )
         return {
             "artifact_row_id": row["id"],
             "source_id": artifact["source_id"],

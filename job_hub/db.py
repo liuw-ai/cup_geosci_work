@@ -2056,6 +2056,61 @@ class Database:
             )
         return True
 
+    def update_job_field_evidence(
+        self,
+        job_id: int,
+        field_evidence: dict[str, Any],
+    ) -> bool:
+        """Repair structured official evidence without changing source identity."""
+        payload = json.dumps(field_evidence, ensure_ascii=False)
+        with self.transaction() as connection:
+            current = connection.execute(
+                "SELECT field_evidence_json FROM jobs WHERE id = ?", (job_id,)
+            ).fetchone()
+            if current is None:
+                return False
+            if current["field_evidence_json"] == payload:
+                return False
+            now = utc_now()
+            connection.execute(
+                "UPDATE jobs SET field_evidence_json = ?, updated_at = ? WHERE id = ?",
+                (payload, now, job_id),
+            )
+            connection.execute(
+                """
+                INSERT INTO job_events (job_id, event_type, occurred_at, payload_json)
+                VALUES (?, 'evidence_repaired', ?, ?)
+                """,
+                (job_id, now, json.dumps({"field_evidence": field_evidence}, ensure_ascii=False)),
+            )
+        return True
+
+    def update_artifact_candidate_field_evidence(
+        self,
+        candidate_id: int,
+        field_evidence: dict[str, Any],
+    ) -> bool:
+        """Backfill canonical row evidence while preserving review state."""
+        payload = json.dumps(field_evidence, ensure_ascii=False)
+        with self.transaction() as connection:
+            current = connection.execute(
+                "SELECT field_evidence_json FROM artifact_job_candidates WHERE id = ?",
+                (candidate_id,),
+            ).fetchone()
+            if current is None:
+                return False
+            if current["field_evidence_json"] == payload:
+                return False
+            connection.execute(
+                """
+                UPDATE artifact_job_candidates
+                SET field_evidence_json = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (payload, utc_now(), candidate_id),
+            )
+        return True
+
     def update_job_normalization(
         self,
         job_id: int,

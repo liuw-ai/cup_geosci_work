@@ -9,7 +9,11 @@ from zoneinfo import ZoneInfo
 from flask import Flask, abort, jsonify, render_template, request, url_for
 
 from job_hub.audit import audit_database
-from job_hub.attachments import AttachmentProcessingError, OfficialAttachmentProcessor
+from job_hub.attachments import (
+    AttachmentProcessingError,
+    OfficialAttachmentProcessor,
+    build_attachment_field_evidence,
+)
 from job_hub.config import Settings
 from job_hub.contracts import (
     NATIONAL_RUNTIME_STATUSES,
@@ -995,9 +999,24 @@ def create_app(settings: Settings | None = None) -> Flask:
         source = database.get_source(str(candidate["source_id"]))
         if source is None:
             return jsonify({"error": "Candidate source is no longer registered."}), 409
-        field_evidence = dict(candidate.get("field_evidence") or {})
-        field_evidence["evidence_scope"] = "official_attachment_row"
-        field_evidence.setdefault("岗位", str(candidate["title"]))
+        existing_evidence = candidate.get("field_evidence") or {}
+        if not isinstance(existing_evidence, dict):
+            existing_evidence = {}
+        nested_fields = existing_evidence.get("fields")
+        if not isinstance(nested_fields, dict):
+            nested_fields = {}
+        field_evidence = build_attachment_field_evidence(
+            title=str(candidate["title"]),
+            major=str(existing_evidence.get("专业范围") or nested_fields.get("major") or "") or None,
+            degree=str(existing_evidence.get("学历要求") or nested_fields.get("degree") or "") or None,
+            location=str(candidate.get("location") or "").strip() or None,
+            artifact=candidate,
+            row={
+                "sheet_name": candidate.get("row_sheet_name"),
+                "row_number": candidate.get("row_number"),
+            },
+            row_text=str(candidate.get("row_text") or ""),
+        )
         raw = RawPosting(
             title=str(candidate["title"]),
             employer=str(candidate["employer"]),
