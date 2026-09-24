@@ -44,6 +44,22 @@ def test_official_snapshot_rows_loads_all_verified_rows(tmp_path) -> None:
     assert any(posting.title == "管道工程师（甘肃兰州）" for posting in postings)
 
 
+def test_pipechina_snapshot_builds_job_detail_links_and_search_fallback(tmp_path) -> None:
+    registry = json.loads(
+        (PROJECT_ROOT / "data" / "sources.json").read_text(encoding="utf-8")
+    )
+    source = next(item for item in registry if item["id"] == "pipechina-career")
+    postings = OfficialSourceCollector(make_settings(tmp_path)).collect(source)
+
+    geology = next(posting for posting in postings if posting.title == "地质探测")
+    assert geology.field_evidence["官方岗位编号"] == "54647"
+    assert geology.field_evidence["招聘人数"] == "3"
+    assert "common_board_view_anonymous" in geology.source_url
+    assert "_HB4_eyJpZCI6NTQ2NDcs" in geology.source_url
+    assert "search_key=%E5%9C%B0%E8%B4%A8" in geology.field_evidence["官方地质筛选入口"]
+    assert geology.field_evidence["官方详情链接"] == geology.source_url
+
+
 def test_official_snapshot_rows_preserves_non_matching_rows_for_gate(tmp_path) -> None:
     collector = OfficialSourceCollector(make_settings(tmp_path))
 

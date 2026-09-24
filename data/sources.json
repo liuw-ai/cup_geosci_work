@@ -402,9 +402,14 @@
       "allowed_hosts": ["zhaopin.pipechina.com.cn", "www.pipechina.com.cn"],
       "minimum_relevance": 20,
       "snapshot_path": "data/verified/pipechina-2027-geoscience-20260924.json",
+      "detail_index_path": "data/verified/pipechina-detail-index-20260924.json",
+      "detail_base_url": "https://zhaopin.pipechina.com.cn/recruit",
+      "detail_board_category": "_HB4_NDA%253D",
+      "detail_job_meta_state": "new_portal_campus",
+      "official_search_url": "https://zhaopin.pipechina.com.cn/recruit#/portal_job_list?job_class=_HB4_Y2FtcHVz&search_key=%E5%9C%B0%E8%B4%A8&filter_dict=_HB4_eyJfam9iX2NsYXNzIjoiY2FtcHVzIiwic2VsZWN0X2RlcGFydCI6bnVsbH0%253D",
       "official_evidence_url": "https://www.pipechina.com.cn/front/tzgg/3004720.html",
       "application_url": "https://zhaopin.pipechina.com.cn/recruit",
-      "note": "官方招聘系统为动态 Angular 页面；2026-09-24 浏览器核验到校园招聘地质关键词 24 条。当前以管理员核验的官方页面快照接入，学生端仍逐岗位执行专业、学历和证据门禁。本机 requests/curl_cffi 直连为 TLS EOF，未绕过 robots、验证码或访问控制；服务器直连动态适配器待后续接入。"
+      "note": "官方招聘系统为动态 Angular 页面；2026-09-24 浏览器核验到校园招聘地质关键词 24 条。已逐条核对岗位编号和下属单位编号，生成官方岗位详情链接；学生端仍逐岗位执行专业、学历和证据门禁。官方地质筛选入口作为备用入口。本机 requests/curl_cffi 直连为 TLS EOF，未绕过 robots、验证码或访问控制；服务器直连动态适配器待后续接入。"
     }
   },
   {

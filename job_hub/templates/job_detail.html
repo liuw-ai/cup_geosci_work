@@ -68,6 +68,21 @@
           {% if job.field_evidence.get("工作地点") %}
             <div><dt>地点原文</dt><dd>{{ job.field_evidence.get("工作地点") }}</dd></div>
           {% endif %}
+          {% if job.field_evidence.get("招聘人数") %}
+            <div><dt>招聘人数</dt><dd>{{ job.field_evidence.get("招聘人数") }}</dd></div>
+          {% endif %}
+          {% if job.field_evidence.get("职位类别") %}
+            <div><dt>职位类别</dt><dd>{{ job.field_evidence.get("职位类别") }}</dd></div>
+          {% endif %}
+          {% if job.field_evidence.get("职位序列") %}
+            <div><dt>职位序列</dt><dd>{{ job.field_evidence.get("职位序列") }}</dd></div>
+          {% endif %}
+          {% if job.field_evidence.get("职位下线时间") %}
+            <div><dt>官方下线时间</dt><dd>{{ job.field_evidence.get("职位下线时间") }}</dd></div>
+          {% endif %}
+          {% if job.field_evidence.get("官方岗位编号") %}
+            <div><dt>官方岗位编号</dt><dd>{{ job.field_evidence.get("官方岗位编号") }}</dd></div>
+          {% endif %}
           {% if job.field_evidence.get("table_row") %}
             <div><dt>证据位置</dt><dd>官方职位表第 {{ job.field_evidence.get("table_row") }} 行</dd></div>
           {% endif %}
@@ -99,7 +114,10 @@
         <a class="action-link full-width" href="{{ job.application_url or 'https://zhaopin.cnpc.com.cn/web/recruitInfolist.html' }}" target="_blank" rel="noopener noreferrer">打开中国石油官方招聘入口</a>
         <a class="secondary-link" href="{{ job.source_url }}" target="_blank" rel="noopener noreferrer">尝试打开岗位详情页</a>
       {% else %}
-        <a class="action-link full-width" href="{{ job.source_url }}" target="_blank" rel="noopener noreferrer">打开官方原文</a>
+        <a class="action-link full-width" href="{{ job.source_url }}" target="_blank" rel="noopener noreferrer">{% if job.source_id == "pipechina-career" %}打开官方岗位详情{% else %}打开官方原文{% endif %}</a>
+      {% endif %}
+      {% if job.field_evidence.get("官方地质筛选入口") %}
+        <a class="secondary-link" href="{{ job.field_evidence.get('官方地质筛选入口') }}" target="_blank" rel="noopener noreferrer">打开官方“地质”筛选结果</a>
       {% endif %}
       {% if job.application_url and job.application_url != job.source_url %}
         {% if job.source_id != "cnpc-career" or job.field_evidence.get("官方详情状态") != "official_detail_api_degraded" %}

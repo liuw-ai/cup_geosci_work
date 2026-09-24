@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from html import unescape
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs, urlencode, urljoin, urlparse
+from urllib.parse import parse_qs, quote, urlencode, urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 
 import requests
@@ -372,6 +372,8 @@ class OfficialSourceCollector:
         if not isinstance(payload, list) or not payload:
             raise SourceCollectionError("official snapshot must be a non-empty JSON list")
 
+        detail_index = self._load_snapshot_detail_index(source)
+
         postings: list[RawPosting] = []
         allowed_hosts = {
             str(host).strip().lower()
@@ -419,6 +421,21 @@ class OfficialSourceCollector:
                 str(key): str(value)
                 for key, value in field_evidence.items()
             }
+            detail = detail_index.get(str(item.get("external_id") or "").strip())
+            if detail:
+                source_url = self._build_official_detail_url(source, detail)
+                detail_hostname = (urlparse(source_url).hostname or "").lower()
+                if not source_url.startswith(("http://", "https://")) or (
+                    allowed_hosts and detail_hostname not in allowed_hosts
+                ):
+                    raise SourceCollectionError(
+                        f"official snapshot row {index} generated detail URL is not allowlisted"
+                    )
+                field_evidence.setdefault("官方岗位编号", str(detail["job_id"]))
+                field_evidence.setdefault("官方详情链接", source_url)
+            search_url = str(config.get("official_search_url") or "").strip()
+            if search_url:
+                field_evidence.setdefault("官方地质筛选入口", search_url)
             # CNPC currently renders an empty detail shell when its public
             # ``showN`` response omits ``recruitInfoObj``. Preserve the
             # verified row evidence, but expose the opaque detail identifier
@@ -454,6 +471,75 @@ class OfficialSourceCollector:
                 )
             )
         return postings
+
+    def _load_snapshot_detail_index(
+        self, source: dict[str, Any]
+    ) -> dict[str, dict[str, Any]]:
+        """Load optional, administrator-verified detail identifiers for snapshots."""
+        relative_path = str(source.get("config", {}).get("detail_index_path") or "").strip()
+        if not relative_path:
+            return {}
+        path = Path(__file__).resolve().parent.parent / relative_path
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError as error:
+            raise SourceCollectionError(
+                f"official detail index is missing: {relative_path}"
+            ) from error
+        except (OSError, json.JSONDecodeError) as error:
+            raise SourceCollectionError(
+                f"official detail index cannot be read: {relative_path}"
+            ) from error
+        if not isinstance(payload, list):
+            raise SourceCollectionError("official detail index must be a JSON list")
+        result: dict[str, dict[str, Any]] = {}
+        for index, item in enumerate(payload, start=1):
+            if not isinstance(item, dict):
+                raise SourceCollectionError(
+                    f"official detail index row {index} must be an object"
+                )
+            external_id = str(item.get("external_id") or "").strip()
+            job_id = str(item.get("job_id") or "").strip()
+            department_id = str(item.get("department_id") or "").strip()
+            if not external_id or not job_id or not department_id:
+                raise SourceCollectionError(
+                    f"official detail index row {index} is missing an identifier"
+                )
+            result[external_id] = {
+                "job_id": job_id,
+                "department_id": department_id,
+            }
+        return result
+
+    @staticmethod
+    def _build_official_detail_url(
+        source: dict[str, Any], detail: dict[str, Any]
+    ) -> str:
+        """Build a PipeChina public detail route from verified identifiers."""
+        config = source.get("config", {})
+        base_url = str(
+            config.get("detail_base_url")
+            or "https://zhaopin.pipechina.com.cn/recruit"
+        ).rstrip("/")
+        board_category = str(config.get("detail_board_category") or "_HB4_NDA%253D")
+        params = {
+            "id": int(detail["job_id"]),
+            "contract_unit": None,
+            "job_meta_state": str(
+                config.get("detail_job_meta_state") or "new_portal_campus"
+            ),
+            "depart_id": int(detail["department_id"]),
+        }
+        encoded = base64.b64encode(
+            json.dumps(params, ensure_ascii=False, separators=(",", ":")).encode(
+                "utf-8"
+            )
+        ).decode("ascii")
+        encoded_param = quote(quote(encoded, safe=""), safe="")
+        return (
+            f"{base_url}#/common_board_view_anonymous?board_category="
+            f"{board_category}&params=_HB4_{encoded_param}"
+        )
 
     def _collect_sinopec_spa_rows(
         self, source: dict[str, Any]
