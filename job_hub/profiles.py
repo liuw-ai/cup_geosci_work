@@ -246,6 +246,18 @@ def evaluate_student_publication(job: dict[str, Any]) -> PublicationDecision:
             matched_profile_ids=(),
         )
 
+    # Government notices are often announcement-level pages with several
+    # institutions and rows.  A matching major without a row-level location
+    # is not actionable for students and must stay in review until the
+    # position table or detail block supplies it.
+    if _government_record_requires_location(job) and not _location_evidence_text(job):
+        return PublicationDecision(
+            status=PUBLICATION_PENDING_EVIDENCE,
+            label="待补岗位地点",
+            reason="事业单位/公务员岗位缺少与当前岗位行绑定的工作地点证据。",
+            matched_profile_ids=(),
+        )
+
     required_experience = _student_blocking_work_experience(qualification_text)
     if required_experience:
         return PublicationDecision(
@@ -454,6 +466,34 @@ def _has_job_level_evidence(job: dict[str, Any]) -> bool:
         or normalized_evidence in normalized_job
         or normalized_job in normalized_evidence
     )
+
+
+def _government_record_requires_location(job: dict[str, Any]) -> bool:
+    source_id = str(job.get("source_id") or "").casefold()
+    category = str(job.get("category") or "").casefold()
+    markers = (
+        "事业单位",
+        "公务员",
+        "自然资源",
+        "地调与地勘",
+        "geology-bureau",
+        "hrss",
+        "civil-service",
+        "public-institution",
+        "mnr-",
+        "cgs-",
+    )
+    return any(marker.casefold() in source_id or marker.casefold() in category for marker in markers)
+
+
+def _location_evidence_text(job: dict[str, Any]) -> str:
+    values = [job.get("location"), job.get("province"), job.get("country_or_region")]
+    field_evidence = job.get("field_evidence") or {}
+    if isinstance(field_evidence, dict):
+        for key, value in field_evidence.items():
+            if str(key).casefold() in {"工作地点", "地点", "location", "work location"}:
+                values.append(value)
+    return clean_text(" ".join(str(value or "") for value in values))
 
 
 def _evidence_title(field_evidence: dict[str, Any]) -> str:

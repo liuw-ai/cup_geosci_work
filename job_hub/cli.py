@@ -29,6 +29,10 @@ from job_hub.contracts import (
 )
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
+from job_hub.government_positions import (
+    government_position_quality_report,
+    load_position_registry,
+)
 from job_hub.domestic_expansion import (
     QUEUE_STATUSES,
     domestic_expansion_rows,
@@ -326,6 +330,25 @@ def main() -> None:
         help="可选：按核验阶段筛选",
     )
     source_validation_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整 JSON 写入指定文件",
+    )
+    government_position_parser = subparsers.add_parser(
+        "government-position-audit",
+        help="审计事业编与公务员职位表的官方证据、有效期和专业匹配",
+    )
+    government_position_parser.add_argument(
+        "--path",
+        type=Path,
+        default=Path("data/government_position_registry.json"),
+        help="政府职位表证据台账 JSON",
+    )
+    government_position_parser.add_argument(
+        "--today",
+        help="覆盖审计日期，格式 YYYY-MM-DD",
+    )
+    government_position_parser.add_argument(
         "--output",
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
@@ -835,6 +858,20 @@ def main() -> None:
             args.output.write_text(
                 json.dumps(result, ensure_ascii=False, indent=2),
                 encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "government-position-audit":
+        try:
+            registry = load_position_registry(args.path)
+            result = government_position_quality_report(registry, today=args.today)
+        except (OSError, ValueError) as error:
+            print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return

@@ -196,6 +196,25 @@ def test_publication_gate_accepts_explicit_target_major() -> None:
     assert "master-geological-engineering" in decision.matched_profile_ids
 
 
+def test_government_position_without_row_location_stays_private() -> None:
+    decision = evaluate_student_publication(
+        job(
+            source_id="anhui-geology-bureau",
+            category="事业单位与人才引进",
+            title="专业技术岗位",
+            field_evidence={
+                "evidence_scope": "official_attachment_row",
+                "岗位": "专业技术岗位",
+                "专业范围": "地质学、地质资源与地质工程",
+                "学历要求": "博士研究生",
+            },
+        )
+    )
+
+    assert decision.status == "pending_evidence"
+    assert decision.label == "待补岗位地点"
+
+
 def test_publication_gate_rejects_experienced_role_for_current_students() -> None:
     decision = evaluate_student_publication(
         job(

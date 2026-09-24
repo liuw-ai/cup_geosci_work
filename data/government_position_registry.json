@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "as_of": "2026-09-25",
+  "description": "事业单位与公务员职位表的官方证据台账。records 只保存逐岗位证据；source_assessments 保存尚未形成岗位行的年度入口状态。",
+  "source_assessments": [
+    {
+      "source_id": "anhui-geology-bureau",
+      "position_type": "public_institution",
+      "province": "安徽",
+      "status": "verified_open_sample",
+      "official_notice_url": "https://dkj.ah.gov.cn/xwzx/tzgg/40788529.html",
+      "official_attachment_url": "https://dkj.ah.gov.cn/group3/M00/14/5E/wKg86mnx3JSAe_TTAAA0PEnJC-Q385.xls",
+      "deadline_date": "2026-10-31",
+      "note": "公告与岗位表均为安徽省地质矿产勘查局官网内容；岗位行仍需逐条补齐地点证据后才可自动发布。"
+    },
+    {
+      "source_id": "beijing-hrss",
+      "position_type": "public_institution",
+      "province": "北京",
+      "status": "verified_source_fixture",
+      "official_notice_url": "https://rsj.beijing.gov.cn/xxgk/gkzp/202609/t20260917_4867574.html",
+      "official_attachment_url": "",
+      "deadline_date": "2026-11-15",
+      "note": "已验证公告与附件入口；当前夹具是高校教师公告，尚未证明存在本院目标专业岗位。"
+    },
+    {
+      "source_id": "national-civil-service",
+      "position_type": "civil_service",
+      "province": "全国",
+      "status": "manual_review_required",
+      "official_notice_url": "https://bm.scs.gov.cn/",
+      "official_attachment_url": "https://bm.scs.gov.cn/",
+      "deadline_date": "",
+      "note": "国家公务员局年度职位表需要以当年正式公告和 PDF/Excel 附件为准；当前未确认 2027 年职位表已发布，不能把历史职位表当作在招。"
+    }
+  ],
+  "records": [
+    {
+      "id": "anhui-2026-2026113",
+      "source_id": "anhui-geology-bureau",
+      "position_type": "public_institution",
+      "province": "安徽",
+      "employer": "安徽工业经济职业技术学院",
+      "title": "专业技术岗位（地质资源与地质工程等）",
+      "major_requirement": "地质学、地质资源与地质工程、地球物理学",
+      "degree_requirement": "博士研究生",
+      "location": "",
+      "headcount": 1,
+      "deadline_date": "2026-10-31",
+      "official_notice_url": "https://dkj.ah.gov.cn/xwzx/tzgg/40788529.html",
+      "official_attachment_url": "https://dkj.ah.gov.cn/group3/M00/14/5E/wKg86mnx3JSAe_TTAAA0PEnJC-Q385.xls",
+      "evidence_locator": "2026年高层次人才招聘岗位汇总表!17",
+      "record_status": "manual_review_required",
+      "match_status": "explicit_match",
+      "note": "专业和学历在官方岗位行中明确；岗位行未单列工作地点，补齐地点证据前不得进入学生端。"
+    },
+    {
+      "id": "anhui-2026-2026120",
+      "source_id": "anhui-geology-bureau",
+      "position_type": "public_institution",
+      "province": "安徽",
+      "employer": "安徽工业经济职业技术学院",
+      "title": "专业技术岗位（地质学）",
+      "major_requirement": "地质学",
+      "degree_requirement": "博士研究生",
+      "location": "",
+      "headcount": 1,
+      "deadline_date": "2026-10-31",
+      "official_notice_url": "https://dkj.ah.gov.cn/xwzx/tzgg/40788529.html",
+      "official_attachment_url": "https://dkj.ah.gov.cn/group3/M00/14/5E/wKg86mnx3JSAe_TTAAA0PEnJC-Q385.xls",
+      "evidence_locator": "2026年高层次人才招聘岗位汇总表!24",
+      "record_status": "manual_review_required",
+      "match_status": "explicit_match",
+      "note": "专业和学历在官方岗位行中明确；岗位行未单列工作地点，补齐地点证据前不得进入学生端。"
+    }
+  ]
+}
