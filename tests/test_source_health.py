@@ -45,6 +45,9 @@ def test_source_health_accepts_public_entry_when_robots_is_absent(tmp_path) -> N
     assert result.status == "source_active"
     assert result.successful is True
     assert result.status_code == 200
+    assert result.checks["robots"]["status"] == "not_found_assumed_allowed"
+    assert result.checks["entry"]["status"] == "http_ok"
+    assert result.checks["transport"]["transport_mode"] == "environment"
 
 
 def test_source_health_stops_when_robots_disallows_access(tmp_path) -> None:
@@ -64,6 +67,7 @@ def test_source_health_stops_when_robots_disallows_access(tmp_path) -> None:
 
     assert result.status == "source_blocked"
     assert result.successful is False
+    assert result.checks["robots"]["status"] == "disallowed"
 
 
 def test_source_health_checks_registered_listing_not_generic_homepage(tmp_path) -> None:

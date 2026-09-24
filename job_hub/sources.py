@@ -9,7 +9,7 @@ import re
 import time
 import xml.etree.ElementTree as ET
 import zlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from html import unescape
 from pathlib import Path
@@ -45,6 +45,7 @@ from job_hub.transport import (
     configure_session,
     create_session,
     request_exception_types,
+    transport_metadata,
 )
 from job_hub.browser_capture import BrowserCaptureError, load_browser_capture
 from job_hub.sinopec import load_sinopec_capture
@@ -91,6 +92,7 @@ class SourceHealthResult:
     detail: str
     status_code: int | None = None
     successful: bool = False
+    checks: dict[str, Any] = field(default_factory=dict)
 
 
 class SourceHealthProbe:
@@ -129,10 +131,17 @@ class SourceHealthProbe:
         )
 
     def check(self, source: dict[str, Any]) -> SourceHealthResult:
+        checks: dict[str, Any] = {
+            "transport": {
+                **transport_metadata(self.settings.http_transport_mode),
+                "http_client": self.settings.http_client,
+            }
+        }
         if source.get("source_type") == "manual":
             return SourceHealthResult(
                 "unknown",
                 "人工补录来源不执行网络探测。",
+                checks=checks | {"entry": {"status": "skipped", "reason": "manual_source"}},
             )
         entry_url = self._entry_url(source)
         parsed = urlparse(entry_url)
@@ -146,25 +155,47 @@ class SourceHealthProbe:
                 allow_redirects=True,
             )
         except REQUEST_ERRORS as error:
-            return SourceHealthResult("source_degraded", f"robots.txt 无法核验：{error}")
+            checks["robots"] = {
+                "status": "transport_error",
+                "url": robots_url,
+                "error_class": error.__class__.__name__,
+                "error": str(error),
+                "attempts": self.request_policy.last_outcome.attempts,
+            }
+            return SourceHealthResult(
+                "source_degraded", f"robots.txt 无法核验：{error}", checks=checks
+            )
 
         if robots_response.status_code == 404:
             robots_allowed = True
+            checks["robots"] = {"status": "not_found_assumed_allowed", "status_code": 404, "url": robots_url}
         elif robots_response.ok:
             parser = RobotFileParser()
             parser.parse(robots_response.text.splitlines())
             robots_allowed = parser.can_fetch(USER_AGENT, entry_url)
+            checks["robots"] = {
+                "status": "allowed" if robots_allowed else "disallowed",
+                "status_code": robots_response.status_code,
+                "url": robots_url,
+            }
         else:
+            checks["robots"] = {
+                "status": "http_error",
+                "status_code": robots_response.status_code,
+                "url": robots_url,
+            }
             return SourceHealthResult(
                 "source_degraded",
                 f"robots.txt 返回 HTTP {robots_response.status_code}，未访问来源页面。",
                 robots_response.status_code,
+                checks=checks,
             )
         if not robots_allowed:
             return SourceHealthResult(
                 "source_blocked",
                 "robots.txt 不允许本服务访问公开入口。",
                 robots_response.status_code,
+                checks=checks,
             )
 
         try:
@@ -175,18 +206,35 @@ class SourceHealthProbe:
                 allow_redirects=True,
             )
         except REQUEST_ERRORS as error:
-            return SourceHealthResult("source_error", f"公开入口请求失败：{error}")
+            checks["entry"] = {
+                "status": "transport_error",
+                "url": entry_url,
+                "error_class": error.__class__.__name__,
+                "error": str(error),
+                "attempts": self.request_policy.last_outcome.attempts,
+            }
+            return SourceHealthResult(
+                "source_error", f"公开入口请求失败：{error}", checks=checks
+            )
+        checks["entry"] = {
+            "status": "http_ok" if response.ok else "http_error",
+            "status_code": response.status_code,
+            "url": entry_url,
+            "resolved_url": str(getattr(response, "url", "") or entry_url),
+        }
         if response.ok and self._is_soft_not_found(response):
             return SourceHealthResult(
                 "source_degraded",
                 "公开入口返回了站点的未找到页面，不能作为可用来源。",
                 response.status_code,
+                checks=checks,
             )
         if response.ok and not self._preserves_entry_path(entry_url, response.url, source):
             return SourceHealthResult(
                 "source_degraded",
                 "公开入口重定向后丢失了登记的栏目路径，不能作为可用来源。",
                 response.status_code,
+                checks=checks,
             )
         if response.ok:
             return SourceHealthResult(
@@ -194,6 +242,7 @@ class SourceHealthProbe:
                 "robots.txt 允许且登记的公开入口可访问；尚未代表有匹配岗位。",
                 response.status_code,
                 successful=True,
+                checks=checks,
             )
         if response.status_code in {401, 403, 412, 429}:
             status = "source_blocked"
@@ -205,6 +254,7 @@ class SourceHealthProbe:
             status,
             f"公开入口返回 HTTP {response.status_code}。",
             response.status_code,
+            checks=checks,
         )
 
     @staticmethod

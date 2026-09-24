@@ -429,6 +429,9 @@ def main() -> None:
         action="store_true",
         help="明确检查停用来源；未提供时只检查已启用来源",
     )
+    source_health_parser.add_argument(
+        "--output", type=Path, help="将含传输、robots 和入口检查的诊断 JSON 写入文件"
+    )
     source_tasks_parser = subparsers.add_parser(
         "source-tasks",
         help="查看来源队列的待执行、失败、阻断和租约状态",
@@ -1017,15 +1020,16 @@ def main() -> None:
                     "status": result.status,
                     "status_code": result.status_code,
                     "detail": result.detail,
+                    "checks": result.checks,
                 }
             )
-        print(
-            json.dumps(
-                {"checked": len(results), "sources": results},
-                ensure_ascii=False,
-                indent=2,
+        payload = {"checked": len(results), "sources": results}
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
             )
-        )
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
         return
     if args.command == "sync":
         summary = pipeline.sync_all()
