@@ -287,7 +287,7 @@
     "source_type": "sinopec_spa_rows",
     "category": "油气上游业主与研究机构",
     "source_tier": "A",
-    "enabled": false,
+    "enabled": true,
     "config": {
       "employer_hint": "中国石油化工集团有限公司",
       "allowed_hosts": ["job.sinopec.com"],
@@ -299,7 +299,7 @@
       "candidate_enterprise_total": 35,
       "max_items": 500,
       "require_complete_manifest": true,
-      "note": "2026-09-24 浏览器核验确认官方 SPA 分页显示 132 个单位，关键词“地质”筛选 35 个候选单位；当前快照已保存 132 个单位清单、35 个详情页和 348 条岗位行。来源仍保持禁用，待管理员审计岗位专业匹配和运行证据后启用。"
+      "note": "2026-09-24 浏览器核验确认官方 SPA 分页显示 132 个单位，关键词“地质”筛选 35 个候选单位；快照已保存 132 个单位清单、35 个详情页和 348 条岗位行。已完成岗位级专业/学历门禁审计，正式启用快照来源；学生端只展示明确匹配岗位，待后续公开只读接口验证后替换为自动刷新。"
     }
   },
   {

@@ -130,7 +130,7 @@ def test_sinopec_capture_admin_endpoint_is_private_and_reports_complete_manifest
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["enabled"] is False
+    assert payload["enabled"] is True
     assert payload["summary"]["enterprise_total"] == 132
     assert payload["summary"]["enterprise_captured"] == 132
     assert payload["summary"]["candidate_enterprise_captured"] == 35

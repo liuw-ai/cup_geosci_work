@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from job_hub.cli import main as cli_main
+from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
 from job_hub.sinopec import SinopecCaptureError, load_sinopec_capture, sinopec_capture_summary
 from job_hub.sources import OfficialSourceCollector
@@ -116,6 +117,50 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
         for row in rows
         if row["publication_status"] != "student_eligible"
     )
+
+
+def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
+    """A promoted source stores the full audit set but exposes only 69 rows."""
+    settings = replace(make_settings(tmp_path), max_source_items=500)
+    database = Database(settings.database_path)
+    database.initialize()
+    source = sinopec_source()
+    source["enabled"] = True
+    source["config"] = {
+        **source["config"],
+        "require_complete_manifest": True,
+    }
+    database.upsert_source(source)
+    pipeline = JobPipeline(settings, database=database)
+
+    result = pipeline.sync_source(source)
+    assert result.status == "finished"
+    assert result.discovered == 348
+    assert result.open_matches == 69
+
+    public_rows, public_count = database.list_jobs(page_size=None)
+    audit_rows, audit_count = database.list_jobs(
+        page_size=None,
+        student_visible=False,
+        only_open=False,
+    )
+    source_audit_rows = [
+        row for row in audit_rows if row["source_id"] == "sinopec-career"
+    ]
+
+    assert public_count == 69
+    assert len(public_rows) == 69
+    assert audit_count == 348
+    assert len(source_audit_rows) == 348
+    assert all(
+        row["publication_status"] in {"student_eligible", "unrestricted_eligible"}
+        for row in public_rows
+    )
+    assert {row["publication_status"] for row in source_audit_rows} == {
+        "student_eligible",
+        "pending_evidence",
+        "out_of_scope",
+    }
 
 
 def test_sinopec_capture_rejects_external_evidence(tmp_path: Path) -> None:
