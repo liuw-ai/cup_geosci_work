@@ -167,9 +167,21 @@ MAJOR_EVIDENCE_KEYS = frozenset(
         "专业要求",
         "需求专业",
         "专业",
+        "首选专业",
+        "所学专业",
+        "专业背景",
+        "专业类别",
+        "招聘专业",
+        "岗位要求",
+        "任职要求",
+        "资格条件",
+        "应聘条件",
         "major",
         "majors",
         "major_requirement",
+        "job requirements",
+        "job requirement",
+        "qualifications",
     }
 )
 

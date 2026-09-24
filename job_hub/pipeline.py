@@ -19,6 +19,7 @@ from job_hub.matching import (
     stable_hash,
     structured_evidence_text,
 )
+from job_hub.profiles import evaluate_student_publication
 from job_hub.sources import (
     OfficialSourceCollector,
     RawPosting,
@@ -185,7 +186,11 @@ class JobPipeline:
                 if normalized["relevance_score"] < minimum_score:
                     result.skipped += 1
                     continue
-                if normalized["status"] == "open":
+                if (
+                    normalized["status"] == "open"
+                    and normalized["publication_status"]
+                    in {"student_eligible", "unrestricted_eligible"}
+                ):
                     result.open_matches += 1
                 _, outcome = self.database.save_job(normalized)
                 if outcome == "created":
@@ -318,7 +323,7 @@ class JobPipeline:
             posting.text,
             posting.deadline_date or "",
         )
-        return {
+        normalized = {
             "source_id": source["id"],
             "external_id": posting.external_id,
             "fingerprint": fingerprint,
@@ -361,6 +366,10 @@ class JobPipeline:
             "relevance_band": relevance_band,
             "status": status,
         }
+        publication = evaluate_student_publication(normalized)
+        normalized["publication_status"] = publication.status
+        normalized["publication_basis"] = publication.as_dict()
+        return normalized
 
     @staticmethod
     def _skipped_source_health_status(detail: str) -> str:
@@ -400,7 +409,11 @@ class JobPipeline:
         only when a derived value actually changes.
         """
         sources = {source["id"]: source for source in self.database.list_sources()}
-        jobs, _ = self.database.list_jobs(page_size=None, only_open=False)
+        jobs, _ = self.database.list_jobs(
+            page_size=None,
+            only_open=False,
+            student_visible=False,
+        )
         result = {
             "checked": len(jobs),
             "reclassified": 0,
@@ -460,6 +473,16 @@ class JobPipeline:
                 source=source or {"config": {}},
                 today=datetime.now(self.timezone).date(),
             )
+            normalized = {
+                **job,
+                "category": category,
+                "degree_levels": degree_levels,
+                "major_tags": major_tags,
+                "relevance_score": relevance_score,
+                "relevance_band": relevance_band,
+                "status": status,
+            }
+            publication = evaluate_student_publication(normalized)
             changed = self.database.update_derived_job_fields(
                 int(job["id"]),
                 category=category,
@@ -468,6 +491,8 @@ class JobPipeline:
                 relevance_score=relevance_score,
                 relevance_band=relevance_band,
                 status=status,
+                publication_status=publication.status,
+                publication_basis=publication.as_dict(),
             )
             existing_location = str(job.get("location") or "").strip() or None
             location_text = existing_location or extract_location_hint(

@@ -52,7 +52,12 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
         published_date="2026-09-17",
         deadline_date="2026-12-20",
         location="北京",
-        field_evidence={"专业范围": "地质工程", "学历要求": "硕士"},
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程师招聘",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+        },
     )
     job_id, _ = database.save_job(
         pipeline.normalize_posting(posting, database.get_source("official-test-source"))
@@ -233,6 +238,12 @@ def test_admin_publish_refuses_data_that_fails_the_same_audit_as_worker(tmp_path
         published_date="2026-09-17",
         deadline_date="2026-12-20",
         location="北京",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程师招聘",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+        },
     )
     job_id, _ = database.save_job(
         pipeline.normalize_posting(posting, database.get_source("official-test-source"))
@@ -250,3 +261,37 @@ def test_admin_publish_refuses_data_that_fails_the_same_audit_as_worker(tmp_path
 
     assert response.status_code == 409
     assert response.get_json()["audit"]["ok"] is False
+
+
+def test_student_endpoints_never_expose_out_of_scope_official_job(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    pipeline = app.extensions["pipeline"]
+    database.upsert_source(source())
+    posting = RawPosting(
+        title="炼化设备技术",
+        employer="中国石油某炼化分公司",
+        source_url="https://careers.example.edu.cn/jobs/refinery-equipment",
+        application_url=None,
+        text="官方招聘岗位。",
+        summary="炼化设备岗位。",
+        published_date="2026-09-20",
+        deadline_date="2026-12-31",
+        location="呼和浩特",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "炼化设备技术",
+            "专业范围": "过程装备与控制工程、机械工程、电气工程及其自动化",
+            "学历要求": "本科、硕士研究生",
+        },
+    )
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+    )
+
+    client = app.test_client()
+    assert client.get("/api/jobs").get_json()["total"] == 0
+    assert "炼化设备技术" not in client.get("/jobs").get_data(as_text=True)
+    assert client.get(f"/jobs/{job_id}").status_code == 404
+    assert database.find_job(job_id)["publication_status"] == "out_of_scope"

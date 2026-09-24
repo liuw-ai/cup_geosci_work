@@ -543,6 +543,16 @@ small {
   background: #edf0ef;
 }
 
+.publication-student_eligible {
+  color: #175640;
+  background: #e1f1e8;
+}
+
+.publication-unrestricted_eligible {
+  color: #7a4a13;
+  background: var(--amber-soft);
+}
+
 .job-card h3 {
   margin: 15px 0 6px;
   overflow-wrap: anywhere;

@@ -59,6 +59,14 @@ def test_bgp_structured_page_preserves_official_fields_and_evidence(
     assert "Geophysics" in (posting.match_text or "")
     assert "Bachelor's degree" in posting.text
     assert posting.external_id and "#opening-1-" in posting.external_id
+    assert posting.field_evidence is not None
+    assert posting.field_evidence["evidence_scope"] == "official_detail_block"
+    assert posting.field_evidence["岗位"] == posting.title
+    assert "Bachelor's degree" in posting.field_evidence["岗位要求"]
+    assert (
+        posting.field_evidence["学历要求"]
+        == posting.field_evidence["岗位要求"]
+    )
 
 
 def test_structured_page_rejects_title_content_mismatch(tmp_path, monkeypatch) -> None:

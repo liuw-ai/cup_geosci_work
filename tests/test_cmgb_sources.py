@@ -88,6 +88,12 @@ def test_cmgb_inner_mongolia_xlsx_publishes_only_hash_locked_reviewed_rows(
     assert all("内蒙古地质勘查院" in posting.employer for posting in postings)
     assert all(posting.published_date == "2026-08-04" for posting in postings)
     assert all(posting.deadline_date is None for posting in postings)
+    assert all(
+        posting.field_evidence
+        and posting.field_evidence["evidence_scope"] == "official_attachment_row"
+        and posting.field_evidence["岗位"] == posting.title
+        for posting in postings
+    )
 
 
 def test_cmgb_inner_mongolia_xlsx_fails_closed_when_official_file_changes(

@@ -88,6 +88,8 @@ def test_coverage_distinguishes_successful_no_match_from_source_failure(tmp_path
             deadline_date="2026-12-31",
             location="山东省东营市",
             field_evidence={
+                "evidence_scope": "official_html_table_row",
+                "岗位": "东营地质工程师招聘",
                 "专业范围": "资源勘查工程本科、地质工程硕士",
                 "学历要求": "本科、硕士",
             },

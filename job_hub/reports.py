@@ -37,6 +37,8 @@ def job_card(job: dict[str, Any]) -> dict[str, Any]:
         "field_evidence": job.get("field_evidence", {}),
         "relevance_score": job["relevance_score"],
         "relevance_band": job["relevance_band"],
+        "publication_status": job.get("publication_status"),
+        "publication_basis": job.get("publication_basis", {}),
         "source_name": job["source_name"],
         "source_url": job["source_url"],
         "application_url": job.get("application_url"),
@@ -77,10 +79,12 @@ def publish_daily_report(
     database: Database,
     settings: Settings,
     report_date: date | None = None,
+    *,
+    force_refresh: bool = False,
 ) -> dict[str, Any]:
     target_date = report_date or local_today(settings)
     existing = database.get_daily_report(target_date.isoformat())
-    if existing is not None:
+    if existing is not None and not force_refresh:
         return existing
     report = build_daily_report(database, settings, target_date)
     database.save_daily_report(report["report_date"], report)

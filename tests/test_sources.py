@@ -276,6 +276,84 @@ def test_cupb_adapter_uses_structured_job_table_as_matching_evidence(tmp_path, m
     assert "单位长期从事" not in (postings[0].match_text or "")
 
 
+def test_cupb_single_role_table_keeps_row_level_evidence(tmp_path) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "cupb-career",
+        "name": "中国石油大学（北京）就业信息网",
+        "publisher": "中国石油大学（北京）",
+        "homepage_url": "https://career.cup.edu.cn/",
+        "source_type": "cupb_career",
+        "category": "能源、工程与地学拓展",
+        "source_tier": "B",
+        "config": {"request_interval_seconds": 0},
+    }
+    document = """
+    <h1>某单位校园招聘公告</h1>
+    <main class="zp-details">
+      <table>
+        <tr><td>岗位</td><td>地质工程师</td></tr>
+        <tr><td>专业要求</td><td>地质工程</td></tr>
+        <tr><td>学历要求</td><td>本科或以上学历</td></tr>
+        <tr><td>工作地点</td><td>北京</td></tr>
+      </table>
+    </main>
+    """
+
+    postings = collector._extract_cupb_details(
+        document,
+        "https://career.cup.edu.cn/campus/view/id/1001",
+        source,
+        "某单位校园招聘公告",
+    )
+
+    assert len(postings) == 1
+    assert postings[0].title == "地质工程师"
+    assert postings[0].field_evidence["evidence_scope"] == "official_html_table_row"
+    assert postings[0].field_evidence["岗位"] == postings[0].title
+    assert postings[0].field_evidence["专业范围"] == "地质工程"
+
+
+def test_cupb_parallel_role_columns_are_never_merged(tmp_path) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "cupb-career",
+        "name": "中国石油大学（北京）就业信息网",
+        "publisher": "中国石油大学（北京）",
+        "homepage_url": "https://career.cup.edu.cn/",
+        "source_type": "cupb_career",
+        "category": "能源、工程与地学拓展",
+        "source_tier": "B",
+        "config": {"request_interval_seconds": 0},
+    }
+    document = """
+    <h1>某单位校园招聘公告</h1>
+    <main class="zp-details">
+      <table>
+        <tr><td>岗位</td><td>物探地质研发岗</td><td>软件开发与人工智能岗</td></tr>
+        <tr><td>专业范围</td><td>地质工程、地质资源与地质工程</td><td>计算机科学与技术、人工智能</td></tr>
+        <tr><td>面向对象</td><td colspan="2">硕士、博士</td></tr>
+        <tr><td>工作地点</td><td colspan="2">北京、成都</td></tr>
+      </table>
+    </main>
+    """
+
+    postings = collector._extract_cupb_details(
+        document,
+        "https://career.cup.edu.cn/campus/view/id/1002",
+        source,
+        "某单位校园招聘公告",
+    )
+
+    assert [posting.title for posting in postings] == [
+        "物探地质研发岗",
+        "软件开发与人工智能岗",
+    ]
+    assert postings[0].field_evidence["专业范围"] == "地质工程、地质资源与地质工程"
+    assert postings[1].field_evidence["专业范围"] == "计算机科学与技术、人工智能"
+    assert all(posting.field_evidence["面向对象"] == "硕士、博士" for posting in postings)
+
+
 def test_cupb_adapter_decodes_public_embedded_announcement_content(tmp_path) -> None:
     settings = make_settings(tmp_path)
     collector = OfficialSourceCollector(settings)

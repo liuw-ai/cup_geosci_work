@@ -39,6 +39,13 @@ CATEGORY_DISPLAY_NAMES = {
     "油气上游业主与研究机构": "油气勘探开发运营与研究机构",
 }
 
+PUBLICATION_STATUS_LABELS = {
+    "student_eligible": "目标专业明确匹配",
+    "unrestricted_eligible": "不限专业可报",
+    "pending_evidence": "待补岗位级证据",
+    "out_of_scope": "专业不匹配",
+}
+
 CATEGORY_DESCRIPTIONS = {
     "油气上游业主与研究机构": "油田、勘探开发公司及油藏、地球物理研究机构",
     "油气工程技术服务": "物探、测井、钻完井、井下作业与油气技术服务",
@@ -271,6 +278,9 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
     enriched = dict(job)
     enriched["category_label"] = CATEGORY_DISPLAY_NAMES.get(
         str(job.get("category") or ""), str(job.get("category") or "")
+    )
+    enriched["publication_status_label"] = PUBLICATION_STATUS_LABELS.get(
+        str(job.get("publication_status") or ""), "资格待核验"
     )
     identity_values = (job.get("title"), job.get("employer"))
     identity = resolve_employer(str(job.get("employer") or ""))
@@ -631,7 +641,7 @@ def _upstream_profile(
     identity_text: str = "",
 ) -> EmploymentProfile:
     employer_type = (
-        "油气上游业主/运营主体"
+        "油气勘探开发运营单位"
         if not _contains_any(value, ("研究院", "研究所", "技术中心"))
         else "油气勘探开发研究机构"
     )

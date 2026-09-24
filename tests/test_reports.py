@@ -59,6 +59,56 @@ def test_published_daily_report_is_frozen_for_its_calendar_day(tmp_path) -> None
     )
 
 
+def test_daily_report_can_be_refreshed_after_verified_import(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    pipeline = JobPipeline(settings, database)
+    first = RawPosting(
+        title="地质工程师招聘",
+        employer="测试能源集团",
+        source_url="https://careers.example.edu.cn/jobs/refresh-a",
+        application_url=None,
+        text="面向地质工程硕士毕业生的官方招聘。",
+        summary="首条岗位。",
+        published_date=None,
+        deadline_date="2099-12-31",
+        location="北京",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程师招聘",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+        },
+    )
+    database.save_job(
+        pipeline.normalize_posting(first, database.get_source("official-test-source"))
+    )
+    initial = publish_daily_report(database, settings)
+
+    second = RawPosting(
+        **{
+            **first.__dict__,
+            "title": "地质工程师招聘 B",
+            "source_url": "https://careers.example.edu.cn/jobs/refresh-b",
+            "field_evidence": {
+                "evidence_scope": "official_html_table_row",
+                "岗位": "地质工程师招聘 B",
+                "专业范围": "地质工程",
+                "学历要求": "硕士",
+            },
+        }
+    )
+    database.save_job(
+        pipeline.normalize_posting(second, database.get_source("official-test-source"))
+    )
+    refreshed = publish_daily_report(database, settings, force_refresh=True)
+
+    assert refreshed["stats"]["open_total"] == initial["stats"]["open_total"] + 1
+    assert len(refreshed["new_jobs"]) == 2
+
+
 def test_worker_heartbeat_can_be_read_without_touching_job_data(tmp_path) -> None:
     database = Database(make_settings(tmp_path).database_path)
     database.initialize()

@@ -44,11 +44,17 @@ def audit_database(
     """Check persisted jobs against the registered official-source contract."""
     target_date = today or datetime.now(ZoneInfo(settings.timezone)).date()
     sources = {item["id"]: item for item in database.list_sources()}
-    _, total = database.list_jobs(page=1, page_size=1, only_open=False)
+    _, total = database.list_jobs(
+        page=1,
+        page_size=1,
+        only_open=False,
+        student_visible=False,
+    )
     jobs, _ = database.list_jobs(
         page=1,
         page_size=max(total, 1),
         only_open=False,
+        student_visible=False,
     )
     issues: list[dict[str, Any]] = []
     source_urls: dict[str, list[tuple[int, str, str]]] = defaultdict(list)
@@ -57,6 +63,16 @@ def audit_database(
     for job in jobs:
         job_id = int(job["id"])
         source_id = str(job.get("source_id") or "")
+        student_public = (
+            job.get("status") == "open"
+            and job.get("publication_status")
+            in {"student_eligible", "unrestricted_eligible"}
+        )
+        # Official but out-of-scope records stay available for administrator
+        # re-review. They are not part of a student-facing daily publication
+        # and therefore must not make that publication fail.
+        if not student_public:
+            continue
         source = sources.get(source_id)
         if source is None:
             issues.append(
@@ -70,10 +86,9 @@ def audit_database(
             continue
 
         source_url = str(job.get("source_url") or "")
-        if job.get("status") == "open":
-            source_urls[source_url].append(
-                (job_id, source_id, str(job.get("external_id") or ""))
-            )
+        source_urls[source_url].append(
+            (job_id, source_id, str(job.get("external_id") or ""))
+        )
         if job.get("verification_status") != "published_official":
             issues.append(
                 {
@@ -84,8 +99,7 @@ def audit_database(
                 }
             )
         if (
-            job.get("status") == "open"
-            and job.get("relevance_band") == "强相关"
+            job.get("relevance_band") == "强相关"
             and not has_major_qualification_evidence(job.get("field_evidence"))
         ):
             issues.append(
@@ -94,6 +108,21 @@ def audit_database(
                     "job_id": job_id,
                     "source_id": source_id,
                     "message": "强相关岗位缺少岗位级专业要求证据。",
+                }
+            )
+        if (
+            job.get("publication_status") in {
+                "student_eligible",
+                "unrestricted_eligible",
+            }
+            and not job.get("publication_basis", {}).get("matched_profile_ids")
+        ):
+            issues.append(
+                {
+                    "code": "public_job_without_supported_student_profile",
+                    "job_id": job_id,
+                    "source_id": source_id,
+                    "message": "学生端公开岗位缺少岗位级专业或不限专业的适配依据。",
                 }
             )
         official_evidence_url = str(job.get("official_evidence_url") or "")
@@ -181,7 +210,7 @@ def audit_database(
                     "message": "来源 minimum_relevance 不是整数。",
                 }
             )
-        if job.get("status") == "open" and int(job.get("relevance_score", 0)) < minimum:
+        if int(job.get("relevance_score", 0)) < minimum:
             issues.append(
                 {
                     "code": "below_source_threshold",
@@ -194,7 +223,6 @@ def audit_database(
         if (
             source.get("source_type") != "manual"
             and not source.get("enabled", False)
-            and job.get("status") == "open"
         ):
             issues.append(
                 {
@@ -238,7 +266,7 @@ def audit_database(
                     }
                 )
             else:
-                if job.get("status") == "open" and deadline_value < target_date:
+                if deadline_value < target_date:
                     issues.append(
                         {
                             "code": "stale_open_job",
@@ -295,7 +323,13 @@ def audit_database(
         "ok": not issues,
         "checked_jobs": len(jobs),
         "total_jobs": total,
-        "open_jobs": sum(1 for job in jobs if job.get("status") == "open"),
+        "open_jobs": sum(
+            1
+            for job in jobs
+            if job.get("status") == "open"
+            and job.get("publication_status")
+            in {"student_eligible", "unrestricted_eligible"}
+        ),
         "registered_sources": len(sources),
         "enabled_sources": sum(1 for source in sources.values() if source.get("enabled")),
         "issues": issues,

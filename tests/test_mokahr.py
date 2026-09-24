@@ -71,6 +71,53 @@ def test_mokahr_adapter_filters_list_jobs_and_keeps_detail_fields(tmp_path, monk
     assert len(calls) == 2
 
 
+def test_mokahr_adapter_reads_bounded_following_pages(tmp_path, monkeypatch) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    listing_url = "https://app.mokahr.com/social-recruitment/zijinmining/140688?locale=zh-CN#/jobs"
+    source = {
+        "id": "zijin-social-career",
+        "publisher": "紫金矿业集团股份有限公司",
+        "homepage_url": listing_url,
+        "source_type": "mokahr_search",
+        "config": {
+            "listing_url": listing_url,
+            "org_id": "zijinmining",
+            "site_id": 140688,
+            "mode": "social",
+            "include_patterns": ["地质"],
+            "fetch_detail_pages": True,
+            "require_detail_pages": True,
+            "max_items": 2,
+            "page_size": 1,
+            "max_listing_pages": 2,
+            "request_interval_seconds": 0,
+        },
+    }
+    initial = """<input id="init-data" value='{"org":{"id":"zijinmining"},"siteId":140688,"mode":"social","aesIv":"1234567890123456"}'>"""
+    monkeypatch.setattr(collector, "_get", lambda _url, _source: FakeResponse(initial, listing_url))
+    requested_offsets: list[int] = []
+
+    def api(url, payload, _iv, _source=None):
+        if url.endswith("/jobs/v2"):
+            requested_offsets.append(payload["offset"])
+            job_id = "geo-1" if payload["offset"] == 0 else "geo-2"
+            return {"data": {"jobs": [{"id": job_id, "title": "地质工程师"}]}}
+        job_id = payload["jobId"]
+        return {"data": {
+            "id": job_id,
+            "title": "地质工程师",
+            "education": "本科及以上",
+            "jobDescription": "地质工程专业。",
+        }}
+
+    monkeypatch.setattr(collector, "_mokahr_api_json", api)
+
+    postings = collector.collect(source)
+
+    assert requested_offsets == [0, 1]
+    assert [posting.external_id for posting in postings] == ["geo-1", "geo-2"]
+
+
 def test_mokahr_aes_payload_is_decrypted() -> None:
     key = b"0123456789abcdef"
     iv = "1234567890123456"

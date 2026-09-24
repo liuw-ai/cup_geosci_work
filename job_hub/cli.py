@@ -77,6 +77,7 @@ def import_verified_jobs(
     database: Database,
     pipeline: JobPipeline,
     path: Path,
+    source_id_override: str | None = None,
 ) -> dict[str, int]:
     with path.open("r", encoding="utf-8") as handle:
         payload = json.load(handle)
@@ -94,11 +95,12 @@ def import_verified_jobs(
         official_evidence_url = str(item.get("official_evidence_url", "")).strip()
         if official_evidence_url and not is_http_url(official_evidence_url):
             raise ValueError("official_evidence_url must be an HTTP(S) URL")
-        source = database.get_source(
-            str(item.get("source_id", "official-manual-import"))
-        )
+        source_id = str(
+            source_id_override or item.get("source_id") or "official-manual-import"
+        ).strip()
+        source = database.get_source(source_id)
         if source is None:
-            raise ValueError("source_id is not registered in data/sources.json")
+            raise ValueError(f"source_id is not registered in data/sources.json: {source_id}")
         posting = RawPosting(
             title=str(item["title"]).strip(),
             employer=str(item["employer"]).strip(),
@@ -348,11 +350,20 @@ def main() -> None:
         action="store_true",
         help="日报生成后按 .env 邮件配置发送通知",
     )
+    publish_parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help="重建当天日报快照；用于补录已核验岗位后更新当前日期页面",
+    )
     import_parser = subparsers.add_parser(
         "import-json",
         help="导入已人工核验的官方岗位 JSON 文件",
     )
     import_parser.add_argument("path", type=Path)
+    import_parser.add_argument(
+        "--source-id",
+        help="覆盖 JSON 中的 source_id；适用于由来源注册表绑定的官方快照文件",
+    )
     import_leads_parser = subparsers.add_parser(
         "import-leads-json",
         help="导入第三方发现线索到私有候选池，不会发布到学生端",
@@ -824,7 +835,11 @@ def main() -> None:
                 )
             )
             raise SystemExit(1)
-        report = publish_daily_report(database, settings)
+        report = publish_daily_report(
+            database,
+            settings,
+            force_refresh=bool(args.refresh),
+        )
         result: dict[str, Any] = {
             "report_date": report["report_date"],
             "stats": report["stats"],
@@ -838,7 +853,12 @@ def main() -> None:
     if args.command == "import-json":
         print(
             json.dumps(
-                import_verified_jobs(database, pipeline, args.path),
+                import_verified_jobs(
+                    database,
+                    pipeline,
+                    args.path,
+                    source_id_override=args.source_id,
+                ),
                 ensure_ascii=False,
                 indent=2,
             )
@@ -935,7 +955,7 @@ def main() -> None:
         print(json.dumps(display_result, ensure_ascii=False, indent=2))
         return
     if args.command == "delete-job":
-        job = database.find_job(args.job_id)
+        job = database.find_job(args.job_id, student_visible=False)
         if job is None:
             parser.error(f"job_id is not present: {args.job_id}")
         result = {

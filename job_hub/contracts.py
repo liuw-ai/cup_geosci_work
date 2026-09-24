@@ -35,6 +35,7 @@ SOURCE_TYPES = frozenset(
         "html_notice",
         "official_table_rows",
         "official_xlsx_rows",
+        "official_snapshot_rows",
         "structured_opening_page",
         "landing_page",
     }
@@ -549,6 +550,34 @@ def validate_source_record(value: Any, *, context: str = "Source") -> dict[str, 
                 validate_http_url(value, f"{context} config {field_name}")
                 for value in source["config"].get(field_name, [])
             ]
+    if source["source_type"] == "official_snapshot_rows":
+        snapshot_path = _required_text(
+            source["config"].get("snapshot_path"),
+            f"{context} config snapshot_path",
+        )
+        snapshot = PurePosixPath(snapshot_path.replace("\\", "/"))
+        if snapshot.is_absolute() or ".." in snapshot.parts:
+            raise ContractValidationError(
+                f"{context} config snapshot_path must stay inside the repository"
+            )
+        source["config"]["snapshot_path"] = snapshot.as_posix()
+        source["config"]["official_evidence_url"] = validate_http_url(
+            source["config"].get("official_evidence_url"),
+            f"{context} config official_evidence_url",
+        )
+        source["config"]["application_url"] = validate_http_url(
+            source["config"].get("application_url"),
+            f"{context} config application_url",
+        )
+        allowed_hosts = source["config"].get("allowed_hosts")
+        if not isinstance(allowed_hosts, list) or not allowed_hosts:
+            raise ContractValidationError(
+                f"{context} snapshot source config allowed_hosts must be a non-empty list"
+            )
+        source["config"]["allowed_hosts"] = _validate_domains(
+            allowed_hosts,
+            f"{context} config allowed_hosts",
+        )
     enabled = source.get("enabled", True)
     if not isinstance(enabled, bool):
         raise ContractValidationError(f"{context} enabled must be true or false")

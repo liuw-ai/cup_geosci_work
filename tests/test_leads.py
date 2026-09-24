@@ -71,6 +71,10 @@ def test_candidate_leads_stay_private_until_official_content_is_verified(tmp_pat
             "metadata": {
                 "employer": "某省地质局",
                 "description": "面向资源勘查工程本科、地质工程硕士毕业生的公开招聘。",
+                "field_evidence": {
+                    "专业范围": "资源勘查工程、地质工程",
+                    "学历要求": "本科、硕士研究生",
+                },
                 "location": "山东省东营市",
                 "deadline_date": "2026-12-31",
             },

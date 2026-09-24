@@ -12,7 +12,7 @@
       {% endif %}
       <div class="detail-topline">
         <span class="category-label">{{ job.category_label or job.category|category_label }}</span>
-        <span class="relevance relevance-{{ job.relevance_band }}">{{ job.relevance_band }}</span>
+        <span class="relevance publication-{{ job.publication_status }}">{{ job.publication_status_label }}</span>
       </div>
       <h1>{{ job.title }}</h1>
       <p class="employer large-employer">{{ job.canonical_employer_name or job.employer }}</p>
@@ -40,7 +40,7 @@
         <div><dt>发布时间</dt><dd>{{ job.published_date|cn_date }}</dd></div>
         <div><dt>报名截止</dt><dd class="deadline">{{ job.deadline_date|cn_date }}</dd></div>
         <div><dt>信息来源</dt><dd>{{ job.source_name }}（{{ job.source_tier }} 级）</dd></div>
-        <div><dt>专业匹配</dt><dd>{{ job.relevance_band }}</dd></div>
+        <div><dt>可报依据</dt><dd>{{ job.publication_status_label }}</dd></div>
       </dl>
       {% if job.major_tags %}
         <h2>专业线索{% if job.qualification_evidence_status != "explicit" %}（需核验）{% endif %}</h2>
@@ -72,6 +72,10 @@
             <div><dt>证据位置</dt><dd>官方职位表第 {{ job.field_evidence.get("table_row") }} 行</dd></div>
           {% endif %}
         </dl>
+      {% endif %}
+      {% if job.publication_basis %}
+        <h2>面向本院学生的收录依据</h2>
+        <p>{{ job.publication_basis.get("reason", "岗位级条件已核验。") }}</p>
       {% endif %}
       {% if job.profile_match %}
         <h2>与 {{ profile.label }} 的匹配</h2>

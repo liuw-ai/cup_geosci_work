@@ -25,6 +25,12 @@ def _saved_job(database: Database, settings, *, source_id: str = "official-test-
         published_date="2026-09-20",
         deadline_date="2026-12-31",
         location="北京",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程师招聘",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+        },
     )
     job_id, _ = database.save_job(
         pipeline.normalize_posting(posting, database.get_source(source_id))

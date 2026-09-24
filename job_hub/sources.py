@@ -12,6 +12,7 @@ import zlib
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from html import unescape
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode, urljoin, urlparse
 from urllib.robotparser import RobotFileParser
@@ -334,9 +335,102 @@ class OfficialSourceCollector:
             return self._collect_official_xlsx_rows(source)
         if source_type == "official_table_rows":
             return self._collect_official_table_rows(source)
+        if source_type == "official_snapshot_rows":
+            return self._collect_official_snapshot_rows(source)
         if source_type in {"html_notice", "landing_page"}:
             return self._collect_html_notice(source)
         raise SourceCollectionError(f"Unsupported source type: {source_type}")
+
+    def _collect_official_snapshot_rows(
+        self, source: dict[str, Any]
+    ) -> list[RawPosting]:
+        """Load administrator-verified official rows from a versioned snapshot.
+
+        This adapter is intentionally file-backed. It is the controlled bridge
+        for dynamic portals that are visible in a browser but not safely
+        callable from the server runtime. The snapshot is still passed through
+        the normal normalization and student publication gate; it is not a
+        bypass for source access controls or a substitute for a live adapter.
+        """
+        config = source["config"]
+        snapshot_path = Path(__file__).resolve().parent.parent / str(
+            config["snapshot_path"]
+        )
+        try:
+            payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+        except FileNotFoundError as error:
+            raise SourceCollectionError(
+                f"official snapshot file is missing: {config['snapshot_path']}"
+            ) from error
+        except (OSError, json.JSONDecodeError) as error:
+            raise SourceCollectionError(
+                f"official snapshot file cannot be read: {config['snapshot_path']}"
+            ) from error
+        if not isinstance(payload, list) or not payload:
+            raise SourceCollectionError("official snapshot must be a non-empty JSON list")
+
+        postings: list[RawPosting] = []
+        allowed_hosts = {
+            str(host).strip().lower()
+            for host in config.get("allowed_hosts", [])
+            if str(host).strip()
+        }
+        for index, item in enumerate(payload, start=1):
+            if not isinstance(item, dict):
+                raise SourceCollectionError(
+                    f"official snapshot row {index} must be an object"
+                )
+            required = ("title", "employer", "location", "qualification_text")
+            if any(not str(item.get(field) or "").strip() for field in required):
+                raise SourceCollectionError(
+                    f"official snapshot row {index} is missing a required field"
+                )
+            field_evidence = item.get("field_evidence")
+            if not isinstance(field_evidence, dict):
+                raise SourceCollectionError(
+                    f"official snapshot row {index} is missing field_evidence"
+                )
+            source_url = str(item.get("source_url") or source["homepage_url"]).strip()
+            evidence_url = str(
+                item.get("official_evidence_url")
+                or config["official_evidence_url"]
+            ).strip()
+            application_url = str(
+                item.get("application_url") or config["application_url"]
+            ).strip()
+            for label, value in (
+                ("source_url", source_url),
+                ("official_evidence_url", evidence_url),
+                ("application_url", application_url),
+            ):
+                if not value.startswith(("http://", "https://")):
+                    raise SourceCollectionError(
+                        f"official snapshot row {index} {label} must be HTTP(S)"
+                    )
+                hostname = (urlparse(value).hostname or "").lower()
+                if allowed_hosts and hostname not in allowed_hosts:
+                    raise SourceCollectionError(
+                        f"official snapshot row {index} {label} host is not allowlisted"
+                    )
+            postings.append(
+                RawPosting(
+                    title=str(item["title"]).strip(),
+                    employer=str(item["employer"]).strip(),
+                    source_url=source_url,
+                    application_url=application_url,
+                    text=str(item.get("description") or item["qualification_text"]).strip(),
+                    summary=str(item.get("summary") or "").strip(),
+                    published_date=str(item.get("published_date") or "").strip() or None,
+                    deadline_date=str(item.get("deadline_date") or "").strip() or None,
+                    location=str(item["location"]).strip(),
+                    external_id=str(item.get("external_id") or f"snapshot-{index}").strip(),
+                    match_text=str(item.get("match_text") or "").strip() or None,
+                    official_evidence_url=evidence_url,
+                    field_evidence={str(key): str(value) for key, value in field_evidence.items()},
+                    qualification_text=str(item["qualification_text"]).strip(),
+                )
+            )
+        return postings
 
     def collect_with_fallback(self, source: dict[str, Any]) -> list[RawPosting]:
         """Try the registered official ladder for one source.
@@ -402,100 +496,112 @@ class OfficialSourceCollector:
         if not api_base or not public_detail_url:
             raise SourceCollectionError("MNR source needs api_base and public_detail_url")
         announcement_limit = self._item_limit(source)
-        self._wait(source)
-        listing = self._post_json(
-            f"{api_base}/Affiche/GetAfficheList",
-            {
-                "pageIndex": 1,
-                "pageSize": announcement_limit,
-                "type": int(config.get("notice_type", 0)),
-            },
+        page_size = self._mnr_page_size(
+            source, "announcement_page_size", announcement_limit
         )
-        try:
-            notices = listing.json().get("items", [])
-        except (ValueError, AttributeError) as error:
-            raise SourceCollectionError("MNR listing is not valid JSON") from error
-        if not isinstance(notices, list):
-            raise SourceCollectionError("MNR listing does not contain an items list")
-
+        max_pages = self._configured_page_limit(
+            source, "max_announcement_pages", default=3
+        )
         postings: list[RawPosting] = []
         seen_external_ids: set[str] = set()
-        for notice in notices:
-            if not isinstance(notice, dict):
-                continue
-            view_id = clean_text(str(notice.get("ViewId") or ""))
-            title = clean_text(str(notice.get("Title") or ""))
-            if not view_id or not title:
-                continue
+        seen_notices: set[str] = set()
+        for page_index in range(1, max_pages + 1):
             self._wait(source)
-            detail_response = self._post_json(
-                f"{api_base}/Affiche/GetAfficheInfo",
-                {"viewId": view_id, "type": int(config.get("notice_type", 0))},
+            listing = self._post_json(
+                f"{api_base}/Affiche/GetAfficheList",
+                {
+                    "pageIndex": page_index,
+                    "pageSize": page_size,
+                    "type": int(config.get("notice_type", 0)),
+                },
             )
             try:
-                detail_payload = detail_response.json()
-            except ValueError as error:
-                raise SourceCollectionError("MNR announcement detail is not valid JSON") from error
-            detail = (
-                detail_payload[0]
-                if isinstance(detail_payload, list) and detail_payload
-                else detail_payload
-            )
-            if not isinstance(detail, dict):
-                continue
-            announcement_url = f"{public_detail_url}?ViewId={view_id}"
-            published_date = parse_date_value(
-                str(detail.get("FbDate") or notice.get("FbDate") or "")
-            )
-            deadline_date = parse_date_value(str(detail.get("BmjsDate") or ""))
-            announcement_text = clean_text(
-                BeautifulSoup(str(detail.get("AnncCont") or ""), "html.parser").get_text(
-                    " ", strip=True
+                notices = listing.json().get("items", [])
+            except (ValueError, AttributeError) as error:
+                raise SourceCollectionError("MNR listing is not valid JSON") from error
+            if not isinstance(notices, list):
+                raise SourceCollectionError("MNR listing does not contain an items list")
+            for notice in notices:
+                if not isinstance(notice, dict):
+                    continue
+                view_id = clean_text(str(notice.get("ViewId") or ""))
+                title = clean_text(str(notice.get("Title") or ""))
+                if not view_id or not title or view_id in seen_notices:
+                    continue
+                seen_notices.add(view_id)
+                self._wait(source)
+                detail_response = self._post_json(
+                    f"{api_base}/Affiche/GetAfficheInfo",
+                    {"viewId": view_id, "type": int(config.get("notice_type", 0))},
                 )
-            )
-            positions = self._mnr_positions(
-                api_base,
-                view_id,
-                source,
-                int(config.get("notice_type", 0)),
-                announcement_limit,
-            )
-            if positions:
-                for position in positions:
-                    posting = self._mnr_position_posting(
-                        position,
-                        view_id=view_id,
-                        announcement_title=title,
-                        announcement_url=announcement_url,
-                        published_date=published_date,
-                        deadline_date=deadline_date,
-                        source=source,
+                try:
+                    detail_payload = detail_response.json()
+                except ValueError as error:
+                    raise SourceCollectionError("MNR announcement detail is not valid JSON") from error
+                detail = (
+                    detail_payload[0]
+                    if isinstance(detail_payload, list) and detail_payload
+                    else detail_payload
+                )
+                if not isinstance(detail, dict):
+                    continue
+                announcement_url = f"{public_detail_url}?ViewId={view_id}"
+                published_date = parse_date_value(
+                    str(detail.get("FbDate") or notice.get("FbDate") or "")
+                )
+                deadline_date = parse_date_value(str(detail.get("BmjsDate") or ""))
+                announcement_text = clean_text(
+                    BeautifulSoup(str(detail.get("AnncCont") or ""), "html.parser").get_text(
+                        " ", strip=True
                     )
-                    if posting is None or posting.external_id in seen_external_ids:
-                        continue
-                    seen_external_ids.add(str(posting.external_id))
-                    postings.append(posting)
+                )
+                positions = self._mnr_positions(
+                    api_base,
+                    view_id,
+                    source,
+                    int(config.get("notice_type", 0)),
+                    announcement_limit,
+                )
+                if positions:
+                    for position in positions:
+                        posting = self._mnr_position_posting(
+                            position,
+                            view_id=view_id,
+                            announcement_title=title,
+                            announcement_url=announcement_url,
+                            published_date=published_date,
+                            deadline_date=deadline_date,
+                            source=source,
+                        )
+                        if posting is None or posting.external_id in seen_external_ids:
+                            continue
+                        seen_external_ids.add(str(posting.external_id))
+                        postings.append(posting)
+                        if len(postings) >= announcement_limit:
+                            return postings
+                    continue
+                if config.get("include_announcement_fallback", True) and self._accept_candidate(
+                    f"{title} {announcement_text}", source
+                ):
+                    postings.append(
+                        RawPosting(
+                            title=title,
+                            employer=clean_text(str(detail.get("Fbdw") or source["publisher"])),
+                            source_url=announcement_url,
+                            application_url=None,
+                            text=announcement_text,
+                            summary=announcement_text[:500],
+                            published_date=published_date,
+                            deadline_date=deadline_date,
+                            location=None,
+                            external_id=view_id,
+                            match_text=f"{title} {announcement_text}",
+                        )
+                    )
                     if len(postings) >= announcement_limit:
                         return postings
-                continue
-            if config.get("include_announcement_fallback", True) and self._accept_candidate(
-                f"{title} {announcement_text}", source
-            ):
-                postings.append(
-                    RawPosting(
-                        title=title,
-                        employer=clean_text(str(detail.get("Fbdw") or source["publisher"])),
-                        source_url=announcement_url,
-                        application_url=None,
-                        text=announcement_text,
-                        summary=announcement_text[:500],
-                        published_date=published_date,
-                        deadline_date=deadline_date,
-                        location=None,
-                        external_id=view_id,
-                        match_text=f"{title} {announcement_text}",
-                    )
-                )
+            if len(notices) < page_size:
+                break
         return postings[:announcement_limit]
 
     def _mnr_positions(
@@ -506,24 +612,53 @@ class OfficialSourceCollector:
         notice_type: int,
         item_limit: int,
     ) -> list[dict[str, Any]]:
-        self._wait(source)
-        response = self._post_json(
-            f"{api_base}/Affiche/GetPostSelectFyList",
-            {
-                "viewId": view_id,
-                "zpdw": "",
-                "zpgw": "",
-                "xwxlyq": "",
-                "pageIndex": 1,
-                "pageSize": min(item_limit, 100),
-                "type": notice_type,
-            },
+        page_size = self._mnr_page_size(source, "position_page_size", item_limit)
+        max_pages = self._configured_page_limit(
+            source, "max_position_pages", default=4
         )
+        positions: list[dict[str, Any]] = []
+        seen_ids: set[str] = set()
+        for page_index in range(1, max_pages + 1):
+            self._wait(source)
+            response = self._post_json(
+                f"{api_base}/Affiche/GetPostSelectFyList",
+                {
+                    "viewId": view_id,
+                    "zpdw": "",
+                    "zpgw": "",
+                    "xwxlyq": "",
+                    "pageIndex": page_index,
+                    "pageSize": page_size,
+                    "type": notice_type,
+                },
+            )
+            try:
+                items = response.json().get("items", [])
+            except (ValueError, AttributeError) as error:
+                raise SourceCollectionError("MNR position list is not valid JSON") from error
+            if not isinstance(items, list):
+                raise SourceCollectionError("MNR position list does not contain an items list")
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                position_id = clean_text(
+                    str(item.get("gwbh") or item.get("gwbm") or item.get("zpgw") or "")
+                )
+                if not position_id or position_id in seen_ids:
+                    continue
+                seen_ids.add(position_id)
+                positions.append(item)
+            if len(items) < page_size:
+                break
+        return positions
+
+    @staticmethod
+    def _mnr_page_size(source: dict[str, Any], key: str, default: int) -> int:
         try:
-            items = response.json().get("items", [])
-        except (ValueError, AttributeError) as error:
-            raise SourceCollectionError("MNR position list is not valid JSON") from error
-        return [item for item in items if isinstance(item, dict)]
+            value = int(source.get("config", {}).get(key, default))
+        except (TypeError, ValueError):
+            value = default
+        return max(1, min(value, 100))
 
     def _mnr_position_posting(
         self,
@@ -579,6 +714,25 @@ class OfficialSourceCollector:
             location=clean_text(str(position.get("gzdd") or "")) or None,
             external_id=f"{view_id}:{external_position_id}",
             match_text=matching_text,
+            official_evidence_url=announcement_url,
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "official_position_id": external_position_id,
+                "岗位": role,
+                "专业范围": clean_text(
+                    " ".join(
+                        str(position.get(field) or "")
+                        for field in ("zy", "yjfx", "gwyq")
+                    )
+                ),
+                "学历要求": clean_text(
+                    " ".join(
+                        str(position.get(field) or "")
+                        for field in ("xwxlyq", "gwyq")
+                    )
+                ),
+                "工作地点": clean_text(str(position.get("gzdd") or "")),
+            },
         )
 
     def _collect_slb_coveo_search(self, source: dict[str, Any]) -> list[RawPosting]:
@@ -671,7 +825,21 @@ class OfficialSourceCollector:
                 break
 
         postings: list[RawPosting] = []
-        for item in candidates:
+        try:
+            detail_budget_seconds = max(
+                1.0, float(config.get("detail_time_budget_seconds", 90.0))
+            )
+        except (TypeError, ValueError):
+            detail_budget_seconds = 90.0
+        detail_deadline = time.monotonic() + detail_budget_seconds
+        for index, item in enumerate(candidates, start=1):
+            if time.monotonic() >= detail_deadline:
+                # Returning a partial list would make a slow public endpoint
+                # look like a successful scan with few or no opportunities.
+                raise SourceCollectionError(
+                    "SLB detail-page time budget exhausted after "
+                    f"{index - 1} of {len(candidates)} candidates"
+                )
             posting = self._slb_posting_from_result(item, source)
             if posting is None:
                 continue
@@ -840,6 +1008,14 @@ class OfficialSourceCollector:
             location=location,
             external_id=external_id,
             match_text=clean_text(f"{title} {page_text}"),
+            official_evidence_url=normalize_url(source_url),
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": title,
+                "岗位要求": page_text,
+                "学历要求": page_text,
+                "工作地点": location or "",
+            },
         )
 
     @staticmethod
@@ -1052,6 +1228,13 @@ class OfficialSourceCollector:
                     ),
                     match_text=role_text,
                     official_evidence_url=source_url,
+                    field_evidence={
+                        "evidence_scope": "official_role_section",
+                        "role_section": str(position),
+                        "岗位": title or raw_title,
+                        "岗位要求": role_text,
+                        "学历要求": role_text,
+                    },
                 )
             )
             if len(postings) >= self._item_limit(source):
@@ -1194,6 +1377,16 @@ class OfficialSourceCollector:
                         external_id=f"{self._external_id_from_url(attachment_url)}#row-{row_number}",
                         match_text=evidence_text,
                         official_evidence_url=attachment_url,
+                        field_evidence={
+                            "evidence_scope": "official_attachment_row",
+                            "attachment_row": str(row_number),
+                            "岗位": title,
+                            "岗位职责": duties,
+                            "岗位要求": requirements,
+                            "学历要求": requirements,
+                            "招聘人数": quantity,
+                            "工作地点": location,
+                        },
                     )
                 )
                 if len(postings) >= self._item_limit(source):
@@ -1447,6 +1640,16 @@ class OfficialSourceCollector:
                         ),
                         match_text=clean_text(f"{title} {fields.get('major', '')} {fields.get('degree', '')}"),
                         official_evidence_url=normalize_url(source_url),
+                        field_evidence={
+                            "evidence_scope": "official_html_table_row",
+                            "table_index": str(table_index),
+                            "table_row": str(row_number),
+                            "岗位": title,
+                            "专业范围": fields.get("major", ""),
+                            "学历要求": fields.get("degree", ""),
+                            "工作地点": location,
+                            "招聘单位": employer,
+                        },
                     )
                 )
         return postings
@@ -1632,6 +1835,14 @@ class OfficialSourceCollector:
                     ),
                     match_text=role_text,
                     official_evidence_url=source_url,
+                    field_evidence={
+                        "evidence_scope": "official_role_section",
+                        "role_section": str(position),
+                        "岗位": title,
+                        "岗位要求": role_text,
+                        "学历要求": role_text,
+                        "工作地点": clean_text(str(location or "")),
+                    },
                 )
             )
             if len(postings) >= self._item_limit(source):
@@ -2046,68 +2257,96 @@ class OfficialSourceCollector:
         parsed = urlparse(listing_response.url)
         api_base = f"{parsed.scheme}://{parsed.netloc}"
         list_url = urljoin(api_base, "/api/outer/ats-apply/website/jobs/v2")
-        result = self._mokahr_api_json(
-            list_url,
-            {
-                "orgId": org_id,
-                "siteId": site_id,
-                "limit": self._mokahr_page_size(source),
-                "offset": 0,
-                "needStat": True,
-                "site": mode,
-                "locale": locale,
-            },
-            iv,
-        )
-        result_data = result.get("data")
-        jobs = result_data.get("jobs") if isinstance(result_data, dict) else None
-        if not isinstance(jobs, list):
-            raise SourceCollectionError("MokaHR job list payload does not contain jobs")
         detail_url = urljoin(api_base, "/api/outer/ats-apply/website/job")
         postings: list[RawPosting] = []
         seen: set[str] = set()
-        for listed_job in jobs:
-            if not isinstance(listed_job, dict):
-                continue
-            job_id = str(listed_job.get("id") or "").strip()
-            if not job_id or job_id in seen:
-                continue
-            seen.add(job_id)
-            if not self._mokahr_candidate_allowed(
-                self._mokahr_job_text(listed_job), config
-            ):
-                continue
-            job = listed_job
-            if config.get("fetch_detail_pages", True):
+        page_size = self._mokahr_page_size(source)
+        item_limit = self._item_limit(source)
+        max_pages = self._configured_page_limit(
+            source, "max_listing_pages", default=4
+        )
+        offset = 0
+        for page_index in range(max_pages):
+            if page_index:
                 self._wait(source)
-                try:
-                    detail_result = self._mokahr_api_json(
-                        detail_url,
-                        {
-                            "orgId": org_id,
-                            "siteId": site_id,
-                            "jobId": job_id,
-                            "locale": locale,
-                        },
-                        iv,
-                    )
-                    detail_data = detail_result.get("data")
-                    if not isinstance(detail_data, dict):
-                        raise SourceCollectionError("MokaHR job detail payload is invalid")
-                    job = {**listed_job, **detail_data}
-                except (SourceSkipped, SourceCollectionError):
-                    if config.get("require_detail_pages"):
-                        continue
-            if not self._mokahr_candidate_allowed(
-                self._mokahr_job_text(job),
-                config,
-                exclude_patterns=config.get("detail_exclude_patterns", []),
-            ):
-                continue
-            postings.append(self._mokahr_posting(job, source, listing_url))
-            if len(postings) >= self._item_limit(source):
+            result = self._mokahr_api_json(
+                list_url,
+                {
+                    "orgId": org_id,
+                    "siteId": site_id,
+                    "limit": page_size,
+                    "offset": offset,
+                    "needStat": True,
+                    "site": mode,
+                    "locale": locale,
+                },
+                iv,
+            )
+            result_data = result.get("data")
+            jobs = result_data.get("jobs") if isinstance(result_data, dict) else None
+            if not isinstance(jobs, list):
+                raise SourceCollectionError("MokaHR job list payload does not contain jobs")
+            for listed_job in jobs:
+                if not isinstance(listed_job, dict):
+                    continue
+                job_id = str(listed_job.get("id") or "").strip()
+                if not job_id or job_id in seen:
+                    continue
+                seen.add(job_id)
+                if not self._mokahr_candidate_allowed(
+                    self._mokahr_job_text(listed_job), config
+                ):
+                    continue
+                job = listed_job
+                if config.get("fetch_detail_pages", True):
+                    self._wait(source)
+                    try:
+                        detail_result = self._mokahr_api_json(
+                            detail_url,
+                            {
+                                "orgId": org_id,
+                                "siteId": site_id,
+                                "jobId": job_id,
+                                "locale": locale,
+                            },
+                            iv,
+                        )
+                        detail_data = detail_result.get("data")
+                        if not isinstance(detail_data, dict):
+                            raise SourceCollectionError("MokaHR job detail payload is invalid")
+                        job = {**listed_job, **detail_data}
+                    except (SourceSkipped, SourceCollectionError):
+                        if config.get("require_detail_pages"):
+                            continue
+                if not self._mokahr_candidate_allowed(
+                    self._mokahr_job_text(job),
+                    config,
+                    exclude_patterns=config.get("detail_exclude_patterns", []),
+                ):
+                    continue
+                postings.append(self._mokahr_posting(job, source, listing_url))
+                if len(postings) >= item_limit:
+                    return postings
+            # MokaHR does not promise a total field on every tenant. A short
+            # page is the only universally safe terminal condition.
+            if len(jobs) < page_size:
                 break
+            offset += len(jobs)
         return postings
+
+    @staticmethod
+    def _configured_page_limit(
+        source: dict[str, Any],
+        key: str,
+        *,
+        default: int,
+    ) -> int:
+        """Read a bounded page limit without allowing an accidental full crawl."""
+        try:
+            value = int(source.get("config", {}).get(key, default))
+        except (TypeError, ValueError):
+            value = default
+        return max(1, min(value, 20))
 
     @staticmethod
     def _cupb_listing_root(url: str) -> str:
@@ -2306,6 +2545,9 @@ class OfficialSourceCollector:
         title_label = str(config.get("opening_title_field_label") or "").strip()
         location_label = str(config.get("opening_location_field_label") or "").strip()
         date_label = str(config.get("opening_date_field_label") or "").strip()
+        requirements_label = str(
+            config.get("opening_requirements_field_label") or "Job Requirements"
+        ).strip()
         required_fields = {
             str(field).strip()
             for field in config.get("required_opening_fields", [])
@@ -2328,6 +2570,9 @@ class OfficialSourceCollector:
                     flags=re.IGNORECASE,
                 ).strip()
             location = self._structured_opening_field(lines, location_label, labels)
+            requirements = self._structured_opening_field(
+                lines, requirements_label, labels
+            )
             published_date = parse_date_value(
                 self._structured_opening_field(lines, date_label, labels)
             ) or extract_published_date(body_text)
@@ -2376,6 +2621,14 @@ class OfficialSourceCollector:
                     ),
                     match_text=clean_text(f"{title or heading} {body_text}"),
                     official_evidence_url=source_url,
+                    field_evidence={
+                        "evidence_scope": "official_detail_block",
+                        "detail_block": str(index),
+                        "岗位": title or heading,
+                        "岗位要求": requirements or "",
+                        "学历要求": requirements or "",
+                        "工作地点": location or "",
+                    },
                 )
             )
         return postings
@@ -2642,6 +2895,13 @@ class OfficialSourceCollector:
             external_id=job_number or self._external_id_from_url(evidence_url),
             match_text=match_text,
             official_evidence_url=evidence_url,
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": title,
+                "岗位要求": detail,
+                "学历要求": detail,
+                "工作地点": city or extract_location_hint(detail) or "",
+            },
         )
 
     def _mokahr_api_json(
@@ -2859,6 +3119,14 @@ class OfficialSourceCollector:
             location=location,
             external_id=str(job.get("id") or "") or None,
             match_text=match_text,
+            official_evidence_url=detail_url,
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": title,
+                "岗位要求": description,
+                "学历要求": education or description,
+                "工作地点": location or "",
+            },
         )
 
     def _collect_rss(self, source: dict[str, Any]) -> list[RawPosting]:
@@ -3348,7 +3616,20 @@ class OfficialSourceCollector:
                 if key in {"岗位", "专业范围", "面向对象", "学历要求", "工作地点"}
             },
         )
-        if len(records) <= 1:
+        # A label/value table can represent one concrete role just as a
+        # conventional header table can. Preserve that row identity instead
+        # of returning an announcement-level record without a row locator.
+        if len(records) == 1 and records[0].get("岗位"):
+            return [
+                self._cupb_row_posting(
+                    base_posting,
+                    records[0],
+                    row_number=1,
+                    announcement_title=title,
+                    source_url=source_url,
+                )
+            ]
+        if not records:
             return [base_posting]
 
         # A structured table is authoritative at row level.  Do not reuse the
@@ -3356,52 +3637,74 @@ class OfficialSourceCollector:
         # position's major and degree requirements to this one.
         row_postings: list[RawPosting] = []
         for row_number, record in enumerate(records, start=1):
-            row_title = record.get("岗位") or title
-            row_major = record.get("专业范围", "")
-            row_degree = record.get("学历要求", "") or record.get("面向对象", "")
-            row_location = record.get("工作地点", "") or fields.get("工作地点", "")
-            row_evidence = clean_text(
-                "；".join(
-                    part
-                    for part in (
-                        f"岗位：{row_title}" if row_title else "",
-                        f"专业范围：{row_major}" if row_major else "",
-                        f"学历要求：{row_degree}" if row_degree else "",
-                        f"工作地点：{row_location}" if row_location else "",
-                    )
-                    if part
-                )
-            )
             row_postings.append(
-                RawPosting(
-                    title=(
-                        row_title
-                        if row_title != title
-                        else f"{title}（第{row_number}项）"
-                    ),
-                    employer=base_posting.employer,
-                    source_url=base_posting.source_url,
-                    application_url=base_posting.application_url,
-                    text=row_evidence,
-                    summary=row_evidence[:420] or base_posting.summary,
-                    published_date=base_posting.published_date,
-                    deadline_date=base_posting.deadline_date,
-                    location=row_location or base_posting.location,
-                    external_id=f"{base_posting.external_id or self._external_id_from_url(source_url)}#row-{row_number}",
-                    match_text=clean_text(f"{row_title} {row_major} {row_degree}"),
-                    qualification_text=row_evidence,
-                    official_evidence_url=base_posting.official_evidence_url,
-                    field_evidence={
-                        "table_row": str(row_number),
-                        **{
-                            key: value
-                            for key, value in record.items()
-                            if key in {"岗位", "专业范围", "面向对象", "学历要求", "工作地点"}
-                        },
-                    },
+                self._cupb_row_posting(
+                    base_posting,
+                    record,
+                    row_number=row_number,
+                    announcement_title=title,
+                    source_url=source_url,
                 )
             )
         return row_postings
+
+    def _cupb_row_posting(
+        self,
+        base_posting: RawPosting,
+        record: dict[str, str],
+        *,
+        row_number: int,
+        announcement_title: str,
+        source_url: str,
+    ) -> RawPosting:
+        """Build one CUPB role from one named official table row."""
+        row_title = record.get("岗位") or announcement_title
+        row_major = record.get("专业范围", "")
+        row_degree = record.get("学历要求", "") or record.get("面向对象", "")
+        row_location = record.get("工作地点", "")
+        row_evidence = clean_text(
+            "；".join(
+                part
+                for part in (
+                    f"岗位：{row_title}" if row_title else "",
+                    f"专业范围：{row_major}" if row_major else "",
+                    f"学历要求：{row_degree}" if row_degree else "",
+                    f"工作地点：{row_location}" if row_location else "",
+                )
+                if part
+            )
+        )
+        return RawPosting(
+            title=(
+                row_title
+                if row_title != announcement_title
+                else f"{announcement_title}（第{row_number}项）"
+            ),
+            employer=base_posting.employer,
+            source_url=base_posting.source_url,
+            application_url=base_posting.application_url,
+            text=row_evidence,
+            summary=row_evidence[:420] or base_posting.summary,
+            published_date=base_posting.published_date,
+            deadline_date=base_posting.deadline_date,
+            location=row_location or base_posting.location,
+            external_id=(
+                f"{base_posting.external_id or self._external_id_from_url(source_url)}"
+                f"#row-{row_number}"
+            ),
+            match_text=clean_text(f"{row_title} {row_major} {row_degree}"),
+            qualification_text=row_evidence,
+            official_evidence_url=base_posting.official_evidence_url,
+            field_evidence={
+                "evidence_scope": "official_html_table_row",
+                "table_row": str(row_number),
+                **{
+                    key: value
+                    for key, value in record.items()
+                    if key in {"岗位", "专业范围", "面向对象", "学历要求", "工作地点"}
+                },
+            },
+        )
 
     def _extract_cupb_detail(
         self,
@@ -3450,6 +3753,21 @@ class OfficialSourceCollector:
         return records[0] if records else {}
 
     @staticmethod
+    def _cupb_table_row_cells(row: Any) -> list[str]:
+        """Read direct cells while expanding an explicit table column span."""
+        values: list[str] = []
+        for cell in row.find_all(["th", "td"], recursive=False):
+            text = clean_text(cell.get_text(" ", strip=True))
+            if not text:
+                continue
+            try:
+                span = max(1, int(cell.get("colspan", 1)))
+            except (TypeError, ValueError):
+                span = 1
+            values.extend([text] * span)
+        return values
+
+    @staticmethod
     def _cupb_table_records(soup: BeautifulSoup) -> list[dict[str, str]]:
         """Return every structured CUPB table row as an independent record."""
         aliases = {
@@ -3474,8 +3792,7 @@ class OfficialSourceCollector:
         }
         label_fields: dict[str, str] = {}
         for row in soup.select("table tr"):
-            cells = [clean_text(cell.get_text(" ", strip=True)) for cell in row.select("th, td")]
-            cells = [cell for cell in cells if cell]
+            cells = OfficialSourceCollector._cupb_table_row_cells(row)
             if len(cells) < 2:
                 continue
             label = aliases.get(cells[0].rstrip("：:"))
@@ -3504,14 +3821,45 @@ class OfficialSourceCollector:
         for table in soup.select("table"):
             rows: list[list[str]] = []
             for row in table.select("tr"):
-                cells = [
-                    clean_text(cell.get_text(" ", strip=True))
-                    for cell in row.select("th, td")
-                ]
+                cells = OfficialSourceCollector._cupb_table_row_cells(row)
                 if any(cells):
                     rows.append(cells)
             if len(rows) < 2:
                 continue
+
+            # Some official notices put two or more roles in parallel table
+            # columns: ``岗位 | 物探地质研发岗 | 软件开发岗`` followed by
+            # matching parallel ``专业范围`` cells. Flattening the row would
+            # join a geology role to a software role, so reconstruct one
+            # record per role column before considering ordinary header rows.
+            labeled_rows = [
+                (aliases.get(row[0].rstrip("：:")), row[1:])
+                for row in rows
+                if len(row) >= 2 and aliases.get(row[0].rstrip("：:"))
+            ]
+            matrix_fields = {field: values for field, values in labeled_rows if field}
+            role_columns = matrix_fields.get("岗位", [])
+            if len(matrix_fields) >= 2 and role_columns:
+                matrix_records: list[dict[str, str]] = []
+                for column, role_title in enumerate(role_columns):
+                    record = {"岗位": role_title}
+                    for field, values in matrix_fields.items():
+                        if field == "岗位" or not values:
+                            continue
+                        # A colspan in an official table represents a shared
+                        # value, such as one location for two role columns.
+                        value = values[column] if column < len(values) else values[0]
+                        if value:
+                            record[field] = value
+                    matrix_records.append(record)
+                matrix_score = (
+                    (3 if "岗位" in matrix_fields else 0)
+                    + (2 if "专业范围" in matrix_fields else 0)
+                    + (2 if "学历要求" in matrix_fields or "面向对象" in matrix_fields else 0)
+                    + (1 if "工作地点" in matrix_fields else 0)
+                )
+                if matrix_score >= 5:
+                    candidates.append((matrix_score, len(matrix_records), matrix_records))
             header_index = next(
                 (
                     index
@@ -3772,10 +4120,19 @@ class OfficialSourceCollector:
         if not self._robots_allowed(normalized):
             raise SourceSkipped(f"robots.txt does not permit collection: {normalized}")
         try:
+            configured_timeout = float(
+                source.get("config", {}).get(
+                    "request_timeout_seconds", self.settings.request_timeout_seconds
+                )
+            )
+            timeout = max(1.0, min(configured_timeout, self.settings.request_timeout_seconds))
+        except (TypeError, ValueError):
+            timeout = float(self.settings.request_timeout_seconds)
+        try:
             response = self.request_policy.request(
                 "GET",
                 normalized,
-                timeout=self.settings.request_timeout_seconds,
+                timeout=timeout,
                 allow_redirects=True,
             )
             response.raise_for_status()

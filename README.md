@@ -149,6 +149,12 @@ python -m job_hub.cli publish --send-email
 python -m job_hub.cli sync-source halliburton-career
 ~~~
 
+管理员核验的官方快照可以绑定到注册来源后导入；来源必须显式指定，避免岗位被误归入通用人工来源：
+
+~~~powershell
+python -m job_hub.cli import-json .\data\verified\pipechina-2027-geoscience-20260924.json --source-id pipechina-career
+~~~
+
 如发现某个来源的旧数据存在误采，先预览受影响数量；确认后只删除该来源的岗位及其变更事件，来源配置和其他来源数据不会被删除：
 
 ~~~powershell

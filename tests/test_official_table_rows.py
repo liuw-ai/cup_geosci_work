@@ -88,6 +88,12 @@ def test_official_table_rows_preserve_context_and_evidence(tmp_path) -> None:
     assert all(posting.source_url == NOTICE_URL for posting in postings)
     assert all(posting.official_evidence_url == NOTICE_URL for posting in postings)
     assert all(posting.deadline_date == "2025-11-15" for posting in postings)
+    assert all(
+        posting.field_evidence
+        and posting.field_evidence["evidence_scope"] == "official_html_table_row"
+        and posting.field_evidence["岗位"] == posting.title
+        for posting in postings
+    )
 
 
 def test_official_table_rows_exclude_non_geoscience_rows(tmp_path) -> None:

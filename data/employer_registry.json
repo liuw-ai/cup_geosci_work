@@ -16,7 +16,7 @@
     "parent_id": null,
     "parent_name": null,
     "category": "油气上游业主与研究机构",
-    "employer_type": "油气上游业主/运营主体",
+    "employer_type": "油气勘探开发运营单位",
     "affiliation": "中国石油体系",
     "aliases": ["中国石油天然气集团", "中国石油", "中石油", "CNPC", "PetroChina"],
     "official_domains": ["cnpc.com.cn", "zhaopin.cnpc.com.cn"]
@@ -38,7 +38,7 @@
     "parent_id": "cnpc",
     "parent_name": "中国石油天然气集团有限公司",
     "category": "油气上游业主与研究机构",
-    "employer_type": "油气上游业主/运营主体",
+    "employer_type": "油气勘探开发运营单位",
     "affiliation": "中国石油体系",
     "aliases": ["长庆油田", "长庆油田分公司"],
     "official_domains": ["cqyt.cnpc.com.cn"]
@@ -115,7 +115,7 @@
     "parent_id": null,
     "parent_name": null,
     "category": "油气上游业主与研究机构",
-    "employer_type": "油气上游业主/运营主体",
+    "employer_type": "油气勘探开发运营单位",
     "affiliation": "中国石化体系",
     "aliases": ["中国石油化工集团", "中国石化", "中石化", "Sinopec"],
     "official_domains": ["sinopecgroup.com", "job.sinopec.com"]
@@ -137,7 +137,7 @@
     "parent_id": "sinopec",
     "parent_name": "中国石油化工集团有限公司",
     "category": "油气上游业主与研究机构",
-    "employer_type": "油气上游业主/运营主体",
+    "employer_type": "油气勘探开发运营单位",
     "affiliation": "中国石化体系",
     "aliases": ["胜利油田", "胜利油田分公司"],
     "official_domains": ["slof.sinopec.com"]
@@ -148,7 +148,7 @@
     "parent_id": "sinopec",
     "parent_name": "中国石油化工集团有限公司",
     "category": "油气上游业主与研究机构",
-    "employer_type": "油气上游业主/运营主体",
+    "employer_type": "油气勘探开发运营单位",
     "affiliation": "中国石化体系",
     "aliases": ["江汉油田", "江汉油田分公司"],
     "official_domains": ["jhof.sinopec.com"]
@@ -170,7 +170,7 @@
     "parent_id": null,
     "parent_name": null,
     "category": "油气上游业主与研究机构",
-    "employer_type": "油气上游业主/运营主体",
+    "employer_type": "油气勘探开发运营单位",
     "affiliation": "中国海油体系",
     "aliases": ["中国海洋石油集团", "中国海油", "中海油", "CNOOC"],
     "official_domains": ["cnooc.com.cn", "cnooc.zhaopin.com"]
@@ -181,7 +181,7 @@
     "parent_id": "cnooc",
     "parent_name": "中国海洋石油集团有限公司",
     "category": "油气上游业主与研究机构",
-    "employer_type": "油气上游业主/运营主体",
+    "employer_type": "油气勘探开发运营单位",
     "affiliation": "中国海油体系",
     "aliases": ["中国海油天津分公司", "中海石油天津分公司", "中海油天津分公司"],
     "official_domains": ["cnooc.com.cn"]
@@ -192,7 +192,7 @@
     "parent_id": "cnooc",
     "parent_name": "中国海洋石油集团有限公司",
     "category": "油气上游业主与研究机构",
-    "employer_type": "油气上游业主/运营主体",
+    "employer_type": "油气勘探开发运营单位",
     "affiliation": "中国海油体系",
     "aliases": ["中国海油上海分公司", "中海石油上海分公司", "中海油上海分公司"],
     "official_domains": ["cnooc.com.cn"]
@@ -203,7 +203,7 @@
     "parent_id": "cnooc",
     "parent_name": "中国海洋石油集团有限公司",
     "category": "油气上游业主与研究机构",
-    "employer_type": "油气上游业主/运营主体",
+    "employer_type": "油气勘探开发运营单位",
     "affiliation": "中国海油体系",
     "aliases": ["中国海油海南分公司", "中海石油海南分公司", "中海油海南分公司"],
     "official_domains": ["cnooc.com.cn"]

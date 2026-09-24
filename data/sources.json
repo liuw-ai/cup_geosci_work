@@ -359,7 +359,7 @@
         "https://www.cnooc.com.cn/"
       ],
       "coverage_scope": "全国",
-      "company_id": "CZ258591510",
+      "company_id": "104879",
       "company_number": "25859151",
       "scene": "cam",
       "api_host": "https://fe.zhaopin.com",
@@ -371,9 +371,9 @@
       "max_items": 40,
       "request_interval_seconds": 1.2,
       "allow_shared_source_url": false,
-      "automation_status": "adapter_ready_probe_failed",
+      "automation_status": "validated_public_api_empty_20260924",
       "minimum_relevance": 20,
-      "note": "已实现公开 Zhaopin 校招接口适配器，但 2026-09-22 公开岗位接口返回业务 code=500，不能解释为无岗位；来源继续停用，待招聘平台恢复有效公开响应后重新探测。适配器不登录、不调用申请接口。"
+      "note": "官方校招页公开调用的只读 Zhaopin 接口已用组织号 104879 复测；2026-09-24 返回 code=200 且 totalNum=0，记录为扫描成功无匹配。接口业务错误、详情缺失或岗位 URL 不在官方白名单时仍会阻断发布；适配器不登录、不调用申请接口。"
     }
   },
   {
@@ -381,15 +381,41 @@
     "name": "国家管网集团招聘平台",
     "publisher": "国家石油天然气管网集团有限公司",
     "homepage_url": "https://zhaopin.pipechina.com.cn/",
-    "source_type": "landing_page",
+    "source_type": "official_snapshot_rows",
     "category": "管网、炼化与综合能源",
     "source_tier": "A",
-    "enabled": false,
+    "enabled": true,
     "config": {
       "employer_hint": "国家石油天然气管网集团有限公司",
-      "allowed_hosts": ["zhaopin.pipechina.com.cn"],
+      "allowed_hosts": ["zhaopin.pipechina.com.cn", "www.pipechina.com.cn"],
       "minimum_relevance": 20,
-      "note": "此前曾观察到 robots.txt HTTP 403；2026-09-22 本地网络探测时为 TLS EOF，当前无法完成公开入口核验。待公开接口或专用适配器核验后接入，不能解释为无岗位。"
+      "snapshot_path": "data/verified/pipechina-2027-geoscience-20260924.json",
+      "official_evidence_url": "https://www.pipechina.com.cn/front/tzgg/3004720.html",
+      "application_url": "https://zhaopin.pipechina.com.cn/recruit",
+      "note": "官方招聘系统为动态 Angular 页面；2026-09-24 浏览器核验到校园招聘地质关键词 24 条。当前以管理员核验的官方页面快照接入，学生端仍逐岗位执行专业、学历和证据门禁。本机 requests/curl_cffi 直连为 TLS EOF，未绕过 robots、验证码或访问控制；服务器直连动态适配器待后续接入。"
+    }
+  },
+  {
+    "id": "cupb-verified-geoscience-snapshot",
+    "name": "中国石油大学（北京）就业网地学岗位核验快照",
+    "publisher": "中国石油大学（北京）就业指导中心",
+    "homepage_url": "https://career.cup.edu.cn/campus",
+    "source_type": "official_snapshot_rows",
+    "category": "科研院所、高校与博士后",
+    "source_tier": "B",
+    "enabled": true,
+    "config": {
+      "allowed_hosts": [
+        "career.cup.edu.cn",
+        "www.glut.edu.cn",
+        "www.jxust.edu.cn",
+        "zhaopin.chnenergy.com.cn"
+      ],
+      "minimum_relevance": 20,
+      "snapshot_path": "data/verified/cupb-geoscience-20260924.json",
+      "official_evidence_url": "https://career.cup.edu.cn/campus/view/id/460426",
+      "application_url": "https://career.cup.edu.cn/campus",
+      "note": "2026-09-24 浏览器只读核验的中国石油大学（北京）就业网公开岗位快照。每条记录保留具体公告、岗位级专业/学历字段和报名入口；动态列表因本机 robots/TLS 不稳定不直接绕过，快照仅作为管理员复核桥接。无岗位级证据的公告总述不进入快照。"
     }
   },
   {
@@ -541,7 +567,9 @@
       ],
       "query_page_size": 20,
       "max_items": 36,
-      "max_detail_candidates": 40,
+      "max_detail_candidates": 12,
+      "detail_time_budget_seconds": 50,
+      "request_timeout_seconds": 8,
       "fetch_detail_pages": true,
       "require_detail_content": true,
       "minimum_detail_characters": 250,

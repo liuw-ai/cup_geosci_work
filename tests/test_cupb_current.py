@@ -59,6 +59,10 @@ def test_cupb_current_notice_reads_outer_job_table_fields(tmp_path) -> None:
     assert posting.location == "广西南宁市青秀区"
     assert posting.published_date == "2026-09-22"
     assert posting.deadline_date == "2026-12-21"
-    assert "资源勘查工程" in (posting.match_text or "")
+    # The outer position table is the role-level evidence.  The long
+    # announcement body can mention other disciplines, but must not be used
+    # to relabel this storage/materials/IT role as a geoscience vacancy.
+    assert "储能科学与工程" in (posting.match_text or "")
+    assert "资源勘查工程" not in (posting.match_text or "")
     assert "本科" in posting.summary
     assert posting.source_url == NOTICE_URL

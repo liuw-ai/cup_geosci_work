@@ -1,7 +1,7 @@
 <article class="job-card">
   <div class="job-card-topline">
     <span class="category-label">{{ job.category_label or job.category|category_label }}</span>
-    <span class="relevance relevance-{{ job.relevance_band }}">{{ job.relevance_band }}</span>
+    <span class="relevance publication-{{ job.publication_status }}">{{ job.publication_status_label }}</span>
   </div>
   <h3><a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
   <p class="employer">{{ job.canonical_employer_name or job.employer }}</p>

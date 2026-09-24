@@ -54,15 +54,16 @@ def test_pipeline_deduplicates_and_creates_daily_change(tmp_path) -> None:
     assert second.created == 0
     assert second.updated == 0
     jobs, total = database.list_jobs()
-    assert total == 1
-    # A free-form notice without structured professional evidence remains a
-    # review opportunity; it must not be promoted to a strong match solely by
-    # keywords in the announcement body.
-    assert jobs[0]["relevance_band"] == "相关机会"
+    assert total == 0
+    internal_jobs, internal_total = database.list_jobs(student_visible=False)
+    assert internal_total == 1
+    # Announcement prose is a private discovery hint, never a student-facing
+    # recommendation without row-level professional and degree evidence.
+    assert internal_jobs[0]["publication_status"] == "pending_evidence"
 
     report = build_daily_report(database, settings)
-    assert report["stats"]["new"] == 1
-    assert report["new_jobs"][0]["title"] == posting.title
+    assert report["stats"]["new"] == 0
+    assert report["new_jobs"] == []
 
     assert database.count_jobs_for_source("official-test-source") == 1
     assert database.delete_jobs_for_source("official-test-source") == 1
@@ -177,6 +178,12 @@ def test_stale_crawl_run_blocks_audit_then_is_safely_recovered_before_sync(tmp_p
         published_date="2026-09-17",
         deadline_date=None,
         location="北京",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程师招聘",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+        },
     )
     pipeline = JobPipeline(settings, database, FakeCollector(posting))
     result = pipeline.sync_source(database.get_source("official-test-source"))
@@ -209,6 +216,12 @@ def test_daily_changes_use_the_configured_local_calendar_day(tmp_path) -> None:
         published_date="2026-09-17",
         deadline_date=None,
         location="北京",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程科研助理招聘",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+        },
     )
     database.save_job(
         pipeline.normalize_posting(posting, database.get_source("official-test-source"))

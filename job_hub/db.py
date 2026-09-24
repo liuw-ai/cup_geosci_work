@@ -79,6 +79,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     degree_levels_json TEXT NOT NULL DEFAULT '[]',
     major_tags_json TEXT NOT NULL DEFAULT '[]',
     field_evidence_json TEXT NOT NULL DEFAULT '{}',
+    publication_status TEXT NOT NULL DEFAULT 'pending_evidence',
+    publication_basis_json TEXT NOT NULL DEFAULT '{}',
     summary TEXT NOT NULL DEFAULT '',
     description TEXT NOT NULL DEFAULT '',
     relevance_score INTEGER NOT NULL DEFAULT 0,
@@ -398,6 +400,8 @@ class Database:
             "verification_status": "TEXT NOT NULL DEFAULT 'published_official'",
             "official_evidence_url": "TEXT",
             "field_evidence_json": "TEXT NOT NULL DEFAULT '{}'",
+            "publication_status": "TEXT NOT NULL DEFAULT 'pending_evidence'",
+            "publication_basis_json": "TEXT NOT NULL DEFAULT '{}'",
         }
         added_official_evidence_url = False
         for name, definition in additions.items():
@@ -406,6 +410,10 @@ class Database:
                 added_official_evidence_url = (
                     added_official_evidence_url or name == "official_evidence_url"
                 )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_jobs_publication_status "
+            "ON jobs(status, publication_status, deadline_date)"
+        )
         crawl_run_columns = {
             row["name"]
             for row in connection.execute("PRAGMA table_info(crawl_runs)").fetchall()
@@ -978,6 +986,9 @@ class Database:
             "field_evidence_json": json.dumps(
                 job.get("field_evidence", {}), ensure_ascii=False
             ),
+            "publication_basis_json": json.dumps(
+                job.get("publication_basis", {}), ensure_ascii=False
+            ),
         }
         with self.transaction() as connection:
             existing = connection.execute(
@@ -996,11 +1007,12 @@ class Database:
                         location_confidence, location_evidence, verification_status,
                         official_evidence_url, published_date,
                          deadline_date, degree_levels_json, major_tags_json,
-                         field_evidence_json, summary,
+                         field_evidence_json, publication_status, publication_basis_json,
+                         summary,
                         description, relevance_score, relevance_band, status,
                         first_seen_at, last_seen_at, created_at, updated_at
                     )
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         job.get("source_id"),
@@ -1031,6 +1043,8 @@ class Database:
                         json_fields["degree_levels_json"],
                         json_fields["major_tags_json"],
                         json_fields["field_evidence_json"],
+                        job.get("publication_status", "pending_evidence"),
+                        json_fields["publication_basis_json"],
                         job.get("summary", ""),
                         job.get("description", ""),
                         job["relevance_score"],
@@ -1068,6 +1082,7 @@ class Database:
                         official_evidence_url = ?,
                         published_date = ?, deadline_date = ?, degree_levels_json = ?,
                          major_tags_json = ?, field_evidence_json = ?,
+                         publication_status = ?, publication_basis_json = ?,
                          summary = ?, description = ?,
                         relevance_score = ?, relevance_band = ?, status = ?,
                         last_seen_at = ?
@@ -1099,6 +1114,8 @@ class Database:
                         json_fields["degree_levels_json"],
                         json_fields["major_tags_json"],
                         json_fields["field_evidence_json"],
+                        job.get("publication_status", "pending_evidence"),
+                        json_fields["publication_basis_json"],
                         job.get("summary", ""),
                         job.get("description", ""),
                         job["relevance_score"],
@@ -1124,6 +1141,7 @@ class Database:
                     official_evidence_url = ?,
                     published_date = ?, deadline_date = ?, degree_levels_json = ?,
                      major_tags_json = ?, field_evidence_json = ?,
+                     publication_status = ?, publication_basis_json = ?,
                      summary = ?, description = ?,
                     relevance_score = ?, relevance_band = ?, status = ?,
                     last_seen_at = ?, updated_at = ?
@@ -1154,9 +1172,11 @@ class Database:
                     job.get("published_date"),
                     job.get("deadline_date"),
                     json_fields["degree_levels_json"],
-                    json_fields["major_tags_json"],
-                    json_fields["field_evidence_json"],
-                    job.get("summary", ""),
+                        json_fields["major_tags_json"],
+                        json_fields["field_evidence_json"],
+                        job.get("publication_status", "pending_evidence"),
+                        json_fields["publication_basis_json"],
+                        job.get("summary", ""),
                     job.get("description", ""),
                     job["relevance_score"],
                     job["relevance_band"],
@@ -1932,12 +1952,26 @@ class Database:
             raise RuntimeError("Job evidence could not be persisted")
         return Database._evidence_row(row)
 
-    def find_job(self, job_id: int) -> dict[str, Any] | None:
+    def find_job(
+        self,
+        job_id: int,
+        *,
+        student_visible: bool = False,
+    ) -> dict[str, Any] | None:
         with self.connect() as connection:
+            where = "id = ?"
+            values: list[Any] = [job_id]
+            if student_visible:
+                where += " AND publication_status IN (?, ?)"
+                values.extend(("student_eligible", "unrestricted_eligible"))
             row = connection.execute(
-                "SELECT * FROM jobs WHERE id = ?", (job_id,)
+                f"SELECT * FROM jobs WHERE {where}", values
             ).fetchone()
         return self._job_row(row) if row else None
+
+    def find_public_job(self, job_id: int) -> dict[str, Any] | None:
+        """Return one job only when it has passed the student publication gate."""
+        return self.find_job(job_id, student_visible=True)
 
     def update_derived_job_fields(
         self,
@@ -1949,6 +1983,8 @@ class Database:
         relevance_score: int,
         relevance_band: str,
         status: str,
+        publication_status: str,
+        publication_basis: dict[str, Any],
     ) -> bool:
         """Refresh rule-derived fields without changing the official job record.
 
@@ -1961,7 +1997,8 @@ class Database:
             current = connection.execute(
                 """
                 SELECT category, degree_levels_json, major_tags_json,
-                       relevance_score, relevance_band, status
+                       relevance_score, relevance_band, status,
+                       publication_status, publication_basis_json
                 FROM jobs
                 WHERE id = ?
                 """,
@@ -1976,6 +2013,10 @@ class Database:
                 "relevance_score": relevance_score,
                 "relevance_band": relevance_band,
                 "status": status,
+                "publication_status": publication_status,
+                "publication_basis_json": json.dumps(
+                    publication_basis, ensure_ascii=False
+                ),
             }
             if all(current[key] == value for key, value in derived.items()):
                 return False
@@ -1983,7 +2024,8 @@ class Database:
                 """
                 UPDATE jobs
                 SET category = ?, degree_levels_json = ?, major_tags_json = ?,
-                    relevance_score = ?, relevance_band = ?, status = ?
+                    relevance_score = ?, relevance_band = ?, status = ?,
+                    publication_status = ?, publication_basis_json = ?
                 WHERE id = ?
                 """,
                 (
@@ -1993,6 +2035,8 @@ class Database:
                     relevance_score,
                     relevance_band,
                     status,
+                    publication_status,
+                    derived["publication_basis_json"],
                     job_id,
                 ),
             )
@@ -2135,11 +2179,15 @@ class Database:
         page: int = 1,
         page_size: int | None = 20,
         only_open: bool = True,
+        student_visible: bool = True,
     ) -> tuple[list[dict[str, Any]], int]:
         clauses: list[str] = []
         values: list[Any] = []
         if only_open:
             clauses.append("status = 'open'")
+        if student_visible:
+            clauses.append("publication_status IN (?, ?)")
+            values.extend(("student_eligible", "unrestricted_eligible"))
         if category:
             clauses.append("category = ?")
             values.append(category)
@@ -2193,6 +2241,7 @@ class Database:
                 SELECT category, COUNT(*) AS count
                 FROM jobs
                 WHERE status = 'open'
+                  AND publication_status IN ('student_eligible', 'unrestricted_eligible')
                 GROUP BY category
                 ORDER BY count DESC, category
                 """
@@ -2227,6 +2276,7 @@ class Database:
                 WHERE job_events.occurred_at >= ?
                   AND job_events.occurred_at < ?
                   AND jobs.status = 'open'
+                  AND jobs.publication_status IN ('student_eligible', 'unrestricted_eligible')
                 ORDER BY jobs.relevance_score DESC, jobs.deadline_date ASC
                 """,
                 (start_value, end_value),
@@ -2247,6 +2297,7 @@ class Database:
                 """
                 SELECT * FROM jobs
                 WHERE status = 'open'
+                  AND publication_status IN ('student_eligible', 'unrestricted_eligible')
                   AND deadline_date IS NOT NULL
                   AND deadline_date >= ?
                   AND deadline_date <= ?
@@ -2260,7 +2311,8 @@ class Database:
         with self.connect() as connection:
             return int(
                 connection.execute(
-                    "SELECT COUNT(*) FROM jobs WHERE status = 'open'"
+                    "SELECT COUNT(*) FROM jobs WHERE status = 'open' "
+                    "AND publication_status IN ('student_eligible', 'unrestricted_eligible')"
                 ).fetchone()[0]
             )
 
@@ -3162,4 +3214,7 @@ class Database:
         item["degree_levels"] = json.loads(item.pop("degree_levels_json"))
         item["major_tags"] = json.loads(item.pop("major_tags_json"))
         item["field_evidence"] = json.loads(item.pop("field_evidence_json", "{}"))
+        item["publication_basis"] = json.loads(
+            item.pop("publication_basis_json", "{}")
+        )
         return enrich_job(item)

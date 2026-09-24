@@ -64,15 +64,6 @@
           </select>
         </div>
       {% endif %}
-      <div class="field">
-        <label for="relevance">专业匹配</label>
-        <select id="relevance" name="relevance">
-          <option value="">全部匹配度</option>
-          <option value="强相关" {% if selected.relevance == "强相关" %}selected{% endif %}>强相关</option>
-          <option value="相关机会" {% if selected.relevance == "相关机会" %}selected{% endif %}>相关机会</option>
-          <option value="拓展机会" {% if selected.relevance == "拓展机会" %}selected{% endif %}>拓展机会</option>
-        </select>
-      </div>
       <div class="filter-actions">
         <button type="submit">筛选岗位</button>
         <a href="{{ url_for('jobs') }}" aria-label="清除全部筛选条件" title="清除筛选条件">×</a>
@@ -84,10 +75,10 @@
         <p><strong>{{ profile.label }}</strong>：当前找到 <strong>{{ total }}</strong> 条可优先查看的岗位</p>
         <p class="muted">“明确匹配”同时具备专业和学历证据；其余岗位请以原始公告为准。</p>
       {% else %}
-        <p>当前找到 <strong>{{ total }}</strong> 条在招岗位</p>
+        <p>当前找到 <strong>{{ total }}</strong> 条可报的官方岗位</p>
       {% endif %}
-      {% if selected.category or selected.degree or selected.province or selected.relevance or selected.q %}
-        <p class="muted">筛选结果按匹配度、截止日期和更新时间排序。</p>
+      {% if selected.category or selected.degree or selected.province or selected.q %}
+        <p class="muted">仅展示岗位级专业与学历条件支持本院学生申请的官方岗位。</p>
       {% endif %}
     </div>
 

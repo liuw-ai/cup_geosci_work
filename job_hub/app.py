@@ -156,13 +156,29 @@ def create_app(settings: Settings | None = None) -> Flask:
         return response
 
     def report_for_display(report: dict[str, Any]) -> dict[str, Any]:
-        """Enrich historical daily snapshots without rewriting frozen report data."""
+        """Render only records that remain safe for student-facing display.
+
+        The stored report stays immutable for audit purposes. A later evidence
+        correction must still be able to withdraw an out-of-scope job from old
+        public report pages.
+        """
         displayed = dict(report)
         for key in ("new_jobs", "updated_jobs", "deadline_jobs"):
             displayed[key] = [
-                enrich_job(item)
+                job
                 for item in report.get(key, [])
+                if (job := database.find_public_job(int(item["id"]))) is not None
             ]
+        stats = dict(report.get("stats", {}))
+        stats.update(
+            {
+                "new": len(displayed["new_jobs"]),
+                "updated": len(displayed["updated_jobs"]),
+                "deadline_soon": len(displayed["deadline_jobs"]),
+                "open_total": database.count_open_jobs(),
+            }
+        )
+        displayed["stats"] = stats
         return displayed
 
     def active_report() -> tuple[dict[str, Any], bool]:
@@ -337,7 +353,7 @@ def create_app(settings: Settings | None = None) -> Flask:
 
     @app.get("/jobs/<int:job_id>")
     def job_detail(job_id: int) -> str:
-        job = database.find_job(job_id)
+        job = database.find_public_job(job_id)
         if job is None:
             abort(404)
         profile = requested_profile()
@@ -680,6 +696,16 @@ def create_app(settings: Settings | None = None) -> Flask:
         )
         if source is None:
             return jsonify({"error": "Unknown source_id."}), 400
+        field_evidence = payload.get("field_evidence")
+        if not isinstance(field_evidence, dict):
+            field_evidence = {}
+        else:
+            field_evidence = dict(field_evidence)
+        if field_evidence:
+            field_evidence.setdefault(
+                "evidence_scope", "admin_verified_official_record"
+            )
+            field_evidence.setdefault("岗位", str(payload["title"]).strip())
         raw = RawPosting(
             title=str(payload["title"]).strip(),
             employer=str(payload["employer"]).strip(),
@@ -694,11 +720,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             official_evidence_url=official_evidence_url or None,
             match_text=str(payload.get("match_text", "")).strip() or None,
             qualification_text=str(payload.get("qualification_text", "")).strip() or None,
-            field_evidence=(
-                payload.get("field_evidence")
-                if isinstance(payload.get("field_evidence"), dict)
-                else None
-            ),
+            field_evidence=field_evidence or None,
         )
         normalized = pipeline.normalize_posting(raw, source)
         job_id, outcome = database.save_job(normalized)
@@ -815,6 +837,21 @@ def create_app(settings: Settings | None = None) -> Flask:
         )
         if source is None:
             return jsonify({"error": "Configured source_id is not registered."}), 409
+        field_evidence = metadata.get("field_evidence")
+        if not isinstance(field_evidence, dict):
+            field_evidence = {}
+        else:
+            field_evidence = dict(field_evidence)
+        # This route is available only after an administrator verified the
+        # official original. Record that provenance so manual and automated
+        # sources pass through the same student-publication gate.
+        if field_evidence:
+            field_evidence.setdefault(
+                "evidence_scope", "admin_verified_official_record"
+            )
+            field_evidence.setdefault(
+                "岗位", str(metadata.get("title") or lead["title"]).strip()
+            )
         raw = RawPosting(
             title=str(metadata.get("title") or lead["title"]).strip(),
             employer=employer,
@@ -831,6 +868,11 @@ def create_app(settings: Settings | None = None) -> Flask:
             or None,
             external_id=f"verified-lead-{lead_id}",
             official_evidence_url=str(lead["official_url"]).strip(),
+            match_text=str(metadata.get("match_text") or "").strip() or None,
+            qualification_text=(
+                str(metadata.get("qualification_text") or "").strip() or None
+            ),
+            field_evidence=field_evidence or None,
         )
         job_id, outcome = database.save_job(pipeline.normalize_posting(raw, source))
         try:
@@ -953,6 +995,9 @@ def create_app(settings: Settings | None = None) -> Flask:
         source = database.get_source(str(candidate["source_id"]))
         if source is None:
             return jsonify({"error": "Candidate source is no longer registered."}), 409
+        field_evidence = dict(candidate.get("field_evidence") or {})
+        field_evidence["evidence_scope"] = "official_attachment_row"
+        field_evidence.setdefault("岗位", str(candidate["title"]))
         raw = RawPosting(
             title=str(candidate["title"]),
             employer=str(candidate["employer"]),
@@ -965,6 +1010,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             location=candidate.get("location"),
             external_id=f"artifact-candidate-{candidate_id}",
             official_evidence_url=str(candidate["official_page_url"]),
+            field_evidence=field_evidence,
         )
         try:
             job_id, outcome, published = database.publish_artifact_job_candidate(
