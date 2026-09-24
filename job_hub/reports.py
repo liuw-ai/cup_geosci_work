@@ -6,6 +6,14 @@ from zoneinfo import ZoneInfo
 
 from job_hub.config import Settings
 from job_hub.db import Database
+from job_hub.government_artifacts import (
+    government_artifact_refresh_summary,
+    load_government_artifact_manifest,
+)
+from job_hub.government_positions import (
+    government_position_quality_report,
+    load_position_registry,
+)
 
 
 def local_today(settings: Settings) -> date:
@@ -61,6 +69,39 @@ def build_daily_report(
         target,
         (target_date + timedelta(days=7)).isoformat(),
     )
+    manifest = None
+    manifest_error = None
+    manifest_path = settings.government_artifact_manifest_path
+    if manifest_path is not None:
+        try:
+            manifest = load_government_artifact_manifest(manifest_path)
+        except (OSError, ValueError) as error:
+            # A malformed manifest must be visible in operations, but must not
+            # prevent an already verified daily report from being generated.
+            manifest = {"as_of": None, "artifacts": []}
+            manifest_error = str(error)
+    government_quality = government_artifact_refresh_summary(
+        database,
+        manifest=manifest,
+        today=target,
+        manifest_error=manifest_error,
+    )
+    position_registry_error = None
+    position_quality = None
+    registry_path = settings.government_position_registry_path
+    if registry_path is not None:
+        try:
+            position_quality = government_position_quality_report(
+                load_position_registry(registry_path), today=target
+            )
+        except (OSError, ValueError) as error:
+            position_registry_error = str(error)
+            position_quality = {
+                "verified_open_records": 0,
+                "explicit_student_matches": 0,
+                "source_failures_or_pending": 1,
+                "scan_interpretation": "职位表台账不可用，不能解释为无岗位。",
+            }
     return {
         "report_date": target,
         "new_jobs": [job_card(job) for job in changes["new"]],
@@ -71,6 +112,11 @@ def build_daily_report(
             "updated": len(updated),
             "deadline_soon": len(deadline_jobs),
             "open_total": database.count_open_jobs(),
+        },
+        "government_quality": government_quality,
+        "government_positions": {
+            **(position_quality or {}),
+            "registry_error": position_registry_error,
         },
     }
 

@@ -1277,6 +1277,23 @@ class Database:
             self._validate_source_artifact_urls(
                 self._source_row(source), normalized
             )
+            existing_artifact = connection.execute(
+                """
+                SELECT extraction_status, metadata_json
+                FROM source_artifacts
+                WHERE source_id = ? AND artifact_url = ?
+                """,
+                (normalized["source_id"], normalized["artifact_url"]),
+            ).fetchone()
+            if existing_artifact is not None:
+                try:
+                    existing_metadata = json.loads(existing_artifact["metadata_json"] or "{}")
+                except json.JSONDecodeError:
+                    existing_metadata = {}
+                if isinstance(existing_metadata, dict):
+                    merged_metadata = dict(existing_metadata)
+                    merged_metadata.update(normalized["metadata"])
+                    normalized["metadata"] = merged_metadata
             connection.execute(
                 """
                 INSERT INTO source_artifacts (
@@ -1296,7 +1313,16 @@ class Database:
                     parser_version=COALESCE(
                         excluded.parser_version, source_artifacts.parser_version
                     ),
-                    extraction_status=excluded.extraction_status,
+                    -- A recurring manifest refresh must not reset an artifact
+                    -- that has already been downloaded, extracted, or failed.
+                    -- Re-registration may advance metadata, but only an
+                    -- explicit processor call may change processing state.
+                    extraction_status=CASE
+                        WHEN source_artifacts.extraction_status <> 'registered'
+                             AND excluded.extraction_status = 'registered'
+                        THEN source_artifacts.extraction_status
+                        ELSE excluded.extraction_status
+                    END,
                     metadata_json=excluded.metadata_json,
                     updated_at=excluded.updated_at
                 """,

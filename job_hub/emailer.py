@@ -24,6 +24,8 @@ class Mailer:
             f"{self.settings.base_url}/daily/{report['report_date']}"
         )
         stats = report["stats"]
+        government = report.get("government_quality", {})
+        government_positions = report.get("government_positions", {})
         subject = (
             f"就业日报 {report['report_date']} | 新增 {stats['new']} 条，"
             f"7 日内截止 {stats['deadline_soon']} 条"
@@ -34,6 +36,11 @@ class Mailer:
             f"更新：{stats['updated']} 条\n"
             f"7 日内截止：{stats['deadline_soon']} 条\n"
             f"在招总数：{stats['open_total']} 条\n\n"
+            f"政府职位表：已登记 {government.get('registered_artifacts', 0)} 份，"
+            f"待人工复核 {government.get('pending_manual_review', 0)} 条，"
+            f"来源故障/不可用 {government.get('source_failures_or_unavailable', 0)} 条\n\n"
+            f"政府岗位行：明确匹配 {government_positions.get('explicit_student_matches', 0)} 条，"
+            f"待核验/来源故障 {government_positions.get('source_failures_or_pending', 0)} 条\n\n"
             f"查看完整日报：{report_url}\n"
         )
         content = (
@@ -45,6 +52,8 @@ class Mailer:
             f"<tr><td style='padding:4px 18px 4px 0'>信息更新</td><td><strong>{stats['updated']}</strong> 条</td></tr>"
             f"<tr><td style='padding:4px 18px 4px 0'>7 日内截止</td><td><strong>{stats['deadline_soon']}</strong> 条</td></tr>"
             f"<tr><td style='padding:4px 18px 4px 0'>当前在招</td><td><strong>{stats['open_total']}</strong> 条</td></tr>"
+            f"<tr><td style='padding:4px 18px 4px 0'>政府职位表</td><td>已登记 {government.get('registered_artifacts', 0)} 份，待复核 {government.get('pending_manual_review', 0)} 条</td></tr>"
+            f"<tr><td style='padding:4px 18px 4px 0'>政府岗位行</td><td>明确匹配 {government_positions.get('explicit_student_matches', 0)} 条，待核验/故障 {government_positions.get('source_failures_or_pending', 0)} 条</td></tr>"
             "</table>"
             f"<p><a href='{html.escape(report_url, quote=True)}'>打开完整就业日报</a></p>"
             "</body></html>"

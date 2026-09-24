@@ -104,7 +104,7 @@ docker compose logs --tail=100 web worker
 
 ## 5. 每日 20:00 链路
 
-worker 会按 `SOURCE_SYNC_INTERVAL_MINUTES` 周期刷新来源。到达 `DAILY_PUBLISH_TIME=20:00` 后，它会再次同步、执行发布前审计、冻结当天日报，并通过 SMTP 发送日报链接。服务器在 20:00 短暂离线时，worker 重启后会检测当天是否缺少日报并补发。
+worker 会按 `SOURCE_SYNC_INTERVAL_MINUTES` 周期刷新来源，并在每次周期中自动幂等登记 `GOVERNMENT_ARTIFACT_MANIFEST_PATH` 指向的事业编/公务员官方附件清单，再进入受控附件处理队列。到达 `DAILY_PUBLISH_TIME=20:00` 后，它会再次同步、执行发布前审计、冻结当天日报，并通过 SMTP 发送日报链接。服务器在 20:00 短暂离线时，worker 重启后会检测当天是否缺少日报并补发。
 
 健康检查要求：
 

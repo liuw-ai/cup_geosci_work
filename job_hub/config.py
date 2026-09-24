@@ -48,6 +48,8 @@ class Settings:
     smtp_use_ssl: bool
     crawl_run_stale_seconds: int = 1800
     artifact_storage_dir: Path | None = None
+    government_artifact_manifest_path: Path | None = None
+    government_position_registry_path: Path | None = None
     attachment_max_bytes: int = 25_000_000
     attachment_discovery_max_bytes: int = 2_000_000
     attachment_max_rows: int = 2_000
@@ -106,6 +108,18 @@ class Settings:
             crawl_run_stale_seconds=_env_int("CRAWL_RUN_STALE_SECONDS", 1800),
             artifact_storage_dir=Path(
                 os.getenv("ATTACHMENT_STORAGE_DIR", data_dir / "official-attachments")
+            ),
+            government_artifact_manifest_path=Path(
+                os.getenv(
+                    "GOVERNMENT_ARTIFACT_MANIFEST_PATH",
+                    PROJECT_ROOT / "data" / "government_artifact_manifest.json",
+                )
+            ),
+            government_position_registry_path=Path(
+                os.getenv(
+                    "GOVERNMENT_POSITION_REGISTRY_PATH",
+                    PROJECT_ROOT / "data" / "government_position_registry.json",
+                )
             ),
             attachment_max_bytes=_env_int("ATTACHMENT_MAX_BYTES", 25_000_000),
             attachment_discovery_max_bytes=_env_int(

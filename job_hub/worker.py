@@ -13,6 +13,12 @@ from job_hub.config import Settings
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
 from job_hub.emailer import DeliveryError, Mailer
+from job_hub.government_artifacts import (
+    GovernmentArtifactContractError,
+    government_artifact_refresh_summary,
+    load_government_artifact_manifest,
+    register_government_artifacts,
+)
 from job_hub.pipeline import JobPipeline
 from job_hub.reports import publish_daily_report
 
@@ -68,8 +74,22 @@ class DailyWorker:
         LOGGER.info("Starting source synchronization.")
         self._heartbeat("syncing")
         try:
+            manifest_summary = self._register_government_artifacts()
             summary = self.pipeline.sync_all()
             attachment_summary = self._process_registered_attachments()
+            government_summary = government_artifact_refresh_summary(
+                self.database,
+                manifest=manifest_summary.get("manifest"),
+                today=datetime.now(self.timezone).date().isoformat(),
+                manifest_error=(
+                    str(manifest_summary.get("error"))
+                    if manifest_summary.get("status") == "failed"
+                    else None
+                ),
+            )
+            manifest_log = {
+                key: value for key, value in manifest_summary.items() if key != "manifest"
+            }
             snapshot_date = datetime.now(self.timezone).date().isoformat()
             self.database.save_coverage_snapshot(
                 snapshot_date,
@@ -78,9 +98,19 @@ class DailyWorker:
             self.last_sync_monotonic = time.monotonic()
             LOGGER.info(
                 "Source synchronization complete: %s; coverage snapshot recorded for %s.",
-                {"sources": summary.as_dict(), "attachments": attachment_summary},
+                {
+                    "sources": summary.as_dict(),
+                    "government_manifest": manifest_log,
+                    "attachments": attachment_summary,
+                    "government_quality": government_summary,
+                },
                 snapshot_date,
             )
+            if manifest_summary.get("status") == "failed":
+                self._send_failure_safely(
+                    "政府职位表清单加载失败",
+                    str(manifest_summary.get("error") or "unknown manifest error"),
+                )
             if summary.failed:
                 self._send_failure_safely(
                     "部分官方来源采集失败",
@@ -92,6 +122,30 @@ class DailyWorker:
             LOGGER.exception("Source synchronization failed")
             self._heartbeat("degraded", "source synchronization failed")
             self._send_failure_safely("官方来源同步失败", str(error))
+
+    def _register_government_artifacts(self) -> dict[str, object]:
+        """Idempotently load the versioned government-artifact manifest.
+
+        This runs on every source cycle so a newly committed official PDF/XLS
+        becomes eligible for controlled processing without an operator shell
+        command. Registration never downloads a file or publishes a candidate.
+        """
+        path = self.settings.government_artifact_manifest_path
+        if path is None:
+            return {"status": "skipped", "registered": 0, "manifest": None}
+        try:
+            manifest = load_government_artifact_manifest(path)
+            registered = register_government_artifacts(self.database, manifest)
+            return {
+                "status": "ok",
+                "path": str(path),
+                "as_of": manifest.get("as_of"),
+                "registered": len(registered),
+                "manifest": manifest,
+            }
+        except (OSError, ValueError, GovernmentArtifactContractError) as error:
+            LOGGER.error("Government artifact manifest could not be registered: %s", error)
+            return {"status": "failed", "path": str(path), "error": str(error), "manifest": None}
 
     def _process_registered_attachments(self) -> dict[str, int]:
         """Advance discovered official files without publishing unreviewed rows."""

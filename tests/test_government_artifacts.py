@@ -6,9 +6,13 @@ import pytest
 
 from job_hub.government_artifacts import (
     GovernmentArtifactContractError,
+    government_artifact_refresh_summary,
     load_government_artifact_manifest,
     register_government_artifacts,
 )
+from job_hub.db import Database
+
+from conftest import make_settings, source
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -55,3 +59,40 @@ def test_registration_only_creates_private_artifact_rows() -> None:
     assert all(item["extraction_status"] == "registered" for item in database.items)
     assert all("government_artifact_id" in item["metadata"] for item in database.items)
 
+
+def test_manifest_refresh_does_not_reset_processed_artifact(tmp_path: Path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    manifest = {
+        "as_of": "2026-09-25",
+        "artifacts": [
+            {
+                "id": "test-artifact",
+                "source_id": "official-test-source",
+                "province": "北京",
+                "position_type": "public_institution",
+                "notice_url": "https://careers.example.edu.cn/notice",
+                "attachment_url": "https://careers.example.edu.cn/notice.xlsx",
+                "artifact_kind": "position_table",
+                "deadline_date": "2099-12-31",
+                "observed_on": "2026-09-25",
+                "status": "server_download_pending",
+                "note": "test",
+            }
+        ],
+    }
+    first = register_government_artifacts(database, manifest)[0]
+    database.update_source_artifact_processing(
+        first["id"], extraction_status="failed", metadata_updates={"last_error": "temporary"}
+    )
+
+    register_government_artifacts(database, manifest)
+
+    refreshed = database.get_source_artifact(first["id"])
+    assert refreshed["extraction_status"] == "failed"
+    assert refreshed["metadata"]["last_error"] == "temporary"
+    summary = government_artifact_refresh_summary(database, manifest=manifest, today="2026-09-25")
+    assert summary["registered_artifacts"] == 1
+    assert summary["source_failures_or_unavailable"] == 1

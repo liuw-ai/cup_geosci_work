@@ -9,6 +9,8 @@ services:
     environment:
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      GOVERNMENT_ARTIFACT_MANIFEST_PATH: /app/data/government_artifact_manifest.json
+      GOVERNMENT_POSITION_REGISTRY_PATH: /app/data/government_position_registry.json
     command:
       - gunicorn
       - --bind
@@ -51,6 +53,8 @@ services:
     environment:
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      GOVERNMENT_ARTIFACT_MANIFEST_PATH: /app/data/government_artifact_manifest.json
+      GOVERNMENT_POSITION_REGISTRY_PATH: /app/data/government_position_registry.json
     command:
       - python
       - -m

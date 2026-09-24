@@ -139,3 +139,70 @@ def register_government_artifacts(database: Any, manifest: dict[str, Any]) -> li
         )
     return registered
 
+
+def government_artifact_refresh_summary(
+    database: Any,
+    *,
+    manifest: dict[str, Any] | None = None,
+    today: str | None = None,
+    manifest_error: str | None = None,
+) -> dict[str, Any]:
+    """Return an operational summary for the daily report and worker logs.
+
+    The summary distinguishes an unavailable source or a private review queue
+    from a verified absence of jobs. It counts only artifacts registered through
+    the versioned manifest; public job rows remain subject to the normal gate.
+    """
+    target = date.fromisoformat(today) if today else date.today()
+    declared = list((manifest or {}).get("artifacts") or [])
+    artifacts = []
+    for item in database.list_source_artifacts(limit=500):
+        metadata = item.get("metadata") or {}
+        if metadata.get("government_artifact_id"):
+            artifacts.append(item)
+    extraction_counts: dict[str, int] = {}
+    manifest_counts: dict[str, int] = {}
+    current = historical = 0
+    for artifact in artifacts:
+        extraction = str(artifact.get("extraction_status") or "unknown")
+        extraction_counts[extraction] = extraction_counts.get(extraction, 0) + 1
+        metadata = artifact.get("metadata") or {}
+        status = str(metadata.get("manifest_status") or "unknown")
+        manifest_counts[status] = manifest_counts.get(status, 0) + 1
+        deadline = str(metadata.get("deadline_date") or "").strip()
+        if deadline:
+            try:
+                if date.fromisoformat(deadline) >= target:
+                    current += 1
+                else:
+                    historical += 1
+            except ValueError:
+                pass
+    candidates = database.list_artifact_job_candidates(limit=500)
+    candidate_counts: dict[str, int] = {}
+    for candidate in candidates:
+        status = str(candidate.get("review_status") or "unknown")
+        candidate_counts[status] = candidate_counts.get(status, 0) + 1
+    source_failures = sum(
+        count
+        for status, count in extraction_counts.items()
+        if status in {"failed", "skipped", "source_unavailable"}
+    ) + manifest_counts.get("source_unavailable", 0) + (1 if manifest_error else 0)
+    return {
+        "as_of": (manifest or {}).get("as_of"),
+        "declared_artifacts": len(declared),
+        "registered_artifacts": len(artifacts),
+        "current_deadline_artifacts": current,
+        "historical_deadline_artifacts": historical,
+        "extraction_status": dict(sorted(extraction_counts.items())),
+        "manifest_status": dict(sorted(manifest_counts.items())),
+        "candidate_review_status": dict(sorted(candidate_counts.items())),
+        "source_failures_or_unavailable": source_failures,
+        "manifest_error": manifest_error,
+        "pending_manual_review": candidate_counts.get("needs_review", 0),
+        "interpretation": (
+            "存在来源故障或待人工复核记录，不能把未形成岗位行解释为无岗位。"
+            if source_failures or candidate_counts.get("needs_review", 0) or manifest_error
+            else "已登记附件均已完成当前处理；公开岗位仍以岗位级证据门禁为准。"
+        ),
+    }
