@@ -618,7 +618,7 @@
           "backup_urls": ["https://www.pipechina.com.cn/"],
           "source_id": "pipechina-career",
           "verification_status": "official_confirmed",
-          "evidence_note": "国家管网招聘平台；当前来源记录为停用，待稳定性验证。"
+          "evidence_note": "国家管网招聘平台；学生端当前使用已核验官方快照，动态浏览器捕获任务待服务器具备公开 Chromium 且完成 robots/分页复测后启用。"
         }
       ]
     },

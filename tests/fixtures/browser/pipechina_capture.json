@@ -1,0 +1,33 @@
+{
+  "status": "success",
+  "platform_url": "https://zhaopin.pipechina.com.cn/recruit#/portal_job_list?search_key=%E5%9C%B0%E8%B4%A8",
+  "captured_at": "2026-09-24T08:00:00+08:00",
+  "scan": {
+    "pagination_complete": true,
+    "rows_discovered": 1,
+    "rows_exported": 1,
+    "failed_rows": 0
+  },
+  "rows": [
+    {
+      "external_id": "pipechina-browser-001",
+      "title": "管道保护工程师（三明）",
+      "employer": "国家石油天然气管网集团有限公司福建分公司",
+      "degree": "硕士研究生及以上",
+      "major": "地质学、地质资源与地质工程、地质工程",
+      "location": "福建省三明市",
+      "deadline": "2026-10-20",
+      "published_date": "2026-09-25",
+      "detail_url": "https://zhaopin.pipechina.com.cn/recruit#/common_board_view_anonymous?job=pipechina-browser-001",
+      "evidence_url": "https://www.pipechina.com.cn/front/tzgg/3004720.html",
+      "field_evidence": {
+        "岗位": "管道保护工程师（三明）",
+        "招聘单位": "国家石油天然气管网集团有限公司福建分公司",
+        "专业范围": "地质学、地质资源与地质工程、地质工程",
+        "学历要求": "硕士研究生及以上",
+        "工作地点": "福建省三明市",
+        "报名截止": "2026-10-20"
+      }
+    }
+  ]
+}

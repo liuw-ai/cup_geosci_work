@@ -36,6 +36,7 @@ SOURCE_TYPES = frozenset(
         "official_table_rows",
         "official_xlsx_rows",
         "official_snapshot_rows",
+        "official_browser_rows",
         "sinopec_spa_rows",
         "structured_opening_page",
         "landing_page",
@@ -579,6 +580,52 @@ def validate_source_record(value: Any, *, context: str = "Source") -> dict[str, 
             allowed_hosts,
             f"{context} config allowed_hosts",
         )
+    if source["source_type"] == "official_browser_rows":
+        capture_path = _required_text(
+            source["config"].get("capture_path"),
+            f"{context} config capture_path",
+        )
+        capture = PurePosixPath(capture_path.replace("\\", "/"))
+        if capture.is_absolute() or ".." in capture.parts:
+            raise ContractValidationError(
+                f"{context} config capture_path must stay inside APP_DATA_DIR"
+            )
+        source["config"]["capture_path"] = capture.as_posix()
+        source["config"]["application_url"] = validate_http_url(
+            source["config"].get("application_url") or source["homepage_url"],
+            f"{context} config application_url",
+        )
+        allowed_hosts = source["config"].get("allowed_hosts")
+        if not isinstance(allowed_hosts, list) or not allowed_hosts:
+            raise ContractValidationError(
+                f"{context} browser source config allowed_hosts must be a non-empty list"
+            )
+        source["config"]["allowed_hosts"] = _validate_domains(
+            allowed_hosts,
+            f"{context} browser source config allowed_hosts",
+        )
+        max_age = source["config"].get("max_age_hours", 30)
+        if isinstance(max_age, bool):
+            raise ContractValidationError(
+                f"{context} config max_age_hours must be a positive number"
+            )
+        try:
+            max_age_value = float(max_age)
+        except (TypeError, ValueError) as error:
+            raise ContractValidationError(
+                f"{context} config max_age_hours must be a positive number"
+            ) from error
+        if max_age_value <= 0:
+            raise ContractValidationError(
+                f"{context} config max_age_hours must be a positive number"
+            )
+        source["config"]["max_age_hours"] = max_age_value
+        if "require_complete_scan" in source["config"] and not isinstance(
+            source["config"]["require_complete_scan"], bool
+        ):
+            raise ContractValidationError(
+                f"{context} config require_complete_scan must be true or false"
+            )
     if source["source_type"] == "sinopec_spa_rows":
         snapshot_path = _required_text(
             source["config"].get("snapshot_path"),

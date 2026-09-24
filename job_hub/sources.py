@@ -46,6 +46,7 @@ from job_hub.transport import (
     create_session,
     request_exception_types,
 )
+from job_hub.browser_capture import BrowserCaptureError, load_browser_capture
 from job_hub.sinopec import load_sinopec_capture
 
 
@@ -338,11 +339,83 @@ class OfficialSourceCollector:
             return self._collect_official_table_rows(source)
         if source_type == "official_snapshot_rows":
             return self._collect_official_snapshot_rows(source)
+        if source_type == "official_browser_rows":
+            return self._collect_official_browser_rows(source)
         if source_type == "sinopec_spa_rows":
             return self._collect_sinopec_spa_rows(source)
         if source_type in {"html_notice", "landing_page"}:
             return self._collect_html_notice(source)
         raise SourceCollectionError(f"Unsupported source type: {source_type}")
+
+    def _collect_official_browser_rows(
+        self, source: dict[str, Any]
+    ) -> list[RawPosting]:
+        """Consume a fresh, server-generated browser capture.
+
+        The browser is a separate concern from publication.  It may render a
+        public SPA, but this adapter only accepts a complete, fresh manifest
+        with official detail URLs and field evidence.  A missing browser
+        runtime or blocked portal therefore remains a source failure/skip and
+        never becomes a zero-result job list.
+        """
+        config = source["config"]
+        capture_path = Path(self.settings.data_dir) / str(config["capture_path"])
+        try:
+            payload = load_browser_capture(
+                capture_path,
+                allowed_hosts=list(config["allowed_hosts"]),
+                max_age_hours=float(config.get("max_age_hours", 30)),
+                require_complete_scan=bool(config.get("require_complete_scan", True)),
+            )
+        except BrowserCaptureError as error:
+            message = str(error)
+            if "access_limited" in message or "not publishable" in message:
+                raise SourceSkipped(message) from error
+            raise SourceCollectionError(message) from error
+
+        postings: list[RawPosting] = []
+        max_items = min(self._item_limit(source), 2_000)
+        for index, item in enumerate(payload["rows"][:max_items], start=1):
+            major = str(item["major"]).strip()
+            degree = str(item["degree"]).strip()
+            detail_url = str(item["detail_url"]).strip()
+            evidence = {
+                "evidence_scope": "official_browser_capture_row",
+                "captured_at": str(payload["captured_at"]),
+                "岗位": str(item["title"]),
+                "专业范围": major,
+                "学历要求": degree,
+                "工作地点": str(item["location"]),
+                "报名截止": str(item["deadline"]),
+                **{str(key): str(value) for key, value in item["field_evidence"].items()},
+            }
+            postings.append(
+                RawPosting(
+                    title=str(item["title"]),
+                    employer=str(item["employer"]),
+                    source_url=detail_url,
+                    application_url=str(item.get("application_url") or config["application_url"]),
+                    text=clean_text(
+                        f"{item['title']}；专业要求：{major}；学历要求：{degree}；"
+                        f"工作地点：{item['location']}；截止时间：{item['deadline']}"
+                    ),
+                    summary=clean_text(
+                        f"{item['title']}；{item['employer']}；{item['location']}；"
+                        f"截止 {item['deadline']}"
+                    ),
+                    published_date=str(item.get("published_date") or "").strip() or None,
+                    deadline_date=str(item["deadline"]).strip() or None,
+                    location=str(item["location"]).strip(),
+                    external_id=str(item["external_id"]),
+                    match_text=clean_text(f"{item['title']} {major} {degree}"),
+                    official_evidence_url=str(item["evidence_url"]),
+                    field_evidence=evidence,
+                    qualification_text=clean_text(f"学历要求：{degree}；专业要求：{major}"),
+                )
+            )
+        if not postings:
+            raise SourceCollectionError("browser capture contains no publishable rows")
+        return postings
 
     def _collect_official_snapshot_rows(
         self, source: dict[str, Any]

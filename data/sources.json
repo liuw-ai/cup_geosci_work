@@ -413,6 +413,38 @@
     }
   },
   {
+    "id": "pipechina-browser-capture",
+    "name": "国家管网集团公开动态岗位捕获任务",
+    "publisher": "国家石油天然气管网集团有限公司",
+    "homepage_url": "https://zhaopin.pipechina.com.cn/recruit",
+    "source_type": "official_browser_rows",
+    "category": "管网、炼化与综合能源",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allowed_hosts": ["zhaopin.pipechina.com.cn", "www.pipechina.com.cn"],
+      "capture_path": "captures/pipechina-career.json",
+      "browser_url": "https://zhaopin.pipechina.com.cn/recruit#/portal_job_list?job_class=_HB4_Y2FtcHVz&search_key=%E5%9C%B0%E8%B4%A8",
+      "row_selector": "div.table-row[hcm-key]",
+      "id_attribute": "hcm-key",
+      "field_selectors": {
+        "title": "[data-field='title'], .job-title, .position-name",
+        "employer": "[data-field='employer'], .employer, .company-name",
+        "degree": "[data-field='degree'], .degree, .education",
+        "major": "[data-field='major'], .major, .专业要求",
+        "location": "[data-field='location'], .location, .work-location",
+        "deadline": "[data-field='deadline'], .deadline, .close-date"
+      },
+      "detail_selector": "a[href*='common_board_view'], a[href]",
+      "next_selector": ".el-pagination .btn-next:not(.is-disabled), button[aria-label='Next Page']",
+      "max_pages": 20,
+      "application_url": "https://zhaopin.pipechina.com.cn/recruit",
+      "max_age_hours": 30,
+      "require_complete_scan": true,
+      "note": "服务器安装并授权使用公开 Chromium 后启用。捕获任务必须完成地质关键词结果的分页扫描，并逐岗位保留官方详情 URL、专业、学历、地点和截止日期；浏览器不可用、robots 无法核验或扫描不完整时保持停用并继续使用 2026-09-24 官方快照。"
+    }
+  },
+  {
     "id": "cupb-verified-geoscience-snapshot",
     "name": "中国石油大学（北京）就业网地学岗位核验快照",
     "publisher": "中国石油大学（北京）就业指导中心",

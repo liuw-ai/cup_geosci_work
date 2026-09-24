@@ -9,6 +9,12 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from job_hub.audit import audit_database
+from job_hub.browser_capture import (
+    BrowserCaptureError,
+    browser_capture_summary,
+    load_browser_capture,
+    run_browser_capture,
+)
 from job_hub.attachments import (
     AttachmentProcessingError,
     OfficialAttachmentProcessor,
@@ -354,6 +360,28 @@ def main() -> None:
         action="store_true",
         help="要求捕获文件已包含全部 132 个单位",
     )
+    browser_capture_parser = subparsers.add_parser(
+        "browser-capture-check",
+        help="校验服务器浏览器生成的动态官方岗位捕获清单",
+    )
+    browser_capture_parser.add_argument("source_id", help="已注册的 official_browser_rows 来源")
+    browser_capture_parser.add_argument(
+        "--path", type=Path, help="可选：覆盖来源配置中的捕获文件路径"
+    )
+    browser_capture_parser.add_argument(
+        "--max-age-hours", type=float, help="可选：覆盖来源配置中的捕获有效期"
+    )
+    browser_capture_run_parser = subparsers.add_parser(
+        "browser-capture-run",
+        help="在服务器公开 Chromium 中执行一次动态官方岗位捕获",
+    )
+    browser_capture_run_parser.add_argument("source_id", help="已注册的 official_browser_rows 来源")
+    browser_capture_run_parser.add_argument(
+        "--output", type=Path, help="可选：覆盖来源配置中的输出路径"
+    )
+    browser_capture_run_parser.add_argument(
+        "--url", help="可选：覆盖来源配置中的 browser_url"
+    )
     source_health_parser = subparsers.add_parser(
         "source-health",
         help="轻量检查公开来源和 robots.txt，不采集岗位",
@@ -691,6 +719,77 @@ def main() -> None:
             ),
         }
         print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "browser-capture-check":
+        source = database.get_source(args.source_id)
+        if source is None:
+            parser.error(f"source_id is not registered: {args.source_id}")
+        if source.get("source_type") != "official_browser_rows":
+            parser.error("browser-capture-check requires an official_browser_rows source")
+        config = source["config"]
+        capture_path = args.path or (settings.data_dir / str(config["capture_path"]))
+        try:
+            payload = load_browser_capture(
+                capture_path,
+                allowed_hosts=list(config["allowed_hosts"]),
+                max_age_hours=args.max_age_hours
+                if args.max_age_hours is not None
+                else float(config.get("max_age_hours", 30)),
+                require_complete_scan=bool(config.get("require_complete_scan", True)),
+            )
+        except BrowserCaptureError as error:
+            print(
+                json.dumps(
+                    {"error": str(error), "source_id": args.source_id},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        print(
+            json.dumps(
+                {
+                    "source_id": args.source_id,
+                    "capture_path": str(capture_path),
+                    "summary": browser_capture_summary(payload),
+                    "publication_policy": "normal student publication gate remains mandatory",
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if args.command == "browser-capture-run":
+        source = database.get_source(args.source_id)
+        if source is None:
+            parser.error(f"source_id is not registered: {args.source_id}")
+        if source.get("source_type") != "official_browser_rows":
+            parser.error("browser-capture-run requires an official_browser_rows source")
+        config = source["config"]
+        output = args.output or (settings.data_dir / str(config["capture_path"]))
+        browser_url = args.url or str(config.get("browser_url") or source["homepage_url"])
+        try:
+            payload = run_browser_capture(
+                url=browser_url,
+                output=output,
+                config=config,
+                allowed_hosts=list(config["allowed_hosts"]),
+                user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
+            )
+        except BrowserCaptureError as error:
+            print(json.dumps({"error": str(error), "source_id": args.source_id}, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        print(
+            json.dumps(
+                {
+                    "source_id": args.source_id,
+                    "output": str(output),
+                    "summary": browser_capture_summary(payload),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return
     if args.command == "source-validation-matrix":
         registry = load_source_validation_registry()
