@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from datetime import date, datetime
-from typing import Any
+from typing import Any, Callable
 from urllib.parse import parse_qs, urlparse
 from zoneinfo import ZoneInfo
 
@@ -41,6 +41,9 @@ class SourceSyncResult:
     skipped: int = 0
     error: str | None = None
     run_id: int | None = None
+
+
+SyncProgressCallback = Callable[[int, int, str], None]
 
 
 @dataclass
@@ -118,14 +121,26 @@ class JobPipeline:
         )
         return len(sources)
 
-    def sync_all(self) -> SyncSummary:
+    def sync_all(
+        self,
+        *,
+        progress_callback: SyncProgressCallback | None = None,
+    ) -> SyncSummary:
         recovered = self.database.recover_stale_crawl_runs(
             self.settings.crawl_run_stale_seconds
         )
         sources = self.database.list_sources(True)
         self.database.ensure_source_tasks(sources)
         results: list[SourceSyncResult] = []
-        for source in sources:
+        total_sources = len(sources)
+        for index, source in enumerate(sources, start=1):
+            if progress_callback is not None:
+                try:
+                    progress_callback(index - 1, total_sources, str(source["id"]))
+                except Exception:
+                    # Progress reporting must never change source collection
+                    # semantics or turn a healthy sync into a failed one.
+                    pass
             task = self.database.claim_source_task(
                 source["id"],
                 lease_seconds=self.settings.crawl_run_stale_seconds,
@@ -138,6 +153,11 @@ class JobPipeline:
                         error="source task is not due yet",
                     )
                 )
+                if progress_callback is not None:
+                    try:
+                        progress_callback(index, total_sources, str(source["id"]))
+                    except Exception:
+                        pass
                 continue
             result = self.sync_source(source)
             results.append(result)
@@ -162,6 +182,11 @@ class JobPipeline:
                     blocked=blocked,
                     run_id=result.run_id,
                 )
+            if progress_callback is not None:
+                try:
+                    progress_callback(index, total_sources, str(source["id"]))
+                except Exception:
+                    pass
         today = datetime.now(self.timezone).date().isoformat()
         expired = self.database.expire_jobs_before(today)
         return SyncSummary(results, expired, len(recovered))

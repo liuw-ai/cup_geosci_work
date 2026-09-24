@@ -72,6 +72,35 @@ def test_pipeline_deduplicates_and_creates_daily_change(tmp_path) -> None:
         assert connection.execute("SELECT COUNT(*) FROM job_events").fetchone()[0] == 0
 
 
+def test_sync_all_reports_progress_without_changing_results(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    database.upsert_source(official_source)
+    pipeline = JobPipeline(settings, database, FakeCollector(RawPosting(
+        title="地质勘探技术岗",
+        employer="测试能源集团",
+        source_url="https://careers.example.edu.cn/jobs/progress",
+        application_url=None,
+        text="资源勘查工程本科可报，工作地点北京。",
+        summary="地学岗位",
+        published_date="2026-09-20",
+        deadline_date="2026-12-20",
+        location="北京",
+    )))
+    events: list[tuple[int, int, str]] = []
+
+    result = pipeline.sync_all(progress_callback=lambda completed, total, source_id: events.append(
+        (completed, total, source_id)
+    ))
+
+    assert len(result.source_results) == 1
+    assert result.source_results[0].status == "finished"
+    assert events[0] == (0, 1, "official-test-source")
+    assert events[-1] == (1, 1, "official-test-source")
+
+
 def test_successful_scan_records_zero_open_matches_without_marking_source_unavailable(
     tmp_path,
 ) -> None:

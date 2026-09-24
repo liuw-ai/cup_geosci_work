@@ -75,7 +75,7 @@ class DailyWorker:
         self._heartbeat("syncing")
         try:
             manifest_summary = self._register_government_artifacts()
-            summary = self.pipeline.sync_all()
+            summary = self.pipeline.sync_all(progress_callback=self._sync_progress)
             attachment_summary = self._process_registered_attachments()
             government_summary = government_artifact_refresh_summary(
                 self.database,
@@ -221,6 +221,11 @@ class DailyWorker:
             self.database.record_service_heartbeat("worker", status, detail)
         except Exception:
             LOGGER.exception("Could not record worker heartbeat")
+
+    def _sync_progress(self, completed: int, total: int, source_id: str) -> None:
+        """Keep Docker health and admin monitoring alive during long syncs."""
+
+        self._heartbeat("syncing", f"{completed}/{total}: {source_id}")
 
     def _send_failure_safely(self, subject: str, details: str) -> None:
         try:
