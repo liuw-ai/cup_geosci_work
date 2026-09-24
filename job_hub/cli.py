@@ -59,6 +59,7 @@ from job_hub.national_probes import (
 )
 from job_hub.reports import publish_daily_report
 from job_hub.simulation import simulate_cohort
+from job_hub.sinopec import load_sinopec_capture, sinopec_capture_summary
 from job_hub.source_targets import REQUIRED_ROLES
 from job_hub.source_validation import (
     load_source_validation_registry,
@@ -337,6 +338,21 @@ def main() -> None:
         "--output",
         type=Path,
         help="可选：将完整队列 JSON 写入指定文件",
+    )
+    sinopec_capture_parser = subparsers.add_parser(
+        "sinopec-capture",
+        help="输出中石化官方 SPA 捕获快照的单位和岗位扫描统计",
+    )
+    sinopec_capture_parser.add_argument(
+        "--path",
+        type=Path,
+        default=Path("data/verified/sinopec-geoscience-20260924.json"),
+        help="版本化浏览器捕获 JSON 路径",
+    )
+    sinopec_capture_parser.add_argument(
+        "--require-complete",
+        action="store_true",
+        help="要求捕获文件已包含全部 132 个单位",
     )
     source_health_parser = subparsers.add_parser(
         "source-health",
@@ -658,6 +674,22 @@ def main() -> None:
                 json.dumps(result, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "sinopec-capture":
+        payload = load_sinopec_capture(
+            args.path,
+            require_complete_manifest=args.require_complete,
+        )
+        result = {
+            "summary": sinopec_capture_summary(payload),
+            "platform_url": payload["platform_url"],
+            "captured_at": payload["captured_at"],
+            "source_policy": (
+                "浏览器捕获快照仅在单位清单、岗位详情、专业和学历证据完整后，"
+                "才允许进入学生端发布门禁。"
+            ),
+        }
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
     if args.command == "source-validation-matrix":

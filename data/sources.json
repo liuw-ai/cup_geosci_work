@@ -284,7 +284,7 @@
     "name": "中国石化人才招聘网站",
     "publisher": "中国石油化工集团有限公司",
     "homepage_url": "https://job.sinopec.com/",
-    "source_type": "landing_page",
+    "source_type": "sinopec_spa_rows",
     "category": "油气上游业主与研究机构",
     "source_tier": "A",
     "enabled": false,
@@ -292,7 +292,13 @@
       "employer_hint": "中国石油化工集团有限公司",
       "allowed_hosts": ["job.sinopec.com"],
       "minimum_relevance": 20,
-      "note": "此前曾观察到 robots.txt HTTP 403；2026-09-22 本地网络探测时为 TLS EOF，当前无法完成公开入口核验。待网站公开规则和稳定入口核验后接入，不能解释为无岗位。"
+      "snapshot_path": "data/verified/sinopec-geoscience-20260924.json",
+      "official_evidence_url": "https://job.sinopec.com/#/school/recruitmentPositions",
+      "application_url": "https://job.sinopec.com/",
+      "enterprise_total": 132,
+      "candidate_enterprise_total": 35,
+      "require_complete_manifest": false,
+      "note": "2026-09-24 浏览器核验确认官方 SPA 显示 132 个单位，关键词“地质”筛选 35 个候选单位。当前快照仅含已核验的胜利油田代表性岗位，来源保持禁用；完成 132 单位清单、35 单位详情和分页回归后才可启用。"
     }
   },
   {

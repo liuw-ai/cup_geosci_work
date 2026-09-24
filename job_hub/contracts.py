@@ -36,6 +36,7 @@ SOURCE_TYPES = frozenset(
         "official_table_rows",
         "official_xlsx_rows",
         "official_snapshot_rows",
+        "sinopec_spa_rows",
         "structured_opening_page",
         "landing_page",
     }
@@ -578,6 +579,44 @@ def validate_source_record(value: Any, *, context: str = "Source") -> dict[str, 
             allowed_hosts,
             f"{context} config allowed_hosts",
         )
+    if source["source_type"] == "sinopec_spa_rows":
+        snapshot_path = _required_text(
+            source["config"].get("snapshot_path"),
+            f"{context} config snapshot_path",
+        )
+        snapshot = PurePosixPath(snapshot_path.replace("\\", "/"))
+        if snapshot.is_absolute() or ".." in snapshot.parts:
+            raise ContractValidationError(
+                f"{context} Sinopec snapshot_path must stay inside the repository"
+            )
+        source["config"]["snapshot_path"] = snapshot.as_posix()
+        source["config"]["official_evidence_url"] = validate_http_url(
+            source["config"].get("official_evidence_url"),
+            f"{context} config official_evidence_url",
+        )
+        source["config"]["application_url"] = validate_http_url(
+            source["config"].get("application_url"),
+            f"{context} config application_url",
+        )
+        allowed_hosts = source["config"].get("allowed_hosts")
+        if not isinstance(allowed_hosts, list) or not allowed_hosts:
+            raise ContractValidationError(
+                f"{context} Sinopec source config allowed_hosts must be a non-empty list"
+            )
+        source["config"]["allowed_hosts"] = _validate_domains(
+            allowed_hosts,
+            f"{context} Sinopec source config allowed_hosts",
+        )
+        for field_name in ("enterprise_total", "candidate_enterprise_total"):
+            value = source["config"].get(field_name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ContractValidationError(
+                    f"{context} config {field_name} must be a non-negative integer"
+                )
+        if source["config"]["candidate_enterprise_total"] > source["config"]["enterprise_total"]:
+            raise ContractValidationError(
+                f"{context} Sinopec candidate enterprise total cannot exceed total"
+            )
     enabled = source.get("enabled", True)
     if not isinstance(enabled, bool):
         raise ContractValidationError(f"{context} enabled must be true or false")

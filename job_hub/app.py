@@ -14,7 +14,7 @@ from job_hub.attachments import (
     OfficialAttachmentProcessor,
     build_attachment_field_evidence,
 )
-from job_hub.config import Settings
+from job_hub.config import PROJECT_ROOT, Settings
 from job_hub.contracts import (
     NATIONAL_RUNTIME_STATUSES,
     ORGANIZATION_ROLES,
@@ -70,6 +70,7 @@ from job_hub.source_validation import (
 )
 from job_hub.reports import build_daily_report, local_today, publish_daily_report
 from job_hub.sources import RawPosting
+from job_hub.sinopec import load_sinopec_capture, sinopec_capture_summary
 
 
 def create_app(settings: Settings | None = None) -> Flask:
@@ -574,6 +575,34 @@ def create_app(settings: Settings | None = None) -> Flask:
             {
                 "summary": national_source_probe_summary(probes),
                 "items": probes["probes"],
+            }
+        )
+
+    @app.get("/api/admin/sinopec-capture")
+    @require_admin
+    def sinopec_capture_api() -> Any:
+        """Expose the private Sinopec SPA capture status to administrators."""
+        source = database.get_source("sinopec-career")
+        if source is None:
+            return jsonify({"error": "sinopec-career source is not registered"}), 404
+        config = source.get("config", {})
+        snapshot_path = PROJECT_ROOT / str(config.get("snapshot_path") or "")
+        try:
+            capture = load_sinopec_capture(
+                snapshot_path,
+                allowed_hosts=list(config.get("allowed_hosts", [])),
+                require_complete_manifest=False,
+            )
+        except (OSError, ValueError) as error:
+            return jsonify({"error": str(error)}), 503
+        return jsonify(
+            {
+                "source_id": "sinopec-career",
+                "enabled": bool(source.get("enabled")),
+                "summary": sinopec_capture_summary(capture),
+                "platform_url": capture["platform_url"],
+                "captured_at": capture["captured_at"],
+                "enterprises": capture["enterprises"],
             }
         )
 

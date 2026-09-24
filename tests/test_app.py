@@ -8,7 +8,7 @@ from job_hub.app import create_app
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
 from job_hub.reports import publish_daily_report
-from job_hub.sources import RawPosting
+from job_hub.sources import RawPosting, load_source_registries
 from job_hub.source_validation import load_source_validation_registry
 
 from conftest import make_settings, source
@@ -108,6 +108,32 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     )
     assert response.status_code == 201
     assert response.get_json()["outcome"] == "created"
+
+
+def test_sinopec_capture_admin_endpoint_is_private_and_reports_partial_manifest(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    sinopec = next(
+        item
+        for item in load_source_registries(["data/sources.json"])
+        if item["id"] == "sinopec-career"
+    )
+    database.upsert_source(sinopec)
+    client = app.test_client()
+
+    assert client.get("/api/admin/sinopec-capture").status_code == 403
+    response = client.get(
+        "/api/admin/sinopec-capture",
+        headers={"X-Admin-Token": settings.admin_token},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["enabled"] is False
+    assert payload["summary"]["enterprise_total"] == 132
+    assert payload["summary"]["enterprise_captured"] == 1
+    assert payload["summary"]["complete_manifest"] is False
 
 
 def test_organization_matrix_is_admin_only_and_supports_role_filter(tmp_path) -> None:

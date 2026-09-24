@@ -46,6 +46,7 @@ from job_hub.transport import (
     create_session,
     request_exception_types,
 )
+from job_hub.sinopec import load_sinopec_capture
 
 
 REQUEST_ERRORS = request_exception_types()
@@ -337,6 +338,8 @@ class OfficialSourceCollector:
             return self._collect_official_table_rows(source)
         if source_type == "official_snapshot_rows":
             return self._collect_official_snapshot_rows(source)
+        if source_type == "sinopec_spa_rows":
+            return self._collect_sinopec_spa_rows(source)
         if source_type in {"html_notice", "landing_page"}:
             return self._collect_html_notice(source)
         raise SourceCollectionError(f"Unsupported source type: {source_type}")
@@ -428,6 +431,72 @@ class OfficialSourceCollector:
                     official_evidence_url=evidence_url,
                     field_evidence={str(key): str(value) for key, value in field_evidence.items()},
                     qualification_text=str(item["qualification_text"]).strip(),
+                )
+            )
+        return postings
+
+    def _collect_sinopec_spa_rows(
+        self, source: dict[str, Any]
+    ) -> list[RawPosting]:
+        """Convert an administrator-captured Sinopec SPA snapshot to rows.
+
+        The browser portal exposes the useful fields only after Vue renders the
+        detail route.  This adapter deliberately consumes a versioned capture,
+        validates the enterprise manifest, and then lets the normal pipeline
+        decide whether each row is suitable for the geoscience audience.
+        """
+        config = source["config"]
+        snapshot_path = Path(__file__).resolve().parent.parent / str(
+            config["snapshot_path"]
+        )
+        payload = load_sinopec_capture(
+            snapshot_path,
+            allowed_hosts=list(config.get("allowed_hosts", [])),
+            require_complete_manifest=bool(config.get("require_complete_manifest", False)),
+        )
+        postings: list[RawPosting] = []
+        max_items = min(
+            int(config.get("max_items", self.settings.max_source_items)),
+            self.settings.max_source_items,
+        )
+        for item in payload["jobs"][:max_items]:
+            major = str(item["major"]).strip()
+            degree = str(item["degree"]).strip()
+            evidence = {
+                "evidence_scope": "official_sinopec_detail_snapshot",
+                "captured_at": str(payload["captured_at"]),
+                "岗位": str(item["title"]),
+                "专业范围": major,
+                "学历要求": degree,
+                "工作地点": str(item["location"]),
+                "报名截止": str(item["deadline"]),
+                **{
+                    str(key): str(value)
+                    for key, value in item["field_evidence"].items()
+                },
+            }
+            postings.append(
+                RawPosting(
+                    title=str(item["title"]),
+                    employer=str(item["employer"]),
+                    source_url=str(item["detail_url"]),
+                    application_url=str(item.get("application_url") or source["homepage_url"]),
+                    text=clean_text(
+                        f"{item['title']}；专业要求：{major}；学历要求：{degree}；"
+                        f"工作地点：{item['location']}；截止时间：{item['deadline']}"
+                    ),
+                    summary=clean_text(
+                        f"{item['title']}；{item['employer']}；{item['location']}；"
+                        f"截止 {item['deadline']}"
+                    ),
+                    published_date=(str(item.get("published_date") or "").strip() or None),
+                    deadline_date=str(item["deadline"]),
+                    location=str(item["location"]),
+                    external_id=str(item["external_id"]),
+                    match_text=clean_text(f"{item['title']} {major} {degree}"),
+                    official_evidence_url=str(item["evidence_url"]),
+                    field_evidence=evidence,
+                    qualification_text=clean_text(f"学历要求：{degree}；专业要求：{major}"),
                 )
             )
         return postings

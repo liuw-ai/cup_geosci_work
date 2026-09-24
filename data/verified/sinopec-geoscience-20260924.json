@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "captured_at": "2026-09-24",
+  "platform_url": "https://job.sinopec.com/#/school/recruitmentPositions",
+  "enterprise_total": 132,
+  "candidate_enterprise_total": 35,
+  "enterprises": [
+    {
+      "id": "BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75",
+      "name": "胜利油田",
+      "scan_status": "success",
+      "detail_url": "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75"
+    }
+  ],
+  "jobs": [
+    {
+      "external_id": "sinopec-BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75-01",
+      "title": "油气勘探开发高级研究岗",
+      "employer": "胜利油田",
+      "degree": "博士研究生",
+      "major": "地质资源与地质工程、地球探测与信息技术、矿产普查与勘探、地质工程、地质学、矿物学岩石学矿床学、构造地质学、古生物学与地层学、地球化学、能源地质工程、油气田开发地质；石油与天然气工程、油气田开发工程、油气井工程；物理学；动力工程及工程热物理；机械工程；材料科学与工程；数学；化学",
+      "location": "山东青岛、东营",
+      "deadline": "2026-10-28",
+      "detail_url": "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75",
+      "evidence_url": "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75",
+      "recruitment_count": "12人",
+      "field_evidence": {
+        "招聘人数": "12人",
+        "截止时间": "2026-10-28 17:00:00"
+      }
+    },
+    {
+      "external_id": "sinopec-BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75-03",
+      "title": "油气地质研究岗",
+      "employer": "胜利油田",
+      "degree": "本科、硕士研究生",
+      "major": "地质资源与地质工程、矿产普查与勘探、资源勘查工程、地质工程、资源与环境（限地质工程方向硕士）、地质学、矿物学岩石学矿床学、构造地质学、地球化学、古生物学与地层学、能源地质工程、沉积学、海洋地质、海洋科学（限海洋地质方向硕士）、地球信息科学与技术、非常规油气地质学",
+      "location": "山东东营、青岛、滨州、淄博、德州、潍坊、烟台、济南及新疆乌鲁木齐、克拉玛依",
+      "deadline": "2026-10-28",
+      "detail_url": "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75",
+      "evidence_url": "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75",
+      "recruitment_count": "125人",
+      "field_evidence": {
+        "招聘人数": "125人",
+        "截止时间": "2026-10-28 17:00:00"
+      }
+    },
+    {
+      "external_id": "sinopec-BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75-07",
+      "title": "油气勘探开发工程研究岗（三地）",
+      "employer": "胜利油田",
+      "degree": "本科、硕士研究生",
+      "major": "地质资源与地质工程、地球探测与信息技术、矿产普查与勘探、地质工程、地质学、矿物学岩石学矿床学、构造地质学、地球化学、古生物学与地层学、能源地质工程、沉积学、海洋地质、海洋科学（限海洋地质方向硕士）、资源勘查工程；石油与天然气工程、油气田开发工程、油气井工程、石油工程、海洋油气工程；地球物理学、地球探测与信息技术、固体地球物理学、勘查技术与工程；资源与环境（限地质工程、石油与天然气方向）",
+      "location": "山东东营、青岛、滨州、淄博、德州、潍坊、烟台、济南及新疆乌鲁木齐、克拉玛依",
+      "deadline": "2026-10-28",
+      "detail_url": "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75",
+      "evidence_url": "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75",
+      "recruitment_count": "10人",
+      "field_evidence": {
+        "招聘人数": "10人",
+        "截止时间": "2026-10-28 17:00:00"
+      }
+    }
+  ]
+}
