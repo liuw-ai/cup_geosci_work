@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 from datetime import date
+from pathlib import Path
 
 import job_hub.app as app_module
 from job_hub.app import create_app
+from job_hub.cli import import_verified_jobs
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
 from job_hub.reports import publish_daily_report
@@ -136,6 +138,30 @@ def test_sinopec_capture_admin_endpoint_is_private_and_reports_complete_manifest
     assert payload["summary"]["candidate_enterprise_captured"] == 35
     assert payload["summary"]["job_rows_captured"] == 348
     assert payload["summary"]["complete_manifest"] is True
+
+
+def test_cnpc_detail_page_discloses_degraded_official_detail_endpoint(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    source = next(
+        item
+        for item in load_source_registries(["data/sources.json"])
+        if item["id"] == "cnpc-career"
+    )
+    database.upsert_source(source)
+    pipeline = JobPipeline(settings, database)
+    snapshot_path = Path("data/verified/cnpc-geoscience-20260924.json")
+    import_verified_jobs(database, pipeline, snapshot_path)
+    job = database.list_jobs(page_size=None)[0][0]
+
+    response = app.test_client().get(f"/jobs/{job['id']}")
+
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    assert "中国石油详情接口当前返回空字段" in body
+    assert "打开中国石油官方招聘入口" in body
+    assert "官方详情编号" in body
 
 
 def test_organization_matrix_is_admin_only_and_supports_role_filter(tmp_path) -> None:

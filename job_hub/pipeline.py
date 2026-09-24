@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import date, datetime
 from typing import Any
+from urllib.parse import parse_qs, urlparse
 from zoneinfo import ZoneInfo
 
 from job_hub.config import Settings
@@ -269,15 +270,35 @@ class JobPipeline:
         posting: RawPosting,
         source: dict[str, Any],
     ) -> dict[str, Any]:
+        field_evidence = dict(posting.field_evidence or {})
+        # Keep the CNPC snapshot contract consistent for both live collector
+        # runs and administrator imports. The official page currently renders
+        # an empty shell when its public showN response lacks recruitInfoObj;
+        # the opaque id and status must remain visible in the audit record.
+        if source["id"] == "cnpc-career":
+            detail_id = parse_qs(urlparse(posting.source_url).query).get("id", [""])[0]
+            if detail_id:
+                field_evidence.setdefault("官方详情编号", detail_id)
+            field_evidence.setdefault(
+                "官方详情状态",
+                str(
+                    source.get("config", {}).get("detail_access_status")
+                    or "official_detail_api_degraded"
+                ),
+            )
+            field_evidence.setdefault(
+                "官方招聘入口",
+                str(source.get("config", {}).get("listing_url") or posting.source_url),
+            )
         text = f"{posting.title} {posting.employer} {posting.text}"
-        evidence_text = qualification_evidence_text(posting.field_evidence)
+        evidence_text = qualification_evidence_text(field_evidence)
         matching_text = posting.match_text or " ".join(
             value
             for value in (posting.title, posting.employer, posting.summary, evidence_text)
             if value
         )
         has_qualification_evidence = has_major_qualification_evidence(
-            posting.field_evidence
+            field_evidence
         )
         employer_identity = resolve_employer(posting.employer)
         category = (
@@ -299,7 +320,7 @@ class JobPipeline:
         )
         qualification_text = (
             posting.qualification_text
-            or structured_evidence_text(posting.field_evidence)
+            or structured_evidence_text(field_evidence)
             or posting.summary
             or posting.title
         )
@@ -359,7 +380,7 @@ class JobPipeline:
             "deadline_date": posting.deadline_date,
             "degree_levels": degree_levels,
             "major_tags": major_tags,
-            "field_evidence": posting.field_evidence or {},
+            "field_evidence": field_evidence,
             "summary": posting.summary,
             "description": posting.text[:12000],
             "relevance_score": relevance_score,

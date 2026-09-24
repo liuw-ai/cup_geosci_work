@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from html import unescape
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlencode, urljoin, urlparse
+from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 
 import requests
@@ -415,6 +415,26 @@ class OfficialSourceCollector:
                     raise SourceCollectionError(
                         f"official snapshot row {index} {label} host is not allowlisted"
                     )
+            field_evidence = {
+                str(key): str(value)
+                for key, value in field_evidence.items()
+            }
+            # CNPC currently renders an empty detail shell when its public
+            # ``showN`` response omits ``recruitInfoObj``. Preserve the
+            # verified row evidence, but expose the opaque detail identifier
+            # and degraded official-page state so the UI never implies that
+            # the blank shell is a complete announcement.
+            if source["id"] == "cnpc-career":
+                detail_id = parse_qs(urlparse(source_url).query).get("id", [""])[0]
+                if detail_id:
+                    field_evidence["官方详情编号"] = detail_id
+                field_evidence["官方详情状态"] = str(
+                    config.get("detail_access_status")
+                    or "official_detail_api_degraded"
+                )
+                field_evidence["官方招聘入口"] = str(
+                    config.get("listing_url") or source_url
+                )
             postings.append(
                 RawPosting(
                     title=str(item["title"]).strip(),
@@ -429,7 +449,7 @@ class OfficialSourceCollector:
                     external_id=str(item.get("external_id") or f"snapshot-{index}").strip(),
                     match_text=str(item.get("match_text") or "").strip() or None,
                     official_evidence_url=evidence_url,
-                    field_evidence={str(key): str(value) for key, value in field_evidence.items()},
+                    field_evidence=field_evidence,
                     qualification_text=str(item["qualification_text"]).strip(),
                 )
             )

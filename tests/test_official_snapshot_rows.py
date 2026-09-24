@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import pytest
 
 from job_hub.db import Database
@@ -5,6 +8,9 @@ from job_hub.pipeline import JobPipeline
 from job_hub.sources import OfficialSourceCollector, SourceCollectionError
 
 from conftest import make_settings
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 SNAPSHOT_SOURCE = {
@@ -84,6 +90,22 @@ def test_cupb_snapshot_rows_pass_the_same_publication_gate(tmp_path) -> None:
     assert statuses["cupb-460487-postdoc-mineral-green-mining"] == "student_eligible"
     assert statuses["cupb-460487-postdoc-geohazard"] == "student_eligible"
     assert statuses["cupb-460520-national-energy-unrestricted"] == "unrestricted_eligible"
+
+
+def test_cnpc_snapshot_exposes_opaque_detail_id_and_degraded_page_state(tmp_path) -> None:
+    registry = json.loads(
+        (PROJECT_ROOT / "data" / "sources.json").read_text(encoding="utf-8")
+    )
+    source = next(item for item in registry if item["id"] == "cnpc-career")
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+
+    posting = collector.collect(source)[0]
+
+    assert posting.field_evidence["官方详情编号"].startswith("8b8b6c9e")
+    assert posting.field_evidence["官方详情状态"] == "official_detail_api_degraded"
+    assert posting.field_evidence["官方招聘入口"] == (
+        "https://zhaopin.cnpc.com.cn/web/recruitInfolist.html"
+    )
 
 
 def test_official_snapshot_rows_reject_unallowlisted_evidence_hosts(tmp_path) -> None:

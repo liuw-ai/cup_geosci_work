@@ -71,6 +71,9 @@
           {% if job.field_evidence.get("table_row") %}
             <div><dt>证据位置</dt><dd>官方职位表第 {{ job.field_evidence.get("table_row") }} 行</dd></div>
           {% endif %}
+          {% if job.field_evidence.get("官方详情状态") %}
+            <div><dt>官方详情状态</dt><dd>详情接口当前异常，已保留官方快照证据</dd></div>
+          {% endif %}
         </dl>
       {% endif %}
       {% if job.publication_basis %}
@@ -91,9 +94,22 @@
       <p class="eyebrow">核验与报名</p>
       <h2>以原始公告为准</h2>
       <p>本页仅整理公开信息。请在投递前核对资格条件、报名入口、截止时间和单位通知。</p>
-      <a class="action-link full-width" href="{{ job.source_url }}" target="_blank" rel="noopener noreferrer">打开官方原文</a>
+      {% if job.source_id == "cnpc-career" and job.field_evidence.get("官方详情状态") == "official_detail_api_degraded" %}
+        <p class="muted">中国石油详情接口当前返回空字段。下方岗位信息来自已核验的官方岗位快照；请先打开官方招聘入口，在官网内重新核对岗位编号和报名条件。</p>
+        <a class="action-link full-width" href="{{ job.application_url or 'https://zhaopin.cnpc.com.cn/web/recruitInfolist.html' }}" target="_blank" rel="noopener noreferrer">打开中国石油官方招聘入口</a>
+        <a class="secondary-link" href="{{ job.source_url }}" target="_blank" rel="noopener noreferrer">尝试打开岗位详情页</a>
+      {% else %}
+        <a class="action-link full-width" href="{{ job.source_url }}" target="_blank" rel="noopener noreferrer">打开官方原文</a>
+      {% endif %}
       {% if job.application_url and job.application_url != job.source_url %}
-        <a class="secondary-link" href="{{ job.application_url }}" target="_blank" rel="noopener noreferrer">打开报名入口</a>
+        {% if job.source_id != "cnpc-career" or job.field_evidence.get("官方详情状态") != "official_detail_api_degraded" %}
+          <a class="secondary-link" href="{{ job.application_url }}" target="_blank" rel="noopener noreferrer">打开报名入口</a>
+        {% endif %}
+      {% endif %}
+      {% if job.field_evidence.get("官方详情编号") %}
+        <dl class="source-meta">
+          <div><dt>官方详情编号</dt><dd>{{ job.field_evidence.get("官方详情编号") }}</dd></div>
+        </dl>
       {% endif %}
       <dl class="source-meta">
         <div><dt>首次收录</dt><dd>{{ job.first_seen_at|local_timestamp_date }}</dd></div>
