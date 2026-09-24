@@ -23,6 +23,12 @@ from job_hub.contracts import (
 )
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
+from job_hub.domestic_expansion import (
+    QUEUE_STATUSES,
+    domestic_expansion_rows,
+    domestic_expansion_summary,
+    load_domestic_expansion_queue,
+)
 from job_hub.discovery import (
     discovery_funnel,
     discovery_source_rows,
@@ -317,6 +323,21 @@ def main() -> None:
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
     )
+    domestic_queue_parser = subparsers.add_parser(
+        "domestic-expansion-queue",
+        help="输出三桶油、地勘、事业编和公务员官方来源扩展队列",
+    )
+    domestic_queue_parser.add_argument("--system", help="按体系筛选，例如中国石油或公务员")
+    domestic_queue_parser.add_argument(
+        "--status",
+        choices=sorted(QUEUE_STATUSES),
+        help="按来源当前证据状态筛选",
+    )
+    domestic_queue_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整队列 JSON 写入指定文件",
+    )
     source_health_parser = subparsers.add_parser(
         "source-health",
         help="轻量检查公开来源和 robots.txt，不采集岗位",
@@ -517,6 +538,25 @@ def main() -> None:
         # Console encodings on Windows may not represent arbitrary upstream
         # error text; the JSON file remains UTF-8 with native Chinese text.
         print(json.dumps(output, ensure_ascii=True, indent=2))
+        return
+    if args.command == "domestic-expansion-queue":
+        queue = load_domestic_expansion_queue()
+        result = {
+            "summary": domestic_expansion_summary(queue),
+            "filters": {"system": args.system, "status": args.status},
+            "items": domestic_expansion_rows(
+                queue,
+                system=args.system,
+                status=args.status,
+            ),
+        }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
         return
 
     settings, database, pipeline = services()

@@ -265,15 +265,18 @@
     "name": "中国石油高校毕业生招聘平台",
     "publisher": "中国石油天然气集团有限公司",
     "homepage_url": "https://zhaopin.cnpc.com.cn/",
-    "source_type": "landing_page",
-    "category": "油气上游业主与研究机构",
+    "source_type": "official_snapshot_rows",
+    "category": "油气勘探开发运营与研究机构",
     "source_tier": "A",
-    "enabled": false,
+    "enabled": true,
     "config": {
       "employer_hint": "中国石油天然气集团有限公司",
       "allowed_hosts": ["zhaopin.cnpc.com.cn"],
       "minimum_relevance": 20,
-      "note": "此前曾观察到 HTTP 412；2026-09-22 本地网络探测 robots 时为 TLS EOF，当前无法完成公开入口核验。待取得合规公开接口或专用适配器后再启用，不绕过访问限制，也不能解释为无岗位。"
+      "snapshot_path": "data/verified/cnpc-geoscience-20260924.json",
+      "official_evidence_url": "https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
+      "application_url": "https://zhaopin.cnpc.com.cn/",
+      "note": "当前启用的是 2026-09-24 浏览器核验的官方岗位快照；统一入口普通 HTTP 仍可能返回 412/TLS EOF，不能将实时入口失败解释为无岗位。快照仅在官方详情页、岗位级专业/学历/地点/截止日证据和发布审计通过后进入学生端；待服务器取得合规公开接口或专用适配器后再替换为自动同步。"
     }
   },
   {
