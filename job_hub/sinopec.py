@@ -89,6 +89,14 @@ def load_sinopec_capture(
         raise SinopecCaptureError("enterprise totals must be integers") from error
     if enterprise_total < 1 or candidate_total < 0 or candidate_total > enterprise_total:
         raise SinopecCaptureError("enterprise totals are inconsistent")
+    try:
+        candidate_captured = int(
+            payload.get("candidate_enterprise_captured", candidate_total)
+        )
+    except (TypeError, ValueError) as error:
+        raise SinopecCaptureError("candidate_enterprise_captured must be an integer") from error
+    if candidate_captured < 0 or candidate_captured > candidate_total:
+        raise SinopecCaptureError("candidate enterprise capture total is inconsistent")
 
     enterprises = payload.get("enterprises")
     jobs = payload.get("jobs")
@@ -97,6 +105,10 @@ def load_sinopec_capture(
     if require_complete_manifest and len(enterprises) != enterprise_total:
         raise SinopecCaptureError(
             f"complete manifest requires {enterprise_total} enterprises, got {len(enterprises)}"
+        )
+    if require_complete_manifest and candidate_captured != candidate_total:
+        raise SinopecCaptureError(
+            f"complete manifest requires {candidate_total} candidate enterprises, got {candidate_captured}"
         )
 
     normalized_enterprises: list[dict[str, Any]] = []
@@ -165,6 +177,7 @@ def load_sinopec_capture(
         "captured_at": captured_at,
         "enterprise_total": enterprise_total,
         "candidate_enterprise_total": candidate_total,
+        "candidate_enterprise_captured": candidate_captured,
         "enterprises": normalized_enterprises,
         "jobs": normalized_jobs,
         "complete_manifest": len(normalized_enterprises) == enterprise_total,
@@ -184,6 +197,9 @@ def sinopec_capture_summary(payload: dict[str, Any]) -> dict[str, int | bool]:
     return {
         "enterprise_total": int(payload["enterprise_total"]),
         "candidate_enterprise_total": int(payload["candidate_enterprise_total"]),
+        "candidate_enterprise_captured": int(
+            payload.get("candidate_enterprise_captured", 0)
+        ),
         "enterprise_captured": len(enterprises),
         "job_rows_captured": len(jobs),
         "complete_manifest": bool(payload.get("complete_manifest")),

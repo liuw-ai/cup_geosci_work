@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from job_hub.cli import main as cli_main
+from job_hub.pipeline import JobPipeline
 from job_hub.sinopec import SinopecCaptureError, load_sinopec_capture, sinopec_capture_summary
 from job_hub.sources import OfficialSourceCollector
 
@@ -34,26 +35,28 @@ def sinopec_source() -> dict[str, object]:
             "allowed_hosts": ["job.sinopec.com"],
             "enterprise_total": 132,
             "candidate_enterprise_total": 35,
+            "max_items": 500,
             "require_complete_manifest": False,
         },
     }
 
 
-def test_sinopec_capture_keeps_partial_manifest_explicit() -> None:
+def test_sinopec_capture_contains_complete_manifest() -> None:
     payload = load_sinopec_capture(SNAPSHOT)
     summary = sinopec_capture_summary(payload)
 
     assert summary["enterprise_total"] == 132
     assert summary["candidate_enterprise_total"] == 35
-    assert summary["enterprise_captured"] == 1
-    assert summary["job_rows_captured"] == 3
-    assert summary["complete_manifest"] is False
-    assert summary["enterprise_success"] == 1
+    assert summary["enterprise_captured"] == 132
+    assert summary["candidate_enterprise_captured"] == 35
+    assert summary["job_rows_captured"] == 348
+    assert summary["complete_manifest"] is True
+    assert summary["enterprise_success"] == 35
 
 
-def test_sinopec_capture_rejects_incomplete_manifest_when_promoted() -> None:
-    with pytest.raises(SinopecCaptureError, match="complete manifest"):
-        load_sinopec_capture(SNAPSHOT, require_complete_manifest=True)
+def test_sinopec_capture_accepts_complete_manifest_when_promoted() -> None:
+    payload = load_sinopec_capture(SNAPSHOT, require_complete_manifest=True)
+    assert payload["complete_manifest"] is True
 
 
 def test_sinopec_spa_rows_preserve_official_field_evidence(tmp_path: Path) -> None:
@@ -62,7 +65,7 @@ def test_sinopec_spa_rows_preserve_official_field_evidence(tmp_path: Path) -> No
     )
     postings = collector.collect(sinopec_source())
 
-    assert len(postings) == 3
+    assert len(postings) == 348
     geology = next(posting for posting in postings if posting.title == "油气地质研究岗")
     assert geology.employer == "胜利油田"
     assert geology.location.startswith("山东东营")
@@ -71,6 +74,48 @@ def test_sinopec_spa_rows_preserve_official_field_evidence(tmp_path: Path) -> No
     assert geology.official_evidence_url == geology.source_url
     assert geology.field_evidence["evidence_scope"] == "official_sinopec_detail_snapshot"
     assert geology.field_evidence["招聘人数"] == "125人"
+
+
+def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> None:
+    """The full capture must be audited before the source can be promoted.
+
+    This locks the distinction between explicit matches, ambiguous related
+    wording and rejected majors for the reviewed 2026-09-24 capture.  It also
+    prevents a future parser change from silently publishing all 348 rows.
+    """
+    settings = replace(make_settings(tmp_path), max_source_items=500)
+    collector = OfficialSourceCollector(settings)
+    pipeline = JobPipeline(settings, database=None, collector=collector)
+    rows = [
+        pipeline.normalize_posting(posting, sinopec_source())
+        for posting in collector.collect(sinopec_source())
+    ]
+
+    statuses = {}
+    for row in rows:
+        status = row["publication_status"]
+        statuses[status] = statuses.get(status, 0) + 1
+        assert row["official_evidence_url"].startswith("https://job.sinopec.com/")
+        assert row["field_evidence"]["evidence_scope"] == (
+            "official_sinopec_detail_snapshot"
+        )
+
+    assert len(rows) == 348
+    assert statuses == {
+        "student_eligible": 69,
+        "pending_evidence": 98,
+        "out_of_scope": 181,
+    }
+    assert all(
+        row["publication_basis"]["matched_profile_ids"]
+        for row in rows
+        if row["publication_status"] == "student_eligible"
+    )
+    assert all(
+        not row["publication_basis"]["matched_profile_ids"]
+        for row in rows
+        if row["publication_status"] != "student_eligible"
+    )
 
 
 def test_sinopec_capture_rejects_external_evidence(tmp_path: Path) -> None:
@@ -91,5 +136,7 @@ def test_sinopec_capture_cli_reports_partial_manifest(monkeypatch, capsys) -> No
     cli_main()
     payload = json.loads(capsys.readouterr().out)
     assert payload["summary"]["enterprise_total"] == 132
-    assert payload["summary"]["enterprise_captured"] == 1
-    assert payload["summary"]["complete_manifest"] is False
+    assert payload["summary"]["enterprise_captured"] == 132
+    assert payload["summary"]["candidate_enterprise_captured"] == 35
+    assert payload["summary"]["job_rows_captured"] == 348
+    assert payload["summary"]["complete_manifest"] is True

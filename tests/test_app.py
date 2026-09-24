@@ -110,7 +110,7 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     assert response.get_json()["outcome"] == "created"
 
 
-def test_sinopec_capture_admin_endpoint_is_private_and_reports_partial_manifest(tmp_path) -> None:
+def test_sinopec_capture_admin_endpoint_is_private_and_reports_complete_manifest(tmp_path) -> None:
     settings = make_settings(tmp_path)
     app = create_app(settings)
     database = app.extensions["database"]
@@ -132,8 +132,10 @@ def test_sinopec_capture_admin_endpoint_is_private_and_reports_partial_manifest(
     payload = response.get_json()
     assert payload["enabled"] is False
     assert payload["summary"]["enterprise_total"] == 132
-    assert payload["summary"]["enterprise_captured"] == 1
-    assert payload["summary"]["complete_manifest"] is False
+    assert payload["summary"]["enterprise_captured"] == 132
+    assert payload["summary"]["candidate_enterprise_captured"] == 35
+    assert payload["summary"]["job_rows_captured"] == 348
+    assert payload["summary"]["complete_manifest"] is True
 
 
 def test_organization_matrix_is_admin_only_and_supports_role_filter(tmp_path) -> None:

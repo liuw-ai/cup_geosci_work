@@ -107,6 +107,11 @@ JOB_LEVEL_EVIDENCE_SCOPES = frozenset(
         "official_attachment_row",
         "official_role_section",
         "official_detail_block",
+        # The Sinopec SPA is captured from each official enterprise detail
+        # route and then replayed from a versioned, administrator-verified
+        # snapshot.  It is still job-level evidence: the capture stores the
+        # detail title, major field and degree field for the same row.
+        "official_sinopec_detail_snapshot",
         "admin_verified_official_record",
     }
 )

@@ -455,9 +455,12 @@ class OfficialSourceCollector:
             require_complete_manifest=bool(config.get("require_complete_manifest", False)),
         )
         postings: list[RawPosting] = []
+        # This source is a verified multi-unit snapshot.  Its explicit cap is
+        # independent of the conservative default used for live pages, while
+        # remaining bounded to prevent an accidentally unbounded import.
         max_items = min(
             int(config.get("max_items", self.settings.max_source_items)),
-            self.settings.max_source_items,
+            1_000,
         )
         for item in payload["jobs"][:max_items]:
             major = str(item["major"]).strip()

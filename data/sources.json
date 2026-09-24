@@ -297,8 +297,9 @@
       "application_url": "https://job.sinopec.com/",
       "enterprise_total": 132,
       "candidate_enterprise_total": 35,
-      "require_complete_manifest": false,
-      "note": "2026-09-24 浏览器核验确认官方 SPA 显示 132 个单位，关键词“地质”筛选 35 个候选单位。当前快照仅含已核验的胜利油田代表性岗位，来源保持禁用；完成 132 单位清单、35 单位详情和分页回归后才可启用。"
+      "max_items": 500,
+      "require_complete_manifest": true,
+      "note": "2026-09-24 浏览器核验确认官方 SPA 分页显示 132 个单位，关键词“地质”筛选 35 个候选单位；当前快照已保存 132 个单位清单、35 个详情页和 348 条岗位行。来源仍保持禁用，待管理员审计岗位专业匹配和运行证据后启用。"
     }
   },
   {
