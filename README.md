@@ -6,6 +6,8 @@
 
 完整的数据流、专业匹配边界、100 人模拟检查和运维边界见 [ARCHITECTURE.md](ARCHITECTURE.md)。生产部署、HTTPS 反向代理和手机/微信访问排查见 [DEPLOYMENT.md](DEPLOYMENT.md)。
 
+最新的事业编地点核验、两条安徽地学博士岗位和公务员年度职位表门禁见 [docs/phase-36/README.md](docs/phase-36/README.md)。
+
 项目进入长期迭代前的 Phase 0 审阅材料见 [docs/phase-0/README.md](docs/phase-0/README.md)。其中明确区分当前已经实现的能力、尚未实现的能力，以及后续扩源时不得突破的公开发布边界。
 
 当前待审阅的 Phase 1 数据契约、SQLite 迁移、岗位证据、附件台账和私有线索状态机见 [docs/phase-1/README.md](docs/phase-1/README.md)。本阶段不新增爬虫或招聘数据；它为后续官方职位表解析和全国来源扩展建立可追溯的数据基础。

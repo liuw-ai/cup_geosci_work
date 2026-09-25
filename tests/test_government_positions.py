@@ -15,16 +15,16 @@ from job_hub.government_positions import (
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
-def test_official_government_registry_loads_and_reports_pending_rows() -> None:
+def test_official_government_registry_loads_and_reports_verified_rows() -> None:
     registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
     report = government_position_quality_report(registry, today="2026-09-25")
 
     assert report["source_assessments"] == 3
     assert report["records"] == 2
-    assert report["verified_open_records"] == 0
-    assert report["explicit_student_matches"] == 0
-    assert report["source_failures_or_pending"] == 2
-    assert report["scan_interpretation"].startswith("存在来源故障")
+    assert report["verified_open_records"] == 2
+    assert report["explicit_student_matches"] == 2
+    assert report["source_failures_or_pending"] == 0
+    assert report["scan_interpretation"].startswith("台账中的正式来源")
 
 
 def test_verified_open_row_requires_location_and_deadline() -> None:

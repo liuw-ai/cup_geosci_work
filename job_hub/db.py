@@ -1675,7 +1675,15 @@ class Database:
         current = self.get_artifact_job_candidate(candidate_id)
         if current is None:
             return None
-        editable = {"review_status", "review_note"}
+        # Official tables often omit location while the notice body identifies
+        # the institution address. Location may be filled only in the private
+        # review queue and is required before public publication.
+        editable = {
+            "review_status",
+            "review_note",
+            "location",
+            "location_evidence",
+        }
         unexpected = set(changes) - editable
         if unexpected:
             raise ValueError(
@@ -1694,15 +1702,36 @@ class Database:
             raise ValueError(
                 "Use mark_artifact_job_candidate_published after saving the verified job"
             )
+        location = self._optional_text(
+            changes.get("location", current.get("location"))
+        )
+        field_evidence = current.get("field_evidence")
+        if not isinstance(field_evidence, dict):
+            field_evidence = {}
+        else:
+            field_evidence = dict(field_evidence)
+        location_evidence = self._optional_text(
+            changes.get("location_evidence")
+        )
+        if location_evidence:
+            field_evidence["工作地点依据"] = location_evidence
         now = utc_now()
         with self.transaction() as connection:
             connection.execute(
                 """
                 UPDATE artifact_job_candidates
-                SET review_status = ?, review_note = ?, updated_at = ?
+                SET review_status = ?, review_note = ?, location = ?,
+                    field_evidence_json = ?, updated_at = ?
                 WHERE id = ?
                 """,
-                (review_status, review_note, now, candidate_id),
+                (
+                    review_status,
+                    review_note,
+                    location,
+                    json.dumps(field_evidence, ensure_ascii=False),
+                    now,
+                    candidate_id,
+                ),
             )
             row = self._select_artifact_job_candidate(connection, candidate_id)
         return self._artifact_candidate_row(row) if row else None

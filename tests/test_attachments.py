@@ -234,6 +234,34 @@ def test_attachment_candidate_requires_review_then_publishes_with_evidence(tmp_p
     }
 
 
+def test_government_candidate_location_can_be_verified_before_publication(tmp_path) -> None:
+    """A notice-level address may complete an otherwise location-less table row."""
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path, session=FakeSession(_xlsx_bytes())
+    )
+    processor.process(artifact["id"])
+    candidate = database.list_artifact_job_candidates(artifact_id=artifact["id"])[0]
+
+    updated = database.update_artifact_job_candidate(
+        candidate["id"],
+        {
+            "location": "北京市",
+            "location_evidence": "官方公告正文地址：北京市海淀区学院路。",
+            "review_status": "official_content_verified",
+            "review_note": "已核对官方公告正文地址与附件岗位行；地点为公告载明的单位所在地。",
+        },
+    )
+    assert updated["location"] == "北京市"
+    assert updated["review_status"] == "official_content_verified"
+    assert updated["field_evidence"]["工作地点依据"].startswith("官方公告正文地址")
+
+
+def test_site_attribution_is_rendered(tmp_path: Path) -> None:
+    app = create_app(make_settings(tmp_path))
+    body = app.test_client().get("/").get_data(as_text=True)
+    assert "测试项目归属" in body
+
+
 def test_attachment_publication_rolls_back_job_when_evidence_fails(
     tmp_path, monkeypatch
 ) -> None:

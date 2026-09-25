@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "as_of": "2026-09-25",
+  "as_of": "2026-09-26",
   "description": "事业单位与公务员职位表的官方证据台账。records 只保存逐岗位证据；source_assessments 保存尚未形成岗位行的年度入口状态。",
   "source_assessments": [
     {
@@ -11,7 +11,7 @@
       "official_notice_url": "https://dkj.ah.gov.cn/xwzx/tzgg/40788529.html",
       "official_attachment_url": "https://dkj.ah.gov.cn/group3/M00/14/5E/wKg86mnx3JSAe_TTAAA0PEnJC-Q385.xls",
       "deadline_date": "2026-10-31",
-      "note": "公告与岗位表均为安徽省地质矿产勘查局官网内容；岗位行仍需逐条补齐地点证据后才可自动发布。"
+      "note": "公告与岗位表均为安徽省地质矿产勘查局官网内容；公告正文地址为安徽省合肥市屯溪路296号，岗位行已进入地点核验与发布流程。"
     },
     {
       "source_id": "beijing-hrss",
@@ -45,15 +45,15 @@
       "title": "专业技术岗位（地质资源与地质工程等）",
       "major_requirement": "地质学、地质资源与地质工程、地球物理学",
       "degree_requirement": "博士研究生",
-      "location": "",
+      "location": "合肥市",
       "headcount": 1,
       "deadline_date": "2026-10-31",
       "official_notice_url": "https://dkj.ah.gov.cn/xwzx/tzgg/40788529.html",
       "official_attachment_url": "https://dkj.ah.gov.cn/group3/M00/14/5E/wKg86mnx3JSAe_TTAAA0PEnJC-Q385.xls",
       "evidence_locator": "2026年高层次人才招聘岗位汇总表!17",
-      "record_status": "manual_review_required",
+      "record_status": "verified_open",
       "match_status": "explicit_match",
-      "note": "专业和学历在官方岗位行中明确；岗位行未单列工作地点，补齐地点证据前不得进入学生端。"
+      "note": "专业和学历在官方岗位行中明确；地点依据官方公告正文地址：安徽省合肥市屯溪路296号。附件岗位表第17行，报名截止2026-10-31。"
     },
     {
       "id": "anhui-2026-2026120",
@@ -65,15 +65,15 @@
       "title": "专业技术岗位（地质学）",
       "major_requirement": "地质学",
       "degree_requirement": "博士研究生",
-      "location": "",
+      "location": "合肥市",
       "headcount": 1,
       "deadline_date": "2026-10-31",
       "official_notice_url": "https://dkj.ah.gov.cn/xwzx/tzgg/40788529.html",
       "official_attachment_url": "https://dkj.ah.gov.cn/group3/M00/14/5E/wKg86mnx3JSAe_TTAAA0PEnJC-Q385.xls",
       "evidence_locator": "2026年高层次人才招聘岗位汇总表!24",
-      "record_status": "manual_review_required",
+      "record_status": "verified_open",
       "match_status": "explicit_match",
-      "note": "专业和学历在官方岗位行中明确；岗位行未单列工作地点，补齐地点证据前不得进入学生端。"
+      "note": "专业和学历在官方岗位行中明确；地点依据官方公告正文地址：安徽省合肥市屯溪路296号。附件岗位表第24行，报名截止2026-10-31。"
     }
   ]
 }

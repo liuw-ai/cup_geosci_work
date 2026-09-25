@@ -27,6 +27,7 @@ def _env_int(name: str, default: int) -> int:
 @dataclass(frozen=True)
 class Settings:
     site_name: str
+    site_attribution: str
     secret_key: str
     base_url: str
     timezone: str
@@ -79,6 +80,10 @@ class Settings:
         )
         return cls(
             site_name=os.getenv("SITE_NAME", "地学就业信息站"),
+            site_attribution=os.getenv(
+                "SITE_ATTRIBUTION",
+                "中国石油大学（北京）地球科学学院就业信息项目",
+            ).strip(),
             secret_key=os.getenv("APP_SECRET_KEY", "development-only-change-me"),
             base_url=os.getenv("APP_BASE_URL", "http://127.0.0.1:8080").rstrip("/"),
             timezone=os.getenv("APP_TIMEZONE", "Asia/Shanghai"),

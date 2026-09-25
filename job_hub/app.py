@@ -98,6 +98,7 @@ def create_app(settings: Settings | None = None) -> Flask:
     def inject_globals() -> dict[str, Any]:
         return {
             "site_name": settings.site_name,
+            "site_attribution": settings.site_attribution,
             "category_order": CATEGORY_ORDER,
             "category_descriptions": CATEGORY_DESCRIPTIONS,
             "category_display_names": CATEGORY_DISPLAY_NAMES,
@@ -1082,6 +1083,11 @@ def create_app(settings: Settings | None = None) -> Flask:
             },
             row_text=str(candidate.get("row_text") or ""),
         )
+        location_basis = str(
+            (candidate.get("field_evidence") or {}).get("工作地点依据") or ""
+        ).strip()
+        if location_basis:
+            field_evidence["工作地点依据"] = location_basis
         raw = RawPosting(
             title=str(candidate["title"]),
             employer=str(candidate["employer"]),

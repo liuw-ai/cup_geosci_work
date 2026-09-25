@@ -12,6 +12,7 @@ def make_settings(tmp_path: Path) -> Settings:
     registry.write_text("[]", encoding="utf-8")
     return Settings(
         site_name="测试就业信息站",
+        site_attribution="测试项目归属",
         secret_key="test-secret",
         base_url="http://testserver",
         timezone="Asia/Shanghai",
