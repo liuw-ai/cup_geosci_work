@@ -22,6 +22,8 @@
 
 中石油单位与岗位证据绑定审计见 [docs/phase-32/README.md](docs/phase-32/README.md)，可用 `python -m job_hub.cli cnpc-matrix` 重复检查 13 个单位矩阵和官方快照岗位绑定状态。
 
+当前最新交付为 Phase 32；后续实时扩源仍以单位矩阵审计通过、官方岗位证据完整和学生端专业门禁通过为前提。
+
 当前待审阅的 Phase 7 公开动态校招接口适配器见 [docs/phase-7/README.md](docs/phase-7/README.md)。本阶段首先接入中国海油公开校招页面的只读接口证据和严格适配器；接口当前返回业务错误，因此来源保持停用，不会产生虚假的“无岗位”结果。
 
 当前待审阅的 Phase 8 国家能源公开入口探测见 [docs/phase-8/README.md](docs/phase-8/README.md)。它对中国石油、中国石化、中国海油和国家管网的主入口、备用官方入口及 robots 进行只读探测，记录 TLS、访问策略、动态页面和可发现招聘链接；探测结果不是岗位数据。
