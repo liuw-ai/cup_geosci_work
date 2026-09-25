@@ -27,11 +27,11 @@
       "source_id": "national-civil-service",
       "position_type": "civil_service",
       "province": "全国",
-      "status": "manual_review_required",
+      "status": "source_unavailable",
       "official_notice_url": "https://bm.scs.gov.cn/",
       "official_attachment_url": "https://bm.scs.gov.cn/",
       "deadline_date": "",
-      "note": "国家公务员局年度职位表需要以当年正式公告和 PDF/Excel 附件为准；当前未确认 2027 年职位表已发布，不能把历史职位表当作在招。"
+      "note": "国家公务员局年度职位表需要以当年正式公告和 PDF/Excel 附件为准；2026-09-25 浏览器访问 bm.scs.gov.cn 返回连接拒绝，当前未确认 2027 年职位表已发布，不能把历史职位表当作在招。"
     }
   ],
   "records": [
