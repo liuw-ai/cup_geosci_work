@@ -2017,7 +2017,7 @@ class Database:
             where = "id = ?"
             values: list[Any] = [job_id]
             if student_visible:
-                where += " AND publication_status IN (?, ?)"
+                where += " AND status = 'open' AND publication_status IN (?, ?)"
                 values.extend(("student_eligible", "unrestricted_eligible"))
             row = connection.execute(
                 f"SELECT * FROM jobs WHERE {where}", values
@@ -2025,7 +2025,7 @@ class Database:
         return self._job_row(row) if row else None
 
     def find_public_job(self, job_id: int) -> dict[str, Any] | None:
-        """Return one job only when it has passed the student publication gate."""
+        """Return one currently open job that passed the student gate."""
         return self.find_job(job_id, student_visible=True)
 
     def update_derived_job_fields(
@@ -3027,17 +3027,74 @@ class Database:
     def expire_jobs_before(self, today: str) -> int:
         now = utc_now()
         with self.transaction() as connection:
-            cursor = connection.execute(
+            rows = connection.execute(
                 """
-                UPDATE jobs
-                SET status = 'expired', updated_at = ?
+                SELECT id, title, deadline_date
+                FROM jobs
                 WHERE status = 'open'
                   AND deadline_date IS NOT NULL
                   AND deadline_date < ?
                 """,
-                (now, today),
+                (today,),
+            ).fetchall()
+            if not rows:
+                return 0
+            connection.executemany(
+                """
+                UPDATE jobs
+                SET status = 'expired', updated_at = ?
+                WHERE id = ? AND status = 'open'
+                """,
+                [(now, int(row["id"])) for row in rows],
             )
-            return int(cursor.rowcount)
+            connection.executemany(
+                """
+                INSERT INTO job_events (job_id, event_type, occurred_at, payload_json)
+                VALUES (?, 'expired', ?, ?)
+                """,
+                [
+                    (
+                        int(row["id"]),
+                        now,
+                        json.dumps(
+                            {
+                                "title": row["title"],
+                                "deadline_date": row["deadline_date"],
+                            },
+                            ensure_ascii=False,
+                        ),
+                    )
+                    for row in rows
+                ],
+            )
+            return len(rows)
+
+    def count_job_events_on_local_day(
+        self,
+        event_type: str,
+        local_date: str,
+        timezone_name: str = "UTC",
+    ) -> int:
+        """Count immutable job events in a configured local calendar day."""
+        report_day = date.fromisoformat(local_date)
+        local_zone = ZoneInfo(timezone_name)
+        start = datetime.combine(report_day, time.min, tzinfo=local_zone)
+        end = start + timedelta(days=1)
+        start_value = start.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        end_value = end.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        with self.connect() as connection:
+            return int(
+                connection.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM job_events
+                    WHERE event_type = ?
+                      AND occurred_at >= ?
+                      AND occurred_at < ?
+                    """,
+                    (event_type, start_value, end_value),
+                ).fetchone()[0]
+            )
 
     def get_daily_report(self, report_date: str) -> dict[str, Any] | None:
         with self.connect() as connection:

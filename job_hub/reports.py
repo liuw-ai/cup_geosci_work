@@ -62,6 +62,11 @@ def build_daily_report(
     target_date = report_date or local_today(settings)
     target = target_date.isoformat()
     database.expire_jobs_before(target)
+    expired_today = database.count_job_events_on_local_day(
+        "expired",
+        target,
+        settings.timezone,
+    )
     changes = database.jobs_for_report(target, settings.timezone)
     new_ids = {job["id"] for job in changes["new"]}
     updated = [job for job in changes["updated"] if job["id"] not in new_ids]
@@ -110,6 +115,7 @@ def build_daily_report(
         "stats": {
             "new": len(changes["new"]),
             "updated": len(updated),
+            "expired": expired_today,
             "deadline_soon": len(deadline_jobs),
             "open_total": database.count_open_jobs(),
         },

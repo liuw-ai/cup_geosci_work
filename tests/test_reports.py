@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from datetime import timedelta
+
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
-from job_hub.reports import publish_daily_report
+from job_hub.reports import build_daily_report, local_today, publish_daily_report
 from job_hub.sources import RawPosting
 
 from conftest import make_settings, source
@@ -119,3 +121,64 @@ def test_worker_heartbeat_can_be_read_without_touching_job_data(tmp_path) -> Non
     assert heartbeat is not None
     assert heartbeat["status"] == "running"
     assert heartbeat["detail"] == "test"
+
+
+def test_expired_jobs_leave_public_views_and_are_counted_once_per_day(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    pipeline = JobPipeline(settings, database)
+    today = local_today(settings)
+    posting = RawPosting(
+        title="地质工程师招聘",
+        employer="测试能源集团",
+        source_url="https://careers.example.edu.cn/jobs/expiry",
+        application_url=None,
+        text="面向地质工程硕士毕业生的官方招聘。",
+        summary="可验证的测试岗位。",
+        published_date=None,
+        deadline_date="2099-12-31",
+        location="北京",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程师招聘",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+        },
+    )
+    normalized = pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+    job_id, _ = database.save_job(normalized)
+
+    yesterday = (today - timedelta(days=1)).isoformat()
+    with database.transaction() as connection:
+        connection.execute(
+            "UPDATE jobs SET deadline_date = ?, status = 'open' WHERE id = ?",
+            (today.isoformat(), job_id),
+        )
+    assert database.expire_jobs_before(today.isoformat()) == 0
+    assert database.find_public_job(job_id) is not None
+
+    with database.transaction() as connection:
+        connection.execute(
+            "UPDATE jobs SET deadline_date = ?, status = 'open' WHERE id = ?",
+            (yesterday, job_id),
+        )
+
+    report = build_daily_report(database, settings, today)
+    assert report["stats"]["expired"] == 1
+    assert report["stats"]["open_total"] == 0
+    assert database.list_jobs()[1] == 0
+    assert database.find_public_job(job_id) is None
+    internal, total = database.list_jobs(only_open=False, student_visible=False)
+    assert total == 1
+    assert internal[0]["status"] == "expired"
+    with database.connect() as connection:
+        event = connection.execute(
+            "SELECT event_type FROM job_events WHERE job_id = ? ORDER BY id DESC LIMIT 1",
+            (job_id,),
+        ).fetchone()
+    assert event["event_type"] == "expired"
+
+    refreshed = build_daily_report(database, settings, today)
+    assert refreshed["stats"]["expired"] == 1

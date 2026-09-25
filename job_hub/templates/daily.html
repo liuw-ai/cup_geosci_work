@@ -38,6 +38,7 @@
   <section class="shell compact-stats" aria-label="日报统计">
     <span>新增 <strong>{{ report.stats.new }}</strong></span>
     <span>更新 <strong>{{ report.stats.updated }}</strong></span>
+    <span>已清退 <strong>{{ report.stats.expired|default(0) }}</strong></span>
     <span>7 日内截止 <strong>{{ report.stats.deadline_soon }}</strong></span>
     <span>在招总数 <strong>{{ report.stats.open_total }}</strong></span>
   </section>
