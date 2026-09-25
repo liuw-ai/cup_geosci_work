@@ -23,6 +23,10 @@ from job_hub.contracts import (
 )
 from job_hub.coverage import build_coverage_report
 from job_hub.cnpc_matrix import CnpcMatrixError, build_cnpc_matrix_report
+from job_hub.cnpc_browser_capture import (
+    CnpcBrowserCaptureError,
+    build_cnpc_browser_capture_report,
+)
 from job_hub.db import Database
 from job_hub.discovery import (
     discovery_funnel,
@@ -621,6 +625,22 @@ def create_app(settings: Settings | None = None) -> Flask:
         except CnpcMatrixError as error:
             return jsonify({"error": str(error), "source_id": "cnpc-career"}), 503
         return jsonify({"source_id": "cnpc-career", **report})
+
+    @app.get("/api/admin/cnpc-browser-capture")
+    @require_admin
+    def cnpc_browser_capture_api() -> Any:
+        """Expose the private CNPC browser index/detail audit."""
+        source = database.get_source("cnpc-career")
+        configured_path = str(
+            (source or {}).get("config", {}).get("browser_index_capture_path")
+            or "data/verified/cnpc-browser-index-20260925.json"
+        )
+        path = PROJECT_ROOT / configured_path
+        try:
+            report = build_cnpc_browser_capture_report(path)
+        except CnpcBrowserCaptureError as error:
+            return jsonify({"error": str(error), "capture_path": str(path)}), 503
+        return jsonify({"capture_path": str(path), **report})
 
     @app.get("/api/admin/national-entry-probes")
     @require_admin

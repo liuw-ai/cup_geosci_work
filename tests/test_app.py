@@ -182,6 +182,24 @@ def test_cnpc_matrix_is_admin_only_and_binds_snapshot_rows(tmp_path) -> None:
     assert payload["summary"]["snapshot_contract_passed"] is True
 
 
+def test_cnpc_browser_capture_is_admin_only_and_never_publishes_index_rows(tmp_path) -> None:
+    app = create_app(make_settings(tmp_path))
+    client = app.test_client()
+
+    assert client.get("/api/admin/cnpc-browser-capture").status_code == 403
+    response = client.get(
+        "/api/admin/cnpc-browser-capture",
+        headers={"X-Admin-Token": "test-admin-token"},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["summary"]["pages_scanned"] == 13
+    assert payload["summary"]["announcements_discovered"] == 122
+    assert payload["summary"]["publishable_job_rows"] == 0
+    assert payload["source_policy"]["index_is_job"] is False
+
+
 def test_organization_matrix_is_admin_only_and_supports_role_filter(tmp_path) -> None:
     app = create_app(make_settings(tmp_path))
     client = app.test_client()

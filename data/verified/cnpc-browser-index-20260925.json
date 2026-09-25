@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "status": "partial",
+  "platform_url": "https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
+  "captured_at": "2026-09-25T08:47:00Z",
+  "scan": {
+    "pages_scanned": 13,
+    "pagination_complete": true,
+    "announcements_discovered": 122,
+    "announcements_targeted": 3,
+    "failed_detail_rows": 0,
+    "list_observation": "官方招聘列表在浏览器中显示 13 页；逐页读取分页 1-13。该数字是公告索引数，不是地学岗位数。"
+  },
+  "detail_targets": [
+    {
+      "external_id": "cnpc-research-institute-2026-autumn",
+      "title": "勘探开发研究院2026年秋季高校毕业生招聘启事",
+      "detail_url": "https://zhaopin.cnpc.com.cn/web/recruitInfoshow.html?id=8b8b6c9ea07c29cc01a07fe77831004a",
+      "deadline": "2026-10-15",
+      "detail_status": "official_detail_api_degraded",
+      "observed_at": "2026-09-25T08:40:00Z",
+      "reason": "官方详情页脚本请求 showN 后缺少 recruitInfoObj，页面标题、专业、学历、地点和人数均未渲染；浏览器控制台记录 recruitInfoshow.js 的 TypeError。"
+    },
+    {
+      "external_id": "cnpc-logging-2026-autumn",
+      "title": "中油测井公司2026年秋季高校毕业生招聘启事",
+      "detail_url": "https://zhaopin.cnpc.com.cn/web/recruitInfoshow.html?id=8b8b6c9ea05aee4d01a07fa61edf0018",
+      "deadline": "2026-10-15",
+      "detail_status": "official_detail_api_degraded",
+      "observed_at": "2026-09-25T08:45:17Z",
+      "reason": "官方详情页与勘探开发研究院出现相同的 recruitInfoObj 缺失错误；岗位级专业、学历、地点和人数证据不可见，因此不发布。"
+    },
+    {
+      "external_id": "cnpc-bgp-2026-autumn",
+      "title": "东方地球物理勘探有限责任公司2026年秋季高校毕业生招聘启事",
+      "detail_url": "https://zhaopin.cnpc.com.cn/web/recruitInfoshow.html?id=8b8b6c9ea05aee4d01a08032a037006a",
+      "deadline": "2026-10-15",
+      "detail_status": "official_detail_api_degraded",
+      "observed_at": "2026-09-25T08:47:00Z",
+      "reason": "该公告已从官方列表索引捕获，但本轮未取得岗位级详情字段；保留为待复核目标，不将公告标题当作专业证据。"
+    }
+  ],
+  "evidence_policy": "只记录官方招聘列表和官方详情 URL；详情字段缺失、访问受限或接口退化时保持管理员待复核状态。"
+}

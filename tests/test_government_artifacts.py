@@ -22,9 +22,9 @@ def test_provincial_manifest_contains_real_official_attachments() -> None:
     manifest = load_government_artifact_manifest(
         PROJECT_ROOT / "data" / "government_artifact_manifest.json"
     )
-    assert len(manifest["artifacts"]) == 3
-    assert {item["province"] for item in manifest["artifacts"]} == {"山东", "河南", "天津"}
-    assert all(item["status"] == "historical_closed" for item in manifest["artifacts"])
+    assert len(manifest["artifacts"]) == 4
+    assert {item["province"] for item in manifest["artifacts"]} == {"安徽", "山东", "河南", "天津"}
+    assert all(item["status"] in {"historical_closed", "server_download_pending"} for item in manifest["artifacts"])
     assert all(item["attachment_url"].endswith((".xlsx", ".xls")) for item in manifest["artifacts"])
 
 
@@ -54,8 +54,8 @@ def test_registration_only_creates_private_artifact_rows() -> None:
     database = FakeDatabase()
     rows = register_government_artifacts(database, manifest)
 
-    assert len(rows) == 3
-    assert len(database.items) == 3
+    assert len(rows) == 4
+    assert len(database.items) == 4
     assert all(item["extraction_status"] == "registered" for item in database.items)
     assert all("government_artifact_id" in item["metadata"] for item in database.items)
 

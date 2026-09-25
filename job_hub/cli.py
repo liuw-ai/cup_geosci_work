@@ -32,6 +32,10 @@ from job_hub.cnpc_matrix import (
     CnpcMatrixError,
     build_cnpc_matrix_report,
 )
+from job_hub.cnpc_browser_capture import (
+    CnpcBrowserCaptureError,
+    build_cnpc_browser_capture_report,
+)
 from job_hub.db import Database
 from job_hub.government_positions import (
     government_position_quality_report,
@@ -410,6 +414,21 @@ def main() -> None:
         type=Path,
         help="可选：将完整矩阵审计 JSON 写入指定文件",
     )
+    cnpc_browser_parser = subparsers.add_parser(
+        "cnpc-browser-capture",
+        help="审计中国石油官方招聘列表的浏览器分页捕获和重点详情状态",
+    )
+    cnpc_browser_parser.add_argument(
+        "--path",
+        type=Path,
+        default=Path("data/verified/cnpc-browser-index-20260925.json"),
+        help="版本化浏览器捕获 JSON 路径",
+    )
+    cnpc_browser_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将管理员审计报告写入指定 JSON 文件",
+    )
     sinopec_capture_parser = subparsers.add_parser(
         "sinopec-capture",
         help="输出中石化官方 SPA 捕获快照的单位和岗位扫描统计",
@@ -687,6 +706,26 @@ def main() -> None:
             print(
                 json.dumps(
                     {"error": str(error), "snapshot_path": str(args.snapshot)},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "cnpc-browser-capture":
+        try:
+            result = build_cnpc_browser_capture_report(args.path)
+        except CnpcBrowserCaptureError as error:
+            print(
+                json.dumps(
+                    {"error": str(error), "capture_path": str(args.path)},
                     ensure_ascii=False,
                     indent=2,
                 )

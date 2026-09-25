@@ -1,8 +1,21 @@
 {
   "version": 1,
   "as_of": "2026-09-25",
-  "description": "山东、河南、天津已核验政府官网事业单位岗位表附件。当前本机网络无法稳定下载，先登记为服务器受控下载队列；附件行未解析和人工复核前不得发布。",
+  "description": "安徽、山东、河南、天津已核验政府官网事业单位岗位表附件。当前本机网络无法稳定下载，先登记为服务器受控下载队列；附件行未解析和人工复核前不得发布。",
   "artifacts": [
+    {
+      "id": "anhui-geology-bureau-2026-high-level-position-table",
+      "source_id": "anhui-geology-bureau",
+      "province": "安徽",
+      "position_type": "public_institution",
+      "notice_url": "https://dkj.ah.gov.cn/xwzx/tzgg/40788529.html",
+      "attachment_url": "https://dkj.ah.gov.cn/group3/M00/14/5E/wKg86mnx3JSAe_TTAAA0PEnJC-Q385.xls",
+      "artifact_kind": "position_table",
+      "deadline_date": "2026-10-31",
+      "observed_on": "2026-09-25",
+      "status": "server_download_pending",
+      "note": "安徽省地矿局官网公告确认安徽工业经济职业技术学院2026年高层次人才招聘29人，岗位表含地质学、地质资源与地质工程等博士岗位。公告和附件已核验；服务器下载、逐行地点证据和人工复核完成前不得发布。"
+    },
     {
       "id": "shandong-geology-bureau-2026-position-table",
       "source_id": "shandong-geology-bureau",

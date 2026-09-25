@@ -277,6 +277,8 @@
       "official_evidence_url": "https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
       "application_url": "https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
       "listing_url": "https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
+      "browser_index_capture_path": "data/verified/cnpc-browser-index-20260925.json",
+      "browser_index_capture_status": "partial_detail_api_degraded",
       "detail_access_status": "official_detail_api_degraded",
       "note": "当前启用的是 2026-09-24 浏览器核验的官方岗位快照。2026-09-24 复测发现官方详情页前端调用 showN 接口返回缺少 recruitInfoObj，页面会显示空白；因此学生端保留官方快照字段，主入口指向中国石油官方招聘列表，详情编号和接口异常状态均明确展示。待服务器取得合规公开接口或专用适配器后再替换为自动同步。"
     }
