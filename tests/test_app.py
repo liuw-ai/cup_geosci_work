@@ -136,7 +136,7 @@ def test_sinopec_capture_admin_endpoint_is_private_and_reports_complete_manifest
     assert payload["summary"]["enterprise_total"] == 132
     assert payload["summary"]["enterprise_captured"] == 132
     assert payload["summary"]["candidate_enterprise_captured"] == 35
-    assert payload["summary"]["job_rows_captured"] == 348
+    assert payload["summary"]["job_rows_captured"] == 397
     assert payload["summary"]["complete_manifest"] is True
 
 

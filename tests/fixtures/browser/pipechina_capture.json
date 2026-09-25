@@ -1,7 +1,7 @@
 {
   "status": "success",
   "platform_url": "https://zhaopin.pipechina.com.cn/recruit#/portal_job_list?search_key=%E5%9C%B0%E8%B4%A8",
-  "captured_at": "2026-09-24T08:00:00+08:00",
+  "captured_at": "2026-09-25T08:00:00+08:00",
   "scan": {
     "pagination_complete": true,
     "rows_discovered": 1,

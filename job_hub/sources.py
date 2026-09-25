@@ -428,6 +428,8 @@ class OfficialSourceCollector:
         for index, item in enumerate(payload["rows"][:max_items], start=1):
             major = str(item["major"]).strip()
             degree = str(item["degree"]).strip()
+            raw_deadline = str(item["deadline"]).strip()
+            deadline_date = parse_date_value(raw_deadline)
             detail_url = str(item["detail_url"]).strip()
             evidence = {
                 "evidence_scope": "official_browser_capture_row",
@@ -436,7 +438,7 @@ class OfficialSourceCollector:
                 "专业范围": major,
                 "学历要求": degree,
                 "工作地点": str(item["location"]),
-                "报名截止": str(item["deadline"]),
+                "报名截止": raw_deadline,
                 **{str(key): str(value) for key, value in item["field_evidence"].items()},
             }
             postings.append(
@@ -454,7 +456,7 @@ class OfficialSourceCollector:
                         f"截止 {item['deadline']}"
                     ),
                     published_date=str(item.get("published_date") or "").strip() or None,
-                    deadline_date=str(item["deadline"]).strip() or None,
+                    deadline_date=deadline_date,
                     location=str(item["location"]).strip(),
                     external_id=str(item["external_id"]),
                     match_text=clean_text(f"{item['title']} {major} {degree}"),
@@ -683,6 +685,26 @@ class OfficialSourceCollector:
             allowed_hosts=list(config.get("allowed_hosts", [])),
             require_complete_manifest=bool(config.get("require_complete_manifest", False)),
         )
+        max_age_hours = config.get("max_age_hours")
+        if max_age_hours is not None:
+            captured_text = str(payload.get("captured_at") or "").strip().replace("Z", "+00:00")
+            try:
+                captured_at = datetime.fromisoformat(captured_text)
+            except ValueError as error:
+                raise SourceCollectionError(
+                    "Sinopec capture timestamp is not ISO-8601"
+                ) from error
+            if captured_at.tzinfo is None:
+                raise SourceCollectionError(
+                    "Sinopec capture timestamp must include a timezone"
+                )
+            age_hours = (
+                datetime.now(timezone.utc) - captured_at.astimezone(timezone.utc)
+            ).total_seconds() / 3600
+            if age_hours > float(max_age_hours):
+                raise SourceCollectionError(
+                    f"Sinopec capture is stale ({age_hours:.1f}h > {float(max_age_hours):.1f}h)"
+                )
         postings: list[RawPosting] = []
         # This source is a verified multi-unit snapshot.  Its explicit cap is
         # independent of the conservative default used for live pages, while
@@ -694,6 +716,8 @@ class OfficialSourceCollector:
         for item in payload["jobs"][:max_items]:
             major = str(item["major"]).strip()
             degree = str(item["degree"]).strip()
+            raw_deadline = str(item["deadline"]).strip()
+            deadline_date = parse_date_value(raw_deadline)
             evidence = {
                 "evidence_scope": "official_sinopec_detail_snapshot",
                 "captured_at": str(payload["captured_at"]),
@@ -701,7 +725,7 @@ class OfficialSourceCollector:
                 "专业范围": major,
                 "学历要求": degree,
                 "工作地点": str(item["location"]),
-                "报名截止": str(item["deadline"]),
+                "报名截止": raw_deadline,
                 **{
                     str(key): str(value)
                     for key, value in item["field_evidence"].items()
@@ -722,7 +746,7 @@ class OfficialSourceCollector:
                         f"截止 {item['deadline']}"
                     ),
                     published_date=(str(item.get("published_date") or "").strip() or None),
-                    deadline_date=str(item["deadline"]),
+                    deadline_date=deadline_date,
                     location=str(item["location"]),
                     external_id=str(item["external_id"]),
                     match_text=clean_text(f"{item['title']} {major} {degree}"),
