@@ -259,7 +259,7 @@ docker compose up -d --build
 docker compose logs -f worker
 ~~~
 
-Compose 默认只把 8080 绑定到服务器本机的 `127.0.0.1`，不直接暴露给公网。请在 Nginx、Caddy 或学校现有网关上配置 HTTPS 反向代理到 `127.0.0.1:8080`。APP_BASE_URL 必须填写学生实际访问的 HTTPS 域名，例如 https://jobs.example.edu.cn，否则邮件中的日报链接会不正确。`docker compose ps` 应显示 web 与 worker 均为 healthy；worker 健康检查读取共享 SQLite 中最近 180 秒的心跳。
+Compose 默认只把 8080 绑定到服务器本机的 `127.0.0.1`，不直接暴露给公网。正式部署优先在 Nginx、Caddy 或学校现有网关上配置 HTTPS 反向代理到 `127.0.0.1:8080`。如果暂时没有域名，可在服务器 `.env` 中明确设置 `WEB_BIND_ADDRESS=0.0.0.0` 和已在云安全组放行的 `WEB_PORT=80`，通过 `http://服务器公网IP/` 临时访问；这只提供 HTTP，不等同于生产 HTTPS。`APP_BASE_URL` 必须填写学生实际访问的完整地址，否则邮件中的日报链接会不正确。`docker compose ps` 应显示 web 与 worker 均为 healthy；worker 健康检查读取共享 SQLite 中最近 180 秒的心跳。
 
 若服务器位于中国大陆且网站向公众开放，通常需要准备已备案域名；若使用境外服务器，不需要 ICP 备案，但应评估中国大陆和微信内访问速度。网页可被微信直接打开，不要求学生安装飞书、腾讯文档或其他办公软件。
 

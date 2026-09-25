@@ -21,7 +21,9 @@ services:
       - "4"
       - job_hub.wsgi:app
     ports:
-      - "127.0.0.1:8080:8080"
+      # Keep localhost-only development as the default. A public deployment
+      # must opt in explicitly with WEB_BIND_ADDRESS and WEB_PORT in .env.
+      - "${WEB_BIND_ADDRESS:-127.0.0.1}:${WEB_PORT:-8080}:8080"
     volumes:
       - job_hub_data:/var/lib/job-hub
     init: true
