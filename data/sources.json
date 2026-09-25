@@ -529,9 +529,10 @@
     "enabled": false,
     "config": {
       "employer_hint": "国家公务员局",
-      "allowed_hosts": ["bm.scs.gov.cn"],
+      "allowed_hosts": ["bm.scs.gov.cn", "www.scs.gov.cn"],
+      "fallback_entry_urls": ["https://www.scs.gov.cn/"],
       "minimum_relevance": 40,
-      "note": "职位表与专题入口按年度变化，需在每年公告期验证公开职位表后建立专用解析器。"
+      "note": "职位表与专题入口按年度变化；bm.scs.gov.cn 当前连接受限，www.scs.gov.cn 为官方备用入口但返回反自动化校验页。仅在取得当年官方公告与 PDF/Excel 职位表后建立专用解析器。"
     }
   },
   {
