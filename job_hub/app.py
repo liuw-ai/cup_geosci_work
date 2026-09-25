@@ -22,6 +22,7 @@ from job_hub.contracts import (
     is_http_url,
 )
 from job_hub.coverage import build_coverage_report
+from job_hub.cnpc_matrix import CnpcMatrixError, build_cnpc_matrix_report
 from job_hub.db import Database
 from job_hub.discovery import (
     discovery_funnel,
@@ -605,6 +606,21 @@ def create_app(settings: Settings | None = None) -> Flask:
                 "enterprises": capture["enterprises"],
             }
         )
+
+    @app.get("/api/admin/cnpc-matrix")
+    @require_admin
+    def cnpc_matrix_api() -> Any:
+        """Expose CNPC unit registration and snapshot binding to administrators."""
+        source = database.get_source("cnpc-career")
+        snapshot_path = PROJECT_ROOT / str(
+            (source or {}).get("config", {}).get("snapshot_path")
+            or "data/verified/cnpc-geoscience-20260924.json"
+        )
+        try:
+            report = build_cnpc_matrix_report(snapshot_path=snapshot_path)
+        except CnpcMatrixError as error:
+            return jsonify({"error": str(error), "source_id": "cnpc-career"}), 503
+        return jsonify({"source_id": "cnpc-career", **report})
 
     @app.get("/api/admin/national-entry-probes")
     @require_admin

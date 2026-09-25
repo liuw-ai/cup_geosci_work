@@ -164,6 +164,24 @@ def test_cnpc_detail_page_discloses_degraded_official_detail_endpoint(tmp_path) 
     assert "官方详情编号" in body
 
 
+def test_cnpc_matrix_is_admin_only_and_binds_snapshot_rows(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    client = app.test_client()
+
+    assert client.get("/api/admin/cnpc-matrix").status_code == 403
+    response = client.get(
+        "/api/admin/cnpc-matrix",
+        headers={"X-Admin-Token": settings.admin_token},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["summary"]["unit_count"] == 13
+    assert payload["summary"]["snapshot_rows_bound"] == 20
+    assert payload["summary"]["snapshot_contract_passed"] is True
+
+
 def test_organization_matrix_is_admin_only_and_supports_role_filter(tmp_path) -> None:
     app = create_app(make_settings(tmp_path))
     client = app.test_client()

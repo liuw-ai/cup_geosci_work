@@ -28,6 +28,10 @@ from job_hub.contracts import (
     is_http_url,
 )
 from job_hub.coverage import build_coverage_report
+from job_hub.cnpc_matrix import (
+    CnpcMatrixError,
+    build_cnpc_matrix_report,
+)
 from job_hub.db import Database
 from job_hub.government_positions import (
     government_position_quality_report,
@@ -391,6 +395,21 @@ def main() -> None:
         type=Path,
         help="可选：将完整队列 JSON 写入指定文件",
     )
+    cnpc_matrix_parser = subparsers.add_parser(
+        "cnpc-matrix",
+        help="审计中国石油下属单位矩阵与官方岗位快照绑定状态",
+    )
+    cnpc_matrix_parser.add_argument(
+        "--snapshot",
+        type=Path,
+        default=Path("data/verified/cnpc-geoscience-20260924.json"),
+        help="经管理员核验的中国石油岗位快照 JSON",
+    )
+    cnpc_matrix_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整矩阵审计 JSON 写入指定文件",
+    )
     sinopec_capture_parser = subparsers.add_parser(
         "sinopec-capture",
         help="输出中石化官方 SPA 捕获快照的单位和岗位扫描统计",
@@ -653,6 +672,26 @@ def main() -> None:
                 status=args.status,
             ),
         }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "cnpc-matrix":
+        try:
+            result = build_cnpc_matrix_report(snapshot_path=args.snapshot)
+        except CnpcMatrixError as error:
+            print(
+                json.dumps(
+                    {"error": str(error), "snapshot_path": str(args.snapshot)},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(
