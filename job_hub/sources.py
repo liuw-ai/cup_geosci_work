@@ -377,6 +377,8 @@ class OfficialSourceCollector:
             return self._collect_mokahr_search(source)
         if source_type == "zhaopin_campus":
             return self._collect_zhaopin_campus(source)
+        if source_type == "beisen_job_portal":
+            return self._collect_beisen_job_portal(source)
         if source_type == "mnr_recruitment":
             return self._collect_mnr_recruitment(source)
         if source_type == "slb_coveo_search":
@@ -3110,6 +3112,334 @@ class OfficialSourceCollector:
                 "Zhaopin public job API returned rows but no row had publishable evidence"
             )
         return postings
+
+    def _collect_beisen_job_portal(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Collect a public Beisen portal through its read-only job API.
+
+        Beisen portals render a JavaScript shell, but the public page itself
+        calls ``JobAd/GetJobAdPageList`` without authentication.  This adapter
+        mirrors that request, keeps pagination bounded, and splits each
+        official job advertisement into role-level records only when the
+        advertisement contains an explicit ``岗位职责`` block.  No login,
+        submission, recommendation, or captcha endpoint is used.
+        """
+        config = source["config"]
+        listing_url = normalize_url(
+            str(config.get("listing_url") or source["homepage_url"])
+        )
+        api_url = normalize_url(
+            str(config.get("api_url") or "")
+        )
+        if not api_url:
+            raise SourceCollectionError("Beisen source requires api_url")
+        allowed_api_hosts = {
+            str(host).strip().lower().rstrip(".")
+            for host in config.get("api_allowed_hosts", [])
+            if str(host).strip()
+        }
+        api_host = (urlparse(api_url).hostname or "").lower().rstrip(".")
+        if allowed_api_hosts and api_host not in allowed_api_hosts:
+            raise SourceCollectionError(
+                f"Beisen API host is not allowlisted: {api_host or api_url}"
+            )
+        portal_id = str(config.get("portal_id") or "").strip()
+        if not portal_id:
+            raise SourceCollectionError("Beisen source requires portal_id")
+        categories = config.get("categories") or ["2"]
+        if not isinstance(categories, list) or not categories:
+            raise SourceCollectionError("Beisen source categories must be a non-empty list")
+        try:
+            page_size = max(1, min(int(config.get("page_size", 100)), 100))
+            max_pages = max(1, min(int(config.get("max_pages", 20)), 100))
+        except (TypeError, ValueError) as error:
+            raise SourceCollectionError("Beisen page limits must be integers") from error
+        max_items = min(self._item_limit(source), 2_000)
+        detail_template = str(
+            config.get("detail_url_template")
+            or "{listing_origin}/campus/detail?jobAdId={job_ad_id}"
+        )
+        postings: list[RawPosting] = []
+        seen_job_ids: set[str] = set()
+        origin = f"{urlparse(listing_url).scheme}://{urlparse(listing_url).netloc}"
+        for category in categories:
+            category_id = str(category).strip()
+            if not category_id:
+                continue
+            for page_index in range(max_pages):
+                payload = {
+                    "Category": [category_id],
+                    "PageIndex": page_index,
+                    "PageSize": page_size,
+                    "KeyWords": str(config.get("keywords") or ""),
+                    "SpecialType": 0,
+                    "PortalId": portal_id,
+                    "DisplayFields": ["Category"],
+                }
+                self._wait(source)
+                response = self._post_json(
+                    api_url,
+                    payload,
+                    headers={
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "Origin": origin,
+                        "Referer": listing_url,
+                    },
+                )
+                try:
+                    result = response.json()
+                except ValueError as error:
+                    raise SourceCollectionError(
+                        "Beisen public job API did not return JSON"
+                    ) from error
+                if not isinstance(result, dict) or str(result.get("Code")) != "200":
+                    message = clean_text(
+                        str((result or {}).get("Message") if isinstance(result, dict) else "")
+                    )
+                    raise SourceCollectionError(
+                        "Beisen public job API business error"
+                        + (f": {message}" if message else "")
+                    )
+                rows = result.get("Data")
+                if not isinstance(rows, list):
+                    raise SourceCollectionError(
+                        "Beisen public job API is missing a Data list"
+                    )
+                if not rows:
+                    break
+                for row in rows:
+                    if not isinstance(row, dict):
+                        continue
+                    job_id = str(row.get("JobAdId") or row.get("Id") or "").strip()
+                    if not job_id or job_id in seen_job_ids:
+                        continue
+                    seen_job_ids.add(job_id)
+                    postings.extend(
+                        self._beisen_role_postings(
+                            row,
+                            source,
+                            detail_template=detail_template,
+                            listing_origin=origin,
+                            listing_url=listing_url,
+                        )
+                    )
+                    if len(postings) >= max_items:
+                        return postings[:max_items]
+                # The portal returns a short page at the end.  ``Total`` is
+                # not reliable across Beisen deployments, so page length is
+                # the only safe termination signal.
+                if len(rows) < page_size:
+                    break
+        return postings[:max_items]
+
+    def _beisen_role_postings(
+        self,
+        row: dict[str, Any],
+        source: dict[str, Any],
+        *,
+        detail_template: str,
+        listing_origin: str,
+        listing_url: str,
+    ) -> list[RawPosting]:
+        job_id = str(row.get("JobAdId") or row.get("Id") or "").strip()
+        title = clean_text(str(row.get("JobAdName") or ""))
+        if not title or self._title_matches_filters(
+            title, source["config"]
+        ) is False:
+            return []
+        duty_raw = str(row.get("Duty") or "")
+        requirements_raw = str(row.get("Require") or "")
+        duty = clean_text(duty_raw)
+        requirements = clean_text(requirements_raw)
+        if not duty and not requirements:
+            raise SourceCollectionError(
+                f"Beisen job {job_id} has no public duty or requirement text"
+            )
+        detail_url = detail_template.format(
+            listing_origin=listing_origin,
+            job_ad_id=job_id,
+            category_id=str(row.get("CategoryId") or ""),
+        )
+        official_host = (urlparse(detail_url).hostname or "").lower().rstrip(".")
+        allowed_hosts = {
+            str(host).strip().lower().rstrip(".")
+            for host in source["config"].get("allowed_hosts", [])
+            if str(host).strip()
+        }
+        if allowed_hosts and official_host not in allowed_hosts:
+            raise SourceCollectionError(
+                f"Beisen detail URL host is not allowlisted: {official_host}"
+            )
+        role_blocks = self._beisen_role_blocks(duty_raw)
+        if not role_blocks:
+            # A complete advertisement without explicit role blocks is kept as
+            # one reviewable official record, but its publication gate will
+            # require job-level title/major/degree evidence.
+            role_blocks = [(title, duty)]
+        # COSL places the authoritative category-to-major mapping at the end
+        # of the public duty text, while the separate Require field contains
+        # general graduate conditions and locations.
+        category_sections = self._beisen_category_sections(duty_raw)
+        published_date = parse_date_value(str(row.get("ChangeDate") or ""))
+        deadline_date = parse_date_value(str(row.get("EndTime") or ""))
+        if str(row.get("EndTime") or "").startswith("0001-"):
+            deadline_date = extract_deadline(requirements or duty)
+        location = self._beisen_location(requirements_raw or duty_raw)
+        results: list[RawPosting] = []
+        for index, (role_title, role_text) in enumerate(role_blocks, start=1):
+            role_major = self._beisen_role_major(role_text)
+            degree_text = self._beisen_degree(role_title)
+            mapped_sections = " ".join(
+                category_sections.get(category, "")
+                for category in self._beisen_major_categories(role_major)
+                if category_sections.get(category)
+            )
+            qualification = clean_text(
+                f"主要专业：{role_major or '见官方招聘专业章节'}；"
+                f"{mapped_sections}"
+            )
+            evidence = {
+                "evidence_scope": "official_role_section",
+                "岗位": role_title,
+                "岗位编号": job_id,
+                "专业要求": qualification,
+                "专业范围": role_major,
+                "学历要求": degree_text,
+                "工作地点": location,
+                "官方岗位详情": detail_url,
+                "官方招聘接口": str(source["config"].get("api_url") or ""),
+                "岗位原文": role_text,
+            }
+            body = clean_text(
+                f"{role_text} 招聘专业原文：{mapped_sections} 招聘对象与资格条件：{requirements}"
+            )
+            results.append(
+                RawPosting(
+                    title=role_title,
+                    employer=str(
+                        source["config"].get("employer_hint") or source["publisher"]
+                    ),
+                    source_url=detail_url,
+                    application_url=listing_url,
+                    text=body,
+                    summary=clean_text(
+                        f"{role_title}；{location or '地点见官方原文'}；{degree_text}"
+                    ),
+                    published_date=published_date,
+                    deadline_date=deadline_date,
+                    location=location,
+                    external_id=f"cosl-{job_id}-role-{index}-{stable_hash(role_title)[:12]}",
+                    match_text=clean_text(f"{role_title} {role_major} {mapped_sections}"),
+                    official_evidence_url=detail_url,
+                    field_evidence=evidence,
+                    qualification_text=qualification,
+                )
+            )
+        return results
+
+    @staticmethod
+    def _beisen_role_blocks(text: str) -> list[tuple[str, str]]:
+        """Split Beisen duty text only at numbered lines followed by duties."""
+        pattern = re.compile(
+            r"(?ms)^\s*\d+\s*[\.．、]\s*(?P<title>[^\r\n]+?)\s*"
+            r"(?:\r?\n)+\s*岗位职责\s*[:：]"
+        )
+        matches = list(pattern.finditer(text))
+        blocks: list[tuple[str, str]] = []
+        for index, match in enumerate(matches):
+            start = match.start()
+            end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+            block = clean_text(text[start:end])
+            title = clean_text(match.group("title"))
+            if title and block:
+                blocks.append((title, block))
+        return blocks
+
+    @staticmethod
+    def _beisen_role_major(role_text: str) -> str:
+        match = re.search(
+            r"主要专业\s*[:：]\s*(.+?)(?=\s*(?:岗位职责|相关岗位|\d+\s*[\.．、])|$)",
+            role_text,
+            re.IGNORECASE,
+        )
+        return clean_text(match.group(1)) if match else ""
+
+    @staticmethod
+    def _beisen_degree(title: str) -> str:
+        lowered = title.casefold()
+        if "硕博" in title or "硕士博士" in title:
+            return "硕士、博士（原文岗位标注：硕博）"
+        if "本硕" in title:
+            return "本科、硕士（原文岗位标注：本硕）"
+        if "博士" in title or "ph.d" in lowered or "phd" in lowered:
+            return "博士"
+        if "硕士" in title or "master" in lowered:
+            return "硕士"
+        if "本科" in title or "undergraduate" in lowered:
+            return "本科"
+        return ""
+
+    @staticmethod
+    def _beisen_major_categories(value: str) -> list[str]:
+        categories = (
+            "石油工程类", "地质类", "机械类", "电气仪表类", "能源动力类",
+            "化工材料类", "计算机与信息类", "海洋工程类", "海洋科学类",
+            "物理核能类", "数学类", "测绘类", "航海类", "安全环保类",
+        )
+        return [item for item in categories if item in value]
+
+    @staticmethod
+    def _beisen_category_sections(requirements: str) -> dict[str, str]:
+        sections: dict[str, list[str]] = {}
+        categories = (
+            "石油工程类", "地质类", "机械类", "电气仪表类", "能源动力类",
+            "化工材料类", "计算机与信息类", "海洋工程类", "海洋科学类",
+            "物理核能类", "数学类", "测绘类", "航海类", "安全环保类",
+        )
+        # The same category headings can occur in multiple official role
+        # groups (for example, COSL has separate research and field groups).
+        # Keep every occurrence; taking only the first one silently drops
+        # later degree-specific majors such as undergraduate resource
+        # exploration engineering.
+        category_pattern = "|".join(
+            re.escape(category) for category in sorted(categories, key=len, reverse=True)
+        )
+        heading_pattern = re.compile(
+            rf"(?:^|\n)\s*\d+\s*[\.．、]\s*"
+            rf"(?P<category>{category_pattern})(?=\s*(?:\r?\n|$))"
+        )
+        headings = list(heading_pattern.finditer(requirements))
+        for heading in headings:
+            category = clean_text(heading.group("category"))
+            if category not in categories:
+                continue
+            next_heading = next(
+                (candidate for candidate in headings if candidate.start() > heading.start()),
+                None,
+            )
+            end = next_heading.start() if next_heading else len(requirements)
+            section = clean_text(requirements[heading.end() : end])
+            if section:
+                sections.setdefault(category, []).append(section)
+        return {
+            category: " ".join(dict.fromkeys(values))
+            for category, values in sections.items()
+        }
+
+    @staticmethod
+    def _beisen_location(text: str) -> str:
+        values: list[str] = []
+        for match in re.finditer(
+            r"(?:^|\n)[ \t]*(?:\d+[\.．、][ \t]*)?"
+            r"工作地点[ \t]*[:：]?[ \t]*(?:\r?\n[ \t]*)?"
+            r"([^\r\n]{2,160})",
+            text,
+            re.IGNORECASE,
+        ):
+            value = clean_text(match.group(1))
+            if value and value not in values:
+                values.append(value)
+        return "；".join(values)[:240]
 
     def _zhaopin_campaign_metadata(
         self,

@@ -30,6 +30,7 @@ SOURCE_TYPES = frozenset(
         "successfactors_search",
         "mokahr_search",
         "zhaopin_campus",
+        "beisen_job_portal",
         "mnr_recruitment",
         "slb_coveo_search",
         "html_notice",
@@ -485,6 +486,46 @@ def validate_source_record(value: Any, *, context: str = "Source") -> dict[str, 
             allowed_hosts,
             f"{context} config allowed_hosts",
         )
+    if source["source_type"] == "beisen_job_portal":
+        source["config"]["api_url"] = validate_http_url(
+            source["config"].get("api_url"),
+            f"{context} config api_url",
+        )
+        source["config"]["listing_url"] = validate_http_url(
+            source["config"].get("listing_url"),
+            f"{context} config listing_url",
+        )
+        source["config"]["portal_id"] = _required_text(
+            source["config"].get("portal_id"),
+            f"{context} config portal_id",
+        )
+        allowed_hosts = source["config"].get("allowed_hosts")
+        api_allowed_hosts = source["config"].get("api_allowed_hosts")
+        if not isinstance(allowed_hosts, list) or not allowed_hosts:
+            raise ContractValidationError(
+                f"{context} Beisen config allowed_hosts must be a non-empty list"
+            )
+        if not isinstance(api_allowed_hosts, list) or not api_allowed_hosts:
+            raise ContractValidationError(
+                f"{context} Beisen config api_allowed_hosts must be a non-empty list"
+            )
+        source["config"]["allowed_hosts"] = _validate_domains(
+            allowed_hosts,
+            f"{context} Beisen config allowed_hosts",
+        )
+        source["config"]["api_allowed_hosts"] = _validate_domains(
+            api_allowed_hosts,
+            f"{context} Beisen config api_allowed_hosts",
+        )
+        categories = source["config"].get("categories") or ["2"]
+        if not isinstance(categories, list) or not categories:
+            raise ContractValidationError(
+                f"{context} Beisen config categories must be a non-empty list"
+            )
+        source["config"]["categories"] = [
+            _required_text(value, f"{context} config categories")
+            for value in categories
+        ]
     if source["source_type"] == "official_xlsx_rows":
         for field_name in ("notice_url", "attachment_url", "sha256", "verified_rows"):
             if field_name not in source["config"]:

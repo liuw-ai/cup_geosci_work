@@ -948,16 +948,34 @@
     "name": "中海油田服务股份有限公司官方招聘入口",
     "publisher": "中海油田服务股份有限公司",
     "homepage_url": "http://cosl.zhiye.com/",
-    "source_type": "landing_page",
+    "source_type": "beisen_job_portal",
     "category": "油气工程技术服务",
     "source_tier": "A",
-    "enabled": false,
+    "enabled": true,
     "config": {
       "official_referrer_url": "https://www.cosl.com.cn/",
       "allowed_hosts": ["cosl.zhiye.com"],
+      "api_url": "https://cosl.zhiye.com/api/Jobad/GetJobAdPageList",
+      "api_allowed_hosts": ["cosl.zhiye.com"],
+      "portal_id": "5bea7e77-44c5-4e95-9662-5e64bee3b9ec",
+      "listing_url": "https://cosl.zhiye.com/campus/jobs",
+      "detail_url_template": "{listing_origin}/campus/detail?jobAdId={job_ad_id}",
+      "categories": ["1", "2", "3"],
+      "page_size": 100,
+      "max_pages": 20,
+      "max_items": 120,
+      "excluded_title_patterns": [
+        "面试信息采集",
+        "面试名单",
+        "拟录用",
+        "录用公示"
+      ],
+      "employer_hint": "中海油田服务股份有限公司",
+      "undated_open_window_days": 90,
+      "minimum_relevance": 20,
       "fallback_entry_urls": ["https://www.cosl.com.cn/"],
-      "automation_status": "official_link_confirmed_access_unverified",
-      "note": "中海油服官网首页公开链接到该招聘系统；当前网络对 ATS 返回 502/TLS 失败，不能解释为无岗位。启用前需在服务器直连复测并核验公开列表、详情和专业字段。"
+      "automation_status": "validated_public_read_api_20260926",
+      "note": "服务器直连核验到中海油服北森门户公开只读接口。适配器仅调用官方页面自身使用的 JobAd/GetJobAdPageList，按校园/社会/实习三类分页读取，并将岗位职责块绑定到官方岗位编号和详情 URL；面试采集、拟录用和过期信息不进入学生端。"
     }
   },
   {
