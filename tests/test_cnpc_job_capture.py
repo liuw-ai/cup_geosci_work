@@ -11,6 +11,7 @@ from job_hub.cnpc_browser_runner import (
     _resolve_cdp_websocket,
     extract_cnpc_announcements,
     extract_cnpc_detail_jobs,
+    write_cnpc_capture_failure,
 )
 from job_hub.cnpc_browser_worker import outside_maintenance_window
 from job_hub.sources import OfficialSourceCollector
@@ -226,3 +227,16 @@ def test_cdp_endpoint_rewrites_headless_shell_websocket_host(monkeypatch: pytest
     assert _resolve_cdp_websocket("http://headless-shell:9222") == (
         "ws://172.18.0.3:9222/devtools/browser/abc"
     )
+
+
+def test_cnpc_failure_capture_replaces_stale_success_artifact(tmp_path: Path) -> None:
+    path = tmp_path / "captures" / "cnpc-jobs.json"
+    write_cnpc_capture_failure(
+        output=path,
+        platform_url="https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
+        status="access_limited",
+        reason="HTTP 412",
+    )
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["status"] == "access_limited"
+    assert payload["scan"]["failure_reason"] == "HTTP 412"

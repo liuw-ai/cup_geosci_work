@@ -55,6 +55,8 @@ docker compose exec worker python -m job_hub.cli cnpc-job-capture-check \
 
 浏览器 Worker 需要能够访问中国石油公开页面；不安装浏览器或页面被官方访问策略限制时，Worker 只记录心跳和失败原因，不绕过 robots、验证码、登录或访问限制。
 
+服务器首次直连复测已确认：`zhaopin.cnpc.com.cn/web/recruitInfolist.html` 返回 HTTP 412。该结果说明当前出口仍受中国石油访问策略限制，不是岗位不存在；浏览器 Worker 会写入 `access_limited` 捕获，普通 Worker 将其记录为 `skipped`，继续保留之前的官方快照。
+
 ## 发布门禁
 
 以下任何一项不满足，岗位不会进入学生端：
@@ -67,4 +69,3 @@ docker compose exec worker python -m job_hub.cli cnpc-job-capture-check \
 - 既有地球科学学院专业匹配和岗位相关性门禁通过。
 
 “partial”“access_limited”“stale”均不是“扫描成功但无匹配”，而是来源受限状态，保留在管理员审计中。
-

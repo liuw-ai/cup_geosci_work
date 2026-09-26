@@ -11,7 +11,7 @@ from pathlib import Path
 from threading import Event
 from zoneinfo import ZoneInfo
 
-from job_hub.cnpc_browser_runner import run_cnpc_browser_capture
+from job_hub.cnpc_browser_runner import run_cnpc_browser_capture, write_cnpc_capture_failure
 from job_hub.config import Settings
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
@@ -82,8 +82,15 @@ class CnpcBrowserWorker:
                 self._heartbeat("running", f"CNPC capture wrote {len(payload.get('jobs', []))} job rows")
                 LOGGER.info("CNPC capture completed: %s", payload.get("scan"))
         except Exception as error:
-            # Do not delete the previous capture.  The normal worker will keep
-            # the last verified rows and record this run as source-degraded.
+            try:
+                write_cnpc_capture_failure(
+                    output=output,
+                    platform_url=str(config.get("browser_url") or source["homepage_url"]),
+                    status="access_limited" if "HTTP 4" in str(error) or "access-limited" in str(error) else "parse_failed",
+                    reason=str(error),
+                )
+            except Exception:
+                LOGGER.exception("Could not persist CNPC failure capture")
             self._heartbeat("degraded", str(error)[:500])
             LOGGER.exception("CNPC browser capture failed")
 

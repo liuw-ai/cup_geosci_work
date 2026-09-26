@@ -367,3 +367,41 @@ def run_cnpc_browser_capture(
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     temporary.replace(destination)
     return payload
+
+
+def write_cnpc_capture_failure(
+    *, output: Path | str, platform_url: str, status: str, reason: str
+) -> dict[str, Any]:
+    """Persist an access-limited/parse-failed observation atomically.
+
+    Replacing an older successful artifact prevents a stale zero-row capture
+    from being mistaken for today's result.  The normal source adapter rejects
+    this status for student publication but keeps it visible in operator audit.
+    """
+
+    if status not in {"access_limited", "parse_failed", "partial"}:
+        raise ValueError("failure capture status must be access_limited, parse_failed or partial")
+    payload: dict[str, Any] = {
+        "version": 1,
+        "status": status,
+        "platform_url": platform_url,
+        "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "scan": {
+            "pages_scanned": 0,
+            "pagination_complete": False,
+            "announcements_discovered": 0,
+            "announcements_targeted": 0,
+            "failed_announcement_details": 0,
+            "jobs_discovered": 0,
+            "jobs_exported": 0,
+            "failure_reason": str(reason)[:1000],
+        },
+        "announcements": [],
+        "jobs": [],
+    }
+    destination = Path(output)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_suffix(destination.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary.replace(destination)
+    return payload
