@@ -1,0 +1,28 @@
+name: cupb-geoscience-job-hub
+services:
+  cnpc-browser:
+    build:
+      context: .
+      dockerfile: Dockerfile.browser
+    image: cupb-geoscience-job-hub-browser:latest
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      CNPC_BROWSER_SOURCE_ID: cnpc-career-browser
+      CNPC_BROWSER_INTERVAL_MINUTES: 180
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  job_hub_data:

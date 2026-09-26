@@ -34,8 +34,12 @@ from job_hub.cnpc_matrix import (
 )
 from job_hub.cnpc_browser_capture import (
     CnpcBrowserCaptureError,
+    CnpcJobCaptureError,
     build_cnpc_browser_capture_report,
+    cnpc_job_capture_summary,
+    load_cnpc_job_capture,
 )
+from job_hub.cnpc_browser_runner import run_cnpc_browser_capture
 from job_hub.db import Database
 from job_hub.government_positions import (
     government_position_quality_report,
@@ -429,6 +433,45 @@ def main() -> None:
         type=Path,
         help="可选：将管理员审计报告写入指定 JSON 文件",
     )
+    cnpc_job_parser = subparsers.add_parser(
+        "cnpc-job-capture-check",
+        help="校验中国石油公告分页与岗位详情的浏览器捕获清单",
+    )
+    cnpc_job_parser.add_argument(
+        "--path",
+        type=Path,
+        required=True,
+        help="服务器浏览器生成的 CNPC 岗位捕获 JSON",
+    )
+    cnpc_job_parser.add_argument(
+        "--max-age-hours",
+        type=float,
+        default=30,
+        help="捕获文件最长有效期（默认 30 小时）",
+    )
+    cnpc_job_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将管理员审计报告写入指定 JSON 文件",
+    )
+    cnpc_job_run_parser = subparsers.add_parser(
+        "cnpc-job-capture-run",
+        help="在服务器公开 Chromium 中执行中国石油公告和岗位详情捕获",
+    )
+    cnpc_job_run_parser.add_argument(
+        "--source-id",
+        default="cnpc-career-browser",
+        help="浏览器来源 ID（默认 cnpc-career-browser）",
+    )
+    cnpc_job_run_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：覆盖来源配置中的输出路径",
+    )
+    cnpc_job_run_parser.add_argument(
+        "--url",
+        help="可选：覆盖来源配置中的浏览器入口",
+    )
     sinopec_capture_parser = subparsers.add_parser(
         "sinopec-capture",
         help="输出中石化官方 SPA 捕获快照的单位和岗位扫描统计",
@@ -738,6 +781,73 @@ def main() -> None:
                 encoding="utf-8",
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "cnpc-job-capture-check":
+        try:
+            payload = load_cnpc_job_capture(
+                args.path,
+                allowed_hosts=["zhaopin.cnpc.com.cn", "www.cnpc.com.cn", "cnpc.com.cn"],
+                max_age_hours=args.max_age_hours,
+            )
+        except CnpcJobCaptureError as error:
+            result = {
+                "ok": False,
+                "error": str(error),
+                "capture_path": str(args.path),
+                "publication_policy": "捕获不完整或过期时不得写入学生端，也不得解释为无岗位。",
+            }
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        result = {
+            "ok": True,
+            "capture_path": str(args.path),
+            "summary": cnpc_job_capture_summary(payload),
+            "publication_policy": "岗位仍需经过正常的专业、学历、官方证据和截止日期门禁。",
+        }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "cnpc-job-capture-run":
+        source = database.get_source(args.source_id)
+        if source is None:
+            parser.error(f"source_id is not registered: {args.source_id}")
+        if source.get("source_type") != "cnpc_browser_rows":
+            parser.error("cnpc-job-capture-run requires a cnpc_browser_rows source")
+        config = source["config"]
+        output = args.output or (settings.data_dir / str(config["capture_path"]))
+        browser_url = args.url or str(config.get("browser_url") or source["homepage_url"])
+        try:
+            payload = run_cnpc_browser_capture(
+                url=browser_url,
+                output=output,
+                config=config,
+                allowed_hosts=list(config["allowed_hosts"]),
+                user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
+            )
+        except Exception as error:
+            print(
+                json.dumps(
+                    {"ok": False, "source_id": args.source_id, "error": str(error)},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        print(
+            json.dumps(
+                {
+                    "ok": payload["status"] == "success",
+                    "source_id": args.source_id,
+                    "output": str(output),
+                    "status": payload["status"],
+                    "scan": payload["scan"],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return
 
     settings, database, pipeline = services()

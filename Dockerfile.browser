@@ -1,0 +1,15 @@
+FROM mcr.microsoft.com/playwright/python:v1.48.0-jammy
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV APP_DATA_DIR=/var/lib/job-hub
+
+WORKDIR /app
+
+COPY requirements.txt requirements-browser.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-browser.txt
+
+COPY . .
+RUN mkdir -p /var/lib/job-hub
+
+CMD ["python", "-m", "job_hub.cnpc_browser_worker"]

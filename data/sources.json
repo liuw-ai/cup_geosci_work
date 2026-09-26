@@ -284,6 +284,31 @@
     }
   },
   {
+    "id": "cnpc-career-browser",
+    "name": "中国石油招聘平台浏览器岗位详情采集",
+    "publisher": "中国石油天然气集团有限公司",
+    "homepage_url": "https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
+    "source_type": "cnpc_browser_rows",
+    "category": "油气勘探开发运营与研究机构",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "allowed_hosts": ["zhaopin.cnpc.com.cn"],
+      "capture_path": "captures/cnpc-jobs.json",
+      "browser_url": "https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
+      "application_url": "https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
+      "announcement_link_selector": "a[href*='recruitInfoshow']",
+      "detail_table_selector": "table",
+      "next_selector": ".pagination .next:not(.disabled), .el-pagination .btn-next:not(.is-disabled), button[aria-label='Next Page']",
+      "max_pages": 30,
+      "max_age_hours": 30,
+      "require_complete_scan": true,
+      "max_items": 2000,
+      "maintenance_window": "00:00-06:00 Asia/Shanghai",
+      "note": "独立浏览器任务负责公告分页和岗位详情表；浏览器不可用、详情字段不完整、维护窗口或扫描未完成时保持停用，不把访问故障写成无岗位。启用前必须完成服务器 Chromium 运行回归。"
+    }
+  },
+  {
     "id": "sinopec-career",
     "name": "中国石化人才招聘网站",
     "publisher": "中国石油化工集团有限公司",
