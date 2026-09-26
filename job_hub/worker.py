@@ -167,7 +167,12 @@ class DailyWorker:
                 # later registry refresh updates one row instead of inserting a
                 # second copy of the same official table row.
                 posting = replace(posting, external_id=equivalent["external_id"])
-                used_existing_ids.add(int(equivalent["id"]))
+                # ``existing_jobs`` is extended with the normalized posting
+                # produced during this same batch.  Those transient records do
+                # not have a database id yet, so only reserve persisted rows.
+                equivalent_id = equivalent.get("id") or equivalent.get("job_id")
+                if equivalent_id is not None:
+                    used_existing_ids.add(int(equivalent_id))
             normalized = self.pipeline.normalize_posting(posting, source)
             _, outcome = self.database.save_job(normalized)
             if outcome in counts:
@@ -192,7 +197,12 @@ class DailyWorker:
         deadline = str(record.get("deadline_date") or "").strip()
         candidates: list[tuple[bool, bool, dict[str, object]]] = []
         for job in jobs:
-            if int(job.get("id") or 0) in (excluded_ids or set()):
+            job_id = job.get("id") or job.get("job_id")
+            # A normalized posting appended during the current sync has no
+            # database identity and must not be selected as an existing row.
+            if job_id is None:
+                continue
+            if int(job_id) in (excluded_ids or set()):
                 continue
             if str(job.get("source_id") or "") != source_id:
                 continue

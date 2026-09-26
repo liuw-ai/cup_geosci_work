@@ -19,12 +19,48 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
     registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
     report = government_position_quality_report(registry, today="2026-09-25")
 
-    assert report["source_assessments"] == 7
-    assert report["records"] == 9
-    assert report["verified_open_records"] == 9
-    assert report["explicit_student_matches"] == 9
+    assert report["source_assessments"] == 9
+    assert report["records"] == 122
+    assert report["verified_open_records"] == 122
+    assert report["explicit_student_matches"] == 122
     assert report["source_failures_or_pending"] == 0
     assert report["scan_interpretation"].startswith("台账中的正式来源")
+
+
+def test_hunan_position_batch_expands_each_official_attachment_row() -> None:
+    registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
+    hunan = [item for item in registry["records"] if item["source_id"] == "hunan-geology-institute"]
+
+    assert len(hunan) == 34
+    assert sum(item["headcount"] for item in hunan) == 43
+    assert {item["position_code"] for item in hunan} >= {"A02", "A09", "A53"}
+    assert all(item["deadline_policy"] == "open_until_filled" for item in hunan)
+    assert all(item["official_attachment_url"].endswith(".xlsx") for item in hunan)
+
+
+def test_cgs_postdoctoral_batch_expands_nine_current_geoscience_rows() -> None:
+    registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
+    rows = [item for item in registry["records"] if item["position_type"] == "postdoctoral"]
+
+    assert len(rows) == 9
+    assert sum(item["headcount"] for item in rows) == 9
+    assert {item["position_code"] for item in rows} == {str(i) for i in range(1, 10)}
+    assert all(item["deadline_date"] == "2026-10-16" for item in rows)
+    geoscience_markers = ("地质", "矿产", "地球", "地图学", "资源")
+    assert all(any(marker in item["major_requirement"] for marker in geoscience_markers) for item in rows)
+
+
+def test_cea_batch_expands_verified_rows_with_unit_and_location_evidence() -> None:
+    registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
+    rows = [item for item in registry["records"] if item["source_id"] == "cea-2027-recruitment"]
+
+    assert len(rows) == 70
+    assert sum(item["headcount"] for item in rows) == 89
+    assert all(item["employer"] for item in rows)
+    assert all(item["location"] for item in rows)
+    assert all(item["deadline_date"] == "2026-10-26" for item in rows)
+    assert all("Excel第" in item["evidence_locator"] for item in rows)
+    assert {item["position_code"] for item in rows} >= {"R010", "R142", "R157"}
 
 
 def test_verified_open_row_requires_location_and_deadline() -> None:
@@ -50,6 +86,30 @@ def test_verified_open_row_requires_location_and_deadline() -> None:
     }
     with pytest.raises(GovernmentPositionContractError, match="location"):
         validate_position_record(record)
+
+
+def test_postdoctoral_is_a_distinct_government_source_type() -> None:
+    record = {
+        "id": "postdoc-1",
+        "source_id": "cgs-notices",
+        "position_type": "postdoctoral",
+        "province": "北京",
+        "employer": "中国地质调查局发展研究中心",
+        "position_code": "1",
+        "title": "博士后研究人员（矿产勘查）",
+        "major_requirement": "地质学、矿物学、岩石学、矿床学",
+        "degree_requirement": "博士研究生",
+        "location": "北京市西城区",
+        "headcount": 1,
+        "deadline_date": "2026-10-16",
+        "deadline_policy": "fixed_date",
+        "official_notice_url": "https://www.drc.cgs.gov.cn/ggl/202609/t20260921_869371.html",
+        "official_attachment_url": "https://www.drc.cgs.gov.cn/ggl/202609/t20260921_869371.html",
+        "evidence_locator": "公告正文\"招收计划\"表格第1行",
+        "record_status": "verified_open",
+        "match_status": "explicit_match",
+    }
+    assert validate_position_record(record)["position_type"] == "postdoctoral"
 
 
 def test_out_of_scope_rows_can_be_closed_without_student_match() -> None:

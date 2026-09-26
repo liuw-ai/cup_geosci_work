@@ -4,6 +4,7 @@ from job_hub.government_positions import (
     current_publishable_position_records,
     position_record_to_posting,
 )
+from job_hub.worker import DailyWorker
 
 
 def test_current_publishable_rows_require_open_explicit_match() -> None:
@@ -59,3 +60,24 @@ def test_position_record_preserves_notice_attachment_and_row_evidence() -> None:
     assert posting.field_evidence["evidence_scope"] == "official_attachment_row"
     assert posting.field_evidence["岗位"] == record["title"]
     assert "地质资源与地质工程" in (posting.qualification_text or "")
+
+
+def test_government_equivalence_ignores_transient_normalized_rows() -> None:
+    record = {
+        "source_id": "hunan-geology-institute",
+        "employer": "湖南省地质调查所",
+        "position_code": "A02",
+        "major_requirement": "地质学",
+        "deadline_date": "",
+    }
+    transient = {
+        "source_id": record["source_id"],
+        "employer": record["employer"],
+        "deadline_date": "",
+        "external_id": "government-position:hunan-2026-a02:A02",
+        "field_evidence": {"专业范围": "地质学", "职位代码": "A02"},
+    }
+
+    assert DailyWorker._find_equivalent_government_job(
+        [transient], record, "https://example.gov.cn/table.xlsx"
+    ) is None

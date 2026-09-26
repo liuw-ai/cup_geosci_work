@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pytest
 
@@ -22,10 +24,41 @@ def test_provincial_manifest_contains_real_official_attachments() -> None:
     manifest = load_government_artifact_manifest(
         PROJECT_ROOT / "data" / "government_artifact_manifest.json"
     )
-    assert len(manifest["artifacts"]) == 9
-    assert {item["province"] for item in manifest["artifacts"]} == {"安徽", "山东", "河南", "天津", "甘肃", "宁夏", "湖北"}
+    assert len(manifest["artifacts"]) == 11
+    assert {item["province"] for item in manifest["artifacts"]} == {"全国", "安徽", "山东", "河南", "天津", "甘肃", "宁夏", "湖北", "湖南"}
     assert all(item["status"] in {"historical_closed", "server_download_pending"} for item in manifest["artifacts"])
     assert all(item["attachment_url"].lower().endswith((".xlsx", ".xls", ".pdf")) for item in manifest["artifacts"])
+
+
+def test_manifest_hosts_are_registered_by_their_source() -> None:
+    """Every controlled attachment must pass the runtime host allow-list."""
+    manifest = load_government_artifact_manifest(
+        PROJECT_ROOT / "data" / "government_artifact_manifest.json"
+    )
+    source_rows = json.loads(
+        (PROJECT_ROOT / "data" / "sources.json").read_text(encoding="utf-8")
+    ) + json.loads(
+        (PROJECT_ROOT / "data" / "provincial_sources.json").read_text(encoding="utf-8")
+    )
+    sources = {str(row["id"]): row for row in source_rows}
+    for artifact in manifest["artifacts"]:
+        source = sources[artifact["source_id"]]
+        config = source.get("config") or {}
+        allowed = {
+            str(host).strip().lower()
+            for host in config.get("allowed_hosts", [])
+            if str(host).strip()
+        }
+        homepage_host = urlparse(str(source.get("homepage_url") or "")).hostname
+        if homepage_host:
+            allowed.add(homepage_host.lower())
+        attachment_allowed = allowed | {
+            str(host).strip().lower()
+            for host in config.get("attachment_allowed_hosts", [])
+            if str(host).strip()
+        }
+        assert (urlparse(artifact["notice_url"]).hostname or "").lower() in allowed
+        assert (urlparse(artifact["attachment_url"]).hostname or "").lower() in attachment_allowed
 
 
 def test_manifest_rejects_unknown_status(tmp_path: Path) -> None:
@@ -54,8 +87,8 @@ def test_registration_only_creates_private_artifact_rows() -> None:
     database = FakeDatabase()
     rows = register_government_artifacts(database, manifest)
 
-    assert len(rows) == 9
-    assert len(database.items) == 9
+    assert len(rows) == 11
+    assert len(database.items) == 11
     assert all(item["extraction_status"] == "registered" for item in database.items)
     assert all("government_artifact_id" in item["metadata"] for item in database.items)
 

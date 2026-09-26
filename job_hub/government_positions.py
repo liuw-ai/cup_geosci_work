@@ -23,7 +23,7 @@ from job_hub.sources import RawPosting
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_REGISTRY_PATH = PROJECT_ROOT / "data" / "government_position_registry.json"
 
-POSITION_TYPES = frozenset({"public_institution", "civil_service"})
+POSITION_TYPES = frozenset({"public_institution", "civil_service", "postdoctoral"})
 RECORD_STATUSES = frozenset(
     {"verified_open", "verified_closed", "manual_review_required", "source_unavailable"}
 )
@@ -165,6 +165,68 @@ def validate_position_record(value: Any, *, context: str = "position") -> dict[s
     return normalized
 
 
+def _expand_position_batches(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """Expand compact, spreadsheet-derived batches into auditable position rows.
+
+    A batch stores shared official URLs and lifecycle policy once while each
+    row retains its employer, code, title, qualification evidence, headcount
+    and spreadsheet locator.  Expansion happens before normal contract
+    validation, so generated rows have exactly the same safeguards as hand-
+    entered records and remain easy to diff when an attachment changes.
+    """
+    batches = payload.get("position_batches") or []
+    if not isinstance(batches, list):
+        raise GovernmentPositionContractError("registry.position_batches must be a list")
+    expanded: list[dict[str, Any]] = []
+    for batch_index, batch in enumerate(batches):
+        if not isinstance(batch, dict):
+            raise GovernmentPositionContractError(
+                f"registry.position_batches[{batch_index}] must be an object"
+            )
+        batch_id = _text(batch.get("id"), f"registry.position_batches[{batch_index}].id")
+        shared_fields = {
+            "source_id": batch.get("source_id"),
+            "position_type": batch.get("position_type"),
+            "province": batch.get("province"),
+            "location": batch.get("location"),
+            "deadline_date": batch.get("deadline_date", ""),
+            "deadline_policy": batch.get("deadline_policy"),
+            "official_notice_url": batch.get("official_notice_url"),
+            "official_attachment_url": batch.get("official_attachment_url"),
+            "record_status": batch.get("record_status"),
+            "match_status": batch.get("match_status"),
+        }
+        rows = batch.get("rows")
+        if not isinstance(rows, list):
+            raise GovernmentPositionContractError(
+                f"registry.position_batches[{batch_index}].rows must be a list"
+            )
+        for row_index, row in enumerate(rows):
+            if not isinstance(row, list) or len(row) not in {7, 8}:
+                raise GovernmentPositionContractError(
+                    f"{batch_id}.rows[{row_index}] must contain code, employer, title, "
+                    "major, degree, headcount and evidence locator, with an optional location"
+                )
+            code, employer, title, major, degree, headcount, locator = row[:7]
+            row_location = row[7] if len(row) == 8 else shared_fields["location"]
+            expanded.append(
+                {
+                    **shared_fields,
+                    "location": row_location,
+                    "id": f"{batch_id}-{str(code).strip().lower()}",
+                    "employer": employer,
+                    "position_code": code,
+                    "title": title,
+                    "major_requirement": major,
+                    "degree_requirement": degree,
+                    "headcount": headcount,
+                    "evidence_locator": locator,
+                    "note": str(batch.get("note") or "").strip(),
+                }
+            )
+    return expanded
+
+
 def load_position_registry(path: Path | str | None = None) -> dict[str, Any]:
     registry_path = Path(path or DEFAULT_REGISTRY_PATH)
     try:
@@ -180,6 +242,7 @@ def load_position_registry(path: Path | str | None = None) -> dict[str, Any]:
     records = payload.get("records")
     if not isinstance(records, list):
         raise GovernmentPositionContractError("registry.records must be a list")
+    records = [*records, *_expand_position_batches(payload)]
     normalized: list[dict[str, Any]] = []
     seen: set[str] = set()
     for index, value in enumerate(records):

@@ -174,7 +174,12 @@ def test_source_validation_contract_rejects_malformed_records() -> None:
         validate_source_validation_registry(missing_fixture)
 
     entry_with_sample = copy.deepcopy(payload)
-    entry_with_sample["records"][6]["sample"] = copy.deepcopy(
+    entry_record = next(
+        record
+        for record in entry_with_sample["records"]
+        if record["validation_stage"] == "entry_checked_no_recruitment_sample"
+    )
+    entry_record["sample"] = copy.deepcopy(
         payload["records"][0]["sample"]
     )
     with pytest.raises(ContractValidationError, match="must not claim a parser fixture"):

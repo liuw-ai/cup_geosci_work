@@ -1,7 +1,7 @@
 {
   "version": 1,
   "as_of": "2026-09-27",
-  "description": "安徽、甘肃、宁夏、山东、河南、天津已核验政府官网事业单位岗位表附件。附件先进入服务器受控下载队列；逐行解析、截止日期和专业证据复核前不得发布。",
+  "description": "安徽、甘肃、宁夏、湖南、山东、河南、天津和中国地震局已核验政府官网事业单位岗位表附件。附件先进入服务器受控下载队列；逐行解析、截止日期和专业证据复核前不得发布。",
   "artifacts": [
     {
       "id": "anhui-geology-bureau-2026-high-level-position-table",
@@ -128,6 +128,34 @@
       "observed_on": "2026-09-27",
       "status": "server_download_pending",
       "note": "宁夏地质局2026-08-27官方公告仅变更自治区地球物理地球化学调查院地质矿产岗（岗位代码002）所需专业；该附件不能单独代表完整岗位表，须与原始岗位表联合复核。"
+    },
+    {
+      "id": "hunan-geology-institute-2026-high-level-position-table",
+      "source_id": "hunan-geology-institute",
+      "province": "湖南",
+      "position_type": "public_institution",
+      "notice_url": "http://rst.hunan.gov.cn/rst/xxgk/zpzl/sydwzp/202603/t20260330_33943916.html",
+      "attachment_url": "http://rst.hunan.gov.cn/rst/xxgk/zpzl/sydwzp/202603/33943916/files/ba916a8ff2624904ac352bd6f514c2a0.xlsx",
+      "artifact_kind": "position_table",
+      "deadline_date": "",
+      "deadline_policy": "open_until_filled",
+      "observed_on": "2026-09-27",
+      "status": "server_download_pending",
+      "note": "湖南省人力资源和社会保障厅官方公告附件1为57行、66名计划的岗位表；其中34行、43名计划明确包含地质学、地质资源与地质工程、地质工程、资源勘查工程及直接相关地学专业。公告报名至2026-12-31且招满即止，岗位级证据已绑定附件行定位。"
+    },
+    {
+      "id": "cea-2027-recruitment-position-table",
+      "source_id": "cea-2027-recruitment",
+      "province": "全国",
+      "position_type": "public_institution",
+      "notice_url": "https://www.cea.gov.cn/cea/zwgk/rsxx/ryzp/5855536/index.html",
+      "attachment_url": "https://www.cea.gov.cn/cea/zwgk/rsxx/ryzp/5855536/2026092316044245325.xlsx",
+      "artifact_kind": "position_table",
+      "deadline_date": "2026-10-26",
+      "deadline_policy": "fixed_date",
+      "observed_on": "2026-09-27",
+      "status": "server_download_pending",
+      "note": "中国地震局2027年度事业单位公开招聘官方岗位信息表。云服务器直连下载成功；岗位台账已逐行保留70条地学匹配行、89个计划名额及Excel行号，附件仍由受控流水线登记。"
     }
   ]
 }

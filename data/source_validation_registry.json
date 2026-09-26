@@ -195,6 +195,70 @@
       "regression_test": "tests/test_source_validation.py::test_adapter_fixture_records_collect_current_official_samples"
     },
     {
+      "id": "hubei-natural-resources-v1",
+      "source_id": "hubei-natural-resources",
+      "province": "湖北",
+      "role": "natural_resources",
+      "validation_stage": "server_health_and_adapter_verified",
+      "official_entry_url": "http://zrzyt.hubei.gov.cn/fbjd/xxgkml/zkly/",
+      "backup_entry_urls": ["http://zrzyt.hubei.gov.cn/"],
+      "last_checked_on": "2026-09-27",
+      "access_assessment": {
+        "observed_access": "server_direct_public_page_accessible",
+        "robots_assessment": "server_direct_allowed",
+        "note": "服务器直连确认湖北省自然资源厅招考录用栏目、公告详情和 XLSX 附件可访问；岗位级发布仍以附件行专业、学历、地点和人数为准。"
+      },
+      "finding": "官方公告明确自发布之日起招满即止；附件计划表共7行，只有序号2矿产资源管理岗进入地学专业发布台账。",
+      "sample": {
+        "official_url": "http://zrzyt.hubei.gov.cn/fbjd/xxgkml/zkly/202604/t20260423_5921057.shtml",
+        "title": "湖北省空间规划研究院2026年公开招聘专业技术人员公告",
+        "publisher": "湖北省自然资源厅",
+        "published_date": "2026-04-23",
+        "deadline_date": null,
+        "field_evidence": {
+          "publisher": "公告发布于湖北省自然资源厅招考录用公开栏目。",
+          "published_date": "详情页发布时间为2026-04-23。",
+          "recruitment_scope": "正文明确湖北省空间规划研究院公开招聘专业技术人员。",
+          "application_or_deadline": "正文明确自公告发布之日起报名，招满即止。",
+          "attachment_or_position_table": "附件3为官方 XLSX 岗位计划表，序号2为矿产资源管理岗。"
+        }
+      },
+      "fixture_path": "tests/fixtures/source_validation/hubei_natural_resources_detail.html",
+      "regression_test": "tests/test_source_validation.py::test_adapter_fixture_records_collect_current_official_samples"
+    },
+    {
+      "id": "gansu-geology-bureau-v1",
+      "source_id": "gansu-geology-bureau",
+      "province": "甘肃",
+      "role": "geology_bureau_or_institute",
+      "validation_stage": "server_health_and_adapter_verified",
+      "official_entry_url": "http://gsdkj.net/xxgk/rsxx",
+      "backup_entry_urls": ["http://gsdkj.net/", "https://zrzy.gansu.gov.cn/"],
+      "last_checked_on": "2026-09-27",
+      "access_assessment": {
+        "observed_access": "server_direct_public_page_accessible",
+        "robots_assessment": "server_direct_allowed",
+        "note": "服务器直连确认甘肃省地矿局正式人事信息栏目和调整版岗位表可访问；准考证、缴费、补充和流程结果通知不作为招聘样例。"
+      },
+      "finding": "调整版官方岗位表包含2026001和2026002两个地质科研岗位，专业与学历证据已进入政府职位台账；报名政策为招满即止。",
+      "sample": {
+        "official_url": "http://gsdkj.net/xxgk/rsxx/content_103876",
+        "title": "甘肃省地矿局所属事业单位2026年引进高层次人才公告（第一期）",
+        "publisher": "甘肃省地质矿产勘查开发局",
+        "published_date": "2026-03-06",
+        "deadline_date": "2026-12-31",
+        "field_evidence": {
+          "publisher": "详情页页眉和页脚标明甘肃省地质矿产勘查开发局。",
+          "published_date": "原公告发布日期为2026-03-06，调整公告发布日期为2026-09-08。",
+          "recruitment_scope": "正文明确所属事业单位面向社会公开考核招聘博士研究生。",
+          "application_or_deadline": "正文明确自公告发布之日至2026-12-31 18:00，按计划名额招满即止。",
+          "attachment_or_position_table": "调整公告附件为官方岗位列表，逐行核对岗位代码、单位、专业、学历和地点。"
+        }
+      },
+      "fixture_path": "tests/fixtures/source_validation/gansu_geology_bureau_detail.html",
+      "regression_test": "tests/test_source_validation.py::test_adapter_fixture_records_collect_current_official_samples"
+    },
+    {
       "id": "beijing-natural-resources-entry-check-v1",
       "source_id": "beijing-natural-resources",
       "province": "北京",
