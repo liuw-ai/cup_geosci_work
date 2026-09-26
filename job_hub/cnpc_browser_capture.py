@@ -268,6 +268,8 @@ def load_cnpc_job_capture(
     status = _job_text(payload.get("status"), "status")
     if status not in JOB_CAPTURE_STATUSES:
         raise CnpcJobCaptureError(f"unsupported CNPC job capture status: {status}")
+    if status != "success":
+        raise CnpcJobCaptureError(f"CNPC job capture is not publishable: {status}")
     hosts = {str(host).strip().lower().rstrip(".") for host in allowed_hosts if str(host).strip()}
     if not hosts:
         raise CnpcJobCaptureError("allowed_hosts must not be empty")

@@ -240,3 +240,26 @@ def test_cnpc_failure_capture_replaces_stale_success_artifact(tmp_path: Path) ->
     payload = json.loads(path.read_text(encoding="utf-8"))
     assert payload["status"] == "access_limited"
     assert payload["scan"]["failure_reason"] == "HTTP 412"
+
+
+def test_cnpc_job_capture_rejects_access_limited_before_empty_rows(tmp_path: Path) -> None:
+    path = tmp_path / "capture.json"
+    payload = _payload()
+    payload["status"] = "access_limited"
+    payload["announcements"] = []
+    payload["jobs"] = []
+    payload["scan"].update(  # type: ignore[union-attr]
+        {
+            "announcements_discovered": 0,
+            "announcements_targeted": 0,
+            "jobs_discovered": 0,
+            "jobs_exported": 0,
+        }
+    )
+    path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    with pytest.raises(CnpcJobCaptureError, match="not publishable: access_limited"):
+        load_cnpc_job_capture(
+            path,
+            allowed_hosts=["zhaopin.cnpc.com.cn"],
+            now=datetime(2026, 9, 26, 9, tzinfo=timezone.utc),
+        )
