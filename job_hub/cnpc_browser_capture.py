@@ -359,6 +359,10 @@ def load_cnpc_job_capture(
         normalized_jobs.append(item)
     if normalized_scan["jobs_exported"] != len(normalized_jobs):
         raise CnpcJobCaptureError("jobs_exported does not match jobs length")
+    if status == "success" and normalized_scan["announcements_discovered"] == 0:
+        raise CnpcJobCaptureError(
+            "CNPC job capture is not publishable: listing rendered no announcements"
+        )
     if status == "success" and require_complete_scan:
         if not normalized_scan["pagination_complete"] or normalized_scan["failed_announcement_details"]:
             raise CnpcJobCaptureError("CNPC job capture is incomplete; it cannot publish rows")

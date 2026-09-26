@@ -494,7 +494,11 @@ class OfficialSourceCollector:
             )
         except CnpcJobCaptureError as error:
             message = str(error)
-            if "not publishable" in message or "incomplete" in message or "stale" in message:
+            if (
+                "not publishable" in message
+                or "incomplete" in message
+                or "stale" in message
+            ):
                 raise SourceSkipped(message) from error
             raise SourceCollectionError(message) from error
 

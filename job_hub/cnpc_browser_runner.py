@@ -282,7 +282,11 @@ def run_cnpc_browser_capture(
             else:
                 browser = playwright.chromium.launch(headless=True)
                 page = browser.new_page(user_agent=user_agent)
-            page.goto(target_url, wait_until="networkidle", timeout=timeout_ms)
+            response = page.goto(target_url, wait_until="networkidle", timeout=timeout_ms)
+            if response is not None and response.status >= 400:
+                raise BrowserCaptureError(
+                    f"CNPC listing returned HTTP {response.status}; capture is access-limited"
+                )
             max_pages = max(1, int(config.get("max_pages", 30)))
             next_selector = str(config.get("next_selector") or "").strip()
             for _ in range(max_pages):
@@ -306,7 +310,15 @@ def run_cnpc_browser_capture(
 
             for announcement in announcements:
                 try:
-                    page.goto(announcement["detail_url"], wait_until="networkidle", timeout=timeout_ms)
+                    response = page.goto(
+                        announcement["detail_url"],
+                        wait_until="networkidle",
+                        timeout=timeout_ms,
+                    )
+                    if response is not None and response.status >= 400:
+                        raise BrowserCaptureError(
+                            f"CNPC detail returned HTTP {response.status}"
+                        )
                     detail_jobs = extract_cnpc_detail_jobs(
                         page.content(),
                         detail_url=page.url,
