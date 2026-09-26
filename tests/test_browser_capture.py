@@ -35,7 +35,9 @@ def _source(tmp_path: Path) -> dict[str, object]:
             "allowed_hosts": ["zhaopin.pipechina.com.cn", "www.pipechina.com.cn"],
             "capture_path": "captures/pipechina.json",
             "application_url": "https://zhaopin.pipechina.com.cn/recruit",
-            "max_age_hours": 30,
+            # Keep the fixture deterministic across calendar days; production
+            # configuration remains 30 hours in data/sources.json.
+            "max_age_hours": 72,
             "require_complete_scan": True,
             "minimum_relevance": 0,
         },
