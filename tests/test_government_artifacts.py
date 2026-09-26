@@ -96,3 +96,54 @@ def test_manifest_refresh_does_not_reset_processed_artifact(tmp_path: Path) -> N
     summary = government_artifact_refresh_summary(database, manifest=manifest, today="2026-09-25")
     assert summary["registered_artifacts"] == 1
     assert summary["source_failures_or_unavailable"] == 1
+
+
+def test_expire_stale_attachment_candidates_preserves_evidence(tmp_path: Path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    artifact = database.upsert_source_artifact(
+        {
+            "source_id": "official-test-source",
+            "parent_url": "https://careers.example.edu.cn/notice",
+            "artifact_url": "https://careers.example.edu.cn/notice.xlsx",
+            "artifact_kind": "position_table",
+            "extraction_status": "registered",
+            "metadata": {"deadline_date": "2026-09-25"},
+        }
+    )
+    row = database.upsert_source_artifact_rows(
+        int(artifact["id"]),
+        [
+            {
+                "sheet_name": "岗位表",
+                "row_number": 2,
+                "cells": {"岗位": "地质工程师"},
+                "row_text": "岗位：地质工程师",
+            }
+        ],
+    )[0]
+    candidate = database.upsert_artifact_job_candidate(
+        {
+            "artifact_row_id": row["id"],
+            "source_id": "official-test-source",
+            "official_page_url": "https://careers.example.edu.cn/notice",
+            "title": "地质工程师",
+            "employer": "测试能源集团",
+            "deadline_date": "2026-09-25",
+            "summary": "官方岗位表第2行",
+            "description": "官方岗位表第2行",
+            "field_evidence": {"table_row": "岗位表!2"},
+            "major_tags": ["地质工程"],
+            "review_status": "needs_review",
+        }
+    )
+
+    changed = database.expire_stale_artifact_candidates(as_of="2026-09-26")
+
+    assert changed == 1
+    refreshed = database.get_artifact_job_candidate(int(candidate["id"]))
+    assert refreshed["review_status"] == "expired"
+    assert "系统自动过期" in refreshed["review_note"]
+    assert refreshed["field_evidence"]["table_row"] == "岗位表!2"

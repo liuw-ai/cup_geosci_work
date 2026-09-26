@@ -77,6 +77,10 @@ class DailyWorker:
             manifest_summary = self._register_government_artifacts()
             summary = self.pipeline.sync_all(progress_callback=self._sync_progress)
             attachment_summary = self._process_registered_attachments()
+            expired_candidates = self.database.expire_stale_artifact_candidates(
+                as_of=datetime.now(self.timezone).date().isoformat()
+            )
+            attachment_summary["expired_candidates"] = expired_candidates
             government_summary = government_artifact_refresh_summary(
                 self.database,
                 manifest=manifest_summary.get("manifest"),

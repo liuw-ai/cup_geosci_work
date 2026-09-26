@@ -1664,6 +1664,40 @@ class Database:
             rows = connection.execute(query, values).fetchall()
         return [self._artifact_candidate_row(row) for row in rows]
 
+    def expire_stale_artifact_candidates(self, *, as_of: str) -> int:
+        """Move unreviewed attachment rows past their deadline out of review.
+
+        The source file and extracted evidence remain immutable.  Only private
+        candidates that have not been published are transitioned, so an old
+        table cannot keep inflating the operator queue or be mistaken for a
+        current opportunity after a daily sync.
+        """
+        try:
+            date.fromisoformat(as_of)
+        except ValueError as error:
+            raise ValueError("as_of must use YYYY-MM-DD") from error
+        note = f"系统自动过期：报名截止日期早于 {as_of}。原始附件证据已保留。"
+        now = utc_now()
+        with self.transaction() as connection:
+            cursor = connection.execute(
+                """
+                UPDATE artifact_job_candidates
+                SET review_status = 'expired',
+                    review_note = CASE
+                        WHEN review_note IS NULL OR review_note = '' THEN ?
+                        WHEN review_note LIKE '%' || ? || '%' THEN review_note
+                        ELSE review_note || '；' || ?
+                    END,
+                    updated_at = ?
+                WHERE review_status IN ('needs_review', 'official_content_verified')
+                  AND deadline_date IS NOT NULL
+                  AND deadline_date <> ''
+                  AND deadline_date < ?
+                """,
+                (note, note, note, now, as_of),
+            )
+            return int(cursor.rowcount)
+
     def update_artifact_job_candidate(
         self,
         candidate_id: int,
