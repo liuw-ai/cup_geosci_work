@@ -39,12 +39,13 @@ def test_source_validation_registry_loads_and_reports_bounded_evidence() -> None
     assert summary["record_count"] == 9
     assert summary["adapter_fixture_verified_records"] == 6
     assert summary["records_by_validation_stage"] == {
-        "adapter_fixture_verified": 6,
+        "adapter_fixture_verified": 5,
+        "server_health_and_adapter_verified": 1,
         "entry_checked_no_recruitment_sample": 3,
     }
-    assert summary["adapter_fixture_verified_targets"] == 5
-    assert summary["candidate_targets_with_adapter_fixture"] == 1
-    assert summary["fixture_verified_enabled_sources"] == 5
+    assert summary["adapter_fixture_verified_targets"] == 6
+    assert summary["candidate_targets_with_adapter_fixture"] == 0
+    assert summary["fixture_verified_enabled_sources"] == 6
     assert summary["records_with_backup"] == 9
     assert len(summary["unvalidated_verified_targets"]) > 0
 
@@ -59,7 +60,8 @@ def test_adapter_fixture_records_collect_current_official_samples(monkeypatch, t
     fixture_records = [
         record
         for record in registry["records"]
-        if record["validation_stage"] == "adapter_fixture_verified"
+        if record["validation_stage"]
+        in {"adapter_fixture_verified", "server_health_and_adapter_verified"}
     ]
     for record in fixture_records:
         source = source_by_id[record["source_id"]]
@@ -95,11 +97,11 @@ def test_adapter_fixture_records_collect_current_official_samples(monkeypatch, t
         assert requested == [listing_url, sample["official_url"]]
 
 
-def test_source_validation_rows_keep_candidate_source_disabled() -> None:
+def test_source_validation_rows_promote_server_verified_source() -> None:
     registry = load_source_validation_registry()
     rows = source_validation_matrix_rows(registry)
     candidate = next(row for row in rows if row["source_id"] == "shandong-hrss-exam")
 
-    assert candidate["target_state"] == "candidate"
-    assert candidate["source_enabled"] is False
+    assert candidate["target_state"] == "verified"
+    assert candidate["source_enabled"] is True
     assert candidate["source_registered_in_runtime"] is True

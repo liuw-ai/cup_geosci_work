@@ -1,17 +1,29 @@
-# Phase 44：浏览器采集门禁修复与生产验收
+# Phase 44：服务器官方来源扩展与域名上线门禁
 
-日期：2026-09-26
+本阶段把一次服务器直连健康扫描转成可维护的来源状态：山东省人事考试网省属事业单位栏目和甘肃省地质矿产勘查开发局人事栏目均通过服务器的 robots 与正式入口检查，并保留原有解析配置、样例/夹具和备用入口。只有这两个来源被启用；其它“入口可达但尚未完成字段验证”的来源继续停用。
 
-本阶段修复动态官方招聘采集命令的服务初始化缺陷，并在服务器上完成政府职位表桥接去重、来源复测和生产健康验收。阶段目标仍是“只发布有官方岗位级证据的地学岗位”，不是用历史公告增加数量。
+## 本阶段交付
 
-## 完成内容
+- `shandong-hrss-exam`：山东省人力资源和社会保障厅正式省属事业单位招聘入口，服务器验证状态为 `server_health_and_adapter_verified`。
+- `gansu-geology-bureau`：甘肃省地质矿产勘查开发局正式人事栏目，服务器验证状态为 `validated_server_health_20260926`。
+- 新增 `server_health_and_adapter_verified` 数据契约状态，防止验证台账与契约枚举不一致。
+- 省级目标矩阵与来源验证台账同步升级；来源故障、扫描成功无匹配和历史截止岗位仍严格区分。
+- 域名上线仍由注册商 DNS 记录触发：`jobs.cupdky.cn` 必须解析到 `81.70.62.174`，Caddy 才能签发 HTTPS。
 
-- `cnpc-job-capture-run` 和 `browser-capture-run` 在读取来源前初始化数据库、运行配置和来源注册表。
-- 同一轮政府职位表同步中，一个旧附件候选不能被两条台账行重复复用。
-- 服务器强制复测山东、河南、天津及已启用省级官方来源，区分“扫描成功无匹配”和“访问故障”。
-- 服务器 Web、Worker、CNPC 浏览器容器和 Caddy 配置保持运行；失败捕获写入访问受限状态，不进入学生端。
+## 不在本阶段宣称
 
-## 明确边界
+- 不把 39 个可达入口全部视为可发布来源；可达不等于有岗位，也不等于完成岗位级字段验证。
+- 不导入历史山东、河南、天津职位表作为当前在招。
+- 不绕过中石化、中石油或其他站点的 robots、验证码、登录或访问策略。
 
-`jobs.cupdky.cn` 当前仍为 NXDOMAIN。代码、Caddy 和服务器不能代替域名所有权凭据创建 DNS 记录；域名服务商完成 `A jobs -> 81.70.62.174` 后，才能申请 HTTPS 证书并作为正式入口。
+## 验收命令
 
+```bash
+docker compose exec worker python -m job_hub.cli worker-health --max-age 300
+docker compose exec web python -m job_hub.cli audit
+docker compose exec web python -m job_hub.cli source-health --include-disabled
+docker compose exec web python -m job_hub.cli domain-check \
+  --hostname jobs.cupdky.cn --expected-ip 81.70.62.174
+```
+
+域名检查在 DNS 未配置时必须明确返回 `nxdomain`，不能将 IP 访问或 Caddy 容器运行误报为域名已上线。

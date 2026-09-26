@@ -210,15 +210,19 @@ def source_validation_summary(
     records = source_validation_records(payload)
     targets = _target_slots(matrix)
     stage_counts = Counter(str(record["validation_stage"]) for record in records)
+    fixture_stages = {
+        "adapter_fixture_verified",
+        "server_health_and_adapter_verified",
+    }
     role_counts = Counter(
         str(record["role"])
         for record in records
-        if record["validation_stage"] == "adapter_fixture_verified"
+        if record["validation_stage"] in fixture_stages
     )
     fixture_records = [
         record
         for record in records
-        if record["validation_stage"] == "adapter_fixture_verified"
+        if record["validation_stage"] in fixture_stages
     ]
     verified_fixture_records = [
         record

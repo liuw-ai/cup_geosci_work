@@ -406,16 +406,16 @@
     "source_type": "html_notice",
     "category": "事业单位与人才引进",
     "source_tier": "A",
-    "enabled": false,
+    "enabled": true,
     "config": {
       "province": "山东",
       "source_role": "human_resources_or_exam",
       "fallback_source_ids": ["shandong-geology-bureau", "mnr-public-recruitment", "cgs-notices"],
       "fallback_entry_urls": ["https://hrss.shandong.gov.cn/", "http://dkj.shandong.gov.cn/"],
-      "automation_status": "adapter_fixture_verified_pending_runtime_health",
+      "automation_status": "validated_server_health_20260926",
       "healthcheck_url": "https://hrss.shandong.gov.cn/rsks/",
       "listing_urls": ["https://hrss.shandong.gov.cn/rsks/"],
-      "healthcheck_enabled": false,
+      "healthcheck_enabled": true,
       "target_active_sources": 3,
       "allowed_hosts": ["hrss.shandong.gov.cn"],
       "listing_selector": "a[href*='/articles/']",
@@ -431,7 +431,7 @@
       "max_items": 12,
       "undated_open_window_days": 45,
       "request_interval_seconds": 1.2,
-      "note": "已通过公开页面和离线回归夹具验证省属事业单位招聘公告、岗位汇总表附件与详情结构。当前部署环境的 robots/TLS 健康探测尚未稳定复现，因此保持停用；不得仅因夹具通过而启用。"
+      "note": "已通过公开页面和离线回归夹具验证省属事业单位招聘公告、岗位汇总表附件与详情结构；2026-09-26 服务器直连确认 robots 与正式栏目可访问。仍须以公告/附件中的专业、学历、地点、截止日期证据为发布门禁。"
     }
   },
   {
@@ -678,13 +678,13 @@
     "source_type": "html_notice",
     "category": "自然资源、地调与地勘",
     "source_tier": "A",
-    "enabled": false,
+    "enabled": true,
     "config": {
       "province": "甘肃",
       "source_role": "geology_bureau_or_institute",
       "fallback_source_ids": ["gansu-natural-resources", "mnr-public-recruitment", "cgs-notices"],
       "fallback_entry_urls": ["http://gsdkj.net/", "https://zrzy.gansu.gov.cn/"],
-      "automation_status": "robots_tls_unverified",
+      "automation_status": "validated_server_health_20260926",
       "healthcheck_url": "http://gsdkj.net/xxgk/rsxx",
       "listing_urls": ["http://gsdkj.net/xxgk/rsxx"],
       "healthcheck_enabled": true,
@@ -703,7 +703,7 @@
       "max_items": 24,
       "undated_open_window_days": 45,
       "request_interval_seconds": 1.2,
-      "note": "已定位甘肃省地矿局官方人事信息栏目和公开招聘原公告。当前 robots.txt 从 HTTP 重定向至 HTTPS 后发生 TLS 握手失败，未能按本项目规则完成自动化权限核验，因此保持停用；准考证、缴费、补充和招聘流程结果通知已预先列为排除项。"
+      "note": "已定位甘肃省地矿局官方人事信息栏目和公开招聘原公告；2026-09-26 服务器直连确认 robots 与正式栏目可访问。准考证、缴费、补充和招聘流程结果通知已预先列为排除项，只有岗位级地学专业证据才允许发布。"
     }
   },
   {

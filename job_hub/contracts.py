@@ -60,6 +60,7 @@ SOURCE_VALIDATION_STAGES = frozenset(
         "official_identity_verified",
         "access_policy_verified",
         "adapter_fixture_verified",
+        "server_health_and_adapter_verified",
         "entry_checked_no_recruitment_sample",
         "access_limited",
         "retired",
@@ -1934,10 +1935,13 @@ def validate_source_validation_registry(payload: Any) -> dict[str, Any]:
             raise ContractValidationError(
                 f"Source validation record {record_id} regression_test must name a test node"
             )
-        if record["validation_stage"] == "adapter_fixture_verified":
+        if record["validation_stage"] in {
+            "adapter_fixture_verified",
+            "server_health_and_adapter_verified",
+        }:
             if sample is None or fixture_path is None or regression_test is None:
                 raise ContractValidationError(
-                    f"Source validation record {record_id} adapter_fixture_verified "
+                    f"Source validation record {record_id} {record['validation_stage']} "
                     "requires sample, fixture_path and regression_test"
                 )
         if record["validation_stage"] == "entry_checked_no_recruitment_sample":

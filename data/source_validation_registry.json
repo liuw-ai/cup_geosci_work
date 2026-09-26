@@ -7,10 +7,10 @@
       "source_id": "beijing-hrss",
       "province": "北京",
       "role": "human_resources_or_exam",
-      "validation_stage": "adapter_fixture_verified",
+      "validation_stage": "server_health_and_adapter_verified",
       "official_entry_url": "https://rsj.beijing.gov.cn/xxgk/gkzp/",
       "backup_entry_urls": ["https://rsj.beijing.gov.cn/"],
-      "last_checked_on": "2026-09-21",
+      "last_checked_on": "2026-09-26",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
         "robots_assessment": "runtime_probe_pending",
@@ -173,10 +173,10 @@
       "last_checked_on": "2026-09-21",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
-        "robots_assessment": "runtime_probe_pending",
-        "note": "山东人事考试信息网可公开打开省属事业单位招聘公告及职位表附件；当前环境的 requests TLS 健康探测未稳定通过，因此来源保持停用。"
+        "robots_assessment": "server_direct_allowed",
+        "note": "服务器直连确认 robots.txt 允许且正式栏目返回 HTTP 200；岗位发布仍需逐公告/附件核验专业、学历、地点和截止日期。"
       },
-      "finding": "这是新登记的正式候选来源：身份、列表、详情和附件解析夹具已验证，但尚未通过部署环境的合规健康检查，不计入已自动化来源或岗位覆盖。",
+      "finding": "身份、列表、详情和附件解析夹具已验证，并通过部署服务器的 robots 与入口健康检查；启用后若没有匹配岗位只记为扫描结果，不解释为来源故障。",
       "sample": {
         "official_url": "https://hrss.shandong.gov.cn/articles/ch00232/202601/f257f59a-0904-4130-935e-d959873b68d3.shtml",
         "title": "2026年度省属事业单位公开招聘初级综合类岗位人员公告",
