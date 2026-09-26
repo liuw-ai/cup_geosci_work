@@ -24,6 +24,7 @@ services:
       CNPC_BROWSER_SOURCE_ID: cnpc-career-browser
       CNPC_BROWSER_INTERVAL_MINUTES: 180
       CNPC_BROWSER_CDP_URL: http://headless-shell:9222
+      CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
     command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
     volumes:
       - job_hub_data:/var/lib/job-hub

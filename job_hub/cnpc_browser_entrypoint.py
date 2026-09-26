@@ -10,6 +10,12 @@ from pathlib import Path
 
 
 def ensure_playwright() -> None:
+    target = Path(
+        os.getenv("CNPC_BROWSER_PYTHON_TARGET", "/var/lib/job-hub/python-packages")
+    )
+    target.mkdir(parents=True, exist_ok=True)
+    if str(target) not in sys.path:
+        sys.path.insert(0, str(target))
     if importlib.util.find_spec("playwright") is not None:
         return
     wheel = Path(
@@ -24,7 +30,8 @@ def ensure_playwright() -> None:
             "-m",
             "pip",
             "install",
-            "--user",
+            "--target",
+            str(target),
             "--no-index",
             "--find-links",
             str(wheel.parent),
@@ -36,7 +43,8 @@ def ensure_playwright() -> None:
             "-m",
             "pip",
             "install",
-            "--user",
+            "--target",
+            str(target),
             "-r",
             "/app/requirements-browser.txt",
         ]
