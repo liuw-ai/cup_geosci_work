@@ -200,6 +200,7 @@ def test_cdp_endpoint_rewrites_headless_shell_websocket_host(monkeypatch: pytest
         return Response()
 
     monkeypatch.setattr("job_hub.cnpc_browser_runner.requests.get", fake_get)
+    monkeypatch.setattr("job_hub.cnpc_browser_runner.socket.gethostbyname", lambda _host: "172.18.0.3")
     assert _resolve_cdp_websocket("http://headless-shell:9222") == (
-        "ws://headless-shell:9222/devtools/browser/abc"
+        "ws://172.18.0.3:9222/devtools/browser/abc"
     )

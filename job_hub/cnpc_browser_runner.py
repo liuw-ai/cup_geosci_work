@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+import socket
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -64,10 +65,13 @@ def _resolve_cdp_websocket(cdp_url: str) -> str:
         raise BrowserCaptureError("headless-shell CDP version response lacks websocket URL") from error
     websocket_parsed = urlparse(websocket)
     scheme = "wss" if parsed.scheme == "https" else "ws"
+    host = parsed.hostname or ""
+    resolved_host = socket.gethostbyname(host)
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
     return urlunparse(
         (
             scheme,
-            parsed.netloc,
+            f"{resolved_host}:{port}",
             websocket_parsed.path,
             websocket_parsed.params,
             websocket_parsed.query,
