@@ -317,7 +317,13 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
         source_category=job.get("category"),
         identity_text=" ".join(str(value) for value in identity_values if value),
     )
-    enriched.update(profile.as_dict())
+    profile_values = profile.as_dict()
+    # A verified government position carries an explicit publication category;
+    # employer identity (for example, a university) must not relabel it as a
+    # generic academic opportunity in the student-facing filter.
+    if str(job.get("category") or "") in {"事业单位与人才引进", "公务员与选调"}:
+        profile_values["category"] = str(job["category"])
+    enriched.update(profile_values)
     if identity:
         # Persistent rows already carry these values after v0.3 migration.
         # Applying them here also keeps frozen reports from older versions clear.
