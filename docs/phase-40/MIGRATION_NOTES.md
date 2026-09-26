@@ -14,4 +14,4 @@ docker compose -f docker-compose.browser.yml up -d --build
 
 该文件与主 compose 共享 `job_hub_data` 卷。浏览器 Worker 不拥有数据库写入以外的应用管理权限，也不调用报名或登录接口。
 
-浏览器 compose 复用主服务已经构建的 Python 应用镜像，并使用服务器已有的 `chromedp/headless-shell` 作为 CDP 浏览器；采集容器只额外安装 Python Playwright 客户端，因此不会再次下载数百 MB 的 Playwright 浏览器基础镜像。CDP 端口只在 Compose 内网可见，不映射到公网。
+浏览器 compose 复用主服务已经构建的 Python 应用镜像，并使用服务器已有的 `chromedp/headless-shell` 作为 CDP 浏览器。容器启动时从 `runtime/deploy/wheels-linux` 的只读挂载安装 Python Playwright 客户端（没有 wheel 时才回退到 PyPI），因此不会再次下载数百 MB 的 Playwright 浏览器基础镜像。CDP 端口只在 Compose 内网可见，不映射到公网。
