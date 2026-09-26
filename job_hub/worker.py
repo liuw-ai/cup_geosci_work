@@ -190,10 +190,14 @@ class DailyWorker:
                 continue
             if str(job.get("deadline_date") or "") != deadline:
                 continue
-            if attachment_url and str(job.get("official_evidence_url") or "") != attachment_url:
-                continue
             evidence = job.get("field_evidence")
             if not isinstance(evidence, dict):
+                continue
+            evidence_attachment = str(evidence.get("artifact_url") or "").strip()
+            if attachment_url and attachment_url not in {
+                str(job.get("official_evidence_url") or "").strip(),
+                evidence_attachment,
+            }:
                 continue
             existing_major = str(
                 evidence.get("专业范围") or evidence.get("专业要求") or ""
