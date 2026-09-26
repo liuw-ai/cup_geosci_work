@@ -843,6 +843,12 @@ def main() -> None:
             args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
+    # Browser capture commands need the registered source and runtime paths.
+    # Keep this initialization before their early-return branches; the common
+    # service setup below is intentionally later for lightweight read-only
+    # commands such as domain probes.
+    if args.command in {"cnpc-job-capture-run", "browser-capture-run"}:
+        settings, database, pipeline = services()
     if args.command == "cnpc-job-capture-run":
         source = database.get_source(args.source_id)
         if source is None:
