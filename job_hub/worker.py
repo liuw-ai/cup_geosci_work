@@ -179,10 +179,11 @@ class DailyWorker:
     ) -> dict[str, object] | None:
         """Match a registry row to an earlier attachment publication."""
         major = str(record.get("major_requirement") or "").strip()
+        position_code = str(record.get("position_code") or "").strip()
         source_id = str(record.get("source_id") or "").strip()
         employer = str(record.get("employer") or "").strip()
         deadline = str(record.get("deadline_date") or "").strip()
-        candidates: list[tuple[bool, dict[str, object]]] = []
+        candidates: list[tuple[bool, bool, dict[str, object]]] = []
         for job in jobs:
             if str(job.get("source_id") or "") != source_id:
                 continue
@@ -203,17 +204,22 @@ class DailyWorker:
                 evidence.get("专业范围") or evidence.get("专业要求") or ""
             ).strip()
             if existing_major and (existing_major == major or major in existing_major or existing_major in major):
-                candidates.append((existing_major == major, job))
+                candidates.append(
+                    (str(evidence.get("职位代码") or "").strip() == position_code,
+                     existing_major == major,
+                     job)
+                )
         # Prefer a row already produced from the controlled attachment queue;
         # it carries the original OCR/table evidence and keeps its event history.
         candidates.sort(
             key=lambda item: (
                 0 if item[0] else 1,
-                0 if str(item[1].get("external_id") or "").startswith("artifact-candidate:") else 1,
-                int(item[1].get("id") or 0),
+                0 if item[1] else 1,
+                0 if str(item[2].get("external_id") or "").startswith("artifact-candidate:") else 1,
+                int(item[2].get("id") or 0),
             )
         )
-        return candidates[0][1] if candidates else None
+        return candidates[0][2] if candidates else None
 
     def _register_government_artifacts(self) -> dict[str, object]:
         """Idempotently load the versioned government-artifact manifest.
