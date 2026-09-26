@@ -1,3 +1,5 @@
-# Optional dependency for the isolated official-browser worker.
-# The normal web/worker image intentionally does not install Chromium.
+# Optional dependencies for the isolated official-browser worker.
+# The normal web/worker image intentionally does not install these packages.
+beautifulsoup4==4.12.3
+requests==2.32.3
 playwright==1.48.0

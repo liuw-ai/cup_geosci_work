@@ -6,8 +6,8 @@ ENV APP_DATA_DIR=/var/lib/job-hub
 
 WORKDIR /app
 
-COPY requirements.txt requirements-browser.txt ./
-RUN pip install --no-cache-dir -r requirements.txt -r requirements-browser.txt
+COPY requirements-browser.txt ./
+RUN pip install --no-cache-dir -r requirements-browser.txt
 
 COPY . .
 RUN mkdir -p /var/lib/job-hub
