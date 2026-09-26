@@ -148,6 +148,7 @@ class DailyWorker:
         existing_jobs, _ = self.database.list_jobs(
             page_size=None, only_open=False, student_visible=False
         )
+        used_existing_ids: set[int] = set()
         for record in current_publishable_position_records(registry, today=today):
             source = self.database.get_source(str(record["source_id"]))
             if source is None:
@@ -156,13 +157,17 @@ class DailyWorker:
                 continue
             posting = position_record_to_posting(record)
             equivalent = self._find_equivalent_government_job(
-                existing_jobs, record, posting.official_evidence_url
+                existing_jobs,
+                record,
+                posting.official_evidence_url,
+                excluded_ids=used_existing_ids,
             )
             if equivalent is not None:
                 # Preserve the original attachment-candidate fingerprint so a
                 # later registry refresh updates one row instead of inserting a
                 # second copy of the same official table row.
                 posting = replace(posting, external_id=equivalent["external_id"])
+                used_existing_ids.add(int(equivalent["id"]))
             normalized = self.pipeline.normalize_posting(posting, source)
             _, outcome = self.database.save_job(normalized)
             if outcome in counts:
@@ -176,6 +181,8 @@ class DailyWorker:
         jobs: list[dict[str, object]],
         record: dict[str, object],
         attachment_url: str | None,
+        *,
+        excluded_ids: set[int] | None = None,
     ) -> dict[str, object] | None:
         """Match a registry row to an earlier attachment publication."""
         major = str(record.get("major_requirement") or "").strip()
@@ -185,6 +192,8 @@ class DailyWorker:
         deadline = str(record.get("deadline_date") or "").strip()
         candidates: list[tuple[bool, bool, dict[str, object]]] = []
         for job in jobs:
+            if int(job.get("id") or 0) in (excluded_ids or set()):
+                continue
             if str(job.get("source_id") or "") != source_id:
                 continue
             if str(job.get("employer") or "") != employer:
