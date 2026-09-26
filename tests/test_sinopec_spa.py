@@ -53,6 +53,7 @@ def test_sinopec_capture_contains_complete_manifest() -> None:
     assert summary["job_rows_captured"] == 348
     assert summary["complete_manifest"] is True
     assert summary["enterprise_success"] == 35
+    assert summary["candidate_row_count_mismatches"] == 4
 
 
 def test_sinopec_capture_accepts_complete_manifest_when_promoted() -> None:

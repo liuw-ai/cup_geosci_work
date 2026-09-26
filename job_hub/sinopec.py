@@ -306,7 +306,7 @@ def load_sinopec_capture(
     }
 
 
-def sinopec_capture_summary(payload: dict[str, Any]) -> dict[str, int | bool]:
+def sinopec_capture_summary(payload: dict[str, Any]) -> dict[str, Any]:
     """Return auditable capture metrics without treating them as job counts."""
 
     enterprises = list(payload.get("enterprises", []))
@@ -318,6 +318,16 @@ def sinopec_capture_summary(payload: dict[str, Any]) -> dict[str, int | bool]:
     jobs_discovered = 0
     jobs_exported = 0
     failed_jobs = 0
+    row_count_mismatches: list[dict[str, Any]] = []
+    job_counts_by_enterprise: dict[str, int] = {}
+    for job in jobs:
+        if not isinstance(job, dict):
+            continue
+        enterprise_id = _job_enterprise_id(job)
+        if enterprise_id:
+            job_counts_by_enterprise[enterprise_id] = (
+                job_counts_by_enterprise.get(enterprise_id, 0) + 1
+            )
     for item in enterprises:
         status = str(item.get("scan_status") or "")
         if status in statuses:
@@ -338,6 +348,22 @@ def sinopec_capture_summary(payload: dict[str, Any]) -> dict[str, int | bool]:
             and int(metrics.get("failed_jobs") or 0) == 0
         ):
             candidate_scan_complete += 1
+        if item.get("candidate_by_keyword"):
+            listed_value = str(item.get("recruitment_jobs") or "").strip()
+            try:
+                listed_count = int(listed_value)
+            except (TypeError, ValueError):
+                listed_count = None
+            exported_count = job_counts_by_enterprise.get(str(item.get("id")), 0)
+            if listed_count is not None and listed_count != exported_count:
+                row_count_mismatches.append(
+                    {
+                        "enterprise_id": str(item.get("id")),
+                        "name": str(item.get("name") or ""),
+                        "listed_jobs": listed_count,
+                        "exported_rows": exported_count,
+                    }
+                )
     candidate_total = int(payload["candidate_enterprise_total"])
     return {
         "enterprise_total": int(payload["enterprise_total"]),
@@ -354,6 +380,10 @@ def sinopec_capture_summary(payload: dict[str, Any]) -> dict[str, int | bool]:
         "jobs_discovered": jobs_discovered,
         "jobs_exported": jobs_exported,
         "failed_jobs": failed_jobs,
+        "candidate_row_count_mismatches": len(row_count_mismatches),
+        "candidate_row_count_mismatch_ids": [
+            item["enterprise_id"] for item in row_count_mismatches
+        ],
         **{f"enterprise_{key}": value for key, value in statuses.items()},
         **{f"candidate_{key}": value for key, value in candidate_statuses.items()},
     }

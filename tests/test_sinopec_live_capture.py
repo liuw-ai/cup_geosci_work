@@ -44,6 +44,7 @@ def test_live_sinopec_capture_has_complete_candidate_scan() -> None:
     assert summary["job_rows_captured"] == 397
     assert summary["jobs_exported"] == 397
     assert summary["failed_jobs"] == 0
+    assert summary["candidate_row_count_mismatches"] == 0
 
 
 def test_live_sinopec_rows_keep_raw_deadline_and_iso_deadline_field(tmp_path: Path) -> None:
