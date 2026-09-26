@@ -815,7 +815,10 @@ def main() -> None:
             parser.error(f"source_id is not registered: {args.source_id}")
         if source.get("source_type") != "cnpc_browser_rows":
             parser.error("cnpc-job-capture-run requires a cnpc_browser_rows source")
-        config = source["config"]
+        config = dict(source["config"])
+        cdp_url = os.getenv("CNPC_BROWSER_CDP_URL", "").strip()
+        if cdp_url:
+            config["cdp_url"] = cdp_url
         output = args.output or (settings.data_dir / str(config["capture_path"]))
         browser_url = args.url or str(config.get("browser_url") or source["homepage_url"])
         try:

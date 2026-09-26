@@ -61,7 +61,10 @@ class CnpcBrowserWorker:
             LOGGER.error("CNPC browser source is not registered: %s", self.source_id)
             self.stop_event.wait(self.interval_seconds)
             return
-        config = source["config"]
+        config = dict(source["config"])
+        cdp_url = os.getenv("CNPC_BROWSER_CDP_URL", "").strip()
+        if cdp_url:
+            config["cdp_url"] = cdp_url
         output = self.settings.data_dir / str(config["capture_path"])
         self._heartbeat("capturing", f"capturing {self.source_id}")
         try:
@@ -104,4 +107,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

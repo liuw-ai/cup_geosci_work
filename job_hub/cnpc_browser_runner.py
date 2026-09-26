@@ -232,8 +232,16 @@ def run_cnpc_browser_capture(
     failed_details = 0
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=True)
-            page = browser.new_page(user_agent=user_agent)
+            cdp_url = _text(config.get("cdp_url"))
+            if cdp_url:
+                browser = playwright.chromium.connect_over_cdp(cdp_url)
+                context = browser.contexts[0] if browser.contexts else browser.new_context(
+                    user_agent=user_agent
+                )
+                page = context.new_page()
+            else:
+                browser = playwright.chromium.launch(headless=True)
+                page = browser.new_page(user_agent=user_agent)
             page.goto(target_url, wait_until="networkidle", timeout=timeout_ms)
             max_pages = max(1, int(config.get("max_pages", 30)))
             next_selector = str(config.get("next_selector") or "").strip()

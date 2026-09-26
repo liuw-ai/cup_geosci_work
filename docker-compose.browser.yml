@@ -1,10 +1,24 @@
 name: cupb-geoscience-job-hub
 services:
+  headless-shell:
+    image: chromedp/headless-shell:latest
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      - --remote-debugging-address=0.0.0.0
+      - --remote-debugging-port=9222
+    init: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
   cnpc-browser:
     build:
       context: .
       dockerfile: Dockerfile.browser
     image: cupb-geoscience-job-hub-browser:latest
+    depends_on:
+      - headless-shell
     env_file:
       - .env
     environment:
@@ -12,6 +26,7 @@ services:
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
       CNPC_BROWSER_SOURCE_ID: cnpc-career-browser
       CNPC_BROWSER_INTERVAL_MINUTES: 180
+      CNPC_BROWSER_CDP_URL: http://headless-shell:9222
     volumes:
       - job_hub_data:/var/lib/job-hub
     init: true
