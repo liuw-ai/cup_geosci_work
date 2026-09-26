@@ -13,8 +13,9 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin, urlparse, parse_qs
+from urllib.parse import parse_qs, urljoin, urlparse, urlunparse
 
+import requests
 from bs4 import BeautifulSoup
 
 from job_hub.browser_capture import BrowserCaptureError, _robots_permit
@@ -40,6 +41,39 @@ def _official_url(value: str, hosts: set[str], field: str) -> str:
     if host not in hosts:
         raise BrowserCaptureError(f"{field} is outside the CNPC allowlist: {host}")
     return value
+
+
+def _resolve_cdp_websocket(cdp_url: str) -> str:
+    """Resolve headless-shell's websocket while preserving its Host quirk."""
+
+    parsed = urlparse(cdp_url)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise BrowserCaptureError("CNPC_BROWSER_CDP_URL must be an HTTP(S) endpoint")
+    response = requests.get(
+        f"{cdp_url.rstrip('/')}/json/version",
+        headers={"Host": "localhost"},
+        timeout=10,
+    )
+    if not response.ok:
+        raise BrowserCaptureError(
+            f"headless-shell CDP version endpoint returned HTTP {response.status_code}"
+        )
+    try:
+        websocket = str(response.json()["webSocketDebuggerUrl"])
+    except (ValueError, KeyError, TypeError) as error:
+        raise BrowserCaptureError("headless-shell CDP version response lacks websocket URL") from error
+    websocket_parsed = urlparse(websocket)
+    scheme = "wss" if parsed.scheme == "https" else "ws"
+    return urlunparse(
+        (
+            scheme,
+            parsed.netloc,
+            websocket_parsed.path,
+            websocket_parsed.params,
+            websocket_parsed.query,
+            websocket_parsed.fragment,
+        )
+    )
 
 
 def _announcement_id(url: str, fallback: str) -> str:
@@ -234,7 +268,9 @@ def run_cnpc_browser_capture(
         with sync_playwright() as playwright:
             cdp_url = _text(config.get("cdp_url"))
             if cdp_url:
-                browser = playwright.chromium.connect_over_cdp(cdp_url)
+                browser = playwright.chromium.connect_over_cdp(
+                    _resolve_cdp_websocket(cdp_url)
+                )
                 context = browser.contexts[0] if browser.contexts else browser.new_context(
                     user_agent=user_agent
                 )

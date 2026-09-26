@@ -7,7 +7,11 @@ from pathlib import Path
 import pytest
 
 from job_hub.cnpc_browser_capture import CnpcJobCaptureError, cnpc_job_capture_summary, load_cnpc_job_capture
-from job_hub.cnpc_browser_runner import extract_cnpc_announcements, extract_cnpc_detail_jobs
+from job_hub.cnpc_browser_runner import (
+    _resolve_cdp_websocket,
+    extract_cnpc_announcements,
+    extract_cnpc_detail_jobs,
+)
 from job_hub.cnpc_browser_worker import outside_maintenance_window
 from job_hub.sources import OfficialSourceCollector
 
@@ -179,3 +183,23 @@ def test_cnpc_browser_worker_respects_maintenance_window() -> None:
     assert outside_maintenance_window(datetime(2026, 9, 26, 6, 5, tzinfo=tz)) is True
     assert outside_maintenance_window(datetime(2026, 9, 26, 23, 49, tzinfo=tz)) is True
     assert outside_maintenance_window(datetime(2026, 9, 27, 0, 0, tzinfo=tz)) is False
+
+
+def test_cdp_endpoint_rewrites_headless_shell_websocket_host(monkeypatch: pytest.MonkeyPatch) -> None:
+    class Response:
+        ok = True
+        status_code = 200
+
+        @staticmethod
+        def json() -> dict[str, str]:
+            return {"webSocketDebuggerUrl": "ws://localhost/devtools/browser/abc"}
+
+    def fake_get(_url: str, *, headers: dict[str, str], timeout: int) -> Response:
+        assert headers == {"Host": "localhost"}
+        assert timeout == 10
+        return Response()
+
+    monkeypatch.setattr("job_hub.cnpc_browser_runner.requests.get", fake_get)
+    assert _resolve_cdp_websocket("http://headless-shell:9222") == (
+        "ws://headless-shell:9222/devtools/browser/abc"
+    )
