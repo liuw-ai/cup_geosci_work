@@ -19,6 +19,11 @@ from job_hub.government_artifacts import (
     load_government_artifact_manifest,
     register_government_artifacts,
 )
+from job_hub.government_positions import (
+    current_publishable_position_records,
+    load_position_registry,
+    position_record_to_posting,
+)
 from job_hub.pipeline import JobPipeline
 from job_hub.reports import publish_daily_report
 
@@ -76,6 +81,7 @@ class DailyWorker:
         try:
             manifest_summary = self._register_government_artifacts()
             summary = self.pipeline.sync_all(progress_callback=self._sync_progress)
+            government_jobs = self._sync_verified_government_positions()
             attachment_summary = self._process_registered_attachments()
             expired_candidates = self.database.expire_stale_artifact_candidates(
                 as_of=datetime.now(self.timezone).date().isoformat()
@@ -104,6 +110,7 @@ class DailyWorker:
                 "Source synchronization complete: %s; coverage snapshot recorded for %s.",
                 {
                     "sources": summary.as_dict(),
+                    "government_positions": government_jobs,
                     "government_manifest": manifest_log,
                     "attachments": attachment_summary,
                     "government_quality": government_summary,
@@ -126,6 +133,29 @@ class DailyWorker:
             LOGGER.exception("Source synchronization failed")
             self._heartbeat("degraded", "source synchronization failed")
             self._send_failure_safely("官方来源同步失败", str(error))
+
+    def _sync_verified_government_positions(self) -> dict[str, int]:
+        """Publish current explicit-match rows from the official position ledger."""
+        path = self.settings.government_position_registry_path
+        try:
+            registry = load_position_registry(path)
+        except Exception as error:  # noqa: BLE001 - keep registry failures visible
+            LOGGER.error("Government position registry unavailable: %s", error)
+            return {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0, "error": 1}
+        today = datetime.now(self.timezone).date().isoformat()
+        counts = {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0, "error": 0}
+        for record in current_publishable_position_records(registry, today=today):
+            source = self.database.get_source(str(record["source_id"]))
+            if source is None:
+                counts["skipped"] += 1
+                LOGGER.error("Government position source is not registered: %s", record["source_id"])
+                continue
+            _, outcome = self.database.save_job(
+                self.pipeline.normalize_posting(position_record_to_posting(record), source)
+            )
+            if outcome in counts:
+                counts[outcome] += 1
+        return counts
 
     def _register_government_artifacts(self) -> dict[str, object]:
         """Idempotently load the versioned government-artifact manifest.

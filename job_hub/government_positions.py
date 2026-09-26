@@ -17,6 +17,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from job_hub.sources import RawPosting
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_REGISTRY_PATH = PROJECT_ROOT / "data" / "government_position_registry.json"
@@ -270,3 +272,60 @@ def government_position_quality_report(
             else "台账中的正式来源均已完成当前记录核验。"
         ),
     }
+
+
+def current_publishable_position_records(
+    registry: dict[str, Any], *, today: str,
+) -> list[dict[str, Any]]:
+    """Return current official rows that passed the explicit student match gate."""
+    target = date.fromisoformat(today)
+    rows: list[dict[str, Any]] = []
+    for item in registry.get("records", []):
+        if item["record_status"] != "verified_open":
+            continue
+        if item["match_status"] not in {"explicit_match", "unrestricted_match"}:
+            continue
+        deadline = str(item.get("deadline_date") or "").strip()
+        if deadline and date.fromisoformat(deadline) < target:
+            continue
+        rows.append(dict(item))
+    return rows
+
+
+def position_record_to_posting(record: dict[str, Any]) -> RawPosting:
+    """Convert one verified government table row into the normal job contract."""
+    major = str(record["major_requirement"]).strip()
+    degree = str(record["degree_requirement"]).strip()
+    notice_url = str(record["official_notice_url"]).strip()
+    attachment_url = str(record["official_attachment_url"]).strip()
+    code = str(record["position_code"]).strip()
+    evidence = {
+        "政府岗位类型": str(record["position_type"]),
+        "职位代码": code,
+        "专业要求": major,
+        "学历要求": degree,
+        "招聘人数": str(record["headcount"]),
+        "表格定位": str(record["evidence_locator"]),
+        "官方公告链接": notice_url,
+        "官方附件链接": attachment_url,
+    }
+    description = (
+        f"官方职位表岗位代码：{code}；专业要求：{major}；学历要求：{degree}；"
+        f"工作地点：{record['location']}；招聘人数：{record['headcount']}。"
+    )
+    return RawPosting(
+        title=str(record["title"]).strip(),
+        employer=str(record["employer"]).strip(),
+        source_url=notice_url,
+        application_url=notice_url,
+        text=description,
+        summary=str(record.get("note") or description).strip(),
+        published_date=None,
+        deadline_date=str(record.get("deadline_date") or "").strip() or None,
+        location=str(record["location"]).strip(),
+        external_id=f"government-position:{record['id']}:{code}",
+        match_text=f"{record['title']} {major}",
+        official_evidence_url=attachment_url,
+        field_evidence=evidence,
+        qualification_text=f"专业要求：{major}；学历要求：{degree}",
+    )
