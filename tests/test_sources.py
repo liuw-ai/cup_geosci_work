@@ -5,9 +5,10 @@ from dataclasses import dataclass
 import json
 import zlib
 
+import pytest
 from bs4 import BeautifulSoup
 
-from job_hub.sources import OfficialSourceCollector
+from job_hub.sources import OfficialSourceCollector, SourceSkipped
 
 from conftest import make_settings
 
@@ -808,6 +809,23 @@ def test_html_notice_skips_interview_replacement_announcements(tmp_path, monkeyp
     monkeypatch.setattr(collector, "_get", get)
 
     assert collector.collect(source) == []
+
+
+def test_single_source_access_skip_is_not_wrapped_as_collection_failure(tmp_path, monkeypatch) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "cnpc-browser",
+        "homepage_url": "https://zhaopin.cnpc.com.cn/",
+        "source_type": "cnpc_browser_rows",
+        "config": {},
+    }
+
+    def blocked(_source):
+        raise SourceSkipped("CNPC listing returned HTTP 412; capture is access-limited")
+
+    monkeypatch.setattr(collector, "collect", blocked)
+    with pytest.raises(SourceSkipped, match="HTTP 412"):
+        collector.collect_with_fallback(source)
 
 
 def test_html_notice_applies_configured_title_filters(tmp_path, monkeypatch) -> None:

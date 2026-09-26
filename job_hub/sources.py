@@ -891,9 +891,12 @@ class OfficialSourceCollector:
                 failures.append(str(error))
             except SourceCollectionError as error:
                 failures.append(str(error))
-        if first_blocked is not None and all(
-            "robots" in failure.lower() or "permit" in failure.lower()
-            for failure in failures
+        if first_blocked is not None and (
+            len(candidates) == 1
+            or all(
+                "robots" in failure.lower() or "permit" in failure.lower()
+                for failure in failures
+            )
         ):
             raise first_blocked
         detail = "; ".join(failures[-4:]) or "no registered official fallback succeeded"
