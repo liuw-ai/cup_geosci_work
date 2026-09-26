@@ -167,10 +167,10 @@
       "source_id": "shandong-hrss-exam",
       "province": "山东",
       "role": "human_resources_or_exam",
-      "validation_stage": "adapter_fixture_verified",
+      "validation_stage": "server_health_and_adapter_verified",
       "official_entry_url": "https://hrss.shandong.gov.cn/rsks/",
       "backup_entry_urls": ["https://hrss.shandong.gov.cn/", "http://dkj.shandong.gov.cn/"],
-      "last_checked_on": "2026-09-21",
+      "last_checked_on": "2026-09-26",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
         "robots_assessment": "server_direct_allowed",

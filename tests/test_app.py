@@ -251,7 +251,7 @@ def test_source_validation_matrix_is_admin_only_and_keeps_evidence_private(tmp_p
     assert response.status_code == 200
     private_payload = response.get_json()
     assert private_payload["summary"]["record_count"] == 9
-    assert len(private_payload["items"]) == 5
+    assert len(private_payload["items"]) == 4
     assert all(
         "sample" in item and "fixture_path" in item
         for item in private_payload["items"]

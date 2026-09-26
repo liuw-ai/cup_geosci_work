@@ -207,7 +207,7 @@
     "甘肃": {
       "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "甘肃省人力资源和社会保障厅公开招聘"},
       "natural_resources": {"state": "candidate", "official_entry_url": "https://zrzy.gansu.gov.cn/zwgk/rsxx/"},
-      "geology_bureau_or_institute": {"state": "verified", "source_id": "gansu-geology-bureau", "official_entry_url": "http://gsdkj.net/xxgk/rsxx", "discovery_hint": "2026-09-26 服务器直连通过 robots 与正式栏目检查；岗位级证据仍按公告/附件门禁发布。"},
+      "geology_bureau_or_institute": {"state": "candidate", "candidate_source_id": "gansu-geology-bureau", "official_entry_url": "http://gsdkj.net/xxgk/rsxx", "discovery_hint": "2026-09-26 服务器直连通过 robots 与正式栏目检查，但尚未取得岗位级样例和回归夹具；保持停用，不能解释为无岗位。"},
       "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "甘肃省事业单位公开招聘"},
       "civil_service": {"state": "unlocated", "discovery_hint": "甘肃省公务员考试录用"}
     },

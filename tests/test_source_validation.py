@@ -39,8 +39,8 @@ def test_source_validation_registry_loads_and_reports_bounded_evidence() -> None
     assert summary["record_count"] == 9
     assert summary["adapter_fixture_verified_records"] == 6
     assert summary["records_by_validation_stage"] == {
-        "adapter_fixture_verified": 5,
-        "server_health_and_adapter_verified": 1,
+        "adapter_fixture_verified": 4,
+        "server_health_and_adapter_verified": 2,
         "entry_checked_no_recruitment_sample": 3,
     }
     assert summary["adapter_fixture_verified_targets"] == 6
