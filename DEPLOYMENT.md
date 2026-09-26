@@ -22,7 +22,7 @@ cp .env.example .env
 ```dotenv
 APP_SECRET_KEY=使用密码管理器生成的长随机字符串
 ADMIN_TOKEN=另一条长随机字符串
-APP_BASE_URL=https://jobs.example.edu.cn
+APP_BASE_URL=https://jobs.cupdky.cn
 MAIL_ENABLED=true
 SMTP_HOST=smtp.example.com
 SMTP_PORT=465
@@ -69,16 +69,29 @@ docker compose exec worker python -m job_hub.cli worker-health --max-age 180
 
 ## 3. HTTPS 反向代理
 
-当前 `docker-compose.yml` 的端口映射是 `127.0.0.1:8080:8080`。这是有意的：应用端口只对服务器本机开放，公网流量应由 HTTPS 代理终止 TLS 后转发到它。示例 Caddy 配置见 [`deploy/Caddyfile.example`](deploy/Caddyfile.example)。
+生产部署使用 `docker-compose.public.yml` 中的 Caddy。应用端口只对服务器本机开放，公网流量由 Caddy 终止 TLS 后转发到 Web 容器。示例配置见 [`deploy/Caddyfile.example`](deploy/Caddyfile.example)。
 
-将示例中的域名改成自己的域名，并确保 DNS 的 A/AAAA 记录指向服务器：
+本项目固定使用 `jobs.cupdky.cn`，先在域名服务商创建 `A` 记录：`jobs` -> `81.70.62.174`。确认 `nslookup jobs.cupdky.cn` 返回该地址后，在服务器执行：
 
 ```bash
-sudo cp deploy/Caddyfile.example /etc/caddy/Caddyfile
-sudo systemctl reload caddy
+docker compose up -d --build web worker
+docker compose -f docker-compose.public.yml up -d
+docker compose -f docker-compose.public.yml logs --tail=100 caddy
 ```
 
-防火墙只需要对外开放 80 和 443；不要把 SQLite、管理员接口或 8080 直接暴露到公网。Caddy 会自动申请和续期公开证书，微信浏览器可以直接打开标准 HTTPS 链接。
+部署后先运行只读域名预检：
+
+```bash
+docker compose exec web python -m job_hub.cli domain-check \
+  --hostname jobs.cupdky.cn --expected-ip 81.70.62.174
+```
+
+该命令的退出码只有在 DNS 已解析到目标地址且 `https://jobs.cupdky.cn/healthz`
+返回成功时才为 0。`nxdomain` 表示域名服务商还没有创建记录，`wrong_target`
+表示 A 记录指向了其他地址，`tls_error` 表示证书尚未签发或证书链错误；这些状态
+都与应用进程和招聘来源采集无关。
+
+防火墙只需要对外开放 80 和 443；不要把 SQLite、管理员接口或 8080 直接暴露到公网。DNS 生效后 Caddy 会自动申请和续期公开证书，微信浏览器可以直接打开标准 HTTPS 链接。DNS 未生效时 Caddy 会保持重试，不能用 IP 地址申请 `jobs.cupdky.cn` 的证书。
 
 若使用 Nginx，等价的核心配置是 `proxy_pass http://127.0.0.1:8080;`，并保留原始 `Host`、`X-Forwarded-Proto` 和 `X-Real-IP` 请求头。
 
@@ -96,11 +109,13 @@ sudo systemctl reload caddy
 ```bash
 curl -fsS http://127.0.0.1:8080/healthz
 curl -I https://jobs.example.edu.cn/healthz
+nslookup jobs.cupdky.cn
+docker compose -f docker-compose.public.yml ps
 docker compose ps
 docker compose logs --tail=100 web worker
 ```
 
-第一条失败说明容器或 Gunicorn 没有正常工作；第一条成功而第二条失败，说明是 Caddy/Nginx、DNS 或防火墙链路问题；第二条成功但微信打不开，优先检查证书链、域名是否带了错误端口，以及是否误用了 `localhost` 链接。
+第一条失败说明容器或 Gunicorn 没有正常工作；本机 Web 成功而域名失败，说明是 DNS、Caddy 或防火墙链路问题；DNS 返回 NXDOMAIN 时必须先到域名服务商添加记录，代码和服务器无法替代 DNS 所有权操作。
 
 ## 5. 每日 20:00 链路
 

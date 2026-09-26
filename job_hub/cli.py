@@ -61,6 +61,7 @@ from job_hub.discovery import (
     discovery_source_summary,
     load_discovery_source_registry,
 )
+from job_hub.domain_probe import probe_public_domain
 from job_hub.entry_probes import (
     PublicEntryProbeRunner,
     load_national_entry_targets,
@@ -235,6 +236,25 @@ def main() -> None:
     subparsers.add_parser("init", help="初始化数据库和来源白名单")
     subparsers.add_parser("sync", help="立即同步已启用的公开来源")
     subparsers.add_parser("audit", help="审计岗位来源、阈值、日期和公告噪声")
+    domain_parser = subparsers.add_parser(
+        "domain-check",
+        help="只读检查生产域名 DNS、目标 IP 和 HTTPS 健康地址",
+    )
+    domain_parser.add_argument(
+        "--hostname",
+        default="jobs.cupdky.cn",
+        help="生产域名（默认 jobs.cupdky.cn）",
+    )
+    domain_parser.add_argument(
+        "--expected-ip",
+        default="81.70.62.174",
+        help="期望的 A 记录地址；不需要校验时省略",
+    )
+    domain_parser.add_argument(
+        "--health-url",
+        help="可选 HTTPS 健康地址，默认 https://<hostname>/healthz",
+    )
+    domain_parser.add_argument("--timeout", type=float, default=10.0)
     coverage_parser = subparsers.add_parser(
         "coverage",
         help="输出省份、来源健康、字段完整率和 100 人明确匹配覆盖报告",
@@ -668,6 +688,20 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+    if args.command == "domain-check":
+        try:
+            result = probe_public_domain(
+                args.hostname,
+                expected_ip=args.expected_ip or None,
+                health_url=args.health_url,
+                timeout=args.timeout,
+            )
+        except ValueError as error:
+            parser.error(str(error))
+        print(json.dumps(result.as_dict(), ensure_ascii=False, indent=2))
+        if not result.ready:
+            raise SystemExit(1)
+        return
     if args.command == "worker":
         worker_main()
         return

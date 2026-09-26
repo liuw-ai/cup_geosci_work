@@ -1,11 +1,12 @@
-# Replace the hostname with the public HTTPS domain configured in APP_BASE_URL.
+# The hostname must resolve to the server before Caddy can obtain a certificate.
+# For this deployment use jobs.cupdky.cn and keep APP_BASE_URL identical.
 # Caddy obtains and renews the certificate automatically when DNS and firewall
 # rules point the hostname at this server.
-jobs.example.edu.cn {
+jobs.cupdky.cn {
     encode gzip
 
-    # Gunicorn is intentionally bound to the server loopback by Compose.
-    reverse_proxy 127.0.0.1:8080 {
+    # Caddy runs beside the web service on the Compose network.
+    reverse_proxy web:8080 {
         header_up Host {host}
         header_up X-Forwarded-Proto {scheme}
         header_up X-Real-IP {remote_host}
