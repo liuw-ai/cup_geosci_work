@@ -300,12 +300,15 @@ def position_record_to_posting(record: dict[str, Any]) -> RawPosting:
     attachment_url = str(record["official_attachment_url"]).strip()
     code = str(record["position_code"]).strip()
     evidence = {
+        "evidence_scope": "official_attachment_row",
+        "岗位": str(record["title"]).strip(),
         "政府岗位类型": str(record["position_type"]),
         "职位代码": code,
         "专业要求": major,
         "学历要求": degree,
         "招聘人数": str(record["headcount"]),
         "表格定位": str(record["evidence_locator"]),
+        "工作地点": str(record["location"]).strip(),
         "官方公告链接": notice_url,
         "官方附件链接": attachment_url,
     }

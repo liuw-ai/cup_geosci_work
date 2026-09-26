@@ -54,4 +54,6 @@ def test_position_record_preserves_notice_attachment_and_row_evidence() -> None:
     assert posting.source_url == record["official_notice_url"]
     assert posting.official_evidence_url == record["official_attachment_url"]
     assert posting.field_evidence["表格定位"] == "岗位表!17"
+    assert posting.field_evidence["evidence_scope"] == "official_attachment_row"
+    assert posting.field_evidence["岗位"] == record["title"]
     assert "地质资源与地质工程" in (posting.qualification_text or "")

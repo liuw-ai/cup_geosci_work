@@ -335,6 +335,11 @@ class JobPipeline:
                 identity_text=f"{posting.title} {posting.employer}",
             )
         )
+        configured_category = str(
+            source.get("config", {}).get("publication_category") or ""
+        ).strip()
+        if configured_category:
+            category = configured_category
         location_text = posting.location or extract_location_hint(posting.text)
         location = normalize_location(location_text)
         relevance_score, relevance_band, major_tags = score_relevance(

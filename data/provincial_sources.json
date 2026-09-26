@@ -91,6 +91,7 @@
     "config": {
       "province": "河北",
       "source_role": "geology_bureau_or_institute",
+      "publication_category": "事业单位与人才引进",
       "fallback_source_ids": ["hebei-natural-resources", "mnr-public-recruitment", "cgs-notices"],
       "fallback_entry_urls": ["http://www.hebdkj.cn/dkj3w", "http://zrzy.hebei.gov.cn/"],
       "automation_status": "validated_html_notice",
