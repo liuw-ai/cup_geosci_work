@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import signal
 import time
+from dataclasses import replace
 from datetime import datetime, time as clock_time
 from threading import Event
 from zoneinfo import ZoneInfo
@@ -144,18 +145,70 @@ class DailyWorker:
             return {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0, "error": 1}
         today = datetime.now(self.timezone).date().isoformat()
         counts = {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0, "error": 0}
+        existing_jobs, _ = self.database.list_jobs(
+            page_size=None, only_open=False, student_visible=False
+        )
         for record in current_publishable_position_records(registry, today=today):
             source = self.database.get_source(str(record["source_id"]))
             if source is None:
                 counts["skipped"] += 1
                 LOGGER.error("Government position source is not registered: %s", record["source_id"])
                 continue
-            _, outcome = self.database.save_job(
-                self.pipeline.normalize_posting(position_record_to_posting(record), source)
+            posting = position_record_to_posting(record)
+            equivalent = self._find_equivalent_government_job(
+                existing_jobs, record, posting.official_evidence_url
             )
+            if equivalent is not None:
+                # Preserve the original attachment-candidate fingerprint so a
+                # later registry refresh updates one row instead of inserting a
+                # second copy of the same official table row.
+                posting = replace(posting, external_id=equivalent["external_id"])
+            normalized = self.pipeline.normalize_posting(posting, source)
+            _, outcome = self.database.save_job(normalized)
             if outcome in counts:
                 counts[outcome] += 1
+            if equivalent is None:
+                existing_jobs.append(normalized)
         return counts
+
+    @staticmethod
+    def _find_equivalent_government_job(
+        jobs: list[dict[str, object]],
+        record: dict[str, object],
+        attachment_url: str | None,
+    ) -> dict[str, object] | None:
+        """Match a registry row to an earlier attachment publication."""
+        major = str(record.get("major_requirement") or "").strip()
+        source_id = str(record.get("source_id") or "").strip()
+        employer = str(record.get("employer") or "").strip()
+        deadline = str(record.get("deadline_date") or "").strip()
+        candidates: list[dict[str, object]] = []
+        for job in jobs:
+            if str(job.get("source_id") or "") != source_id:
+                continue
+            if str(job.get("employer") or "") != employer:
+                continue
+            if str(job.get("deadline_date") or "") != deadline:
+                continue
+            if attachment_url and str(job.get("official_evidence_url") or "") != attachment_url:
+                continue
+            evidence = job.get("field_evidence")
+            if not isinstance(evidence, dict):
+                continue
+            existing_major = str(
+                evidence.get("专业范围") or evidence.get("专业要求") or ""
+            ).strip()
+            if existing_major and (existing_major == major or major in existing_major or existing_major in major):
+                candidates.append(job)
+        # Prefer a row already produced from the controlled attachment queue;
+        # it carries the original OCR/table evidence and keeps its event history.
+        candidates.sort(
+            key=lambda item: (
+                0 if str(item.get("external_id") or "").startswith("artifact-candidate:") else 1,
+                int(item.get("id") or 0),
+            )
+        )
+        return candidates[0] if candidates else None
 
     def _register_government_artifacts(self) -> dict[str, object]:
         """Idempotently load the versioned government-artifact manifest.
