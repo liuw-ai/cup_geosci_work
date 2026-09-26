@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM cupb-geoscience-job-hub:latest
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
