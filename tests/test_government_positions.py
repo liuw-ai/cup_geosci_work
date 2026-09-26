@@ -19,10 +19,10 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
     registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
     report = government_position_quality_report(registry, today="2026-09-25")
 
-    assert report["source_assessments"] == 4
-    assert report["records"] == 2
-    assert report["verified_open_records"] == 2
-    assert report["explicit_student_matches"] == 2
+    assert report["source_assessments"] == 6
+    assert report["records"] == 6
+    assert report["verified_open_records"] == 6
+    assert report["explicit_student_matches"] == 6
     assert report["source_failures_or_pending"] == 0
     assert report["scan_interpretation"].startswith("台账中的正式来源")
 
