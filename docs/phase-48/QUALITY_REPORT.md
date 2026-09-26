@@ -10,6 +10,7 @@
 - Open-until-filled records: `7`
 - Required evidence fields complete: `100%` for position code, major, degree, location, official notice, official attachment and row locator.
 - Source failures represented separately: `0` in the publishable registry; unavailable sources remain in `source_assessments` and are not treated as “no jobs”.
+- 甘肃省地矿局来源已绑定 `gansu-geology-bureau` 并启用正式栏目扫描；岗位不再来自停用来源。
 
 ## Manual evidence checks
 

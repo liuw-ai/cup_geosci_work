@@ -678,13 +678,13 @@
     "source_type": "html_notice",
     "category": "自然资源、地调与地勘",
     "source_tier": "A",
-    "enabled": false,
+    "enabled": true,
     "config": {
       "province": "甘肃",
       "source_role": "geology_bureau_or_institute",
       "fallback_source_ids": ["gansu-natural-resources", "mnr-public-recruitment", "cgs-notices"],
       "fallback_entry_urls": ["http://gsdkj.net/", "https://zrzy.gansu.gov.cn/"],
-      "automation_status": "server_health_verified_adapter_pending_20260926",
+      "automation_status": "validated_html_notice_20260927",
       "healthcheck_url": "http://gsdkj.net/xxgk/rsxx",
       "listing_urls": ["http://gsdkj.net/xxgk/rsxx"],
       "healthcheck_enabled": true,
@@ -703,7 +703,7 @@
       "max_items": 24,
       "undated_open_window_days": 45,
       "request_interval_seconds": 1.2,
-      "note": "已定位甘肃省地矿局官方人事信息栏目；2026-09-26 服务器直连确认 robots 与正式栏目可访问，但尚未形成岗位级样例和回归夹具，因此保持停用。准考证、缴费、补充和招聘流程结果通知已预先列为排除项。"
+      "note": "已在服务器直连核验正式人事信息栏目、公告详情和岗位表证据；岗位级样例已进入政府职位台账。准考证、缴费、补充和招聘流程结果通知已预先列为排除项。"
     }
   },
   {
