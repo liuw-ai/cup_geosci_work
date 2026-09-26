@@ -287,11 +287,11 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
     field_evidence = job.get("field_evidence") or {}
     evidence_values = [
         field_evidence.get(key)
-        for key in ("岗位", "专业范围", "面向对象", "学历要求", "工作地点")
+        for key in ("岗位", "专业范围", "专业要求", "面向对象", "学历要求", "工作地点")
         if field_evidence.get(key)
     ]
     nested_fields = field_evidence.get("fields")
-    major_evidence = field_evidence.get("专业范围") or (
+    major_evidence = field_evidence.get("专业范围") or field_evidence.get("专业要求") or (
         nested_fields.get("major")
         if isinstance(nested_fields, dict)
         else None

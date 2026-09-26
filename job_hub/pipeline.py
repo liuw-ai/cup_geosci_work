@@ -340,6 +340,11 @@ class JobPipeline:
         ).strip()
         if configured_category:
             category = configured_category
+        if str(field_evidence.get("政府岗位类型") or "").strip() in {
+            "public_institution",
+            "civil_service",
+        }:
+            category = "事业单位与人才引进" if field_evidence.get("政府岗位类型") == "public_institution" else "公务员与选调"
         location_text = posting.location or extract_location_hint(posting.text)
         location = normalize_location(location_text)
         relevance_score, relevance_band, major_tags = score_relevance(
