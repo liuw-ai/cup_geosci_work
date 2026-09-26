@@ -8,6 +8,10 @@
 
 最新的事业编地点核验、两条安徽地学博士岗位和公务员年度职位表门禁见 [docs/phase-36/README.md](docs/phase-36/README.md)。
 
+最新的政府职位表 PDF 布局解析、甘肃省地矿局官方岗位表和过期清退回归见
+[docs/phase-46/README.md](docs/phase-46/README.md)。甘肃 PDF 中的地质岗位已能进入私有
+候选队列，但报名截止后不会增加学生端当前岗位。
+
 每日同步、截止日期清退、旧岗位详情门禁和日报清退统计见 [docs/phase-37/README.md](docs/phase-37/README.md)。
 
 项目进入长期迭代前的 Phase 0 审阅材料见 [docs/phase-0/README.md](docs/phase-0/README.md)。其中明确区分当前已经实现的能力、尚未实现的能力，以及后续扩源时不得突破的公开发布边界。
@@ -111,7 +115,7 @@ tests/            自动化测试
 ARCHITECTURE.md    数据流、收录边界、运维与代码职责
 ~~~
 
-附件处理不会在学生端请求中触发。管理员先用 `discover-artifacts` 登记官方公告页中的附件，再用 `process-artifact` 受控下载和解析；低置信度 OCR 结果必须人工复核，不能自动发布。完整的字段、状态和回退边界见 [docs/phase-2/README.md](docs/phase-2/README.md)。
+附件处理不会在学生端请求中触发。管理员先用 `discover-artifacts` 登记官方公告页中的附件，再用 `process-artifact` 受控下载和解析；PDF 职位表优先使用布局提取并按职位代码聚合跨行文本；低置信度 OCR 结果必须人工复核，不能自动发布。完整的字段、状态和回退边界见 [docs/phase-2/README.md](docs/phase-2/README.md) 和 [docs/phase-46/README.md](docs/phase-46/README.md)。
 
 ## 本地启动
 

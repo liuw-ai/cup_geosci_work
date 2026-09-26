@@ -45,7 +45,7 @@ from job_hub.transport import (
 
 
 USER_AGENT = "cupb-geoscience-job-hub-attachment-fetcher/0.1 (+official-public-source)"
-PARSER_VERSION = "attachments-v1"
+PARSER_VERSION = "attachments-v2"
 REQUEST_ERRORS = request_exception_types()
 
 SUPPORTED_SUFFIXES = {
@@ -418,7 +418,21 @@ class OfficialAttachmentProcessor:
             raise AttachmentSkipped("PDF parser pypdf is not installed") from error
         try:
             reader = PdfReader(str(path))
-            page_texts = [(page.extract_text() or "").strip() for page in reader.pages]
+            page_texts: list[str] = []
+            page_modes: list[str] = []
+            for page in reader.pages:
+                try:
+                    # Position-aware extraction keeps the visual columns of
+                    # government position tables together.  Without it,
+                    # pypdf emits one token per line and the position code,
+                    # title, degree and major cannot be tied to one row.
+                    extracted = page.extract_text(extraction_mode="layout") or ""
+                    page_modes.append("layout")
+                except (TypeError, ValueError):
+                    # Older pypdf releases do not expose extraction_mode.
+                    extracted = page.extract_text() or ""
+                    page_modes.append("text")
+                page_texts.append(extracted.strip())
         except Exception as error:
             raise AttachmentProcessingError(f"PDF text extraction failed: {error}") from error
         text = "\n\n".join(page_texts).strip()
@@ -436,6 +450,14 @@ class OfficialAttachmentProcessor:
         rows = self._rows_from_pdf_pages(page_texts if not ocr_used else [text])
         if ocr_used:
             rows = [dict(row, extraction_confidence="low") for row in rows]
+        if ocr_used:
+            extraction_mode = "ocr"
+        elif page_modes and all(mode == "layout" for mode in page_modes):
+            extraction_mode = "layout"
+        elif "layout" in page_modes:
+            extraction_mode = "layout_with_text_fallback"
+        else:
+            extraction_mode = "text"
         return {
             "rows": rows[: self.settings.attachment_max_rows],
             "metadata": {
@@ -443,7 +465,7 @@ class OfficialAttachmentProcessor:
                 "page_count": len(reader.pages),
                 "text_characters": len(text),
                 "text_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
-                "extraction_mode": "ocr" if ocr_used else "text",
+                "extraction_mode": extraction_mode,
                 "extraction_note": extraction_note,
                 "ocr_enabled": self.settings.attachment_ocr_enabled,
                 "text_storage_path": text_storage_path,
@@ -871,32 +893,151 @@ class OfficialAttachmentProcessor:
             return value.date().isoformat()
         return str(value).strip()
 
-    @staticmethod
-    def _rows_from_pdf_pages(page_texts: list[str]) -> list[dict[str, object]]:
+    @classmethod
+    def _rows_from_pdf_pages(cls, page_texts: list[str]) -> list[dict[str, object]]:
+        """Turn positioned PDF text into logical position-table rows.
+
+        Government PDFs frequently wrap a single position over several visual
+        lines.  The old line-by-line implementation lost that relationship
+        and therefore produced no usable candidate even when the official
+        table clearly contained a matching geoscience role.  A position code
+        is the most stable row boundary across provincial templates, so lines
+        are grouped from one code to the next.  The original text is retained
+        verbatim as evidence; inferred fields are only hints for the private
+        review queue.
+        """
         rows: list[dict[str, object]] = []
         for page_number, page in enumerate(page_texts, start=1):
-            lines = [line.strip() for line in page.splitlines() if line.strip()]
+            lines = [line.rstrip() for line in page.splitlines() if line.strip()]
             if not lines:
                 continue
+            groups: list[tuple[int, list[str]]] = []
+            current: list[str] = []
+            current_number = 1
             for line_number, line in enumerate(lines, start=1):
-                cells: dict[str, str]
-                if "\t" in line:
-                    parts = [part.strip() for part in line.split("\t") if part.strip()]
-                    cells = {f"列{index + 1}": part for index, part in enumerate(parts)}
-                else:
-                    parts = [part.strip() for part in re.split(r"\s{2,}", line) if part.strip()]
-                    cells = {f"列{index + 1}": part for index, part in enumerate(parts)}
+                code_match = cls._pdf_position_code(line)
+                # A repeated table header may contain no code and should stay
+                # with neither the preceding nor the following position.
+                if code_match:
+                    if current and cls._pdf_group_has_position(current):
+                        groups.append((current_number, current))
+                    current = [line.strip()]
+                    current_number = line_number
+                elif current:
+                    if not cls._pdf_table_header(line):
+                        current.append(line.strip())
+                elif not cls._pdf_table_header(line):
+                    # Some official PDFs omit position codes. Preserve those
+                    # lines using the safe legacy behavior.
+                    groups.append((line_number, [line.strip()]))
+            if current and cls._pdf_group_has_position(current):
+                groups.append((current_number, current))
+
+            for line_number, group in groups:
+                row_text = "\n".join(group)
+                cells = cls._pdf_cells(group)
                 rows.append(
                     {
                         "sheet_name": f"page-{page_number}",
                         "row_number": line_number,
                         "row_kind": "text_table",
-                        "cells": cells or {"正文": line},
-                        "row_text": line,
+                        "cells": cells or {"正文": row_text},
+                        "row_text": row_text,
                         "extraction_confidence": "medium" if len(cells) > 1 else "low",
                     }
                 )
         return rows
+
+    @staticmethod
+    def _pdf_position_code(line: str) -> str | None:
+        """Return a likely official position code from a table line.
+
+        Position tables commonly prefix the code with a serial number (for
+        example ``1  202602101``), so requiring the code at column zero loses
+        every row in that layout.  Prefer nine-digit year-coded identifiers;
+        only then use the stricter legacy start-of-line fallback.
+        """
+        # Allow spaces between the code's digits, but do not collapse the
+        # serial number immediately before it (``1  202602101``).
+        year_code = re.search(
+            r"(?<!\d)((?:19|20)(?:[\s　]*\d){7})(?!\d)",
+            line,
+        )
+        if year_code:
+            return re.sub(r"[\s　]+", "", year_code.group(1))
+        compact = re.sub(r"(?<=\d)[\s　]+(?=\d)", "", line.strip())
+        match = re.match(r"^(\d{6,12})(?=\s|　|$)", compact)
+        return match.group(1) if match else None
+
+    @staticmethod
+    def _pdf_table_header(line: str) -> bool:
+        normalized = re.sub(r"\s+", "", line)
+        keywords = ("岗位代码", "职位代码", "岗位名称", "招聘单位", "学历", "专业", "招聘人数")
+        return sum(keyword in normalized for keyword in keywords) >= 2
+
+    @classmethod
+    def _pdf_group_has_position(cls, lines: list[str]) -> bool:
+        return bool(lines and cls._pdf_position_code(lines[0]))
+
+    @classmethod
+    def _pdf_cells(cls, lines: list[str]) -> dict[str, str]:
+        """Extract conservative semantic hints from one grouped PDF row."""
+        text = " ".join(lines)
+        normalized = re.sub(r"\s+", " ", text).strip()
+        compact_text = re.sub(r"\s+", "", text)
+        cells: dict[str, str] = {}
+        code = cls._pdf_position_code(lines[0])
+        if code:
+            cells["职位代码"] = code
+
+        degree_match = re.search(
+            r"(博士研究生|硕士研究生|本科及以上|硕士及以上|本科以上|大专及以上|研究生|博士|硕士|本科|大专)",
+            compact_text,
+        )
+        if degree_match:
+            cells["学历要求"] = degree_match.group(1)
+
+        major_terms = (
+            "地质资源与地质工程", "资源勘查工程", "矿产普查与勘探", "环境地质工程",
+            "人文地理与城乡规划", "地质学", "地质工程", "地球物理学", "地球化学",
+            "水文地质", "工程地质", "勘查技术与工程", "测绘工程",
+        )
+        major_hits = [term for term in major_terms if term in compact_text]
+        if major_hits:
+            cells["专业要求"] = "、".join(dict.fromkeys(major_hits))
+
+        title_terms = (
+            r"地质(?:专业技术人员|技术人员|工程师|勘查人员)",
+            # PDF column extraction can split “地质技术人员” as
+            # “地质技术人” + “员” on a later visual line.  Keep the
+            # normalized title conservative while retaining the row for review.
+            r"地质技术人(?:员)?",
+            r"资源勘查(?:工程师|技术人员)",
+            r"矿产(?:普查|勘查)(?:技术人员|工程师)",
+            r"勘查技术与工程(?:技术人员)",
+        )
+        title_found = False
+        for pattern in title_terms:
+            title_match = re.search(pattern, compact_text)
+            if title_match:
+                title = title_match.group(0)
+                if title == "地质技术人":
+                    title = "地质技术人员"
+                cells["岗位名称"] = title
+                title_found = True
+                break
+        if not title_found and major_hits:
+            # A layout PDF can separate the title characters across visual
+            # columns. Keep the row reviewable without inventing a public
+            # title; an administrator must confirm the exact title first.
+            cells["岗位名称"] = "职位表岗位（待核验）"
+        # Keep the table's visual columns available to a human reviewer even
+        # when no semantic label could be inferred.
+        parts = [part.strip() for part in re.split(r"\s{2,}|\t+", lines[0]) if part.strip()]
+        for index, part in enumerate(parts):
+            cells.setdefault(f"列{index + 1}", part)
+        cells["正文"] = normalized
+        return cells
 
     def _ocr_pdf(self, path: Path, page_count: int) -> tuple[str, str]:
         if page_count < 1:
