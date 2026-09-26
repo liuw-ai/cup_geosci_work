@@ -12,6 +12,7 @@
       "attachment_url": "https://dkj.ah.gov.cn/group3/M00/14/5E/wKg86mnx3JSAe_TTAAA0PEnJC-Q385.xls",
       "artifact_kind": "position_table",
       "deadline_date": "2026-10-31",
+      "deadline_policy": "fixed_date",
       "observed_on": "2026-09-25",
       "status": "server_download_pending",
       "note": "安徽省地矿局官网公告确认安徽工业经济职业技术学院2026年高层次人才招聘29人，岗位表含地质学、地质资源与地质工程等博士岗位。公告和附件已核验；服务器下载、逐行地点证据和人工复核完成前不得发布。"
@@ -25,6 +26,7 @@
       "attachment_url": "http://dkj.shandong.gov.cn/module/download/downfile.jsp?classid=0&filename=732c4f35c08742398d1c946003273bca.xlsx",
       "artifact_kind": "position_table",
       "deadline_date": "2026-07-28",
+      "deadline_policy": "fixed_date",
       "observed_on": "2026-09-25",
       "status": "historical_closed",
       "note": "山东省地质矿产勘查开发局所属15家事业单位2026年公开招聘人员公告，附件含72个专业技术岗位。报名期已结束，仍可用于历史岗位和解析回归。"
@@ -38,6 +40,7 @@
       "attachment_url": "https://dzj.henan.gov.cn/file/file/xlsx/2026/04/22/5ee1f4c87add4b50a0548f717c50977c.xlsx",
       "artifact_kind": "position_table",
       "deadline_date": "2026-04-30",
+      "deadline_policy": "fixed_date",
       "observed_on": "2026-09-25",
       "status": "historical_closed",
       "note": "河南省地质局官网转发的2026年事业单位公开招聘联考岗位信息表，报名期已结束；服务器下载后逐行解析并保留历史证据。"
@@ -51,6 +54,7 @@
       "attachment_url": "https://ghhzrzy.tj.gov.cn/zwgk_143/zfxxgk1/fdzdgknr1/zkly/202602/W020260228691245270225.xls",
       "artifact_kind": "position_table",
       "deadline_date": "2026-03-25",
+      "deadline_policy": "fixed_date",
       "observed_on": "2026-09-25",
       "status": "historical_closed",
       "note": "天津市规划和自然资源局所属事业单位2026年公开招聘计划表，报名期已结束；用于职位表解析和来源回归，不计当前在招。"
@@ -64,9 +68,24 @@
       "attachment_url": "http://gsdkj.net/upload/main/contentmanage/article/file/2026/08/21/202608211130341061.pdf",
       "artifact_kind": "position_table",
       "deadline_date": "2026-09-01",
+      "deadline_policy": "fixed_date",
       "observed_on": "2026-09-26",
       "status": "historical_closed",
       "note": "甘肃省地矿局所属6个事业单位2026年公开招聘公告及官方岗位列表，计划招聘23人；官方报名窗口为2026-08-24 08:30至2026-09-01 18:00，已截止，仅用于解析回归和历史证据，不计当前在招。"
+    },
+    {
+      "id": "hubei-space-planning-institute-2026-position-table",
+      "source_id": "hubei-natural-resources",
+      "province": "湖北",
+      "position_type": "public_institution",
+      "notice_url": "http://zrzyt.hubei.gov.cn/fbjd/xxgkml/zkly/202604/t20260423_5921057.shtml",
+      "attachment_url": "http://zrzyt.hubei.gov.cn/fbjd/xxgkml/zkly/202604/P020260423528630344561.xlsx",
+      "artifact_kind": "position_table",
+      "deadline_date": "",
+      "deadline_policy": "open_until_filled",
+      "observed_on": "2026-09-27",
+      "status": "server_download_pending",
+      "note": "湖北省自然资源厅直属事业单位公开招聘岗位表。计划表共7行，只有序号2矿产资源管理岗明确匹配地质学、地质资源与地质工程；公告写明自发布之日起招满即止。"
     },
     {
       "id": "gansu-geology-bureau-2026-high-level-adjusted-position-table",
@@ -77,6 +96,7 @@
       "attachment_url": "http://gsdkj.net/upload/main/contentmanage/article/file/2026/09/08/202609080914513449.pdf",
       "artifact_kind": "position_table",
       "deadline_date": "2026-12-31",
+      "deadline_policy": "fixed_date",
       "observed_on": "2026-09-27",
       "status": "server_download_pending",
       "note": "甘肃省地矿局官方补充公告说明高层次人才第一期岗位表已于2026-09-08调整，原公告报名自发布之日起至2026-12-31 18:00，按计划名额招满即止。最新 PDF 只作为岗位表证据，岗位级专业/学历/地点仍须复核。"
@@ -90,6 +110,7 @@
       "attachment_url": "http://www.nxdizhiju.cn/zwgk/zfxxgkml/rsxx/202604/W020260422644720955266.xls",
       "artifact_kind": "position_table",
       "deadline_date": "2026-12-31",
+      "deadline_policy": "fixed_date",
       "observed_on": "2026-09-27",
       "status": "server_download_pending",
       "note": "宁夏回族自治区地质局官方公告明确拟招聘地质类专业博士研究生4名，公告有效期至2026-12-31，公告有效期内均可报名直至招满。岗位表为官方 XLS；专业条件变更另登记为补充附件并在复核时覆盖岗位002。"
@@ -103,6 +124,7 @@
       "attachment_url": "http://www.nxdizhiju.cn/zwgk/zfxxgkml/rsxx/202608/P020260827676113796535.xls",
       "artifact_kind": "announcement_attachment",
       "deadline_date": "2026-12-31",
+      "deadline_policy": "fixed_date",
       "observed_on": "2026-09-27",
       "status": "server_download_pending",
       "note": "宁夏地质局2026-08-27官方公告仅变更自治区地球物理地球化学调查院地质矿产岗（岗位代码002）所需专业；该附件不能单独代表完整岗位表，须与原始岗位表联合复核。"

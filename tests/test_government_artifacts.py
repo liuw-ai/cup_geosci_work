@@ -22,8 +22,8 @@ def test_provincial_manifest_contains_real_official_attachments() -> None:
     manifest = load_government_artifact_manifest(
         PROJECT_ROOT / "data" / "government_artifact_manifest.json"
     )
-    assert len(manifest["artifacts"]) == 8
-    assert {item["province"] for item in manifest["artifacts"]} == {"安徽", "山东", "河南", "天津", "甘肃", "宁夏"}
+    assert len(manifest["artifacts"]) == 9
+    assert {item["province"] for item in manifest["artifacts"]} == {"安徽", "山东", "河南", "天津", "甘肃", "宁夏", "湖北"}
     assert all(item["status"] in {"historical_closed", "server_download_pending"} for item in manifest["artifacts"])
     assert all(item["attachment_url"].lower().endswith((".xlsx", ".xls", ".pdf")) for item in manifest["artifacts"])
 
@@ -31,7 +31,7 @@ def test_provincial_manifest_contains_real_official_attachments() -> None:
 def test_manifest_rejects_unknown_status(tmp_path: Path) -> None:
     path = tmp_path / "manifest.json"
     path.write_text(
-        '{"version":1,"as_of":"2026-09-25","artifacts":[{"id":"x","source_id":"s","province":"山东","position_type":"public_institution","notice_url":"https://example.gov.cn/a","attachment_url":"https://example.gov.cn/a.xlsx","artifact_kind":"position_table","deadline_date":"2026-09-25","observed_on":"2026-09-25","status":"published"}]}',
+        '{"version":1,"as_of":"2026-09-25","artifacts":[{"id":"x","source_id":"s","province":"山东","position_type":"public_institution","notice_url":"https://example.gov.cn/a","attachment_url":"https://example.gov.cn/a.xlsx","artifact_kind":"position_table","deadline_date":"2026-09-25","deadline_policy":"fixed_date","observed_on":"2026-09-25","status":"published"}]}',
         encoding="utf-8",
     )
     with pytest.raises(GovernmentArtifactContractError, match="unsupported"):
@@ -54,8 +54,8 @@ def test_registration_only_creates_private_artifact_rows() -> None:
     database = FakeDatabase()
     rows = register_government_artifacts(database, manifest)
 
-    assert len(rows) == 8
-    assert len(database.items) == 8
+    assert len(rows) == 9
+    assert len(database.items) == 9
     assert all(item["extraction_status"] == "registered" for item in database.items)
     assert all("government_artifact_id" in item["metadata"] for item in database.items)
 
@@ -77,6 +77,7 @@ def test_manifest_refresh_does_not_reset_processed_artifact(tmp_path: Path) -> N
                 "attachment_url": "https://careers.example.edu.cn/notice.xlsx",
                 "artifact_kind": "position_table",
                 "deadline_date": "2099-12-31",
+                "deadline_policy": "fixed_date",
                 "observed_on": "2026-09-25",
                 "status": "server_download_pending",
                 "note": "test",

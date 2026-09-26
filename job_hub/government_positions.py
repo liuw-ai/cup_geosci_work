@@ -28,6 +28,7 @@ RECORD_STATUSES = frozenset(
     {"verified_open", "verified_closed", "manual_review_required", "source_unavailable"}
 )
 MATCH_STATUSES = frozenset({"explicit_match", "unrestricted_match", "needs_review", "out_of_scope"})
+DEADLINE_POLICIES = frozenset({"fixed_date", "open_until_filled"})
 ASSESSMENT_STATUSES = frozenset(
     {"verified_open_sample", "verified_source_fixture", "manual_review_required", "source_unavailable"}
 )
@@ -44,6 +45,7 @@ REQUIRED_FIELDS = (
     "location",
     "headcount",
     "deadline_date",
+    "deadline_policy",
     "official_notice_url",
     "official_attachment_url",
     "evidence_locator",
@@ -134,6 +136,11 @@ def validate_position_record(value: Any, *, context: str = "position") -> dict[s
         raise GovernmentPositionContractError(f"{context}.headcount must be a non-negative integer")
     normalized["headcount"] = headcount
     normalized["deadline_date"] = _date(normalized["deadline_date"], f"{context}.deadline_date", allow_empty=True)
+    normalized["deadline_policy"] = _text(normalized["deadline_policy"], f"{context}.deadline_policy")
+    if normalized["deadline_policy"] not in DEADLINE_POLICIES:
+        raise GovernmentPositionContractError(
+            f"{context}.deadline_policy must be one of {sorted(DEADLINE_POLICIES)}"
+        )
     normalized["official_notice_url"] = _url(normalized["official_notice_url"], f"{context}.official_notice_url")
     normalized["official_attachment_url"] = _url(
         normalized["official_attachment_url"], f"{context}.official_attachment_url"
@@ -146,10 +153,15 @@ def validate_position_record(value: Any, *, context: str = "position") -> dict[s
         raise GovernmentPositionContractError(
             f"{context} cannot be verified_open while marked out_of_scope"
         )
-    if normalized["record_status"] == "verified_open" and not normalized["deadline_date"]:
-        raise GovernmentPositionContractError(
-            f"{context} verified_open records require a deadline or explicit open-ended policy"
-        )
+    if normalized["record_status"] == "verified_open":
+        if normalized["deadline_policy"] == "fixed_date" and not normalized["deadline_date"]:
+            raise GovernmentPositionContractError(
+                f"{context} fixed_date records require deadline_date"
+            )
+        if normalized["deadline_policy"] == "open_until_filled" and normalized["deadline_date"]:
+            raise GovernmentPositionContractError(
+                f"{context} open_until_filled records must not invent a fixed deadline_date"
+            )
     return normalized
 
 
@@ -243,6 +255,12 @@ def government_position_quality_report(
         "by_province": dict(sorted(province_counts.items())),
         "by_source": dict(sorted(source_counts.items())),
         "verified_open_records": len(open_records),
+        "open_until_filled_records": sum(
+            1 for item in open_records if item.get("deadline_policy") == "open_until_filled"
+        ),
+        "fixed_deadline_records": sum(
+            1 for item in open_records if item.get("deadline_policy") == "fixed_date"
+        ),
         "explicit_student_matches": len(explicit_matches),
         "verified_closed_records": len(closed),
         "source_failures_or_pending": len(failures),
@@ -261,6 +279,7 @@ def government_position_quality_report(
                 "degree_requirement",
                 "location",
                 "deadline_date",
+                "deadline_policy",
                 "official_notice_url",
                 "official_attachment_url",
                 "evidence_locator",
@@ -316,6 +335,8 @@ def position_record_to_posting(record: dict[str, Any]) -> RawPosting:
         f"官方职位表岗位代码：{code}；专业要求：{major}；学历要求：{degree}；"
         f"工作地点：{record['location']}；招聘人数：{record['headcount']}。"
     )
+    if record["deadline_policy"] == "open_until_filled":
+        description += "报名政策：招满即止，需每日复核公告状态。"
     return RawPosting(
         title=str(record["title"]).strip(),
         employer=str(record["employer"]).strip(),

@@ -21,6 +21,7 @@ DEFAULT_MANIFEST_PATH = PROJECT_ROOT / "data" / "government_artifact_manifest.js
 ARTIFACT_STATUSES = frozenset(
     {"server_download_pending", "historical_closed", "source_unavailable"}
 )
+DEADLINE_POLICIES = frozenset({"fixed_date", "open_until_filled"})
 
 
 class GovernmentArtifactContractError(ValueError):
@@ -42,8 +43,12 @@ def _url(value: Any, field: str) -> str:
     return result
 
 
-def _date(value: Any, field: str) -> str:
-    result = _text(value, field)
+def _date(value: Any, field: str, *, allow_empty: bool = False) -> str:
+    result = str(value or "").strip()
+    if not result and allow_empty:
+        return ""
+    if not result:
+        raise GovernmentArtifactContractError(f"{field} must be non-empty")
     try:
         date.fromisoformat(result)
     except ValueError as error:
@@ -79,6 +84,7 @@ def load_government_artifact_manifest(
         "attachment_url",
         "artifact_kind",
         "deadline_date",
+        "deadline_policy",
         "observed_on",
         "status",
     )
@@ -94,7 +100,20 @@ def load_government_artifact_manifest(
             item[field] = _text(item[field], f"{context}.{field}")
         item["notice_url"] = _url(item["notice_url"], f"{context}.notice_url")
         item["attachment_url"] = _url(item["attachment_url"], f"{context}.attachment_url")
-        item["deadline_date"] = _date(item["deadline_date"], f"{context}.deadline_date")
+        item["deadline_date"] = _date(
+            item["deadline_date"], f"{context}.deadline_date", allow_empty=True
+        )
+        item["deadline_policy"] = _text(item["deadline_policy"], f"{context}.deadline_policy")
+        if item["deadline_policy"] not in DEADLINE_POLICIES:
+            raise GovernmentArtifactContractError(
+                f"{context}.deadline_policy must be one of {sorted(DEADLINE_POLICIES)}"
+            )
+        if item["deadline_policy"] == "fixed_date" and not item["deadline_date"]:
+            raise GovernmentArtifactContractError(f"{context} fixed_date artifacts require deadline_date")
+        if item["deadline_policy"] == "open_until_filled" and item["deadline_date"]:
+            raise GovernmentArtifactContractError(
+                f"{context} open_until_filled artifacts must not invent a fixed deadline_date"
+            )
         item["observed_on"] = _date(item["observed_on"], f"{context}.observed_on")
         item["status"] = _text(item["status"], f"{context}.status")
         if item["status"] not in ARTIFACT_STATUSES:
@@ -130,6 +149,7 @@ def register_government_artifacts(database: Any, manifest: dict[str, Any]) -> li
                         "position_type": item["position_type"],
                         "province": item["province"],
                         "deadline_date": item["deadline_date"],
+                        "deadline_policy": item["deadline_policy"],
                         "observed_on": item["observed_on"],
                         "manifest_status": item["status"],
                         "note": item["note"],
@@ -170,6 +190,10 @@ def government_artifact_refresh_summary(
         status = str(metadata.get("manifest_status") or "unknown")
         manifest_counts[status] = manifest_counts.get(status, 0) + 1
         deadline = str(metadata.get("deadline_date") or "").strip()
+        policy = str(metadata.get("deadline_policy") or "fixed_date").strip()
+        if policy == "open_until_filled" and not deadline:
+            current += 1
+            continue
         if deadline:
             try:
                 if date.fromisoformat(deadline) >= target:

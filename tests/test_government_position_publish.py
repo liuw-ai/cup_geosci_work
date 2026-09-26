@@ -14,6 +14,7 @@ def test_current_publishable_rows_require_open_explicit_match() -> None:
                 "record_status": "verified_open",
                 "match_status": "explicit_match",
                 "deadline_date": "2026-10-01",
+                "deadline_policy": "fixed_date",
             },
             {
                 "id": "review",
@@ -45,6 +46,7 @@ def test_position_record_preserves_notice_attachment_and_row_evidence() -> None:
         "location": "合肥市",
         "headcount": 1,
         "deadline_date": "2026-10-31",
+        "deadline_policy": "fixed_date",
         "official_notice_url": "https://example.gov.cn/notice.html",
         "official_attachment_url": "https://example.gov.cn/table.xls",
         "evidence_locator": "岗位表!17",
