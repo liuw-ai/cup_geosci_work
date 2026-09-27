@@ -9,7 +9,9 @@
       "role": "human_resources_or_exam",
       "validation_stage": "server_health_and_adapter_verified",
       "official_entry_url": "https://rsj.beijing.gov.cn/xxgk/gkzp/",
-      "backup_entry_urls": ["https://rsj.beijing.gov.cn/"],
+      "backup_entry_urls": [
+        "https://rsj.beijing.gov.cn/"
+      ],
       "last_checked_on": "2026-09-26",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
@@ -41,7 +43,10 @@
       "role": "natural_resources",
       "validation_stage": "adapter_fixture_verified",
       "official_entry_url": "https://ghhzrzy.tj.gov.cn/zwgk_143/zfxxgk1/fdzdgknr1/zkly/",
-      "backup_entry_urls": ["https://ghhzrzy.tj.gov.cn/", "https://hrss.tj.gov.cn/jsdw/rsksw/"],
+      "backup_entry_urls": [
+        "https://ghhzrzy.tj.gov.cn/",
+        "https://hrss.tj.gov.cn/jsdw/rsksw/"
+      ],
       "last_checked_on": "2026-09-21",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
@@ -73,7 +78,10 @@
       "role": "geology_bureau_or_institute",
       "validation_stage": "adapter_fixture_verified",
       "official_entry_url": "https://dkj.ah.gov.cn/xwzx/tzgg/index.html",
-      "backup_entry_urls": ["https://dkj.ah.gov.cn/", "https://zrzyt.ah.gov.cn/"],
+      "backup_entry_urls": [
+        "https://dkj.ah.gov.cn/",
+        "https://zrzyt.ah.gov.cn/"
+      ],
       "last_checked_on": "2026-09-21",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
@@ -105,7 +113,11 @@
       "role": "geology_bureau_or_institute",
       "validation_stage": "adapter_fixture_verified",
       "official_entry_url": "http://dkj.shandong.gov.cn/col/col185988/index.html?number=DKJ09",
-      "backup_entry_urls": ["http://dkj.shandong.gov.cn/", "http://dnr.shandong.gov.cn/", "https://hrss.shandong.gov.cn/rsks/"],
+      "backup_entry_urls": [
+        "http://dkj.shandong.gov.cn/",
+        "http://dnr.shandong.gov.cn/",
+        "https://hrss.shandong.gov.cn/rsks/"
+      ],
       "last_checked_on": "2026-09-21",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
@@ -137,7 +149,11 @@
       "role": "geology_bureau_or_institute",
       "validation_stage": "adapter_fixture_verified",
       "official_entry_url": "https://dzj.henan.gov.cn/tzgg1/",
-      "backup_entry_urls": ["https://dzj.henan.gov.cn/", "https://zrzyt.henan.gov.cn/", "https://hrss.henan.gov.cn/"],
+      "backup_entry_urls": [
+        "https://dzj.henan.gov.cn/",
+        "https://zrzyt.henan.gov.cn/",
+        "https://hrss.henan.gov.cn/"
+      ],
       "last_checked_on": "2026-09-21",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
@@ -169,7 +185,10 @@
       "role": "human_resources_or_exam",
       "validation_stage": "server_health_and_adapter_verified",
       "official_entry_url": "https://hrss.shandong.gov.cn/rsks/",
-      "backup_entry_urls": ["https://hrss.shandong.gov.cn/", "http://dkj.shandong.gov.cn/"],
+      "backup_entry_urls": [
+        "https://hrss.shandong.gov.cn/",
+        "http://dkj.shandong.gov.cn/"
+      ],
       "last_checked_on": "2026-09-26",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
@@ -201,7 +220,9 @@
       "role": "natural_resources",
       "validation_stage": "server_health_and_adapter_verified",
       "official_entry_url": "http://zrzyt.hubei.gov.cn/fbjd/xxgkml/zkly/",
-      "backup_entry_urls": ["http://zrzyt.hubei.gov.cn/"],
+      "backup_entry_urls": [
+        "http://zrzyt.hubei.gov.cn/"
+      ],
       "last_checked_on": "2026-09-27",
       "access_assessment": {
         "observed_access": "server_direct_public_page_accessible",
@@ -233,7 +254,10 @@
       "role": "geology_bureau_or_institute",
       "validation_stage": "server_health_and_adapter_verified",
       "official_entry_url": "http://gsdkj.net/xxgk/rsxx",
-      "backup_entry_urls": ["http://gsdkj.net/", "https://zrzy.gansu.gov.cn/"],
+      "backup_entry_urls": [
+        "http://gsdkj.net/",
+        "https://zrzy.gansu.gov.cn/"
+      ],
       "last_checked_on": "2026-09-27",
       "access_assessment": {
         "observed_access": "server_direct_public_page_accessible",
@@ -265,7 +289,10 @@
       "role": "natural_resources",
       "validation_stage": "entry_checked_no_recruitment_sample",
       "official_entry_url": "https://ghzrzyw.beijing.gov.cn/zhengwuxinxi/rsxx/",
-      "backup_entry_urls": ["https://ghzrzyw.beijing.gov.cn/", "https://rsj.beijing.gov.cn/xxgk/gkzp/"],
+      "backup_entry_urls": [
+        "https://ghzrzyw.beijing.gov.cn/",
+        "https://rsj.beijing.gov.cn/xxgk/gkzp/"
+      ],
       "last_checked_on": "2026-09-21",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
@@ -284,7 +311,10 @@
       "role": "natural_resources",
       "validation_stage": "entry_checked_no_recruitment_sample",
       "official_entry_url": "https://ghzyj.sh.gov.cn/rsxx/",
-      "backup_entry_urls": ["https://ghzyj.sh.gov.cn/", "https://rsj.sh.gov.cn/"],
+      "backup_entry_urls": [
+        "https://ghzyj.sh.gov.cn/",
+        "https://rsj.sh.gov.cn/"
+      ],
       "last_checked_on": "2026-09-21",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
@@ -303,7 +333,10 @@
       "role": "natural_resources",
       "validation_stage": "entry_checked_no_recruitment_sample",
       "official_entry_url": "https://zrzyt.ah.gov.cn/xwdt/tzgg/",
-      "backup_entry_urls": ["https://zrzyt.ah.gov.cn/", "https://dkj.ah.gov.cn/"],
+      "backup_entry_urls": [
+        "https://zrzyt.ah.gov.cn/",
+        "https://dkj.ah.gov.cn/"
+      ],
       "last_checked_on": "2026-09-21",
       "access_assessment": {
         "observed_access": "browser_public_page_accessible",
@@ -314,6 +347,41 @@
       "sample": null,
       "fixture_path": null,
       "regression_test": null
+    },
+    {
+      "id": "hunan-geology-institute-current-scan-v1",
+      "source_id": "hunan-geology-institute",
+      "province": "湖南",
+      "role": "geology_bureau_or_institute",
+      "validation_stage": "server_health_and_adapter_verified",
+      "official_entry_url": "http://hnsdzy.hunan.gov.cn/dzy/c100643/c100646/list.html",
+      "backup_entry_urls": [
+        "http://rst.hunan.gov.cn/rst/xxgk/zpzl/sydwzp/",
+        "https://rst.hunan.gov.cn/rst/hnrsksw/rskswsy.html"
+      ],
+      "last_checked_on": "2026-09-27",
+      "access_assessment": {
+        "observed_access": "server_direct_public_page_accessible",
+        "robots_assessment": "server_direct_allowed",
+        "note": "服务器直连可访问湖南省地质院通知公告列表、公告正文和官方XLSX附件。"
+      },
+      "finding": "当前列表中可核验的省直事业单位第四次招聘报名已于2026-09-16结束；岗位表18行明确包含地学专业，已进入verified_closed历史回归批次。9月3日公开选拔公告仅面向湖南省地质院系统正式在编人员，不面向社会毕业生，不作为学生岗位。",
+      "sample": {
+        "official_url": "http://hnsdzy.hunan.gov.cn/dzy/c100643/c100646/202609/t20260908_34060413.html",
+        "title": "湖南省2026年省直事业单位第四次公开招聘工作人员公告",
+        "publisher": "湖南省人力资源和社会保障厅、湖南省地质院",
+        "published_date": "2026-09-08",
+        "deadline_date": "2026-09-16",
+        "field_evidence": {
+          "publisher": "公告页署名湖南省人力资源和社会保障厅、湖南省地质院。",
+          "published_date": "公告页标注发布时间为2026-09-08。",
+          "recruitment_scope": "公告面向社会公开招聘省直事业单位工作人员，附件1为岗位表。",
+          "application_or_deadline": "公告明确网上报名时间为2026-09-09至2026-09-16。",
+          "attachment_or_position_table": "附件1岗位表第41-67行包含E类地质、资源勘查、地球物理等岗位，其中14行（15个计划）通过专业门禁。"
+        }
+      },
+      "fixture_path": "tests/fixtures/source_validation/hunan_geology_institute_detail.html",
+      "regression_test": "tests/test_government_positions.py::test_hunan_closed_batch_is_not_publishable"
     }
   ]
 }

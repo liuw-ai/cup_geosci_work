@@ -156,6 +156,20 @@
       "observed_on": "2026-09-27",
       "status": "server_download_pending",
       "note": "中国地震局2027年度事业单位公开招聘官方岗位信息表。云服务器直连下载成功；岗位台账已逐行保留70条地学匹配行、89个计划名额及Excel行号，附件仍由受控流水线登记。"
+    },
+    {
+      "id": "hunan-provincial-fourth-2026-position-table",
+      "source_id": "hunan-geology-institute",
+      "province": "湖南",
+      "position_type": "public_institution",
+      "notice_url": "http://hnsdzy.hunan.gov.cn/dzy/c100643/c100646/202609/t20260908_34060413.html",
+      "attachment_url": "http://hnsdzy.hunan.gov.cn/dzy/c100643/c100646/202609/34060413/files/3d282d81c73f4b7184ea1e2d09afe290.xlsx",
+      "artifact_kind": "position_table",
+      "deadline_date": "2026-09-16",
+      "deadline_policy": "fixed_date",
+      "observed_on": "2026-09-27",
+      "status": "historical_closed",
+      "note": "湖南省2026年省直事业单位第四次公开招聘岗位表共160行、255个计划；其中18行明确匹配地学专业。报名窗口已于2026-09-16结束，作为历史解析回归证据，不进入学生端。"
     }
   ]
 }

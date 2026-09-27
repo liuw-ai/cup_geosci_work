@@ -30,7 +30,13 @@ RECORD_STATUSES = frozenset(
 MATCH_STATUSES = frozenset({"explicit_match", "unrestricted_match", "needs_review", "out_of_scope"})
 DEADLINE_POLICIES = frozenset({"fixed_date", "open_until_filled"})
 ASSESSMENT_STATUSES = frozenset(
-    {"verified_open_sample", "verified_source_fixture", "manual_review_required", "source_unavailable"}
+    {
+        "verified_open_sample",
+        "verified_source_fixture",
+        "verified_scan_no_current_match",
+        "manual_review_required",
+        "source_unavailable",
+    }
 )
 REQUIRED_FIELDS = (
     "id",
@@ -307,6 +313,11 @@ def government_position_quality_report(
     ]
     failures = [item for item in records if item["record_status"] in {"source_unavailable", "manual_review_required"}]
     closed = [item for item in records if item["record_status"] == "verified_closed"]
+    scan_no_current_match = sum(
+        1
+        for item in payload.get("source_assessments", [])
+        if item.get("status") == "verified_scan_no_current_match"
+    )
     return {
         "as_of": payload.get("as_of"),
         "today": today_date.isoformat(),
@@ -327,6 +338,7 @@ def government_position_quality_report(
         "explicit_student_matches": len(explicit_matches),
         "verified_closed_records": len(closed),
         "source_failures_or_pending": len(failures),
+        "verified_scan_no_current_match": scan_no_current_match,
         "field_completeness": {
             field: {
                 "complete": sum(1 for item in records if str(item.get(field) or "").strip()),
@@ -351,6 +363,8 @@ def government_position_quality_report(
         "scan_interpretation": (
             "存在来源故障或待核验记录，不能把缺少岗位解释为无岗位。"
             if failures
+            else "部分官方来源已扫描成功但当前无可发布匹配；这不是来源故障。"
+            if scan_no_current_match
             else "台账中的正式来源均已完成当前记录核验。"
         ),
     }

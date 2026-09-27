@@ -19,22 +19,26 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
     registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
     report = government_position_quality_report(registry, today="2026-09-25")
 
-    assert report["source_assessments"] == 9
-    assert report["records"] == 122
+    assert report["source_assessments"] == 10
+    assert report["records"] == 136
     assert report["verified_open_records"] == 122
     assert report["explicit_student_matches"] == 122
     assert report["source_failures_or_pending"] == 0
-    assert report["scan_interpretation"].startswith("台账中的正式来源")
+    assert report["verified_scan_no_current_match"] == 1
+    assert "扫描成功" in report["scan_interpretation"]
 
 
 def test_hunan_position_batch_expands_each_official_attachment_row() -> None:
     registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
     hunan = [item for item in registry["records"] if item["source_id"] == "hunan-geology-institute"]
 
-    assert len(hunan) == 34
-    assert sum(item["headcount"] for item in hunan) == 43
+    assert len(hunan) == 48
+    assert sum(item["headcount"] for item in hunan) == 58
     assert {item["position_code"] for item in hunan} >= {"A02", "A09", "A53"}
-    assert all(item["deadline_policy"] == "open_until_filled" for item in hunan)
+    assert sum(item["record_status"] == "verified_open" for item in hunan) == 34
+    assert sum(item["record_status"] == "verified_closed" for item in hunan) == 14
+    assert sum(item["deadline_policy"] == "open_until_filled" for item in hunan) == 34
+    assert sum(item["deadline_policy"] == "fixed_date" for item in hunan) == 14
     assert all(item["official_attachment_url"].endswith(".xlsx") for item in hunan)
 
 
@@ -61,6 +65,20 @@ def test_cea_batch_expands_verified_rows_with_unit_and_location_evidence() -> No
     assert all(item["deadline_date"] == "2026-10-26" for item in rows)
     assert all("Excel第" in item["evidence_locator"] for item in rows)
     assert {item["position_code"] for item in rows} >= {"R010", "R142", "R157"}
+
+
+def test_hunan_closed_batch_is_not_publishable() -> None:
+    registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
+    rows = [
+        item
+        for item in registry["records"]
+        if item["id"].startswith("hunan-2026-fourth-geoscience-closed-")
+    ]
+
+    assert len(rows) == 14
+    assert sum(item["headcount"] for item in rows) == 15
+    assert all(item["record_status"] == "verified_closed" for item in rows)
+    assert all(item["deadline_date"] == "2026-09-16" for item in rows)
 
 
 def test_verified_open_row_requires_location_and_deadline() -> None:

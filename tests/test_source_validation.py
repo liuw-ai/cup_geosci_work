@@ -36,17 +36,17 @@ def test_source_validation_registry_loads_and_reports_bounded_evidence() -> None
     registry = load_source_validation_registry()
     summary = source_validation_summary(registry)
 
-    assert summary["record_count"] == 11
-    assert summary["adapter_fixture_verified_records"] == 8
+    assert summary["record_count"] == 12
+    assert summary["adapter_fixture_verified_records"] == 9
     assert summary["records_by_validation_stage"] == {
         "adapter_fixture_verified": 4,
-        "server_health_and_adapter_verified": 4,
+        "server_health_and_adapter_verified": 5,
         "entry_checked_no_recruitment_sample": 3,
     }
-    assert summary["adapter_fixture_verified_targets"] == 8
+    assert summary["adapter_fixture_verified_targets"] == 9
     assert summary["candidate_targets_with_adapter_fixture"] == 0
-    assert summary["fixture_verified_enabled_sources"] == 8
-    assert summary["records_with_backup"] == 11
+    assert summary["fixture_verified_enabled_sources"] == 9
+    assert summary["records_with_backup"] == 12
     assert len(summary["unvalidated_verified_targets"]) > 0
 
 
