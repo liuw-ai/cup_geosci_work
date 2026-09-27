@@ -17,7 +17,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 from job_hub.browser_capture import BrowserCaptureError, _robots_permit
 from job_hub.cnpc_browser_runner import _resolve_cdp_websocket
@@ -376,6 +376,9 @@ def run_cmgb_browser_capture(
     row_selector = str(config.get("row_selector") or ".ant-card")
     next_selector = str(config.get("next_selector") or ".ant-pagination-next")
     detail_button_selector = str(config.get("detail_button_selector") or "button")
+    detail_popup_timeout_ms = max(
+        1_000, min(timeout_ms, int(config.get("detail_popup_timeout_ms", 5_000)))
+    )
     rows: list[dict[str, Any]] = []
     seen: set[str] = set()
     pages_scanned = 0
@@ -405,6 +408,9 @@ def run_cmgb_browser_capture(
                 for index in range(cards.count()):
                     card = cards.nth(index)
                     detail_discovered += 1
+                    list_url = page.url
+                    detail_page = None
+                    detail_page_is_current = False
                     try:
                         title = _first_text(card, (".job-name", "h3", "h4"))
                         employer = _first_text(card, (".company-name", ".requirement .company-name"))
@@ -412,18 +418,50 @@ def run_cmgb_browser_capture(
                         fold = card.locator(".fold").first
                         if fold.count() and fold.is_visible():
                             fold.click()
+                        detail_link = card.locator("a[href]").filter(has_text="查看").first
+                        href = (
+                            str(detail_link.get_attribute("href") or "").strip()
+                            if detail_link.count()
+                            else ""
+                        )
+                        if href:
+                            detail_page = context.new_page()
+                            detail_page.goto(
+                                urljoin(list_url, href),
+                                wait_until="domcontentloaded",
+                                timeout=timeout_ms,
+                            )
                         detail_button = card.locator(detail_button_selector).filter(has_text="查看").first
                         if not detail_button.count():
                             detail_button = card.get_by_text("查看", exact=True).first
-                        if not detail_button.count():
+                        if detail_page is None and not detail_button.count():
                             raise BrowserCaptureError("CMGB card has no 查看 detail control")
-                        with context.expect_page(timeout=timeout_ms) as detail_info:
-                            detail_button.click()
-                        detail_page = detail_info.value
-                        detail_page.wait_for_load_state("networkidle", timeout=timeout_ms)
+                        if detail_page is None:
+                            try:
+                                with context.expect_page(timeout=detail_popup_timeout_ms) as detail_info:
+                                    detail_button.click()
+                                detail_page = detail_info.value
+                            except PlaywrightTimeoutError:
+                                # Some deployments use an SPA route in the same
+                                # tab.  The click has already happened; use the
+                                # current page only when its route/content changed.
+                                page.wait_for_load_state(
+                                    "domcontentloaded", timeout=timeout_ms
+                                )
+                                if page.url == list_url and page.locator(row_selector).count():
+                                    raise BrowserCaptureError(
+                                        "CMGB 查看 control did not open an official detail route"
+                                    )
+                                detail_page = page
+                                detail_page_is_current = True
+                        detail_page.wait_for_load_state("domcontentloaded", timeout=timeout_ms)
                         detail_url = detail_page.url
                         detail = extract_cmgb_detail(detail_page, detail_url=detail_url, allowed_hosts=hosts)
-                        detail_page.close()
+                        if not detail_page_is_current:
+                            detail_page.close()
+                        else:
+                            page.go_back(wait_until="domcontentloaded", timeout=timeout_ms)
+                            page.wait_for_selector(row_selector, timeout=timeout_ms)
                         external_id = str(card_id).strip()
                         if external_id in seen:
                             raise BrowserCaptureError(
@@ -445,6 +483,11 @@ def run_cmgb_browser_capture(
                             "field_evidence": detail["field_evidence"],
                         })
                     except Exception:
+                        if detail_page is not None and not detail_page_is_current:
+                            try:
+                                detail_page.close()
+                            except Exception:
+                                pass
                         failed_rows += 1
                         detail_failed += 1
                 next_button = page.locator(next_selector).first
