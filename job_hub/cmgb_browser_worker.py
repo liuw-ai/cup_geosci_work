@@ -28,6 +28,11 @@ class CmgbBrowserWorker:
         self.stop_event = Event()
         self.timezone = ZoneInfo(settings.timezone)
         self.source_id = os.getenv("CMGB_BROWSER_SOURCE_ID", "cmgb-iguopin-browser")
+        self.run_once = os.getenv("CMGB_BROWSER_ONCE", "").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+        }
         self.interval_seconds = max(
             900, int(os.getenv("CMGB_BROWSER_INTERVAL_MINUTES", "180")) * 60
         )
@@ -36,6 +41,9 @@ class CmgbBrowserWorker:
         self._heartbeat("starting", "CMGB browser worker boot completed")
         while not self.stop_event.is_set():
             self._run_once()
+            if self.run_once:
+                self._heartbeat("stopped", "CMGB browser worker completed one-shot capture")
+                return
             self.stop_event.wait(self.interval_seconds)
         self._heartbeat("stopped", "CMGB browser worker received a stop signal")
 
