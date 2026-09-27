@@ -23,6 +23,7 @@ services:
     command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
     volumes:
       - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
       # Optional offline wheel cache; this deployment directory is ignored by Git.
       - ./runtime/deploy/wheels-linux:/opt/browser-wheels:ro
     init: true
@@ -62,6 +63,7 @@ services:
     command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
     volumes:
       - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
       - ./runtime/deploy/wheels-linux:/opt/browser-wheels:ro
     init: true
     stop_grace_period: 45s

@@ -26,6 +26,7 @@ services:
       - "${WEB_BIND_ADDRESS:-127.0.0.1}:${WEB_PORT:-8080}:8080"
     volumes:
       - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
       # The validation ledger references versioned offline parser fixtures.
       # Keep them available after image rebuilds so admin quality reports do
       # not depend on a build cache containing the test tree.
@@ -67,6 +68,7 @@ services:
       - job_hub.worker
     volumes:
       - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
       - ./tests/fixtures/source_validation:/app/tests/fixtures/source_validation:ro
     init: true
     stop_grace_period: 45s

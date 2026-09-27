@@ -321,7 +321,7 @@
       "employer_hint": "中国石油化工集团有限公司",
       "allowed_hosts": ["job.sinopec.com"],
       "minimum_relevance": 20,
-      "snapshot_path": "data/verified/sinopec-geoscience-20260925.json",
+      "snapshot_path": "data/verified/sinopec-geoscience-20260928.json",
       "official_evidence_url": "https://job.sinopec.com/#/school/recruitmentPositions",
       "application_url": "https://job.sinopec.com/",
       "enterprise_total": 132,
@@ -329,7 +329,8 @@
       "max_items": 1000,
       "max_age_hours": 30,
       "require_complete_manifest": true,
-      "note": "2026-09-24 浏览器核验确认官方 SPA 分页显示 132 个单位，关键词“地质”筛选 35 个候选单位；快照已保存 132 个单位清单、35 个详情页和 348 条岗位行。已完成岗位级专业/学历门禁审计，正式启用快照来源；学生端只展示明确匹配岗位，待后续公开只读接口验证后替换为自动刷新。"
+      "reconcile_missing_external_ids": true,
+      "note": "2026-09-28 服务器/浏览器官方 SPA 捕获确认 132 个单位，关键词“地质”筛选 35 个候选单位；本次 132 个单位清单、35 个详情页和 348 条岗位行均通过完整扫描门禁，0 个候选单位失败。学生端只展示岗位级专业/学历明确匹配，捕获文件必须在 max_age_hours 内重新核验。"
     }
   },
   {
