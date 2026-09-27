@@ -724,6 +724,45 @@ class Database:
                 ),
             )
 
+    def recover_expired_source_tasks(self) -> list[dict[str, Any]]:
+        """Return expired task leases to the durable pending queue.
+
+        ``crawl_runs`` and ``source_tasks`` represent separate failure modes.
+        Closing an abandoned crawl row alone is not sufficient: a task left in
+        ``running`` is not eligible for another claim, even after its lease has
+        expired.  Recovering the lease preserves the task's attempt history and
+        records an operator-visible reason, while allowing the next scheduled
+        sync to make a fresh, independently audited attempt.
+        """
+
+        now = utc_now()
+        message = "Source task lease expired before completion; returned to pending queue."
+        with self.transaction() as connection:
+            rows = connection.execute(
+                """
+                SELECT * FROM source_tasks
+                WHERE status = 'running'
+                  AND lease_until IS NOT NULL
+                  AND lease_until < ?
+                ORDER BY lease_until ASC, source_id ASC
+                """,
+                (now,),
+            ).fetchall()
+            connection.executemany(
+                """
+                UPDATE source_tasks
+                SET status = 'pending', next_attempt_at = ?, lease_until = NULL,
+                    last_finished_at = ?, last_error = ?,
+                    last_error_class = 'lease_expired', updated_at = ?
+                WHERE source_id = ? AND status = 'running' AND lease_until < ?
+                """,
+                [
+                    (now, now, message, now, str(row["source_id"]), now)
+                    for row in rows
+                ],
+            )
+        return [dict(row) for row in rows]
+
     def set_source_enabled(self, source_id: str, enabled: bool) -> None:
         """Set one source's durable collection state after an audited decision."""
 

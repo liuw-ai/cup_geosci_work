@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from job_hub.db import Database, utc_now
 
@@ -58,6 +58,35 @@ def test_source_queue_keeps_policy_blocked_sources_distinct_from_success(tmp_pat
     assert task["status"] == "blocked"
     assert task["last_error_class"] == "access_policy"
     assert database.list_source_tasks(due_only=True) == []
+
+
+def test_source_queue_recovers_expired_running_lease(tmp_path) -> None:
+    database = Database(tmp_path / "queue.sqlite3")
+    database.initialize()
+    source = _source("source-expired")
+    database.upsert_source(source)
+    database.ensure_source_tasks([source])
+    assert database.claim_source_task("source-expired", lease_seconds=60) is not None
+
+    expired_lease = (
+        datetime.now(timezone.utc) - timedelta(seconds=1)
+    ).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    with database.transaction() as connection:
+        connection.execute(
+            "UPDATE source_tasks SET lease_until = ? WHERE source_id = ?",
+            (expired_lease, "source-expired"),
+        )
+
+    recovered = database.recover_expired_source_tasks()
+
+    assert [row["source_id"] for row in recovered] == ["source-expired"]
+    task = database.get_source_task("source-expired")
+    assert task is not None
+    assert task["status"] == "pending"
+    assert task["lease_until"] is None
+    assert task["last_error_class"] == "lease_expired"
+    assert "lease expired" in task["last_error"].lower()
+    assert database.claim_source_task("source-expired", lease_seconds=60) is not None
 
 
 def test_queue_migration_is_additive_for_existing_database(tmp_path) -> None:

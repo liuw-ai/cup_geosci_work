@@ -101,6 +101,50 @@ def test_sync_all_reports_progress_without_changing_results(tmp_path) -> None:
     assert events[-1] == (1, 1, "official-test-source")
 
 
+def test_sync_all_recovers_expired_source_task_before_claiming_it(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    database.upsert_source(official_source)
+    database.ensure_source_tasks([official_source])
+    assert database.claim_source_task("official-test-source", lease_seconds=60) is not None
+    expired_lease = (
+        datetime.now(timezone.utc) - timedelta(seconds=1)
+    ).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    with database.transaction() as connection:
+        connection.execute(
+            "UPDATE source_tasks SET lease_until = ? WHERE source_id = ?",
+            (expired_lease, "official-test-source"),
+        )
+
+    posting = RawPosting(
+        title="地质工程科研助理",
+        employer="测试研究院",
+        source_url="https://careers.example.edu.cn/jobs/recovered-task",
+        application_url=None,
+        text="地质工程硕士可报，工作地点北京。",
+        summary="测试任务租约恢复。",
+        published_date="2026-09-20",
+        deadline_date="2026-12-20",
+        location="北京",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程科研助理",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+        },
+    )
+
+    result = JobPipeline(settings, database, FakeCollector(posting)).sync_all()
+
+    assert result.recovered_source_tasks == 1
+    assert result.source_results[0].status == "finished"
+    task = database.get_source_task("official-test-source")
+    assert task is not None
+    assert task["status"] == "succeeded"
+
+
 def test_successful_scan_records_zero_open_matches_without_marking_source_unavailable(
     tmp_path,
 ) -> None:

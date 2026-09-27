@@ -52,6 +52,7 @@ class SyncSummary:
     source_results: list[SourceSyncResult]
     expired: int
     recovered_crawl_runs: int = 0
+    recovered_source_tasks: int = 0
 
     @property
     def discovered(self) -> int:
@@ -94,6 +95,7 @@ class SyncSummary:
             "withdrawn": self.withdrawn,
             "expired": self.expired,
             "recovered_crawl_runs": self.recovered_crawl_runs,
+            "recovered_source_tasks": self.recovered_source_tasks,
             "failed": self.failed,
             "blocked": self.blocked,
             "sources": [asdict(item) for item in self.source_results],
@@ -135,6 +137,7 @@ class JobPipeline:
         recovered = self.database.recover_stale_crawl_runs(
             self.settings.crawl_run_stale_seconds
         )
+        recovered_tasks = self.database.recover_expired_source_tasks()
         sources = self.database.list_sources(True)
         self.database.ensure_source_tasks(sources)
         results: list[SourceSyncResult] = []
@@ -195,7 +198,12 @@ class JobPipeline:
                     pass
         today = datetime.now(self.timezone).date().isoformat()
         expired = self.database.expire_jobs_before(today)
-        return SyncSummary(results, expired, len(recovered))
+        return SyncSummary(
+            results,
+            expired,
+            recovered_crawl_runs=len(recovered),
+            recovered_source_tasks=len(recovered_tasks),
+        )
 
     def sync_source(self, source: dict[str, Any]) -> SourceSyncResult:
         self.database.recover_stale_crawl_runs(
