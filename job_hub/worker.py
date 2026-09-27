@@ -25,6 +25,7 @@ from job_hub.government_positions import (
     load_position_registry,
     position_record_to_posting,
 )
+from job_hub.government_revalidation import revalidate_government_sources
 from job_hub.pipeline import JobPipeline
 from job_hub.reports import publish_daily_report
 
@@ -82,6 +83,7 @@ class DailyWorker:
         try:
             manifest_summary = self._register_government_artifacts()
             summary = self.pipeline.sync_all(progress_callback=self._sync_progress)
+            government_verification = self._revalidate_government_position_sources()
             government_jobs = self._sync_verified_government_positions()
             attachment_summary = self._process_registered_attachments()
             expired_candidates = self.database.expire_stale_artifact_candidates(
@@ -112,6 +114,7 @@ class DailyWorker:
                 {
                     "sources": summary.as_dict(),
                     "government_positions": government_jobs,
+                    "government_evidence_recheck": government_verification,
                     "government_manifest": manifest_log,
                     "attachments": attachment_summary,
                     "government_quality": government_summary,
@@ -135,6 +138,42 @@ class DailyWorker:
             self._heartbeat("degraded", "source synchronization failed")
             self._send_failure_safely("官方来源同步失败", str(error))
 
+    def _revalidate_government_position_sources(self) -> dict[str, int]:
+        """Refresh explicit official evidence without discovering new sources.
+
+        Position-table rows remain a reviewed ledger. This recheck only keeps
+        the ledger's already-approved official notice/attachment URLs current
+        enough for student-facing publication.
+        """
+        path = self.settings.government_position_registry_path
+        try:
+            registry = load_position_registry(path)
+        except Exception as error:  # noqa: BLE001 - keep a broken ledger visible
+            LOGGER.error("Government position registry unavailable for recheck: %s", error)
+            return {"verified": 0, "source_unavailable": 0, "withdrawn": 0, "not_configured": 0, "error": 1}
+        try:
+            results = revalidate_government_sources(
+                registry,
+                {source["id"]: source for source in self.database.list_sources()},
+                self.settings,
+                now=datetime.now(self.timezone),
+            )
+        except Exception as error:  # noqa: BLE001 - source recheck must not stop all sources
+            LOGGER.exception("Government position evidence recheck failed")
+            return {"verified": 0, "source_unavailable": 0, "withdrawn": 0, "not_configured": 0, "error": 1}
+        counts = {"verified": 0, "source_unavailable": 0, "withdrawn": 0, "not_configured": 0, "error": 0}
+        for result in results:
+            status = str(result["status"])
+            self.database.record_government_source_verification(
+                str(result["source_id"]),
+                status=status,
+                checked_at=str(result["checked_at"]),
+                detail=str(result.get("detail") or ""),
+                evidence_fingerprint=str(result.get("evidence_fingerprint") or ""),
+            )
+            counts[status] += 1
+        return counts
+
     def _sync_verified_government_positions(self) -> dict[str, int]:
         """Publish current explicit-match rows from the official position ledger."""
         path = self.settings.government_position_registry_path
@@ -150,7 +189,8 @@ class DailyWorker:
                 "withdrawn": 0,
                 "error": 1,
             }
-        today = datetime.now(self.timezone).date().isoformat()
+        now = datetime.now(self.timezone)
+        today = now.date().isoformat()
         counts = {
             "created": 0,
             "updated": 0,
@@ -167,6 +207,11 @@ class DailyWorker:
             registry,
             today=today,
             max_age_hours=self.settings.government_position_max_age_hours,
+            source_verifications={
+                str(item["source_id"]): item
+                for item in self.database.list_government_source_verifications()
+            },
+            now=now,
         )
         current_ids_by_source: dict[str, set[str]] = {}
         reconcile_source_ids: set[str] = set()

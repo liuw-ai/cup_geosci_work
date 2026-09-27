@@ -100,6 +100,11 @@ def build_daily_report(
                 load_position_registry(registry_path),
                 today=target,
                 max_age_hours=settings.government_position_max_age_hours,
+                source_verifications={
+                    str(item["source_id"]): item
+                    for item in database.list_government_source_verifications()
+                },
+                now=datetime.now(ZoneInfo(settings.timezone)),
             )
         except (OSError, ValueError) as error:
             position_registry_error = str(error)

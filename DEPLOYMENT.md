@@ -71,7 +71,7 @@ docker compose exec worker python -m job_hub.cli worker-health --max-age 180
 
 生产部署使用 `docker-compose.public.yml` 中的 Caddy。应用端口只对服务器本机开放，公网流量由 Caddy 终止 TLS 后转发到 Web 容器。示例配置见 [`deploy/Caddyfile.example`](deploy/Caddyfile.example)。
 
-本项目固定使用 `jobs.cupdky.cn`，先在域名服务商创建 `A` 记录：`jobs` -> `81.70.62.174`。确认 `nslookup jobs.cupdky.cn` 返回该地址后，在服务器执行：
+本项目固定使用 `jobs.cupdky.cn`。先确认 `cupdky.cn` 已注册且已在域名服务商或 DNS 托管商处启用权威 DNS；若 `nslookup cupdky.cn` 本身返回 `NXDOMAIN`，仅添加 `jobs` 记录不会生效。根域可解析后，创建 `A` 记录：`jobs` -> `81.70.62.174`（TTL 设为 `600` 或服务商的 `Auto`）。确认 `nslookup jobs.cupdky.cn` 返回该地址后，在服务器执行：
 
 ```bash
 docker compose up -d --build web worker

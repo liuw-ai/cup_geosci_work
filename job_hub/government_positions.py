@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter
-from datetime import date
+from datetime import date, datetime, time, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -233,6 +233,32 @@ def _expand_position_batches(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return expanded
 
 
+def _source_opening_dates(payload: dict[str, Any], source_ids: set[str]) -> dict[str, str]:
+    """Validate optional source-wide application opening dates.
+
+    Official tables may be published before their registration window starts.
+    The evidence is retained, but the rows cannot be called open until that
+    official start date. A source-wide date is limited to batches that share
+    the same recruitment window; an exceptional row may still set its own
+    optional ``opening_date``.
+    """
+    raw = payload.get("source_opening_dates") or {}
+    if not isinstance(raw, dict):
+        raise GovernmentPositionContractError("registry.source_opening_dates must be an object")
+    result: dict[str, str] = {}
+    for source_id, opening_date in raw.items():
+        normalized_id = _text(source_id, "registry.source_opening_dates source id")
+        if normalized_id not in source_ids:
+            raise GovernmentPositionContractError(
+                f"registry.source_opening_dates references unknown source: {normalized_id}"
+            )
+        result[normalized_id] = _date(
+            opening_date,
+            f"registry.source_opening_dates[{normalized_id}]",
+        )
+    return result
+
+
 def load_position_registry(path: Path | str | None = None) -> dict[str, Any]:
     registry_path = Path(path or DEFAULT_REGISTRY_PATH)
     try:
@@ -257,6 +283,10 @@ def load_position_registry(path: Path | str | None = None) -> dict[str, Any]:
             raise GovernmentPositionContractError(f"duplicate position id: {record['id']}")
         seen.add(record["id"])
         normalized.append(record)
+    opening_dates = _source_opening_dates(
+        payload,
+        {str(record["source_id"]) for record in normalized},
+    )
     assessments = payload.get("source_assessments") or []
     if not isinstance(assessments, list):
         raise GovernmentPositionContractError("registry.source_assessments must be a list")
@@ -285,6 +315,7 @@ def load_position_registry(path: Path | str | None = None) -> dict[str, Any]:
         "version": version,
         "as_of": as_of,
         "description": str(payload.get("description") or "").strip(),
+        "source_opening_dates": opening_dates,
         "source_assessments": normalized_assessments,
         "records": normalized,
     }
@@ -295,6 +326,8 @@ def government_position_quality_report(
     *,
     today: str | None = None,
     max_age_hours: float | None = None,
+    source_verifications: dict[str, dict[str, Any]] | None = None,
+    now: datetime | None = None,
 ) -> dict[str, Any]:
     payload = registry or load_position_registry()
     records = list(payload.get("records", []))
@@ -310,18 +343,34 @@ def government_position_quality_report(
     type_counts = Counter(str(item["position_type"]) for item in records)
     province_counts = Counter(str(item["province"]) for item in records)
     source_counts = Counter(str(item["source_id"]) for item in records)
-    open_records = [
-        item
-        for item in records
-        if freshness_status == "fresh"
-        and item["record_status"] == "verified_open"
-        and (not item["deadline_date"] or date.fromisoformat(item["deadline_date"]) >= today_date)
-    ]
+    open_records = current_publishable_position_records(
+        payload,
+        today=today_date.isoformat(),
+        max_age_hours=max_age_hours,
+        source_verifications=source_verifications,
+        now=now,
+    )
     explicit_matches = [
         item for item in open_records if item["match_status"] in {"explicit_match", "unrestricted_match"}
     ]
     failures = [item for item in records if item["record_status"] in {"source_unavailable", "manual_review_required"}]
+    verification_counts = Counter(
+        str(item.get("status") or "unknown")
+        for item in (source_verifications or {}).values()
+    )
+    verification_failures = (
+        verification_counts.get("source_unavailable", 0)
+        + verification_counts.get("not_configured", 0)
+    )
     closed = [item for item in records if item["record_status"] == "verified_closed"]
+    upcoming = [
+        item
+        for item in records
+        if item["record_status"] == "verified_open"
+        and item["match_status"] in {"explicit_match", "unrestricted_match"}
+        and (_opening_date_for_record(item, payload.get("source_opening_dates") or {}) or today_date)
+        > today_date
+    ]
     scan_no_current_match = sum(
         1
         for item in payload.get("source_assessments", [])
@@ -341,6 +390,7 @@ def government_position_quality_report(
         "by_province": dict(sorted(province_counts.items())),
         "by_source": dict(sorted(source_counts.items())),
         "verified_open_records": len(open_records),
+        "verified_upcoming_records": len(upcoming),
         "open_until_filled_records": sum(
             1 for item in open_records if item.get("deadline_policy") == "open_until_filled"
         ),
@@ -349,8 +399,13 @@ def government_position_quality_report(
         ),
         "explicit_student_matches": len(explicit_matches),
         "verified_closed_records": len(closed),
-        "source_failures_or_pending": len(failures),
+        "source_failures_or_pending": len(failures) + verification_failures,
         "verified_scan_no_current_match": scan_no_current_match,
+        "source_evidence_verifications": {
+            "total": sum(verification_counts.values()),
+            "by_status": dict(sorted(verification_counts.items())),
+            "note": "来源复核失败不等于无岗位；超过新鲜度窗口后才会从学生端清退。",
+        },
         "field_completeness": {
             field: {
                 "complete": sum(1 for item in records if str(item.get(field) or "").strip()),
@@ -374,7 +429,7 @@ def government_position_quality_report(
         },
         "scan_interpretation": (
             "存在来源故障或待核验记录，不能把缺少岗位解释为无岗位。"
-            if failures
+            if failures or verification_failures
             else "部分官方来源已扫描成功但当前无可发布匹配；这不是来源故障。"
             if scan_no_current_match
             else "台账中的正式来源均已完成当前记录核验。"
@@ -383,27 +438,103 @@ def government_position_quality_report(
 
 
 def current_publishable_position_records(
-    registry: dict[str, Any], *, today: str, max_age_hours: float | None = None,
+    registry: dict[str, Any],
+    *,
+    today: str,
+    max_age_hours: float | None = None,
+    source_verifications: dict[str, dict[str, Any]] | None = None,
+    now: datetime | None = None,
 ) -> list[dict[str, Any]]:
-    """Return current official rows that passed the explicit student match gate."""
+    """Return current rows with per-source official-evidence freshness.
+
+    ``as_of`` is retained as a short bootstrap window for a reviewed ledger.
+    Once the worker has rechecked a source, its own ``last_success_at`` becomes
+    the freshness clock. A temporary source failure preserves that timestamp;
+    it is not represented as a successful empty scan. An explicit official
+    cancellation withdraws the source immediately.
+    """
     target = date.fromisoformat(today)
+    verification_map = source_verifications or {}
+    reference = now or datetime.combine(target, time.min, tzinfo=timezone.utc)
+    if reference.tzinfo is None:
+        reference = reference.replace(tzinfo=timezone.utc)
+    reference = reference.astimezone(timezone.utc)
     raw_as_of = str(registry.get("as_of") or "").strip()
-    if raw_as_of:
-        as_of = date.fromisoformat(raw_as_of)
-        age_hours = max(0, (target - as_of).days * 24)
-        if max_age_hours is not None and age_hours > float(max_age_hours):
-            return []
+    fallback_fresh = _registry_fresh(raw_as_of, reference, max_age_hours)
+    source_opening_dates = registry.get("source_opening_dates") or {}
     rows: list[dict[str, Any]] = []
     for item in registry.get("records", []):
         if item["record_status"] != "verified_open":
             continue
         if item["match_status"] not in {"explicit_match", "unrestricted_match"}:
             continue
+        opening_date = _opening_date_for_record(item, source_opening_dates)
+        if opening_date and opening_date > target:
+            continue
+        if not _source_evidence_is_current(
+            str(item.get("source_id") or ""),
+            verification_map,
+            reference,
+            max_age_hours,
+            fallback_fresh,
+        ):
+            continue
         deadline = str(item.get("deadline_date") or "").strip()
         if deadline and date.fromisoformat(deadline) < target:
             continue
         rows.append(dict(item))
     return rows
+
+
+def _opening_date_for_record(
+    record: dict[str, Any],
+    source_opening_dates: dict[str, Any],
+) -> date | None:
+    """Resolve a row-specific opening date before the source-wide fallback."""
+    raw = str(
+        record.get("opening_date")
+        or source_opening_dates.get(str(record.get("source_id") or ""))
+        or ""
+    ).strip()
+    return date.fromisoformat(raw) if raw else None
+
+
+def _registry_fresh(
+    raw_as_of: str,
+    reference: datetime,
+    max_age_hours: float | None,
+) -> bool:
+    if max_age_hours is None or not raw_as_of:
+        return True
+    as_of = datetime.combine(date.fromisoformat(raw_as_of), time.min, tzinfo=timezone.utc)
+    return max(0.0, (reference - as_of).total_seconds() / 3600) <= float(max_age_hours)
+
+
+def _source_evidence_is_current(
+    source_id: str,
+    verifications: dict[str, dict[str, Any]],
+    reference: datetime,
+    max_age_hours: float | None,
+    fallback_fresh: bool,
+) -> bool:
+    verification = verifications.get(source_id)
+    if not verification:
+        return fallback_fresh
+    if str(verification.get("status") or "") == "withdrawn":
+        return False
+    raw_success = str(verification.get("last_success_at") or "").strip()
+    if not raw_success:
+        return fallback_fresh
+    try:
+        success = datetime.fromisoformat(raw_success.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    if success.tzinfo is None:
+        success = success.replace(tzinfo=timezone.utc)
+    if max_age_hours is None:
+        return True
+    age_hours = max(0.0, (reference - success.astimezone(timezone.utc)).total_seconds() / 3600)
+    return age_hours <= float(max_age_hours)
 
 
 def position_record_to_posting(record: dict[str, Any]) -> RawPosting:

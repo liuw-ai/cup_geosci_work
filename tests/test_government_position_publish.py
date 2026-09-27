@@ -56,6 +56,28 @@ def test_stale_review_snapshot_is_not_publishable() -> None:
     ) == []
 
 
+def test_future_official_application_window_is_not_published_early() -> None:
+    registry = {
+        "as_of": "2026-09-28",
+        "source_opening_dates": {"official-test-source": "2026-10-10"},
+        "records": [
+            {
+                "id": "scheduled",
+                "source_id": "official-test-source",
+                "record_status": "verified_open",
+                "match_status": "explicit_match",
+                "deadline_date": "2026-10-26",
+                "deadline_policy": "fixed_date",
+            }
+        ],
+    }
+
+    assert current_publishable_position_records(registry, today="2026-09-28") == []
+    assert [item["id"] for item in current_publishable_position_records(registry, today="2026-10-10")] == [
+        "scheduled"
+    ]
+
+
 def test_position_record_preserves_notice_attachment_and_row_evidence() -> None:
     record = {
         "id": "anhui-2026-2026113",

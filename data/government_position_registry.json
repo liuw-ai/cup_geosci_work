@@ -1,6 +1,9 @@
 {
   "version": 1,
   "as_of": "2026-09-27",
+  "source_opening_dates": {
+    "cea-2027-recruitment": "2026-10-10"
+  },
   "description": "事业单位与公务员职位表的官方证据台账。records 只保存逐岗位证据；source_assessments 保存尚未形成岗位行的年度入口状态。",
   "source_assessments": [
     {

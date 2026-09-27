@@ -177,6 +177,7 @@
     "config": {
       "listing_urls": ["https://www.cgs.gov.cn/tzgg/tzgg/"],
       "allowed_hosts": ["www.cgs.gov.cn", "www.drc.cgs.gov.cn"],
+      "government_evidence_recheck": true,
       "title_selector": "h1, .title",
       "content_selector": "article, main, .TRS_Editor, .content, body",
       "require_recruitment_word": true,
@@ -1077,6 +1078,7 @@
       "allow_shared_source_url": true,
       "allowed_hosts": ["www.cea.gov.cn"],
       "attachment_allowed_hosts": ["www.cea.gov.cn"],
+      "government_evidence_recheck": true,
       "publication_category": "事业单位与人才引进",
       "official_attachment_url": "https://www.cea.gov.cn/cea/zwgk/rsxx/ryzp/5855536/2026092316044245325.xlsx",
       "note": "中国地震局官网公告及官方岗位信息表逐行核验；仅发布岗位表明确包含本院目标专业且学历覆盖的岗位。来源为人工核验附件，不触发通用网页抓取。"

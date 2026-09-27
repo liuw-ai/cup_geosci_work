@@ -247,6 +247,21 @@ CREATE TABLE IF NOT EXISTS source_health (
 CREATE INDEX IF NOT EXISTS idx_source_health_status
 ON source_health(status, checked_at DESC);
 
+-- Government position ledgers are reviewed source snapshots. Their source
+-- evidence is rechecked independently of ordinary crawl runs so a static JSON
+-- ``as_of`` date cannot be mistaken for a perpetual live scan.
+CREATE TABLE IF NOT EXISTS government_source_verifications (
+    source_id TEXT PRIMARY KEY REFERENCES sources(id) ON DELETE CASCADE,
+    status TEXT NOT NULL,
+    checked_at TEXT NOT NULL,
+    last_success_at TEXT,
+    detail TEXT NOT NULL DEFAULT '',
+    evidence_fingerprint TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_government_source_verifications_status
+ON government_source_verifications(status, checked_at DESC);
+
 -- A durable per-source queue keeps one slow or blocked domain from stopping
 -- the rest of the nationwide scan.  The queue is operational state, not job
 -- content, and can be rebuilt from the versioned source registry.
@@ -829,6 +844,64 @@ class Database:
         with self.connect() as connection:
             rows = connection.execute(
                 "SELECT * FROM source_health ORDER BY checked_at DESC, source_id"
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def record_government_source_verification(
+        self,
+        source_id: str,
+        *,
+        status: str,
+        checked_at: str,
+        detail: str = "",
+        evidence_fingerprint: str = "",
+    ) -> dict[str, Any]:
+        """Persist a controlled recheck without treating a failure as no jobs."""
+        if status not in {"verified", "source_unavailable", "withdrawn", "not_configured"}:
+            raise ValueError(f"Unsupported government source verification status: {status}")
+        with self.transaction() as connection:
+            existing = connection.execute(
+                "SELECT last_success_at FROM government_source_verifications WHERE source_id = ?",
+                (source_id,),
+            ).fetchone()
+            last_success_at = (
+                checked_at
+                if status == "verified"
+                else (existing["last_success_at"] if existing else None)
+            )
+            connection.execute(
+                """
+                INSERT INTO government_source_verifications (
+                    source_id, status, checked_at, last_success_at, detail, evidence_fingerprint
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(source_id) DO UPDATE SET
+                    status=excluded.status,
+                    checked_at=excluded.checked_at,
+                    last_success_at=excluded.last_success_at,
+                    detail=excluded.detail,
+                    evidence_fingerprint=excluded.evidence_fingerprint
+                """,
+                (
+                    source_id,
+                    status,
+                    checked_at,
+                    last_success_at,
+                    detail[:2000],
+                    evidence_fingerprint[:128],
+                ),
+            )
+            row = connection.execute(
+                "SELECT * FROM government_source_verifications WHERE source_id = ?",
+                (source_id,),
+            ).fetchone()
+        if row is None:  # pragma: no cover - guarded by the insert above
+            raise RuntimeError("Government verification could not be persisted")
+        return dict(row)
+
+    def list_government_source_verifications(self) -> list[dict[str, Any]]:
+        with self.connect() as connection:
+            rows = connection.execute(
+                "SELECT * FROM government_source_verifications ORDER BY checked_at DESC, source_id"
             ).fetchall()
         return [dict(row) for row in rows]
 

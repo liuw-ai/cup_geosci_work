@@ -21,8 +21,9 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
 
     assert report["source_assessments"] == 12
     assert report["records"] == 136
-    assert report["verified_open_records"] == 122
-    assert report["explicit_student_matches"] == 122
+    assert report["verified_open_records"] == 52
+    assert report["verified_upcoming_records"] == 70
+    assert report["explicit_student_matches"] == 52
     assert report["source_failures_or_pending"] == 0
     assert report["verified_scan_no_current_match"] == 3
     assert "扫描成功" in report["scan_interpretation"]
