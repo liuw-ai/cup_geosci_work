@@ -118,6 +118,30 @@
       "deadline_date": "2026-09-16",
       "deadline_policy": "fixed_date",
       "note": "服务器直连核验成功；公告与附件共160行、255个计划，其中18行明确匹配地学专业，但报名已于2026-09-16结束。该状态表示扫描成功但当前无可发布岗位，不是来源故障。"
+    },
+    {
+      "source_id": "shandong-civil-service-2026",
+      "position_type": "civil_service",
+      "province": "山东",
+      "status": "verified_scan_no_current_match",
+      "official_notice_url": "https://hrss.shandong.gov.cn/rsks/articles/ch03577/202511/101d712c-d68b-4ef8-b240-9fd37c9819e5.shtml",
+      "official_attachment_url": "",
+      "deadline_date": "2025-11-10",
+      "deadline_policy": "fixed_date",
+      "official_backup_url": "https://www.dtdjzx.gov.cn/web/dtdjzx/gwygzlygwy.html",
+      "note": "服务器直连核验山东省人力资源和社会保障厅官方公告。2026年度省级机关及其直属机构公务员网上报名时间为2025-11-07 09:00至2025-11-10 16:00；截至2026-09-27已结束。职位查询由山东省委组织部灯塔党建在线公务员专栏提供，未发现当前仍面向社会毕业生开放的地学职位表，因此不创建学生端岗位。"
+    },
+    {
+      "source_id": "zhejiang-civil-service-2026",
+      "position_type": "civil_service",
+      "province": "浙江",
+      "status": "verified_scan_no_current_match",
+      "official_notice_url": "http://gwy.zjks.gov.cn/zjgwy/website/init.htm",
+      "official_attachment_url": "",
+      "deadline_date": "",
+      "deadline_policy": "fixed_date",
+      "official_backup_url": "https://www.zjzzgz.gov.cn/",
+      "note": "服务器直连核验浙江省公务员考试录用官方专题。页面可见2026年度考试录用、山海协作县专项招录及下半年省级机关面向基层公开遴选公告；后者面向在编公务员，当前页面未提供面向社会应届毕业生且仍在报名的地学职位表。保留入口和扫描状态，待2027年度正式职位表发布后再按岗位代码、专业、学历、地点、人数和截止日期导入。"
     }
   ],
   "position_batches": [

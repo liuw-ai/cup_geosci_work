@@ -19,13 +19,28 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
     registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
     report = government_position_quality_report(registry, today="2026-09-25")
 
-    assert report["source_assessments"] == 10
+    assert report["source_assessments"] == 12
     assert report["records"] == 136
     assert report["verified_open_records"] == 122
     assert report["explicit_student_matches"] == 122
     assert report["source_failures_or_pending"] == 0
-    assert report["verified_scan_no_current_match"] == 1
+    assert report["verified_scan_no_current_match"] == 3
     assert "扫描成功" in report["scan_interpretation"]
+
+
+def test_provincial_civil_service_scans_keep_closed_or_non_student_entries_out() -> None:
+    registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
+    assessments = {
+        item["source_id"]: item
+        for item in registry["source_assessments"]
+        if item["position_type"] == "civil_service"
+    }
+
+    assert assessments["shandong-civil-service-2026"]["status"] == "verified_scan_no_current_match"
+    assert assessments["shandong-civil-service-2026"]["deadline_date"] == "2025-11-10"
+    assert assessments["zhejiang-civil-service-2026"]["status"] == "verified_scan_no_current_match"
+    assert assessments["zhejiang-civil-service-2026"]["official_attachment_url"] == ""
+    assert not [row for row in registry["records"] if row["position_type"] == "civil_service"]
 
 
 def test_hunan_position_batch_expands_each_official_attachment_row() -> None:

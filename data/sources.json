@@ -1034,5 +1034,35 @@
       "official_attachment_url": "https://www.cea.gov.cn/cea/zwgk/rsxx/ryzp/5855536/2026092316044245325.xlsx",
       "note": "中国地震局官网公告及官方岗位信息表逐行核验；仅发布岗位表明确包含本院目标专业且学历覆盖的岗位。来源为人工核验附件，不触发通用网页抓取。"
     }
+  },
+  {
+    "id": "shandong-civil-service-2026",
+    "name": "山东省2026年度公务员考试录用官方入口",
+    "publisher": "山东省人力资源和社会保障厅、山东省委组织部",
+    "homepage_url": "https://hrss.shandong.gov.cn/rsks/articles/ch03577/202511/101d712c-d68b-4ef8-b240-9fd37c9819e5.shtml",
+    "source_type": "manual",
+    "category": "公务员与选调",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allow_shared_source_url": true,
+      "fallback_entry_urls": ["https://www.dtdjzx.gov.cn/web/dtdjzx/gwygzlygwy.html"],
+      "note": "服务器直连核验官方公告与灯塔职位查询入口。2026年度报名已于2025-11-10结束；当前仅保留扫描与年度更新定位，不把历史职位表导入学生端。"
+    }
+  },
+  {
+    "id": "zhejiang-civil-service-2026",
+    "name": "浙江省2026年度公务员考试录用官方入口",
+    "publisher": "浙江省公务员局、浙江省人事考试院",
+    "homepage_url": "http://gwy.zjks.gov.cn/zjgwy/website/init.htm",
+    "source_type": "manual",
+    "category": "公务员与选调",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allow_shared_source_url": true,
+      "fallback_entry_urls": ["https://www.zjzzgz.gov.cn/"],
+      "note": "服务器直连核验官方公务员专题。页面当前展示2026年度招录、专项招录和面向基层遴选信息；遴选面向在编公务员，未发现面向本院社会毕业生的当前开放地学职位表。"
+    }
   }
 ]
