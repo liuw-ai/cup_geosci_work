@@ -2,7 +2,7 @@
 
 ## Local verification
 
-- `python -m pytest -q`: **307 passed**.
+- `python -m pytest -q`: **308 passed**.
 - 新增真实 DOM 夹具覆盖：标题、单位、地点、学历、人数、截止日期和职位介绍专业提取。
 - 新增门禁覆盖：只有“详见职位描述”而没有专业正文时，解析失败，不发布。
 - 新增回归覆盖：`official_cmgb_browser_detail` 详情证据经过正常学生端专业门禁。

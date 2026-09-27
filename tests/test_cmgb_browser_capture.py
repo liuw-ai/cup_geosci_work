@@ -186,6 +186,44 @@ def test_cmgb_browser_detail_evidence_passes_student_publication_gate(tmp_path: 
     assert "undergraduate-resource-exploration" in decision.matched_profile_ids
 
 
+def test_cmgb_capture_consumes_all_validated_rows_above_global_source_limit(
+    tmp_path: Path,
+) -> None:
+    """A complete manifest is not truncated by MAX_SOURCE_ITEMS."""
+    rows = [_row(f"cmgb-{index}") for index in range(81)]
+    scan = dict(_payload()["scan"])
+    scan.update(
+        {
+            "rows_discovered": len(rows),
+            "rows_exported": len(rows),
+            "detail_discovered": len(rows),
+            "detail_succeeded": len(rows),
+        }
+    )
+    _write(tmp_path, _payload(rows=rows, scan=scan))
+    source = {
+        "id": "cmgb-browser-limit-test",
+        "name": "国聘完整捕获上限测试",
+        "publisher": "中国冶金地质总局",
+        "homepage_url": "https://cmgb.iguopin.com/jobCampus",
+        "source_type": "cmgb_browser_rows",
+        "category": "自然资源、地调与地勘",
+        "source_tier": "A",
+        "enabled": True,
+        "config": {
+            "allowed_hosts": HOSTS,
+            "capture_path": "captures/cmgb.json",
+            "application_url": "https://cmgb.iguopin.com/jobCampus",
+            "max_age_hours": 24,
+            "max_items": 2_000,
+            "require_complete_scan": True,
+            "minimum_relevance": 0,
+        },
+    }
+    postings = OfficialSourceCollector(make_settings(tmp_path)).collect(source)
+    assert len(postings) == len(rows)
+
+
 class _FakeLocator:
     def __init__(self, value: str, *, count: int = 1) -> None:
         self.value = value

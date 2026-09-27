@@ -592,7 +592,19 @@ class OfficialSourceCollector:
             raise SourceCollectionError(message) from error
 
         postings: list[RawPosting] = []
-        max_items = min(self._item_limit(source), 2_000)
+        # This adapter consumes a completed, server-side browser manifest.
+        # Unlike a live list request, its pagination and row count have already
+        # been validated by ``load_cmgb_browser_capture``.  Do not apply the
+        # ordinary network-source MAX_SOURCE_ITEMS (80 by default), otherwise
+        # a successful 146-row capture would silently publish only its first
+        # page.  Keep a hard upper bound as a corrupt-manifest guard.
+        try:
+            max_items = max(
+                1,
+                min(int(config.get("max_items", self.settings.max_source_items)), 2_000),
+            )
+        except (TypeError, ValueError):
+            max_items = min(self.settings.max_source_items, 2_000)
         for item in payload["rows"][:max_items]:
             raw_deadline = str(item["deadline"]).strip()
             deadline_date = parse_date_value(raw_deadline)
