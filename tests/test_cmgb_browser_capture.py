@@ -123,6 +123,31 @@ def test_cmgb_capture_rejects_stale_manifest(tmp_path: Path) -> None:
         )
 
 
+def test_cmgb_capture_reconciles_ambiguous_overview_from_same_detail_body(
+    tmp_path: Path,
+) -> None:
+    """Older captures retain enough official detail text for safe repair."""
+    row = _row()
+    row["major"] = "详见职位描述，地质类，资源勘查类"
+    row["field_evidence"]["专业范围"] = row["major"]
+    row["description"] = (
+        "专业要求：资源勘查工程、地质学等相关专业。"
+        "岗位职责：开展野外地质调查。"
+    )
+    path = _write(tmp_path, _payload(rows=[row]))
+    payload = load_cmgb_browser_capture(
+        path,
+        allowed_hosts=HOSTS,
+        max_age_hours=24,
+        now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+    )
+    repaired = payload["rows"][0]
+    assert repaired["major"] == "资源勘查工程、地质学等相关专业"
+    assert repaired["field_evidence"]["专业范围"] == repaired["major"]
+    assert repaired["field_evidence"]["概览专业范围"].startswith("详见职位描述")
+    assert repaired["field_evidence"]["专业证据定位"] == "官方详情职位介绍"
+
+
 def test_cmgb_source_routes_verified_rows_through_normal_pipeline(tmp_path: Path) -> None:
     _write(tmp_path, _payload())
     source = {

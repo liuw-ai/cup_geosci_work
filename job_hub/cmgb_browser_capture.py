@@ -194,6 +194,18 @@ def load_cmgb_browser_capture(
             str(key): _text(value, f"row {index}.field_evidence.{key}")
             for key, value in evidence.items()
         }
+        # Captures made before a parser improvement still retain the rendered
+        # job-duty text. Reconcile an ambiguous overview value with an exact
+        # major sentence from that same official detail before it enters the
+        # publication gate. This is not inference from the title or employer:
+        # both values originate in the job's own official detail page.
+        description = " ".join(str(row.get("description") or "").split()).strip()
+        detail_major = _major_from_description(description)
+        if detail_major and _major_needs_detail_evidence(row["major"]):
+            row["field_evidence"].setdefault("概览专业范围", row["major"])
+            row["field_evidence"]["专业范围"] = detail_major
+            row["field_evidence"]["专业证据定位"] = "官方详情职位介绍"
+            row["major"] = detail_major
         normalized_rows.append(row)
     return {
         **payload,
@@ -273,9 +285,21 @@ def _is_generic_major_summary(value: str) -> bool:
     values = {
         item.strip()
         for item in re.split(r"[、，,；;]", normalized)
-        if item.strip()
+        if item.strip() and not _is_major_placeholder(item)
     }
     return bool(values) and values.issubset(generic_labels)
+
+
+def _major_needs_detail_evidence(value: str) -> bool:
+    """Whether a captured overview should be reconciled with its prose."""
+
+    normalized = " ".join(str(value or "").split()).strip()
+    return (
+        not normalized
+        or _is_major_placeholder(normalized)
+        or "详见职位描述" in normalized
+        or _is_generic_major_summary(normalized)
+    )
 
 
 def _major_from_description(text: str) -> str:
@@ -284,7 +308,15 @@ def _major_from_description(text: str) -> str:
     normalized = " ".join(str(text or "").split()).strip()
     if not normalized:
         return ""
-    labels = ("专业要求", "专业范围", "需求专业", "专业背景", "专业需求", "所学专业")
+    labels = (
+        "专业要求",
+        "专业范围",
+        "需求专业",
+        "专业背景",
+        "专业需求",
+        "专业类别",
+        "所学专业",
+    )
     for label in labels:
         match = re.search(
             rf"{re.escape(label)}\s*[：:]\s*(.+?)(?=\s*(?:"
@@ -298,6 +330,19 @@ def _major_from_description(text: str) -> str:
             value = " ".join(match.group(1).split()).strip(" ：:;；")
             if value:
                 return value
+
+    # A small set of official detail pages use an unlabeled first line under
+    # "任职要求", for example "1.地质学；...；煤炭地质勘查相关专业。".
+    # It is accepted only when that same requirement sentence explicitly ends
+    # in a professional requirement, never from a responsibility paragraph.
+    requirement_line = re.search(
+        r"(?:任职要求|任职条件)\s*(?:[：:]\s*)?(?:1[、.．)]\s*)"
+        r"([^。；;]{1,180}?专业[^。；;]{0,80})(?:[。；;]|$)",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if requirement_line:
+        return " ".join(requirement_line.group(1).split()).strip(" ：:;；")
 
     # Some official details put the major only in an employment-condition
     # sentence, for example ``具备地球化学等化探类相关专业``.  This remains
@@ -367,10 +412,19 @@ def extract_cmgb_detail(page: Any, *, detail_url: str, allowed_hosts: set[str]) 
     )
     major = _overview_value(page, ("专业要求", "专业范围", "需求专业"))
     detail_major = _major_from_description(duty)
-    if _is_major_placeholder(major) or not major or _is_generic_major_summary(major):
+    if _major_needs_detail_evidence(major):
         major = detail_major or _label_value(
             duty or body,
-            ("专业要求", "专业范围", "需求专业", "专业背景", "专业需求", "所学专业", "专业"),
+            (
+                "专业要求",
+                "专业范围",
+                "需求专业",
+                "专业背景",
+                "专业需求",
+                "专业类别",
+                "所学专业",
+                "专业",
+            ),
         ) or major
     degree = _overview_value(page, ("最低学历", "学历要求", "学历")) or _label_value(
         body, ("最低学历", "学历要求", "学历")

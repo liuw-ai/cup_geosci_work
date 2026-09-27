@@ -38,6 +38,7 @@ class SourceSyncResult:
     open_matches: int = 0
     created: int = 0
     updated: int = 0
+    withdrawn: int = 0
     skipped: int = 0
     error: str | None = None
     run_id: int | None = None
@@ -69,6 +70,10 @@ class SyncSummary:
         return sum(item.updated for item in self.source_results)
 
     @property
+    def withdrawn(self) -> int:
+        return sum(item.withdrawn for item in self.source_results)
+
+    @property
     def failed(self) -> int:
         return sum(1 for item in self.source_results if item.status == "failed")
 
@@ -86,6 +91,7 @@ class SyncSummary:
             "open_matches": self.open_matches,
             "created": self.created,
             "updated": self.updated,
+            "withdrawn": self.withdrawn,
             "expired": self.expired,
             "recovered_crawl_runs": self.recovered_crawl_runs,
             "failed": self.failed,
@@ -206,6 +212,7 @@ class JobPipeline:
                 else self.collector.collect(source)
             )
             result.discovered = len(postings)
+            current_external_ids: set[str] = set()
             for posting in postings:
                 normalized = self.normalize_posting(posting, source)
                 minimum_score = int(source["config"].get("minimum_relevance", 0))
@@ -219,10 +226,18 @@ class JobPipeline:
                 ):
                     result.open_matches += 1
                 _, outcome = self.database.save_job(normalized)
+                if posting.external_id:
+                    current_external_ids.add(str(posting.external_id))
                 if outcome == "created":
                     result.created += 1
                 elif outcome == "updated":
                     result.updated += 1
+            if source["config"].get("reconcile_missing_external_ids"):
+                result.withdrawn = self.database.withdraw_missing_source_jobs(
+                    source["id"],
+                    current_external_ids,
+                    reason="完整官方动态清单中已不再出现该岗位。",
+                )
             if source["config"].get("deduplicate_by_title"):
                 self.database.supersede_duplicate_jobs(source["id"])
             self.database.mark_source_synced(source["id"])
@@ -233,7 +248,7 @@ class JobPipeline:
                     f"公开采集完成：发现 {result.discovered} 条候选，"
                     f"当前在招匹配 {result.open_matches} 条，"
                     f"新增 {result.created} 条，更新 {result.updated} 条，"
-                    f"过滤 {result.skipped} 条。"
+                    f"过滤 {result.skipped} 条，撤回 {result.withdrawn} 条。"
                 ),
                 successful=True,
             )
@@ -270,6 +285,117 @@ class JobPipeline:
                 run_id,
                 result.status,
                 error_message=result.error[:1500],
+            )
+        return result
+
+    def sync_source_atomically(
+        self,
+        source: dict[str, Any],
+        *,
+        before_commit: Callable[[], None] | None = None,
+    ) -> SourceSyncResult:
+        """Collect and persist one source as one database transaction.
+
+        This is reserved for a source handover where exposing a half-synced
+        successor would create duplicate public vacancies.  Collection and all
+        normalization happen before any write.  The optional callback shares
+        the same transaction and may switch source states only after every
+        successor record has been saved successfully.
+        """
+
+        self.database.recover_stale_crawl_runs(
+            self.settings.crawl_run_stale_seconds,
+            source["id"],
+        )
+        run_id = self.database.record_crawl_start(source["id"])
+        result = SourceSyncResult(source_id=source["id"], status="finished", run_id=run_id)
+        try:
+            collect = getattr(self.collector, "collect_with_fallback", None)
+            postings = (
+                collect(source)
+                if callable(collect)
+                else self.collector.collect(source)
+            )
+            result.discovered = len(postings)
+            minimum_score = int(source["config"].get("minimum_relevance", 0))
+            normalized_postings: list[tuple[dict[str, Any], str | None]] = []
+            current_external_ids: set[str] = set()
+            for posting in postings:
+                normalized = self.normalize_posting(posting, source)
+                if normalized["relevance_score"] < minimum_score:
+                    result.skipped += 1
+                    continue
+                if (
+                    normalized["status"] == "open"
+                    and normalized["publication_status"]
+                    in {"student_eligible", "unrestricted_eligible"}
+                ):
+                    result.open_matches += 1
+                normalized_postings.append((normalized, posting.external_id))
+                if posting.external_id:
+                    current_external_ids.add(str(posting.external_id))
+
+            # ``save_job`` and all database helpers reuse this outer
+            # transaction.  An exception anywhere below therefore leaves no
+            # staged successor rows and, critically, no source-state switch.
+            with self.database.transaction():
+                for normalized, _external_id in normalized_postings:
+                    _, outcome = self.database.save_job(normalized)
+                    if outcome == "created":
+                        result.created += 1
+                    elif outcome == "updated":
+                        result.updated += 1
+                if source["config"].get("reconcile_missing_external_ids"):
+                    result.withdrawn = self.database.withdraw_missing_source_jobs(
+                        source["id"],
+                        current_external_ids,
+                        reason="完整官方动态清单中已不再出现该岗位。",
+                    )
+                if source["config"].get("deduplicate_by_title"):
+                    self.database.supersede_duplicate_jobs(source["id"])
+                if before_commit is not None:
+                    before_commit()
+                self.database.mark_source_synced(source["id"])
+                self.database.record_source_health(
+                    source["id"],
+                    status="source_active",
+                    detail=(
+                        f"原子公开采集完成：发现 {result.discovered} 条候选，"
+                        f"当前在招匹配 {result.open_matches} 条，"
+                        f"新增 {result.created} 条，更新 {result.updated} 条，"
+                        f"过滤 {result.skipped} 条，撤回 {result.withdrawn} 条。"
+                    ),
+                    successful=True,
+                )
+                self.database.record_crawl_finish(
+                    run_id,
+                    result.status,
+                    discovered_count=result.discovered,
+                    open_matching_count=result.open_matches,
+                    inserted_count=result.created,
+                    updated_count=result.updated,
+                )
+        except SourceSkipped as error:
+            result.status = "skipped"
+            result.error = str(error)
+            result.created = result.updated = result.withdrawn = 0
+            self.database.record_source_health(
+                source["id"],
+                status=self._skipped_source_health_status(result.error),
+                detail=result.error,
+            )
+            self.database.record_crawl_finish(
+                run_id, result.status, error_message=result.error
+            )
+        except Exception as error:
+            result.status = "failed"
+            result.error = str(error)
+            result.created = result.updated = result.withdrawn = 0
+            self.database.record_source_health(
+                source["id"], status="source_error", detail=result.error
+            )
+            self.database.record_crawl_finish(
+                run_id, result.status, error_message=result.error[:1500]
             )
         return result
 

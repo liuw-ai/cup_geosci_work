@@ -40,6 +40,7 @@ from job_hub.cnpc_browser_capture import (
     load_cnpc_job_capture,
 )
 from job_hub.cnpc_browser_runner import run_cnpc_browser_capture
+from job_hub.cmgb_transition import transition_cmgb_browser_to_production
 from job_hub.db import Database
 from job_hub.government_positions import (
     government_position_quality_report,
@@ -570,6 +571,15 @@ def main() -> None:
         help="立即同步一个已启用的公开来源",
     )
     sync_source_parser.add_argument("source_id")
+    cmgb_transition_parser = subparsers.add_parser(
+        "cmgb-production-transition",
+        help="预检或安全切换国聘动态来源，避免快照重复和失败误清退",
+    )
+    cmgb_transition_parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="预检通过后执行原子生产切换；未提供时只读检查",
+    )
     publish_parser = subparsers.add_parser("publish", help="立即生成一份日报")
     publish_parser.add_argument(
         "--send-email",
@@ -1421,6 +1431,16 @@ def main() -> None:
                 indent=2,
             )
         )
+        return
+    if args.command == "cmgb-production-transition":
+        result = transition_cmgb_browser_to_production(
+            database,
+            pipeline,
+            activate=bool(args.confirm),
+        )
+        print(json.dumps(result.as_dict(), ensure_ascii=False, indent=2))
+        if result.status == "blocked":
+            raise SystemExit(1)
         return
     if args.command == "repair-attachment-evidence":
         candidates = database.list_artifact_job_candidates(limit=500)

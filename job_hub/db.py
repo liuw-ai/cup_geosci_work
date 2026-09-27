@@ -516,6 +516,20 @@ class Database:
         now = utc_now()
         payload = json.dumps(source.get("config", {}), ensure_ascii=False)
         with self.transaction() as connection:
+            # Some sources are deliberately switched by a guarded production
+            # transition.  Their registry definition describes the default for
+            # a new database, while the durable enabled state records whether
+            # the transition has actually passed in this deployment.  Without
+            # this preservation a container restart could silently reactivate a
+            # retired snapshot or disable a validated dynamic source.
+            existing = connection.execute(
+                "SELECT enabled FROM sources WHERE id = ?", (source["id"],)
+            ).fetchone()
+            enabled = int(source.get("enabled", True))
+            if existing is not None and source.get("config", {}).get(
+                "runtime_enabled_control"
+            ):
+                enabled = int(existing["enabled"])
             connection.execute(
                 """
                 INSERT INTO sources (
@@ -542,7 +556,7 @@ class Database:
                     source["source_type"],
                     source["category"],
                     source["source_tier"],
-                    int(source.get("enabled", True)),
+                    enabled,
                     payload,
                     now,
                     now,
@@ -709,6 +723,17 @@ class Database:
                     source_id,
                 ),
             )
+
+    def set_source_enabled(self, source_id: str, enabled: bool) -> None:
+        """Set one source's durable collection state after an audited decision."""
+
+        with self.transaction() as connection:
+            cursor = connection.execute(
+                "UPDATE sources SET enabled = ?, updated_at = ? WHERE id = ?",
+                (int(enabled), utc_now(), source_id),
+            )
+            if not cursor.rowcount:
+                raise ValueError(f"Source is not registered: {source_id}")
 
     def record_source_health(
         self,
@@ -2510,6 +2535,151 @@ class Database:
                 (source_id,),
             )
             return int(cursor.rowcount)
+
+    def student_visible_external_ids_for_source(self, source_id: str) -> set[str]:
+        """Return open student-facing external identifiers for a source.
+
+        This deliberately ignores the source's collector enabled flag.  A
+        transition needs to compare a retired snapshot with a staged dynamic
+        source before the latter is enabled for normal scheduled collection.
+        """
+
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT external_id
+                FROM jobs
+                WHERE source_id = ?
+                  AND status = 'open'
+                  AND publication_status IN ('student_eligible', 'unrestricted_eligible')
+                  AND external_id IS NOT NULL
+                  AND external_id <> ''
+                """,
+                (source_id,),
+            ).fetchall()
+        return {str(row["external_id"]) for row in rows}
+
+    def withdraw_missing_source_jobs(
+        self,
+        source_id: str,
+        current_external_ids: set[str],
+        *,
+        reason: str,
+    ) -> int:
+        """Withdraw previously open records absent from a complete source scan.
+
+        This must be called only after a collector has verified complete
+        pagination and detail success.  A partial scan is never allowed to
+        clear existing vacancies.
+        """
+
+        now = utc_now()
+        with self.transaction() as connection:
+            rows = connection.execute(
+                """
+                SELECT id, title, external_id
+                FROM jobs
+                WHERE source_id = ?
+                  AND status = 'open'
+                  AND external_id IS NOT NULL
+                  AND external_id <> ''
+                """,
+                (source_id,),
+            ).fetchall()
+            missing = [row for row in rows if str(row["external_id"]) not in current_external_ids]
+            if not missing:
+                return 0
+            connection.executemany(
+                "UPDATE jobs SET status = 'withdrawn', updated_at = ? WHERE id = ? AND status = 'open'",
+                [(now, int(row["id"])) for row in missing],
+            )
+            connection.executemany(
+                """
+                INSERT INTO job_events (job_id, event_type, occurred_at, payload_json)
+                VALUES (?, 'withdrawn', ?, ?)
+                """,
+                [
+                    (
+                        int(row["id"]),
+                        now,
+                        json.dumps(
+                            {
+                                "title": row["title"],
+                                "external_id": row["external_id"],
+                                "reason": reason,
+                            },
+                            ensure_ascii=False,
+                        ),
+                    )
+                    for row in missing
+                ],
+            )
+            return len(missing)
+
+    def complete_source_transition(
+        self,
+        *,
+        retired_source_id: str,
+        active_source_id: str,
+        transition_name: str,
+    ) -> int:
+        """Atomically retire one visible snapshot after a successor has synced.
+
+        The old jobs remain in the database with their original evidence and
+        events.  They are marked superseded, so an administrator can audit or
+        roll back the source switch without presenting duplicate vacancies to
+        students.
+        """
+
+        now = utc_now()
+        with self.transaction() as connection:
+            retired = connection.execute(
+                "SELECT id FROM sources WHERE id = ?", (retired_source_id,)
+            ).fetchone()
+            active = connection.execute(
+                "SELECT id FROM sources WHERE id = ?", (active_source_id,)
+            ).fetchone()
+            if retired is None or active is None:
+                raise ValueError("Both transition sources must be registered")
+            rows = connection.execute(
+                "SELECT id, title, external_id FROM jobs WHERE source_id = ? AND status = 'open'",
+                (retired_source_id,),
+            ).fetchall()
+            connection.execute(
+                "UPDATE sources SET enabled = 0, updated_at = ? WHERE id = ?",
+                (now, retired_source_id),
+            )
+            connection.execute(
+                "UPDATE sources SET enabled = 1, updated_at = ? WHERE id = ?",
+                (now, active_source_id),
+            )
+            if rows:
+                connection.executemany(
+                    "UPDATE jobs SET status = 'superseded', updated_at = ? WHERE id = ?",
+                    [(now, int(row["id"])) for row in rows],
+                )
+                connection.executemany(
+                    """
+                    INSERT INTO job_events (job_id, event_type, occurred_at, payload_json)
+                    VALUES (?, 'superseded', ?, ?)
+                    """,
+                    [
+                        (
+                            int(row["id"]),
+                            now,
+                            json.dumps(
+                                {
+                                    "transition": transition_name,
+                                    "successor_source_id": active_source_id,
+                                    "external_id": row["external_id"],
+                                },
+                                ensure_ascii=False,
+                            ),
+                        )
+                        for row in rows
+                    ],
+                )
+            return len(rows)
 
     def delete_job(self, job_id: int) -> bool:
         """Remove one exact invalid record and its cascade-owned change events.

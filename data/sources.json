@@ -937,13 +937,14 @@
     "source_tier": "A",
     "enabled": true,
     "config": {
+      "runtime_enabled_control": "cmgb-iguopin-browser-production",
       "allowed_hosts": ["www.cmgb.com.cn", "cmgb.iguopin.com", "www.iguopin.com"],
       "minimum_relevance": 40,
       "snapshot_path": "data/verified/cmgb-iguopin-geoscience-20260927.json",
       "official_evidence_url": "https://www.cmgb.com.cn/content/2026/09-25/7509048960149884928.html",
       "application_url": "https://cmgb.iguopin.com/jobCampus",
       "official_search_url": "https://cmgb.iguopin.com/jobCampus",
-      "note": "中国冶金地质总局官网于2026-09-25发布2027届校园招聘公告，公告指向官方国聘校园招聘系统。2026-09-27已通过浏览器逐页打开8页列表（146/146条详情成功），新快照保存33条含岗位级专业证据的地学候选；其余详情因专业或学历不匹配不发布。每条保留官方国聘详情页和总局公告证据、专业、学历、地点、人数、截止日期。动态系统尚未形成服务器自动采集适配器，快照只代表本次可复核记录，不代表后续分页永久不变；每日同步应在快照更新前保留来源状态。"
+      "note": "中国冶金地质总局官网于2026-09-25发布2027届校园招聘公告，公告指向官方国聘校园招聘系统。该来源作为首次核验快照保留原始岗位证据；动态浏览器来源完成生产切换后，快照岗位仅作可审计历史，不与动态岗位重复展示。"
     }
   },
   {
@@ -956,6 +957,8 @@
     "source_tier": "A",
     "enabled": false,
     "config": {
+      "runtime_enabled_control": "cmgb-iguopin-browser-production",
+      "reconcile_missing_external_ids": true,
       "browser_url": "https://cmgb.iguopin.com/jobCampus",
       "application_url": "https://cmgb.iguopin.com/jobCampus",
       "capture_path": "captures/cmgb-iguopin-browser.json",
@@ -967,7 +970,7 @@
       "row_selector": ".ant-card",
       "next_selector": ".ant-pagination-next",
       "detail_button_selector": "button",
-      "note": "2026-09-27 已在服务器逐页捕获 8 页、146/146 条详情，字段完整率 100%；隔离管线明确匹配 16 条。当前保持 disabled，先完成与人工核验快照的去重替换、定时任务和过期清退验证，避免动态采集器与快照重复计数。"
+      "note": "2026-09-27 已在服务器逐页捕获 8 页、146/146 条详情，字段完整率 100%。启用前必须通过 cmgb-production-transition：完整捕获、明确匹配不低于现有快照、原子同步后才停用快照；捕获失败或分页不完整时旧快照保持可见。启用后每次完整动态清单会撤回已消失的岗位，保留原始事件审计。"
     }
   },
   {
