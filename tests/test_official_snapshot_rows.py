@@ -121,7 +121,10 @@ def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) 
     pipeline = JobPipeline(settings, database)
     postings = OfficialSourceCollector(settings).collect(source)
 
-    assert len(postings) == 12
+    # The browser-verified pagination pass covered all 8 pages and retained
+    # only the 33 rows with explicit geoscience evidence. Keep the exact count
+    # here so a future collector change cannot silently shrink the snapshot.
+    assert len(postings) == 33
     assert all(
         posting.official_evidence_url
         == "https://www.cmgb.com.cn/content/2026/09-25/7509048960149884928.html"
@@ -131,11 +134,20 @@ def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) 
     assert all(posting.deadline_date == "2026-11-06" for posting in postings)
 
     normalized = [pipeline.normalize_posting(posting, source) for posting in postings]
-    assert len(normalized) == 12
+    assert len(normalized) == 33
     statuses = [item["publication_status"] for item in normalized]
-    assert statuses.count("student_eligible") == 9
-    assert statuses.count("pending_evidence") == 2
-    assert statuses.count("out_of_scope") == 1
+    assert statuses.count("student_eligible") == 21
+    assert statuses.count("pending_evidence") == 9
+    assert statuses.count("out_of_scope") == 3
+    assert all(
+        posting.field_evidence["招聘人数"]
+        and posting.field_evidence["学历要求"]
+        and posting.field_evidence["工作地点"]
+        and posting.field_evidence["报名截止"]
+        and posting.field_evidence["专业范围"]
+        and posting.field_evidence["官方详情链接"]
+        for posting in postings
+    )
     assert all(
         item["publication_status"] != "student_eligible"
         or "地质" in item["field_evidence"]["专业范围"]

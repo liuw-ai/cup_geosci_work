@@ -939,11 +939,11 @@
     "config": {
       "allowed_hosts": ["www.cmgb.com.cn", "cmgb.iguopin.com", "www.iguopin.com"],
       "minimum_relevance": 40,
-      "snapshot_path": "data/verified/cmgb-iguopin-geoscience-20260926.json",
+      "snapshot_path": "data/verified/cmgb-iguopin-geoscience-20260927.json",
       "official_evidence_url": "https://www.cmgb.com.cn/content/2026/09-25/7509048960149884928.html",
       "application_url": "https://cmgb.iguopin.com/jobCampus",
       "official_search_url": "https://cmgb.iguopin.com/jobCampus",
-      "note": "中国冶金地质总局官网于2026-09-25发布2027届校园招聘公告，公告指向官方国聘校园招聘系统。快照中的12条记录均逐条打开国聘详情页核验，保存了岗位级专业、学历、地点、人数、截止日期和详情链接。只纳入明确包含资源勘查工程、地质学、地质工程或地质资源与地质工程等地学专业的岗位；化探、水文、城乡规划、行政和财会等不符合本项目专业边界的岗位不纳入。该快照是动态系统服务器适配器完成前的人工核验桥接，不代表国聘页面全部分页已完成导出；未核验分页继续保留在采集任务中。"
+      "note": "中国冶金地质总局官网于2026-09-25发布2027届校园招聘公告，公告指向官方国聘校园招聘系统。2026-09-27已通过浏览器逐页打开8页列表（146/146条详情成功），新快照保存33条含岗位级专业证据的地学候选；其余详情因专业或学历不匹配不发布。每条保留官方国聘详情页和总局公告证据、专业、学历、地点、人数、截止日期。动态系统尚未形成服务器自动采集适配器，快照只代表本次可复核记录，不代表后续分页永久不变；每日同步应在快照更新前保留来源状态。"
     }
   },
   {
