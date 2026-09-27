@@ -368,3 +368,51 @@ def test_cmgb_detail_parser_extracts_major_from_condition_sentence() -> None:
         allowed_hosts=set(HOSTS),
     )
     assert detail["major"] == "地球化学等化探类相关专业"
+
+
+def test_cmgb_detail_parser_prefers_precise_requirement_over_generic_overview() -> None:
+    """A broad overview label must not hide job-level target-major evidence."""
+    page = _HtmlFixturePage(
+        """
+        <main>
+          <div class="title">地质专业技术岗</div>
+          <div class="company-title">示例地质单位</div>
+          <span class="address">全国项目地</span>
+          <div class="overview-item"><span class="overview-title">专业要求：</span><span class="overview-desc">地质类</span></div>
+          <div class="overview-item"><span class="overview-title">最低学历：</span><span class="overview-desc">本科</span></div>
+          <div class="overview-item"><span class="overview-title">招聘人数：</span><span class="overview-desc">2人</span></div>
+          <div class="overview-item"><span class="overview-title">报名截止：</span><span class="overview-desc">2026-11-06 23:59:59</span></div>
+          <div class="job-duty">一、岗位职责：开展区域地质调查。二、任职要求：1.专业背景：地质学、资源勘查工程等相关专业。2.能适应野外工作。</div>
+        </main>
+        """
+    )
+    detail = extract_cmgb_detail(
+        page,
+        detail_url="https://www.iguopin.com/job/detail?id=generic-overview",
+        allowed_hosts=set(HOSTS),
+    )
+    assert detail["major"] == "地质学、资源勘查工程等相关专业"
+
+
+def test_cmgb_detail_parser_keeps_generic_overview_without_precise_detail() -> None:
+    """No prose evidence means no invented exact major requirement."""
+    page = _HtmlFixturePage(
+        """
+        <main>
+          <div class="title">地质专业技术岗</div>
+          <div class="company-title">示例地质单位</div>
+          <span class="address">北京</span>
+          <div class="overview-item"><span class="overview-title">专业要求：</span><span class="overview-desc">地质类</span></div>
+          <div class="overview-item"><span class="overview-title">最低学历：</span><span class="overview-desc">本科</span></div>
+          <div class="overview-item"><span class="overview-title">招聘人数：</span><span class="overview-desc">1人</span></div>
+          <div class="overview-item"><span class="overview-title">报名截止：</span><span class="overview-desc">2026-11-06</span></div>
+          <div class="job-duty">从事地质相关技术工作。</div>
+        </main>
+        """
+    )
+    detail = extract_cmgb_detail(
+        page,
+        detail_url="https://www.iguopin.com/job/detail?id=generic-only",
+        allowed_hosts=set(HOSTS),
+    )
+    assert detail["major"] == "地质类"

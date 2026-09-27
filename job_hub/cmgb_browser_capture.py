@@ -249,19 +249,55 @@ def _is_major_placeholder(value: str) -> bool:
     }
 
 
+def _is_generic_major_summary(value: str) -> bool:
+    """Return whether an overview value needs its detail prose to disambiguate it.
+
+    A category such as ``地质类`` is useful discovery metadata, but does not
+    prove that one of the four supported CUPB Geoscience programmes is
+    eligible.  The same official detail frequently provides a precise
+    ``专业背景`` or ``专业需求`` sentence below the overview.  We only replace
+    the generic summary when that sentence is present; otherwise the normal
+    student-publication gate still rejects the ambiguous category.
+    """
+
+    normalized = " ".join(str(value or "").split()).strip(" 。；;：:")
+    generic_labels = {
+        "地质类",
+        "资源勘查类",
+        "地球物理学类",
+        "地球化学类",
+        "水文地质类",
+        "矿业类",
+        "地球科学类",
+    }
+    values = {
+        item.strip()
+        for item in re.split(r"[、，,；;]", normalized)
+        if item.strip()
+    }
+    return bool(values) and values.issubset(generic_labels)
+
+
 def _major_from_description(text: str) -> str:
     """Extract the explicit major line from 国聘's job-duty prose."""
 
     normalized = " ".join(str(text or "").split()).strip()
     if not normalized:
         return ""
-    match = re.search(
-        r"专业要求\s*[：:]\s*(.+?)(?=\s*(?:二、|2[、.．)]|职责描述|岗位职责|任职要求|工作内容|$))",
-        normalized,
-        flags=re.IGNORECASE,
-    )
-    if match:
-        return " ".join(match.group(1).split()).strip(" ：:;；")
+    labels = ("专业要求", "专业范围", "需求专业", "专业背景", "专业需求", "所学专业")
+    for label in labels:
+        match = re.search(
+            rf"{re.escape(label)}\s*[：:]\s*(.+?)(?=\s*(?:"
+            r"[二三四五六七八九十]+、|\d+[、.．)]|职责描述|岗位职责|任职要求|"
+            r"工作内容|专业技能|现场执行能力|实践与规范意识|个人素质|适应能力|"
+            r"软件应用|$)|[。；;])",
+            normalized,
+            flags=re.IGNORECASE,
+        )
+        if match:
+            value = " ".join(match.group(1).split()).strip(" ：:;；")
+            if value:
+                return value
 
     # Some official details put the major only in an employment-condition
     # sentence, for example ``具备地球化学等化探类相关专业``.  This remains
@@ -330,10 +366,12 @@ def extract_cmgb_detail(page: Any, *, detail_url: str, allowed_hosts: set[str]) 
         (".company-title", ".company-name", ".requirement .company-name", ".company"),
     )
     major = _overview_value(page, ("专业要求", "专业范围", "需求专业"))
-    if _is_major_placeholder(major) or not major:
-        major = _major_from_description(duty) or _label_value(
-            duty or body, ("专业要求", "专业范围", "需求专业", "专业")
-        )
+    detail_major = _major_from_description(duty)
+    if _is_major_placeholder(major) or not major or _is_generic_major_summary(major):
+        major = detail_major or _label_value(
+            duty or body,
+            ("专业要求", "专业范围", "需求专业", "专业背景", "专业需求", "所学专业", "专业"),
+        ) or major
     degree = _overview_value(page, ("最低学历", "学历要求", "学历")) or _label_value(
         body, ("最低学历", "学历要求", "学历")
     )
