@@ -1,14 +1,10 @@
-# The hostname must resolve to the server before Caddy can obtain a certificate.
-# For this deployment use jobs.cupdky.cn and keep APP_BASE_URL identical.
-# Caddy obtains and renews the certificate automatically when DNS and firewall
-# rules point the hostname at this server.
-jobs.cupdky.cn {
+# The formal hostname must resolve to the server before Caddy can obtain a
+# certificate. Caddy obtains and renews it automatically after DNS is live.
+(job_hub_proxy) {
     encode gzip
 
-    # Caddy runs beside the web service on the Compose network.
     reverse_proxy web:8080 {
         header_up Host {host}
-        header_up X-Forwarded-Proto {scheme}
         header_up X-Real-IP {remote_host}
     }
 
@@ -17,4 +13,15 @@ jobs.cupdky.cn {
         Referrer-Policy strict-origin-when-cross-origin
         X-Frame-Options SAMEORIGIN
     }
+}
+
+# Formal public hostname. Keep APP_BASE_URL identical to this hostname.
+jobs.cupdky.cn {
+    import job_hub_proxy
+}
+
+# Temporary access endpoint before the formal domain resolves. It is HTTP only
+# and must not be used in public materials because it has no TLS certificate.
+http://81.70.62.174 {
+    import job_hub_proxy
 }
