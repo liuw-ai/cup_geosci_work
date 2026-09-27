@@ -928,6 +928,25 @@
     }
   },
   {
+    "id": "cmgb-iguopin-2027-geoscience-snapshot",
+    "name": "中国冶金地质总局2027届校园招聘国聘地学岗位核验快照",
+    "publisher": "中国冶金地质总局",
+    "homepage_url": "https://www.cmgb.com.cn/content/2026/09-25/7509048960149884928.html",
+    "source_type": "official_snapshot_rows",
+    "category": "自然资源、地调与地勘",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "allowed_hosts": ["www.cmgb.com.cn", "cmgb.iguopin.com", "www.iguopin.com"],
+      "minimum_relevance": 40,
+      "snapshot_path": "data/verified/cmgb-iguopin-geoscience-20260926.json",
+      "official_evidence_url": "https://www.cmgb.com.cn/content/2026/09-25/7509048960149884928.html",
+      "application_url": "https://cmgb.iguopin.com/jobCampus",
+      "official_search_url": "https://cmgb.iguopin.com/jobCampus",
+      "note": "中国冶金地质总局官网于2026-09-25发布2027届校园招聘公告，公告指向官方国聘校园招聘系统。快照中的12条记录均逐条打开国聘详情页核验，保存了岗位级专业、学历、地点、人数、截止日期和详情链接。只纳入明确包含资源勘查工程、地质学、地质工程或地质资源与地质工程等地学专业的岗位；化探、水文、城乡规划、行政和财会等不符合本项目专业边界的岗位不纳入。该快照是动态系统服务器适配器完成前的人工核验桥接，不代表国聘页面全部分页已完成导出；未核验分页继续保留在采集任务中。"
+    }
+  },
+  {
     "id": "cnpc-bgp-recruitment",
     "name": "中国石油集团东方地球物理勘探有限责任公司公开招聘",
     "publisher": "中国石油集团东方地球物理勘探有限责任公司",

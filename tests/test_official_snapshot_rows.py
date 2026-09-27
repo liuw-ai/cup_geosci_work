@@ -108,6 +108,42 @@ def test_cupb_snapshot_rows_pass_the_same_publication_gate(tmp_path) -> None:
     assert statuses["cupb-460520-national-energy-unrestricted"] == "unrestricted_eligible"
 
 
+def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) -> None:
+    registry = json.loads(
+        (PROJECT_ROOT / "data" / "sources.json").read_text(encoding="utf-8")
+    )
+    source = next(
+        item for item in registry if item["id"] == "cmgb-iguopin-2027-geoscience-snapshot"
+    )
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    pipeline = JobPipeline(settings, database)
+    postings = OfficialSourceCollector(settings).collect(source)
+
+    assert len(postings) == 12
+    assert all(
+        posting.official_evidence_url
+        == "https://www.cmgb.com.cn/content/2026/09-25/7509048960149884928.html"
+        for posting in postings
+    )
+    assert all("www.iguopin.com/job/detail?id=" in posting.source_url for posting in postings)
+    assert all(posting.deadline_date == "2026-11-06" for posting in postings)
+
+    normalized = [pipeline.normalize_posting(posting, source) for posting in postings]
+    assert len(normalized) == 12
+    statuses = [item["publication_status"] for item in normalized]
+    assert statuses.count("student_eligible") == 9
+    assert statuses.count("pending_evidence") == 2
+    assert statuses.count("out_of_scope") == 1
+    assert all(
+        item["publication_status"] != "student_eligible"
+        or "地质" in item["field_evidence"]["专业范围"]
+        or "资源勘查工程" in item["field_evidence"]["专业范围"]
+        for item in normalized
+    )
+
+
 def test_cnpc_snapshot_exposes_opaque_detail_id_and_degraded_page_state(tmp_path) -> None:
     registry = json.loads(
         (PROJECT_ROOT / "data" / "sources.json").read_text(encoding="utf-8")
