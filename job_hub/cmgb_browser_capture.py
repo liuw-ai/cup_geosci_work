@@ -380,6 +380,10 @@ def run_cmgb_browser_capture(
         1_000, min(timeout_ms, int(config.get("detail_popup_timeout_ms", 5_000)))
     )
     detail_render_wait_ms = max(250, min(10_000, int(config.get("detail_render_wait_ms", 1_000))))
+    initial_render_wait_ms = max(
+        detail_render_wait_ms,
+        min(20_000, int(config.get("initial_render_wait_ms", 10_000))),
+    )
     rows: list[dict[str, Any]] = []
     seen: set[str] = set()
     pages_scanned = 0
@@ -387,6 +391,9 @@ def run_cmgb_browser_capture(
     detail_failed = 0
     detail_discovered = 0
     pagination_complete = False
+    browser = None
+    context = None
+    created_pages: list[Any] = []
     try:
         with sync_playwright() as playwright:
             cdp_url = str(config.get("cdp_url") or "").strip()
@@ -401,10 +408,13 @@ def run_cmgb_browser_capture(
                 browser = playwright.chromium.launch(headless=True)
                 context = browser.new_context(user_agent=user_agent)
             page = context.new_page()
+            created_pages.append(page)
             page.goto(target_url, wait_until="domcontentloaded", timeout=timeout_ms)
+            page.wait_for_timeout(initial_render_wait_ms)
             while pages_scanned < max_pages:
                 pages_scanned += 1
-                page.wait_for_selector(row_selector, timeout=timeout_ms)
+                page.wait_for_selector(row_selector, state="attached", timeout=timeout_ms)
+                page.locator(row_selector).first.wait_for(state="visible", timeout=timeout_ms)
                 cards = page.locator(row_selector)
                 for index in range(cards.count()):
                     card = cards.nth(index)
@@ -429,6 +439,7 @@ def run_cmgb_browser_capture(
                         )
                         if href:
                             detail_page = context.new_page()
+                            created_pages.append(detail_page)
                             detail_page.goto(
                                 urljoin(list_url, href),
                                 wait_until="domcontentloaded",
@@ -510,15 +521,29 @@ def run_cmgb_browser_capture(
                 if pages_scanned >= max_pages:
                     break
                 next_button.click()
-                page.wait_for_timeout(detail_render_wait_ms)
-                page.wait_for_selector(row_selector, timeout=timeout_ms)
-            browser.close()
+                page.wait_for_timeout(initial_render_wait_ms)
+                page.wait_for_selector(row_selector, state="attached", timeout=timeout_ms)
+                page.locator(row_selector).first.wait_for(state="visible", timeout=timeout_ms)
     except PlaywrightTimeoutError as error:
         raise BrowserCaptureError(f"CMGB browser page timed out: {error}") from error
     except BrowserCaptureError:
         raise
     except Exception as error:
         raise BrowserCaptureError(f"CMGB browser capture failed: {error}") from error
+    finally:
+        if browser is not None:
+            if str(config.get("cdp_url") or "").strip():
+                for opened_page in created_pages:
+                    try:
+                        if not opened_page.is_closed():
+                            opened_page.close()
+                    except Exception:
+                        pass
+            else:
+                try:
+                    browser.close()
+                except Exception:
+                    pass
 
     status = "success" if pagination_complete and failed_rows == 0 else "partial"
     payload = {
