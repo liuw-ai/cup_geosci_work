@@ -379,6 +379,7 @@ def run_cmgb_browser_capture(
     detail_popup_timeout_ms = max(
         1_000, min(timeout_ms, int(config.get("detail_popup_timeout_ms", 5_000)))
     )
+    detail_render_wait_ms = max(250, min(10_000, int(config.get("detail_render_wait_ms", 1_000))))
     rows: list[dict[str, Any]] = []
     seen: set[str] = set()
     pages_scanned = 0
@@ -400,7 +401,7 @@ def run_cmgb_browser_capture(
                 browser = playwright.chromium.launch(headless=True)
                 context = browser.new_context(user_agent=user_agent)
             page = context.new_page()
-            page.goto(target_url, wait_until="networkidle", timeout=timeout_ms)
+            page.goto(target_url, wait_until="domcontentloaded", timeout=timeout_ms)
             while pages_scanned < max_pages:
                 pages_scanned += 1
                 page.wait_for_selector(row_selector, timeout=timeout_ms)
@@ -418,7 +419,9 @@ def run_cmgb_browser_capture(
                         fold = card.locator(".fold").first
                         if fold.count() and fold.is_visible():
                             fold.click()
-                        detail_link = card.locator("a[href]").filter(has_text="查看").first
+                        detail_link = card.locator("a[href]").filter(
+                            has_text=re.compile(r"查\s*看")
+                        ).first
                         href = (
                             str(detail_link.get_attribute("href") or "").strip()
                             if detail_link.count()
@@ -431,9 +434,13 @@ def run_cmgb_browser_capture(
                                 wait_until="domcontentloaded",
                                 timeout=timeout_ms,
                             )
-                        detail_button = card.locator(detail_button_selector).filter(has_text="查看").first
+                        detail_button = card.locator(detail_button_selector).filter(
+                            has_text=re.compile(r"查\s*看")
+                        ).first
                         if not detail_button.count():
-                            detail_button = card.get_by_text("查看", exact=True).first
+                            detail_button = card.get_by_text(
+                                re.compile(r"查\s*看"), exact=True
+                            ).first
                         if detail_page is None and not detail_button.count():
                             raise BrowserCaptureError("CMGB card has no 查看 detail control")
                         if detail_page is None:
@@ -445,9 +452,8 @@ def run_cmgb_browser_capture(
                                 # Some deployments use an SPA route in the same
                                 # tab.  The click has already happened; use the
                                 # current page only when its route/content changed.
-                                page.wait_for_load_state(
-                                    "domcontentloaded", timeout=timeout_ms
-                                )
+                                page.wait_for_load_state("domcontentloaded", timeout=timeout_ms)
+                                page.wait_for_timeout(detail_render_wait_ms)
                                 if page.url == list_url and page.locator(row_selector).count():
                                     raise BrowserCaptureError(
                                         "CMGB 查看 control did not open an official detail route"
@@ -455,6 +461,7 @@ def run_cmgb_browser_capture(
                                 detail_page = page
                                 detail_page_is_current = True
                         detail_page.wait_for_load_state("domcontentloaded", timeout=timeout_ms)
+                        detail_page.wait_for_timeout(detail_render_wait_ms)
                         detail_url = detail_page.url
                         detail = extract_cmgb_detail(detail_page, detail_url=detail_url, allowed_hosts=hosts)
                         if not detail_page_is_current:
@@ -503,7 +510,8 @@ def run_cmgb_browser_capture(
                 if pages_scanned >= max_pages:
                     break
                 next_button.click()
-                page.wait_for_load_state("networkidle", timeout=timeout_ms)
+                page.wait_for_timeout(detail_render_wait_ms)
+                page.wait_for_selector(row_selector, timeout=timeout_ms)
             browser.close()
     except PlaywrightTimeoutError as error:
         raise BrowserCaptureError(f"CMGB browser page timed out: {error}") from error
