@@ -441,3 +441,25 @@ def test_cmgb_detail_parser_keeps_generic_overview_without_precise_detail() -> N
         allowed_hosts=set(HOSTS),
     )
     assert detail["major"] == "地质类"
+
+
+def test_cmgb_detail_allows_official_card_employer_fallback() -> None:
+    page = _HtmlFixturePage(
+        """
+        <main>
+          <div class="title">地质勘查技术岗</div>
+          <span class="address">北京</span>
+          <div class="overview-item"><span class="overview-title">专业要求：</span><span class="overview-desc">地质工程</span></div>
+          <div class="overview-item"><span class="overview-title">最低学历：</span><span class="overview-desc">本科</span></div>
+          <div class="overview-item"><span class="overview-title">招聘人数：</span><span class="overview-desc">1人</span></div>
+          <div class="overview-item"><span class="overview-title">报名截止：</span><span class="overview-desc">2026-11-06</span></div>
+        </main>
+        """
+    )
+    detail = extract_cmgb_detail(
+        page,
+        detail_url="https://www.iguopin.com/job/detail?id=card-fallback",
+        allowed_hosts=set(HOSTS),
+        require_employer=False,
+    )
+    assert detail["employer"] == ""

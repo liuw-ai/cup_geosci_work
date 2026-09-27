@@ -394,7 +394,13 @@ def _label_value(text: str, labels: Iterable[str]) -> str:
     return ""
 
 
-def extract_cmgb_detail(page: Any, *, detail_url: str, allowed_hosts: set[str]) -> dict[str, Any]:
+def extract_cmgb_detail(
+    page: Any,
+    *,
+    detail_url: str,
+    allowed_hosts: set[str],
+    require_employer: bool = True,
+) -> dict[str, Any]:
     """Extract fields from a rendered official detail tab.
 
     Reading ``body.inner_text`` deliberately supports both text and generic
@@ -447,7 +453,13 @@ def extract_cmgb_detail(page: Any, *, detail_url: str, allowed_hosts: set[str]) 
         "headcount": headcount,
         "deadline": deadline,
     }
-    missing = [field for field, value in values.items() if not value and field != "major"]
+    missing = [
+        field
+        for field, value in values.items()
+        if not value
+        and field != "major"
+        and (field != "employer" or require_employer)
+    ]
     if not values["major"] or _is_major_placeholder(values["major"]):
         missing.append("major evidence")
     if missing:
@@ -653,7 +665,23 @@ def run_cmgb_browser_capture(
                             # also insufficient.
                             pass
                         detail_url = detail_page.url
-                        detail = extract_cmgb_detail(detail_page, detail_url=detail_url, allowed_hosts=hosts)
+                        detail = extract_cmgb_detail(
+                            detail_page,
+                            detail_url=detail_url,
+                            allowed_hosts=hosts,
+                            # A single 国聘 detail occasionally omits the
+                            # employer while its official list card still
+                            # displays it. The card and detail are the same
+                            # first-party record; use that value only as a
+                            # controlled fallback, and still fail if both are
+                            # absent.
+                            require_employer=False,
+                        )
+                        resolved_employer = str(detail.get("employer") or employer).strip()
+                        if not resolved_employer:
+                            raise BrowserCaptureError(
+                                "CMGB detail and official list card are missing employer"
+                            )
                         if not detail_page_is_current:
                             detail_page.close()
                         else:
@@ -673,7 +701,7 @@ def run_cmgb_browser_capture(
                         rows.append({
                             "external_id": external_id,
                             "title": detail["title"] or title,
-                            "employer": detail["employer"] or employer,
+                            "employer": resolved_employer,
                             "major": detail["major"],
                             "degree": detail["degree"],
                             "location": detail["location"],
