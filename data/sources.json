@@ -947,6 +947,30 @@
     }
   },
   {
+    "id": "cmgb-iguopin-browser",
+    "name": "中国冶金地质总局国聘校园招聘动态浏览器采集（待首轮服务器核验）",
+    "publisher": "中国冶金地质总局",
+    "homepage_url": "https://cmgb.iguopin.com/jobCampus",
+    "source_type": "cmgb_browser_rows",
+    "category": "自然资源、地调与地勘",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "browser_url": "https://cmgb.iguopin.com/jobCampus",
+      "application_url": "https://cmgb.iguopin.com/jobCampus",
+      "capture_path": "captures/cmgb-iguopin-browser.json",
+      "allowed_hosts": ["cmgb.iguopin.com", "www.iguopin.com", "iguopin.com", "www.cmgb.com.cn"],
+      "max_age_hours": 30,
+      "require_complete_scan": true,
+      "minimum_relevance": 40,
+      "max_items": 2000,
+      "row_selector": ".ant-card",
+      "next_selector": ".ant-pagination-next",
+      "detail_button_selector": "button",
+      "note": "先由 cmgb-browser 在服务器完成一次真实完整捕获，并核对分页、详情字段和专业门禁；在首轮捕获通过前保持 disabled，避免动态采集器与人工快照重复计数。"
+    }
+  },
+  {
     "id": "cnpc-bgp-recruitment",
     "name": "中国石油集团东方地球物理勘探有限责任公司公开招聘",
     "publisher": "中国石油集团东方地球物理勘探有限责任公司",

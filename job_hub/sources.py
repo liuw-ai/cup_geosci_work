@@ -49,6 +49,10 @@ from job_hub.transport import (
 )
 from job_hub.browser_capture import BrowserCaptureError, load_browser_capture
 from job_hub.cnpc_browser_capture import CnpcJobCaptureError, load_cnpc_job_capture
+from job_hub.cmgb_browser_capture import (
+    CmgbBrowserCaptureError,
+    load_cmgb_browser_capture,
+)
 from job_hub.sinopec import load_sinopec_capture
 
 
@@ -396,6 +400,8 @@ class OfficialSourceCollector:
             return self._collect_official_browser_rows(source)
         if source_type == "cnpc_browser_rows":
             return self._collect_cnpc_browser_rows(source)
+        if source_type == "cmgb_browser_rows":
+            return self._collect_cmgb_browser_rows(source)
         if source_type == "sinopec_spa_rows":
             return self._collect_sinopec_spa_rows(source)
         if source_type in {"html_notice", "landing_page"}:
@@ -559,6 +565,91 @@ class OfficialSourceCollector:
             )
         if not postings:
             raise SourceCollectionError("CNPC job capture contains no publishable rows")
+        return postings
+
+    def _collect_cmgb_browser_rows(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Consume a complete CMGB/国聘 list-plus-detail browser capture.
+
+        The browser worker owns pagination and detail-tab interaction.  This
+        adapter only accepts its validated manifest, then routes every row
+        through the ordinary professional-match and expiry gates.  A partial
+        capture is a source failure, never a zero-result success.
+        """
+
+        config = source["config"]
+        capture_path = Path(self.settings.data_dir) / str(config["capture_path"])
+        try:
+            payload = load_cmgb_browser_capture(
+                capture_path,
+                allowed_hosts=list(config.get("allowed_hosts", [])),
+                max_age_hours=float(config.get("max_age_hours", 30)),
+                require_complete_scan=bool(config.get("require_complete_scan", True)),
+            )
+        except CmgbBrowserCaptureError as error:
+            message = str(error)
+            if "not publishable" in message or "incomplete" in message or "stale" in message:
+                raise SourceSkipped(message) from error
+            raise SourceCollectionError(message) from error
+
+        postings: list[RawPosting] = []
+        max_items = min(self._item_limit(source), 2_000)
+        for item in payload["rows"][:max_items]:
+            raw_deadline = str(item["deadline"]).strip()
+            deadline_date = parse_date_value(raw_deadline)
+            if not deadline_date:
+                raise SourceCollectionError(
+                    f"CMGB job {item['external_id']} has no parseable deadline"
+                )
+            major = str(item["major"]).strip()
+            degree = str(item["degree"]).strip()
+            location = str(item["location"]).strip()
+            evidence = {
+                "evidence_scope": "official_cmgb_browser_detail",
+                "captured_at": str(payload["captured_at"]),
+                "岗位": str(item["title"]).strip(),
+                "招聘单位": str(item["employer"]).strip(),
+                "专业范围": major,
+                "学历要求": degree,
+                "工作地点": location,
+                "招聘人数": str(item["headcount"]).strip(),
+                "报名截止": raw_deadline,
+                "官方详情链接": str(item["detail_url"]).strip(),
+                **{
+                    str(key): str(value)
+                    for key, value in item["field_evidence"].items()
+                },
+            }
+            postings.append(
+                RawPosting(
+                    title=str(item["title"]).strip(),
+                    employer=str(item["employer"]).strip(),
+                    source_url=str(item["detail_url"]).strip(),
+                    application_url=str(
+                        item.get("application_url") or config.get("application_url") or payload["platform_url"]
+                    ).strip(),
+                    text=clean_text(
+                        f"{item['title']}；专业要求：{major}；学历要求：{degree}；"
+                        f"工作地点：{location}；招聘人数：{item['headcount']}；"
+                        f"截止时间：{raw_deadline}；{item.get('description') or ''}"
+                    ),
+                    summary=clean_text(
+                        f"{item['title']}；{item['employer']}；{location}；"
+                        f"招聘 {item['headcount']} 人；截止 {raw_deadline}"
+                    ),
+                    published_date=str(item.get("published_date") or "").strip() or None,
+                    deadline_date=deadline_date,
+                    location=location,
+                    external_id=str(item["external_id"]).strip(),
+                    match_text=clean_text(f"{item['title']} {major} {degree}"),
+                    official_evidence_url=str(item["evidence_url"]).strip(),
+                    field_evidence=evidence,
+                    qualification_text=clean_text(
+                        f"学历要求：{degree}；专业要求：{major}"
+                    ),
+                )
+            )
+        if not postings:
+            raise SourceCollectionError("CMGB browser capture contains no publishable rows")
         return postings
 
     def _collect_official_snapshot_rows(
