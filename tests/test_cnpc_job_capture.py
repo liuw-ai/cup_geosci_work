@@ -161,7 +161,10 @@ def test_cnpc_job_capture_rejects_unknown_announcement(tmp_path: Path) -> None:
 def test_cnpc_job_source_converts_verified_rows(tmp_path: Path) -> None:
     _write_capture(tmp_path)
     settings = make_settings(tmp_path)
-    postings = OfficialSourceCollector(settings).collect(_source(tmp_path))
+    source = _source(tmp_path)
+    # This test checks row conversion, not the wall-clock freshness gate.
+    source["config"]["max_age_hours"] = 100_000  # type: ignore[index]
+    postings = OfficialSourceCollector(settings).collect(source)
     assert len(postings) == 1
     assert postings[0].external_id == "cnpc-daqing-27011103"
     assert postings[0].official_evidence_url.endswith("id=daqing")

@@ -112,6 +112,10 @@ JOB_LEVEL_EVIDENCE_SCOPES = frozenset(
         # snapshot.  It is still job-level evidence: the capture stores the
         # detail title, major field and degree field for the same row.
         "official_sinopec_detail_snapshot",
+        # A server-side Playwright capture of the public GuoPin detail route.
+        # The capture manifest binds the title, major, degree, location,
+        # headcount and deadline to the same official detail URL.
+        "official_cmgb_browser_detail",
         "admin_verified_official_record",
     }
 )

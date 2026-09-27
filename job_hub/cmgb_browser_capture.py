@@ -17,7 +17,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
-from urllib.parse import urljoin, urlparse
+from urllib.parse import parse_qs, urljoin, urlparse
 
 from job_hub.browser_capture import BrowserCaptureError, _robots_permit
 from job_hub.cnpc_browser_runner import _resolve_cdp_websocket
@@ -220,6 +220,62 @@ def _first_text(container: Any, selectors: Iterable[str]) -> str:
     return ""
 
 
+def _overview_value(page: Any, labels: Iterable[str]) -> str:
+    """Read a value from 国聘's structured overview block.
+
+    The overview is more reliable than matching the whole body because the
+    live page deliberately renders ``专业要求：详见职位描述`` while the
+    actual professional evidence is in the job-duty section below it.
+    """
+
+    wanted = {str(label).strip().rstrip("：:") for label in labels}
+    items = page.locator(".overview-item")
+    for index in range(items.count()):
+        item = items.nth(index)
+        label = _first_text(item, (".overview-title",)).rstrip("：:")
+        if label not in wanted:
+            continue
+        value = _first_text(item, (".overview-desc",))
+        if value:
+            return value
+    return ""
+
+
+def _is_major_placeholder(value: str) -> bool:
+    return " ".join(str(value or "").split()).strip() in {
+        "详见职位描述",
+        "见职位描述",
+        "请见职位描述",
+    }
+
+
+def _major_from_description(text: str) -> str:
+    """Extract the explicit major line from 国聘's job-duty prose."""
+
+    normalized = " ".join(str(text or "").split()).strip()
+    if not normalized:
+        return ""
+    match = re.search(
+        r"专业要求\s*[：:]\s*(.+?)(?=\s*(?:二、|2[、.．)]|职责描述|岗位职责|任职要求|工作内容|$))",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if match:
+        return " ".join(match.group(1).split()).strip(" ：:;；")
+
+    # Some official details put the major only in an employment-condition
+    # sentence, for example ``具备地球化学等化探类相关专业``.  This remains
+    # job-level evidence, while the student publication gate decides whether
+    # the wording is an exact target-major match or needs review.
+    condition = re.search(
+        r"(?:具备|要求|(?:【)?任职条件(?:】)?|专业背景|所学专业)\s*[：:]?\s*"
+        r"(?:\d+[.、)]\s*)*([^。；;\n]{1,120}?专业)(?:[^。；;\n]{0,24})?(?:[。；;]|$)",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    return " ".join(condition.group(1).split()).strip(" ：:;；") if condition else ""
+
+
 def _label_value(text: str, labels: Iterable[str]) -> str:
     all_labels = (
         "专业要求",
@@ -267,13 +323,29 @@ def extract_cmgb_detail(page: Any, *, detail_url: str, allowed_hosts: set[str]) 
 
     official_detail_url = _official_url(detail_url, "detail_url", allowed_hosts)
     body = _body_text(page)
-    title = _first_text(page, (".job-name", "h1", "h2"))
-    employer = _first_text(page, (".company-name", ".requirement .company-name", ".company"))
-    major = _label_value(body, ("专业要求", "专业范围", "需求专业", "专业"))
-    degree = _label_value(body, ("最低学历", "学历要求", "学历"))
-    location = _label_value(body, ("工作地点", "工作城市", "工作地区", "地点"))
-    headcount = _label_value(body, ("招聘人数", "需求人数", "人数"))
-    deadline = _label_value(body, ("报名截止", "截止日期", "截止时间"))
+    duty = _first_text(page, (".job-duty", ".job-introduction", ".job-description"))
+    title = _first_text(page, (".job-banner .title", ".title", ".job-name", "h1", "h2"))
+    employer = _first_text(
+        page,
+        (".company-title", ".company-name", ".requirement .company-name", ".company"),
+    )
+    major = _overview_value(page, ("专业要求", "专业范围", "需求专业"))
+    if _is_major_placeholder(major) or not major:
+        major = _major_from_description(duty) or _label_value(
+            duty or body, ("专业要求", "专业范围", "需求专业", "专业")
+        )
+    degree = _overview_value(page, ("最低学历", "学历要求", "学历")) or _label_value(
+        body, ("最低学历", "学历要求", "学历")
+    )
+    location = _first_text(page, (".job-banner .address", ".address")) or _overview_value(
+        page, ("工作地点", "工作城市", "工作地区", "地点")
+    ) or _label_value(body, ("工作地点", "工作城市", "工作地区", "地点"))
+    headcount = _overview_value(page, ("招聘人数", "需求人数", "人数")) or _label_value(
+        body, ("招聘人数", "需求人数", "人数")
+    )
+    deadline = _overview_value(page, ("报名截止", "截止日期", "截止时间")) or _label_value(
+        body, ("报名截止", "截止日期", "截止时间")
+    )
     values = {
         "title": title or _label_value(body, ("岗位名称", "职位名称")),
         "employer": employer or _label_value(body, ("招聘单位", "用人单位", "单位")),
@@ -283,7 +355,9 @@ def extract_cmgb_detail(page: Any, *, detail_url: str, allowed_hosts: set[str]) 
         "headcount": headcount,
         "deadline": deadline,
     }
-    missing = [field for field, value in values.items() if not value]
+    missing = [field for field, value in values.items() if not value and field != "major"]
+    if not values["major"] or _is_major_placeholder(values["major"]):
+        missing.append("major evidence")
     if missing:
         raise BrowserCaptureError(
             "CMGB detail is missing required fields: " + ", ".join(missing)
@@ -302,7 +376,7 @@ def extract_cmgb_detail(page: Any, *, detail_url: str, allowed_hosts: set[str]) 
         "detail_url": official_detail_url,
         "evidence_url": official_detail_url,
         "field_evidence": evidence,
-        "description": body,
+        "description": duty or body,
     }
 
 
@@ -390,6 +464,7 @@ def run_cmgb_browser_capture(
     failed_rows = 0
     detail_failed = 0
     detail_discovered = 0
+    failure_records: list[dict[str, Any]] = []
     pagination_complete = False
     browser = None
     context = None
@@ -422,10 +497,11 @@ def run_cmgb_browser_capture(
                     list_url = page.url
                     detail_page = None
                     detail_page_is_current = False
+                    card_id = f"page-{pages_scanned}-row-{index + 1}"
                     try:
                         title = _first_text(card, (".job-name", "h3", "h4"))
                         employer = _first_text(card, (".company-name", ".requirement .company-name"))
-                        card_id = card.get_attribute("data-id") or card.get_attribute("id") or f"page-{pages_scanned}-row-{index + 1}"
+                        card_id = card.get_attribute("data-id") or card.get_attribute("id") or card_id
                         fold = card.locator(".fold").first
                         if fold.count() and fold.is_visible():
                             fold.click()
@@ -473,6 +549,17 @@ def run_cmgb_browser_capture(
                                 detail_page_is_current = True
                         detail_page.wait_for_load_state("domcontentloaded", timeout=timeout_ms)
                         detail_page.wait_for_timeout(detail_render_wait_ms)
+                        try:
+                            detail_page.locator(
+                                ".job-duty, .job-introduction, .job-description"
+                            ).first.wait_for(
+                                state="visible", timeout=min(timeout_ms, 5_000)
+                            )
+                        except PlaywrightTimeoutError:
+                            # Some valid details do not have a prose block; the
+                            # field parser will fail closed if the overview is
+                            # also insufficient.
+                            pass
                         detail_url = detail_page.url
                         detail = extract_cmgb_detail(detail_page, detail_url=detail_url, allowed_hosts=hosts)
                         if not detail_page_is_current:
@@ -480,7 +567,12 @@ def run_cmgb_browser_capture(
                         else:
                             page.go_back(wait_until="domcontentloaded", timeout=timeout_ms)
                             page.wait_for_selector(row_selector, timeout=timeout_ms)
-                        external_id = str(card_id).strip()
+                        detail_id = parse_qs(urlparse(detail["detail_url"]).query).get("id", [""])[0].strip()
+                        external_id = (
+                            f"cmgb-iguopin-{detail_id}"
+                            if detail_id
+                            else str(card_id).strip()
+                        )
                         if external_id in seen:
                             raise BrowserCaptureError(
                                 f"duplicate CMGB card identifier: {external_id}"
@@ -500,12 +592,21 @@ def run_cmgb_browser_capture(
                             "description": detail["description"],
                             "field_evidence": detail["field_evidence"],
                         })
-                    except Exception:
+                    except Exception as error:
                         if detail_page is not None and not detail_page_is_current:
                             try:
                                 detail_page.close()
                             except Exception:
                                 pass
+                        failure_records.append(
+                            {
+                                "page": pages_scanned,
+                                "row": index + 1,
+                                "card_id": str(card_id),
+                                "detail_url": str(detail_page.url) if detail_page is not None else "",
+                                "reason": str(error)[:500],
+                            }
+                        )
                         failed_rows += 1
                         detail_failed += 1
                 next_button = page.locator(next_selector).first
@@ -560,6 +661,7 @@ def run_cmgb_browser_capture(
             "detail_discovered": detail_discovered,
             "detail_succeeded": len(rows),
             "detail_failed": detail_failed,
+            "failure_records": failure_records,
         },
         "rows": rows,
     }
