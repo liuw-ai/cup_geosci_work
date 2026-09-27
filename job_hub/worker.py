@@ -142,20 +142,46 @@ class DailyWorker:
             registry = load_position_registry(path)
         except Exception as error:  # noqa: BLE001 - keep registry failures visible
             LOGGER.error("Government position registry unavailable: %s", error)
-            return {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0, "error": 1}
+            return {
+                "created": 0,
+                "updated": 0,
+                "unchanged": 0,
+                "skipped": 0,
+                "withdrawn": 0,
+                "error": 1,
+            }
         today = datetime.now(self.timezone).date().isoformat()
-        counts = {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0, "error": 0}
+        counts = {
+            "created": 0,
+            "updated": 0,
+            "unchanged": 0,
+            "skipped": 0,
+            "withdrawn": 0,
+            "error": 0,
+        }
         existing_jobs, _ = self.database.list_jobs(
             page_size=None, only_open=False, student_visible=False
         )
         used_existing_ids: set[int] = set()
-        for record in current_publishable_position_records(registry, today=today):
-            source = self.database.get_source(str(record["source_id"]))
+        current_records = current_publishable_position_records(
+            registry,
+            today=today,
+            max_age_hours=self.settings.government_position_max_age_hours,
+        )
+        current_ids_by_source: dict[str, set[str]] = {}
+        reconcile_source_ids: set[str] = set()
+        for record in current_records:
+            source_id = str(record["source_id"])
+            source = self.database.get_source(source_id)
             if source is None:
                 counts["skipped"] += 1
-                LOGGER.error("Government position source is not registered: %s", record["source_id"])
+                LOGGER.error("Government position source is not registered: %s", source_id)
                 continue
+            reconcile_source_ids.add(source_id)
             posting = position_record_to_posting(record)
+            current_ids_by_source.setdefault(source_id, set()).add(
+                str(posting.external_id)
+            )
             equivalent = self._find_equivalent_government_job(
                 existing_jobs,
                 record,
@@ -179,6 +205,32 @@ class DailyWorker:
                 counts[outcome] += 1
             if equivalent is None:
                 existing_jobs.append(normalized)
+        # Government rows are fed by a reviewed registry rather than a normal
+        # network collector. Reconcile each registered source explicitly so a
+        # closed deadline, removed table row, or stale registry cannot leave an
+        # old vacancy open forever. An empty set is intentional when the
+        # registry freshness gate fails; it withdraws the old rows and the
+        # quality report records the reason separately.
+        registry_source_ids = {
+            str(item.get("source_id") or "")
+            for item in registry.get("records", [])
+            if str(item.get("source_id") or "").strip()
+        }
+        # A missing source registration is an operator/configuration failure,
+        # not a complete scan. Do not clear its existing jobs in that case.
+        reconcile_source_ids.update(
+            source_id
+            for source_id in registry_source_ids
+            if self.database.get_source(source_id) is not None
+        )
+        for source_id in reconcile_source_ids:
+            counts["withdrawn"] += self.database.withdraw_missing_source_jobs(
+                source_id,
+                current_ids_by_source.get(source_id, set()),
+                reason=(
+                    "政府职位表复核快照中已不再出现该岗位，或快照超过新鲜度门禁。"
+                ),
+            )
         return counts
 
     @staticmethod

@@ -395,6 +395,11 @@ def main() -> None:
         help="覆盖审计日期，格式 YYYY-MM-DD",
     )
     government_position_parser.add_argument(
+        "--max-age-hours",
+        type=float,
+        help="可选：将超过该核验快照年龄的岗位标记为 stale",
+    )
+    government_position_parser.add_argument(
         "--output",
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
@@ -1174,7 +1179,11 @@ def main() -> None:
     if args.command == "government-position-audit":
         try:
             registry = load_position_registry(args.path)
-            result = government_position_quality_report(registry, today=args.today)
+            result = government_position_quality_report(
+                registry,
+                today=args.today,
+                max_age_hours=args.max_age_hours,
+            )
         except (OSError, ValueError) as error:
             print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
             raise SystemExit(1)

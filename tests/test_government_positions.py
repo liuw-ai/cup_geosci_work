@@ -28,6 +28,19 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
     assert "扫描成功" in report["scan_interpretation"]
 
 
+def test_stale_registry_report_excludes_rows_from_current_open_count() -> None:
+    registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
+    report = government_position_quality_report(
+        registry,
+        today="2026-09-30",
+        max_age_hours=48,
+    )
+
+    assert report["registry_freshness"] == "stale"
+    assert report["verified_open_records"] == 0
+    assert report["explicit_student_matches"] == 0
+
+
 def test_provincial_civil_service_scans_keep_closed_or_non_student_entries_out() -> None:
     registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
     assessments = {

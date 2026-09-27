@@ -294,10 +294,18 @@ def government_position_quality_report(
     registry: dict[str, Any] | None = None,
     *,
     today: str | None = None,
+    max_age_hours: float | None = None,
 ) -> dict[str, Any]:
     payload = registry or load_position_registry()
     records = list(payload.get("records", []))
     today_date = date.fromisoformat(today) if today else date.today()
+    as_of_date = date.fromisoformat(str(payload["as_of"]))
+    age_hours = max(0, (today_date - as_of_date).days * 24)
+    freshness_status = (
+        "fresh"
+        if max_age_hours is None or age_hours <= float(max_age_hours)
+        else "stale"
+    )
     status_counts = Counter(str(item["record_status"]) for item in records)
     type_counts = Counter(str(item["position_type"]) for item in records)
     province_counts = Counter(str(item["province"]) for item in records)
@@ -305,7 +313,8 @@ def government_position_quality_report(
     open_records = [
         item
         for item in records
-        if item["record_status"] == "verified_open"
+        if freshness_status == "fresh"
+        and item["record_status"] == "verified_open"
         and (not item["deadline_date"] or date.fromisoformat(item["deadline_date"]) >= today_date)
     ]
     explicit_matches = [
@@ -321,6 +330,9 @@ def government_position_quality_report(
     return {
         "as_of": payload.get("as_of"),
         "today": today_date.isoformat(),
+        "registry_age_hours": age_hours,
+        "registry_freshness": freshness_status,
+        "registry_max_age_hours": max_age_hours,
         "records": len(records),
         "source_assessments": len(payload.get("source_assessments") or []),
         "sources": len(source_counts),
@@ -371,10 +383,16 @@ def government_position_quality_report(
 
 
 def current_publishable_position_records(
-    registry: dict[str, Any], *, today: str,
+    registry: dict[str, Any], *, today: str, max_age_hours: float | None = None,
 ) -> list[dict[str, Any]]:
     """Return current official rows that passed the explicit student match gate."""
     target = date.fromisoformat(today)
+    raw_as_of = str(registry.get("as_of") or "").strip()
+    if raw_as_of:
+        as_of = date.fromisoformat(raw_as_of)
+        age_hours = max(0, (target - as_of).days * 24)
+        if max_age_hours is not None and age_hours > float(max_age_hours):
+            return []
     rows: list[dict[str, Any]] = []
     for item in registry.get("records", []):
         if item["record_status"] != "verified_open":

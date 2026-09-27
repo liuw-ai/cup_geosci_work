@@ -35,6 +35,27 @@ def test_current_publishable_rows_require_open_explicit_match() -> None:
     assert [item["id"] for item in current_publishable_position_records(registry, today="2026-09-26")] == ["open"]
 
 
+def test_stale_review_snapshot_is_not_publishable() -> None:
+    registry = {
+        "as_of": "2026-09-25",
+        "records": [
+            {
+                "id": "open",
+                "record_status": "verified_open",
+                "match_status": "explicit_match",
+                "deadline_date": "2026-10-01",
+                "deadline_policy": "fixed_date",
+            }
+        ],
+    }
+
+    assert current_publishable_position_records(
+        registry,
+        today="2026-09-28",
+        max_age_hours=48,
+    ) == []
+
+
 def test_position_record_preserves_notice_attachment_and_row_evidence() -> None:
     record = {
         "id": "anhui-2026-2026113",

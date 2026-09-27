@@ -97,7 +97,9 @@ def build_daily_report(
     if registry_path is not None:
         try:
             position_quality = government_position_quality_report(
-                load_position_registry(registry_path), today=target
+                load_position_registry(registry_path),
+                today=target,
+                max_age_hours=settings.government_position_max_age_hours,
             )
         except (OSError, ValueError) as error:
             position_registry_error = str(error)

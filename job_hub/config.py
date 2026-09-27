@@ -51,6 +51,10 @@ class Settings:
     artifact_storage_dir: Path | None = None
     government_artifact_manifest_path: Path | None = None
     government_position_registry_path: Path | None = None
+    # A registry is a reviewed snapshot, not a perpetual source.  Once it is
+    # older than this window, its rows are withdrawn until the official tables
+    # are re-checked and the registry's ``as_of`` date is advanced.
+    government_position_max_age_hours: int = 48
     attachment_max_bytes: int = 25_000_000
     attachment_discovery_max_bytes: int = 2_000_000
     attachment_max_rows: int = 2_000
@@ -125,6 +129,9 @@ class Settings:
                     "GOVERNMENT_POSITION_REGISTRY_PATH",
                     PROJECT_ROOT / "data" / "government_position_registry.json",
                 )
+            ),
+            government_position_max_age_hours=_env_int(
+                "GOVERNMENT_POSITION_MAX_AGE_HOURS", 48
             ),
             attachment_max_bytes=_env_int("ATTACHMENT_MAX_BYTES", 25_000_000),
             attachment_discovery_max_bytes=_env_int(
