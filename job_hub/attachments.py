@@ -908,9 +908,18 @@ class OfficialAttachmentProcessor:
             if not isinstance(cells, dict):
                 continue
             keys = " ".join(str(key) for key in cells)
+            condition_text = " ".join(
+                str(value)
+                for key, value in cells.items()
+                if any(marker in str(key) for marker in ("岗位条件", "任职条件", "资格条件"))
+            )
             has_title = any(item in keys for item in ("岗位", "职位"))
-            has_major = any(item in keys for item in ("专业", "学科"))
-            has_degree = any(item in keys for item in ("学历", "学位", "面向对象"))
+            has_major = any(item in keys for item in ("专业", "学科")) or bool(
+                condition_text and extract_major_tags(condition_text)
+            )
+            has_degree = any(item in keys for item in ("学历", "学位", "面向对象")) or bool(
+                condition_text and extract_degree_levels(condition_text)
+            )
             if has_title and has_major and has_degree:
                 return None
         return (
@@ -927,21 +936,49 @@ class OfficialAttachmentProcessor:
         if not isinstance(cells, dict):
             return None
         text = str(row.get("row_text") or "").strip()
-        title = self._field(cells, ("岗位名称", "岗位", "职位", "招聘岗位", "岗位名称（岗位）"))
+        title = self._field(
+            cells,
+            ("岗位名称", "岗位", "职位", "招聘岗位", "岗位名称（岗位）", "需求岗位"),
+        )
         position_code = self._field(
             cells,
             ("职位代码", "岗位代码", "职位编号", "岗位编号", "代码"),
         )
-        employer = self._field(cells, ("用人单位", "招聘单位", "单位名称", "单位", "招聘机构"))
+        employer = self._field(
+            cells,
+            ("用人单位", "招聘单位", "单位名称", "单位", "招聘机构", "人才需求单位"),
+        )
         location = self._field(cells, ("工作地点", "工作区域", "工作城市", "所在地", "地点"))
         degree = self._field(
             cells, ("学历", "学历要求", "学历层次", "学历及学位", "学位要求", "面向对象")
         )
         major = self._field(
-            cells, ("专业", "专业要求", "需求专业", "专业范围", "所学专业", "专业类别", "专业名称")
+            cells,
+            (
+                "专业",
+                "专业要求",
+                "需求专业",
+                "专业范围",
+                "所学专业",
+                "专业类别",
+                "专业名称",
+            ),
         )
         published = self._field(cells, ("发布日期", "发布时间", "公告日期", "发布日"))
         deadline = self._field(cells, ("报名截止", "截止日期", "报名截止日期", "截止时间", "报名时间"))
+        # Some official enterprise tables consolidate professional and degree
+        # requirements into one ``岗位条件`` column.  Keep the original
+        # condition text as row-level evidence, but only promote it when the
+        # shared taxonomy can identify a major or a supported degree.
+        condition = self._field(
+            cells,
+            ("岗位条件", "任职条件", "资格条件", "专业及学历要求"),
+        )
+        if condition:
+            if not major and extract_major_tags(condition):
+                major = condition
+            if not degree and extract_degree_levels(condition):
+                degree = condition
         if title and major and title in {"专业技术", "专业技术岗", "专业技术岗位"}:
             title = f"{title}（{major[:100]}）"
         relevant_text = " ".join(filter(None, (title, major, degree, text)))
@@ -975,6 +1012,21 @@ class OfficialAttachmentProcessor:
         )
         if position_code:
             field_evidence["职位代码"] = position_code
+        headcount_key = None
+        headcount = self._field(
+            cells,
+            ("招聘人数", "需求人数", "计划人数", "人数", "计划数"),
+        )
+        if not headcount:
+            # The CCGC table labels the numeric demand column ``备注``.  It
+            # is retained with its original label so administrators can
+            # verify the interpretation against the official total row.
+            headcount = self._field(cells, ("备注",))
+            headcount_key = "备注"
+        if headcount and re.fullmatch(r"\d+(?:\.0+)?", headcount):
+            field_evidence["招聘人数"] = str(int(float(headcount)))
+            if headcount_key:
+                field_evidence["招聘人数原字段"] = headcount_key
         publication = evaluate_student_publication(
             {
                 "source_id": artifact["source_id"],

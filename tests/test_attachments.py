@@ -411,6 +411,35 @@ def test_unrestricted_major_position_row_enters_private_review_queue(tmp_path) -
     assert candidates[0]["field_evidence"]["专业范围"] == "不限专业"
 
 
+def test_combined_enterprise_condition_columns_are_mapped_without_relaxing_gates(tmp_path) -> None:
+    body = _position_xlsx_bytes(
+        ["序号", "人才需求单位", "需求岗位", "需求理由", "岗位职责", "岗位条件", "备注"],
+        [
+            "1",
+            "山西潞安中煤资源勘查开发有限公司",
+            "施工技术岗",
+            "业务需要",
+            "协助完成地质普查、勘探项目设计和报告整理",
+            "地质工程、资源勘查工程专业；本科及以上学历",
+            "1",
+        ],
+    )
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path, session=FakeSession(body)
+    )
+
+    result = processor.process(artifact["id"])
+
+    assert result.candidates_created == 1
+    candidate = database.list_artifact_job_candidates(artifact_id=artifact["id"])[0]
+    assert candidate["title"] == "施工技术岗"
+    assert candidate["employer"] == "山西潞安中煤资源勘查开发有限公司"
+    assert candidate["degree_levels"] == ["本科"]
+    assert "资源勘查" in candidate["major_tags"]
+    assert candidate["field_evidence"]["招聘人数"] == "1"
+    assert candidate["field_evidence"]["招聘人数原字段"] == "备注"
+
+
 def test_reconcile_rejects_old_candidates_from_an_application_form(tmp_path) -> None:
     settings, database, artifact, processor = _registered_artifact(
         tmp_path, session=FakeSession(_xlsx_bytes())
