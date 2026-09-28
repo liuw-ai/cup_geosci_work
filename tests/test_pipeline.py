@@ -7,6 +7,7 @@ from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
 from job_hub.reports import build_daily_report
 from job_hub.sources import RawPosting
+from job_hub.worker import DailyWorker
 
 from conftest import make_settings, source
 
@@ -314,6 +315,37 @@ def test_stale_crawl_run_blocks_audit_then_is_safely_recovered_before_sync(tmp_p
     assert stale_run["finished_at"] is not None
     assert "timeout" in stale_run["error_message"]
     assert audit_database(database, settings)["ok"] is True
+
+
+def test_publish_recovery_closes_abandoned_runs_without_hiding_recent_runs(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    worker = DailyWorker(settings)
+    worker.database.upsert_source(source())
+    stale_run_id = worker.database.record_crawl_start("official-test-source")
+    recent_run_id = worker.database.record_crawl_start("official-test-source")
+    stale_started_at = (
+        datetime.now(timezone.utc) - timedelta(seconds=1900)
+    ).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    with worker.database.transaction() as connection:
+        connection.execute(
+            "UPDATE crawl_runs SET started_at = ? WHERE id = ?",
+            (stale_started_at, stale_run_id),
+        )
+
+    recovered = worker.database.recover_stale_crawl_runs(
+        settings.crawl_run_stale_seconds
+    )
+
+    assert [item["id"] for item in recovered] == [stale_run_id]
+    with worker.database.connect() as connection:
+        statuses = {
+            int(row["id"]): row["status"]
+            for row in connection.execute(
+                "SELECT id, status FROM crawl_runs WHERE id IN (?, ?)",
+                (stale_run_id, recent_run_id),
+            )
+        }
+    assert statuses == {stale_run_id: "interrupted", recent_run_id: "running"}
 
 
 def test_daily_changes_use_the_configured_local_calendar_day(tmp_path) -> None:

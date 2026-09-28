@@ -84,6 +84,11 @@ class DailyWorker:
         try:
             manifest_summary = self._register_government_artifacts()
             summary = self.pipeline.sync_all(progress_callback=self._sync_progress)
+            # Matching and taxonomy rules are versioned code, while persisted
+            # publication fields are derived data.  Rebuild them after each
+            # source cycle so a rule fix repairs existing official rows even
+            # when their source has not changed since the previous scan.
+            reindex_summary = self.pipeline.reindex_jobs()
             government_verification = self._revalidate_government_position_sources()
             government_jobs = self._sync_verified_government_positions()
             government_discovery = self._discover_configured_government_artifacts()
@@ -115,6 +120,7 @@ class DailyWorker:
                 "Source synchronization complete: %s; coverage snapshot recorded for %s.",
                 {
                     "sources": summary.as_dict(),
+                    "reindex": reindex_summary,
                     "government_positions": government_jobs,
                     "government_evidence_recheck": government_verification,
                     "government_attachment_discovery": government_discovery,
@@ -424,6 +430,20 @@ class DailyWorker:
         self._heartbeat("publishing", f"publishing {report_date}")
         try:
             self._sync_with_alert()
+            # A source process can be interrupted after opening a crawl run
+            # and before recording its result.  Startup recovery handles the
+            # normal restart path, but a long-lived worker may reach the
+            # publish window with that abandoned row still marked ``running``.
+            # Close only runs older than the configured timeout immediately
+            # before the final audit; an active recent run remains a blocker.
+            recovered = self.database.recover_stale_crawl_runs(
+                self.settings.crawl_run_stale_seconds
+            )
+            if recovered:
+                LOGGER.warning(
+                    "Recovered %s stale crawl run(s) before daily publication.",
+                    len(recovered),
+                )
             audit = audit_database(self.database, self.settings)
             if not audit["ok"]:
                 raise RuntimeError(

@@ -11,15 +11,19 @@ The new contract test returns 70 upcoming rows for the current registry date
 (`2026-09-28`), all from the official China Earthquake Administration table,
 with an opening date of `2026-10-10`. No current-open count is changed.
 
-## Production baseline before this rollout
+## Production baseline after the worker re-synchronization
 
-- Student-visible current jobs: 330
+- Student-visible current jobs: 197
 - Government ledger: 52 current, 70 upcoming, 0 current civil-service rows
 - Registered sources: 78; enabled sources: 40
-- Database audit: passed (`1426` checked jobs, no issues)
+- Database audit: passed (`1427` checked jobs, no issues after the abandoned
+  Halliburton crawl run was recovered)
 - Worker heartbeat: passed
 
-The 70 upcoming rows are not counted in the 330 current jobs. The civil-service
+The earlier pre-worker estimate of 330 was not a valid production baseline: the
+worker re-applied the publication gate and correctly withdrew rows without
+current official evidence. The 70 upcoming rows are not counted in the 197
+current jobs. The civil-service
 ledger remains empty until an official current-year position table is
 published and independently verified.
 
