@@ -496,16 +496,26 @@ def _write_capture(path: Path | str, payload: dict[str, Any]) -> dict[str, Any]:
 def write_cmgb_capture_failure(
     *, output: Path | str, platform_url: str, status: str, reason: str
 ) -> dict[str, Any]:
-    """Persist a non-publishable observation for the operator audit."""
+    """Persist a non-publishable diagnostic without replacing a good capture.
+
+    ``output`` is the canonical, publishable manifest path. A browser timeout
+    is an observation about this run, not evidence that every previously
+    captured official position disappeared. Keep the diagnostic beside the
+    manifest as ``*.failure.json`` so a transient portal failure cannot erase
+    the last complete capture or trigger a false withdrawal on the next sync.
+    """
 
     if status not in {"access_limited", "parse_failed", "partial"}:
         raise ValueError("CMGB failure status must be access_limited, parse_failed or partial")
+    destination = Path(output)
+    failure_path = destination.with_suffix(".failure.json")
     return _write_capture(
-        output,
+        failure_path,
         {
             "version": 1,
             "status": status,
             "platform_url": platform_url,
+            "diagnostic_for": destination.name,
             "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "scan": {
                 "pages_scanned": 0,

@@ -372,11 +372,12 @@ def run_cnpc_browser_capture(
 def write_cnpc_capture_failure(
     *, output: Path | str, platform_url: str, status: str, reason: str
 ) -> dict[str, Any]:
-    """Persist an access-limited/parse-failed observation atomically.
+    """Persist an access-limited/parse-failed diagnostic atomically.
 
-    Replacing an older successful artifact prevents a stale zero-row capture
-    from being mistaken for today's result.  The normal source adapter rejects
-    this status for student publication but keeps it visible in operator audit.
+    A failed run must never replace the canonical successful capture. The
+    worker writes this observation to a neighbouring ``*.failure.json`` file;
+    the source adapter then either consumes the still-fresh last success or
+    reports the source as unavailable once that success expires.
     """
 
     if status not in {"access_limited", "parse_failed", "partial"}:
@@ -385,6 +386,7 @@ def write_cnpc_capture_failure(
         "version": 1,
         "status": status,
         "platform_url": platform_url,
+        "diagnostic_for": Path(output).name,
         "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "scan": {
             "pages_scanned": 0,
@@ -400,8 +402,9 @@ def write_cnpc_capture_failure(
         "jobs": [],
     }
     destination = Path(output)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    temporary = destination.with_suffix(destination.suffix + ".tmp")
+    failure_path = destination.with_suffix(".failure.json")
+    failure_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = failure_path.with_suffix(failure_path.suffix + ".tmp")
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    temporary.replace(destination)
+    temporary.replace(failure_path)
     return payload

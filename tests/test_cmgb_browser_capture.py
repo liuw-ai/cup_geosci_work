@@ -12,6 +12,7 @@ from job_hub.cmgb_browser_capture import (
     CmgbBrowserCaptureError,
     extract_cmgb_detail,
     load_cmgb_browser_capture,
+    write_cmgb_capture_failure,
 )
 from job_hub.profiles import evaluate_student_publication
 from job_hub.sources import OfficialSourceCollector
@@ -129,6 +130,22 @@ def test_cmgb_capture_rejects_stale_manifest(tmp_path: Path) -> None:
             max_age_hours=1,
             now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
         )
+
+
+def test_cmgb_failure_capture_preserves_last_successful_artifact(tmp_path: Path) -> None:
+    path = _write(tmp_path, _payload())
+    write_cmgb_capture_failure(
+        output=path,
+        platform_url="https://cmgb.iguopin.com/jobCampus",
+        status="parse_failed",
+        reason="waiting for .ant-card timed out",
+    )
+    success = json.loads(path.read_text(encoding="utf-8"))
+    failure = json.loads(path.with_suffix(".failure.json").read_text(encoding="utf-8"))
+    assert success["status"] == "success"
+    assert failure["status"] == "parse_failed"
+    assert failure["diagnostic_for"] == "cmgb.json"
+    assert "timed out" in failure["scan"]["failure_reason"]
 
 
 def test_cmgb_capture_reconciles_ambiguous_overview_from_same_detail_body(

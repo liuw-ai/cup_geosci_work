@@ -232,17 +232,22 @@ def test_cdp_endpoint_rewrites_headless_shell_websocket_host(monkeypatch: pytest
     )
 
 
-def test_cnpc_failure_capture_replaces_stale_success_artifact(tmp_path: Path) -> None:
+def test_cnpc_failure_capture_preserves_last_successful_artifact(tmp_path: Path) -> None:
     path = tmp_path / "captures" / "cnpc-jobs.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps(_payload(), ensure_ascii=False), encoding="utf-8")
     write_cnpc_capture_failure(
         output=path,
         platform_url="https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
         status="access_limited",
         reason="HTTP 412",
     )
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    assert payload["status"] == "access_limited"
-    assert payload["scan"]["failure_reason"] == "HTTP 412"
+    success = json.loads(path.read_text(encoding="utf-8"))
+    failure = json.loads(path.with_suffix(".failure.json").read_text(encoding="utf-8"))
+    assert success["status"] == "success"
+    assert failure["status"] == "access_limited"
+    assert failure["diagnostic_for"] == "cnpc-jobs.json"
+    assert failure["scan"]["failure_reason"] == "HTTP 412"
 
 
 def test_cnpc_job_capture_rejects_access_limited_before_empty_rows(tmp_path: Path) -> None:
