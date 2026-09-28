@@ -273,6 +273,27 @@ def test_audit_rejects_public_job_without_verified_evidence(tmp_path) -> None:
     )
 
 
+def test_audit_reports_duplicate_source_urls_without_crashing(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    first_source = source()
+    second_source = {**source(), "id": "second-official-test-source"}
+    database.upsert_source(first_source)
+    database.upsert_source(second_source)
+
+    first_job = _saved_job(database, settings, source_id=first_source["id"])
+    second_job = _saved_job(database, settings, source_id=second_source["id"])
+
+    audit = audit_database(database, settings)
+
+    duplicate = next(
+        issue for issue in audit["issues"] if issue["code"] == "duplicate_source_url"
+    )
+    assert audit["ok"] is False
+    assert sorted(duplicate["job_ids"]) == sorted([first_job, second_job])
+
+
 def test_artifact_and_evidence_admin_apis_are_private(tmp_path) -> None:
     settings = make_settings(tmp_path)
     app = create_app(settings)

@@ -23,6 +23,11 @@ The count is not treated as progress. The production database is first restored
 from the pre-reindex backup; the corrected reindex must then reproduce only
 currently publishable government rows.
 
+During production verification, the `audit` command exposed an independent
+three-field duplicate-source-url aggregation defect. It is fixed in the same
+phase and covered by a regression test: audit now reports the violating job
+ids instead of terminating before it can protect the daily publication.
+
 ## Non-Claims
 
 This phase does not add a new official data source and does not claim progress

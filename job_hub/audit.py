@@ -293,7 +293,7 @@ def audit_database(
             issues.append(
                 {
                     "code": "duplicate_source_url",
-                    "job_ids": [job_id for job_id, _ in job_entries],
+                    "job_ids": [job_id for job_id, _, _ in job_entries],
                     "message": "多个岗位记录共用同一原始来源链接。",
                 }
             )
