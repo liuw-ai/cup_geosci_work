@@ -4,6 +4,8 @@
 - Local regression: `349 passed`
 - Production audit: passed after reindex and CMGB handover repair
 - Government opening-date gate: passed; future rows are hidden
+- Government category filter: passed; 39 current rows classified as
+  `事业单位与人才引进`
 - Daily worker heartbeat: passed
 - Public IP health endpoint: passed
 - Formal DNS/HTTPS: blocked by external `NXDOMAIN`, not by the application

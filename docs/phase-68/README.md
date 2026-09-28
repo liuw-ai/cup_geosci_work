@@ -17,6 +17,9 @@ government ledger, reindex code, and the CMGB source handover.
   snapshot remains auditable history and is no longer public or duplicated.
 - Corrected the production source label to state that the dynamic capture is
   enabled.
+- Reindexing now preserves the government position type category, so current
+  public-institution rows appear under `事业单位与人才引进` instead of being
+  silently mixed into a geology source category.
 - Rechecked ten official sources without promoting any unverified or expired
   vacancy.
 

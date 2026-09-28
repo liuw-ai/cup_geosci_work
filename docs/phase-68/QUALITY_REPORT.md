@@ -17,6 +17,7 @@ checked_jobs: 1426
 student-visible open jobs: 330
 registered sources: 78
 enabled sources: 40
+student-visible category `事业单位与人才引进`: 39
 government audit: records=136, current verified_open=52,
   verified_upcoming=70, source_failures_or_pending=0
 worker-health: ok=true
@@ -28,6 +29,11 @@ upcoming because the official table states that registration begins on
 
 The 10-source recheck completed successfully. Sources with zero current
 matches are recorded as successful scans, not as source failures.
+
+The public-institution category count is a derived UI field, not an extra
+vacancy count. It was repaired during this phase so filtering does not hide or
+mislabel verified government rows. The civil-service category remains zero
+until an official current-year table is published and verified.
 
 ## Public endpoint
 

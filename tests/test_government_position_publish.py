@@ -292,3 +292,4 @@ def test_reindex_keeps_current_attachment_candidate_public(tmp_path) -> None:
     job = database.find_job(job_id)
     assert job is not None
     assert job["publication_status"] == "student_eligible"
+    assert job["category"] == "事业单位与人才引进"

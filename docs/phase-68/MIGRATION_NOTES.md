@@ -13,6 +13,9 @@ docker compose exec -T web python -m job_hub.cli coverage --record
 docker compose exec -T worker python -m job_hub.cli worker-health --max-age 180
 ```
 
+The final reindex also reapplies the explicit government position-type to UI
+category mapping. It does not alter evidence, deadlines, or lifecycle status.
+
 ## Data safety
 
 Before deployment, the server database and the previous three Python modules

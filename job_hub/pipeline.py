@@ -651,6 +651,15 @@ class JobPipeline:
                     identity_text=f"{job.get('title', '')} {job.get('employer', '')}",
                 )
             )
+            government_type = str(
+                (job.get("field_evidence") or {}).get("政府岗位类型") or ""
+            ).strip()
+            if government_type in {"public_institution", "civil_service", "postdoctoral"}:
+                category = {
+                    "public_institution": "事业单位与人才引进",
+                    "civil_service": "公务员与选调",
+                    "postdoctoral": "博士后与科研助理",
+                }[government_type]
             relevance_score, relevance_band, major_tags = score_relevance(
                 matching_text,
                 source_tier,
