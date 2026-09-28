@@ -50,6 +50,7 @@ from job_hub.government_artifacts import (
     load_government_artifact_manifest,
     register_government_artifacts,
 )
+from job_hub.government_discovery import discover_configured_government_artifacts
 from job_hub.domestic_expansion import (
     QUEUE_STATUSES,
     domestic_expansion_rows,
@@ -413,6 +414,20 @@ def main() -> None:
         type=Path,
         default=Path("data/government_artifact_manifest.json"),
         help="政府职位表附件清单 JSON",
+    )
+    government_discovery_parser = subparsers.add_parser(
+        "discover-configured-government-artifacts",
+        help="从已启用的官方省级公告栏目发现附件并写入私有复核队列",
+    )
+    government_discovery_parser.add_argument(
+        "--source-id",
+        action="append",
+        help="可选：只扫描一个已配置 attachment_discovery_enabled 的来源，可重复传入",
+    )
+    government_discovery_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将发现摘要写入指定 JSON 文件",
     )
     domestic_queue_parser = subparsers.add_parser(
         "domestic-expansion-queue",
@@ -1213,6 +1228,20 @@ def main() -> None:
                 indent=2,
             )
         )
+        return
+    if args.command == "discover-configured-government-artifacts":
+        result = discover_configured_government_artifacts(
+            settings,
+            database,
+            collector=pipeline.collector,
+            source_ids=args.source_id,
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
         return
     if args.command == "init":
         print(

@@ -468,6 +468,60 @@ def validate_source_record(value: Any, *, context: str = "Source") -> dict[str, 
     if not isinstance(config, dict):
         raise ContractValidationError(f"{context} config must be an object")
     source["config"] = dict(config)
+    attachment_discovery = source["config"].get("attachment_discovery_enabled", False)
+    if not isinstance(attachment_discovery, bool):
+        raise ContractValidationError(
+            f"{context} config attachment_discovery_enabled must be true or false"
+        )
+    if attachment_discovery:
+        if source["source_type"] not in {"html_notice", "landing_page"}:
+            raise ContractValidationError(
+                f"{context} attachment discovery only supports html_notice or landing_page"
+            )
+        allowed_hosts = source["config"].get("allowed_hosts")
+        if not isinstance(allowed_hosts, list) or not allowed_hosts:
+            raise ContractValidationError(
+                f"{context} attachment discovery requires non-empty allowed_hosts"
+            )
+        source["config"]["allowed_hosts"] = _validate_domains(
+            allowed_hosts, f"{context} attachment discovery allowed_hosts"
+        )
+        attachment_hosts = source["config"].get(
+            "attachment_allowed_hosts", source["config"]["allowed_hosts"]
+        )
+        if not isinstance(attachment_hosts, list) or not attachment_hosts:
+            raise ContractValidationError(
+                f"{context} attachment_allowed_hosts must be a non-empty list"
+            )
+        source["config"]["attachment_allowed_hosts"] = _validate_domains(
+            attachment_hosts, f"{context} attachment_allowed_hosts"
+        )
+        notice_urls = (
+            source["config"].get("listing_urls")
+            or source["config"].get("direct_notice_urls")
+        )
+        if not isinstance(notice_urls, list) or not notice_urls:
+            raise ContractValidationError(
+                f"{context} attachment discovery requires listing_urls or direct_notice_urls"
+            )
+        for field_name in ("listing_urls", "direct_notice_urls"):
+            if field_name not in source["config"]:
+                continue
+            values = source["config"][field_name]
+            if not isinstance(values, list):
+                raise ContractValidationError(
+                    f"{context} config {field_name} must be a list"
+                )
+            source["config"][field_name] = [
+                validate_http_url(item, f"{context} config {field_name}")
+                for item in values
+            ]
+        max_notices = source["config"].get("attachment_discovery_max_notices", 12)
+        if isinstance(max_notices, bool) or not isinstance(max_notices, int) or not 1 <= max_notices <= 100:
+            raise ContractValidationError(
+                f"{context} attachment_discovery_max_notices must be an integer from 1 to 100"
+            )
+        source["config"]["attachment_discovery_max_notices"] = max_notices
     if source["source_type"] == "structured_opening_page":
         for field_name in (
             "opening_title_selector",

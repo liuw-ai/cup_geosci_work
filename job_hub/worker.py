@@ -20,6 +20,7 @@ from job_hub.government_artifacts import (
     load_government_artifact_manifest,
     register_government_artifacts,
 )
+from job_hub.government_discovery import discover_configured_government_artifacts
 from job_hub.government_positions import (
     current_publishable_position_records,
     load_position_registry,
@@ -85,6 +86,7 @@ class DailyWorker:
             summary = self.pipeline.sync_all(progress_callback=self._sync_progress)
             government_verification = self._revalidate_government_position_sources()
             government_jobs = self._sync_verified_government_positions()
+            government_discovery = self._discover_configured_government_artifacts()
             attachment_summary = self._process_registered_attachments()
             expired_candidates = self.database.expire_stale_artifact_candidates(
                 as_of=datetime.now(self.timezone).date().isoformat()
@@ -115,6 +117,7 @@ class DailyWorker:
                     "sources": summary.as_dict(),
                     "government_positions": government_jobs,
                     "government_evidence_recheck": government_verification,
+                    "government_attachment_discovery": government_discovery,
                     "government_manifest": manifest_log,
                     "attachments": attachment_summary,
                     "government_quality": government_summary,
@@ -125,6 +128,11 @@ class DailyWorker:
                 self._send_failure_safely(
                     "政府职位表清单加载失败",
                     str(manifest_summary.get("error") or "unknown manifest error"),
+                )
+            if int(government_discovery.get("failed", 0)):
+                self._send_failure_safely(
+                    "部分政府官方公告附件发现失败",
+                    str(government_discovery),
                 )
             if summary.failed:
                 self._send_failure_safely(
@@ -137,6 +145,29 @@ class DailyWorker:
             LOGGER.exception("Source synchronization failed")
             self._heartbeat("degraded", "source synchronization failed")
             self._send_failure_safely("官方来源同步失败", str(error))
+
+    def _discover_configured_government_artifacts(self) -> dict[str, object]:
+        """Discover new official position-table files before the parse queue runs."""
+        try:
+            return discover_configured_government_artifacts(
+                self.settings,
+                self.database,
+                collector=self.pipeline.collector,
+                processor=self.attachment_processor,
+            )
+        except Exception as error:  # noqa: BLE001 - preserve the rest of daily sync
+            LOGGER.exception("Government attachment discovery failed")
+            return {
+                "configured_sources": 0,
+                "notices_found": 0,
+                "notices_scanned": 0,
+                "attachments_registered": 0,
+                "position_table_attachments": 0,
+                "blocked": 0,
+                "failed": 1,
+                "error": str(error),
+                "publication_policy": "发现失败不代表当前无岗位，未复核数据不会进入学生端。",
+            }
 
     def _revalidate_government_position_sources(self) -> dict[str, int]:
         """Refresh explicit official evidence without discovering new sources.

@@ -84,6 +84,37 @@ def test_source_loader_preserves_its_existing_error_boundary(tmp_path) -> None:
         load_source_registry(str(path))
 
 
+def test_attachment_discovery_source_requires_explicit_official_bounds() -> None:
+    record = {
+        "id": "official-test",
+        "name": "测试来源",
+        "publisher": "测试单位",
+        "homepage_url": "https://official.example.edu.cn/notices",
+        "source_type": "html_notice",
+        "category": "事业单位与人才引进",
+        "source_tier": "A",
+        "config": {
+            "attachment_discovery_enabled": True,
+            "allowed_hosts": ["official.example.edu.cn"],
+            "listing_urls": ["https://official.example.edu.cn/notices"],
+            "attachment_discovery_max_notices": 4,
+        },
+    }
+    assert validate_source_registry([record])[0]["config"][
+        "attachment_allowed_hosts"
+    ] == ["official.example.edu.cn"]
+
+    malformed = copy.deepcopy(record)
+    malformed["config"]["attachment_discovery_max_notices"] = 0
+    with pytest.raises(ContractValidationError, match="max_notices"):
+        validate_source_registry([malformed])
+
+    unsafe_type = copy.deepcopy(record)
+    unsafe_type["source_type"] = "json"
+    with pytest.raises(ContractValidationError, match="only supports"):
+        validate_source_registry([unsafe_type])
+
+
 def test_employer_contract_rejects_invalid_parent_alias_and_domain() -> None:
     root = {
         "id": "root",

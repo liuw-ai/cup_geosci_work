@@ -1641,6 +1641,90 @@ class OfficialSourceCollector:
             self._wait(source)
         return postings
 
+    def discover_notice_pages(self, source: dict[str, Any]) -> list[tuple[str, str]]:
+        """Return registered official recruitment notices for attachment discovery.
+
+        This is deliberately narrower than normal collection.  It reads only
+        sources whose administrator explicitly enabled attachment discovery,
+        uses the same robots, host, title and vacancy filters as the HTML
+        collector, and returns announcement pages rather than files or jobs.
+        The caller may then discover official attachments into the *private*
+        review queue.  No candidate is published by this method.
+        """
+        source_type = str(source.get("source_type") or "")
+        if source_type not in {"html_notice", "landing_page"}:
+            raise SourceSkipped(
+                "attachment discovery supports only html_notice or landing_page sources"
+            )
+        config = source.get("config")
+        if not isinstance(config, dict) or not config.get(
+            "attachment_discovery_enabled", False
+        ):
+            raise SourceSkipped("attachment discovery is not enabled for this source")
+
+        allowed_hosts = {
+            str(host).strip().lower()
+            for host in config.get("allowed_hosts", [])
+            if str(host).strip()
+        }
+        homepage_host = urlparse(str(source.get("homepage_url") or "")).hostname
+        if homepage_host:
+            allowed_hosts.add(homepage_host.lower())
+        if not allowed_hosts:
+            raise SourceCollectionError(
+                "attachment discovery source has no registered official hosts"
+            )
+
+        raw_limit = config.get(
+            "attachment_discovery_max_notices", self._item_limit(source)
+        )
+        try:
+            notice_limit = max(1, min(int(raw_limit), self._item_limit(source)))
+        except (TypeError, ValueError):
+            notice_limit = self._item_limit(source)
+
+        links: list[tuple[str, str]] = []
+        seen: set[str] = set()
+
+        def add_direct(title: str, value: object) -> None:
+            detail_url = normalize_url(str(value))
+            parsed = urlparse(detail_url)
+            if (
+                not detail_url
+                or parsed.scheme not in {"http", "https"}
+                or not parsed.hostname
+                or parsed.hostname.lower() not in allowed_hosts
+            ):
+                raise SourceCollectionError(
+                    "Configured attachment-discovery notice is outside registered official hosts"
+                )
+            if detail_url not in seen:
+                seen.add(detail_url)
+                links.append((title, detail_url))
+
+        for direct_url in config.get("direct_notice_urls", []) or []:
+            add_direct(str(config.get("direct_title_hint") or ""), direct_url)
+            if len(links) >= notice_limit:
+                return links
+
+        if config.get("direct_only"):
+            return links
+
+        listing_urls = config.get("listing_urls") or [source.get("homepage_url")]
+        for listing_url in listing_urls:
+            if not listing_url:
+                continue
+            response = self._get(str(listing_url), source)
+            soup = BeautifulSoup(response.text, "html.parser")
+            for title, detail_url in self._notice_links(soup, response.url, source):
+                if detail_url in seen:
+                    continue
+                seen.add(detail_url)
+                links.append((title, detail_url))
+                if len(links) >= notice_limit:
+                    return links
+        return links
+
     def _extract_line_split_details(
         self,
         document: str,

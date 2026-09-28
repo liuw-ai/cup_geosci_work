@@ -163,7 +163,9 @@ def test_cmgb_source_routes_verified_rows_through_normal_pipeline(tmp_path: Path
             "allowed_hosts": HOSTS,
             "capture_path": "captures/cmgb.json",
             "application_url": "https://cmgb.iguopin.com/jobCampus",
-            "max_age_hours": 24,
+            # This test covers source-to-row conversion; the freshness gate
+            # is separately tested with a fixed reference time above.
+            "max_age_hours": 100_000,
             "require_complete_scan": True,
             "minimum_relevance": 0,
         },
@@ -190,7 +192,9 @@ def test_cmgb_browser_detail_evidence_passes_student_publication_gate(tmp_path: 
             "allowed_hosts": HOSTS,
             "capture_path": "captures/cmgb.json",
             "application_url": "https://cmgb.iguopin.com/jobCampus",
-            "max_age_hours": 24,
+            # This test covers publication evidence rather than wall-clock
+            # freshness; keep the committed fixture deterministic.
+            "max_age_hours": 100_000,
             "require_complete_scan": True,
             "minimum_relevance": 0,
         },
@@ -239,7 +243,8 @@ def test_cmgb_capture_consumes_all_validated_rows_above_global_source_limit(
             "allowed_hosts": HOSTS,
             "capture_path": "captures/cmgb.json",
             "application_url": "https://cmgb.iguopin.com/jobCampus",
-            "max_age_hours": 24,
+            # The complete-manifest limit test is independent of capture age.
+            "max_age_hours": 100_000,
             "max_items": 2_000,
             "require_complete_scan": True,
             "minimum_relevance": 0,

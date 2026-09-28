@@ -35,9 +35,11 @@ def _source(tmp_path: Path) -> dict[str, object]:
             "allowed_hosts": ["zhaopin.pipechina.com.cn", "www.pipechina.com.cn"],
             "capture_path": "captures/pipechina.json",
             "application_url": "https://zhaopin.pipechina.com.cn/recruit",
-            # Keep the fixture deterministic across calendar days; production
-            # configuration remains 30 hours in data/sources.json.
-            "max_age_hours": 72,
+            # Keep the row-conversion fixture deterministic across calendar
+            # days; production configuration remains 30 hours in
+            # data/sources.json and freshness rejection is tested above with
+            # an explicit reference time.
+            "max_age_hours": 100_000,
             "require_complete_scan": True,
             "minimum_relevance": 0,
         },

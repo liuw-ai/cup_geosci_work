@@ -575,6 +575,8 @@
       "listing_urls": ["https://rsj.beijing.gov.cn/xxgk/gkzp/"],
       "healthcheck_url": "https://rsj.beijing.gov.cn/xxgk/gkzp/",
       "allowed_hosts": ["rsj.beijing.gov.cn"],
+      "attachment_discovery_enabled": true,
+      "attachment_discovery_max_notices": 8,
       "province": "北京",
       "source_role": "human_resources_or_exam",
       "fallback_source_ids": ["beijing-natural-resources", "mnr-public-recruitment"],

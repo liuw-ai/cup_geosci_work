@@ -8,7 +8,7 @@ import zlib
 import pytest
 from bs4 import BeautifulSoup
 
-from job_hub.sources import OfficialSourceCollector, SourceSkipped
+from job_hub.sources import OfficialSourceCollector, SourceCollectionError, SourceSkipped
 
 from conftest import make_settings
 
@@ -809,6 +809,65 @@ def test_html_notice_skips_interview_replacement_announcements(tmp_path, monkeyp
     monkeypatch.setattr(collector, "_get", get)
 
     assert collector.collect(source) == []
+
+
+def test_attachment_discovery_returns_only_filtered_official_notices(tmp_path, monkeypatch) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    listing_url = "https://official.example.cn/notices"
+    kept_url = "https://official.example.cn/notices/recruit.html"
+    source = {
+        "id": "official-notice",
+        "publisher": "测试地质局",
+        "homepage_url": listing_url,
+        "source_type": "html_notice",
+        "config": {
+            "listing_urls": [listing_url],
+            "allowed_hosts": ["official.example.cn"],
+            "listing_selector": "a",
+            "attachment_discovery_enabled": True,
+            "attachment_discovery_max_notices": 4,
+            "require_recruitment_word": True,
+            "required_title_patterns": ["招聘公告"],
+            "excluded_title_patterns": ["资格条件变更"],
+            "exclude_patterns": ["采购"],
+            "max_items": 10,
+            "request_interval_seconds": 0,
+        },
+    }
+
+    def get(url, _source):
+        assert url == listing_url
+        return FakeResponse(
+            text=(
+                '<a href="/notices/recruit.html">2026年公开招聘公告</a>'
+                '<a href="/notices/change.html">2026年公开招聘公告（资格条件变更）</a>'
+                '<a href="https://outside.example/notice.html">2026年公开招聘公告</a>'
+            ),
+            url=listing_url,
+        )
+
+    monkeypatch.setattr(collector, "_get", get)
+
+    assert collector.discover_notice_pages(source) == [("2026年公开招聘公告", kept_url)]
+
+
+def test_attachment_discovery_rejects_unregistered_direct_notice_host(tmp_path) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "official-notice",
+        "publisher": "测试地质局",
+        "homepage_url": "https://official.example.cn/notices",
+        "source_type": "html_notice",
+        "config": {
+            "direct_only": True,
+            "direct_notice_urls": ["https://outside.example/notice.html"],
+            "allowed_hosts": ["official.example.cn"],
+            "attachment_discovery_enabled": True,
+        },
+    }
+
+    with pytest.raises(SourceCollectionError, match="outside registered official hosts"):
+        collector.discover_notice_pages(source)
 
 
 def test_single_source_access_skip_is_not_wrapped_as_collection_failure(tmp_path, monkeypatch) -> None:
