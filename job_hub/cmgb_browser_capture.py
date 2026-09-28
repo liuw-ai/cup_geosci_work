@@ -533,6 +533,29 @@ def write_cmgb_capture_failure(
     )
 
 
+def _close_context_pages(context: Any) -> None:
+    """Close every page in the dedicated CMGB browser context.
+
+    ``chromedp/headless-shell`` exposes one default CDP context and does not
+    support creating incognito contexts.  The CMGB worker has its own browser
+    container, so closing every page in this one context is safe and gives an
+    interrupted capture a deterministic resource-recovery path.
+    """
+
+    try:
+        pages = list(context.pages)
+    except Exception:
+        return
+    for opened_page in pages:
+        try:
+            if not opened_page.is_closed():
+                opened_page.close()
+        except Exception:
+            # Cleanup must never convert an already-complete capture into a
+            # failure. The next browser restart remains an operator fallback.
+            pass
+
+
 def run_cmgb_browser_capture(
     *,
     url: str,
@@ -582,7 +605,7 @@ def run_cmgb_browser_capture(
     pagination_complete = False
     browser = None
     context = None
-    created_pages: list[Any] = []
+    uses_remote_browser = False
     try:
         with sync_playwright() as playwright:
             cdp_url = str(config.get("cdp_url") or "").strip()
@@ -590,14 +613,19 @@ def run_cmgb_browser_capture(
                 browser = playwright.chromium.connect_over_cdp(
                     _resolve_cdp_websocket(cdp_url)
                 )
-                context = browser.contexts[0] if browser.contexts else browser.new_context(
-                    user_agent=user_agent
-                )
+                if not browser.contexts:
+                    raise BrowserCaptureError("CMGB CDP browser has no default context")
+                # The dedicated chromedp image has a single default context
+                # and rejects Target.createBrowserContext. Clear stale tabs
+                # left by an interrupted earlier scan before this run creates
+                # its list page. No other worker shares this CDP browser.
+                context = browser.contexts[0]
+                _close_context_pages(context)
+                uses_remote_browser = True
             else:
                 browser = playwright.chromium.launch(headless=True)
                 context = browser.new_context(user_agent=user_agent)
             page = context.new_page()
-            created_pages.append(page)
             page.goto(target_url, wait_until="domcontentloaded", timeout=timeout_ms)
             page.wait_for_timeout(initial_render_wait_ms)
             while pages_scanned < max_pages:
@@ -629,7 +657,6 @@ def run_cmgb_browser_capture(
                         )
                         if href:
                             detail_page = context.new_page()
-                            created_pages.append(detail_page)
                             detail_page.goto(
                                 urljoin(list_url, href),
                                 wait_until="domcontentloaded",
@@ -762,19 +789,16 @@ def run_cmgb_browser_capture(
     except Exception as error:
         raise BrowserCaptureError(f"CMGB browser capture failed: {error}") from error
     finally:
-        if browser is not None:
-            if str(config.get("cdp_url") or "").strip():
-                for opened_page in created_pages:
-                    try:
-                        if not opened_page.is_closed():
-                            opened_page.close()
-                    except Exception:
-                        pass
-            else:
-                try:
-                    browser.close()
-                except Exception:
-                    pass
+        # Closing every page covers popup detail pages too. This is essential
+        # for a worker that runs all day: leaked renderers eventually make
+        # later official SPA captures fail with resource-exhaustion errors.
+        if context is not None:
+            _close_context_pages(context)
+        if browser is not None and not uses_remote_browser:
+            try:
+                browser.close()
+            except Exception:
+                pass
 
     status = "success" if pagination_complete and failed_rows == 0 else "partial"
     payload = {

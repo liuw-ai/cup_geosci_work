@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from job_hub.browser_capture import BrowserCaptureError
 from job_hub.cmgb_browser_capture import (
     CmgbBrowserCaptureError,
+    _close_context_pages,
     extract_cmgb_detail,
     load_cmgb_browser_capture,
     write_cmgb_capture_failure,
@@ -146,6 +147,31 @@ def test_cmgb_failure_capture_preserves_last_successful_artifact(tmp_path: Path)
     assert failure["status"] == "parse_failed"
     assert failure["diagnostic_for"] == "cmgb.json"
     assert "timed out" in failure["scan"]["failure_reason"]
+
+
+def test_cmgb_context_cleanup_closes_stale_popup_pages() -> None:
+    """A CDP failure must not leave a growing set of renderer pages behind."""
+
+    class FakePage:
+        def __init__(self, closed: bool = False) -> None:
+            self.closed = closed
+            self.close_calls = 0
+
+        def is_closed(self) -> bool:
+            return self.closed
+
+        def close(self) -> None:
+            self.close_calls += 1
+            self.closed = True
+
+    class FakeContext:
+        def __init__(self) -> None:
+            self.pages = [FakePage(), FakePage(), FakePage(closed=True)]
+
+    context = FakeContext()
+    _close_context_pages(context)
+
+    assert [page.close_calls for page in context.pages] == [1, 1, 0]
 
 
 def test_cmgb_capture_reconciles_ambiguous_overview_from_same_detail_body(
