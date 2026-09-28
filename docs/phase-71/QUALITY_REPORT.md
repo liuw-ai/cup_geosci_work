@@ -3,7 +3,7 @@
 ## Local verification
 
 ```text
-python -m pytest -q: 353 passed
+python -m pytest -q: 354 passed
 docker compose -f docker-compose.browser.yml config --quiet: passed
 ```
 

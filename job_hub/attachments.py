@@ -562,23 +562,24 @@ class OfficialAttachmentProcessor:
                     start=data_start + 1 if header else 1,
                 ):
                     values = self._expand_merged_values(values, header, carry)
-                    cells = {
-                        (header[index] if header and index < len(header) and header[index] else f"列{index + 1}"): value
-                        for index, value in enumerate(values)
-                        if value
-                    }
-                    if not cells:
-                        continue
-                    rows.append(
-                        {
-                            "sheet_name": worksheet.title,
-                            "row_number": offset,
-                            "row_kind": "tabular",
-                            "cells": cells,
-                            "row_text": "；".join(f"{key}：{value}" for key, value in cells.items()),
-                            "extraction_confidence": "high",
-                        }
-                    )
+                    row_cells = self._workbook_row_cells(values, header)
+                    for block_index, cells in enumerate(row_cells, start=1):
+                        if not cells:
+                            continue
+                        rows.append(
+                            {
+                                "sheet_name": worksheet.title,
+                                "row_number": offset,
+                                "row_kind": "tabular_parallel" if len(row_cells) > 1 else "tabular",
+                                "cells": cells,
+                                "row_text": "；".join(f"{key}：{value}" for key, value in cells.items()),
+                                "extraction_confidence": "high",
+                                "parallel_block": block_index if len(row_cells) > 1 else None,
+                                "row_key_suffix": (
+                                    f"parallel-{block_index}" if len(row_cells) > 1 else ""
+                                ),
+                            }
+                        )
                     if len(rows) >= self.settings.attachment_max_rows:
                         break
                 if len(rows) >= self.settings.attachment_max_rows:
@@ -651,29 +652,26 @@ class OfficialAttachmentProcessor:
                     start=data_start + 1 if header else 1,
                 ):
                     values = self._expand_merged_values(values, header, carry)
-                    cells = {
-                        (
-                            header[index]
-                            if header and index < len(header) and header[index]
-                            else f"列{index + 1}"
-                        ): value
-                        for index, value in enumerate(values)
-                        if value
-                    }
-                    if not cells:
-                        continue
-                    rows.append(
-                        {
-                            "sheet_name": sheet.name,
-                            "row_number": offset,
-                            "row_kind": "tabular",
-                            "cells": cells,
-                            "row_text": "；".join(
-                                f"{key}：{value}" for key, value in cells.items()
-                            ),
-                            "extraction_confidence": "high",
-                        }
-                    )
+                    row_cells = self._workbook_row_cells(values, header)
+                    for block_index, cells in enumerate(row_cells, start=1):
+                        if not cells:
+                            continue
+                        rows.append(
+                            {
+                                "sheet_name": sheet.name,
+                                "row_number": offset,
+                                "row_kind": "tabular_parallel" if len(row_cells) > 1 else "tabular",
+                                "cells": cells,
+                                "row_text": "；".join(
+                                    f"{key}：{value}" for key, value in cells.items()
+                                ),
+                                "extraction_confidence": "high",
+                                "parallel_block": block_index if len(row_cells) > 1 else None,
+                                "row_key_suffix": (
+                                    f"parallel-{block_index}" if len(row_cells) > 1 else ""
+                                ),
+                            }
+                        )
                     if len(rows) >= self.settings.attachment_max_rows:
                         break
                 if len(rows) >= self.settings.attachment_max_rows:
@@ -1085,6 +1083,89 @@ class OfficialAttachmentProcessor:
         if score < 1:
             return []
         return [cell or f"列{index + 1}" for index, cell in enumerate(row)]
+
+    @classmethod
+    def _workbook_row_cells(
+        cls,
+        values: list[str],
+        header: list[str],
+    ) -> list[dict[str, str]]:
+        """Preserve parallel position blocks in one spreadsheet row.
+
+        Some official workbooks place two compact position tables side by side.
+        Turning that row directly into a dictionary silently overwrites the
+        second ``岗位/专业/学历`` header.  Split only when each repeated block
+        has the three fields needed for a student-review candidate; ordinary
+        tables keep the legacy one-row representation.
+        """
+
+        if not header:
+            cells = {
+                f"列{index + 1}": value
+                for index, value in enumerate(values)
+                if value
+            }
+            return [cells] if cells else []
+
+        def normalized(value: str) -> str:
+            return re.sub(r"[\\s:：()（）/]+", "", str(value or "")).lower()
+
+        title_aliases = {
+            normalized(item)
+            for item in ("岗位名称", "招聘岗位", "岗位", "职位名称", "招聘职位")
+        }
+        major_aliases = {
+            normalized(item)
+            for item in ("专业", "专业要求", "所需专业", "需求专业", "专业范围")
+        }
+        degree_aliases = {
+            normalized(item)
+            for item in ("学历", "学历要求", "学历学位", "学位要求", "面向对象")
+        }
+        title_positions = [
+            index for index, value in enumerate(header)
+            if normalized(value) in title_aliases
+        ]
+        if len(title_positions) < 2:
+            return [
+                {
+                    (header[index] if index < len(header) and header[index] else f"列{index + 1}"): value
+                    for index, value in enumerate(values)
+                    if value
+                }
+            ]
+
+        starts = title_positions
+        blocks: list[tuple[int, int]] = []
+        for index, start in enumerate(starts):
+            end = starts[index + 1] if index + 1 < len(starts) else len(header)
+            labels = {normalized(item) for item in header[start:end]}
+            if labels & major_aliases and labels & degree_aliases:
+                blocks.append((start, end))
+        if len(blocks) < 2:
+            return [
+                {
+                    (header[index] if index < len(header) and header[index] else f"列{index + 1}"): value
+                    for index, value in enumerate(values)
+                    if value
+                }
+            ]
+
+        prefix_end = blocks[0][0]
+        result: list[dict[str, str]] = []
+        for start, end in blocks:
+            cells: dict[str, str] = {}
+            indices = list(range(0, prefix_end)) + list(range(start, min(end, len(values))))
+            for index in indices:
+                if index >= len(values) or not values[index]:
+                    continue
+                key = header[index] if index < len(header) and header[index] else f"列{index + 1}"
+                if key in cells:
+                    key = f"{key}#{index + 1}"
+                cells[key] = values[index]
+            if cells:
+                result.append(cells)
+        return result or [{}]
 
     @classmethod
     def _workbook_header_info(cls, rows: list[list[str]]) -> tuple[list[str], int]:

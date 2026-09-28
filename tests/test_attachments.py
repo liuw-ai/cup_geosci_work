@@ -165,6 +165,37 @@ def test_excel_attachment_is_hashed_extracted_and_idempotent(tmp_path) -> None:
     assert len(database.list_artifact_job_candidates(artifact_id=artifact["id"])) == 1
 
 
+def test_parallel_position_tables_do_not_overwrite_repeated_headers(tmp_path) -> None:
+    """One official spreadsheet row may contain two independent job blocks."""
+    body = _position_xlsx_bytes(
+        [
+            "岗位名称", "招聘单位", "工作地点", "学历要求", "专业要求",
+            "岗位名称", "招聘单位", "工作地点", "学历要求", "专业要求",
+        ],
+        [
+            "地质工程师", "湖南省地质院", "长沙", "硕士", "地质工程",
+            "地球科学工程师", "湖南省地球物理院", "衡阳", "硕士", "地质学",
+        ],
+    )
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path, session=FakeSession(body)
+    )
+
+    result = processor.process(artifact["id"])
+
+    assert result.status == "extracted"
+    assert result.rows_extracted == 2
+    assert result.candidates_created == 2
+    rows = database.list_source_artifact_rows(artifact["id"])
+    assert {row["row_kind"] for row in rows} == {"tabular_parallel"}
+    candidates = database.list_artifact_job_candidates(artifact_id=artifact["id"])
+    assert {candidate["title"] for candidate in candidates} == {
+        "地质工程师",
+        "地球科学工程师",
+    }
+    assert {candidate["location"] for candidate in candidates} == {"长沙", "衡阳"}
+
+
 def test_mislabelled_xls_with_ooxml_content_uses_excel_parser(tmp_path) -> None:
     """Government portals sometimes serve an XLSX workbook under a .xls name."""
     settings, database, _, processor = _registered_artifact(

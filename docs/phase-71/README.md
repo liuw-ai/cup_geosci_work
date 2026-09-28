@@ -18,6 +18,10 @@ because the ordinary web image intentionally omits Playwright.
   inaccessible from the public internet.
 - The entrypoint now fails fast when the ordinary image is used by mistake;
   runtime installation is opt-in through `CNPC_BROWSER_ALLOW_RUNTIME_INSTALL`.
+- Official XLS/XLSX tables with two compact position blocks on one row are now
+  split into independent private candidates. Their stable keys include the
+  parallel block number, while the original sheet/row locator is retained for
+  human verification.
 - Removed the runtime-only wheel-cache dependency from the browser Compose
   file. `cnpc_browser_entrypoint` remains as a defensive fallback, but normal
   startup no longer needs PyPI or a writable Python package directory.

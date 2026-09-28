@@ -3612,14 +3612,19 @@ class Database:
             if str(key).strip() and str(cell).strip()
         }
         row_kind = str(value.get("row_kind") or "tabular").strip()
-        if row_kind not in {"tabular", "text_table"}:
-            raise ValueError("Source artifact row row_kind must be tabular or text_table")
+        if row_kind not in {"tabular", "text_table", "tabular_parallel"}:
+            raise ValueError(
+                "Source artifact row row_kind must be tabular, tabular_parallel or text_table"
+            )
         confidence = str(value.get("extraction_confidence") or "high").strip()
         if confidence not in {"high", "medium", "low"}:
             raise ValueError("Source artifact row extraction_confidence is unsupported")
         row_text = str(value.get("row_text") or "").strip()
         if not row_text:
             row_text = "；".join(f"{key}：{cell}" for key, cell in cells.items())
+        row_key_suffix = str(value.get("row_key_suffix") or "").strip()
+        if len(row_key_suffix) > 100:
+            raise ValueError("Source artifact row row_key_suffix is too long")
         return {
             "sheet_name": sheet_name,
             "row_number": row_number,
@@ -3627,6 +3632,7 @@ class Database:
             "cells": cells,
             "row_text": row_text,
             "extraction_confidence": confidence,
+            "row_key_suffix": row_key_suffix,
         }
 
     @staticmethod
@@ -3636,6 +3642,7 @@ class Database:
             "sheet_name": row["sheet_name"],
             "row_number": row["row_number"],
             "row_kind": row["row_kind"],
+            "row_key_suffix": row.get("row_key_suffix", ""),
         }
         return hashlib.sha256(
             json.dumps(identity, ensure_ascii=False, sort_keys=True).encode("utf-8")
