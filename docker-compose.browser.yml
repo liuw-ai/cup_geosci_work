@@ -8,7 +8,10 @@ services:
       - no-new-privileges:true
 
   cnpc-browser:
-    image: cupb-geoscience-job-hub:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.browser
+    image: cupb-geoscience-job-hub-browser:latest
     depends_on:
       - headless-shell
     env_file:
@@ -24,8 +27,6 @@ services:
     volumes:
       - job_hub_data:/var/lib/job-hub
       - ./data:/app/data:ro
-      # Optional offline wheel cache; this deployment directory is ignored by Git.
-      - ./runtime/deploy/wheels-linux:/opt/browser-wheels:ro
     init: true
     stop_grace_period: 45s
     security_opt:
@@ -44,7 +45,10 @@ services:
       - no-new-privileges:true
 
   cmgb-browser:
-    image: cupb-geoscience-job-hub:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.browser
+    image: cupb-geoscience-job-hub-browser:latest
     depends_on:
       - cmgb-headless-shell
     env_file:
@@ -64,7 +68,6 @@ services:
     volumes:
       - job_hub_data:/var/lib/job-hub
       - ./data:/app/data:ro
-      - ./runtime/deploy/wheels-linux:/opt/browser-wheels:ro
     init: true
     stop_grace_period: 45s
     security_opt:

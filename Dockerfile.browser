@@ -1,0 +1,15 @@
+FROM cupb-geoscience-job-hub:latest
+
+# The public web/worker image deliberately has no browser client.  This image
+# is built only for the isolated read-only browser workers, which connect to
+# the internal headless-shell CDP service.  Installing the Python client at
+# image build time makes startup independent of PyPI availability and keeps a
+# failed browser dependency from being mistaken for an official-source scan
+# result.
+USER root
+COPY requirements-browser.txt /tmp/requirements-browser.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-browser.txt \
+    && rm -f /tmp/requirements-browser.txt
+USER jobhub
+
+CMD ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
