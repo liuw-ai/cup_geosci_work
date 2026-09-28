@@ -51,6 +51,10 @@ government row missing only a row-level location remains reviewable, because
 the administrator can attach the official notice's location evidence before
 publication. All other missing-evidence cases remain out of queue.
 
+The location decision is intentionally made *after* professional eligibility.
+An unrelated medical, biological, administrative or other non-geoscience row
+with no location is `专业不匹配`; it cannot be disguised as `待补岗位地点`.
+
 ## Corrective Reconciliation
 
 Already extracted files can be rechecked without fetching the network or

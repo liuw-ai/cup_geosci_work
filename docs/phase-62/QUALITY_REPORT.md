@@ -26,6 +26,8 @@ The new regression coverage proves that:
 - a real structured position row for an unrelated major does not enter the
   private review queue;
 - a structured `不限专业` row with a supported degree remains reviewable;
+- an unrelated government role missing its location is still rejected as a
+  professional mismatch, not retained as a pending-location candidate;
 - a candidate already placed in the old queue is moved to `rejected` when its
   attachment is later identified as an application form;
 - a short non-year position code no longer causes the first data row to be

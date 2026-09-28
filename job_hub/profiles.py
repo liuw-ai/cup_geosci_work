@@ -250,18 +250,6 @@ def evaluate_student_publication(job: dict[str, Any]) -> PublicationDecision:
             matched_profile_ids=(),
         )
 
-    # Government notices are often announcement-level pages with several
-    # institutions and rows.  A matching major without a row-level location
-    # is not actionable for students and must stay in review until the
-    # position table or detail block supplies it.
-    if _government_record_requires_location(job) and not _location_evidence_text(job):
-        return PublicationDecision(
-            status=PUBLICATION_PENDING_EVIDENCE,
-            label="待补岗位地点",
-            reason="事业单位/公务员岗位缺少与当前岗位行绑定的工作地点证据。",
-            matched_profile_ids=(),
-        )
-
     required_experience = _student_blocking_work_experience(qualification_text)
     if required_experience:
         return PublicationDecision(
@@ -280,6 +268,18 @@ def evaluate_student_publication(job: dict[str, Any]) -> PublicationDecision:
         if _profile_is_explicitly_eligible(job, profile, qualification_text)
     )
     if eligible_profiles:
+        # Government notices are often announcement-level pages with several
+        # institutions and rows. Only a role already proven to match this
+        # service may remain private while its row-level location is completed.
+        # Checking location earlier would turn an unrelated role into a false
+        # “pending location” candidate.
+        if _government_record_requires_location(job) and not _location_evidence_text(job):
+            return PublicationDecision(
+                status=PUBLICATION_PENDING_EVIDENCE,
+                label="待补岗位地点",
+                reason="事业单位/公务员目标专业岗位缺少与当前岗位行绑定的工作地点证据。",
+                matched_profile_ids=eligible_profiles,
+            )
         return PublicationDecision(
             status=PUBLICATION_STUDENT_ELIGIBLE,
             label="目标专业明确匹配",
@@ -294,6 +294,13 @@ def evaluate_student_publication(job: dict[str, Any]) -> PublicationDecision:
             if _degree_status(job, profile)[0] == "explicit"
         )
         if degree_profiles:
+            if _government_record_requires_location(job) and not _location_evidence_text(job):
+                return PublicationDecision(
+                    status=PUBLICATION_PENDING_EVIDENCE,
+                    label="待补岗位地点",
+                    reason="事业单位/公务员不限专业岗位缺少与当前岗位行绑定的工作地点证据。",
+                    matched_profile_ids=degree_profiles,
+                )
             return PublicationDecision(
                 status=PUBLICATION_UNRESTRICTED_ELIGIBLE,
                 label="不限专业可报",

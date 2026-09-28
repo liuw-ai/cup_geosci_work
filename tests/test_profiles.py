@@ -215,6 +215,26 @@ def test_government_position_without_row_location_stays_private() -> None:
     assert decision.label == "待补岗位地点"
 
 
+def test_unrelated_government_position_without_location_is_not_pending_location() -> None:
+    """Missing location must not hide a non-geoscience professional mismatch."""
+    decision = evaluate_student_publication(
+        job(
+            source_id="beijing-hrss",
+            category="事业单位与人才引进",
+            title="肿瘤生物信息中心科研",
+            field_evidence={
+                "evidence_scope": "official_attachment_row",
+                "岗位": "肿瘤生物信息中心科研",
+                "专业范围": "生物信息学",
+                "学历要求": "硕士研究生、博士研究生",
+            },
+        )
+    )
+
+    assert decision.status == "out_of_scope"
+    assert decision.label == "专业不匹配"
+
+
 def test_publication_gate_rejects_experienced_role_for_current_students() -> None:
     decision = evaluate_student_publication(
         job(
