@@ -229,16 +229,22 @@ def extract_degree_levels(text: str) -> list[str]:
         or "undergraduate" in lowered
     ):
         found.append("本科")
-    if "硕士" in lowered or "研究生" in lowered or "master" in lowered:
-        found.append("硕士")
-    if (
+    # ``博士研究生`` contains the generic word ``研究生`` but is not a
+    # master's requirement.  Treat an unqualified ``研究生`` as a master's
+    # floor only when the same evidence does not explicitly name a doctorate.
+    # This parser feeds the student-facing eligibility gate, so promoting a
+    # doctoral-only role to master's students would be a material mismatch.
+    has_doctoral = (
         "博士" in lowered
         or "博士后" in lowered
         or "ph.d" in lowered
         or "phd" in lowered
         or "doctoral" in lowered
         or "postdoctoral" in lowered
-    ):
+    )
+    if "硕士" in lowered or "master" in lowered or ("研究生" in lowered and not has_doctoral):
+        found.append("硕士")
+    if has_doctoral:
         found.append("博士")
     return found
 

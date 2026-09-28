@@ -104,10 +104,21 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
 
     assert len(rows) == 348
     assert statuses == {
-        "student_eligible": 69,
+        "student_eligible": 70,
         "pending_evidence": 98,
-        "out_of_scope": 181,
+        "out_of_scope": 180,
     }
+    huadong_research = next(
+        row
+        for row in rows
+        if row["external_id"]
+        == "sinopec-F76DDBE3-0690-412B-9A85-1B2DEB6F3FE3-01"
+    )
+    assert huadong_research["publication_status"] == "student_eligible"
+    assert huadong_research["publication_basis"]["matched_profile_ids"] == [
+        "doctoral-geological-resources-engineering"
+    ]
+    assert "矿产普查与勘探" in huadong_research["field_evidence"]["专业要求原文"]
     assert all(
         row["publication_basis"]["matched_profile_ids"]
         for row in rows
@@ -121,7 +132,7 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
 
 
 def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
-    """A promoted source stores the full audit set but exposes only 69 rows."""
+    """A promoted source stores the full audit set but exposes only 70 rows."""
     settings = replace(make_settings(tmp_path), max_source_items=500)
     database = Database(settings.database_path)
     database.initialize()
@@ -137,7 +148,7 @@ def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
     result = pipeline.sync_source(source)
     assert result.status == "finished"
     assert result.discovered == 348
-    assert result.open_matches == 69
+    assert result.open_matches == 70
 
     public_rows, public_count = database.list_jobs(page_size=None)
     audit_rows, audit_count = database.list_jobs(
@@ -149,8 +160,8 @@ def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
         row for row in audit_rows if row["source_id"] == "sinopec-career"
     ]
 
-    assert public_count == 69
-    assert len(public_rows) == 69
+    assert public_count == 70
+    assert len(public_rows) == 70
     assert audit_count == 348
     assert len(source_audit_rows) == 348
     assert all(

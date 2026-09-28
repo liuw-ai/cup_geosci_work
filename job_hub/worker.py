@@ -255,9 +255,6 @@ class DailyWorker:
                 continue
             reconcile_source_ids.add(source_id)
             posting = position_record_to_posting(record)
-            current_ids_by_source.setdefault(source_id, set()).add(
-                str(posting.external_id)
-            )
             equivalent = self._find_equivalent_government_job(
                 existing_jobs,
                 record,
@@ -275,6 +272,13 @@ class DailyWorker:
                 equivalent_id = equivalent.get("id") or equivalent.get("job_id")
                 if equivalent_id is not None:
                     used_existing_ids.add(int(equivalent_id))
+            # An equivalent row can retain its earlier attachment-candidate
+            # identifier. Reconcile against the identifier actually saved,
+            # otherwise a valid current job is withdrawn immediately after it
+            # is updated from the reviewed government registry.
+            current_ids_by_source.setdefault(source_id, set()).add(
+                str(posting.external_id)
+            )
             normalized = self.pipeline.normalize_posting(posting, source)
             _, outcome = self.database.save_job(normalized)
             if outcome in counts:

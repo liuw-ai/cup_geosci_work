@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+from dataclasses import replace
+
+from conftest import make_settings, source, write_registry
 from job_hub.government_positions import (
     current_publishable_position_records,
     position_record_to_posting,
@@ -124,3 +128,56 @@ def test_government_equivalence_ignores_transient_normalized_rows() -> None:
     assert DailyWorker._find_equivalent_government_job(
         [transient], record, "https://example.gov.cn/table.xlsx"
     ) is None
+
+
+def test_government_sync_keeps_equivalent_attachment_candidate_current(tmp_path) -> None:
+    record = {
+        "id": "current-geology-row",
+        "source_id": "official-test-source",
+        "position_type": "public_institution",
+        "province": "测试省",
+        "position_code": "A-001",
+        "title": "地质工程技术岗",
+        "employer": "测试地质调查院",
+        "major_requirement": "地质工程",
+        "degree_requirement": "硕士研究生",
+        "location": "测试市",
+        "headcount": 1,
+        "deadline_date": "2099-12-31",
+        "deadline_policy": "fixed_date",
+        "official_notice_url": "https://example.gov.cn/notice.html",
+        "official_attachment_url": "https://example.gov.cn/table.xlsx",
+        "evidence_locator": "岗位表!2",
+        "record_status": "verified_open",
+        "match_status": "explicit_match",
+    }
+    registry_path = tmp_path / "government-positions.json"
+    registry_path.write_text(
+        json.dumps({"version": 1, "as_of": "2026-09-28", "records": [record]}),
+        encoding="utf-8",
+    )
+    settings = replace(
+        make_settings(tmp_path),
+        government_position_registry_path=registry_path,
+        government_position_max_age_hours=None,
+    )
+    write_registry(settings.source_registry_path, [source()])
+    worker = DailyWorker(settings)
+    worker.pipeline.bootstrap_sources()
+    official_source = worker.database.get_source("official-test-source")
+    assert official_source is not None
+
+    legacy = replace(
+        position_record_to_posting(record), external_id="artifact-candidate-legacy-row"
+    )
+    worker.database.save_job(worker.pipeline.normalize_posting(legacy, official_source))
+
+    result = worker._sync_verified_government_positions()
+    jobs, _ = worker.database.list_jobs(
+        page_size=None, only_open=False, student_visible=False
+    )
+
+    assert result["withdrawn"] == 0
+    assert len(jobs) == 1
+    assert jobs[0]["status"] == "open"
+    assert jobs[0]["external_id"] == "artifact-candidate-legacy-row"

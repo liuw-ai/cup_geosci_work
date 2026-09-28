@@ -487,11 +487,11 @@
       "location": "北京市西城区阜外大街45号",
       "deadline_date": "2026-10-16",
       "deadline_policy": "fixed_date",
-      "official_notice_url": "https://www.drc.cgs.gov.cn/ggl/202609/t20260921_869371.html",
-      "official_attachment_url": "https://www.drc.cgs.gov.cn/ggl/202609/t20260921_869371.html",
+      "official_notice_url": "http://www.drc.cgs.gov.cn/ggl/202609/t20260921_869371.html",
+      "official_attachment_url": "http://www.drc.cgs.gov.cn/ggl/202609/t20260921_869371.html",
       "record_status": "verified_open",
       "match_status": "explicit_match",
-      "note": "中国地质调查局发展研究中心2026年度博士后招收公告正文表格逐岗位核验。公告明确计划9名、博士研究生、报名截止2026-10-16 17:00；岗位表直接位于官方公告正文，未另造附件链接。博士后不等同事业编，学生端按独立类型展示。",
+      "note": "中国地质调查局发展研究中心2026年度博士后招收公告正文表格逐岗位核验。公告明确计划9名、博士研究生、报名截止2026-10-16 17:00；岗位表直接位于官方公告正文，未另造附件链接。2026-09-28 服务器复核发现该官方子域 HTTPS 证书域名不匹配，已改用返回内容哈希一致的官方 HTTP 原文；每日复核失败时仍按来源新鲜度门禁清退。博士后不等同事业编，学生端按独立类型展示。",
       "rows": [
         [
           "1",

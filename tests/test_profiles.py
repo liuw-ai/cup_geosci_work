@@ -196,6 +196,42 @@ def test_publication_gate_accepts_explicit_target_major() -> None:
     assert "master-geological-engineering" in decision.matched_profile_ids
 
 
+def test_publication_gate_accepts_named_geology_second_level_discipline() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="环境地球化学研究岗",
+            field_evidence={
+                "evidence_scope": "official_attachment_row",
+                "岗位": "环境地球化学研究岗",
+                "专业要求": "070902 地球化学；0830 环境科学与工程",
+                "学历要求": "博士研究生",
+                "工作地点": "长沙",
+            },
+        )
+    )
+
+    assert decision.status == "student_eligible"
+    assert decision.matched_profile_ids == ("doctoral-geology",)
+
+
+def test_publication_gate_accepts_named_geological_resources_direction() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="工程检测技术岗",
+            field_evidence={
+                "evidence_scope": "official_attachment_row",
+                "岗位": "工程检测技术岗",
+                "专业要求": "081802 地球探测与信息技术",
+                "学历要求": "硕士研究生及以上",
+                "工作地点": "长沙",
+            },
+        )
+    )
+
+    assert decision.status == "student_eligible"
+    assert "master-geological-resources-engineering" in decision.matched_profile_ids
+
+
 def test_government_position_without_row_location_stays_private() -> None:
     decision = evaluate_student_publication(
         job(
