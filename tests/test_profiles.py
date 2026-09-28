@@ -306,6 +306,26 @@ def test_publication_gate_rejects_profession_qualified_experience_requirement() 
     assert decision.label == "需工作经验"
 
 
+def test_publication_gate_rejects_suffix_and_chinese_numeral_experience_forms() -> None:
+    for requirement in (
+        "本科及以上学历，地质工程专业，项目管理相关工作经验5年以上。",
+        "本科及以上学历，地质工程专业，具有五年以上工程勘察经验。",
+    ):
+        decision = evaluate_student_publication(
+            job(
+                title="工程地质技术岗",
+                field_evidence={
+                    "evidence_scope": "official_attachment_row",
+                    "岗位": "工程地质技术岗",
+                    "岗位要求": requirement,
+                    "学历要求": requirement,
+                },
+            )
+        )
+        assert decision.status == "out_of_scope"
+        assert decision.label == "需工作经验"
+
+
 def test_publication_gate_keeps_explicit_graduate_exception() -> None:
     decision = evaluate_student_publication(
         job(

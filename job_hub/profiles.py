@@ -78,8 +78,13 @@ UNRESTRICTED_MAJOR_MARKERS = (
 # on an unambiguous work-experience condition in the same official job block.
 EXPERIENCE_REQUIREMENT_PATTERNS = (
     re.compile(
-        r"(?:具有|具备|需|要求|不少于|至少|满)?\s*\d+\s*年(?:以上)?"
-        r"[^。；;\n]{0,16}?(?:工作|从业|项目|行业)(?:经验|经历)"
+        r"(?:具有|具备|需|要求|不少于|至少|满)?\s*"
+        r"(?:[一二三四五六七八九十百千\d]+)\s*年(?:以上|以内)?"
+        r"[^。；;\n]{0,24}?(?:工作|从业|项目|行业|工程|勘察|设计)(?:经验|经历)"
+    ),
+    re.compile(
+        r"(?:工作|从业|项目|行业|工程|勘察|设计)(?:经验|经历)\s*"
+        r"(?:不少于|至少)?\s*(?:[一二三四五六七八九十百千\d]+)\s*年"
     ),
     re.compile(
         r"(?:at least|minimum of|over)?\s*\d+\+?\s*years?\s+of\s+experience",
