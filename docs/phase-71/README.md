@@ -16,6 +16,8 @@ because the ordinary web image intentionally omits Playwright.
 - Fixed both headless-shell services to bind CDP on `0.0.0.0:9222` inside the
   Compose network. No host `ports` mapping is added, so this endpoint remains
   inaccessible from the public internet.
+- The entrypoint now fails fast when the ordinary image is used by mistake;
+  runtime installation is opt-in through `CNPC_BROWSER_ALLOW_RUNTIME_INSTALL`.
 - Removed the runtime-only wheel-cache dependency from the browser Compose
   file. `cnpc_browser_entrypoint` remains as a defensive fallback, but normal
   startup no longer needs PyPI or a writable Python package directory.

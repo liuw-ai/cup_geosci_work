@@ -1,4 +1,9 @@
 from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+
+from job_hub.cnpc_browser_entrypoint import ensure_playwright
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -19,3 +24,13 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     # The browser service must not fall back to installing packages in the
     # ordinary application container or depend on a writable wheel cache.
     assert "wheels-linux" not in compose
+
+
+def test_browser_entrypoint_fails_fast_without_runtime_install_permission(tmp_path) -> None:
+    with patch.dict("os.environ", {
+        "CNPC_BROWSER_PYTHON_TARGET": str(tmp_path / "packages"),
+        "CNPC_BROWSER_PLAYWRIGHT_WHEEL": str(tmp_path / "missing.whl"),
+        "CNPC_BROWSER_ALLOW_RUNTIME_INSTALL": "false",
+    }, clear=False), patch("job_hub.cnpc_browser_entrypoint.importlib.util.find_spec", return_value=None):
+        with pytest.raises(RuntimeError, match="Build Dockerfile.browser"):
+            ensure_playwright()

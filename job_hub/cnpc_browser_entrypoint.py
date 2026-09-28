@@ -38,6 +38,16 @@ def ensure_playwright() -> None:
             "playwright==1.48.0",
         ]
     else:
+        allow_runtime_install = os.getenv(
+            "CNPC_BROWSER_ALLOW_RUNTIME_INSTALL", "false"
+        ).strip().lower() in {"1", "true", "yes", "on"}
+        if not allow_runtime_install:
+            raise RuntimeError(
+                "Playwright is unavailable in the browser worker image. "
+                "Build Dockerfile.browser before starting this service; "
+                "set CNPC_BROWSER_ALLOW_RUNTIME_INSTALL=true only for an "
+                "explicit, controlled fallback installation."
+            )
         command = [
             sys.executable,
             "-m",
