@@ -1835,6 +1835,46 @@ class Database:
             )
             return int(cursor.rowcount)
 
+    def reject_unreviewed_artifact_candidates(
+        self,
+        artifact_id: int,
+        *,
+        reason: str,
+        keep_artifact_row_ids: list[int] | None = None,
+    ) -> int:
+        """Remove parser-invalid rows from the private review queue.
+
+        This preserves every raw attachment and row.  Only unreviewed rows are
+        moved to ``rejected`` so a real prior human verification or publication
+        is never silently overwritten by an evolving parser rule.
+        """
+        note = self._optional_text(reason)
+        if not note:
+            raise ValueError("Artifact candidate rejection requires a reason")
+        retained = sorted({int(value) for value in keep_artifact_row_ids or []})
+        query = """
+            UPDATE artifact_job_candidates
+            SET review_status = 'rejected',
+                review_note = CASE
+                    WHEN review_note IS NULL OR review_note = '' THEN ?
+                    WHEN review_note LIKE '%' || ? || '%' THEN review_note
+                    ELSE review_note || '；' || ?
+                END,
+                updated_at = ?
+            WHERE review_status = 'needs_review'
+              AND artifact_row_id IN (
+                  SELECT id FROM source_artifact_rows WHERE artifact_id = ?
+              )
+        """
+        values: list[Any] = [note, note, note, utc_now(), artifact_id]
+        if retained:
+            placeholders = ", ".join("?" for _ in retained)
+            query += f" AND artifact_row_id NOT IN ({placeholders})"
+            values.extend(retained)
+        with self.transaction() as connection:
+            cursor = connection.execute(query, values)
+            return int(cursor.rowcount)
+
     def update_artifact_job_candidate(
         self,
         candidate_id: int,

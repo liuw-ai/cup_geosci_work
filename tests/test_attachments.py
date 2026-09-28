@@ -99,6 +99,18 @@ def _xlsx_bytes() -> bytes:
     return output.getvalue()
 
 
+def _position_xlsx_bytes(headers: list[str], values: list[str]) -> bytes:
+    openpyxl = pytest.importorskip("openpyxl")
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "岗位表"
+    sheet.append(headers)
+    sheet.append(values)
+    output = BytesIO()
+    workbook.save(output)
+    return output.getvalue()
+
+
 def _registered_artifact(tmp_path: Path, *, session: FakeSession):
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
@@ -345,3 +357,78 @@ def test_discovery_registers_only_official_file_links_without_downloading(tmp_pa
     assert discovered[0]["artifact_kind"] == "position_table"
     assert discovered[0]["extraction_status"] == "registered"
     assert not (settings.managed_artifact_dir() / "sha256").exists()
+
+
+def test_discovery_classifies_application_forms_outside_position_tables(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    processor = OfficialAttachmentProcessor(settings, database, session=FakeSession(_xlsx_bytes()))
+
+    discovered = processor.discover_from_page(
+        "official-test-source",
+        "https://careers.example.edu.cn/notice/1",
+        html="<a href='/files/application.xlsx'>附件：公开招聘报名表</a>",
+    )
+
+    assert discovered[0]["artifact_kind"] == "application_material"
+    assert discovered[0]["metadata"]["attachment_intent"].startswith(
+        "non_position_attachment:报名表"
+    )
+
+
+def test_non_geoscience_position_rows_do_not_enter_private_review_queue(tmp_path) -> None:
+    body = _position_xlsx_bytes(
+        ["岗位名称", "招聘单位", "工作地点", "学历要求", "专业要求"],
+        ["生物信息分析师", "测试医院", "北京市", "本科及以上", "生物信息学"],
+    )
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path, session=FakeSession(body)
+    )
+
+    result = processor.process(artifact["id"])
+
+    assert result.status == "extracted"
+    assert result.candidates_created == 0
+    assert database.list_artifact_job_candidates(artifact_id=artifact["id"]) == []
+
+
+def test_unrestricted_major_position_row_enters_private_review_queue(tmp_path) -> None:
+    body = _position_xlsx_bytes(
+        ["岗位名称", "岗位代码", "招聘单位", "工作地点", "学历要求", "专业要求"],
+        ["综合管理岗", "A-001", "测试事业单位", "北京市", "本科及以上", "不限专业"],
+    )
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path, session=FakeSession(body)
+    )
+
+    result = processor.process(artifact["id"])
+    candidates = database.list_artifact_job_candidates(artifact_id=artifact["id"])
+
+    assert result.candidates_created == 1
+    assert len(candidates) == 1
+    assert candidates[0]["field_evidence"]["专业范围"] == "不限专业"
+
+
+def test_reconcile_rejects_old_candidates_from_an_application_form(tmp_path) -> None:
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path, session=FakeSession(_xlsx_bytes())
+    )
+    processor.process(artifact["id"])
+    candidate = database.list_artifact_job_candidates(artifact_id=artifact["id"])[0]
+    database.update_source_artifact_processing(
+        artifact["id"],
+        extraction_status="extracted",
+        metadata_updates={"display_name": "公开招聘报名表"},
+    )
+
+    result = processor.reconcile_candidates(artifact["id"])
+    refreshed = database.get_artifact_job_candidate(candidate["id"])
+    stored = database.get_source_artifact(artifact["id"])
+
+    assert result.candidates_created == 0
+    assert result.candidates_rejected == 1
+    assert refreshed["review_status"] == "rejected"
+    assert "Phase 62 附件用途识别" in refreshed["review_note"]
+    assert stored["metadata"]["candidate_queue_status"] == "rejected_non_position_attachment"

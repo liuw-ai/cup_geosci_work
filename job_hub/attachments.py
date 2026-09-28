@@ -36,6 +36,11 @@ from job_hub.matching import (
     extract_published_date,
     score_relevance,
 )
+from job_hub.profiles import (
+    PUBLICATION_STUDENT_ELIGIBLE,
+    PUBLICATION_UNRESTRICTED_ELIGIBLE,
+    evaluate_student_publication,
+)
 from job_hub.transport import (
     RequestPolicy,
     configure_session,
@@ -45,7 +50,7 @@ from job_hub.transport import (
 
 
 USER_AGENT = "cupb-geoscience-job-hub-attachment-fetcher/0.1 (+official-public-source)"
-PARSER_VERSION = "attachments-v2"
+PARSER_VERSION = "attachments-v3"
 REQUEST_ERRORS = request_exception_types()
 
 SUPPORTED_SUFFIXES = {
@@ -57,6 +62,22 @@ SUPPORTED_SUFFIXES = {
     ".docx",
 }
 HTML_MARKERS = (b"<html", b"<!doctype html", b"<head", b"<script")
+
+# Recruitment notices frequently attach application forms and examination
+# workflow documents beside the real position table. Retain those files as
+# official evidence, but keep them out of the position-review queue.
+NON_POSITION_ATTACHMENT_MARKERS = (
+    "报名表", "报名登记表", "应聘登记表", "资格审查", "资格复审", "准考证",
+    "笔试", "面试", "成绩", "体检", "考察", "拟聘", "拟录用", "录用名单",
+    "聘用名单", "录用公示", "放弃", "递补", "取消招聘", "核减岗位",
+    "诚信承诺", "承诺书", "报考指南", "操作手册",
+)
+APPLICATION_ATTACHMENT_MARKERS = (
+    "报名表", "报名登记表", "应聘登记表", "诚信承诺", "承诺书",
+)
+POSITION_TABLE_MARKERS = (
+    "岗位表", "职位表", "岗位计划", "招聘计划", "需求计划", "职位一览", "岗位一览",
+)
 
 
 def build_attachment_field_evidence(
@@ -99,6 +120,7 @@ class AttachmentResult:
     bytes_downloaded: int = 0
     rows_extracted: int = 0
     candidates_created: int = 0
+    candidates_rejected: int = 0
     detail: str = ""
 
     def as_dict(self) -> dict[str, object]:
@@ -108,8 +130,16 @@ class AttachmentResult:
             "bytes_downloaded": self.bytes_downloaded,
             "rows_extracted": self.rows_extracted,
             "candidates_created": self.candidates_created,
+            "candidates_rejected": self.candidates_rejected,
             "detail": self.detail,
         }
+
+
+@dataclass(frozen=True)
+class AttachmentQueueResult:
+    created: int
+    rejected: int
+    detail: str
 
 
 class OfficialAttachmentProcessor:
@@ -225,10 +255,7 @@ class OfficialAttachmentProcessor:
             except AttachmentSkipped:
                 continue
             seen.add(artifact_url)
-            kind = "position_table" if any(
-                word in f"{label} {artifact_url}"
-                for word in ("职位", "岗位", "招聘", "position", "career")
-            ) else "announcement_attachment"
+            kind, intent = self._discovered_artifact_kind(label, artifact_url)
             discovered.append(
                 self.database.upsert_source_artifact(
                     {
@@ -242,6 +269,7 @@ class OfficialAttachmentProcessor:
                             "discovered_from": parent_url,
                             "discovered_at": _utc_now(),
                             "discovery_only": True,
+                            "attachment_intent": intent,
                             **page_metadata,
                         },
                     }
@@ -287,14 +315,18 @@ class OfficialAttachmentProcessor:
                 parser_version=PARSER_VERSION,
                 metadata_updates=extracted["metadata"],
             )
-            candidates = self._queue_candidates(updated, rows)
+            queue_result = self._reconcile_candidate_queue(updated, rows)
             return AttachmentResult(
                 artifact_id=artifact_id,
                 status="extracted",
                 bytes_downloaded=bytes_downloaded,
                 rows_extracted=len(rows),
-                candidates_created=len(candidates),
-                detail=str(extracted["metadata"].get("extraction_note") or ""),
+                candidates_created=queue_result.created,
+                candidates_rejected=queue_result.rejected,
+                detail=_append_detail(
+                    str(extracted["metadata"].get("extraction_note") or ""),
+                    queue_result.detail,
+                ),
             )
         except AttachmentSkipped as error:
             self._record_failure(artifact_id, "skipped", str(error))
@@ -302,6 +334,24 @@ class OfficialAttachmentProcessor:
         except Exception as error:
             self._record_failure(artifact_id, "failed", str(error))
             raise AttachmentProcessingError(str(error)) from error
+
+    def reconcile_candidates(self, artifact_id: int) -> AttachmentResult:
+        """Reapply candidate gates to an extracted attachment without downloading it."""
+        artifact = self.database.get_source_artifact(artifact_id)
+        if artifact is None:
+            raise ValueError("Source artifact does not exist")
+        if str(artifact.get("extraction_status")) != "extracted":
+            raise ValueError("Only extracted source artifacts can be reconciled")
+        rows = self.database.list_source_artifact_rows(artifact_id, limit=500)
+        queue_result = self._reconcile_candidate_queue(artifact, rows)
+        return AttachmentResult(
+            artifact_id=artifact_id,
+            status="reconciled",
+            rows_extracted=len(rows),
+            candidates_created=queue_result.created,
+            candidates_rejected=queue_result.rejected,
+            detail=queue_result.detail,
+        )
 
     def _download(
         self,
@@ -732,6 +782,142 @@ class OfficialAttachmentProcessor:
             )
         return candidates
 
+    def _reconcile_candidate_queue(
+        self,
+        artifact: dict[str, object],
+        rows: list[dict[str, object]],
+    ) -> AttachmentQueueResult:
+        """Keep only position-table rows eligible for this student service.
+
+        This gate intentionally applies before human review.  A reviewer should
+        see only rows that already contain a job title, a professional condition
+        (or an explicit unrestricted-major condition), and a degree condition.
+        The public publication gate remains stricter and runs again at publish
+        time with the same row-level evidence.
+        """
+        rejection_reason = self._attachment_queue_rejection_reason(artifact, rows)
+        if rejection_reason:
+            rejected = self.database.reject_unreviewed_artifact_candidates(
+                int(artifact["id"]),
+                reason=rejection_reason,
+            )
+            self._record_queue_decision(
+                artifact,
+                status="rejected_non_position_attachment",
+                reason=rejection_reason,
+                retained_rows=0,
+                rejected_rows=rejected,
+            )
+            return AttachmentQueueResult(0, rejected, rejection_reason)
+
+        candidates = self._queue_candidates(artifact, rows)
+        accepted_row_ids = [
+            int(candidate["artifact_row_id"])
+            for candidate in candidates
+            if candidate.get("artifact_row_id") is not None
+        ]
+        rejected = self.database.reject_unreviewed_artifact_candidates(
+            int(artifact["id"]),
+            reason=(
+                "Phase 62 候选净化：该附件行未同时提供岗位、专业/不限专业和学历"
+                "的地学院学生可核验条件。原始附件与行证据已保留。"
+            ),
+            keep_artifact_row_ids=accepted_row_ids,
+        )
+        detail = (
+            "已按岗位、专业/不限专业、学历和地学院学生范围完成候选净化；"
+            f"保留 {len(candidates)} 条，拒绝 {rejected} 条未复核候选。"
+        )
+        self._record_queue_decision(
+            artifact,
+            status="eligible_position_rows",
+            reason=detail,
+            retained_rows=len(candidates),
+            rejected_rows=rejected,
+        )
+        return AttachmentQueueResult(
+            len(candidates),
+            rejected,
+            detail,
+        )
+
+    def _record_queue_decision(
+        self,
+        artifact: dict[str, object],
+        *,
+        status: str,
+        reason: str,
+        retained_rows: int,
+        rejected_rows: int,
+    ) -> None:
+        self.database.update_source_artifact_processing(
+            int(artifact["id"]),
+            extraction_status=str(artifact["extraction_status"]),
+            metadata_updates={
+                "candidate_queue_status": status,
+                "candidate_queue_reason": reason,
+                "candidate_queue_retained_rows": retained_rows,
+                "candidate_queue_rejected_rows": rejected_rows,
+                "candidate_queue_checked_at": _utc_now(),
+            },
+        )
+
+    @staticmethod
+    def _discovered_artifact_kind(label: str, artifact_url: str) -> tuple[str, str]:
+        context = f"{label} {Path(urlparse(artifact_url).path).name}".casefold()
+        marker = next(
+            (item for item in NON_POSITION_ATTACHMENT_MARKERS if item.casefold() in context),
+            None,
+        )
+        if marker:
+            kind = (
+                "application_material"
+                if any(item.casefold() in context for item in APPLICATION_ATTACHMENT_MARKERS)
+                else "supporting_document"
+            )
+            return kind, f"non_position_attachment:{marker}"
+        if any(item.casefold() in context for item in POSITION_TABLE_MARKERS):
+            return "position_table", "position_table_hint"
+        return "announcement_attachment", "unclassified_attachment"
+
+    @staticmethod
+    def _attachment_queue_rejection_reason(
+        artifact: dict[str, object],
+        rows: list[dict[str, object]],
+    ) -> str | None:
+        metadata = artifact.get("metadata")
+        metadata = metadata if isinstance(metadata, dict) else {}
+        label = str(metadata.get("display_name") or "")
+        kind, intent = OfficialAttachmentProcessor._discovered_artifact_kind(
+            label, str(artifact.get("artifact_url") or "")
+        )
+        if str(artifact.get("artifact_kind") or "") in {
+            "application_material",
+            "supporting_document",
+        } or kind in {"application_material", "supporting_document"}:
+            return (
+                "Phase 62 附件用途识别：该文件被识别为"
+                f"{intent.split(':', 1)[-1]}类流程/材料附件，不是职位表。"
+            )
+
+        # A file name alone is not sufficient evidence of a position table.
+        # Require a structured row with a job/position field plus distinct
+        # professional and degree fields before any row can reach review.
+        for row in rows:
+            cells = row.get("cells")
+            if not isinstance(cells, dict):
+                continue
+            keys = " ".join(str(key) for key in cells)
+            has_title = any(item in keys for item in ("岗位", "职位"))
+            has_major = any(item in keys for item in ("专业", "学科"))
+            has_degree = any(item in keys for item in ("学历", "学位", "面向对象"))
+            if has_title and has_major and has_degree:
+                return None
+        return (
+            "Phase 62 附件用途识别：未发现同时包含岗位/职位、专业和学历字段的"
+            "职位表结构；原始附件与行证据已保留。"
+        )
+
     def _candidate_from_row(
         self,
         artifact: dict[str, object],
@@ -748,19 +934,20 @@ class OfficialAttachmentProcessor:
         )
         employer = self._field(cells, ("用人单位", "招聘单位", "单位名称", "单位", "招聘机构"))
         location = self._field(cells, ("工作地点", "工作区域", "工作城市", "所在地", "地点"))
-        degree = self._field(cells, ("学历", "学历要求", "学位要求", "面向对象"))
-        major = self._field(cells, ("专业", "专业要求", "需求专业", "专业范围", "所学专业"))
+        degree = self._field(
+            cells, ("学历", "学历要求", "学历层次", "学历及学位", "学位要求", "面向对象")
+        )
+        major = self._field(
+            cells, ("专业", "专业要求", "需求专业", "专业范围", "所学专业", "专业类别", "专业名称")
+        )
         published = self._field(cells, ("发布日期", "发布时间", "公告日期", "发布日"))
         deadline = self._field(cells, ("报名截止", "截止日期", "报名截止日期", "截止时间", "报名时间"))
-        if not title:
-            for line in text.splitlines():
-                if len(line.strip()) >= 4 and any(word in line for word in ("招聘", "岗位", "工程师", "研究员", "教师")):
-                    title = line.strip()[:160]
-                    break
         if title and major and title in {"专业技术", "专业技术岗", "专业技术岗位"}:
             title = f"{title}（{major[:100]}）"
         relevant_text = " ".join(filter(None, (title, major, degree, text)))
-        if not title or not (extract_major_tags(relevant_text) or extract_degree_levels(relevant_text)):
+        # Do not infer a job row from arbitrary document prose.  The three
+        # values below must all be extracted from the same structured row.
+        if not title or not major or not degree:
             return None
         metadata = artifact.get("metadata") or {}
         source = self.database.get_source(str(artifact.get("source_id") or "")) or {}
@@ -788,6 +975,20 @@ class OfficialAttachmentProcessor:
         )
         if position_code:
             field_evidence["职位代码"] = position_code
+        publication = evaluate_student_publication(
+            {
+                "source_id": artifact["source_id"],
+                "category": str(metadata.get("category") or ""),
+                "title": title,
+                "location": location,
+                "field_evidence": field_evidence,
+            }
+        )
+        if publication.status not in {
+            PUBLICATION_STUDENT_ELIGIBLE,
+            PUBLICATION_UNRESTRICTED_ELIGIBLE,
+        } and publication.label != "待补岗位地点":
+            return None
         return {
             "artifact_row_id": row["id"],
             "source_id": artifact["source_id"],
@@ -840,6 +1041,14 @@ class OfficialAttachmentProcessor:
             header = cls._workbook_header(row)
             if not header:
                 continue
+            header_score = sum(
+                any(
+                    keyword in cell
+                    for keyword in ("岗位", "职位", "单位", "专业", "学历", "地点", "报名", "截止", "学位")
+                )
+                for cell in header
+                if cell
+            )
             end = index + 1
             while end < len(rows):
                 candidate = rows[end]
@@ -854,7 +1063,12 @@ class OfficialAttachmentProcessor:
                 # A data row can contain the word “专业”; continuation rows
                 # usually expose at least two field labels and no job code.
                 has_code = any(re.search(r"20\d{2}\d+", cell) for cell in candidate if cell)
-                if score < 2 or has_code:
+                # Once a first header row already exposes several independent
+                # field labels, the next row is data even if its employer and
+                # major values happen to contain words such as “单位” or
+                # “专业”.  The old rule merged those values into the header
+                # when a portal used a short non-year position code (A-001).
+                if score < 2 or has_code or header_score >= 3:
                     break
                 for column, value in enumerate(candidate):
                     if not value:
@@ -1198,6 +1412,11 @@ class OfficialAttachmentProcessor:
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _append_detail(existing: str, value: str) -> str:
+    """Join bounded operational details without storing remote document text."""
+    return "; ".join(item for item in (existing, value) if item)[:1_000]
 
 
 def _normalize_date(value: str | None) -> str | None:

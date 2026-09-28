@@ -712,6 +712,11 @@ def main() -> None:
     )
     artifact_candidate_parser.add_argument("--artifact-id", type=int)
     artifact_candidate_parser.add_argument("--status")
+    artifact_reconcile_parser = subparsers.add_parser(
+        "reconcile-artifact-candidates",
+        help="按当前岗位、专业和学历门禁净化已解析的私有附件候选",
+    )
+    artifact_reconcile_parser.add_argument("--artifact-id", type=int)
     subparsers.add_parser(
         "repair-attachment-evidence",
         help="把历史附件候选迁移到统一岗位级证据格式并重算发布门禁",
@@ -1464,6 +1469,36 @@ def main() -> None:
                         discovery_source_id=args.discovery_source_id,
                         province=args.province,
                     )
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if args.command == "reconcile-artifact-candidates":
+        processor = OfficialAttachmentProcessor(settings, database)
+        artifacts = database.list_source_artifacts(limit=500)
+        if args.artifact_id is not None:
+            artifacts = [
+                artifact for artifact in artifacts if int(artifact["id"]) == args.artifact_id
+            ]
+            if not artifacts:
+                parser.error(f"artifact_id is not present: {args.artifact_id}")
+        results = []
+        for artifact in artifacts:
+            if str(artifact.get("extraction_status")) != "extracted":
+                continue
+            try:
+                results.append(processor.reconcile_candidates(int(artifact["id"])).as_dict())
+            except ValueError as error:
+                results.append({"artifact_id": artifact["id"], "status": "failed", "error": str(error)})
+        print(
+            json.dumps(
+                {
+                    "processed": len(results),
+                    "candidates_created": sum(int(item.get("candidates_created", 0)) for item in results),
+                    "candidates_rejected": sum(int(item.get("candidates_rejected", 0)) for item in results),
+                    "items": results,
                 },
                 ensure_ascii=False,
                 indent=2,

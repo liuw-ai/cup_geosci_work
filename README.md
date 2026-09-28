@@ -16,6 +16,11 @@ Phase 61 将 11 个已验证的省级/人事官方栏目接入每日附件发现
 DOCX 和 CSV 仍只进入私有复核队列，不会自动作为学生端岗位发布。详见
 [docs/phase-61/README.md](docs/phase-61/README.md)。
 
+Phase 62 为该队列补上附件用途和岗位行语义门禁：报名表、成绩、体检、拟聘等流程文件
+保留为官方证据但不会占用岗位复核队列；职位行必须同时给出岗位、专业（或不限专业）和
+学历，并通过地学院学生范围判断后才进入私有复核。详见
+[docs/phase-62/README.md](docs/phase-62/README.md)。
+
 每日同步、截止日期清退、旧岗位详情门禁和日报清退统计见 [docs/phase-37/README.md](docs/phase-37/README.md)。
 
 项目进入长期迭代前的 Phase 0 审阅材料见 [docs/phase-0/README.md](docs/phase-0/README.md)。其中明确区分当前已经实现的能力、尚未实现的能力，以及后续扩源时不得突破的公开发布边界。
@@ -125,7 +130,8 @@ ARCHITECTURE.md    数据流、收录边界、运维与代码职责
 `discover-configured-government-artifacts` 单独复查。附件受控下载和解析后只进入私有候选队列；
 PDF 职位表优先使用布局提取并按职位代码聚合跨行文本；低置信度 OCR 结果必须人工复核，
 不能自动发布。完整的字段、状态和回退边界见 [docs/phase-2/README.md](docs/phase-2/README.md)、
-[docs/phase-46/README.md](docs/phase-46/README.md) 和 [docs/phase-61/README.md](docs/phase-61/README.md)。
+[docs/phase-46/README.md](docs/phase-46/README.md)、[docs/phase-61/README.md](docs/phase-61/README.md)
+和 [docs/phase-62/README.md](docs/phase-62/README.md)。
 
 ## 本地启动
 
