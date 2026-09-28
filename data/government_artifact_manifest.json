@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "as_of": "2026-09-27",
-  "description": "安徽、甘肃、宁夏、湖南、山东、河南、天津和中国地震局已核验政府官网事业单位岗位表附件。附件先进入服务器受控下载队列；逐行解析、截止日期和专业证据复核前不得发布。",
+  "as_of": "2026-09-28",
+  "description": "安徽、甘肃、宁夏、湖南、山东、河南、天津、中国地震局和中国煤炭地质总局已核验官方岗位表附件。附件先进入服务器受控下载队列；逐行解析、截止日期和专业证据复核前不得发布。",
   "artifacts": [
     {
       "id": "anhui-geology-bureau-2026-high-level-position-table",
@@ -170,6 +170,20 @@
       "observed_on": "2026-09-27",
       "status": "historical_closed",
       "note": "湖南省2026年省直事业单位第四次公开招聘岗位表共160行、255个计划；其中18行明确匹配地学专业。报名窗口已于2026-09-16结束，作为历史解析回归证据，不进入学生端。"
+    },
+    {
+      "id": "ccgc-mature-talent-2026-position-table",
+      "source_id": "ccgc-careers",
+      "province": "北京",
+      "position_type": "state_owned_enterprise",
+      "notice_url": "https://dzjt.ccgc.cn/xxgk/tzgg/9856.html",
+      "attachment_url": "https://dzjt.ccgc.cn/d/file/p/2026/09-01/c4a7009ba6fe77fadbe4d07d2500c49b.xls",
+      "artifact_kind": "position_table",
+      "deadline_date": "2026-10-31",
+      "deadline_policy": "fixed_date",
+      "observed_on": "2026-09-28",
+      "status": "server_download_pending",
+      "note": "中国煤炭地质总局所属中国煤炭地质集团有限公司官网2026年度成熟人才公开招聘公告。公告报名截止2026-10-31 17:00，附件1为人员调配计划明细表；必须逐行核验单位、岗位、专业、学历、人数和地点后才可进入学生端。"
     }
   ]
 }

@@ -24,10 +24,14 @@ def test_provincial_manifest_contains_real_official_attachments() -> None:
     manifest = load_government_artifact_manifest(
         PROJECT_ROOT / "data" / "government_artifact_manifest.json"
     )
-    assert len(manifest["artifacts"]) == 12
-    assert {item["province"] for item in manifest["artifacts"]} == {"全国", "安徽", "山东", "河南", "天津", "甘肃", "宁夏", "湖北", "湖南"}
+    assert len(manifest["artifacts"]) == 13
+    assert {item["province"] for item in manifest["artifacts"]} == {"全国", "北京", "安徽", "山东", "河南", "天津", "甘肃", "宁夏", "湖北", "湖南"}
     assert all(item["status"] in {"historical_closed", "server_download_pending"} for item in manifest["artifacts"])
     assert all(item["attachment_url"].lower().endswith((".xlsx", ".xls", ".pdf")) for item in manifest["artifacts"])
+    ccgc = next(item for item in manifest["artifacts"] if item["id"] == "ccgc-mature-talent-2026-position-table")
+    assert ccgc["source_id"] == "ccgc-careers"
+    assert ccgc["deadline_date"] == "2026-10-31"
+    assert ccgc["notice_url"].startswith("https://dzjt.ccgc.cn/")
 
 
 def test_manifest_hosts_are_registered_by_their_source() -> None:
@@ -87,8 +91,8 @@ def test_registration_only_creates_private_artifact_rows() -> None:
     database = FakeDatabase()
     rows = register_government_artifacts(database, manifest)
 
-    assert len(rows) == 12
-    assert len(database.items) == 12
+    assert len(rows) == 13
+    assert len(database.items) == 13
     assert all(item["extraction_status"] == "registered" for item in database.items)
     assert all("government_artifact_id" in item["metadata"] for item in database.items)
 

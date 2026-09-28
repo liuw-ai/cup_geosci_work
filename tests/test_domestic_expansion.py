@@ -20,6 +20,13 @@ from conftest import make_settings
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
+def _source_by_id(source_id: str) -> dict[str, object]:
+    sources = json.loads(
+        (PROJECT_ROOT / "data" / "sources.json").read_text(encoding="utf-8")
+    )
+    return next(source for source in sources if source["id"] == source_id)
+
+
 def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
     queue = load_domestic_expansion_queue()
     summary = domestic_expansion_summary(queue)
@@ -30,6 +37,14 @@ def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
     assert "中国石油" in summary["by_system"]
     assert "公务员" in summary["by_system"]
     assert summary["scan_success_no_match"] >= 1
+
+    cgs_row = next(
+        item for item in queue["records"] if item["id"] == "cgs-recruitment"
+    )
+    assert cgs_row["official_url"] == "https://www.cgs.gov.cn/tzgg/zpxx/"
+    assert cgs_row["status"] == "scan_success_no_match"
+    assert cgs_row["observed_on"] == "2026-09-28"
+    assert cgs_row["scan_conclusion"] == "scan_success_no_match"
 
     cnpc_rows = [
         item
@@ -50,6 +65,18 @@ def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
     assert all(item["status"] == "access_limited" for item in limited)
     # Queue rows are planning records; none may be mistaken for a job id.
     assert all("job_id" not in item for item in queue["records"])
+
+
+def test_cgs_source_uses_recruitment_channel_and_private_attachment_discovery() -> None:
+    source = _source_by_id("cgs-notices")
+
+    assert source["homepage_url"] == "https://www.cgs.gov.cn/tzgg/zpxx/"
+    assert source["config"]["listing_urls"] == [
+        "https://www.cgs.gov.cn/tzgg/zpxx/"
+    ]
+    assert source["config"]["attachment_discovery_enabled"] is True
+    assert "拟聘" in source["config"]["exclude_patterns"]
+    assert "资格审查" in source["config"]["exclude_patterns"]
 
 
 def test_domestic_verified_snapshot_has_job_level_gate(tmp_path) -> None:

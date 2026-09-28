@@ -331,12 +331,30 @@
       "organization": "中国地质调查局及所属地调中心/研究所",
       "parent_organization": "自然资源部",
       "organization_role": "geology_survey",
-      "official_url": "https://www.cgs.gov.cn/tzgg/tzgg/",
+      "official_url": "https://www.cgs.gov.cn/tzgg/zpxx/",
       "backup_urls": ["https://m.cgs.gov.cn/zpxx/"],
       "source_id": "cgs-notices",
       "channel_type": "official_announcement",
-      "status": "access_limited",
-      "next_action": "定位当前招聘公告和附件；禁止把行业动态当成岗位。"
+      "status": "scan_success_no_match",
+      "observed_on": "2026-09-28",
+      "scan_conclusion": "scan_success_no_match",
+      "next_action": "每日读取官网招聘信息栏目并发现官方职位表附件；拟聘、资格审查等流程公告不得作为学生端岗位。"
+    },
+    {
+      "id": "ccgc-mature-talent-2026",
+      "system": "中央地勘国企",
+      "organization": "中国煤炭地质集团有限公司",
+      "parent_organization": "中国煤炭地质总局",
+      "organization_role": "geology_survey",
+      "official_url": "https://dzjt.ccgc.cn/xxgk/tzgg/9856.html",
+      "backup_urls": ["https://www.ccgc.cn/?mod=zhaopin&tid=129", "https://zhaopin.ccgc.cn/"],
+      "source_id": "ccgc-careers",
+      "channel_type": "official_attachment",
+      "status": "manual_review_required",
+      "observed_on": "2026-09-28",
+      "sample_announcement_url": "https://dzjt.ccgc.cn/xxgk/tzgg/9856.html",
+      "field_validation": "官方公告正文和附件1已定位；报名截止2026-10-31 17:00。岗位级专业、学历、人数、地点和单位需从 XLS 逐行提取并人工复核后发布。",
+      "next_action": "服务器受控下载附件1并解析；仅通过地学院专业/学历门禁的岗位进入学生端，访问或解析失败不得标记为无岗位。"
     },
     {
       "id": "provincial-geology-bureaus-batch",
