@@ -73,6 +73,7 @@ from job_hub.source_validation import (
     source_validation_matrix_rows,
     source_validation_summary,
 )
+from job_hub.government_positions import load_position_registry, upcoming_position_records
 from job_hub.reports import build_daily_report, local_today, publish_daily_report
 from job_hub.sources import RawPosting
 from job_hub.sinopec import load_sinopec_capture, sinopec_capture_summary
@@ -211,6 +212,28 @@ def create_app(settings: Settings | None = None) -> Flask:
             abort(404)
         return profile
 
+    def upcoming_government_positions() -> list[dict[str, Any]]:
+        """Load only officially evidenced government rows opening after today."""
+        path = settings.government_position_registry_path
+        if path is None:
+            return []
+        try:
+            registry = load_position_registry(path)
+            verifications = {
+                str(item["source_id"]): item
+                for item in database.list_government_source_verifications()
+            }
+            return upcoming_position_records(
+                registry,
+                today=local_today(settings).isoformat(),
+                max_age_hours=settings.government_position_max_age_hours,
+                source_verifications=verifications,
+                now=datetime.now(timezone.utc),
+            )
+        except (OSError, ValueError, KeyError):
+            # A broken or stale ledger must not break the public home page.
+            return []
+
     def list_display_jobs(
         *,
         page: int,
@@ -281,6 +304,15 @@ def create_app(settings: Settings | None = None) -> Flask:
             featured=featured,
             categories=database.list_categories(),
             report_dates=database.list_report_dates(14),
+            upcoming_positions=upcoming_government_positions(),
+        )
+
+    @app.get("/government/upcoming")
+    def upcoming_government() -> str:
+        """Show verified official government vacancies before registration opens."""
+        return render_template(
+            "government_upcoming.html",
+            positions=upcoming_government_positions(),
         )
 
     @app.get("/daily/latest")

@@ -1112,6 +1112,20 @@ small {
   overflow-wrap: anywhere;
 }
 
+.upcoming-table-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.upcoming-table {
+  min-width: 1080px;
+}
+
+.upcoming-section {
+  border-top: 3px solid var(--amber);
+}
+
 .failure-list {
   display: grid;
   gap: 10px;

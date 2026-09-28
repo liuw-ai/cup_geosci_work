@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}即将开放的官方岗位 | {{ site_name }}{% endblock %}
+
+{% block content %}
+  <section class="page-heading">
+    <div class="shell">
+      <p class="eyebrow">官方职位表预告</p>
+      <h1>即将开放报名</h1>
+      <p class="lede">以下岗位已从政府或事业单位官方公告、职位表逐行核验，但报名窗口尚未开始。开放前不会计入“在招”岗位。</p>
+    </div>
+  </section>
+
+  <section class="shell content-section">
+    {% if positions %}
+      <div class="result-heading">
+        <p>共 <strong>{{ positions|length }}</strong> 条即将开放的地学相关岗位</p>
+        <p class="muted">请以官方公告和附件为准；开放日期到达后，系统每日复核来源并自动转入当前岗位或清退。</p>
+      </div>
+      <div class="upcoming-table-wrap">
+        <table class="source-table upcoming-table">
+          <thead>
+            <tr><th>开放日期</th><th>岗位</th><th>单位</th><th>专业与学历</th><th>地点</th><th>官方原文</th></tr>
+          </thead>
+          <tbody>
+            {% for position in positions %}
+              <tr>
+                <td>{{ position.opening_date|cn_date }}</td>
+                <td><strong>{{ position.title }}</strong><small>代码：{{ position.position_code }} · {{ position.headcount }} 人</small></td>
+                <td>{{ position.employer }}</td>
+                <td>{{ position.major_requirement }}<small>{{ position.degree_requirement }}</small></td>
+                <td>{{ position.location }}</td>
+                <td>
+                  <a href="{{ position.official_notice_url }}" target="_blank" rel="noopener noreferrer">公告</a>
+                  {% if position.official_attachment_url %}
+                    <a href="{{ position.official_attachment_url }}" target="_blank" rel="noopener noreferrer">附件</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <h2>暂无已核验的即将开放岗位</h2>
+        <p>官方职位表会在每日同步后更新；来源故障不会被解释为无岗位。</p>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

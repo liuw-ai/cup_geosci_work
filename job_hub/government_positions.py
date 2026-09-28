@@ -486,6 +486,62 @@ def current_publishable_position_records(
     return rows
 
 
+def upcoming_position_records(
+    registry: dict[str, Any],
+    *,
+    today: str,
+    max_age_hours: float | None = None,
+    source_verifications: dict[str, dict[str, Any]] | None = None,
+    now: datetime | None = None,
+) -> list[dict[str, Any]]:
+    """Return verified student-matching rows whose official window is upcoming.
+
+    Upcoming rows are deliberately separate from ``current_publishable_position_records``:
+    they are useful planning information, but must never inflate the current
+    vacancy count before the official registration window opens.
+    """
+    target = date.fromisoformat(today)
+    verification_map = source_verifications or {}
+    reference = now or datetime.combine(target, time.min, tzinfo=timezone.utc)
+    if reference.tzinfo is None:
+        reference = reference.replace(tzinfo=timezone.utc)
+    reference = reference.astimezone(timezone.utc)
+    raw_as_of = str(registry.get("as_of") or "").strip()
+    fallback_fresh = _registry_fresh(raw_as_of, reference, max_age_hours)
+    source_opening_dates = registry.get("source_opening_dates") or {}
+    rows: list[dict[str, Any]] = []
+    for item in registry.get("records", []):
+        if item.get("record_status") != "verified_open":
+            continue
+        if item.get("match_status") not in {"explicit_match", "unrestricted_match"}:
+            continue
+        opening_date = _opening_date_for_record(item, source_opening_dates)
+        if opening_date is None or opening_date <= target:
+            continue
+        deadline = str(item.get("deadline_date") or "").strip()
+        if deadline and date.fromisoformat(deadline) < target:
+            continue
+        if not _source_evidence_is_current(
+            str(item.get("source_id") or ""),
+            verification_map,
+            reference,
+            max_age_hours,
+            fallback_fresh,
+        ):
+            continue
+        row = dict(item)
+        row["opening_date"] = opening_date.isoformat()
+        rows.append(row)
+    rows.sort(
+        key=lambda row: (
+            row["opening_date"],
+            str(row.get("province") or ""),
+            str(row.get("position_code") or ""),
+        )
+    )
+    return rows
+
+
 def _opening_date_for_record(
     record: dict[str, Any],
     source_opening_dates: dict[str, Any],

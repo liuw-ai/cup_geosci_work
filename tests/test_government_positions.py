@@ -8,6 +8,7 @@ from job_hub.government_positions import (
     GovernmentPositionContractError,
     government_position_quality_report,
     load_position_registry,
+    upcoming_position_records,
     validate_position_record,
 )
 
@@ -27,6 +28,21 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
     assert report["source_failures_or_pending"] == 0
     assert report["verified_scan_no_current_match"] == 3
     assert "扫描成功" in report["scan_interpretation"]
+
+
+def test_upcoming_records_are_separate_from_current_publishable_rows() -> None:
+    registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
+    rows = upcoming_position_records(
+        registry,
+        today="2026-09-28",
+        max_age_hours=48,
+    )
+
+    assert len(rows) == 70
+    assert {row["source_id"] for row in rows} == {"cea-2027-recruitment"}
+    assert all(row["opening_date"] == "2026-10-10" for row in rows)
+    assert all(row["record_status"] == "verified_open" for row in rows)
+    assert not [row for row in rows if row["deadline_date"] < "2026-09-28"]
 
 
 def test_stale_registry_report_excludes_rows_from_current_open_count() -> None:
