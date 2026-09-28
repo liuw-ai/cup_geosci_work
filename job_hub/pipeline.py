@@ -9,6 +9,10 @@ from zoneinfo import ZoneInfo
 from job_hub.config import Settings
 from job_hub.db import Database
 from job_hub.employers import resolve_employer
+from job_hub.government_positions import (
+    current_publishable_position_records,
+    load_position_registry,
+)
 from job_hub.locations import extract_location_hint, normalize_location
 from job_hub.matching import (
     classify_category,
@@ -20,7 +24,11 @@ from job_hub.matching import (
     stable_hash,
     structured_evidence_text,
 )
-from job_hub.profiles import evaluate_student_publication
+from job_hub.profiles import (
+    PUBLICATION_PENDING_EVIDENCE,
+    PublicationDecision,
+    evaluate_student_publication,
+)
 from job_hub.sources import (
     OfficialSourceCollector,
     RawPosting,
@@ -612,6 +620,7 @@ class JobPipeline:
             "normalized": 0,
             "unchanged": 0,
         }
+        government_context = self._government_reindex_context()
         for job in jobs:
             source = sources.get(job.get("source_id"))
             source_tier = (
@@ -675,6 +684,12 @@ class JobPipeline:
                 "status": status,
             }
             publication = evaluate_student_publication(normalized)
+            government_publication = self._government_reindex_publication(
+                job,
+                government_context,
+            )
+            if government_publication is not None:
+                publication = government_publication
             changed = self.database.update_derived_job_fields(
                 int(job["id"]),
                 category=category,
@@ -718,3 +733,163 @@ class JobPipeline:
             if not changed and not normalized:
                 result["unchanged"] += 1
         return result
+
+    def _government_reindex_context(self) -> dict[str, Any] | None:
+        """Build the current government-table publication boundary.
+
+        Government position rows have a second lifecycle beyond generic major
+        and degree matching: their official table can be published before the
+        application window opens, become stale, or be superseded by a revised
+        row. Reindexing must apply the same reviewed-ledger boundary used by
+        the daily worker, otherwise a taxonomy repair can accidentally expose
+        a future or stale government vacancy.
+        """
+        path = self.settings.government_position_registry_path
+        if path is None:
+            return None
+        try:
+            registry = load_position_registry(path)
+        except Exception:
+            # A registry loading failure must not make an unrelated taxonomy
+            # reindex destructive. The daily worker and audit surface that
+            # operational failure; a valid ledger is required for this gate.
+            return None
+        now = datetime.now(self.timezone)
+        source_verifications = {
+            str(item["source_id"]): item
+            for item in self.database.list_government_source_verifications()
+        }
+        current_records = current_publishable_position_records(
+            registry,
+            today=now.date().isoformat(),
+            max_age_hours=self.settings.government_position_max_age_hours,
+            source_verifications=source_verifications,
+            now=now,
+        )
+        records = list(registry.get("records", []))
+        return {
+            "today": now.date(),
+            "records": records,
+            "current_record_ids": {
+                str(record["id"]) for record in current_records
+            },
+            "source_opening_dates": dict(registry.get("source_opening_dates") or {}),
+            "source_ids": {
+                str(record.get("source_id") or "")
+                for record in records
+                if str(record.get("source_id") or "").strip()
+            },
+        }
+
+    @staticmethod
+    def _government_reindex_publication(
+        job: dict[str, Any],
+        context: dict[str, Any] | None,
+    ) -> PublicationDecision | None:
+        """Fail closed for reviewed government-table rows outside this window."""
+        if context is None:
+            return None
+        source_id = str(job.get("source_id") or "").strip()
+        if source_id not in context["source_ids"]:
+            return None
+        if not JobPipeline._is_government_position_row(job):
+            return None
+
+        matching_records = [
+            record
+            for record in context["records"]
+            if JobPipeline._government_record_matches_job(record, job)
+        ]
+        if any(
+            str(record["id"]) in context["current_record_ids"]
+            for record in matching_records
+        ):
+            return None
+
+        reason = "当前官方职位表复核快照未确认该岗位可发布。"
+        today = context["today"]
+        opening_dates = context["source_opening_dates"]
+        for record in matching_records:
+            raw_opening = str(
+                record.get("opening_date")
+                or opening_dates.get(source_id)
+                or ""
+            ).strip()
+            if raw_opening:
+                try:
+                    if date.fromisoformat(raw_opening) > today:
+                        reason = f"官方报名尚未开始（{raw_opening}），岗位暂不对学生端发布。"
+                        break
+                except ValueError:
+                    # Registry validation prevents this in normal operation;
+                    # retain the conservative private outcome if a hand-edited
+                    # in-memory record is malformed.
+                    pass
+        return PublicationDecision(
+            status=PUBLICATION_PENDING_EVIDENCE,
+            label="政府职位表待当前复核",
+            reason=reason,
+            matched_profile_ids=(),
+        )
+
+    @staticmethod
+    def _is_government_position_row(job: dict[str, Any]) -> bool:
+        external_id = str(job.get("external_id") or "")
+        evidence = job.get("field_evidence")
+        if not isinstance(evidence, dict):
+            evidence = {}
+        return (
+            external_id.startswith("government-position:")
+            or external_id.startswith("artifact-candidate:")
+            or str(evidence.get("政府岗位类型") or "").strip()
+            in {"public_institution", "civil_service", "postdoctoral"}
+            or str(evidence.get("evidence_scope") or "").strip()
+            == "official_attachment_row"
+        )
+
+    @staticmethod
+    def _government_record_matches_job(
+        record: dict[str, Any],
+        job: dict[str, Any],
+    ) -> bool:
+        """Recognize both ledger ids and pre-ledger attachment candidates."""
+        if str(record.get("source_id") or "") != str(job.get("source_id") or ""):
+            return False
+        expected_external_id = (
+            f"government-position:{record.get('id')}:{record.get('position_code')}"
+        )
+        if str(job.get("external_id") or "") == expected_external_id:
+            return True
+
+        evidence = job.get("field_evidence")
+        if not isinstance(evidence, dict):
+            return False
+        position_code = str(record.get("position_code") or "").strip()
+        if str(evidence.get("职位代码") or "").strip() != position_code:
+            return False
+        if str(job.get("employer") or "").strip() != str(record.get("employer") or "").strip():
+            return False
+        if str(job.get("deadline_date") or "").strip() != str(record.get("deadline_date") or "").strip():
+            return False
+
+        attachment_url = str(record.get("official_attachment_url") or "").strip()
+        evidence_urls = {
+            str(job.get("official_evidence_url") or "").strip(),
+            str(evidence.get("artifact_url") or "").strip(),
+            str(evidence.get("官方附件链接") or "").strip(),
+        }
+        if attachment_url not in evidence_urls:
+            return False
+        record_major = str(record.get("major_requirement") or "").strip()
+        job_major = str(
+            evidence.get("专业要求") or evidence.get("专业范围") or ""
+        ).strip()
+        return bool(
+            record_major
+            and job_major
+            and (
+                record_major == job_major
+                or record_major in job_major
+                or job_major in record_major
+            )
+        )

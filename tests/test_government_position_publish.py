@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import json
 from dataclasses import replace
+from datetime import date
 
 from conftest import make_settings, source, write_registry
+from job_hub.db import Database
 from job_hub.government_positions import (
     current_publishable_position_records,
     position_record_to_posting,
 )
+from job_hub.pipeline import JobPipeline
 from job_hub.worker import DailyWorker
 
 
@@ -181,3 +184,111 @@ def test_government_sync_keeps_equivalent_attachment_candidate_current(tmp_path)
     assert len(jobs) == 1
     assert jobs[0]["status"] == "open"
     assert jobs[0]["external_id"] == "artifact-candidate-legacy-row"
+
+
+def test_reindex_keeps_future_government_window_private(tmp_path) -> None:
+    record = {
+        "id": "future-geology-row",
+        "source_id": "official-test-source",
+        "position_type": "public_institution",
+        "province": "测试省",
+        "position_code": "A-001",
+        "title": "地质工程技术岗",
+        "employer": "测试地质调查院",
+        "major_requirement": "地质工程",
+        "degree_requirement": "硕士研究生",
+        "location": "测试市",
+        "headcount": 1,
+        "deadline_date": "2099-12-31",
+        "deadline_policy": "fixed_date",
+        "official_notice_url": "https://example.gov.cn/notice.html",
+        "official_attachment_url": "https://example.gov.cn/table.xlsx",
+        "evidence_locator": "岗位表!2",
+        "record_status": "verified_open",
+        "match_status": "explicit_match",
+    }
+    registry_path = tmp_path / "government-positions.json"
+    registry_path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "as_of": date.today().isoformat(),
+                "source_opening_dates": {"official-test-source": "2099-01-01"},
+                "records": [record],
+            }
+        ),
+        encoding="utf-8",
+    )
+    settings = replace(
+        make_settings(tmp_path),
+        government_position_registry_path=registry_path,
+        government_position_max_age_hours=None,
+    )
+    write_registry(settings.source_registry_path, [source()])
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    pipeline = JobPipeline(settings, database)
+    posting = position_record_to_posting(record)
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+    )
+    assert database.find_job(job_id)["publication_status"] == "student_eligible"
+
+    pipeline.reindex_jobs()
+
+    job = database.find_job(job_id)
+    assert job is not None
+    assert job["publication_status"] == "pending_evidence"
+    assert "尚未开始" in job["publication_basis"]["reason"]
+
+
+def test_reindex_keeps_current_attachment_candidate_public(tmp_path) -> None:
+    record = {
+        "id": "current-geology-row",
+        "source_id": "official-test-source",
+        "position_type": "public_institution",
+        "province": "测试省",
+        "position_code": "A-001",
+        "title": "地质工程技术岗",
+        "employer": "测试地质调查院",
+        "major_requirement": "地质工程",
+        "degree_requirement": "硕士研究生",
+        "location": "测试市",
+        "headcount": 1,
+        "deadline_date": "2099-12-31",
+        "deadline_policy": "fixed_date",
+        "official_notice_url": "https://example.gov.cn/notice.html",
+        "official_attachment_url": "https://example.gov.cn/table.xlsx",
+        "evidence_locator": "岗位表!2",
+        "record_status": "verified_open",
+        "match_status": "explicit_match",
+    }
+    registry_path = tmp_path / "government-positions.json"
+    registry_path.write_text(
+        json.dumps(
+            {"version": 1, "as_of": date.today().isoformat(), "records": [record]}),
+        encoding="utf-8",
+    )
+    settings = replace(
+        make_settings(tmp_path),
+        government_position_registry_path=registry_path,
+        government_position_max_age_hours=None,
+    )
+    write_registry(settings.source_registry_path, [source()])
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    pipeline = JobPipeline(settings, database)
+    legacy = replace(
+        position_record_to_posting(record), external_id="artifact-candidate:legacy-row"
+    )
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(legacy, database.get_source("official-test-source"))
+    )
+
+    pipeline.reindex_jobs()
+
+    job = database.find_job(job_id)
+    assert job is not None
+    assert job["publication_status"] == "student_eligible"

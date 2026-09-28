@@ -101,7 +101,11 @@ def test_cmgb_capture_rejects_missing_evidence_field(tmp_path: Path) -> None:
     del row["field_evidence"]["专业范围"]
     path = _write(tmp_path, _payload(rows=[row]))
     with pytest.raises(CmgbBrowserCaptureError, match="专业范围"):
-        load_cmgb_browser_capture(path, allowed_hosts=HOSTS)
+        load_cmgb_browser_capture(
+            path,
+            allowed_hosts=HOSTS,
+            now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+        )
 
 
 def test_cmgb_capture_rejects_non_official_detail_url(tmp_path: Path) -> None:
@@ -109,7 +113,11 @@ def test_cmgb_capture_rejects_non_official_detail_url(tmp_path: Path) -> None:
     row["detail_url"] = "https://example.com/job/1"
     path = _write(tmp_path, _payload(rows=[row]))
     with pytest.raises(CmgbBrowserCaptureError, match="allowlisted"):
-        load_cmgb_browser_capture(path, allowed_hosts=HOSTS)
+        load_cmgb_browser_capture(
+            path,
+            allowed_hosts=HOSTS,
+            now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+        )
 
 
 def test_cmgb_capture_rejects_stale_manifest(tmp_path: Path) -> None:
