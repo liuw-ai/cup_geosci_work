@@ -1,7 +1,8 @@
 # Phase 71 Delivery Notes
 
 - Branch: `phase/71-browser-runtime`
-- Tag: `phase-71-review`
+- Tags: `phase-71-review` (browser-runtime checkpoint), `phase-71.1-review`
+  (parallel-table preservation checkpoint)
 - Database migration: none
 - Student publication policy: unchanged; official evidence and geoscience
   professional/degree gates remain mandatory
