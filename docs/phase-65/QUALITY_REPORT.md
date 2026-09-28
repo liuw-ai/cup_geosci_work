@@ -28,6 +28,11 @@ three-field duplicate-source-url aggregation defect. It is fixed in the same
 phase and covered by a regression test: audit now reports the violating job
 ids instead of terminating before it can protect the daily publication.
 
+The same production audit exposed a previously incomplete CMGB handover: the
+browser source was active while 21 reviewed snapshot rows remained open. The
+handover now repairs this state through the existing complete-capture preview
+and atomic source-transition path; it does not delete historical evidence.
+
 ## Non-Claims
 
 This phase does not add a new official data source and does not claim progress

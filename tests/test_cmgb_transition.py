@@ -109,3 +109,29 @@ def test_successful_transition_is_atomic_and_removes_public_duplicate(tmp_path) 
     pipeline.bootstrap_sources()
     assert database.get_source("cmgb-iguopin-2027-geoscience-snapshot")["enabled"] is False
     assert database.get_source("cmgb-iguopin-browser")["enabled"] is True
+
+
+def test_active_browser_repairs_a_partially_retired_snapshot(tmp_path) -> None:
+    settings, database = _database(tmp_path)
+    pipeline = JobPipeline(settings, database, _Collector(postings=[_posting("cmgb-1")]))
+    snapshot = database.get_source("cmgb-iguopin-2027-geoscience-snapshot")
+    snapshot_job_id, _ = database.save_job(
+        pipeline.normalize_posting(_posting("cmgb-1"), snapshot)
+    )
+    first = transition_cmgb_browser_to_production(database, pipeline, activate=True)
+    assert first.status == "activated"
+
+    # Simulate an interrupted historical handover: source flags say the
+    # browser is active but an old snapshot job remained publicly open.
+    with database.transaction() as connection:
+        connection.execute("UPDATE jobs SET status = 'open' WHERE id = ?", (snapshot_job_id,))
+
+    repaired = transition_cmgb_browser_to_production(database, pipeline, activate=True)
+
+    assert repaired.status == "repaired"
+    snapshot_job = database.find_job(snapshot_job_id)
+    assert snapshot_job is not None
+    assert snapshot_job["status"] == "superseded"
+    jobs, total = database.list_jobs()
+    assert total == 1
+    assert jobs[0]["source_id"] == "cmgb-iguopin-browser"

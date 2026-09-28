@@ -84,17 +84,9 @@ def transition_cmgb_browser_to_production(
     browser = database.get_source(browser_source_id)
     if snapshot is None or browser is None:
         raise ValueError("CMGB snapshot and browser sources must both be registered")
-    if snapshot.get("enabled") is False and browser.get("enabled") is True:
-        return CmgbTransitionResult(
-            status="already_active",
-            snapshot_eligible=len(
-                database.student_visible_external_ids_for_source(snapshot_source_id)
-            ),
-            dynamic_eligible_preview=len(
-                database.student_visible_external_ids_for_source(browser_source_id)
-            ),
-            message="动态国聘来源已处于生产状态；未重复切换。",
-        )
+    repairing_partial_handover = (
+        snapshot.get("enabled") is False and browser.get("enabled") is True
+    )
 
     snapshot_ids = database.student_visible_external_ids_for_source(snapshot_source_id)
     try:
@@ -141,10 +133,14 @@ def transition_cmgb_browser_to_production(
             message="动态来源同步未完成，旧快照未改动。",
         )
     return CmgbTransitionResult(
-        status="activated",
+        status="repaired" if repairing_partial_handover else "activated",
         snapshot_eligible=len(snapshot_ids),
         dynamic_eligible_preview=len(preview_ids),
         synchronized=sync,
         superseded_snapshot_jobs=database.count_jobs_for_source(snapshot_source_id),
-        message="动态国聘来源已完成核对并接管生产；旧快照已保留为可审计历史。",
+        message=(
+            "动态国聘来源已完成中断切换修复；旧快照已保留为可审计历史。"
+            if repairing_partial_handover
+            else "动态国聘来源已完成核对并接管生产；旧快照已保留为可审计历史。"
+        ),
     )
