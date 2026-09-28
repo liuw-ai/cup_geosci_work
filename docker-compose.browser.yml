@@ -5,8 +5,6 @@ services:
     command:
       - --no-sandbox
       - --disable-gpu
-      - --remote-debugging-address=0.0.0.0
-      - --remote-debugging-port=9222
     init: true
     restart: unless-stopped
     security_opt:
@@ -47,8 +45,6 @@ services:
     command:
       - --no-sandbox
       - --disable-gpu
-      - --remote-debugging-address=0.0.0.0
-      - --remote-debugging-port=9222
     init: true
     restart: unless-stopped
     security_opt:

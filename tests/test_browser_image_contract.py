@@ -18,8 +18,13 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     assert "pip install --no-cache-dir" in dockerfile
     assert compose.count("dockerfile: Dockerfile.browser") == 2
     assert compose.count("image: cupb-geoscience-job-hub-browser:latest") == 2
-    assert compose.count("--remote-debugging-address=0.0.0.0") == 2
-    assert compose.count("--remote-debugging-port=9222") == 2
+    # chromedp/headless-shell's entrypoint starts Chrome on 9223 and exposes
+    # its internal socat proxy on 9222. Passing another 9222 flag here makes
+    # Chrome and socat race for the same port and breaks CDP readiness.
+    assert "--remote-debugging-address=0.0.0.0" not in compose
+    assert "--remote-debugging-port=9222" not in compose
+    assert compose.count("CDP_URL: http://headless-shell:9222") == 1
+    assert compose.count("CDP_URL: http://cmgb-headless-shell:9222") == 1
     assert "ports:" not in compose
     # The browser service must not fall back to installing packages in the
     # ordinary application container or depend on a writable wheel cache.
