@@ -668,12 +668,11 @@ class JobPipeline:
                     if value
                 )
             )
-            status = self._job_status(
-                str(job.get("deadline_date") or "") or None,
-                published_date=str(job.get("published_date") or "") or None,
-                source=source or {"config": {}},
-                today=datetime.now(self.timezone).date(),
-            )
+            # Reindexing only refreshes derived taxonomy fields.  Lifecycle
+            # status is controlled by source sync, expiry, and source
+            # transitions; recomputing it here could reopen a superseded or
+            # withdrawn historical row and expose a retired source again.
+            status = str(job.get("status") or "open")
             normalized = {
                 **job,
                 "category": category,

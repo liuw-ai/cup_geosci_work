@@ -964,7 +964,7 @@
   },
   {
     "id": "cmgb-iguopin-browser",
-    "name": "中国冶金地质总局国聘校园招聘动态浏览器采集（服务器捕获已验证，待去重切换）",
+    "name": "中国冶金地质总局国聘校园招聘动态浏览器采集（服务器捕获已验证，生产启用）",
     "publisher": "中国冶金地质总局",
     "homepage_url": "https://cmgb.iguopin.com/jobCampus",
     "source_type": "cmgb_browser_rows",

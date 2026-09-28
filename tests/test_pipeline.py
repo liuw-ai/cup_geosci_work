@@ -180,6 +180,49 @@ def test_successful_scan_records_zero_open_matches_without_marking_source_unavai
     assert latest_run["open_matching_count"] == 0
 
 
+def test_reindex_preserves_retired_job_lifecycle_status(tmp_path) -> None:
+    """Taxonomy maintenance must not reopen a superseded source record."""
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    database.upsert_source(official_source)
+    pipeline = JobPipeline(settings, database)
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(
+            RawPosting(
+                title="地质工程技术岗",
+                employer="测试能源集团",
+                source_url="https://careers.example.edu.cn/jobs/retired",
+                application_url=None,
+                text="地质工程专业硕士，工作地点北京。",
+                summary="已由动态官方来源接替的历史岗位。",
+                published_date="2026-09-20",
+                deadline_date="2026-12-31",
+                location="北京",
+                field_evidence={
+                    "evidence_scope": "official_html_table_row",
+                    "岗位": "地质工程技术岗",
+                    "专业范围": "地质工程",
+                    "学历要求": "硕士",
+                    "工作地点": "北京",
+                },
+            ),
+            official_source,
+        )
+    )
+    with database.transaction() as connection:
+        connection.execute(
+            "UPDATE jobs SET status = 'superseded' WHERE id = ?", (job_id,)
+        )
+
+    pipeline.reindex_jobs()
+
+    retired = database.find_job(job_id, student_visible=False)
+    assert retired is not None
+    assert retired["status"] == "superseded"
+
+
 def test_delete_job_removes_only_the_exact_invalid_record(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
