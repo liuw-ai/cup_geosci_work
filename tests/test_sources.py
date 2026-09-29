@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 from dataclasses import dataclass
 import json
+from pathlib import Path
 import zlib
 
 import pytest
@@ -11,6 +12,21 @@ from bs4 import BeautifulSoup
 from job_hub.sources import OfficialSourceCollector, SourceCollectionError, SourceSkipped
 
 from conftest import make_settings
+
+
+def test_production_slb_budget_covers_bounded_detail_scan() -> None:
+    """The live source must not fail solely because its detail budget is too tight."""
+    sources = json.loads(
+        (Path(__file__).resolve().parents[1] / "data" / "sources.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    source = next(item for item in sources if item["id"] == "slb-career")
+    config = source["config"]
+    candidates = int(config["max_detail_candidates"])
+    timeout = float(config["request_timeout_seconds"])
+    budget = float(config["detail_time_budget_seconds"])
+    assert budget >= candidates * timeout
 
 
 @dataclass

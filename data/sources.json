@@ -680,7 +680,7 @@
       "query_page_size": 20,
       "max_items": 36,
       "max_detail_candidates": 12,
-      "detail_time_budget_seconds": 50,
+      "detail_time_budget_seconds": 120,
       "request_timeout_seconds": 8,
       "fetch_detail_pages": true,
       "require_detail_content": true,
