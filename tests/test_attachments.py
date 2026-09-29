@@ -112,6 +112,27 @@ def _position_xlsx_bytes(headers: list[str], values: list[str]) -> bytes:
     return output.getvalue()
 
 
+def _docx_position_bytes() -> bytes:
+    docx = pytest.importorskip("docx")
+    document = docx.Document()
+    document.add_paragraph("2026年公开招聘岗位表")
+    table = document.add_table(rows=1, cols=6)
+    for cell, value in zip(
+        table.rows[0].cells,
+        ["岗位代码", "岗位名称", "招聘单位", "工作地点", "学历要求", "专业要求"],
+    ):
+        cell.text = value
+    row = table.add_row().cells
+    for cell, value in zip(
+        row,
+        ["D-001", "地质工程师", "测试地质院", "武汉", "硕士", "地质工程、地质学"],
+    ):
+        cell.text = value
+    output = BytesIO()
+    document.save(output)
+    return output.getvalue()
+
+
 def _registered_artifact(tmp_path: Path, *, session: FakeSession):
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
@@ -212,6 +233,62 @@ def test_mislabelled_xls_with_ooxml_content_uses_excel_parser(tmp_path) -> None:
     assert extracted["metadata"]["extraction_mode"] == "workbook_rows"
     assert len(extracted["rows"]) == 1
     assert extracted["rows"][0]["cells"]["岗位名称"] == "地质工程师"
+
+
+def test_docx_position_table_is_extracted_row_by_row(tmp_path) -> None:
+    body = _docx_position_bytes()
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    processor = OfficialAttachmentProcessor(settings, database, session=FakeSession(body))
+    path = settings.managed_artifact_dir() / "positions.docx"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(body)
+
+    extracted = processor._extract_docx(path)
+
+    assert extracted["metadata"]["parser"] == "python-docx"
+    assert extracted["metadata"]["extraction_mode"] == "tables"
+    assert extracted["metadata"]["table_count"] == 1
+    assert extracted["rows"] == [
+        {
+            "sheet_name": "table-1",
+            "row_number": 2,
+            "row_kind": "tabular",
+            "cells": {
+                "岗位代码": "D-001",
+                "岗位名称": "地质工程师",
+                "招聘单位": "测试地质院",
+                "工作地点": "武汉",
+                "学历要求": "硕士",
+                "专业要求": "地质工程、地质学",
+            },
+            "row_text": "D-001；地质工程师；测试地质院；武汉；硕士；地质工程、地质学",
+            "extraction_confidence": "high",
+        }
+    ]
+
+
+def test_docx_paragraph_fallback_remains_available(tmp_path) -> None:
+    docx = pytest.importorskip("docx")
+    document = docx.Document()
+    document.add_paragraph("地质工程师：硕士，地质工程，工作地点北京")
+    body = BytesIO()
+    document.save(body)
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    processor = OfficialAttachmentProcessor(settings, database, session=FakeSession(body.getvalue()))
+    path = settings.managed_artifact_dir() / "notice.docx"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(body.getvalue())
+
+    extracted = processor._extract_docx(path)
+
+    assert extracted["metadata"]["extraction_mode"] == "paragraphs"
+    assert extracted["rows"][0]["row_kind"] == "text_table"
 
 
 def test_discovery_carries_official_notice_dates_into_xls_artifact(tmp_path) -> None:

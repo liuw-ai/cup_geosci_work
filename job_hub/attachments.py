@@ -759,25 +759,73 @@ class OfficialAttachmentProcessor:
         except ImportError as error:
             raise AttachmentSkipped("DOCX parser python-docx is not installed") from error
         document = Document(str(path))
+        rows: list[dict[str, object]] = []
+        table_count = 0
+        for table_index, table in enumerate(document.tables, start=1):
+            headers: list[str] = []
+            for cell_index, cell in enumerate(table.rows[0].cells if table.rows else [], start=1):
+                header = " ".join(cell.text.split()) or f"列{cell_index}"
+                if header in headers:
+                    header = f"{header}#{headers.count(header) + 1}"
+                headers.append(header)
+            if not headers:
+                continue
+            table_count += 1
+            for row_number, table_row in enumerate(table.rows[1:], start=2):
+                values = [" ".join(cell.text.split()) for cell in table_row.cells]
+                if not any(values):
+                    continue
+                cells = {
+                    headers[index] if index < len(headers) else f"列{index + 1}": value
+                    for index, value in enumerate(values)
+                    if value
+                }
+                rows.append(
+                    {
+                        "sheet_name": f"table-{table_index}",
+                        "row_number": row_number,
+                        "row_kind": "tabular",
+                        "cells": cells,
+                        "row_text": "；".join(value for value in values if value),
+                        "extraction_confidence": "high",
+                    }
+                )
+                if len(rows) >= self.settings.attachment_max_rows:
+                    break
+            if len(rows) >= self.settings.attachment_max_rows:
+                break
+
+        # Some official Word notices encode the position conditions as plain
+        # paragraphs rather than a table. Keep that fallback, but do not add
+        # the surrounding notice prose when a real table was extracted.
         paragraphs = [paragraph.text.strip() for paragraph in document.paragraphs if paragraph.text.strip()]
-        rows = [
-            {
-                "sheet_name": "docx",
-                "row_number": index,
-                "row_kind": "text_table",
-                "cells": {"正文": value},
-                "row_text": value,
-                "extraction_confidence": "medium",
-            }
-            for index, value in enumerate(paragraphs[: self.settings.attachment_max_rows], start=1)
-        ]
+        if not table_count:
+            rows = [
+                {
+                    "sheet_name": "docx",
+                    "row_number": index,
+                    "row_kind": "text_table",
+                    "cells": {"正文": value},
+                    "row_text": value,
+                    "extraction_confidence": "medium",
+                }
+                for index, value in enumerate(
+                    paragraphs[: self.settings.attachment_max_rows], start=1
+                )
+            ]
         return {
             "rows": rows,
             "metadata": {
                 "parser": "python-docx",
                 "row_count": len(rows),
-                "extraction_mode": "paragraphs",
-                "extraction_note": "DOCX 段落已保存为私有待核验记录",
+                "table_count": table_count,
+                "paragraph_count": len(paragraphs),
+                "extraction_mode": "tables" if table_count else "paragraphs",
+                "extraction_note": (
+                    "DOCX 表格逐行保存为私有待核验记录"
+                    if table_count
+                    else "DOCX 段落已保存为私有待核验记录"
+                ),
             },
         }
 
