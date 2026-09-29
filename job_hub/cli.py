@@ -20,6 +20,7 @@ from job_hub.attachments import (
     AttachmentProcessingError,
     OfficialAttachmentProcessor,
     build_attachment_field_evidence,
+    process_pending_attachments,
 )
 from job_hub.config import Settings
 from job_hub.contracts import (
@@ -704,6 +705,22 @@ def main() -> None:
         action="store_true",
         help="只下载并哈希，不提取表格或生成候选",
     )
+    artifact_batch_parser = subparsers.add_parser(
+        "process-pending-artifacts",
+        help="按最早未处理优先批量处理官方附件；仍只进入私有复核队列",
+    )
+    artifact_batch_parser.add_argument("--limit", type=int, default=500)
+    artifact_batch_parser.add_argument(
+        "--retry-failed",
+        action="store_true",
+        help="显式重试失败附件；robots/访问受限附件不会自动重试",
+    )
+    artifact_batch_parser.add_argument(
+        "--source-id",
+        action="append",
+        dest="source_ids",
+        help="只处理指定来源，可重复传入",
+    )
     artifact_rows_parser = subparsers.add_parser(
         "list-artifact-rows",
         help="查看一个附件解析出的私有原始行",
@@ -1348,6 +1365,19 @@ def main() -> None:
             print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
             raise SystemExit(1)
         print(json.dumps(result.as_dict(), ensure_ascii=False, indent=2))
+        return
+    if args.command == "process-pending-artifacts":
+        processor = OfficialAttachmentProcessor(settings, database)
+        result = process_pending_attachments(
+            database,
+            processor,
+            limit=args.limit,
+            retry_failed=args.retry_failed,
+            source_ids=set(args.source_ids) if args.source_ids else None,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if int(result.get("failed", 0)):
+            raise SystemExit(1)
         return
     if args.command == "discover-artifacts":
         processor = OfficialAttachmentProcessor(settings, database)

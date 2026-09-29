@@ -62,6 +62,10 @@ class Settings:
     attachment_ocr_enabled: bool = False
     attachment_ocr_language: str = "chi_sim+eng"
     attachment_ocr_max_pages: int = 12
+    # A bounded queue prevents one synchronization cycle from monopolizing
+    # the worker while ensuring older registered artifacts are not starved by
+    # newly discovered files.
+    attachment_process_batch_limit: int = 500
     http_transport_mode: str = "environment"
     http_client: str = "requests"
     http_retry_attempts: int = 2
@@ -147,6 +151,9 @@ class Settings:
             attachment_ocr_enabled=_env_bool("ATTACHMENT_OCR_ENABLED"),
             attachment_ocr_language=os.getenv("ATTACHMENT_OCR_LANGUAGE", "chi_sim+eng"),
             attachment_ocr_max_pages=_env_int("ATTACHMENT_OCR_MAX_PAGES", 12),
+            attachment_process_batch_limit=_env_int(
+                "ATTACHMENT_PROCESS_BATCH_LIMIT", 500
+            ),
             http_transport_mode=validate_transport_mode(
                 os.getenv("HTTP_TRANSPORT_MODE", "environment")
             ),

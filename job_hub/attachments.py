@@ -1621,6 +1621,100 @@ class OfficialAttachmentProcessor:
         return any(sample.startswith(marker) for marker in HTML_MARKERS)
 
 
+def process_pending_attachments(
+    database: Database,
+    processor: OfficialAttachmentProcessor,
+    *,
+    limit: int = 500,
+    retry_failed: bool = False,
+    source_ids: set[str] | None = None,
+) -> dict[str, object]:
+    """Process a bounded, oldest-first slice of the private attachment queue.
+
+    ``registered`` files need a controlled download and extraction.  A file
+    that was downloaded in a previous interrupted run is also eligible so the
+    parser can resume without another network request.  Failed files are only
+    retried when an administrator explicitly asks for it; ``skipped`` files
+    commonly represent robots or access-policy decisions and must not be
+    retried implicitly by the daily worker.
+
+    The returned items are operational metadata only.  No candidate is
+    published here; ``OfficialAttachmentProcessor.process`` stops at the
+    private review queue by design.
+    """
+    bounded_limit = max(1, min(int(limit), 500))
+    eligible_statuses = {"registered", "downloaded"}
+    if retry_failed:
+        eligible_statuses.add("failed")
+    artifacts = database.list_source_artifacts(
+        limit=bounded_limit,
+        oldest_first=True,
+        extraction_statuses=eligible_statuses,
+    )
+    selected = [
+        artifact
+        for artifact in artifacts
+        if (
+            source_ids is None
+            or str(artifact.get("source_id") or "") in source_ids
+        )
+    ]
+    summary: dict[str, object] = {
+        "selected": len(selected),
+        "processed": 0,
+        "extracted": 0,
+        "skipped": 0,
+        "failed": 0,
+        "rows_extracted": 0,
+        "candidates_created": 0,
+        "candidates_rejected": 0,
+        "retry_failed": bool(retry_failed),
+        "items": [],
+    }
+    items = summary["items"]
+    assert isinstance(items, list)
+    for artifact in selected:
+        artifact_id = int(artifact["id"])
+        summary["processed"] = int(summary["processed"]) + 1
+        try:
+            result = processor.process(artifact_id)
+            result_payload = result.as_dict()
+            status = str(result_payload.get("status") or "")
+            if status == "extracted":
+                summary["extracted"] = int(summary["extracted"]) + 1
+            elif status == "skipped":
+                summary["skipped"] = int(summary["skipped"]) + 1
+            elif status == "failed":
+                summary["failed"] = int(summary["failed"]) + 1
+            summary["rows_extracted"] = int(summary["rows_extracted"]) + int(
+                result_payload.get("rows_extracted") or 0
+            )
+            summary["candidates_created"] = int(summary["candidates_created"]) + int(
+                result_payload.get("candidates_created") or 0
+            )
+            summary["candidates_rejected"] = int(summary["candidates_rejected"]) + int(
+                result_payload.get("candidates_rejected") or 0
+            )
+            items.append(
+                {
+                    "artifact_id": artifact_id,
+                    "source_id": str(artifact.get("source_id") or ""),
+                    **result_payload,
+                }
+            )
+        except (AttachmentProcessingError, ValueError) as error:
+            summary["failed"] = int(summary["failed"]) + 1
+            items.append(
+                {
+                    "artifact_id": artifact_id,
+                    "source_id": str(artifact.get("source_id") or ""),
+                    "status": "failed",
+                    "error": str(error)[:500],
+                }
+            )
+    return summary
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 

@@ -9,7 +9,10 @@ from threading import Event
 from zoneinfo import ZoneInfo
 
 from job_hub.audit import audit_database
-from job_hub.attachments import AttachmentProcessingError, OfficialAttachmentProcessor
+from job_hub.attachments import (
+    OfficialAttachmentProcessor,
+    process_pending_attachments,
+)
 from job_hub.backups import BackupError, DatabaseBackupManager
 from job_hub.config import Settings
 from job_hub.coverage import build_coverage_report
@@ -423,26 +426,24 @@ class DailyWorker:
 
     def _process_registered_attachments(self) -> dict[str, int]:
         """Advance discovered official files without publishing unreviewed rows."""
-        processed = 0
-        extracted = 0
-        failed = 0
-        for artifact in self.database.list_source_artifacts():
-            if str(artifact.get("extraction_status")) != "registered":
-                continue
-            processed += 1
-            try:
-                result = self.attachment_processor.process(int(artifact["id"]))
-                if result.status == "extracted":
-                    extracted += 1
-                elif result.status in {"failed", "skipped"}:
-                    failed += 1
-            except (AttachmentProcessingError, ValueError):
-                failed += 1
-                LOGGER.exception(
-                    "Official attachment processing failed for artifact %s.",
-                    artifact.get("id"),
-                )
-        return {"processed": processed, "extracted": extracted, "failed": failed}
+        summary = process_pending_attachments(
+            self.database,
+            self.attachment_processor,
+            limit=self.settings.attachment_process_batch_limit,
+        )
+        return {
+            key: int(summary.get(key, 0))
+            for key in (
+                "selected",
+                "processed",
+                "extracted",
+                "skipped",
+                "failed",
+                "rows_extracted",
+                "candidates_created",
+                "candidates_rejected",
+            )
+        }
 
     def _publish_with_alert(self, report_date: str) -> None:
         LOGGER.info("Publishing daily report for %s.", report_date)

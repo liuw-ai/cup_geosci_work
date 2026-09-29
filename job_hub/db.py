@@ -1531,13 +1531,29 @@ class Database:
         source_id: str | None = None,
         *,
         limit: int = 100,
+        oldest_first: bool = False,
+        extraction_statuses: set[str] | None = None,
     ) -> list[dict[str, Any]]:
         query = "SELECT * FROM source_artifacts"
         values: list[Any] = []
+        predicates: list[str] = []
         if source_id:
-            query += " WHERE source_id = ?"
+            predicates.append("source_id = ?")
             values.append(source_id)
-        query += " ORDER BY updated_at DESC, id DESC LIMIT ?"
+        if extraction_statuses:
+            statuses = sorted({str(item).strip() for item in extraction_statuses if str(item).strip()})
+            if statuses:
+                predicates.append(
+                    "extraction_status IN (" + ", ".join("?" for _ in statuses) + ")"
+                )
+                values.extend(statuses)
+        if predicates:
+            query += " WHERE " + " AND ".join(predicates)
+        query += (
+            " ORDER BY updated_at ASC, id ASC LIMIT ?"
+            if oldest_first
+            else " ORDER BY updated_at DESC, id DESC LIMIT ?"
+        )
         values.append(max(1, min(limit, 500)))
         with self.connect() as connection:
             rows = connection.execute(query, values).fetchall()
