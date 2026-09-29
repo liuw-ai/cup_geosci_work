@@ -970,7 +970,19 @@ class OfficialAttachmentProcessor:
         # shared taxonomy can identify a major or a supported degree.
         condition = self._field(
             cells,
-            ("岗位条件", "任职条件", "资格条件", "专业及学历要求"),
+            (
+                "岗位条件",
+                "岗位要求",
+                "任职条件",
+                "任职要求",
+                "任职资格",
+                "资格条件",
+                "招聘条件",
+                "应聘条件",
+                "专业及学历要求",
+                "工作经验",
+                "工作年限",
+            ),
         )
         if condition:
             if not major and extract_major_tags(condition):
@@ -1008,6 +1020,8 @@ class OfficialAttachmentProcessor:
             row=row,
             row_text=text,
         )
+        if condition:
+            field_evidence["岗位资格条件"] = condition
         if position_code:
             field_evidence["职位代码"] = position_code
         headcount_key = None

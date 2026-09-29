@@ -306,6 +306,27 @@ def test_publication_gate_rejects_profession_qualified_experience_requirement() 
     assert decision.label == "需工作经验"
 
 
+def test_publication_gate_reads_experience_from_one_attachment_row() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="地质工程师",
+            field_evidence={
+                "evidence_scope": "official_attachment_row",
+                "岗位": "地质工程师",
+                "专业范围": "地质工程",
+                "学历要求": "硕士研究生",
+                "row_text": (
+                    "岗位名称：地质工程师；专业要求：地质工程；学历要求：硕士研究生；"
+                    "任职条件：具有3年以上地质工作经验"
+                ),
+            },
+        )
+    )
+
+    assert decision.status == "out_of_scope"
+    assert decision.label == "需工作经验"
+
+
 def test_publication_gate_rejects_suffix_and_chinese_numeral_experience_forms() -> None:
     for requirement in (
         "本科及以上学历，地质工程专业，项目管理相关工作经验5年以上。",

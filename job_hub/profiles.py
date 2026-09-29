@@ -63,6 +63,31 @@ DEGREE_EVIDENCE_KEYS = frozenset(
         "qualifications",
     }
 )
+ELIGIBILITY_EVIDENCE_KEYS = frozenset(
+    {
+        "岗位要求",
+        "任职要求",
+        "任职条件",
+        "任职资格",
+        "资格条件",
+        "招聘条件",
+        "应聘条件",
+        "岗位条件",
+        "岗位资格条件",
+        "工作经验",
+        "工作年限",
+        "面向对象",
+        "job requirements",
+        "job requirement",
+        "qualifications",
+        "experience",
+    }
+)
+# ``row_text`` is intentionally excluded from major matching because an
+# attachment row can contain unrelated text alongside its degree/major cells.
+# It is safe for the narrower experience veto only when the collector already
+# proves that it is one official attachment row for the displayed position.
+ATTACHMENT_ROW_EVIDENCE_KEYS = frozenset({"row_text", "岗位行原文"})
 UNRESTRICTED_MAJOR_MARKERS = (
     "不限专业",
     "专业不限",
@@ -255,7 +280,9 @@ def evaluate_student_publication(job: dict[str, Any]) -> PublicationDecision:
             matched_profile_ids=(),
         )
 
-    required_experience = _student_blocking_work_experience(qualification_text)
+    required_experience = _student_blocking_work_experience(
+        _eligibility_evidence_text(job)
+    )
     if required_experience:
         return PublicationDecision(
             status=PUBLICATION_OUT_OF_SCOPE,
@@ -451,6 +478,48 @@ def _degree_evidence_text(job: dict[str, Any]) -> str:
                 if str(nested_key).casefold() in DEGREE_EVIDENCE_KEYS
             )
     return clean_text(" ".join(values))
+
+
+def _eligibility_evidence_text(job: dict[str, Any]) -> str:
+    """Return row-bound eligibility conditions for the student-only veto.
+
+    Professional matching stays intentionally stricter: it only reads named
+    major fields.  Work-experience constraints, however, often live in a
+    different cell of the same official attachment row.  Include those
+    explicit condition columns and, for an ``official_attachment_row`` only,
+    the preserved row text.  This prevents a mature-talent role from being
+    published solely because its major and degree cells happen to match.
+    """
+
+    field_evidence = job.get("field_evidence") or {}
+    if not isinstance(field_evidence, dict):
+        return ""
+    scope = str(field_evidence.get("evidence_scope") or "").strip()
+
+    def collect(values: dict[str, Any], *, allow_row_text: bool) -> list[str]:
+        items: list[str] = []
+        for key, value in values.items():
+            normalized_key = str(key).casefold()
+            if key == "fields" and isinstance(value, dict):
+                items.extend(collect(value, allow_row_text=allow_row_text))
+                continue
+            if normalized_key in ELIGIBILITY_EVIDENCE_KEYS:
+                items.append(str(value or ""))
+                continue
+            if allow_row_text and normalized_key in ATTACHMENT_ROW_EVIDENCE_KEYS:
+                items.append(str(value or ""))
+        return items
+
+    return clean_text(
+        " ".join(
+            value
+            for value in collect(
+                field_evidence,
+                allow_row_text=scope == "official_attachment_row",
+            )
+            if value
+        )
+    )
 
 
 def _has_job_level_evidence(job: dict[str, Any]) -> bool:

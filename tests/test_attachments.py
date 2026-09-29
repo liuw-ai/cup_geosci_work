@@ -277,6 +277,42 @@ def test_attachment_candidate_requires_review_then_publishes_with_evidence(tmp_p
     }
 
 
+def test_attachment_row_requiring_experience_never_enters_student_review_queue(
+    tmp_path,
+) -> None:
+    """A target major does not override a same-row experienced-hire condition."""
+    session = FakeSession(
+        _position_xlsx_bytes(
+            [
+                "岗位名称",
+                "岗位代码",
+                "招聘单位",
+                "工作地点",
+                "学历要求",
+                "专业要求",
+                "任职条件",
+            ],
+            [
+                "地质工程师",
+                "G-EXPERIENCE",
+                "测试地质集团",
+                "北京",
+                "硕士研究生",
+                "地质工程",
+                "具有3年以上地质工作经验",
+            ],
+        )
+    )
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path, session=session
+    )
+
+    result = processor.process(artifact["id"])
+
+    assert result.candidates_created == 0
+    assert database.list_artifact_job_candidates(artifact_id=artifact["id"]) == []
+
+
 def test_government_candidate_location_can_be_verified_before_publication(tmp_path) -> None:
     """A notice-level address may complete an otherwise location-less table row."""
     settings, database, artifact, processor = _registered_artifact(
