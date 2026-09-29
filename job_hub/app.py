@@ -73,6 +73,8 @@ from job_hub.source_validation import (
     source_validation_matrix_rows,
     source_validation_summary,
 )
+from job_hub.backups import DatabaseBackupManager
+from job_hub.operations import backup_health_payload
 from job_hub.government_positions import load_position_registry, upcoming_position_records
 from job_hub.reports import build_daily_report, local_today, publish_daily_report
 from job_hub.sources import RawPosting
@@ -441,6 +443,9 @@ def create_app(settings: Settings | None = None) -> Flask:
         )
     @app.get("/healthz")
     def healthz() -> Any:
+        backup = DatabaseBackupManager(settings).latest_status(
+            max_age_seconds=max(1, settings.backup_min_interval_minutes) * 60
+        )
         return jsonify(
             {
                 "status": "ok",
@@ -449,6 +454,7 @@ def create_app(settings: Settings | None = None) -> Flask:
                     database.latest_daily_report() or {}
                 ).get("report_date"),
                 "worker": database.get_service_heartbeat("worker"),
+                "backup": backup_health_payload(backup),
             }
         )
 

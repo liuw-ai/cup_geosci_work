@@ -3,12 +3,13 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
 from job_hub.audit import audit_database
+from job_hub.backups import BackupError, DatabaseBackupManager
 from job_hub.browser_capture import (
     BrowserCaptureError,
     browser_capture_summary,
@@ -77,6 +78,7 @@ from job_hub.organizations import (
     organization_matrix_rows,
     organization_matrix_summary,
 )
+from job_hub.operations import build_production_readiness, worker_health
 from job_hub.national_sources import (
     load_national_source_matrix,
     national_source_matrix_rows,
@@ -191,40 +193,6 @@ def import_candidate_leads(database: Database, path: Path) -> dict[str, int]:
         database.create_candidate_lead(item)
         created += 1
     return {"created": created, "public_jobs_created": 0}
-
-
-def worker_health(database: Database, max_age_seconds: int) -> dict[str, Any]:
-    heartbeat = database.get_service_heartbeat("worker")
-    if heartbeat is None:
-        return {
-            "ok": False,
-            "message": "尚未收到 worker 心跳。",
-            "max_age_seconds": max_age_seconds,
-        }
-    try:
-        updated_at = datetime.fromisoformat(
-            heartbeat["updated_at"].replace("Z", "+00:00")
-        )
-        if updated_at.tzinfo is None:
-            updated_at = updated_at.replace(tzinfo=timezone.utc)
-        age_seconds = max(
-            0,
-            int((datetime.now(timezone.utc) - updated_at).total_seconds()),
-        )
-    except (TypeError, ValueError):
-        return {
-            "ok": False,
-            "message": "worker 心跳时间格式无效。",
-            "heartbeat": heartbeat,
-            "max_age_seconds": max_age_seconds,
-        }
-    ok = age_seconds <= max_age_seconds and heartbeat["status"] != "stopped"
-    return {
-        "ok": ok,
-        "age_seconds": age_seconds,
-        "max_age_seconds": max_age_seconds,
-        "heartbeat": heartbeat,
-    }
 
 
 def coverage_snapshot_date(settings: Settings) -> str:
@@ -679,6 +647,47 @@ def main() -> None:
         default=180,
         help="允许的最大心跳年龄（秒，默认 180）",
     )
+    backup_parser = subparsers.add_parser(
+        "backup-database",
+        help="使用 SQLite 一致性备份创建并校验私有数据库快照",
+    )
+    backup_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="即使尚未到备份间隔也立即创建新快照",
+    )
+    verify_backup_parser = subparsers.add_parser(
+        "verify-backup",
+        help="只读校验一个 SQLite 备份的完整性和应用核心表",
+    )
+    verify_backup_parser.add_argument("path", type=Path)
+    restore_backup_parser = subparsers.add_parser(
+        "restore-database",
+        help="从受管备份恢复数据库；执行前必须停止 Web 和 Worker",
+    )
+    restore_backup_parser.add_argument("path", type=Path)
+    restore_backup_parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="确认替换当前数据库并清理旧 WAL/SHM 文件",
+    )
+    readiness_parser = subparsers.add_parser(
+        "production-readiness",
+        help="汇总数据审计、worker、备份和可选公网 HTTPS 的上线门禁",
+    )
+    readiness_parser.add_argument("--domain-hostname")
+    readiness_parser.add_argument("--expected-ip")
+    readiness_parser.add_argument(
+        "--worker-max-age", type=int, default=180
+    )
+    readiness_parser.add_argument(
+        "--backup-max-age", type=int, default=86_400
+    )
+    readiness_parser.add_argument(
+        "--require-public",
+        action="store_true",
+        help="要求正式域名 DNS 与 HTTPS 同时通过，适用于全院公开发布前核验",
+    )
     subparsers.add_parser("worker", help="启动持续同步和 20:00 发布任务")
     artifact_process_parser = subparsers.add_parser(
         "process-artifact",
@@ -750,6 +759,74 @@ def main() -> None:
         result = worker_health(database, args.max_age)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         if not result["ok"]:
+            raise SystemExit(1)
+        return
+    if args.command in {
+        "backup-database",
+        "verify-backup",
+        "restore-database",
+        "production-readiness",
+    }:
+        settings = Settings.from_env()
+        settings.ensure_runtime_paths()
+        backup_manager = DatabaseBackupManager(settings)
+        if args.command == "backup-database":
+            try:
+                backup = (
+                    backup_manager.create_backup()
+                    if args.force
+                    else backup_manager.backup_if_due()
+                )
+            except BackupError as error:
+                print(json.dumps({"ok": False, "error": str(error)}, ensure_ascii=False, indent=2))
+                raise SystemExit(1)
+            result = (
+                {"ok": True, "created": True, "backup": backup.as_dict()}
+                if backup is not None
+                else {
+                    "ok": True,
+                    "created": False,
+                    "backup": backup_manager.latest_status(
+                        max_age_seconds=max(1, settings.backup_min_interval_minutes)
+                        * 60
+                    ).as_dict(),
+                }
+            )
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return
+        if args.command == "verify-backup":
+            verification = backup_manager.verify_path(args.path)
+            print(json.dumps(verification.as_dict(), ensure_ascii=False, indent=2))
+            if not verification.valid:
+                raise SystemExit(1)
+            return
+        if args.command == "restore-database":
+            if not args.confirm:
+                parser.error("restore-database 需要 --confirm；执行前必须停止 Web 和 Worker")
+            try:
+                result = backup_manager.restore_backup(args.path, confirm=True)
+            except BackupError as error:
+                print(json.dumps({"ok": False, "error": str(error)}, ensure_ascii=False, indent=2))
+                raise SystemExit(1)
+            print(json.dumps({"ok": True, **result.as_dict()}, ensure_ascii=False, indent=2))
+            return
+        if args.worker_max_age < 1 or args.backup_max_age < 1:
+            parser.error("--worker-max-age 和 --backup-max-age 必须大于 0")
+        database = Database(settings.database_path)
+        database.initialize()
+        result = build_production_readiness(
+            settings,
+            database,
+            worker_max_age_seconds=args.worker_max_age,
+            backup_max_age_seconds=args.backup_max_age,
+            domain_hostname=args.domain_hostname,
+            expected_ip=args.expected_ip,
+        )
+        result["ready"] = (
+            result["public_ready"] if args.require_public else result["internal_ready"]
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if not result["ready"]:
             raise SystemExit(1)
         return
     if args.command == "national-entry-probe":

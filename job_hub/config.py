@@ -70,6 +70,9 @@ class Settings:
     http_jitter_seconds: float = 0.15
     http_cache_enabled: bool = True
     http_cache_max_entries: int = 2_000
+    backup_storage_dir: Path | None = None
+    backup_retention_days: int = 14
+    backup_min_interval_minutes: int = 720
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -159,12 +162,18 @@ class Settings:
             http_jitter_seconds=float(os.getenv("HTTP_JITTER_SECONDS", "0.15")),
             http_cache_enabled=_env_bool("HTTP_CACHE_ENABLED", True),
             http_cache_max_entries=_env_int("HTTP_CACHE_MAX_ENTRIES", 2_000),
+            backup_storage_dir=Path(os.getenv("BACKUP_STORAGE_DIR", "backups")),
+            backup_retention_days=_env_int("BACKUP_RETENTION_DAYS", 14),
+            backup_min_interval_minutes=_env_int(
+                "BACKUP_MIN_INTERVAL_MINUTES", 720
+            ),
         )
 
     def ensure_runtime_paths(self) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
         self.managed_artifact_dir().mkdir(parents=True, exist_ok=True)
+        self.managed_backup_dir().mkdir(parents=True, exist_ok=True)
 
     def managed_artifact_dir(self) -> Path:
         """Return the private attachment directory, always below APP_DATA_DIR."""
@@ -180,5 +189,20 @@ class Settings:
         except ValueError as error:
             raise ValueError(
                 "ATTACHMENT_STORAGE_DIR must be located inside APP_DATA_DIR"
+            ) from error
+        return candidate
+
+    def managed_backup_dir(self) -> Path:
+        """Return the private backup directory, always below ``APP_DATA_DIR``."""
+        data_root = self.data_dir.resolve()
+        configured = self.backup_storage_dir or Path("backups")
+        candidate = (
+            configured if configured.is_absolute() else self.data_dir / configured
+        ).resolve()
+        try:
+            candidate.relative_to(data_root)
+        except ValueError as error:
+            raise ValueError(
+                "BACKUP_STORAGE_DIR must be located inside APP_DATA_DIR"
             ) from error
         return candidate

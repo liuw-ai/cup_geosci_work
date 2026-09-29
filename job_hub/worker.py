@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 from job_hub.audit import audit_database
 from job_hub.attachments import AttachmentProcessingError, OfficialAttachmentProcessor
+from job_hub.backups import BackupError, DatabaseBackupManager
 from job_hub.config import Settings
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
@@ -42,6 +43,7 @@ class DailyWorker:
         self.database.initialize()
         self.pipeline = JobPipeline(settings, self.database)
         self.attachment_processor = OfficialAttachmentProcessor(settings, self.database)
+        self.backups = DatabaseBackupManager(settings)
         self.mailer = Mailer(settings)
         self.stop_event = Event()
         self.timezone = ZoneInfo(settings.timezone)
@@ -81,6 +83,23 @@ class DailyWorker:
     def _sync_with_alert(self) -> None:
         LOGGER.info("Starting source synchronization.")
         self._heartbeat("syncing")
+        try:
+            backup = self.backups.backup_if_due()
+        except BackupError as error:
+            # A mutating source synchronization must not run past an overdue
+            # failed backup.  Otherwise a source/parser mistake could replace
+            # the only recoverable production state.
+            self.last_sync_monotonic = time.monotonic()
+            LOGGER.exception("Required database backup failed before synchronization")
+            self._heartbeat("degraded", "database backup failed before source synchronization")
+            self._send_failure_safely("数据库备份失败，已暂停本轮同步", str(error))
+            return
+        if backup is not None:
+            LOGGER.info(
+                "Verified pre-sync database backup created: %s (%s bytes)",
+                backup.path,
+                backup.bytes,
+            )
         try:
             manifest_summary = self._register_government_artifacts()
             summary = self.pipeline.sync_all(progress_callback=self._sync_progress)

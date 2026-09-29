@@ -262,6 +262,27 @@ worker 每 30 秒更新一次心跳。若进程在单个来源采集期间异常
 docker compose exec worker python -m job_hub.cli worker-health --max-age 180
 ~~~
 
+## 数据库备份与上线门禁
+
+SQLite 在运行时使用 WAL，不能用普通文件复制代替一致性备份。worker 会在到达
+`BACKUP_MIN_INTERVAL_MINUTES` 后、下一次来源同步前，使用 SQLite 在线备份 API 创建私有快照；
+快照会执行完整性和核心表校验。备份失败时该轮同步会暂停并将 worker 标记为降级，避免在没有
+回退点时继续改写学生端岗位数据。
+
+~~~bash
+# 立即创建并校验一份快照
+docker compose exec -T web python -m job_hub.cli backup-database --force
+
+# 查看生产数据、worker 与备份是否达标；正式公开时再加域名 HTTPS 门禁
+docker compose exec -T web python -m job_hub.cli production-readiness
+docker compose exec -T web python -m job_hub.cli production-readiness \
+  --domain-hostname jobs.cupdky.cn --expected-ip 81.70.62.174 --require-public
+~~~
+
+恢复数据库是维护操作，不可在 Web 或 Worker 仍在写入时执行。完整步骤见
+`docs/phase-74/MIGRATION_NOTES.md`：先停止写入者、校验受管备份、使用 `restore-database --confirm`
+恢复，再运行审计和健康检查。备份文件始终位于 `APP_DATA_DIR` 内，不通过学生端公开。
+
 ## 邮件提醒配置
 
 推荐使用专门的管理员邮箱和 SMTP 授权码，而不是邮箱登录密码。填写 .env：

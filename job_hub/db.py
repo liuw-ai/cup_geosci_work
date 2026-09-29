@@ -369,6 +369,22 @@ _ACTIVE_TRANSACTION: ContextVar[tuple[Path, sqlite3.Connection] | None] = Contex
 )
 
 
+class _ClosingConnection(sqlite3.Connection):
+    """Make ``with database.connect()`` release SQLite handles predictably.
+
+    sqlite3's built-in context manager commits or rolls back but leaves the
+    connection open. This repository uses the idiom in many read paths; a
+    closing context prevents stale WAL handles from blocking a maintenance-mode
+    backup restore, particularly on Windows.
+    """
+
+    def __exit__(self, *args: object) -> bool:
+        try:
+            return super().__exit__(*args)
+        finally:
+            self.close()
+
+
 class Database:
     def __init__(self, path: Path):
         self.path = path
@@ -378,6 +394,7 @@ class Database:
             self.path,
             timeout=30,
             detect_types=sqlite3.PARSE_DECLTYPES,
+            factory=_ClosingConnection,
         )
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
@@ -386,9 +403,16 @@ class Database:
         return connection
 
     def initialize(self) -> None:
-        with self.connect() as connection:
+        connection = self.connect()
+        try:
             connection.executescript(SCHEMA)
             self._migrate_schema(connection)
+            connection.commit()
+        finally:
+            # sqlite3's connection context manager commits or rolls back but
+            # does not close the handle. Leaving it open can retain a WAL lock
+            # on Windows and makes an explicitly confirmed restore impossible.
+            connection.close()
 
     @staticmethod
     def _migrate_schema(connection: sqlite3.Connection) -> None:
