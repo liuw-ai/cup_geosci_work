@@ -1120,6 +1120,7 @@ def create_app(settings: Settings | None = None) -> Flask:
                 "row_number": candidate.get("row_number"),
             },
             row_text=str(candidate.get("row_text") or ""),
+            extra_evidence=existing_evidence,
         )
         location_basis = str(
             (candidate.get("field_evidence") or {}).get("工作地点依据") or ""

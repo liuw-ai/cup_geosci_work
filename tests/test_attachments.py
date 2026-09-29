@@ -82,13 +82,14 @@ def _xlsx_bytes() -> bytes:
     workbook = openpyxl.Workbook()
     sheet = workbook.active
     sheet.title = "岗位表"
-    sheet.append(["岗位名称", "岗位代码", "招聘单位", "工作地点", "学历要求", "专业要求", "报名截止日期"])
+    sheet.append(["岗位名称", "岗位代码", "招聘单位", "工作地点", "招聘人数", "学历要求", "专业要求", "报名截止日期"])
     sheet.append(
         [
             "地质工程师",
             "G-001",
             "测试能源集团",
             "北京",
+            "2",
             "硕士",
             "地质工程、地质学",
             "2026年12月31日",
@@ -270,6 +271,7 @@ def test_attachment_candidate_requires_review_then_publishes_with_evidence(tmp_p
     assert public_job is not None
     assert public_job["publication_status"] == "student_eligible"
     assert public_job["field_evidence"]["专业范围"] == "地质工程、地质学"
+    assert public_job["field_evidence"]["招聘人数"] == "2"
     evidence = database.list_job_evidence(payload["job_id"])
     assert {item["evidence_type"] for item in evidence} == {
         "official_page",
@@ -333,6 +335,39 @@ def test_government_candidate_location_can_be_verified_before_publication(tmp_pa
     assert updated["location"] == "北京市"
     assert updated["review_status"] == "official_content_verified"
     assert updated["field_evidence"]["工作地点依据"].startswith("官方公告正文地址")
+
+
+def test_attachment_candidate_review_can_correct_extracted_fields_with_evidence(
+    tmp_path,
+) -> None:
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path, session=FakeSession(_xlsx_bytes())
+    )
+    processor.process(artifact["id"])
+    candidate = database.list_artifact_job_candidates(artifact_id=artifact["id"])[0]
+
+    updated = database.update_artifact_job_candidate(
+        candidate["id"],
+        {
+            "title": "地质勘查岗",
+            "employer": "测试地质集团",
+            "location": "甘肃省兰州市",
+            "degree_levels": ["博士"],
+            "major_tags": ["地质资源与地质工程"],
+            "field_evidence_updates": {
+                "职位代码": "2026002",
+                "招聘人数": "3",
+                "工作地点依据": "官方岗位表第1页单位地址：甘肃省兰州市。",
+            },
+            "review_status": "official_content_verified",
+            "review_note": "已逐项核对官方公告、岗位表原文和附件行，修正 PDF 断行字段。",
+        },
+    )
+
+    assert updated["title"] == "地质勘查岗"
+    assert updated["degree_levels"] == ["博士"]
+    assert updated["field_evidence"]["招聘人数"] == "3"
+    assert updated["field_evidence"]["专业范围"] == "地质资源与地质工程"
 
 
 def test_site_attribution_is_rendered(tmp_path: Path) -> None:

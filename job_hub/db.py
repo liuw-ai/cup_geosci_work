@@ -1916,8 +1916,18 @@ class Database:
         editable = {
             "review_status",
             "review_note",
+            "title",
+            "employer",
+            "application_url",
             "location",
+            "published_date",
+            "deadline_date",
+            "degree_levels",
+            "major_tags",
+            "summary",
+            "description",
             "location_evidence",
+            "field_evidence_updates",
         }
         unexpected = set(changes) - editable
         if unexpected:
@@ -1937,9 +1947,38 @@ class Database:
             raise ValueError(
                 "Use mark_artifact_job_candidate_published after saving the verified job"
             )
-        location = self._optional_text(
-            changes.get("location", current.get("location"))
+        text_fields = (
+            "title",
+            "employer",
+            "application_url",
+            "location",
+            "published_date",
+            "deadline_date",
+            "summary",
+            "description",
         )
+        values = {
+            field: self._optional_text(changes.get(field, current.get(field)))
+            for field in text_fields
+        }
+        if not values["title"] or not values["employer"]:
+            raise ValueError("Verified attachment candidates require title and employer")
+        if values["application_url"] and not is_http_url(values["application_url"]):
+            raise ValueError("application_url must be an HTTP(S) URL")
+        if "degree_levels" in changes:
+            if not isinstance(changes["degree_levels"], list):
+                raise ValueError("degree_levels must be a list")
+            degree_levels = [self._optional_text(item) for item in changes["degree_levels"]]
+            degree_levels = [item for item in degree_levels if item]
+        else:
+            degree_levels = list(current.get("degree_levels") or [])
+        if "major_tags" in changes:
+            if not isinstance(changes["major_tags"], list):
+                raise ValueError("major_tags must be a list")
+            major_tags = [self._optional_text(item) for item in changes["major_tags"]]
+            major_tags = [item for item in major_tags if item]
+        else:
+            major_tags = list(current.get("major_tags") or [])
         field_evidence = current.get("field_evidence")
         if not isinstance(field_evidence, dict):
             field_evidence = {}
@@ -1950,19 +1989,50 @@ class Database:
         )
         if location_evidence:
             field_evidence["工作地点依据"] = location_evidence
+        evidence_updates = changes.get("field_evidence_updates")
+        if evidence_updates is not None:
+            if not isinstance(evidence_updates, dict):
+                raise ValueError("field_evidence_updates must be an object")
+            for key, value in evidence_updates.items():
+                key_text = str(key).strip()
+                value_text = self._optional_text(value)
+                if not key_text:
+                    raise ValueError("field_evidence_updates keys cannot be empty")
+                if value_text is None:
+                    field_evidence.pop(key_text, None)
+                else:
+                    field_evidence[key_text] = value_text
+        field_evidence["岗位"] = values["title"]
+        if major_tags:
+            field_evidence["专业范围"] = "、".join(major_tags)
+        if degree_levels:
+            field_evidence["学历要求"] = "、".join(degree_levels)
+        if values["location"]:
+            field_evidence["工作地点"] = values["location"]
         now = utc_now()
         with self.transaction() as connection:
             connection.execute(
                 """
                 UPDATE artifact_job_candidates
-                SET review_status = ?, review_note = ?, location = ?,
-                    field_evidence_json = ?, updated_at = ?
+                SET review_status = ?, review_note = ?, title = ?, employer = ?,
+                    application_url = ?, location = ?, published_date = ?,
+                    deadline_date = ?, degree_levels_json = ?, major_tags_json = ?,
+                    summary = ?, description = ?, field_evidence_json = ?, updated_at = ?
                 WHERE id = ?
                 """,
                 (
                     review_status,
                     review_note,
-                    location,
+                    values["title"],
+                    values["employer"],
+                    values["application_url"],
+                    values["location"],
+                    values["published_date"],
+                    values["deadline_date"],
+                    json.dumps(degree_levels, ensure_ascii=False),
+                    json.dumps(major_tags, ensure_ascii=False),
+                    values["summary"] or "",
+                    values["description"] or values["title"],
                     json.dumps(field_evidence, ensure_ascii=False),
                     now,
                     candidate_id,

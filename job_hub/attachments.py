@@ -89,8 +89,15 @@ def build_attachment_field_evidence(
     artifact: dict[str, object],
     row: dict[str, object],
     row_text: str,
+    extra_evidence: dict[str, object] | None = None,
 ) -> dict[str, str]:
-    """Normalize one official table row to the shared publication schema."""
+    """Normalize one official table row to the shared publication schema.
+
+    ``extra_evidence`` contains parser or reviewer fields such as recruitment
+    count and position code.  Preserve them when a private candidate becomes
+    public; dropping them here made the student page lose facts that were
+    already extracted from the official row.
+    """
     evidence: dict[str, str] = {
         "evidence_scope": "official_attachment_row",
         "岗位": title,
@@ -102,6 +109,15 @@ def build_attachment_field_evidence(
     }
     if location:
         evidence["工作地点"] = location
+    for key, value in (extra_evidence or {}).items():
+        key_text = str(key).strip()
+        value_text = str(value or "").strip()
+        if (
+            key_text
+            and value_text
+            and key_text not in {"evidence_scope", "岗位", "专业范围", "学历要求", "table_row", "artifact_url", "row_text"}
+        ):
+            evidence[key_text] = value_text
     return {key: value for key, value in evidence.items() if value}
 
 
