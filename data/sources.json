@@ -182,7 +182,7 @@
       "page_url_pattern": "https://m.cgs.gov.cn/zpxx/news_4288_{page}.json",
       "max_pages": 6,
       "page_size": 20,
-      "allowed_hosts": ["m.cgs.gov.cn"],
+      "allowed_hosts": ["m.cgs.gov.cn", "www.drc.cgs.gov.cn"],
       "detail_allowed_hosts": [
         "m.cgs.gov.cn",
         "www.cgs.gov.cn",
@@ -352,7 +352,7 @@
       "employer_hint": "中国石油化工集团有限公司",
       "allowed_hosts": ["job.sinopec.com"],
       "minimum_relevance": 20,
-      "snapshot_path": "data/verified/sinopec-geoscience-20260928.json",
+      "snapshot_path": "data/verified/sinopec-geoscience-20260929.json",
       "official_evidence_url": "https://job.sinopec.com/#/school/recruitmentPositions",
       "application_url": "https://job.sinopec.com/",
       "enterprise_total": 132,
@@ -361,7 +361,7 @@
       "max_age_hours": 30,
       "require_complete_manifest": true,
       "reconcile_missing_external_ids": true,
-      "note": "2026-09-28 服务器/浏览器官方 SPA 捕获确认 132 个单位，关键词“地质”筛选 35 个候选单位；本次 132 个单位清单、35 个详情页和 348 条岗位行均通过完整扫描门禁，0 个候选单位失败。学生端只展示岗位级专业/学历明确匹配，捕获文件必须在 max_age_hours 内重新核验。"
+      "note": "2026-09-29 服务器隔离 Chromium 通过官方只读 SPA 接口捕获确认 132 个单位，35 个候选单位、363 条岗位行；132 个单位清单和 35 个候选单位详情均完成分页扫描，失败行为 0。学生端只展示岗位级专业/学历明确匹配，捕获文件必须在 max_age_hours 内重新核验。"
     }
   },
   {

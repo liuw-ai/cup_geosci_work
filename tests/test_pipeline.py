@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
+from dataclasses import replace
 
 from job_hub.audit import audit_database
 from job_hub.db import Database
@@ -483,6 +484,50 @@ def test_audit_accepts_official_host_and_rejects_no_integrity_issues(tmp_path) -
     assert result["ok"] is True
     assert result["checked_jobs"] == 1
     assert result["issues"] == []
+
+
+def test_audit_accepts_registered_detail_host_and_rejects_external_host(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    detail_source = source()
+    detail_source["source_type"] = "html_notice"
+    detail_source["config"] = {
+        **detail_source["config"],
+        "detail_allowed_hosts": ["detail.careers.example.edu.cn"],
+    }
+    database.upsert_source(detail_source)
+    pipeline = JobPipeline(settings, database)
+
+    posting = RawPosting(
+        title="地质工程师招聘",
+        employer="测试能源集团",
+        source_url="https://detail.careers.example.edu.cn/jobs/audit",
+        application_url=None,
+        text="面向地质工程硕士的官方招聘岗位。",
+        summary="官方招聘岗位。",
+        published_date=None,
+        deadline_date="2099-12-31",
+        location="北京",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程师招聘",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+        },
+    )
+    database.save_job(pipeline.normalize_posting(posting, detail_source))
+    assert audit_database(database, settings, date(2026, 9, 18))["ok"] is True
+
+    database.save_job(
+        pipeline.normalize_posting(
+            replace(posting, external_id="external-host", source_url="https://evil.example/jobs/1"),
+            detail_source,
+        )
+    )
+    result = audit_database(database, settings, date(2026, 9, 18))
+    assert result["ok"] is False
+    assert any(issue["code"] == "source_host_mismatch" for issue in result["issues"])
 
 
 def test_audit_allows_explicit_multi_role_notice_but_not_implicit_duplicates(tmp_path) -> None:

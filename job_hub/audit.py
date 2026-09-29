@@ -158,7 +158,11 @@ def audit_database(
         elif source.get("source_type") != "manual":
             allowed_hosts = {
                 str(host).lower()
-                for host in source.get("config", {}).get("allowed_hosts", [])
+                for host in (
+                    list(source.get("config", {}).get("allowed_hosts", []))
+                    + list(source.get("config", {}).get("detail_allowed_hosts", []))
+                    + list(source.get("config", {}).get("attachment_allowed_hosts", []))
+                )
             }
             homepage_host = urlparse(str(source.get("homepage_url", ""))).hostname
             if homepage_host:

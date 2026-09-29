@@ -11,6 +11,7 @@ from conftest import make_settings
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SNAPSHOT = PROJECT_ROOT / "data" / "verified" / "sinopec-geoscience-20260925.json"
+LATEST_SNAPSHOT = PROJECT_ROOT / "data" / "verified" / "sinopec-geoscience-20260929.json"
 
 
 def _source() -> dict[str, object]:
@@ -56,3 +57,18 @@ def test_live_sinopec_rows_keep_raw_deadline_and_iso_deadline_field(tmp_path: Pa
     assert geology.deadline_date == "2026-10-28"
     assert geology.field_evidence["报名截止"] == "截止时间：2026-10-28 17:00:00"
     assert geology.field_evidence["招聘人数"] == "125"
+
+
+def test_latest_sinopec_capture_is_complete_and_freshly_captured() -> None:
+    payload = load_sinopec_capture(LATEST_SNAPSHOT, require_complete_manifest=True)
+    summary = sinopec_capture_summary(payload)
+
+    assert summary["enterprise_total"] == 132
+    assert summary["enterprise_captured"] == 132
+    assert summary["candidate_enterprise_total"] == 35
+    assert summary["candidate_enterprise_captured"] == 35
+    assert summary["candidate_scan_complete_all"] is True
+    assert summary["job_rows_captured"] == 363
+    assert summary["jobs_exported"] == 363
+    assert summary["failed_jobs"] == 0
+    assert summary["candidate_row_count_mismatches"] == 0
