@@ -13,6 +13,7 @@ from job_hub.cmgb_browser_capture import (
     _close_context_pages,
     extract_cmgb_detail,
     load_cmgb_browser_capture,
+    persist_cmgb_browser_capture,
     write_cmgb_capture_failure,
 )
 from job_hub.profiles import evaluate_student_publication
@@ -135,7 +136,7 @@ def test_cmgb_capture_rejects_stale_manifest(tmp_path: Path) -> None:
 
 def test_cmgb_failure_capture_preserves_last_successful_artifact(tmp_path: Path) -> None:
     path = _write(tmp_path, _payload())
-    write_cmgb_capture_failure(
+    archived = write_cmgb_capture_failure(
         output=path,
         platform_url="https://cmgb.iguopin.com/jobCampus",
         status="parse_failed",
@@ -143,10 +144,110 @@ def test_cmgb_failure_capture_preserves_last_successful_artifact(tmp_path: Path)
     )
     success = json.loads(path.read_text(encoding="utf-8"))
     failure = json.loads(path.with_suffix(".failure.json").read_text(encoding="utf-8"))
+    archived_failure = json.loads(
+        (path.parent / archived["archive_file"]).read_text(encoding="utf-8")
+    )
     assert success["status"] == "success"
     assert failure["status"] == "parse_failed"
     assert failure["diagnostic_for"] == "cmgb.json"
     assert "timed out" in failure["scan"]["failure_reason"]
+    assert archived_failure == failure
+
+
+def test_cmgb_partial_run_archives_details_without_replacing_success(tmp_path: Path) -> None:
+    path = _write(tmp_path, _payload())
+    original = path.read_text(encoding="utf-8")
+    scan = dict(_payload()["scan"])
+    scan.update(
+        {
+            "rows_discovered": 2,
+            "rows_exported": 1,
+            "failed_rows": 1,
+            "detail_discovered": 2,
+            "detail_succeeded": 1,
+            "detail_failed": 1,
+            "failure_records": [
+                {
+                    "page": 8,
+                    "row": 2,
+                    "card_id": "official-2",
+                    "detail_url": "https://www.iguopin.com/job/detail?id=official-2",
+                    "reason": "official detail timed out",
+                }
+            ],
+        }
+    )
+    archived = persist_cmgb_browser_capture(
+        output=path,
+        payload=_payload(status="partial", scan=scan, rows=[_row("official-1")]),
+    )
+
+    assert path.read_text(encoding="utf-8") == original
+    assert archived["status"] == "partial"
+    assert archived["scan"]["detail_failed"] == 1
+    assert archived["scan"]["failure_records"][0]["card_id"] == "official-2"
+    assert (path.parent / archived["archive_file"]).is_file()
+
+
+def test_cmgb_partial_run_without_success_does_not_create_canonical_capture(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "captures" / "cmgb.json"
+    scan = dict(_payload()["scan"])
+    scan.update(
+        {
+            "pagination_complete": False,
+            "failed_rows": 1,
+            "detail_failed": 1,
+            "detail_succeeded": 0,
+            "rows_exported": 0,
+            "rows_discovered": 1,
+        }
+    )
+    archived = persist_cmgb_browser_capture(
+        output=path,
+        payload=_payload(status="partial", scan=scan, rows=[]),
+    )
+
+    assert not path.exists()
+    assert (path.parent / archived["archive_file"]).is_file()
+    assert path.with_suffix(".failure.json").is_file()
+
+
+def test_cmgb_success_persistence_rejects_incomplete_scan(tmp_path: Path) -> None:
+    path = _write(tmp_path, _payload())
+    original = path.read_text(encoding="utf-8")
+    scan = dict(_payload()["scan"])
+    scan.update(
+        {
+            "rows_discovered": 2,
+            "detail_discovered": 2,
+            "failed_rows": 1,
+            "detail_failed": 1,
+        }
+    )
+
+    with pytest.raises(CmgbBrowserCaptureError, match="incomplete"):
+        persist_cmgb_browser_capture(output=path, payload=_payload(scan=scan))
+
+    assert path.read_text(encoding="utf-8") == original
+
+
+def test_cmgb_success_persistence_rejects_empty_or_mismatched_row_manifest(
+    tmp_path: Path,
+) -> None:
+    path = _write(tmp_path, _payload())
+    original = path.read_text(encoding="utf-8")
+
+    with pytest.raises(CmgbBrowserCaptureError, match="non-empty"):
+        persist_cmgb_browser_capture(output=path, payload=_payload(rows=[]))
+    with pytest.raises(CmgbBrowserCaptureError, match="does not match"):
+        persist_cmgb_browser_capture(
+            output=path,
+            payload=_payload(rows=[_row("first"), _row("second")]),
+        )
+
+    assert path.read_text(encoding="utf-8") == original
 
 
 def test_cmgb_context_cleanup_closes_stale_popup_pages() -> None:

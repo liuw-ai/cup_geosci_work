@@ -493,43 +493,138 @@ def _write_capture(path: Path | str, payload: dict[str, Any]) -> dict[str, Any]:
     return payload
 
 
+def _failure_archive_path(
+    destination: Path,
+    *,
+    captured_at: str,
+    status: str,
+) -> Path:
+    """Return a new, timestamped diagnostic path next to a canonical capture."""
+
+    captured = datetime.fromisoformat(captured_at.replace("Z", "+00:00"))
+    timestamp = captured.astimezone(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    archive_directory = destination.parent / f"{destination.stem}.failures"
+    archive_directory.mkdir(parents=True, exist_ok=True)
+    candidate = archive_directory / f"{destination.stem}-{timestamp}-{status}.json"
+    sequence = 2
+    while candidate.exists():
+        candidate = archive_directory / (
+            f"{destination.stem}-{timestamp}-{status}-{sequence}.json"
+        )
+        sequence += 1
+    return candidate
+
+
 def write_cmgb_capture_failure(
-    *, output: Path | str, platform_url: str, status: str, reason: str
+    *,
+    output: Path | str,
+    platform_url: str,
+    status: str,
+    reason: str,
+    scan: dict[str, Any] | None = None,
+    rows: list[dict[str, Any]] | None = None,
+    captured_at: str | None = None,
 ) -> dict[str, Any]:
-    """Persist a non-publishable diagnostic without replacing a good capture.
+    """Archive a non-publishable diagnostic without replacing a good capture.
 
     ``output`` is the canonical, publishable manifest path. A browser timeout
     is an observation about this run, not evidence that every previously
-    captured official position disappeared. Keep the diagnostic beside the
-    manifest as ``*.failure.json`` so a transient portal failure cannot erase
-    the last complete capture or trigger a false withdrawal on the next sync.
+    captured official position disappeared. Keep every diagnostic in a
+    timestamped ``*.failures/`` archive. ``*.failure.json`` remains a copy of
+    the newest diagnostic for operator convenience, but never replaces the
+    canonical manifest. A transient portal failure therefore cannot erase the
+    last complete capture or trigger a false withdrawal on the next sync.
     """
 
     if status not in {"access_limited", "parse_failed", "partial"}:
         raise ValueError("CMGB failure status must be access_limited, parse_failed or partial")
     destination = Path(output)
-    failure_path = destination.with_suffix(".failure.json")
-    return _write_capture(
-        failure_path,
-        {
-            "version": 1,
-            "status": status,
-            "platform_url": platform_url,
-            "diagnostic_for": destination.name,
-            "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "scan": {
-                "pages_scanned": 0,
-                "pagination_complete": False,
-                "rows_discovered": 0,
-                "rows_exported": 0,
-                "failed_rows": 0,
-                "detail_discovered": 0,
-                "detail_succeeded": 0,
-                "detail_failed": 0,
-                "failure_reason": str(reason)[:1000],
-            },
-            "rows": [],
-        },
+    timestamp = _timestamp(
+        captured_at
+        or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    )
+    if scan is not None and not isinstance(scan, dict):
+        raise ValueError("CMGB failure scan must be an object")
+    if rows is not None and not isinstance(rows, list):
+        raise ValueError("CMGB failure rows must be a list")
+    diagnostics = {
+        "pages_scanned": 0,
+        "pagination_complete": False,
+        "rows_discovered": 0,
+        "rows_exported": 0,
+        "failed_rows": 0,
+        "detail_discovered": 0,
+        "detail_succeeded": 0,
+        "detail_failed": 0,
+        **(scan or {}),
+        "failure_reason": str(reason)[:1000],
+    }
+    archive_path = _failure_archive_path(
+        destination,
+        captured_at=timestamp,
+        status=status,
+    )
+    payload = {
+        "version": 1,
+        "status": status,
+        "platform_url": platform_url,
+        "diagnostic_for": destination.name,
+        "archive_file": archive_path.relative_to(destination.parent).as_posix(),
+        "captured_at": timestamp,
+        "scan": diagnostics,
+        "rows": rows or [],
+    }
+    _write_capture(archive_path, payload)
+    _write_capture(destination.with_suffix(".failure.json"), payload)
+    return payload
+
+
+def persist_cmgb_browser_capture(
+    *, output: Path | str, payload: dict[str, Any]
+) -> dict[str, Any]:
+    """Persist a CMGB run while protecting the last complete evidence snapshot.
+
+    The configured capture path is consumed by the publication source and is
+    therefore a success-only pointer. A partial crawl can still contain useful
+    diagnosis and a subset of official details, but it is not a safe
+    replacement for the previous complete inventory. It is archived instead.
+    """
+
+    status = _text(payload.get("status"), "status")
+    if status not in CMGB_CAPTURE_STATUSES:
+        raise CmgbBrowserCaptureError(f"unsupported CMGB capture status: {status}")
+    if status == "success":
+        # A producer cannot label an incomplete pass as a canonical success.
+        scan = _scan_metrics(payload, require_complete=True)
+        rows = payload.get("rows")
+        if not isinstance(rows, list) or not rows:
+            raise CmgbBrowserCaptureError("successful CMGB capture rows must be a non-empty list")
+        if scan["rows_exported"] != len(rows):
+            raise CmgbBrowserCaptureError(
+                "successful CMGB capture rows_exported does not match rows length"
+            )
+        return _write_capture(output, payload)
+
+    scan = payload.get("scan")
+    rows = payload.get("rows")
+    if not isinstance(scan, dict):
+        raise CmgbBrowserCaptureError("non-success CMGB capture is missing scan metrics")
+    if not isinstance(rows, list):
+        raise CmgbBrowserCaptureError("non-success CMGB capture rows must be a list")
+    failure_records = scan.get("failure_records")
+    reason = str(scan.get("failure_reason") or "").strip()
+    if not reason and isinstance(failure_records, list) and failure_records:
+        reason = str(failure_records[0].get("reason") or "").strip()
+    if not reason:
+        reason = f"CMGB browser capture ended with status {status}"
+    return write_cmgb_capture_failure(
+        output=output,
+        platform_url=str(payload.get("platform_url") or ""),
+        status=status,
+        reason=reason,
+        scan=scan,
+        rows=rows,
+        captured_at=str(payload.get("captured_at") or ""),
     )
 
 
@@ -819,4 +914,4 @@ def run_cmgb_browser_capture(
         },
         "rows": rows,
     }
-    return _write_capture(output, payload)
+    return persist_cmgb_browser_capture(output=output, payload=payload)
