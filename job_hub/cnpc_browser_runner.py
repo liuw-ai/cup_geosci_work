@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import re
 import socket
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -44,40 +45,65 @@ def _official_url(value: str, hosts: set[str], field: str) -> str:
     return value
 
 
-def _resolve_cdp_websocket(cdp_url: str) -> str:
-    """Resolve headless-shell's websocket while preserving its Host quirk."""
+def _resolve_cdp_websocket(
+    cdp_url: str,
+    *,
+    attempts: int = 6,
+    retry_delay_seconds: float = 2.0,
+) -> str:
+    """Resolve headless-shell's websocket while preserving its Host quirk.
+
+    The CDP proxy can take a few seconds to become ready after Compose starts
+    the browser container. A bounded retry prevents a harmless startup race
+    from being recorded as a long-lived source failure; it does not retry
+    page navigation or bypass any target-site access policy.
+    """
 
     parsed = urlparse(cdp_url)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         raise BrowserCaptureError("CNPC_BROWSER_CDP_URL must be an HTTP(S) endpoint")
-    response = requests.get(
-        f"{cdp_url.rstrip('/')}/json/version",
-        headers={"Host": "localhost"},
-        timeout=10,
-    )
-    if not response.ok:
-        raise BrowserCaptureError(
-            f"headless-shell CDP version endpoint returned HTTP {response.status_code}"
-        )
-    try:
-        websocket = str(response.json()["webSocketDebuggerUrl"])
-    except (ValueError, KeyError, TypeError) as error:
-        raise BrowserCaptureError("headless-shell CDP version response lacks websocket URL") from error
-    websocket_parsed = urlparse(websocket)
-    scheme = "wss" if parsed.scheme == "https" else "ws"
-    host = parsed.hostname or ""
-    resolved_host = socket.gethostbyname(host)
-    port = parsed.port or (443 if parsed.scheme == "https" else 80)
-    return urlunparse(
-        (
-            scheme,
-            f"{resolved_host}:{port}",
-            websocket_parsed.path,
-            websocket_parsed.params,
-            websocket_parsed.query,
-            websocket_parsed.fragment,
-        )
-    )
+    max_attempts = max(1, int(attempts))
+    last_error: Exception | None = None
+    for attempt in range(max_attempts):
+        try:
+            response = requests.get(
+                f"{cdp_url.rstrip('/')}/json/version",
+                headers={"Host": "localhost"},
+                timeout=10,
+            )
+            if not response.ok:
+                raise BrowserCaptureError(
+                    "headless-shell CDP version endpoint returned "
+                    f"HTTP {response.status_code}"
+                )
+            try:
+                websocket = str(response.json()["webSocketDebuggerUrl"])
+            except (ValueError, KeyError, TypeError) as error:
+                raise BrowserCaptureError(
+                    "headless-shell CDP version response lacks websocket URL"
+                ) from error
+            websocket_parsed = urlparse(websocket)
+            scheme = "wss" if parsed.scheme == "https" else "ws"
+            host = parsed.hostname or ""
+            resolved_host = socket.gethostbyname(host)
+            port = parsed.port or (443 if parsed.scheme == "https" else 80)
+            return urlunparse(
+                (
+                    scheme,
+                    f"{resolved_host}:{port}",
+                    websocket_parsed.path,
+                    websocket_parsed.params,
+                    websocket_parsed.query,
+                    websocket_parsed.fragment,
+                )
+            )
+        except (requests.RequestException, BrowserCaptureError, OSError) as error:
+            last_error = error
+            if attempt + 1 < max_attempts:
+                time.sleep(max(0.0, float(retry_delay_seconds)))
+    raise BrowserCaptureError(
+        f"headless-shell CDP endpoint unavailable after {max_attempts} attempts: {last_error}"
+    ) from last_error
 
 
 def _announcement_id(url: str, fallback: str) -> str:

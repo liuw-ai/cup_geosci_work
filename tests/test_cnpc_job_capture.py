@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
+import requests
 
 from job_hub.cnpc_browser_capture import CnpcJobCaptureError, cnpc_job_capture_summary, load_cnpc_job_capture
 from job_hub.cnpc_browser_runner import (
@@ -230,6 +231,37 @@ def test_cdp_endpoint_rewrites_headless_shell_websocket_host(monkeypatch: pytest
     assert _resolve_cdp_websocket("http://headless-shell:9222") == (
         "ws://172.18.0.3:9222/devtools/browser/abc"
     )
+
+
+def test_cdp_endpoint_retries_transient_startup_disconnect(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Response:
+        ok = True
+        status_code = 200
+
+        @staticmethod
+        def json() -> dict[str, str]:
+            return {"webSocketDebuggerUrl": "ws://localhost/devtools/browser/abc"}
+
+    calls = 0
+
+    def fake_get(_url: str, *, headers: dict[str, str], timeout: int) -> Response:
+        nonlocal calls
+        calls += 1
+        if calls < 3:
+            raise requests.ConnectionError("CDP is still starting")
+        return Response()
+
+    monkeypatch.setattr("job_hub.cnpc_browser_runner.requests.get", fake_get)
+    monkeypatch.setattr("job_hub.cnpc_browser_runner.socket.gethostbyname", lambda _host: "172.18.0.3")
+    monkeypatch.setattr("job_hub.cnpc_browser_runner.time.sleep", lambda _seconds: None)
+    assert _resolve_cdp_websocket(
+        "http://headless-shell:9222",
+        attempts=3,
+        retry_delay_seconds=0,
+    ) == "ws://172.18.0.3:9222/devtools/browser/abc"
+    assert calls == 3
 
 
 def test_cnpc_failure_capture_preserves_last_successful_artifact(tmp_path: Path) -> None:
