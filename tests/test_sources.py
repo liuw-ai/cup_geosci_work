@@ -22,6 +22,7 @@ class FakeResponse:
 @dataclass
 class FakeJsonResponse:
     payload: object
+    url: str = "https://m.cgs.gov.cn/zpxx/news_4288.json"
 
     def json(self) -> object:
         return self.payload
@@ -849,6 +850,171 @@ def test_attachment_discovery_returns_only_filtered_official_notices(tmp_path, m
     monkeypatch.setattr(collector, "_get", get)
 
     assert collector.discover_notice_pages(source) == [("2026年公开招聘公告", kept_url)]
+
+
+def test_cgs_dynamic_json_collects_paginated_official_details_with_evidence(
+    tmp_path, monkeypatch
+) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    listing_url = "https://m.cgs.gov.cn/zpxx/news_4288.json"
+    page_two_url = "https://m.cgs.gov.cn/zpxx/news_4288_1.json"
+    first_detail = "https://m.cgs.gov.cn/zpxx/detail-1.html"
+    second_detail = "https://m.cgs.gov.cn/zpxx/detail-2.html"
+    source = {
+        "id": "cgs-notices",
+        "publisher": "中国地质调查局",
+        "homepage_url": "https://m.cgs.gov.cn/zpxx/",
+        "source_type": "cgs_dynamic_json",
+        "config": {
+            "listing_url": listing_url,
+            "listing_urls": [listing_url],
+            "page_url_pattern": "https://m.cgs.gov.cn/zpxx/news_4288_{page}.json",
+            "max_pages": 3,
+            "page_size": 2,
+            "allowed_hosts": ["m.cgs.gov.cn"],
+            "detail_allowed_hosts": ["m.cgs.gov.cn"],
+            "required_title_patterns": ["招聘"],
+            "require_recruitment_word": True,
+            "attachment_discovery_enabled": True,
+            "attachment_discovery_max_notices": 4,
+            "max_items": 10,
+            "request_interval_seconds": 0,
+            "content_selector": "main",
+        },
+    }
+    responses = {
+        listing_url: FakeJsonResponse(
+            {
+                "lists": [
+                    {"title": "2026年公开招聘公告", "url": first_detail, "date": "2026-09-01"},
+                    {"title": "2026年公开招聘拟聘名单", "url": second_detail},
+                    {"title": "load-more-sentinel", "url": "#"},
+                ]
+            },
+            url=listing_url,
+        ),
+        page_two_url: FakeJsonResponse(
+            {
+                "lists": [
+                    {"title": "2026年人才引进招聘公告", "url": second_detail, "date": "2026-09-02"},
+                    {"title": "load-more-sentinel", "url": "#"},
+                ]
+            },
+            url=page_two_url,
+        ),
+        first_detail: FakeResponse(
+            text=(
+                "<main><h1>2026年公开招聘公告</h1>"
+                "招聘岗位：地质调查岗。专业要求：地质学、地质工程、资源勘查工程。"
+                "学历要求：硕士研究生。工作地点：北京。招聘人数：2人。"
+                "报名截止时间：2026年12月31日。</main>"
+            ),
+            url=first_detail,
+        ),
+        second_detail: FakeResponse(
+            text=(
+                "<main><h1>2026年人才引进招聘公告</h1>"
+                "招聘岗位：区域地质调查。专业要求：地质学。学历要求：博士研究生。"
+                "工作地点：河北。招聘人数：1人。报名截止时间：2026年11月30日。</main>"
+            ),
+            url=second_detail,
+        ),
+    }
+
+    def get(url, _source):
+        return responses[url]
+
+    monkeypatch.setattr(collector, "_get", get)
+
+    postings = collector.collect(source)
+
+    assert [posting.source_url for posting in postings] == [first_detail, second_detail]
+    assert postings[0].official_evidence_url == first_detail
+    assert postings[0].field_evidence["专业要求"] == "地质学、地质工程、资源勘查工程"
+    assert postings[0].field_evidence["学历要求"] == "硕士研究生"
+    assert postings[0].field_evidence["招聘人数"] == "2人"
+    assert postings[0].qualification_text == (
+        "专业要求：地质学、地质工程、资源勘查工程；学历要求：硕士研究生"
+    )
+    assert collector.discover_notice_pages(source) == [
+        ("2026年公开招聘公告", first_detail),
+        ("2026年人才引进招聘公告", second_detail),
+    ]
+
+
+def test_cgs_dynamic_json_never_returns_unregistered_detail_host(
+    tmp_path, monkeypatch
+) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    listing_url = "https://m.cgs.gov.cn/zpxx/news_4288.json"
+    source = {
+        "id": "cgs-notices",
+        "publisher": "中国地质调查局",
+        "homepage_url": "https://m.cgs.gov.cn/zpxx/",
+        "source_type": "cgs_dynamic_json",
+        "config": {
+            "listing_url": listing_url,
+            "page_size": 20,
+            "allowed_hosts": ["m.cgs.gov.cn"],
+            "detail_allowed_hosts": ["m.cgs.gov.cn"],
+            "attachment_discovery_enabled": True,
+            "max_items": 10,
+            "request_interval_seconds": 0,
+        },
+    }
+
+    def get(url, _source):
+        return FakeJsonResponse(
+            {
+                "lists": [
+                    {
+                        "title": "2026年公开招聘公告",
+                        "url": "https://outside.example/notice.html",
+                    }
+                ]
+            },
+            url=url,
+        )
+
+    monkeypatch.setattr(collector, "_get", get)
+
+    assert collector.collect(source) == []
+    assert collector.discover_notice_pages(source) == []
+
+
+def test_cgs_dynamic_json_marks_all_detail_failures_as_source_failure(
+    tmp_path, monkeypatch
+) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    listing_url = "https://m.cgs.gov.cn/zpxx/news_4288.json"
+    detail_url = "https://m.cgs.gov.cn/zpxx/detail-1.html"
+    source = {
+        "id": "cgs-notices",
+        "publisher": "中国地质调查局",
+        "homepage_url": "https://m.cgs.gov.cn/zpxx/",
+        "source_type": "cgs_dynamic_json",
+        "config": {
+            "listing_url": listing_url,
+            "page_size": 20,
+            "allowed_hosts": ["m.cgs.gov.cn"],
+            "detail_allowed_hosts": ["m.cgs.gov.cn"],
+            "max_items": 10,
+            "request_interval_seconds": 0,
+        },
+    }
+
+    def get(url, _source):
+        if url == listing_url:
+            return FakeJsonResponse(
+                {"lists": [{"title": "2026年公开招聘公告", "url": detail_url}]},
+                url=listing_url,
+            )
+        raise SourceCollectionError("detail unavailable")
+
+    monkeypatch.setattr(collector, "_get", get)
+
+    with pytest.raises(SourceCollectionError, match="every official detail page failed"):
+        collector.collect(source)
 
 
 def test_attachment_discovery_rejects_unregistered_direct_notice_host(tmp_path) -> None:

@@ -70,9 +70,9 @@ def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
 def test_cgs_source_uses_recruitment_channel_and_private_attachment_discovery() -> None:
     source = _source_by_id("cgs-notices")
 
-    assert source["homepage_url"] == "https://www.cgs.gov.cn/tzgg/zpxx/"
+    assert source["homepage_url"] == "https://m.cgs.gov.cn/zpxx/"
     assert source["config"]["listing_urls"] == [
-        "https://www.cgs.gov.cn/tzgg/zpxx/"
+        "https://m.cgs.gov.cn/zpxx/news_4288.json"
     ]
     assert source["config"]["attachment_discovery_enabled"] is True
     assert "拟聘" in source["config"]["exclude_patterns"]

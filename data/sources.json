@@ -169,17 +169,37 @@
     "id": "cgs-notices",
     "name": "中国地质调查局招聘与人才公告",
     "publisher": "中国地质调查局",
-    "homepage_url": "https://www.cgs.gov.cn/tzgg/zpxx/",
-    "source_type": "html_notice",
+    "homepage_url": "https://m.cgs.gov.cn/zpxx/",
+    "source_type": "cgs_dynamic_json",
     "category": "自然资源、地调与地勘",
     "source_tier": "A",
     "enabled": true,
     "config": {
-      "listing_urls": ["https://www.cgs.gov.cn/tzgg/zpxx/"],
-      "allowed_hosts": ["www.cgs.gov.cn", "www.drc.cgs.gov.cn"],
+      "listing_url": "https://m.cgs.gov.cn/zpxx/news_4288.json",
+      "listing_urls": [
+        "https://m.cgs.gov.cn/zpxx/news_4288.json"
+      ],
+      "page_url_pattern": "https://m.cgs.gov.cn/zpxx/news_4288_{page}.json",
+      "max_pages": 6,
+      "page_size": 20,
+      "allowed_hosts": ["m.cgs.gov.cn"],
+      "detail_allowed_hosts": [
+        "m.cgs.gov.cn",
+        "www.cgs.gov.cn",
+        "www.drc.cgs.gov.cn",
+        "www.mohrss.gov.cn",
+        "www.sydwgkzp.cn"
+      ],
+      "attachment_allowed_hosts": [
+        "m.cgs.gov.cn",
+        "www.cgs.gov.cn",
+        "www.drc.cgs.gov.cn",
+        "www.mohrss.gov.cn",
+        "www.sydwgkzp.cn"
+      ],
       "government_evidence_recheck": true,
       "attachment_discovery_enabled": true,
-      "title_selector": "h1, .title",
+      "title_selector": "h1, .title, .article-title, title",
       "content_selector": "article, main, .TRS_Editor, .content, body",
       "require_recruitment_word": true,
       "include_patterns": ["招聘|招录|招考|人才引进|博士后|科研助理|实习"],
@@ -205,7 +225,7 @@
         "录用公示"
       ],
       "minimum_relevance": 40,
-      "max_items": 18,
+      "max_items": 24,
       "request_interval_seconds": 1.0,
       "note": "主入口为中国地质调查局官网“招聘信息”栏目；只从官方公告中保留明确招聘、人才引进、博士后、科研助理或实习信息。发现的官方附件先进入私有复核队列，采购、招标和流程公示会被排除。"
     }

@@ -9,7 +9,7 @@ import re
 import time
 import xml.etree.ElementTree as ET
 import zlib
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from html import unescape
 from pathlib import Path
@@ -386,6 +386,8 @@ class OfficialSourceCollector:
             return self._collect_beisen_job_portal(source)
         if source_type == "mnr_recruitment":
             return self._collect_mnr_recruitment(source)
+        if source_type == "cgs_dynamic_json":
+            return self._collect_cgs_dynamic_json(source)
         if source_type == "slb_coveo_search":
             return self._collect_slb_coveo_search(source)
         if source_type == "structured_opening_page":
@@ -1652,9 +1654,28 @@ class OfficialSourceCollector:
         review queue.  No candidate is published by this method.
         """
         source_type = str(source.get("source_type") or "")
+        if source_type == "cgs_dynamic_json":
+            config = source.get("config")
+            if not isinstance(config, dict) or not config.get(
+                "attachment_discovery_enabled", False
+            ):
+                raise SourceSkipped("attachment discovery is not enabled for this source")
+            raw_limit = config.get(
+                "attachment_discovery_max_notices", self._item_limit(source)
+            )
+            try:
+                notice_limit = max(1, min(int(raw_limit), self._item_limit(source)))
+            except (TypeError, ValueError):
+                notice_limit = self._item_limit(source)
+            return [
+                (title, detail_url)
+                for title, detail_url, _listed_date in self._cgs_dynamic_notice_links(
+                    source, limit=notice_limit
+                )
+            ]
         if source_type not in {"html_notice", "landing_page"}:
             raise SourceSkipped(
-                "attachment discovery supports only html_notice or landing_page sources"
+                "attachment discovery supports only html_notice, landing_page or cgs_dynamic_json sources"
             )
         config = source.get("config")
         if not isinstance(config, dict) or not config.get(
@@ -4191,6 +4212,194 @@ class OfficialSourceCollector:
                 )
             )
         return postings
+
+    def _collect_cgs_dynamic_json(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Collect CGS recruitment notices from its public mobile JSON pages.
+
+        The CGS mobile recruitment column renders an empty ``<ul>`` and loads
+        ``news_4288.json`` (then ``news_4288_N.json``) from the same official
+        host.  The JSON is an announcement index, not a position table, so
+        each selected official detail page is fetched and passed through the
+        normal HTML evidence and professional-relevance gates.
+        """
+
+        item_limit = self._item_limit(source)
+        links = self._cgs_dynamic_notice_links(source, limit=item_limit)
+
+        postings: list[RawPosting] = []
+        detail_failures = 0
+        for title_hint, detail_url, listed_date in links:
+            try:
+                detail_response = self._get(detail_url, source)
+                posting = self._extract_html_detail(
+                    detail_response.text,
+                    detail_response.url,
+                    source,
+                    title_hint,
+                )
+                if posting is None:
+                    continue
+                evidence = dict(posting.field_evidence or {})
+                detail_text = posting.text
+                def clean_label(label: str, end_labels: tuple[str, ...]) -> str | None:
+                    value = self._label_value(detail_text, label, end_labels)
+                    return value.rstrip("；;。.") if value else None
+
+                major_requirement = clean_label(
+                    "专业要求",
+                    ("学历要求", "工作地点", "招聘人数", "报名", "截止", "联系"),
+                )
+                degree_requirement = clean_label(
+                    "学历要求",
+                    ("专业要求", "工作地点", "招聘人数", "报名", "截止", "联系"),
+                )
+                work_location = clean_label(
+                    "工作地点",
+                    ("专业要求", "学历要求", "招聘人数", "报名", "截止", "联系"),
+                )
+                headcount = clean_label(
+                    "招聘人数",
+                    (
+                        "专业要求",
+                        "学历要求",
+                        "工作地点",
+                        "报名",
+                        "报名截止",
+                        "报名截止时间",
+                        "截止",
+                        "截止时间",
+                        "联系",
+                    ),
+                )
+                if major_requirement:
+                    evidence.setdefault("专业要求", major_requirement)
+                if degree_requirement:
+                    evidence.setdefault("学历要求", degree_requirement)
+                if work_location:
+                    evidence.setdefault("工作地点", work_location)
+                if headcount:
+                    evidence.setdefault("招聘人数", headcount)
+                evidence.setdefault("官方公告标题", title_hint)
+                evidence.setdefault("官方列表日期", listed_date or "")
+                evidence.setdefault("官方详情链接", normalize_url(detail_response.url))
+                qualification_text = posting.qualification_text or clean_text(
+                    "；".join(
+                        value
+                        for value in (
+                            f"专业要求：{major_requirement}" if major_requirement else "",
+                            f"学历要求：{degree_requirement}" if degree_requirement else "",
+                        )
+                        if value
+                    )
+                ) or None
+                postings.append(
+                    replace(
+                        posting,
+                        published_date=posting.published_date or parse_date_value(listed_date or ""),
+                        location=posting.location or work_location,
+                        official_evidence_url=normalize_url(detail_response.url),
+                        field_evidence=evidence,
+                        qualification_text=qualification_text,
+                    )
+                )
+            except SourceSkipped:
+                detail_failures += 1
+                continue
+            except (*REQUEST_ERRORS, SourceCollectionError):
+                detail_failures += 1
+                continue
+            self._wait(source)
+        if links and detail_failures == len(links) and not postings:
+            raise SourceCollectionError(
+                "CGS recruitment list was readable, but every official detail page failed or was rejected"
+            )
+        return postings
+
+    def _cgs_dynamic_notice_links(
+        self,
+        source: dict[str, Any],
+        *,
+        limit: int,
+    ) -> list[tuple[str, str, str | None]]:
+        """Read the CGS mobile JSON index and return bounded official notices.
+
+        The mobile page is only a renderer: its vacancy index is exposed as
+        paginated JSON and includes a trailing sentinel used by the site's
+        ``load more`` control.  Keeping this logic separate lets collection and
+        private attachment discovery use exactly the same host and title gates.
+        """
+        config = source["config"]
+        first_url = normalize_url(
+            str(config.get("listing_url") or source["homepage_url"])
+        )
+        page_pattern = str(config.get("page_url_pattern") or "").strip()
+        try:
+            max_pages = max(1, min(int(config.get("max_pages", 6)), 30))
+        except (TypeError, ValueError):
+            max_pages = 6
+        try:
+            page_size = max(1, int(config.get("page_size", 20)))
+        except (TypeError, ValueError):
+            page_size = 20
+        item_limit = max(1, min(int(limit), self._item_limit(source)))
+        detail_hosts = {
+            str(host).strip().lower().rstrip(".")
+            for host in config.get(
+                "detail_allowed_hosts", config.get("allowed_hosts", [])
+            )
+            if str(host).strip()
+        }
+        if not detail_hosts:
+            raise SourceCollectionError(
+                "CGS dynamic source requires registered official detail hosts"
+            )
+
+        links: list[tuple[str, str, str | None]] = []
+        seen: set[str] = set()
+        for page_index in range(max_pages):
+            listing_url = (
+                first_url
+                if page_index == 0 or not page_pattern
+                else normalize_url(page_pattern.format(page=page_index))
+            )
+            response = self._get(listing_url, source)
+            try:
+                payload = response.json()
+            except ValueError as error:
+                raise SourceCollectionError(
+                    "CGS recruitment listing is not valid JSON"
+                ) from error
+            items = payload.get("lists") if isinstance(payload, dict) else None
+            if not isinstance(items, list):
+                raise SourceCollectionError("CGS recruitment listing lacks a lists array")
+            # The mobile page keeps one sentinel item for its load-more UI;
+            # the JavaScript renderer intentionally skips the final element.
+            entries = items[:-1] if len(items) > page_size else items
+            for item in entries:
+                if not isinstance(item, dict):
+                    continue
+                title = clean_text(str(item.get("title") or item.get("ltitle") or ""))
+                href = normalize_url(urljoin(response.url, str(item.get("url") or "")))
+                if not title or not href or href in seen:
+                    continue
+                if self._is_non_vacancy_notice_title(title) or not self._title_matches_filters(title, config):
+                    continue
+                parsed = urlparse(href)
+                host = (parsed.hostname or "").lower().rstrip(".")
+                if host not in detail_hosts:
+                    # A discovered third-party or unrelated domain is a
+                    # source-layout signal, never a student-facing fallback.
+                    continue
+                seen.add(href)
+                links.append(
+                    (title, href, clean_text(str(item.get("date") or "")) or None)
+                )
+                if len(links) >= item_limit:
+                    break
+            if len(links) >= item_limit or len(items) <= page_size:
+                break
+            self._wait(source)
+        return links
 
     def _notice_links(
         self,
