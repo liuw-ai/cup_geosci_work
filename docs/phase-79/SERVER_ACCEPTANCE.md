@@ -1,7 +1,7 @@
 # Phase 79 服务器验收记录
 
 检查时间：2026-09-29（Asia/Shanghai）。服务器已使用独立工作区
-`/home/ubuntu/cup_geosci_work_phase79` 切换 Web/Worker；原 Phase 78 工作区保留。
+`/home/ubuntu/cup_geosci_work_phase79b` 切换 Web/Worker；原 Phase 78 和 Phase 79 工作区保留。
 
 ## 通过项
 
@@ -17,7 +17,7 @@
 
 ## 复核命令
 
-切换服务器时应先备份数据库和项目目录，再构建 Web/Worker 镜像并执行：
+本次服务器切换通过受控代码归档完成（服务器当时无法连接 GitHub），先备份数据库，再构建 Web/Worker 镜像并执行：
 
 ```bash
 docker compose exec worker python -m job_hub.cli sync-source slb-career
