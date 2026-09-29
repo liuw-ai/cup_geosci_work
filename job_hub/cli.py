@@ -106,6 +106,7 @@ from job_hub.sinopec_scan import (
     validate_sinopec_scan_result,
 )
 from job_hub.source_targets import REQUIRED_ROLES
+from job_hub.provincial_matrix_audit import build_provincial_matrix_audit
 from job_hub.provincial_probe import run_provincial_entry_probe
 from job_hub.source_validation import (
     load_source_validation_registry,
@@ -375,6 +376,27 @@ def main() -> None:
         "--output",
         type=Path,
         help="可选：将只读探测报告写入指定 JSON 文件",
+    )
+    provincial_audit_parser = subparsers.add_parser(
+        "provincial-matrix-audit",
+        help="只读审计31省五类来源的目标状态、岗位证据和运行状态",
+    )
+    provincial_audit_parser.add_argument(
+        "--province",
+        action="append",
+        choices=PROVINCES,
+        help="可选：只审计一个省份，可重复传入",
+    )
+    provincial_audit_parser.add_argument(
+        "--role",
+        action="append",
+        choices=REQUIRED_ROLES,
+        help="可选：只审计一个来源角色，可重复传入",
+    )
+    provincial_audit_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整 JSON 写入指定文件",
     )
     government_position_parser = subparsers.add_parser(
         "government-position-audit",
@@ -1444,6 +1466,21 @@ def main() -> None:
     if args.command == "provincial-entry-probe":
         result = run_provincial_entry_probe(
             settings,
+            provinces=args.province,
+            roles=args.role,
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "provincial-matrix-audit":
+        result = build_provincial_matrix_audit(
+            source_records=database.list_sources(),
+            health_records=database.list_source_health(),
+            latest_runs=database.list_latest_crawl_runs(),
             provinces=args.province,
             roles=args.role,
         )
