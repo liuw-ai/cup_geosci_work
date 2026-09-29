@@ -668,8 +668,14 @@ class Database:
         source_id: str,
         *,
         lease_seconds: int = 1_800,
+        force: bool = False,
     ) -> dict[str, Any] | None:
-        """Atomically claim a due task so a second worker cannot duplicate it."""
+        """Atomically claim a task so a second worker cannot duplicate it.
+
+        Scheduled workers claim only due tasks.  An operator-triggered
+        recovery may set ``force=True`` to run a healthy source immediately,
+        while still respecting an active lease held by another worker.
+        """
         now_dt = datetime.now(timezone.utc).replace(microsecond=0)
         now = now_dt.isoformat().replace("+00:00", "Z")
         lease = (now_dt + timedelta(seconds=max(1, lease_seconds))).isoformat().replace(
@@ -680,11 +686,11 @@ class Database:
                 """
                 SELECT * FROM source_tasks
                 WHERE source_id = ?
-                  AND next_attempt_at <= ?
+                  AND (? OR next_attempt_at <= ?)
                   AND (lease_until IS NULL OR lease_until < ?)
                   AND status IN ('pending', 'failed', 'blocked', 'succeeded')
                 """,
-                (source_id, now, now),
+                (source_id, force, now, now),
             ).fetchone()
             if row is None:
                 return None

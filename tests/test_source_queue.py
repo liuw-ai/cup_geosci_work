@@ -37,6 +37,20 @@ def test_source_queue_claims_and_reschedules_completed_work(tmp_path) -> None:
     assert due[0]["source_id"] == "source-a"
 
 
+def test_source_queue_force_claim_runs_not_due_task_but_respects_active_lease(tmp_path) -> None:
+    database = Database(tmp_path / "queue.sqlite3")
+    database.initialize()
+    source = _source("source-force")
+    database.upsert_source(source)
+    database.ensure_source_tasks([source])
+    database.complete_source_task("source-force", next_attempt_seconds=3600)
+
+    claimed = database.claim_source_task("source-force", force=True, lease_seconds=60)
+    assert claimed is not None
+    assert claimed["status"] == "running"
+    assert database.claim_source_task("source-force", force=True, lease_seconds=60) is None
+
+
 def test_source_queue_keeps_policy_blocked_sources_distinct_from_success(tmp_path) -> None:
     database = Database(tmp_path / "queue.sqlite3")
     database.initialize()

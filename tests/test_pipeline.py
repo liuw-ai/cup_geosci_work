@@ -215,6 +215,30 @@ def test_manual_sync_reconciles_failure_state_on_collector_error(tmp_path) -> No
     assert "unexpected source parser failure" in task["last_error"]
 
 
+def test_manual_sync_defers_when_scheduled_worker_holds_source_lease(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    database.upsert_source(official_source)
+    database.ensure_source_tasks([official_source])
+    assert database.claim_source_task(
+        "official-test-source", lease_seconds=600
+    ) is not None
+
+    result = JobPipeline(
+        settings,
+        database,
+        FailingCollector(),
+    ).sync_source_manual(official_source)
+
+    assert result.status == "deferred"
+    assert result.error == "source task is already running"
+    task = database.get_source_task("official-test-source")
+    assert task is not None
+    assert task["status"] == "running"
+
+
 def test_successful_scan_records_zero_open_matches_without_marking_source_unavailable(
     tmp_path,
 ) -> None:

@@ -3,12 +3,16 @@
 ## 本地自动化验证
 
 - `python -m pytest tests/test_pipeline.py tests/test_source_queue.py -q`
-- 结果：`22 passed`
+- 结果：`24 passed`
+
+- `python -m pytest -q`
+- 结果：`377 passed`
 
 新增覆盖：
 
 - 旧任务失败后手工恢复，当前队列状态收敛为成功；旧失败抓取记录仍保留。
 - 手工采集器异常，当前队列状态收敛为失败并保留错误信息。
+- Worker 持有租约时，手工同步被延后，不产生重复抓取。
 
 ## 当前边界
 

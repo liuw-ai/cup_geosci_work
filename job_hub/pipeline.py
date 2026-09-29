@@ -752,6 +752,17 @@ class JobPipeline:
         Crawl history is untouched, so the original failure remains auditable.
         """
         self.database.ensure_source_tasks([source])
+        claimed = self.database.claim_source_task(
+            source["id"],
+            lease_seconds=self.settings.crawl_run_stale_seconds,
+            force=True,
+        )
+        if claimed is None:
+            return SourceSyncResult(
+                source_id=source["id"],
+                status="deferred",
+                error="source task is already running",
+            )
         result = self.sync_source(source)
         if result.status == "finished":
             self.database.complete_source_task(
