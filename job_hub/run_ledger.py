@@ -146,7 +146,11 @@ def build_run_ledger(
         if report_date is not None and started_local_date != report_date.isoformat():
             continue
         stored_outcome = str(run.get("outcome") or "").strip()
-        outcome = stored_outcome if stored_outcome in RUN_OUTCOMES else classify_run_outcome(
+        # ``unknown`` is the additive-migration default for old runs. Treat it
+        # as missing context and infer conservatively from the legacy status,
+        # otherwise a historical successful scan would remain permanently
+        # indistinguishable from an actually unknown run.
+        outcome = stored_outcome if stored_outcome in RUN_OUTCOMES - {"unknown"} else classify_run_outcome(
             str(run.get("status") or "unknown"),
             error=run.get("error_message"),
             open_matching_count=int(run.get("open_matching_count") or 0),

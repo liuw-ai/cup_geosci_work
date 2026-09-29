@@ -32,6 +32,27 @@ def test_completed_empty_scan_is_distinct_from_unavailable_source() -> None:
     )
 
 
+def test_legacy_unknown_outcome_is_inferred_from_finished_run() -> None:
+    ledger = build_run_ledger(
+        [
+            {
+                "id": 1,
+                "source_id": "source",
+                "started_at": "2026-09-29T01:00:00Z",
+                "finished_at": "2026-09-29T01:00:01Z",
+                "status": "finished",
+                "outcome": "unknown",
+                "discovered_count": 4,
+                "open_matching_count": 2,
+            }
+        ],
+        report_date=date(2026, 9, 29),
+        timezone="Asia/Shanghai",
+    )
+    assert ledger["summary"]["success_with_matches"] == 1
+    assert ledger["summary"]["unknown"] == 0
+
+
 def test_run_ledger_counts_only_local_day_and_preserves_metrics(tmp_path) -> None:
     database = Database(tmp_path / "jobs.sqlite3")
     database.initialize()
