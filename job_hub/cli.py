@@ -1498,6 +1498,10 @@ def main() -> None:
                 registry,
                 today=args.today,
                 max_age_hours=args.max_age_hours,
+                source_verifications={
+                    str(item["source_id"]): item
+                    for item in database.list_government_source_verifications()
+                },
             )
         except (OSError, ValueError) as error:
             print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
