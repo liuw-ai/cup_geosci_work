@@ -6,6 +6,8 @@
 
 完整的数据流、专业匹配边界、100 人模拟检查和运维边界见 [ARCHITECTURE.md](ARCHITECTURE.md)。生产部署、HTTPS 反向代理和手机/微信访问排查见 [DEPLOYMENT.md](DEPLOYMENT.md)。
 
+Phase 83 将 31 省矩阵中已定位、但尚未启用的官方候选入口接入可重复的服务器只读探测：先核验 `robots.txt` 和正式栏目可访问性，再决定哪些入口值得逐条定位当前公告和职位表。探测不采集岗位、不启用来源，也不把访问失败写成“无岗位”。详见 [docs/phase-83/README.md](docs/phase-83/README.md)。
+
 最新的事业编地点核验、两条安徽地学博士岗位和公务员年度职位表门禁见 [docs/phase-36/README.md](docs/phase-36/README.md)。
 
 最新的政府职位表 PDF 布局解析、甘肃省地矿局官方岗位表和过期清退回归见
@@ -94,6 +96,7 @@ job_hub/
   sources.py      公开来源采集器和 robots 合规检查
   locations.py    省份、城市和国家/地区标准化
   source_targets.py 31 省五类官方来源扩展矩阵
+  provincial_probe.py 31 省候选官方入口的只读 robots/可访问性分流
   organizations.py 组织层级、正式入口和来源绑定矩阵
   source_validation.py 省级官方来源样例、夹具和运行状态核验
   discovery.py   私有发现入口契约、线索去重、域名评估和转化漏斗

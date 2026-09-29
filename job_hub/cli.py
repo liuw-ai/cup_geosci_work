@@ -102,6 +102,7 @@ from job_hub.sinopec_scan import (
     validate_sinopec_scan_result,
 )
 from job_hub.source_targets import REQUIRED_ROLES
+from job_hub.provincial_probe import run_provincial_entry_probe
 from job_hub.source_validation import (
     load_source_validation_registry,
     source_validation_matrix_rows,
@@ -349,6 +350,27 @@ def main() -> None:
         "--output",
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
+    )
+    provincial_probe_parser = subparsers.add_parser(
+        "provincial-entry-probe",
+        help="只读核验31省矩阵中候选官方入口的 robots 和栏目可访问性",
+    )
+    provincial_probe_parser.add_argument(
+        "--province",
+        action="append",
+        choices=PROVINCES,
+        help="可选：只探测一个省份，可重复传入",
+    )
+    provincial_probe_parser.add_argument(
+        "--role",
+        action="append",
+        choices=REQUIRED_ROLES,
+        help="可选：只探测一个来源角色，可重复传入",
+    )
+    provincial_probe_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将只读探测报告写入指定 JSON 文件",
     )
     government_position_parser = subparsers.add_parser(
         "government-position-audit",
@@ -1287,6 +1309,19 @@ def main() -> None:
             args.output.write_text(
                 json.dumps(result, ensure_ascii=False, indent=2),
                 encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "provincial-entry-probe":
+        result = run_provincial_entry_probe(
+            settings,
+            provinces=args.province,
+            roles=args.role,
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
