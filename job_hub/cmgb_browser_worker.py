@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import signal
+from contextlib import contextmanager
 from threading import Event
 from zoneinfo import ZoneInfo
 
@@ -15,6 +16,30 @@ from job_hub.pipeline import JobPipeline
 
 
 LOGGER = logging.getLogger("job_hub.cmgb_browser_worker")
+
+
+@contextmanager
+def _capture_deadline(seconds: int):
+    """Bound one browser capture so a stalled detail page cannot block forever."""
+    bounded = max(0, int(seconds))
+    if bounded <= 0 or not hasattr(signal, "SIGALRM"):
+        yield
+        return
+    previous_handler = signal.getsignal(signal.SIGALRM)
+    previous_timer = signal.setitimer(signal.ITIMER_REAL, 0)
+
+    def raise_timeout(_signum: int, _frame: object) -> None:
+        raise TimeoutError(f"CMGB browser capture exceeded {bounded}s deadline")
+
+    signal.signal(signal.SIGALRM, raise_timeout)
+    signal.setitimer(signal.ITIMER_REAL, float(bounded))
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous_handler)
+        if previous_timer[0] > 0:
+            signal.setitimer(signal.ITIMER_REAL, *previous_timer)
 
 
 class CmgbBrowserWorker:
@@ -35,6 +60,9 @@ class CmgbBrowserWorker:
         }
         self.interval_seconds = max(
             900, int(os.getenv("CMGB_BROWSER_INTERVAL_MINUTES", "180")) * 60
+        )
+        self.capture_timeout_seconds = max(
+            0, int(os.getenv("CMGB_BROWSER_CAPTURE_TIMEOUT_SECONDS", "1800"))
         )
 
     def run_forever(self) -> None:
@@ -63,13 +91,14 @@ class CmgbBrowserWorker:
         output = self.settings.data_dir / str(config["capture_path"])
         self._heartbeat("capturing", f"capturing {self.source_id}")
         try:
-            payload = run_cmgb_browser_capture(
-                url=str(config.get("browser_url") or source["homepage_url"]),
-                output=output,
-                config=config,
-                allowed_hosts=list(config["allowed_hosts"]),
-                user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
-            )
+            with _capture_deadline(self.capture_timeout_seconds):
+                payload = run_cmgb_browser_capture(
+                    url=str(config.get("browser_url") or source["homepage_url"]),
+                    output=output,
+                    config=config,
+                    allowed_hosts=list(config["allowed_hosts"]),
+                    user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
+                )
             status = "running" if payload.get("status") == "success" else "degraded"
             self._heartbeat(status, f"CMGB capture: {payload.get('scan')}")
             LOGGER.info("CMGB capture completed: %s", payload.get("scan"))
