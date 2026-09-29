@@ -147,6 +147,74 @@ def test_sync_all_recovers_expired_source_task_before_claiming_it(tmp_path) -> N
     assert task["status"] == "succeeded"
 
 
+def test_manual_sync_reconciles_a_previous_failed_source_task(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    database.upsert_source(official_source)
+    failed_result = JobPipeline(
+        settings, database, FailingCollector()
+    ).sync_source_manual(official_source)
+    assert failed_result.status == "failed"
+
+    pipeline = JobPipeline(
+        settings,
+        database,
+        FakeCollector(
+            RawPosting(
+                title="地质工程技术岗",
+                employer="测试研究院",
+                source_url="https://careers.example.edu.cn/jobs/manual-recovery",
+                application_url=None,
+                text="地质工程硕士可报，工作地点北京。",
+                summary="手工恢复测试。",
+                published_date="2026-09-20",
+                deadline_date="2026-12-20",
+                location="北京",
+            )
+        ),
+    )
+
+    result = pipeline.sync_source_manual(database.get_source("official-test-source"))
+
+    assert result.status == "finished"
+    task = database.get_source_task("official-test-source")
+    assert task is not None
+    assert task["status"] == "succeeded"
+    assert task["last_run_id"] == result.run_id
+    assert task["last_error"] is None
+    # The failed crawl remains in history rather than being overwritten.
+    with database.connect() as connection:
+        runs = [
+            dict(row)
+            for row in connection.execute(
+                "SELECT * FROM crawl_runs WHERE source_id = ? ORDER BY id",
+                ("official-test-source",),
+            ).fetchall()
+        ]
+    assert any(row["id"] == failed_result.run_id and row["status"] == "failed" for row in runs)
+
+
+def test_manual_sync_reconciles_failure_state_on_collector_error(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    database.upsert_source(official_source)
+
+    result = JobPipeline(settings, database, FailingCollector()).sync_source_manual(
+        official_source
+    )
+
+    assert result.status == "failed"
+    task = database.get_source_task("official-test-source")
+    assert task is not None
+    assert task["status"] == "failed"
+    assert task["last_run_id"] == result.run_id
+    assert "unexpected source parser failure" in task["last_error"]
+
+
 def test_successful_scan_records_zero_open_matches_without_marking_source_unavailable(
     tmp_path,
 ) -> None:

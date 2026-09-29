@@ -1471,7 +1471,10 @@ def main() -> None:
             parser.error(f"source_id is not registered: {args.source_id}")
         if not source["enabled"]:
             parser.error(f"source_id is disabled: {args.source_id}")
-        result = pipeline.sync_source(source)
+        # Keep the durable source queue coherent with a one-source operator
+        # recovery.  The scheduled ``sync`` path already reconciles this state
+        # around its batch claim; the manual path needs the same bookkeeping.
+        result = pipeline.sync_source_manual(source)
         snapshot_date = coverage_snapshot_date(settings)
         database.save_coverage_snapshot(
             snapshot_date,

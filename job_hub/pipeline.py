@@ -742,6 +742,40 @@ class JobPipeline:
                 result["unchanged"] += 1
         return result
 
+    def sync_source_manual(self, source: dict[str, Any]) -> SourceSyncResult:
+        """Run an operator-triggered sync and reconcile its durable queue state.
+
+        ``sync_all`` owns queue claiming because it processes the scheduled
+        batch.  The CLI's one-source command intentionally bypasses that batch,
+        but it must still update ``source_tasks``; otherwise a successful
+        manual recovery leaves an old ``failed`` row visible to monitoring.
+        Crawl history is untouched, so the original failure remains auditable.
+        """
+        self.database.ensure_source_tasks([source])
+        result = self.sync_source(source)
+        if result.status == "finished":
+            self.database.complete_source_task(
+                source["id"],
+                next_attempt_seconds=self.settings.source_sync_interval_minutes * 60,
+                run_id=result.run_id,
+            )
+        else:
+            blocked = result.status == "skipped" or self._is_policy_error(result.error)
+            retry_after = (
+                max(3600, self.settings.source_sync_interval_minutes * 60)
+                if blocked
+                else max(60, min(1800, self.settings.source_sync_interval_minutes * 60))
+            )
+            self.database.fail_source_task(
+                source["id"],
+                error=result.error or "source task failed",
+                error_class="access_policy" if blocked else "collector_error",
+                retry_after_seconds=retry_after,
+                blocked=blocked,
+                run_id=result.run_id,
+            )
+        return result
+
     def _government_reindex_context(self) -> dict[str, Any] | None:
         """Build the current government-table publication boundary.
 
