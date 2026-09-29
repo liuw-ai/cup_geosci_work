@@ -999,13 +999,15 @@
       "capture_path": "captures/cmgb-iguopin-browser.json",
       "allowed_hosts": ["cmgb.iguopin.com", "www.iguopin.com", "iguopin.com", "www.cmgb.com.cn"],
       "max_age_hours": 30,
+      "retry_partial_first": true,
+      "detail_retry_max_age_hours": 12,
       "require_complete_scan": true,
       "minimum_relevance": 40,
       "max_items": 2000,
       "row_selector": ".ant-card",
       "next_selector": ".ant-pagination-next",
       "detail_button_selector": "button",
-      "note": "2026-09-27 已在服务器逐页捕获 8 页、146/146 条详情，字段完整率 100%。启用前必须通过 cmgb-production-transition：完整捕获、明确匹配不低于现有快照、原子同步后才停用快照；捕获失败或分页不完整时旧快照保持可见。启用后每次完整动态清单会撤回已消失的岗位，保留原始事件审计。"
+      "note": "2026-09-27 已在服务器逐页捕获 8 页、146/146 条详情，字段完整率 100%。启用前必须通过 cmgb-production-transition：完整捕获、明确匹配不低于现有快照、原子同步后才停用快照；捕获失败或分页不完整时旧快照保持可见。partial 归档在 12 小时内优先只重试其失败的官方详情，全部补齐前绝不覆盖正式快照；归档过期或不适用才恢复完整列表扫描。启用后每次完整动态清单会撤回已消失的岗位，保留原始事件审计。"
     }
   },
   {

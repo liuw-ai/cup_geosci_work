@@ -42,6 +42,10 @@ from job_hub.cnpc_browser_capture import (
     load_cnpc_job_capture,
 )
 from job_hub.cnpc_browser_runner import run_cnpc_browser_capture
+from job_hub.cmgb_browser_capture import (
+    quarantine_cmgb_partial_capture,
+    run_cmgb_detail_retry,
+)
 from job_hub.cmgb_transition import transition_cmgb_browser_to_production
 from job_hub.db import Database
 from job_hub.government_positions import (
@@ -503,6 +507,46 @@ def main() -> None:
     cnpc_job_run_parser.add_argument(
         "--url",
         help="可选：覆盖来源配置中的浏览器入口",
+    )
+    cmgb_retry_parser = subparsers.add_parser(
+        "cmgb-detail-retry",
+        help="仅重试国聘完整分页 partial 捕获中失败的官方岗位详情",
+    )
+    cmgb_retry_parser.add_argument(
+        "--source-id",
+        default="cmgb-iguopin-browser",
+        help="国聘浏览器来源 ID（默认 cmgb-iguopin-browser）",
+    )
+    cmgb_retry_parser.add_argument(
+        "--failure-capture",
+        type=Path,
+        required=True,
+        help="失败归档 JSON；相对路径相对于 APP_DATA_DIR",
+    )
+    cmgb_retry_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：覆盖来源配置中的正式 success-only 捕获路径",
+    )
+    cmgb_retry_parser.add_argument(
+        "--max-age-hours",
+        type=float,
+        default=12,
+        help="冻结的列表捕获允许补齐的最长时限（默认 12 小时）",
+    )
+    cmgb_quarantine_parser = subparsers.add_parser(
+        "cmgb-quarantine-partial",
+        help="归档并隔离旧版写入正式路径的国聘 partial 捕获",
+    )
+    cmgb_quarantine_parser.add_argument(
+        "--source-id",
+        default="cmgb-iguopin-browser",
+        help="国聘浏览器来源 ID（默认 cmgb-iguopin-browser）",
+    )
+    cmgb_quarantine_parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="确认移动旧 partial 文件到可恢复旁路路径",
     )
     sinopec_capture_parser = subparsers.add_parser(
         "sinopec-capture",
@@ -998,7 +1042,12 @@ def main() -> None:
     # Keep this initialization before their early-return branches; the common
     # service setup below is intentionally later for lightweight read-only
     # commands such as domain probes.
-    if args.command in {"cnpc-job-capture-run", "browser-capture-run"}:
+    if args.command in {
+        "cnpc-job-capture-run",
+        "cmgb-detail-retry",
+        "cmgb-quarantine-partial",
+        "browser-capture-run",
+    }:
         settings, database, pipeline = services()
     if args.command == "cnpc-job-capture-run":
         source = database.get_source(args.source_id)
@@ -1034,6 +1083,86 @@ def main() -> None:
                 {
                     "ok": payload["status"] == "success",
                     "source_id": args.source_id,
+                    "output": str(output),
+                    "status": payload["status"],
+                    "scan": payload["scan"],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if args.command == "cmgb-quarantine-partial":
+        if not args.confirm:
+            parser.error("cmgb-quarantine-partial requires --confirm")
+        source = database.get_source(args.source_id)
+        if source is None:
+            parser.error(f"source_id is not registered: {args.source_id}")
+        if source.get("source_type") != "cmgb_browser_rows":
+            parser.error("cmgb-quarantine-partial requires a cmgb_browser_rows source")
+        output = settings.data_dir / str(source["config"]["capture_path"])
+        try:
+            result = quarantine_cmgb_partial_capture(output)
+        except Exception as error:
+            print(
+                json.dumps(
+                    {"ok": False, "source_id": args.source_id, "error": str(error)},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        print(
+            json.dumps(
+                {"ok": True, "source_id": args.source_id, **result},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if args.command == "cmgb-detail-retry":
+        source = database.get_source(args.source_id)
+        if source is None:
+            parser.error(f"source_id is not registered: {args.source_id}")
+        if source.get("source_type") != "cmgb_browser_rows":
+            parser.error("cmgb-detail-retry requires a cmgb_browser_rows source")
+        config = dict(source["config"])
+        cdp_url = os.getenv("CMGB_BROWSER_CDP_URL", "").strip()
+        if cdp_url:
+            config["cdp_url"] = cdp_url
+        failure_capture = args.failure_capture
+        if not failure_capture.is_absolute():
+            failure_capture = settings.data_dir / failure_capture
+        output = args.output or (settings.data_dir / str(config["capture_path"]))
+        try:
+            payload = run_cmgb_detail_retry(
+                retry_capture_path=failure_capture,
+                output=output,
+                config=config,
+                allowed_hosts=list(config["allowed_hosts"]),
+                user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
+                max_age_hours=args.max_age_hours,
+            )
+        except Exception as error:
+            print(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "source_id": args.source_id,
+                        "failure_capture": str(failure_capture),
+                        "error": str(error),
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        print(
+            json.dumps(
+                {
+                    "ok": payload["status"] == "success",
+                    "source_id": args.source_id,
+                    "failure_capture": str(failure_capture),
                     "output": str(output),
                     "status": payload["status"],
                     "scan": payload["scan"],

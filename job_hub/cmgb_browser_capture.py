@@ -125,16 +125,7 @@ def _scan_metrics(payload: dict[str, Any], *, require_complete: bool) -> dict[st
     return {**scan, **normalized}
 
 
-def load_cmgb_browser_capture(
-    path: Path | str,
-    *,
-    allowed_hosts: Iterable[str] | None = None,
-    max_age_hours: float | None = 30,
-    require_complete_scan: bool = True,
-    now: datetime | None = None,
-) -> dict[str, Any]:
-    """Load and validate one server-generated CMGB browser manifest."""
-
+def _read_cmgb_capture_payload(path: Path | str) -> dict[str, Any]:
     capture_path = Path(path)
     try:
         payload = json.loads(capture_path.read_text(encoding="utf-8"))
@@ -142,11 +133,10 @@ def load_cmgb_browser_capture(
         raise CmgbBrowserCaptureError(f"cannot read CMGB capture: {capture_path}") from error
     if not isinstance(payload, dict):
         raise CmgbBrowserCaptureError("CMGB capture must be a JSON object")
-    status = _text(payload.get("status"), "status")
-    if status not in CMGB_CAPTURE_STATUSES:
-        raise CmgbBrowserCaptureError(f"unsupported CMGB capture status: {status}")
-    if status != "success":
-        raise CmgbBrowserCaptureError(f"CMGB capture is not publishable: {status}")
+    return payload
+
+
+def _cmgb_allowed_hosts(allowed_hosts: Iterable[str] | None) -> set[str]:
     hosts = {
         str(host).strip().lower().rstrip(".")
         for host in (allowed_hosts or CMGB_DEFAULT_HOSTS)
@@ -154,8 +144,15 @@ def load_cmgb_browser_capture(
     }
     if not hosts:
         raise CmgbBrowserCaptureError("allowed_hosts must not be empty")
-    platform_url = _official_url(payload.get("platform_url"), "platform_url", hosts)
-    captured_at = _timestamp(payload.get("captured_at"))
+    return hosts
+
+
+def _capture_age_hours(
+    captured_at: str,
+    *,
+    now: datetime | None,
+    max_age_hours: float | None,
+) -> float:
     captured = datetime.fromisoformat(captured_at.replace("Z", "+00:00"))
     current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     age_hours = (current - captured).total_seconds() / 3600
@@ -165,12 +162,12 @@ def load_cmgb_browser_capture(
         raise CmgbBrowserCaptureError(
             f"CMGB capture is stale ({age_hours:.1f}h > {float(max_age_hours):.1f}h)"
         )
-    scan = _scan_metrics(payload, require_complete=require_complete_scan)
-    rows = payload.get("rows")
+    return max(0.0, age_hours)
+
+
+def _normalize_cmgb_rows(rows: Any, *, hosts: set[str]) -> list[dict[str, Any]]:
     if not isinstance(rows, list) or not rows:
         raise CmgbBrowserCaptureError("CMGB capture rows must be a non-empty list")
-    if scan["rows_exported"] != len(rows):
-        raise CmgbBrowserCaptureError("scan.rows_exported does not match rows length")
     normalized_rows: list[dict[str, Any]] = []
     seen: set[str] = set()
     for index, raw in enumerate(rows, start=1):
@@ -207,6 +204,37 @@ def load_cmgb_browser_capture(
             row["field_evidence"]["专业证据定位"] = "官方详情职位介绍"
             row["major"] = detail_major
         normalized_rows.append(row)
+    return normalized_rows
+
+
+def load_cmgb_browser_capture(
+    path: Path | str,
+    *,
+    allowed_hosts: Iterable[str] | None = None,
+    max_age_hours: float | None = 30,
+    require_complete_scan: bool = True,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Load and validate one server-generated CMGB browser manifest."""
+
+    payload = _read_cmgb_capture_payload(path)
+    status = _text(payload.get("status"), "status")
+    if status not in CMGB_CAPTURE_STATUSES:
+        raise CmgbBrowserCaptureError(f"unsupported CMGB capture status: {status}")
+    if status != "success":
+        raise CmgbBrowserCaptureError(f"CMGB capture is not publishable: {status}")
+    hosts = _cmgb_allowed_hosts(allowed_hosts)
+    platform_url = _official_url(payload.get("platform_url"), "platform_url", hosts)
+    captured_at = _timestamp(payload.get("captured_at"))
+    age_hours = _capture_age_hours(
+        captured_at,
+        now=now,
+        max_age_hours=max_age_hours,
+    )
+    scan = _scan_metrics(payload, require_complete=require_complete_scan)
+    normalized_rows = _normalize_cmgb_rows(payload.get("rows"), hosts=hosts)
+    if scan["rows_exported"] != len(normalized_rows):
+        raise CmgbBrowserCaptureError("scan.rows_exported does not match rows length")
     return {
         **payload,
         "status": status,
@@ -215,6 +243,236 @@ def load_cmgb_browser_capture(
         "capture_age_hours": round(max(0.0, age_hours), 3),
         "scan": scan,
         "rows": normalized_rows,
+    }
+
+
+def _cmgb_external_id(detail_url: str, fallback: str) -> str:
+    detail_id = parse_qs(urlparse(detail_url).query).get("id", [""])[0].strip()
+    return f"cmgb-iguopin-{detail_id}" if detail_id else _text(fallback, "card_id")
+
+
+def _cmgb_official_detail_url(value: Any, field: str, hosts: set[str]) -> str:
+    detail_url = _official_url(value, field, hosts)
+    parsed = urlparse(detail_url)
+    detail_id = parse_qs(parsed.query).get("id", [""])[0].strip()
+    if "/job/detail" not in parsed.path or not detail_id:
+        raise CmgbBrowserCaptureError(f"{field} must be a concrete CMGB job detail URL")
+    return detail_url
+
+
+def load_cmgb_detail_retry_capture(
+    path: Path | str,
+    *,
+    allowed_hosts: Iterable[str] | None = None,
+    max_age_hours: float | None = 12,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Load a recent, fully paginated partial capture for detail-only retry.
+
+    This does not make a partial capture publishable. It verifies that its
+    completed rows and failed official detail URLs describe one frozen list
+    pass, so a later retry can complete that exact pass without returning to
+    the discovery pages.
+    """
+
+    payload = _read_cmgb_capture_payload(path)
+    status = _text(payload.get("status"), "status")
+    if status != "partial":
+        raise CmgbBrowserCaptureError("CMGB detail retry requires a partial capture")
+    hosts = _cmgb_allowed_hosts(allowed_hosts)
+    platform_url = _official_url(payload.get("platform_url"), "platform_url", hosts)
+    captured_at = _timestamp(payload.get("captured_at"))
+    age_hours = _capture_age_hours(
+        captured_at,
+        now=now,
+        max_age_hours=max_age_hours,
+    )
+    scan = _scan_metrics(payload, require_complete=False)
+    if not scan["pagination_complete"]:
+        raise CmgbBrowserCaptureError(
+            "CMGB detail retry requires a completed pagination pass"
+        )
+    if scan["detail_failed"] <= 0 or scan["failed_rows"] <= 0:
+        raise CmgbBrowserCaptureError("CMGB partial capture has no failed detail rows to retry")
+    if scan["detail_discovered"] != scan["rows_discovered"]:
+        raise CmgbBrowserCaptureError("CMGB retry capture detail and row totals disagree")
+    if scan["failed_rows"] != scan["detail_failed"]:
+        raise CmgbBrowserCaptureError("CMGB retry capture failed row and detail totals disagree")
+    normalized_rows = _normalize_cmgb_rows(payload.get("rows"), hosts=hosts)
+    if scan["rows_exported"] != len(normalized_rows):
+        raise CmgbBrowserCaptureError("CMGB retry rows_exported does not match rows length")
+    if scan["detail_succeeded"] != len(normalized_rows):
+        raise CmgbBrowserCaptureError("CMGB retry detail_succeeded does not match rows length")
+    if len(normalized_rows) + scan["detail_failed"] != scan["detail_discovered"]:
+        raise CmgbBrowserCaptureError("CMGB retry rows cannot account for all discovered details")
+
+    raw_failures = scan.get("failure_records")
+    if not isinstance(raw_failures, list) or len(raw_failures) != scan["detail_failed"]:
+        raise CmgbBrowserCaptureError("CMGB retry failure_records do not match failed details")
+    existing_ids = {str(row["external_id"]) for row in normalized_rows}
+    targets: list[dict[str, Any]] = []
+    seen_targets: set[str] = set()
+    for index, raw in enumerate(raw_failures, start=1):
+        if not isinstance(raw, dict):
+            raise CmgbBrowserCaptureError(f"retry failure record {index} must be an object")
+        card_id = _text(raw.get("card_id"), f"retry failure record {index}.card_id")
+        detail_url = _cmgb_official_detail_url(
+            raw.get("detail_url"),
+            f"retry failure record {index}.detail_url",
+            hosts,
+        )
+        external_id = _cmgb_external_id(detail_url, card_id)
+        if external_id in existing_ids or external_id in seen_targets:
+            raise CmgbBrowserCaptureError(f"duplicate CMGB retry target: {external_id}")
+        seen_targets.add(external_id)
+        targets.append(
+            {
+                "external_id": external_id,
+                "page": _int(raw.get("page"), f"retry failure record {index}.page"),
+                "row": _int(raw.get("row"), f"retry failure record {index}.row"),
+                "card_id": card_id,
+                "title": " ".join(str(raw.get("title") or "").split()).strip(),
+                "employer": " ".join(str(raw.get("employer") or "").split()).strip(),
+                "detail_url": detail_url,
+                "reason": " ".join(str(raw.get("reason") or "").split()).strip(),
+            }
+        )
+    return {
+        **payload,
+        "status": status,
+        "platform_url": platform_url,
+        "captured_at": captured_at,
+        "capture_age_hours": round(age_hours, 3),
+        "scan": scan,
+        "rows": normalized_rows,
+        "retry_targets": targets,
+    }
+
+
+def build_cmgb_detail_retry_payload(
+    retry_capture: dict[str, Any],
+    *,
+    retried_rows: list[dict[str, Any]],
+    retry_failures: list[dict[str, Any]],
+    captured_at: str | None = None,
+    allowed_hosts: Iterable[str] | None = None,
+) -> dict[str, Any]:
+    """Merge a target retry into its frozen partial capture.
+
+    A success is possible only if every failed target returns one complete,
+    unique official-detail row. Any remaining target stays in a new partial
+    payload, which ``persist_cmgb_browser_capture`` archives instead of
+    replacing the canonical success path.
+    """
+
+    hosts = _cmgb_allowed_hosts(allowed_hosts)
+    base_rows = _normalize_cmgb_rows(retry_capture.get("rows"), hosts=hosts)
+    targets = retry_capture.get("retry_targets")
+    if not isinstance(targets, list) or not targets:
+        raise CmgbBrowserCaptureError("CMGB retry capture has no retry targets")
+    target_by_id = {
+        _text(target.get("external_id"), "retry target external_id"): dict(target)
+        for target in targets
+        if isinstance(target, dict)
+    }
+    if len(target_by_id) != len(targets):
+        raise CmgbBrowserCaptureError("CMGB retry targets must have unique identifiers")
+
+    normalized_retry_rows = (
+        _normalize_cmgb_rows(retried_rows, hosts=hosts) if retried_rows else []
+    )
+    completed_by_id = {
+        str(row["external_id"]): row for row in normalized_retry_rows
+    }
+    if set(completed_by_id) - set(target_by_id):
+        raise CmgbBrowserCaptureError("CMGB retry returned a row outside the failed target set")
+    if len(completed_by_id) != len(normalized_retry_rows):
+        raise CmgbBrowserCaptureError("CMGB retry returned duplicate detail rows")
+
+    failures_by_id: dict[str, dict[str, Any]] = {}
+    for raw in retry_failures:
+        if not isinstance(raw, dict):
+            raise CmgbBrowserCaptureError("CMGB retry failure record must be an object")
+        external_id = _text(raw.get("external_id"), "retry failure external_id")
+        if external_id not in target_by_id:
+            raise CmgbBrowserCaptureError("CMGB retry failure is outside the failed target set")
+        if external_id in completed_by_id or external_id in failures_by_id:
+            raise CmgbBrowserCaptureError("CMGB retry target has conflicting outcomes")
+        target = dict(target_by_id[external_id])
+        target["reason"] = " ".join(str(raw.get("reason") or "").split()).strip() or (
+            "official detail retry did not return a complete record"
+        )
+        failures_by_id[external_id] = target
+    missing = set(target_by_id) - set(completed_by_id) - set(failures_by_id)
+    if missing:
+        raise CmgbBrowserCaptureError("CMGB retry did not record every target outcome")
+
+    combined_rows = _normalize_cmgb_rows(
+        [*base_rows, *normalized_retry_rows],
+        hosts=hosts,
+    )
+    scan = dict(retry_capture.get("scan") or {})
+    total = _int(scan.get("detail_discovered"), "scan.detail_discovered")
+    remaining_failures = [failures_by_id[key] for key in target_by_id if key in failures_by_id]
+    if len(combined_rows) + len(remaining_failures) != total:
+        raise CmgbBrowserCaptureError("CMGB retry outcomes do not account for the frozen detail total")
+    completed = not remaining_failures
+    merged_scan = {
+        **scan,
+        "pagination_complete": True,
+        "rows_exported": len(combined_rows),
+        "failed_rows": len(remaining_failures),
+        "detail_succeeded": len(combined_rows),
+        "detail_failed": len(remaining_failures),
+        "failure_records": remaining_failures,
+    }
+    merged_scan.pop("failure_reason", None)
+    result = {
+        "version": 1,
+        "status": "success" if completed else "partial",
+        "platform_url": retry_capture["platform_url"],
+        "captured_at": _timestamp(
+            captured_at
+            or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        ),
+        "retry_of": str(retry_capture.get("archive_file") or "partial-capture"),
+        "scan": merged_scan,
+        "rows": combined_rows,
+    }
+    # Preserve the invariant in the same place used for canonical writes.
+    _scan_metrics(result, require_complete=completed)
+    return result
+
+
+def _cmgb_row_from_detail(
+    detail: dict[str, Any],
+    *,
+    target: dict[str, Any],
+) -> dict[str, Any]:
+    title = " ".join(str(detail.get("title") or target.get("title") or "").split()).strip()
+    employer = " ".join(
+        str(detail.get("employer") or target.get("employer") or "").split()
+    ).strip()
+    if not title or not employer:
+        raise BrowserCaptureError(
+            "CMGB detail retry is missing title or employer in both official detail and list card"
+        )
+    external_id = _cmgb_external_id(str(detail["detail_url"]), str(target["card_id"]))
+    if external_id != str(target["external_id"]):
+        raise BrowserCaptureError("CMGB detail retry resolved a different official job identifier")
+    return {
+        "external_id": external_id,
+        "title": title,
+        "employer": employer,
+        "major": detail["major"],
+        "degree": detail["degree"],
+        "location": detail["location"],
+        "headcount": detail["headcount"],
+        "deadline": detail["deadline"],
+        "detail_url": detail["detail_url"],
+        "evidence_url": detail["evidence_url"],
+        "description": detail["description"],
+        "field_evidence": detail["field_evidence"],
     }
 
 
@@ -628,6 +886,38 @@ def persist_cmgb_browser_capture(
     )
 
 
+def quarantine_cmgb_partial_capture(output: Path | str) -> dict[str, Any]:
+    """Recover a legacy partial file that occupied the success-only path.
+
+    Phase 84 introduced the success-only path after some servers had already
+    written a ``partial`` manifest at that location. This explicit migration
+    archives the diagnostic first, then moves the legacy input beside it. It
+    never deletes the input and refuses to touch a successful capture.
+    """
+
+    destination = Path(output)
+    payload = _read_cmgb_capture_payload(destination)
+    status = _text(payload.get("status"), "status")
+    if status != "partial":
+        raise CmgbBrowserCaptureError(
+            "only a legacy partial CMGB capture may be quarantined"
+        )
+    archived = persist_cmgb_browser_capture(output=destination, payload=payload)
+    quarantine_path = destination.with_suffix(".legacy-partial.json")
+    sequence = 2
+    while quarantine_path.exists():
+        quarantine_path = destination.with_suffix(f".legacy-partial-{sequence}.json")
+        sequence += 1
+    destination.replace(quarantine_path)
+    return {
+        "status": "quarantined",
+        "canonical_path": str(destination),
+        "quarantine_path": str(quarantine_path),
+        "archive_file": archived["archive_file"],
+        "captured_at": archived["captured_at"],
+    }
+
+
 def _close_context_pages(context: Any) -> None:
     """Close every page in the dedicated CMGB browser context.
 
@@ -855,6 +1145,13 @@ def run_cmgb_browser_capture(
                                 "page": pages_scanned,
                                 "row": index + 1,
                                 "card_id": str(card_id),
+                                # A detail page can omit the employer even
+                                # though its first-party list card has it.
+                                # Preserve that fallback for a later
+                                # detail-only retry; it is not inferred from
+                                # the title or any third-party source.
+                                "title": title,
+                                "employer": employer,
                                 "detail_url": str(detail_page.url) if detail_page is not None else "",
                                 "reason": str(error)[:500],
                             }
@@ -914,4 +1211,134 @@ def run_cmgb_browser_capture(
         },
         "rows": rows,
     }
+    return persist_cmgb_browser_capture(output=output, payload=payload)
+
+
+def run_cmgb_detail_retry(
+    *,
+    retry_capture_path: Path | str,
+    output: Path | str,
+    config: dict[str, Any],
+    allowed_hosts: Iterable[str],
+    user_agent: str,
+    max_age_hours: float | None = 12,
+    timeout_ms: int = 45_000,
+) -> dict[str, Any]:
+    """Retry only the failed official CMGB detail tabs from one frozen scan.
+
+    It intentionally does not revisit the list pages. A retry is allowed only
+    for a recent, pagination-complete partial capture whose failure records
+    contain first-party detail URLs. The output becomes canonical only when
+    every target now has complete official fields.
+    """
+
+    hosts = _cmgb_allowed_hosts(allowed_hosts)
+    retry_capture = load_cmgb_detail_retry_capture(
+        retry_capture_path,
+        allowed_hosts=hosts,
+        max_age_hours=max_age_hours,
+    )
+    target_url = str(retry_capture["platform_url"])
+    _robots_permit(target_url, user_agent=user_agent)
+    try:
+        from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+        from playwright.sync_api import sync_playwright
+    except ImportError as error:
+        raise BrowserCaptureError(
+            "Playwright is not installed; install the browser worker extra before retrying CMGB details"
+        ) from error
+
+    detail_render_wait_ms = max(
+        250, min(10_000, int(config.get("detail_render_wait_ms", 1_000)))
+    )
+    retried_rows: list[dict[str, Any]] = []
+    retry_failures: list[dict[str, Any]] = []
+    browser = None
+    context = None
+    uses_remote_browser = False
+    try:
+        with sync_playwright() as playwright:
+            cdp_url = str(config.get("cdp_url") or "").strip()
+            if cdp_url:
+                browser = playwright.chromium.connect_over_cdp(
+                    _resolve_cdp_websocket(cdp_url)
+                )
+                if not browser.contexts:
+                    raise BrowserCaptureError("CMGB CDP browser has no default context")
+                context = browser.contexts[0]
+                _close_context_pages(context)
+                uses_remote_browser = True
+            else:
+                browser = playwright.chromium.launch(headless=True)
+                context = browser.new_context(user_agent=user_agent)
+
+            for target in retry_capture["retry_targets"]:
+                page = context.new_page()
+                try:
+                    detail_url = _official_url(target["detail_url"], "retry detail_url", hosts)
+                    # Respect the path-specific robots rule before each direct
+                    # detail request. This does not attempt to bypass any
+                    # restriction; a blocked target remains a failed target.
+                    _robots_permit(detail_url, user_agent=user_agent)
+                    response = page.goto(
+                        detail_url,
+                        wait_until="domcontentloaded",
+                        timeout=timeout_ms,
+                    )
+                    if response is not None and response.status >= 400:
+                        raise BrowserCaptureError(
+                            f"CMGB retry detail returned HTTP {response.status}"
+                        )
+                    page.wait_for_timeout(detail_render_wait_ms)
+                    try:
+                        page.locator(
+                            ".job-duty, .job-introduction, .job-description"
+                        ).first.wait_for(
+                            state="visible", timeout=min(timeout_ms, 5_000)
+                        )
+                    except PlaywrightTimeoutError:
+                        # The field extractor is the authoritative completeness
+                        # gate for details without a prose section.
+                        pass
+                    detail = extract_cmgb_detail(
+                        page,
+                        detail_url=page.url,
+                        allowed_hosts=hosts,
+                        require_employer=False,
+                    )
+                    retried_rows.append(_cmgb_row_from_detail(detail, target=target))
+                except Exception as error:
+                    retry_failures.append(
+                        {
+                            **target,
+                            "reason": str(error)[:500],
+                        }
+                    )
+                finally:
+                    try:
+                        if not page.is_closed():
+                            page.close()
+                    except Exception:
+                        pass
+    except PlaywrightTimeoutError as error:
+        raise BrowserCaptureError(f"CMGB detail retry timed out: {error}") from error
+    except BrowserCaptureError:
+        raise
+    except Exception as error:
+        raise BrowserCaptureError(f"CMGB detail retry failed: {error}") from error
+    finally:
+        if context is not None:
+            _close_context_pages(context)
+        if browser is not None and not uses_remote_browser:
+            try:
+                browser.close()
+            except Exception:
+                pass
+
+    payload = build_cmgb_detail_retry_payload(
+        retry_capture,
+        retried_rows=retried_rows,
+        retry_failures=retry_failures,
+        allowed_hosts=hosts,
+    )
     return persist_cmgb_browser_capture(output=output, payload=payload)

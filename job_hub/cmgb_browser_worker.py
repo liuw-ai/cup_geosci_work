@@ -9,7 +9,12 @@ from contextlib import contextmanager
 from threading import Event
 from zoneinfo import ZoneInfo
 
-from job_hub.cmgb_browser_capture import run_cmgb_browser_capture, write_cmgb_capture_failure
+from job_hub.cmgb_browser_capture import (
+    CmgbBrowserCaptureError,
+    run_cmgb_browser_capture,
+    run_cmgb_detail_retry,
+    write_cmgb_capture_failure,
+)
 from job_hub.config import Settings
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
@@ -89,6 +94,8 @@ class CmgbBrowserWorker:
         if cdp_url:
             config["cdp_url"] = cdp_url
         output = self.settings.data_dir / str(config["capture_path"])
+        if self._retry_recent_partial_capture(source, output, config):
+            return
         self._heartbeat("capturing", f"capturing {self.source_id}")
         try:
             with _capture_deadline(self.capture_timeout_seconds):
@@ -114,6 +121,72 @@ class CmgbBrowserWorker:
                 LOGGER.exception("Could not persist CMGB failure capture")
             self._heartbeat("degraded", str(error)[:500])
             LOGGER.exception("CMGB browser capture failed")
+
+    def _retry_recent_partial_capture(
+        self,
+        source: dict[str, object],
+        output: object,
+        config: dict[str, object],
+    ) -> bool:
+        """Retry a fresh frozen partial scan before touching its list pages.
+
+        The retry input is the newest non-publishable diagnostic, never the
+        success-only capture path. A stale or malformed diagnostic is not a
+        new observation, so the ordinary full scan is allowed to replace it.
+        A browser failure during an otherwise valid targeted retry is recorded
+        and ends this cycle instead of immediately re-scanning every card.
+        """
+
+        if not bool(config.get("retry_partial_first", True)):
+            return False
+        capture_path = self.settings.data_dir / str(config["capture_path"])
+        failure_capture = capture_path.with_suffix(".failure.json")
+        if not failure_capture.is_file():
+            return False
+        try:
+            payload = run_cmgb_detail_retry(
+                retry_capture_path=failure_capture,
+                output=output,
+                config=config,
+                allowed_hosts=list(config["allowed_hosts"]),
+                user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
+                max_age_hours=float(config.get("detail_retry_max_age_hours", 12)),
+            )
+        except CmgbBrowserCaptureError as error:
+            message = str(error)
+            retry_preconditions = (
+                "requires a partial capture",
+                "stale",
+                "requires a completed pagination pass",
+                "has no failed detail rows",
+                "failure_records do not match",
+                "detail_url must be non-empty",
+                "must be a concrete CMGB job detail URL",
+            )
+            if any(marker in message for marker in retry_preconditions):
+                LOGGER.info("CMGB partial retry is not applicable: %s", message)
+                return False
+            self._heartbeat("degraded", f"CMGB retry input is invalid: {message}"[:500])
+            LOGGER.exception("CMGB detail retry input is invalid")
+            return True
+        except Exception as error:
+            try:
+                write_cmgb_capture_failure(
+                    output=output,
+                    platform_url=str(config.get("browser_url") or source["homepage_url"]),
+                    status="parse_failed",
+                    reason=f"CMGB targeted detail retry failed: {error}",
+                )
+            except Exception:
+                LOGGER.exception("Could not archive CMGB targeted retry failure")
+            self._heartbeat("degraded", f"CMGB targeted detail retry failed: {error}"[:500])
+            LOGGER.exception("CMGB targeted detail retry failed")
+            return True
+
+        status = "running" if payload.get("status") == "success" else "degraded"
+        self._heartbeat(status, f"CMGB targeted detail retry: {payload.get('scan')}")
+        LOGGER.info("CMGB targeted detail retry completed: %s", payload.get("scan"))
+        return True
 
     def _heartbeat(self, status: str, detail: str = "") -> None:
         try:

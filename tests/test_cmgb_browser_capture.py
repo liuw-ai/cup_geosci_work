@@ -11,9 +11,12 @@ from job_hub.browser_capture import BrowserCaptureError
 from job_hub.cmgb_browser_capture import (
     CmgbBrowserCaptureError,
     _close_context_pages,
+    build_cmgb_detail_retry_payload,
     extract_cmgb_detail,
+    load_cmgb_detail_retry_capture,
     load_cmgb_browser_capture,
     persist_cmgb_browser_capture,
+    quarantine_cmgb_partial_capture,
     write_cmgb_capture_failure,
 )
 from job_hub.profiles import evaluate_student_publication
@@ -74,9 +77,44 @@ def _payload(**overrides: object) -> dict[str, object]:
 
 def _write(tmp_path: Path, payload: dict[str, object]) -> Path:
     path = tmp_path / "captures" / "cmgb.json"
-    path.parent.mkdir(parents=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
     return path
+
+
+def _production_row(external_id: str) -> dict[str, object]:
+    row = _row(external_id)
+    row["external_id"] = f"cmgb-iguopin-{external_id}"
+    return row
+
+
+def _partial_payload() -> dict[str, object]:
+    row = _production_row("official-1")
+    return _payload(
+        status="partial",
+        scan={
+            "pages_scanned": 8,
+            "pagination_complete": True,
+            "rows_discovered": 2,
+            "rows_exported": 1,
+            "failed_rows": 1,
+            "detail_discovered": 2,
+            "detail_succeeded": 1,
+            "detail_failed": 1,
+            "failure_records": [
+                {
+                    "page": 8,
+                    "row": 2,
+                    "card_id": "official-2",
+                    "title": "地质勘查技术岗",
+                    "employer": "中国冶金地质总局一局",
+                    "detail_url": "https://www.iguopin.com/job/detail?id=official-2",
+                    "reason": "official detail timed out",
+                }
+            ],
+        },
+        rows=[row],
+    )
 
 
 def test_cmgb_capture_requires_complete_pagination_and_detail_success(tmp_path: Path) -> None:
@@ -248,6 +286,136 @@ def test_cmgb_success_persistence_rejects_empty_or_mismatched_row_manifest(
         )
 
     assert path.read_text(encoding="utf-8") == original
+
+
+def test_cmgb_detail_retry_loads_only_a_recent_complete_list_pass(tmp_path: Path) -> None:
+    path = _write(tmp_path, _partial_payload())
+
+    retry = load_cmgb_detail_retry_capture(
+        path,
+        allowed_hosts=HOSTS,
+        max_age_hours=24,
+        now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+    )
+
+    assert retry["capture_age_hours"] == 8
+    assert retry["retry_targets"] == [
+        {
+            "external_id": "cmgb-iguopin-official-2",
+            "page": 8,
+            "row": 2,
+            "card_id": "official-2",
+            "title": "地质勘查技术岗",
+            "employer": "中国冶金地质总局一局",
+            "detail_url": "https://www.iguopin.com/job/detail?id=official-2",
+            "reason": "official detail timed out",
+        }
+    ]
+
+
+def test_cmgb_detail_retry_requires_completed_pagination_and_detail_urls(
+    tmp_path: Path,
+) -> None:
+    payload = _partial_payload()
+    payload["scan"]["pagination_complete"] = False
+    path = _write(tmp_path, payload)
+    with pytest.raises(CmgbBrowserCaptureError, match="completed pagination"):
+        load_cmgb_detail_retry_capture(
+            path,
+            allowed_hosts=HOSTS,
+            max_age_hours=24,
+            now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+        )
+
+    payload = _partial_payload()
+    payload["scan"]["failure_records"][0]["detail_url"] = ""
+    path = _write(tmp_path, payload)
+    with pytest.raises(CmgbBrowserCaptureError, match="detail_url must be non-empty"):
+        load_cmgb_detail_retry_capture(
+            path,
+            allowed_hosts=HOSTS,
+            max_age_hours=24,
+            now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+        )
+
+    payload = _partial_payload()
+    payload["scan"]["failure_records"][0]["detail_url"] = "https://www.iguopin.com/jobCampus"
+    path = _write(tmp_path, payload)
+    with pytest.raises(CmgbBrowserCaptureError, match="concrete CMGB job detail"):
+        load_cmgb_detail_retry_capture(
+            path,
+            allowed_hosts=HOSTS,
+            max_age_hours=24,
+            now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+        )
+
+
+def test_cmgb_detail_retry_builds_success_only_after_all_targets_complete(
+    tmp_path: Path,
+) -> None:
+    retry = load_cmgb_detail_retry_capture(
+        _write(tmp_path, _partial_payload()),
+        allowed_hosts=HOSTS,
+        max_age_hours=24,
+        now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+    )
+    repaired = _production_row("official-2")
+    payload = build_cmgb_detail_retry_payload(
+        retry,
+        retried_rows=[repaired],
+        retry_failures=[],
+        captured_at="2026-09-27T11:00:00Z",
+    )
+
+    assert payload["status"] == "success"
+    assert payload["scan"]["detail_failed"] == 0
+    assert payload["scan"]["rows_exported"] == 2
+    output = tmp_path / "captures" / "repaired.json"
+    persist_cmgb_browser_capture(output=output, payload=payload)
+    assert load_cmgb_browser_capture(
+        output,
+        allowed_hosts=HOSTS,
+        max_age_hours=24,
+        now=datetime(2026, 9, 27, 12, 0, tzinfo=timezone.utc),
+    )["status"] == "success"
+
+
+def test_cmgb_detail_retry_keeps_unresolved_target_as_partial(tmp_path: Path) -> None:
+    retry = load_cmgb_detail_retry_capture(
+        _write(tmp_path, _partial_payload()),
+        allowed_hosts=HOSTS,
+        max_age_hours=24,
+        now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+    )
+    payload = build_cmgb_detail_retry_payload(
+        retry,
+        retried_rows=[],
+        retry_failures=[
+            {
+                "external_id": "cmgb-iguopin-official-2",
+                "reason": "official detail still timed out",
+            }
+        ],
+        captured_at="2026-09-27T11:00:00Z",
+    )
+
+    assert payload["status"] == "partial"
+    assert payload["scan"]["detail_failed"] == 1
+    assert payload["scan"]["failure_records"][0]["reason"] == "official detail still timed out"
+
+
+def test_cmgb_quarantine_moves_legacy_partial_after_archiving_it(tmp_path: Path) -> None:
+    path = _write(tmp_path, _partial_payload())
+
+    result = quarantine_cmgb_partial_capture(path)
+
+    quarantined = Path(result["quarantine_path"])
+    assert result["status"] == "quarantined"
+    assert not path.exists()
+    assert quarantined.is_file()
+    assert json.loads(quarantined.read_text(encoding="utf-8"))["status"] == "partial"
+    assert (path.parent / result["archive_file"]).is_file()
+    assert path.with_suffix(".failure.json").is_file()
 
 
 def test_cmgb_context_cleanup_closes_stale_popup_pages() -> None:
