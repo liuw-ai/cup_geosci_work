@@ -6,3 +6,8 @@
 - 服务器必须先保留 `phase89` 工作区归档和数据库副本，再切换 Web/Worker。
 - 如果任一生产验收失败，回到旧 compose 文件，不删除旧镜像、volume 或备份。
 
+本次服务器备份已验证：
+
+- `/opt/backups/cup_geosci_work-before-phase89-2026-09-29-204848.tar.gz`
+- `/opt/backups/job_hub-before-phase89-2026-09-29-204848.sqlite3`
+- 运行中数据库 `PRAGMA integrity_check` 返回 `ok`。
