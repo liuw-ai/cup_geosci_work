@@ -1,0 +1,9 @@
+# Fast server rollout: reuse the already verified dependency image and replace
+# only application code/data. The normal Dockerfile remains the reproducible
+# clean-build path when the server package mirror is available.
+FROM cupb-geoscience-job-hub:latest
+
+WORKDIR /app
+COPY job_hub /app/job_hub
+COPY data /app/data
+
