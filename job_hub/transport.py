@@ -334,15 +334,38 @@ class RequestPolicy:
         self.random_fn = random_fn
         self.transport_mode = validate_transport_mode(transport_mode)
         self.last_outcome = RequestOutcome(0, 0, None, self.transport_mode)
+        self._run_attempts = 0
+        self._run_retryable_failures = 0
+        self._run_request_count = 0
+
+    def reset_run_metrics(self) -> None:
+        """Reset aggregate request telemetry at the start of one source run."""
+
+        self._run_attempts = 0
+        self._run_retryable_failures = 0
+        self._run_request_count = 0
+
+    def run_metrics(self) -> dict[str, Any]:
+        """Return non-secret telemetry for the current source run."""
+
+        return {
+            "attempts": self._run_attempts,
+            "retryable_failures": self._run_retryable_failures,
+            "request_count": self._run_request_count,
+            "transport_mode": self.transport_mode,
+            "last_error_class": self.last_outcome.last_error_class,
+        }
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
         normalized_method = method.upper()
+        self._run_request_count += 1
         attempts = 0
         retryable_failures = 0
         last_error: str | None = None
         last_exception: Exception | None = None
         for attempt in range(self.retries + 1):
             attempts += 1
+            self._run_attempts += 1
             try:
                 request_kwargs = dict(kwargs)
                 request_kwargs.setdefault("timeout", self.timeout)
@@ -351,6 +374,7 @@ class RequestPolicy:
                 status = int(getattr(response, "status_code", 0) or 0)
                 if status in TRANSIENT_STATUS_CODES and attempt < self.retries:
                     retryable_failures += 1
+                    self._run_retryable_failures += 1
                     delay = parse_retry_after(
                         getattr(response, "headers", {}).get("Retry-After")
                     )
@@ -373,6 +397,7 @@ class RequestPolicy:
                 if attempt >= self.retries:
                     break
                 retryable_failures += 1
+                self._run_retryable_failures += 1
                 self._sleep(self._backoff(attempt))
             except Exception as error:
                 # curl_cffi errors are not requests exceptions.  Retry only
@@ -385,6 +410,7 @@ class RequestPolicy:
                 if attempt >= self.retries:
                     break
                 retryable_failures += 1
+                self._run_retryable_failures += 1
                 self._sleep(self._backoff(attempt))
         self.last_outcome = RequestOutcome(
             attempts, retryable_failures, last_error, self.transport_mode

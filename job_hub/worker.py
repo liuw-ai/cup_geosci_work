@@ -115,6 +115,7 @@ class DailyWorker:
             government_jobs = self._sync_verified_government_positions()
             government_discovery = self._discover_configured_government_artifacts()
             attachment_summary = self._process_registered_attachments()
+            self._record_attachment_run_metrics()
             expired_candidates = self.database.expire_stale_artifact_candidates(
                 as_of=datetime.now(self.timezone).date().isoformat()
             )
@@ -444,6 +445,28 @@ class DailyWorker:
                 "candidates_rejected",
             )
         }
+
+    def _record_attachment_run_metrics(self) -> None:
+        """Attach current controlled-file counts to each source's latest run."""
+
+        latest_runs = {
+            str(item["source_id"]): item
+            for item in self.database.list_latest_crawl_runs()
+            if item.get("source_id") is not None
+        }
+        for item in self.database.list_source_artifact_status_counts():
+            source_id = str(item.get("source_id") or "")
+            run = latest_runs.get(source_id)
+            if not run:
+                continue
+            self.database.update_crawl_run_metrics(
+                int(run["id"]),
+                attachment_success_count=int(item.get("extracted_count") or 0),
+                metadata_updates={
+                    "attachment_failed_count": int(item.get("failed_count") or 0),
+                    "attachment_total_count": int(item.get("total_count") or 0),
+                },
+            )
 
     def _publish_with_alert(self, report_date: str) -> None:
         LOGGER.info("Publishing daily report for %s.", report_date)

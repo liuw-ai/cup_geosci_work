@@ -217,7 +217,15 @@ CREATE TABLE IF NOT EXISTS crawl_runs (
     open_matching_count INTEGER NOT NULL DEFAULT 0,
     inserted_count INTEGER NOT NULL DEFAULT 0,
     updated_count INTEGER NOT NULL DEFAULT 0,
-    error_message TEXT
+    error_message TEXT,
+    outcome TEXT NOT NULL DEFAULT 'unknown',
+    attempts INTEGER NOT NULL DEFAULT 0,
+    retryable_failures INTEGER NOT NULL DEFAULT 0,
+    transport_mode TEXT NOT NULL DEFAULT 'environment',
+    evidence_complete_count INTEGER NOT NULL DEFAULT 0,
+    manual_review_count INTEGER NOT NULL DEFAULT 0,
+    attachment_success_count INTEGER NOT NULL DEFAULT 0,
+    metadata_json TEXT NOT NULL DEFAULT '{}'
 );
 
 CREATE TABLE IF NOT EXISTS service_heartbeats (
@@ -462,6 +470,21 @@ class Database:
                 "ALTER TABLE crawl_runs "
                 "ADD COLUMN open_matching_count INTEGER NOT NULL DEFAULT 0"
             )
+        crawl_run_additions = {
+            "outcome": "TEXT NOT NULL DEFAULT 'unknown'",
+            "attempts": "INTEGER NOT NULL DEFAULT 0",
+            "retryable_failures": "INTEGER NOT NULL DEFAULT 0",
+            "transport_mode": "TEXT NOT NULL DEFAULT 'environment'",
+            "evidence_complete_count": "INTEGER NOT NULL DEFAULT 0",
+            "manual_review_count": "INTEGER NOT NULL DEFAULT 0",
+            "attachment_success_count": "INTEGER NOT NULL DEFAULT 0",
+            "metadata_json": "TEXT NOT NULL DEFAULT '{}'",
+        }
+        for name, definition in crawl_run_additions.items():
+            if name not in crawl_run_columns:
+                connection.execute(
+                    f"ALTER TABLE crawl_runs ADD COLUMN {name} {definition}"
+                )
         lead_columns = {
             row["name"]
             for row in connection.execute("PRAGMA table_info(candidate_leads)").fetchall()
@@ -1023,14 +1046,21 @@ class Database:
             snapshots.append(item)
         return snapshots
 
-    def record_crawl_start(self, source_id: str) -> int:
+    def record_crawl_start(
+        self,
+        source_id: str,
+        *,
+        transport_mode: str = "environment",
+    ) -> int:
         with self.transaction() as connection:
             cursor = connection.execute(
                 """
-                INSERT INTO crawl_runs (source_id, started_at, status)
-                VALUES (?, ?, 'running')
+                INSERT INTO crawl_runs (
+                    source_id, started_at, status, outcome, transport_mode
+                )
+                VALUES (?, ?, 'running', 'running', ?)
                 """,
-                (source_id, utc_now()),
+                (source_id, utc_now(), str(transport_mode or "environment")),
             )
             return int(cursor.lastrowid)
 
@@ -1044,6 +1074,14 @@ class Database:
         error_message: str | None = None,
         *,
         open_matching_count: int = 0,
+        outcome: str | None = None,
+        attempts: int = 0,
+        retryable_failures: int = 0,
+        transport_mode: str | None = None,
+        evidence_complete_count: int = 0,
+        manual_review_count: int = 0,
+        attachment_success_count: int = 0,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         with self.transaction() as connection:
             connection.execute(
@@ -1051,7 +1089,11 @@ class Database:
                 UPDATE crawl_runs
                 SET finished_at = ?, status = ?, discovered_count = ?,
                     open_matching_count = ?, inserted_count = ?,
-                    updated_count = ?, error_message = ?
+                    updated_count = ?, error_message = ?, outcome = ?,
+                    attempts = ?, retryable_failures = ?,
+                    transport_mode = COALESCE(?, transport_mode),
+                    evidence_complete_count = ?, manual_review_count = ?,
+                    attachment_success_count = ?, metadata_json = ?
                 WHERE id = ?
                 """,
                 (
@@ -1062,6 +1104,53 @@ class Database:
                     inserted_count,
                     updated_count,
                     error_message,
+                    str(outcome or "unknown"),
+                    max(0, int(attempts)),
+                    max(0, int(retryable_failures)),
+                    transport_mode,
+                    max(0, int(evidence_complete_count)),
+                    max(0, int(manual_review_count)),
+                    max(0, int(attachment_success_count)),
+                    json.dumps(metadata or {}, ensure_ascii=False, sort_keys=True),
+                    run_id,
+                ),
+            )
+
+    def update_crawl_run_metrics(
+        self,
+        run_id: int,
+        *,
+        attachment_success_count: int | None = None,
+        metadata_updates: dict[str, Any] | None = None,
+    ) -> None:
+        """Add post-collection metrics without reopening a completed run."""
+
+        with self.transaction() as connection:
+            row = connection.execute(
+                "SELECT metadata_json FROM crawl_runs WHERE id = ?",
+                (run_id,),
+            ).fetchone()
+            if row is None:
+                raise ValueError(f"Crawl run does not exist: {run_id}")
+            try:
+                metadata = json.loads(row["metadata_json"] or "{}")
+            except (TypeError, ValueError):
+                metadata = {}
+            if not isinstance(metadata, dict):
+                metadata = {}
+            metadata.update(metadata_updates or {})
+            connection.execute(
+                """
+                UPDATE crawl_runs
+                SET attachment_success_count = COALESCE(?, attachment_success_count),
+                    metadata_json = ?
+                WHERE id = ?
+                """,
+                (
+                    None
+                    if attachment_success_count is None
+                    else max(0, int(attachment_success_count)),
+                    json.dumps(metadata, ensure_ascii=False, sort_keys=True),
                     run_id,
                 ),
             )
@@ -1558,6 +1647,25 @@ class Database:
         with self.connect() as connection:
             rows = connection.execute(query, values).fetchall()
         return [self._artifact_row(row) for row in rows]
+
+    def list_source_artifact_status_counts(self) -> list[dict[str, Any]]:
+        """Summarize controlled attachment extraction by official source."""
+
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT source_id,
+                       SUM(CASE WHEN extraction_status = 'extracted' THEN 1 ELSE 0 END)
+                           AS extracted_count,
+                       SUM(CASE WHEN extraction_status IN ('failed', 'skipped') THEN 1 ELSE 0 END)
+                           AS failed_count,
+                       COUNT(*) AS total_count
+                FROM source_artifacts
+                GROUP BY source_id
+                ORDER BY source_id
+                """
+            ).fetchall()
+        return [dict(row) for row in rows]
 
     def update_source_artifact_processing(
         self,
@@ -2601,6 +2709,22 @@ class Database:
                 ) AS latest ON latest.latest_id = crawl_runs.id
                 ORDER BY crawl_runs.source_id
                 """
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def list_crawl_runs(self, *, limit: int = 1000) -> list[dict[str, Any]]:
+        """Return recent source runs, including failed and interrupted runs."""
+
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT crawl_runs.*, sources.name AS source_name
+                FROM crawl_runs
+                LEFT JOIN sources ON sources.id = crawl_runs.source_id
+                ORDER BY crawl_runs.id DESC
+                LIMIT ?
+                """,
+                (max(1, min(int(limit), 10000)),),
             ).fetchall()
         return [dict(row) for row in rows]
         return True

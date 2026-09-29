@@ -36,6 +36,7 @@ from job_hub.sources import (
     SourceSkipped,
     load_source_registries,
 )
+from job_hub.run_ledger import classify_run_outcome
 
 
 @dataclass
@@ -218,8 +219,19 @@ class JobPipeline:
             self.settings.crawl_run_stale_seconds,
             source["id"],
         )
-        run_id = self.database.record_crawl_start(source["id"])
+        request_policy = getattr(self.collector, "request_policy", None)
+        if request_policy is not None and hasattr(request_policy, "reset_run_metrics"):
+            request_policy.reset_run_metrics()
+        transport_mode = str(
+            getattr(request_policy, "transport_mode", None)
+            or self.settings.http_transport_mode
+        )
+        run_id = self.database.record_crawl_start(
+            source["id"], transport_mode=transport_mode
+        )
         result = SourceSyncResult(source_id=source["id"], status="finished", run_id=run_id)
+        evidence_complete_count = 0
+        manual_review_count = 0
         try:
             collect = getattr(self.collector, "collect_with_fallback", None)
             postings = (
@@ -241,6 +253,12 @@ class JobPipeline:
                     in {"student_eligible", "unrestricted_eligible"}
                 ):
                     result.open_matches += 1
+                    if normalized.get("official_evidence_url") and normalized.get(
+                        "field_evidence"
+                    ):
+                        evidence_complete_count += 1
+                if normalized.get("publication_status") == PUBLICATION_PENDING_EVIDENCE:
+                    manual_review_count += 1
                 _, outcome = self.database.save_job(normalized)
                 if posting.external_id:
                     current_external_ids.add(str(posting.external_id))
@@ -275,6 +293,18 @@ class JobPipeline:
                 open_matching_count=result.open_matches,
                 inserted_count=result.created,
                 updated_count=result.updated,
+                outcome=classify_run_outcome(
+                    result.status,
+                    open_matching_count=result.open_matches,
+                    discovered_count=result.discovered,
+                    manual_review_count=manual_review_count,
+                ),
+                **self._run_metrics(
+                    request_policy,
+                    transport_mode=transport_mode,
+                    evidence_complete_count=evidence_complete_count,
+                    manual_review_count=manual_review_count,
+                ),
             )
         except SourceSkipped as error:
             result.status = "skipped"
@@ -288,6 +318,8 @@ class JobPipeline:
                 run_id,
                 result.status,
                 error_message=result.error,
+                outcome=classify_run_outcome(result.status, error=result.error),
+                **self._run_metrics(request_policy, transport_mode=transport_mode),
             )
         except Exception as error:
             result.status = "failed"
@@ -301,8 +333,33 @@ class JobPipeline:
                 run_id,
                 result.status,
                 error_message=result.error[:1500],
+                outcome=classify_run_outcome(result.status, error=result.error),
+                **self._run_metrics(request_policy, transport_mode=transport_mode),
             )
         return result
+
+    @staticmethod
+    def _run_metrics(
+        request_policy: Any,
+        *,
+        transport_mode: str,
+        evidence_complete_count: int = 0,
+        manual_review_count: int = 0,
+    ) -> dict[str, Any]:
+        metrics = {}
+        if request_policy is not None and hasattr(request_policy, "run_metrics"):
+            metrics.update(request_policy.run_metrics())
+        return {
+            "attempts": int(metrics.get("attempts", 0)),
+            "retryable_failures": int(metrics.get("retryable_failures", 0)),
+            "transport_mode": str(metrics.get("transport_mode") or transport_mode),
+            "evidence_complete_count": int(evidence_complete_count),
+            "manual_review_count": int(manual_review_count),
+            "metadata": {
+                "request_count": int(metrics.get("request_count", 0)),
+                "last_error_class": metrics.get("last_error_class"),
+            },
+        }
 
     def sync_source_atomically(
         self,
@@ -323,8 +380,19 @@ class JobPipeline:
             self.settings.crawl_run_stale_seconds,
             source["id"],
         )
-        run_id = self.database.record_crawl_start(source["id"])
+        request_policy = getattr(self.collector, "request_policy", None)
+        if request_policy is not None and hasattr(request_policy, "reset_run_metrics"):
+            request_policy.reset_run_metrics()
+        transport_mode = str(
+            getattr(request_policy, "transport_mode", None)
+            or self.settings.http_transport_mode
+        )
+        run_id = self.database.record_crawl_start(
+            source["id"], transport_mode=transport_mode
+        )
         result = SourceSyncResult(source_id=source["id"], status="finished", run_id=run_id)
+        evidence_complete_count = 0
+        manual_review_count = 0
         try:
             collect = getattr(self.collector, "collect_with_fallback", None)
             postings = (
@@ -347,6 +415,12 @@ class JobPipeline:
                     in {"student_eligible", "unrestricted_eligible"}
                 ):
                     result.open_matches += 1
+                    if normalized.get("official_evidence_url") and normalized.get(
+                        "field_evidence"
+                    ):
+                        evidence_complete_count += 1
+                if normalized.get("publication_status") == PUBLICATION_PENDING_EVIDENCE:
+                    manual_review_count += 1
                 normalized_postings.append((normalized, posting.external_id))
                 if posting.external_id:
                     current_external_ids.add(str(posting.external_id))
@@ -390,6 +464,18 @@ class JobPipeline:
                     open_matching_count=result.open_matches,
                     inserted_count=result.created,
                     updated_count=result.updated,
+                    outcome=classify_run_outcome(
+                        result.status,
+                        open_matching_count=result.open_matches,
+                        discovered_count=result.discovered,
+                        manual_review_count=manual_review_count,
+                    ),
+                    **self._run_metrics(
+                        request_policy,
+                        transport_mode=transport_mode,
+                        evidence_complete_count=evidence_complete_count,
+                        manual_review_count=manual_review_count,
+                    ),
                 )
         except SourceSkipped as error:
             result.status = "skipped"
@@ -401,7 +487,11 @@ class JobPipeline:
                 detail=result.error,
             )
             self.database.record_crawl_finish(
-                run_id, result.status, error_message=result.error
+                run_id,
+                result.status,
+                error_message=result.error,
+                outcome=classify_run_outcome(result.status, error=result.error),
+                **self._run_metrics(request_policy, transport_mode=transport_mode),
             )
         except Exception as error:
             result.status = "failed"
@@ -411,7 +501,11 @@ class JobPipeline:
                 source["id"], status="source_error", detail=result.error
             )
             self.database.record_crawl_finish(
-                run_id, result.status, error_message=result.error[:1500]
+                run_id,
+                result.status,
+                error_message=result.error[:1500],
+                outcome=classify_run_outcome(result.status, error=result.error),
+                **self._run_metrics(request_policy, transport_mode=transport_mode),
             )
         return result
 

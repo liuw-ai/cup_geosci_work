@@ -14,6 +14,7 @@ from job_hub.government_positions import (
     government_position_quality_report,
     load_position_registry,
 )
+from job_hub.run_ledger import build_run_ledger
 
 
 def local_today(settings: Settings) -> date:
@@ -114,6 +115,12 @@ def build_daily_report(
                 "source_failures_or_pending": 1,
                 "scan_interpretation": "职位表台账不可用，不能解释为无岗位。",
             }
+    source_runs = build_run_ledger(
+        database.list_crawl_runs(limit=2000),
+        sources=database.list_sources(),
+        report_date=target_date,
+        timezone=settings.timezone,
+    )
     return {
         "report_date": target,
         "new_jobs": [job_card(job) for job in changes["new"]],
@@ -125,7 +132,14 @@ def build_daily_report(
             "expired": expired_today,
             "deadline_soon": len(deadline_jobs),
             "open_total": database.count_open_jobs(),
+            "source_run_count": source_runs["summary"]["run_count"],
+            "source_runs_with_matches": source_runs["summary"]["success_with_matches"],
+            "source_runs_unavailable": (
+                source_runs["summary"]["source_unavailable"]
+                + source_runs["summary"]["access_limited"]
+            ),
         },
+        "source_runs": source_runs,
         "government_quality": government_quality,
         "government_positions": {
             **(position_quality or {}),

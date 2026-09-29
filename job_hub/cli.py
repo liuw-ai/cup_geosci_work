@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -94,6 +94,7 @@ from job_hub.national_probes import (
     national_source_probe_summary,
 )
 from job_hub.reports import publish_daily_report
+from job_hub.run_ledger import build_run_ledger
 from job_hub.simulation import simulate_cohort
 from job_hub.sinopec import (
     SinopecCaptureError,
@@ -638,6 +639,19 @@ def main() -> None:
         "--due-only",
         action="store_true",
         help="只显示当前到期且未被其他 worker 租用的任务",
+    )
+    source_run_ledger_parser = subparsers.add_parser(
+        "source-run-ledger",
+        help="输出按来源区分成功、无匹配、访问受限和解析失败的运行账本",
+    )
+    source_run_ledger_parser.add_argument(
+        "--date",
+        help="按本地日期筛选，例如 2026-09-29；默认当天",
+    )
+    source_run_ledger_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将账本 JSON 写入指定文件",
     )
     subparsers.add_parser(
         "reindex-jobs",
@@ -1196,6 +1210,27 @@ def main() -> None:
         return
 
     settings, database, pipeline = services()
+    if args.command == "source-run-ledger":
+        report_date = datetime.now(ZoneInfo(settings.timezone)).date()
+        if args.date:
+            try:
+                report_date = date.fromisoformat(args.date)
+            except ValueError:
+                parser.error("--date 必须使用 YYYY-MM-DD")
+        result = build_run_ledger(
+            database.list_crawl_runs(limit=2000),
+            sources=database.list_sources(),
+            report_date=report_date,
+            timezone=settings.timezone,
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command == "organization-matrix":
         registry = load_organization_registry()
         sources = database.list_sources()

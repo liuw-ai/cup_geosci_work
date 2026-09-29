@@ -103,6 +103,9 @@ def test_request_policy_retries_transient_status_with_bounded_backoff() -> None:
     assert delays == [1]
     assert policy.last_outcome.attempts == 2
     assert policy.last_outcome.retryable_failures == 1
+    assert policy.run_metrics()["request_count"] == 1
+    assert policy.run_metrics()["attempts"] == 2
+    assert policy.run_metrics()["retryable_failures"] == 1
 
 
 def test_request_policy_does_not_retry_access_policy_status() -> None:
