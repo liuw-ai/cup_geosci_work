@@ -70,3 +70,13 @@ The report is diagnostic only. A source enters the student-facing pipeline
 only after an official current notice, a job-level position table/detail, the
 major and degree evidence, location/headcount/deadline fields, a parser
 fixture, and a recurring refresh rule have all passed review.
+
+## CNOOC monitoring decision
+
+The server direct check on 2026-09-30 reached the CNOOC campus page and its
+public read-only Zhaopin endpoint. The endpoint returned `code=200` and
+`totalNum=0`. `cnooc-career` is therefore enabled as a daily monitor, not as a
+student-facing vacancy source. A future non-empty response must still pass the
+existing job URL, major, degree, location, headcount and deadline gates. A
+business error or malformed response is a source failure/manual-review event,
+never a zero-vacancy conclusion.
