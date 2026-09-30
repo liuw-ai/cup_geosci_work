@@ -1124,6 +1124,7 @@
       "allowed_hosts": ["www.cea.gov.cn"],
       "attachment_allowed_hosts": ["www.cea.gov.cn"],
       "government_evidence_recheck": true,
+      "government_evidence_recheck_mode": "manual_only",
       "publication_category": "事业单位与人才引进",
       "official_attachment_url": "https://www.cea.gov.cn/cea/zwgk/rsxx/ryzp/5855536/2026092316044245325.xlsx",
       "note": "中国地震局官网公告及官方岗位信息表逐行核验；仅发布岗位表明确包含本院目标专业且学历覆盖的岗位。附件自动下载受 robots 限制，来源保持人工核验台账模式，不触发通用网页抓取。"

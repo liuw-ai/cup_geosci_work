@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
@@ -32,6 +33,38 @@ def test_home_uses_today_preview_when_latest_frozen_report_is_stale(
     assert response.status_code == 200
     assert "2026年9月23日就业日报" in body
     assert "今天的正式日报将在 20:00 固化发布" in body
+
+
+def test_manual_only_government_positions_stay_off_public_upcoming_page_until_confirmed(
+    tmp_path, monkeypatch
+) -> None:
+    settings = replace(
+        make_settings(tmp_path),
+        government_position_registry_path=Path("data/government_position_registry.json"),
+        government_position_max_age_hours=None,
+    )
+    app = create_app(settings)
+    database = app.extensions["database"]
+    cea_source = next(
+        item
+        for item in load_source_registries(["data/sources.json"])
+        if item["id"] == "cea-2027-recruitment"
+    )
+    database.upsert_source(cea_source)
+    monkeypatch.setattr(app_module, "local_today", lambda _settings: date(2026, 9, 30))
+
+    client = app.test_client()
+    unpublished = client.get("/government/upcoming").get_data(as_text=True)
+    assert "中国地震局" not in unpublished
+
+    database.record_government_source_verification(
+        "cea-2027-recruitment",
+        status="verified",
+        checked_at="2026-09-30T01:00:00Z",
+        detail="Administrator manual confirmation: official notice and workbook checked",
+    )
+    confirmed = client.get("/government/upcoming").get_data(as_text=True)
+    assert "中国地震局" in confirmed
 
 
 def test_public_pages_and_verified_import_api(tmp_path) -> None:

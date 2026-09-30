@@ -76,6 +76,7 @@ from job_hub.source_validation import (
 from job_hub.backups import DatabaseBackupManager
 from job_hub.operations import backup_health_payload
 from job_hub.government_positions import load_position_registry, upcoming_position_records
+from job_hub.government_revalidation import requires_manual_government_evidence_confirmation
 from job_hub.reports import build_daily_report, local_today, publish_daily_report
 from job_hub.sources import RawPosting
 from job_hub.sinopec import load_sinopec_capture, sinopec_capture_summary
@@ -230,6 +231,11 @@ def create_app(settings: Settings | None = None) -> Flask:
                 today=local_today(settings).isoformat(),
                 max_age_hours=settings.government_position_max_age_hours,
                 source_verifications=verifications,
+                manual_confirmation_source_ids={
+                    str(source["id"])
+                    for source in database.list_sources()
+                    if requires_manual_government_evidence_confirmation(source)
+                },
                 now=datetime.now(timezone.utc),
             )
         except (OSError, ValueError, KeyError):

@@ -40,6 +40,7 @@ def test_cea_attachment_stays_manual_when_robots_blocks_automated_download() -> 
     assert source["source_type"] == "manual"
     assert source["enabled"] is False
     assert source["config"]["government_evidence_recheck"] is True
+    assert source["config"]["government_evidence_recheck_mode"] == "manual_only"
     assert source["config"]["official_attachment_url"].endswith(".xlsx")
 
 

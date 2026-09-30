@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -57,6 +57,7 @@ from job_hub.government_artifacts import (
     register_government_artifacts,
 )
 from job_hub.government_discovery import discover_configured_government_artifacts
+from job_hub.government_revalidation import requires_manual_government_evidence_confirmation
 from job_hub.domestic_expansion import (
     QUEUE_STATUSES,
     domestic_expansion_rows,
@@ -422,6 +423,27 @@ def main() -> None:
         "--output",
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
+    )
+    government_confirmation_parser = subparsers.add_parser(
+        "confirm-government-source-evidence",
+        help="人工复核官方公告、附件和报名状态后续期一个受限政府职位表来源",
+    )
+    government_confirmation_parser.add_argument("source_id")
+    government_confirmation_parser.add_argument(
+        "--path",
+        type=Path,
+        default=Path("data/government_position_registry.json"),
+        help="政府职位表证据台账 JSON",
+    )
+    government_confirmation_parser.add_argument(
+        "--note",
+        required=True,
+        help="记录已人工核对的公告、附件和报名状态；不得填入未完成的检查",
+    )
+    government_confirmation_parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="确认该来源的官方公告、岗位表和报名状态均已人工核对且未变化",
     )
     government_artifact_parser = subparsers.add_parser(
         "register-government-artifacts",
@@ -1537,6 +1559,11 @@ def main() -> None:
                     str(item["source_id"]): item
                     for item in database.list_government_source_verifications()
                 },
+                manual_confirmation_source_ids={
+                    str(source["id"])
+                    for source in database.list_sources()
+                    if requires_manual_government_evidence_confirmation(source)
+                },
             )
         except (OSError, ValueError) as error:
             print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
@@ -1547,6 +1574,60 @@ def main() -> None:
                 json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "confirm-government-source-evidence":
+        source = database.get_source(args.source_id)
+        if source is None:
+            parser.error(f"source_id is not registered: {args.source_id}")
+        if not requires_manual_government_evidence_confirmation(source):
+            parser.error(
+                "source is not configured for manual-only government evidence confirmation"
+            )
+        note = str(args.note or "").strip()
+        if not note:
+            parser.error("--note must describe the completed manual official-evidence check")
+        if not args.confirm:
+            parser.error("--confirm is required after the manual official-evidence check")
+        try:
+            registry = load_position_registry(args.path)
+        except (OSError, ValueError) as error:
+            parser.error(str(error))
+        records = [
+            item
+            for item in registry.get("records", [])
+            if str(item.get("source_id") or "") == args.source_id
+            and item.get("record_status") == "verified_open"
+        ]
+        if not records:
+            parser.error(
+                "manual confirmation requires at least one verified_open official position record"
+            )
+        checked_at = (
+            datetime.now(ZoneInfo(settings.timezone))
+            .astimezone(timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
+        verification = database.record_government_source_verification(
+            args.source_id,
+            status="verified",
+            checked_at=checked_at,
+            detail=f"Administrator manual confirmation: {note}",
+        )
+        print(
+            json.dumps(
+                {
+                    "source_id": args.source_id,
+                    "status": verification["status"],
+                    "checked_at": verification["checked_at"],
+                    "verified_open_records": len(records),
+                    "publication_policy": "仍受报名窗口、截止日期和证据新鲜度门禁约束。",
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return
     if args.command == "register-government-artifacts":
         try:

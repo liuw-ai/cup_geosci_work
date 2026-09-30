@@ -330,6 +330,7 @@ def government_position_quality_report(
     today: str | None = None,
     max_age_hours: float | None = None,
     source_verifications: dict[str, dict[str, Any]] | None = None,
+    manual_confirmation_source_ids: set[str] | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     payload = registry or load_position_registry()
@@ -346,11 +347,13 @@ def government_position_quality_report(
     type_counts = Counter(str(item["position_type"]) for item in records)
     province_counts = Counter(str(item["province"]) for item in records)
     source_counts = Counter(str(item["source_id"]) for item in records)
+    manual_only_sources = set(manual_confirmation_source_ids or ())
     open_records = current_publishable_position_records(
         payload,
         today=today_date.isoformat(),
         max_age_hours=max_age_hours,
         source_verifications=source_verifications,
+        manual_confirmation_source_ids=manual_only_sources,
         now=now,
     )
     explicit_matches = [
@@ -365,15 +368,36 @@ def government_position_quality_report(
         verification_counts.get("source_unavailable", 0)
         + verification_counts.get("not_configured", 0)
     )
+    reference = now or datetime.combine(today_date, time.min, tzinfo=timezone.utc)
+    if reference.tzinfo is None:
+        reference = reference.replace(tzinfo=timezone.utc)
+    reference = reference.astimezone(timezone.utc)
+    fallback_fresh = _registry_fresh(str(payload.get("as_of") or ""), reference, max_age_hours)
+    manual_confirmation_required_sources = sorted(
+        {
+            str(item.get("source_id") or "")
+            for item in records
+            if str(item.get("source_id") or "") in manual_only_sources
+            and item.get("record_status") == "verified_open"
+            and not _source_evidence_is_current(
+                str(item.get("source_id") or ""),
+                source_verifications or {},
+                reference,
+                max_age_hours,
+                fallback_fresh,
+                requires_manual_confirmation=True,
+            )
+        }
+    )
     closed = [item for item in records if item["record_status"] == "verified_closed"]
-    upcoming = [
-        item
-        for item in records
-        if item["record_status"] == "verified_open"
-        and item["match_status"] in {"explicit_match", "unrestricted_match"}
-        and (_opening_date_for_record(item, payload.get("source_opening_dates") or {}) or today_date)
-        > today_date
-    ]
+    upcoming = upcoming_position_records(
+        payload,
+        today=today_date.isoformat(),
+        max_age_hours=max_age_hours,
+        source_verifications=source_verifications,
+        manual_confirmation_source_ids=manual_only_sources,
+        now=reference,
+    )
     scan_no_current_match = sum(
         1
         for item in payload.get("source_assessments", [])
@@ -402,7 +426,10 @@ def government_position_quality_report(
         ),
         "explicit_student_matches": len(explicit_matches),
         "verified_closed_records": len(closed),
-        "source_failures_or_pending": len(failures) + verification_failures,
+        "source_failures_or_pending": (
+            len(failures) + verification_failures + len(manual_confirmation_required_sources)
+        ),
+        "manual_confirmation_required_sources": manual_confirmation_required_sources,
         "verified_scan_no_current_match": scan_no_current_match,
         "source_evidence_verifications": {
             "total": sum(verification_counts.values()),
@@ -432,7 +459,7 @@ def government_position_quality_report(
         },
         "scan_interpretation": (
             "存在来源故障或待核验记录，不能把缺少岗位解释为无岗位。"
-            if failures or verification_failures
+            if failures or verification_failures or manual_confirmation_required_sources
             else "部分官方来源已扫描成功但当前无可发布匹配；这不是来源故障。"
             if scan_no_current_match
             else "台账中的正式来源均已完成当前记录核验。"
@@ -446,6 +473,7 @@ def current_publishable_position_records(
     today: str,
     max_age_hours: float | None = None,
     source_verifications: dict[str, dict[str, Any]] | None = None,
+    manual_confirmation_source_ids: set[str] | None = None,
     now: datetime | None = None,
 ) -> list[dict[str, Any]]:
     """Return current rows with per-source official-evidence freshness.
@@ -465,6 +493,7 @@ def current_publishable_position_records(
     raw_as_of = str(registry.get("as_of") or "").strip()
     fallback_fresh = _registry_fresh(raw_as_of, reference, max_age_hours)
     source_opening_dates = registry.get("source_opening_dates") or {}
+    manual_only_sources = set(manual_confirmation_source_ids or ())
     rows: list[dict[str, Any]] = []
     for item in registry.get("records", []):
         if item["record_status"] != "verified_open":
@@ -480,6 +509,9 @@ def current_publishable_position_records(
             reference,
             max_age_hours,
             fallback_fresh,
+            requires_manual_confirmation=(
+                str(item.get("source_id") or "") in manual_only_sources
+            ),
         ):
             continue
         deadline = str(item.get("deadline_date") or "").strip()
@@ -495,6 +527,7 @@ def upcoming_position_records(
     today: str,
     max_age_hours: float | None = None,
     source_verifications: dict[str, dict[str, Any]] | None = None,
+    manual_confirmation_source_ids: set[str] | None = None,
     now: datetime | None = None,
 ) -> list[dict[str, Any]]:
     """Return verified student-matching rows whose official window is upcoming.
@@ -512,6 +545,7 @@ def upcoming_position_records(
     raw_as_of = str(registry.get("as_of") or "").strip()
     fallback_fresh = _registry_fresh(raw_as_of, reference, max_age_hours)
     source_opening_dates = registry.get("source_opening_dates") or {}
+    manual_only_sources = set(manual_confirmation_source_ids or ())
     rows: list[dict[str, Any]] = []
     for item in registry.get("records", []):
         if item.get("record_status") != "verified_open":
@@ -530,6 +564,9 @@ def upcoming_position_records(
             reference,
             max_age_hours,
             fallback_fresh,
+            requires_manual_confirmation=(
+                str(item.get("source_id") or "") in manual_only_sources
+            ),
         ):
             continue
         row = dict(item)
@@ -575,10 +612,16 @@ def _source_evidence_is_current(
     reference: datetime,
     max_age_hours: float | None,
     fallback_fresh: bool,
+    *,
+    requires_manual_confirmation: bool = False,
 ) -> bool:
     verification = verifications.get(source_id)
+    if requires_manual_confirmation and not verification:
+        return False
     if not verification:
         return fallback_fresh
+    if requires_manual_confirmation and str(verification.get("status") or "") != "verified":
+        return False
     if str(verification.get("status") or "") == "withdrawn":
         return False
     raw_success = str(verification.get("last_success_at") or "").strip()

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import datetime, timezone
 
 from job_hub.db import Database
 from job_hub.government_positions import current_publishable_position_records
 from job_hub.government_revalidation import revalidate_government_sources
+from job_hub.worker import DailyWorker
 
 from conftest import make_settings, source
 
@@ -34,6 +36,17 @@ class FakeSession:
 
     def get(self, url: str, **_kwargs: object) -> FakeResponse:
         return self.responses[url]
+
+
+class NoRequestSession:
+    def __init__(self) -> None:
+        self.headers: dict[str, str] = {}
+        self.trust_env = False
+        self.calls = 0
+
+    def get(self, _url: str, **_kwargs: object) -> FakeResponse:
+        self.calls += 1
+        raise AssertionError("manual-only evidence recheck must not make HTTP requests")
 
 
 def _registry() -> dict[str, object]:
@@ -103,6 +116,89 @@ def test_recheck_distinguishes_explicit_cancellation_from_source_failure(tmp_pat
 
     assert result["status"] == "withdrawn"
     assert "cancellation" in result["detail"]
+
+
+def test_manual_only_recheck_performs_zero_http_requests(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    source_record = source()
+    source_record["config"] = {
+        "government_evidence_recheck": True,
+        "government_evidence_recheck_mode": "manual_only",
+        "allowed_hosts": ["careers.example.edu.cn"],
+    }
+    session = NoRequestSession()
+
+    result = revalidate_government_sources(
+        _registry(),
+        {"official-test-source": source_record},
+        settings,
+        session=session,
+    )[0]
+
+    assert result["status"] == "manual_confirmation_required"
+    assert session.calls == 0
+
+
+def test_manual_only_source_never_uses_registry_fallback_as_publication_evidence() -> None:
+    manual_sources = {"official-test-source"}
+    assert current_publishable_position_records(
+        _registry(),
+        today="2026-09-28",
+        max_age_hours=None,
+        manual_confirmation_source_ids=manual_sources,
+    ) == []
+
+    confirmed = current_publishable_position_records(
+        _registry(),
+        today="2026-09-28",
+        max_age_hours=48,
+        manual_confirmation_source_ids=manual_sources,
+        source_verifications={
+            "official-test-source": {
+                "status": "verified",
+                "last_success_at": "2026-09-28T00:00:00Z",
+            }
+        },
+        now=datetime(2026, 9, 28, 1, tzinfo=timezone.utc),
+    )
+    assert len(confirmed) == 1
+
+
+def test_worker_preserves_prior_manual_confirmation(tmp_path, monkeypatch) -> None:
+    registry_path = tmp_path / "government_positions.json"
+    registry_path.write_text(
+        '{"version": 1, "as_of": "2026-09-28", "records": []}', encoding="utf-8"
+    )
+    settings = replace(
+        make_settings(tmp_path), government_position_registry_path=registry_path
+    )
+    worker = DailyWorker(settings)
+    worker.database.upsert_source(source())
+    worker.database.record_government_source_verification(
+        "official-test-source",
+        status="verified",
+        checked_at="2026-09-28T00:00:00Z",
+        detail="Administrator manual confirmation: checked official evidence",
+    )
+    monkeypatch.setattr(
+        "job_hub.worker.revalidate_government_sources",
+        lambda *_args, **_kwargs: [
+            {
+                "source_id": "official-test-source",
+                "status": "manual_confirmation_required",
+                "checked_at": "2026-09-28T01:00:00Z",
+                "detail": "no automated request was made",
+                "evidence_fingerprint": "",
+            }
+        ],
+    )
+
+    result = worker._revalidate_government_position_sources()
+    verification = worker.database.list_government_source_verifications()[0]
+
+    assert result["manual_confirmation_required"] == 1
+    assert verification["status"] == "verified"
+    assert verification["checked_at"] == "2026-09-28T00:00:00Z"
 
 
 def test_source_recheck_failure_preserves_last_success_but_eventually_expires(tmp_path) -> None:

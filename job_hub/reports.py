@@ -14,6 +14,7 @@ from job_hub.government_positions import (
     government_position_quality_report,
     load_position_registry,
 )
+from job_hub.government_revalidation import requires_manual_government_evidence_confirmation
 from job_hub.run_ledger import build_run_ledger
 
 
@@ -104,6 +105,11 @@ def build_daily_report(
                 source_verifications={
                     str(item["source_id"]): item
                     for item in database.list_government_source_verifications()
+                },
+                manual_confirmation_source_ids={
+                    str(source["id"])
+                    for source in database.list_sources()
+                    if requires_manual_government_evidence_confirmation(source)
                 },
                 now=datetime.now(ZoneInfo(settings.timezone)),
             )

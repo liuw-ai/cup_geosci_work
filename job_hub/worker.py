@@ -30,7 +30,10 @@ from job_hub.government_positions import (
     load_position_registry,
     position_record_to_posting,
 )
-from job_hub.government_revalidation import revalidate_government_sources
+from job_hub.government_revalidation import (
+    requires_manual_government_evidence_confirmation,
+    revalidate_government_sources,
+)
 from job_hub.pipeline import JobPipeline
 from job_hub.reports import publish_daily_report
 
@@ -210,7 +213,7 @@ class DailyWorker:
             registry = load_position_registry(path)
         except Exception as error:  # noqa: BLE001 - keep a broken ledger visible
             LOGGER.error("Government position registry unavailable for recheck: %s", error)
-            return {"verified": 0, "source_unavailable": 0, "withdrawn": 0, "not_configured": 0, "error": 1}
+            return {"verified": 0, "source_unavailable": 0, "withdrawn": 0, "not_configured": 0, "manual_confirmation_required": 0, "error": 1}
         try:
             results = revalidate_government_sources(
                 registry,
@@ -220,10 +223,15 @@ class DailyWorker:
             )
         except Exception as error:  # noqa: BLE001 - source recheck must not stop all sources
             LOGGER.exception("Government position evidence recheck failed")
-            return {"verified": 0, "source_unavailable": 0, "withdrawn": 0, "not_configured": 0, "error": 1}
-        counts = {"verified": 0, "source_unavailable": 0, "withdrawn": 0, "not_configured": 0, "error": 0}
+            return {"verified": 0, "source_unavailable": 0, "withdrawn": 0, "not_configured": 0, "manual_confirmation_required": 0, "error": 1}
+        counts = {"verified": 0, "source_unavailable": 0, "withdrawn": 0, "not_configured": 0, "manual_confirmation_required": 0, "error": 0}
         for result in results:
             status = str(result["status"])
+            if status == "manual_confirmation_required":
+                # Preserve a prior verified timestamp. The ordinary freshness
+                # window still retires it until an administrator renews it.
+                counts[status] += 1
+                continue
             self.database.record_government_source_verification(
                 str(result["source_id"]),
                 status=status,
@@ -270,6 +278,11 @@ class DailyWorker:
             source_verifications={
                 str(item["source_id"]): item
                 for item in self.database.list_government_source_verifications()
+            },
+            manual_confirmation_source_ids={
+                str(source["id"])
+                for source in self.database.list_sources()
+                if requires_manual_government_evidence_confirmation(source)
             },
             now=now,
         )

@@ -21,8 +21,15 @@ from job_hub.transport import RequestPolicy, create_session, request_exception_t
 
 
 VERIFICATION_STATUSES = frozenset(
-    {"verified", "source_unavailable", "withdrawn", "not_configured"}
+    {
+        "verified",
+        "source_unavailable",
+        "withdrawn",
+        "not_configured",
+        "manual_confirmation_required",
+    }
 )
+MANUAL_EVIDENCE_RECHECK_MODE = "manual_only"
 _EXPLICIT_CANCELLATION_PATTERNS = (
     re.compile(r"本(?:公告|次(?:公开)?招聘(?:公告)?).{0,40}(?:已)?(?:取消|作废|终止|停止|撤销)"),
     re.compile(r"(?:取消|作废|终止|停止|撤销).{0,40}本(?:公告|次(?:公开)?招聘(?:公告)?)"),
@@ -85,6 +92,20 @@ def revalidate_government_sources(
                 )
             )
             continue
+        if requires_manual_government_evidence_confirmation(source):
+            # Some official attachment hosts explicitly prohibit automated
+            # retrieval. An administrator must inspect the official notice and
+            # attachment, then renew the existing verification explicitly.
+            results.append(
+                _result(
+                    source_id,
+                    "manual_confirmation_required",
+                    checked_at,
+                    "official evidence is configured for administrator confirmation; "
+                    "no automated request was made",
+                )
+            )
+            continue
 
         urls = _official_urls(records)
         allowed_hosts = {
@@ -134,6 +155,14 @@ def revalidate_government_sources(
                 )
             )
     return results
+
+
+def requires_manual_government_evidence_confirmation(source: dict[str, Any]) -> bool:
+    """Return whether an official source forbids automated evidence retrieval."""
+    config = source.get("config") if isinstance(source.get("config"), dict) else {}
+    return str(config.get("government_evidence_recheck_mode") or "").strip() == (
+        MANUAL_EVIDENCE_RECHECK_MODE
+    )
 
 
 def _official_urls(records: Iterable[dict[str, Any]]) -> list[str]:

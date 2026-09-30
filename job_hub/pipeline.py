@@ -13,6 +13,7 @@ from job_hub.government_positions import (
     current_publishable_position_records,
     load_position_registry,
 )
+from job_hub.government_revalidation import requires_manual_government_evidence_confirmation
 from job_hub.locations import extract_location_hint, normalize_location
 from job_hub.matching import (
     classify_category,
@@ -975,6 +976,11 @@ class JobPipeline:
             today=now.date().isoformat(),
             max_age_hours=self.settings.government_position_max_age_hours,
             source_verifications=source_verifications,
+            manual_confirmation_source_ids={
+                str(source["id"])
+                for source in self.database.list_sources()
+                if requires_manual_government_evidence_confirmation(source)
+            },
             now=now,
         )
         records = list(registry.get("records", []))
