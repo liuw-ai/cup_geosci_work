@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 import job_hub.cmgb_browser_worker as worker_module
-from job_hub.cmgb_browser_capture import CmgbBrowserCaptureError
+from job_hub.cmgb_browser_capture import CmgbBrowserCaptureError, _detail_retryable
 from job_hub.cmgb_browser_worker import CmgbBrowserWorker, _capture_deadline
 
 
@@ -116,4 +116,11 @@ def test_cmgb_retry_configuration_is_scoped_to_the_cmgb_source() -> None:
 
     assert sources["cmgb-iguopin-browser"]["config"]["retry_partial_first"] is True
     assert sources["cmgb-iguopin-browser"]["config"]["detail_retry_max_age_hours"] == 12
+    assert sources["cmgb-iguopin-browser"]["config"]["detail_retry_attempts"] == 3
     assert "retry_partial_first" not in sources["cnpc-career-browser"]["config"]
+
+
+def test_cmgb_detail_retry_does_not_repeat_access_policy_failures() -> None:
+    assert not _detail_retryable(RuntimeError("robots.txt does not permit browser capture"))
+    assert not _detail_retryable(RuntimeError("CMGB retry detail returned HTTP 412"))
+    assert _detail_retryable(RuntimeError("detail page timed out"))

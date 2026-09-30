@@ -544,6 +544,36 @@ def validate_source_record(value: Any, *, context: str = "Source") -> dict[str, 
             allowed_hosts,
             f"{context} config allowed_hosts",
         )
+        if "max_age_hours" in source["config"]:
+            max_age = source["config"].get("max_age_hours")
+            if isinstance(max_age, bool):
+                raise ContractValidationError(
+                    f"{context} snapshot config max_age_hours must be a positive number"
+                )
+            try:
+                max_age_value = float(max_age)
+            except (TypeError, ValueError) as error:
+                raise ContractValidationError(
+                    f"{context} snapshot config max_age_hours must be a positive number"
+                ) from error
+            if max_age_value <= 0:
+                raise ContractValidationError(
+                    f"{context} snapshot config max_age_hours must be a positive number"
+                )
+            captured_at = _required_text(
+                source["config"].get("snapshot_captured_at"),
+                f"{context} config snapshot_captured_at",
+            )
+            if "T" not in captured_at or not (
+                captured_at.endswith("Z")
+                or "+" in captured_at[10:]
+                or "-" in captured_at[10:]
+            ):
+                raise ContractValidationError(
+                    f"{context} config snapshot_captured_at must be timezone-aware ISO-8601"
+                )
+            source["config"]["max_age_hours"] = max_age_value
+            source["config"]["snapshot_captured_at"] = captured_at
     if source["source_type"] == "beisen_job_portal":
         source["config"]["api_url"] = validate_http_url(
             source["config"].get("api_url"),

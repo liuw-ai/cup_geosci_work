@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -474,6 +475,26 @@ def _cmgb_row_from_detail(
         "description": detail["description"],
         "field_evidence": detail["field_evidence"],
     }
+
+
+def _detail_retryable(error: BaseException) -> bool:
+    """Classify transient detail failures without retrying access denials.
+
+    A second browser attempt is useful for SPA render races and renderer
+    timeouts.  It must not turn robots, authentication, rate limiting, or an
+    explicit server policy response into repeated probing.
+    """
+
+    message = str(error).lower()
+    non_retryable = (
+        "robots" in message,
+        "http 401" in message,
+        "http 403" in message,
+        "http 412" in message,
+        "http 429" in message,
+        "access denied" in message,
+    )
+    return not any(non_retryable)
 
 
 def _body_text(page: Any) -> str:
@@ -1272,54 +1293,80 @@ def run_cmgb_detail_retry(
                 browser = playwright.chromium.launch(headless=True)
                 context = browser.new_context(user_agent=user_agent)
 
+            retry_attempts = max(
+                1, min(5, int(config.get("detail_retry_attempts", 3)))
+            )
+            retry_delay_ms = max(
+                0, min(5_000, int(config.get("detail_retry_delay_ms", 500)))
+            )
             for target in retry_capture["retry_targets"]:
-                page = context.new_page()
-                try:
-                    detail_url = _official_url(target["detail_url"], "retry detail_url", hosts)
-                    # Respect the path-specific robots rule before each direct
-                    # detail request. This does not attempt to bypass any
-                    # restriction; a blocked target remains a failed target.
-                    _robots_permit(detail_url, user_agent=user_agent)
-                    response = page.goto(
-                        detail_url,
-                        wait_until="domcontentloaded",
-                        timeout=timeout_ms,
-                    )
-                    if response is not None and response.status >= 400:
-                        raise BrowserCaptureError(
-                            f"CMGB retry detail returned HTTP {response.status}"
-                        )
-                    page.wait_for_timeout(detail_render_wait_ms)
+                last_error: Exception | None = None
+                completed = False
+                for attempt in range(1, retry_attempts + 1):
+                    page = context.new_page()
                     try:
-                        page.locator(
-                            ".job-duty, .job-introduction, .job-description"
-                        ).first.wait_for(
-                            state="visible", timeout=min(timeout_ms, 5_000)
+                        detail_url = _official_url(
+                            target["detail_url"], "retry detail_url", hosts
                         )
-                    except PlaywrightTimeoutError:
-                        # The field extractor is the authoritative completeness
-                        # gate for details without a prose section.
-                        pass
-                    detail = extract_cmgb_detail(
-                        page,
-                        detail_url=page.url,
-                        allowed_hosts=hosts,
-                        require_employer=False,
-                    )
-                    retried_rows.append(_cmgb_row_from_detail(detail, target=target))
-                except Exception as error:
+                        # Respect the path-specific robots rule before each
+                        # direct detail request. This does not attempt to
+                        # bypass any restriction; a blocked target remains a
+                        # failed target and is not retried.
+                        _robots_permit(detail_url, user_agent=user_agent)
+                        response = page.goto(
+                            detail_url,
+                            wait_until="domcontentloaded",
+                            timeout=timeout_ms,
+                        )
+                        if response is not None and response.status >= 400:
+                            raise BrowserCaptureError(
+                                f"CMGB retry detail returned HTTP {response.status}"
+                            )
+                        page.wait_for_timeout(detail_render_wait_ms)
+                        try:
+                            page.locator(
+                                ".job-duty, .job-introduction, .job-description"
+                            ).first.wait_for(
+                                state="visible", timeout=min(timeout_ms, 5_000)
+                            )
+                        except PlaywrightTimeoutError:
+                            # The field extractor is the authoritative
+                            # completeness gate for details without a prose
+                            # section.
+                            pass
+                        detail = extract_cmgb_detail(
+                            page,
+                            detail_url=page.url,
+                            allowed_hosts=hosts,
+                            require_employer=False,
+                        )
+                        retried_rows.append(_cmgb_row_from_detail(detail, target=target))
+                        completed = True
+                        break
+                    except Exception as error:
+                        last_error = error
+                        if attempt < retry_attempts and _detail_retryable(error):
+                            if retry_delay_ms:
+                                time.sleep((retry_delay_ms * attempt) / 1000)
+                            continue
+                        break
+                    finally:
+                        try:
+                            if not page.is_closed():
+                                page.close()
+                        except Exception:
+                            pass
+                if not completed:
                     retry_failures.append(
                         {
                             **target,
-                            "reason": str(error)[:500],
+                            "reason": (
+                                f"{last_error} (attempts={retry_attempts})"
+                                if last_error is not None
+                                else "detail retry did not run"
+                            )[:500],
                         }
                     )
-                finally:
-                    try:
-                        if not page.is_closed():
-                            page.close()
-                    except Exception:
-                        pass
     except PlaywrightTimeoutError as error:
         raise BrowserCaptureError(f"CMGB detail retry timed out: {error}") from error
     except BrowserCaptureError:

@@ -5,7 +5,11 @@ import pytest
 
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
-from job_hub.sources import OfficialSourceCollector, SourceCollectionError
+from job_hub.sources import (
+    OfficialSourceCollector,
+    SourceCollectionError,
+    SourceSkipped,
+)
 
 from conftest import make_settings
 
@@ -49,6 +53,10 @@ def test_pipechina_snapshot_builds_job_detail_links_and_search_fallback(tmp_path
         (PROJECT_ROOT / "data" / "sources.json").read_text(encoding="utf-8")
     )
     source = next(item for item in registry if item["id"] == "pipechina-career")
+    source = {
+        **source,
+        "config": {**source["config"], "max_age_hours": 100_000},
+    }
     postings = OfficialSourceCollector(make_settings(tmp_path)).collect(source)
 
     geology = next(posting for posting in postings if posting.title == "地质探测")
@@ -161,6 +169,10 @@ def test_cnpc_snapshot_exposes_opaque_detail_id_and_degraded_page_state(tmp_path
         (PROJECT_ROOT / "data" / "sources.json").read_text(encoding="utf-8")
     )
     source = next(item for item in registry if item["id"] == "cnpc-career")
+    source = {
+        **source,
+        "config": {**source["config"], "max_age_hours": 100_000},
+    }
     collector = OfficialSourceCollector(make_settings(tmp_path))
 
     posting = collector.collect(source)[0]
@@ -190,3 +202,30 @@ def test_official_snapshot_rows_reject_unallowlisted_evidence_hosts(tmp_path) ->
                 },
             }
         )
+
+
+def test_official_snapshot_rows_reject_stale_configured_capture(tmp_path) -> None:
+    source = {
+        **SNAPSHOT_SOURCE,
+        "config": {
+            **SNAPSHOT_SOURCE["config"],
+            "max_age_hours": 30,
+            "snapshot_captured_at": "2020-01-01T00:00:00+00:00",
+        },
+    }
+    with pytest.raises(SourceSkipped, match="official snapshot is stale"):
+        OfficialSourceCollector(make_settings(tmp_path)).collect(source)
+
+
+def test_official_snapshot_rows_require_capture_timestamp_when_freshness_enabled(
+    tmp_path,
+) -> None:
+    source = {
+        **SNAPSHOT_SOURCE,
+        "config": {
+            **SNAPSHOT_SOURCE["config"],
+            "max_age_hours": 30,
+        },
+    }
+    with pytest.raises(SourceCollectionError, match="missing snapshot_captured_at"):
+        OfficialSourceCollector(make_settings(tmp_path)).collect(source)

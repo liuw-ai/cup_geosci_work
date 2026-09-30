@@ -694,6 +694,45 @@ class OfficialSourceCollector:
         if not isinstance(payload, list) or not payload:
             raise SourceCollectionError("official snapshot must be a non-empty JSON list")
 
+        # A file-backed snapshot is a controlled bridge for a dynamic portal,
+        # not a permanent substitute for a live source.  Sources that opt into
+        # ``max_age_hours`` must also declare when this exact file was captured.
+        # Rejecting an old file preserves the last verified rows in the
+        # database, while making the source visibly stale instead of silently
+        # presenting historical data as a daily refresh.
+        max_age_hours = config.get("max_age_hours")
+        captured_at_text = str(config.get("snapshot_captured_at") or "").strip()
+        if max_age_hours is not None:
+            if not captured_at_text:
+                raise SourceCollectionError(
+                    "official snapshot is missing snapshot_captured_at"
+                )
+            try:
+                captured_at = datetime.fromisoformat(
+                    captured_at_text.replace("Z", "+00:00")
+                )
+            except ValueError as error:
+                raise SourceCollectionError(
+                    "official snapshot snapshot_captured_at is not ISO-8601"
+                ) from error
+            if captured_at.tzinfo is None:
+                raise SourceCollectionError(
+                    "official snapshot snapshot_captured_at must include a timezone"
+                )
+            age_hours = (
+                datetime.now(timezone.utc)
+                - captured_at.astimezone(timezone.utc)
+            ).total_seconds() / 3600
+            if age_hours < -1:
+                raise SourceCollectionError(
+                    "official snapshot snapshot_captured_at is in the future"
+                )
+            if age_hours > float(max_age_hours):
+                raise SourceSkipped(
+                    "official snapshot is stale "
+                    f"({age_hours:.1f}h > {float(max_age_hours):.1f}h)"
+                )
+
         detail_index = self._load_snapshot_detail_index(source)
 
         postings: list[RawPosting] = []
@@ -743,6 +782,8 @@ class OfficialSourceCollector:
                 str(key): str(value)
                 for key, value in field_evidence.items()
             }
+            if captured_at_text:
+                field_evidence.setdefault("快照采集时间", captured_at_text)
             detail = detail_index.get(str(item.get("external_id") or "").strip())
             if detail:
                 source_url = self._build_official_detail_url(source, detail)
