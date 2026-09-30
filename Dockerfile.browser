@@ -1,4 +1,5 @@
-FROM cupb-geoscience-job-hub:latest
+ARG BROWSER_BASE_IMAGE=cupb-geoscience-job-hub:latest
+FROM ${BROWSER_BASE_IMAGE}
 
 # The public web/worker image deliberately has no browser client.  This image
 # is built only for the isolated read-only browser workers, which connect to
@@ -7,8 +8,11 @@ FROM cupb-geoscience-job-hub:latest
 # failed browser dependency from being mistaken for an official-source scan
 # result.
 USER root
+ARG INSTALL_BROWSER_DEPS=1
 COPY requirements-browser.txt /tmp/requirements-browser.txt
-RUN pip install --no-cache-dir -r /tmp/requirements-browser.txt \
+RUN if [ "$INSTALL_BROWSER_DEPS" = "1" ]; then \
+      pip install --no-cache-dir -r /tmp/requirements-browser.txt; \
+    fi \
     && rm -f /tmp/requirements-browser.txt
 USER jobhub
 
