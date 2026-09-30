@@ -77,6 +77,13 @@ class Settings:
     backup_storage_dir: Path | None = None
     backup_retention_days: int = 14
     backup_min_interval_minutes: int = 720
+    # Failed sources are retried independently from successful sync cadence.
+    # Policy/access failures get a longer cooldown so the worker does not
+    # repeatedly hit a source that has explicitly limited automated access.
+    source_retry_base_seconds: int = 300
+    source_retry_max_seconds: int = 21_600
+    source_blocked_retry_base_seconds: int = 21_600
+    source_blocked_retry_max_seconds: int = 86_400
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -173,6 +180,18 @@ class Settings:
             backup_retention_days=_env_int("BACKUP_RETENTION_DAYS", 14),
             backup_min_interval_minutes=_env_int(
                 "BACKUP_MIN_INTERVAL_MINUTES", 720
+            ),
+            source_retry_base_seconds=_env_int(
+                "SOURCE_RETRY_BASE_SECONDS", 300
+            ),
+            source_retry_max_seconds=_env_int(
+                "SOURCE_RETRY_MAX_SECONDS", 21_600
+            ),
+            source_blocked_retry_base_seconds=_env_int(
+                "SOURCE_BLOCKED_RETRY_BASE_SECONDS", 21_600
+            ),
+            source_blocked_retry_max_seconds=_env_int(
+                "SOURCE_BLOCKED_RETRY_MAX_SECONDS", 86_400
             ),
         )
 

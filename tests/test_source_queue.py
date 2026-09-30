@@ -74,6 +74,43 @@ def test_source_queue_keeps_policy_blocked_sources_distinct_from_success(tmp_pat
     assert database.list_source_tasks(due_only=True) == []
 
 
+def test_source_queue_tracks_consecutive_failures_and_resets_after_success(tmp_path) -> None:
+    database = Database(tmp_path / "queue.sqlite3")
+    database.initialize()
+    source = _source("source-backoff")
+    database.upsert_source(source)
+    database.ensure_source_tasks([source])
+
+    assert database.claim_source_task("source-backoff") is not None
+    database.fail_source_task(
+        "source-backoff",
+        error="temporary parser error",
+        error_class="collector_error",
+        retry_after_seconds=60,
+    )
+    task = database.get_source_task("source-backoff")
+    assert task is not None
+    assert task["attempts"] == 1
+    assert task["consecutive_failures"] == 1
+
+    assert database.claim_source_task("source-backoff", force=True) is not None
+    database.fail_source_task(
+        "source-backoff",
+        error="temporary parser error again",
+        error_class="collector_error",
+        retry_after_seconds=120,
+    )
+    task = database.get_source_task("source-backoff")
+    assert task is not None
+    assert task["attempts"] == 2
+    assert task["consecutive_failures"] == 2
+
+    database.complete_source_task("source-backoff", next_attempt_seconds=60)
+    task = database.get_source_task("source-backoff")
+    assert task is not None
+    assert task["consecutive_failures"] == 0
+
+
 def test_source_queue_recovers_expired_running_lease(tmp_path) -> None:
     database = Database(tmp_path / "queue.sqlite3")
     database.initialize()

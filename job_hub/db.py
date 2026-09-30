@@ -278,6 +278,7 @@ CREATE TABLE IF NOT EXISTS source_tasks (
     priority INTEGER NOT NULL DEFAULT 100,
     status TEXT NOT NULL DEFAULT 'pending',
     attempts INTEGER NOT NULL DEFAULT 0,
+    consecutive_failures INTEGER NOT NULL DEFAULT 0,
     next_attempt_at TEXT NOT NULL,
     lease_until TEXT,
     last_started_at TEXT,
@@ -484,6 +485,18 @@ class Database:
             if name not in crawl_run_columns:
                 connection.execute(
                     f"ALTER TABLE crawl_runs ADD COLUMN {name} {definition}"
+                )
+        source_task_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(source_tasks)").fetchall()
+        }
+        source_task_additions = {
+            "consecutive_failures": "INTEGER NOT NULL DEFAULT 0",
+        }
+        for name, definition in source_task_additions.items():
+            if name not in source_task_columns:
+                connection.execute(
+                    f"ALTER TABLE source_tasks ADD COLUMN {name} {definition}"
                 )
         lead_columns = {
             row["name"]
@@ -750,7 +763,8 @@ class Database:
                 UPDATE source_tasks
                 SET status='succeeded', next_attempt_at=?, lease_until=NULL,
                     last_finished_at=?, last_run_id=COALESCE(?, last_run_id),
-                    last_error=NULL, last_error_class=NULL, updated_at=?
+                    last_error=NULL, last_error_class=NULL,
+                    consecutive_failures=0, updated_at=?
                 WHERE source_id=?
                 """,
                 (next_attempt, now, run_id, now, source_id),
@@ -777,7 +791,9 @@ class Database:
                 UPDATE source_tasks
                 SET status=?, next_attempt_at=?, lease_until=NULL,
                     last_finished_at=?, last_run_id=COALESCE(?, last_run_id),
-                    last_error=?, last_error_class=?, updated_at=?
+                    last_error=?, last_error_class=?,
+                    consecutive_failures=consecutive_failures + 1,
+                    updated_at=?
                 WHERE source_id=?
                 """,
                 (

@@ -26,6 +26,33 @@ class FailingCollector:
         raise RuntimeError("unexpected source parser failure")
 
 
+def test_source_retry_delay_is_bounded_and_policy_failures_are_slower(tmp_path) -> None:
+    settings = replace(
+        make_settings(tmp_path),
+        source_retry_base_seconds=10,
+        source_retry_max_seconds=35,
+        source_blocked_retry_base_seconds=60,
+        source_blocked_retry_max_seconds=180,
+    )
+    pipeline = JobPipeline(settings, Database(settings.database_path))
+
+    assert pipeline._source_retry_after_seconds(
+        {"consecutive_failures": 0}, blocked=False
+    ) == 10
+    assert pipeline._source_retry_after_seconds(
+        {"consecutive_failures": 1}, blocked=False
+    ) == 20
+    assert pipeline._source_retry_after_seconds(
+        {"consecutive_failures": 8}, blocked=False
+    ) == 35
+    assert pipeline._source_retry_after_seconds(
+        {"consecutive_failures": 0}, blocked=True
+    ) == 60
+    assert pipeline._source_retry_after_seconds(
+        {"consecutive_failures": 2}, blocked=True
+    ) == 180
+
+
 def test_pipeline_deduplicates_and_creates_daily_change(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)

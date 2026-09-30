@@ -187,11 +187,7 @@ class JobPipeline:
                 )
             else:
                 blocked = result.status == "skipped" or self._is_policy_error(result.error)
-                retry_after = (
-                    max(3600, self.settings.source_sync_interval_minutes * 60)
-                    if blocked
-                    else max(60, min(1800, self.settings.source_sync_interval_minutes * 60))
-                )
+                retry_after = self._source_retry_after_seconds(task, blocked=blocked)
                 self.database.fail_source_task(
                     source["id"],
                     error=result.error or "source task failed",
@@ -213,6 +209,47 @@ class JobPipeline:
             recovered_crawl_runs=len(recovered),
             recovered_source_tasks=len(recovered_tasks),
         )
+
+    def _source_retry_after_seconds(
+        self,
+        task: dict[str, Any] | None,
+        *,
+        blocked: bool,
+    ) -> int:
+        """Return a bounded exponential delay for one source queue item.
+
+        ``attempts`` is a lifetime counter and is useful for audit reports;
+        ``consecutive_failures`` is the operational signal used here.  A
+        successful run resets the latter, so one old incident cannot make a
+        healthy source wait several hours forever.  Access-policy failures
+        deliberately start with a longer delay and never become a tight loop.
+        """
+        consecutive = max(
+            0,
+            int((task or {}).get("consecutive_failures") or 0),
+        )
+        if blocked:
+            base = max(
+                1,
+                int(getattr(self.settings, "source_blocked_retry_base_seconds", 21_600)),
+            )
+            maximum = max(
+                base,
+                int(getattr(self.settings, "source_blocked_retry_max_seconds", 86_400)),
+            )
+        else:
+            base = max(
+                1,
+                int(getattr(self.settings, "source_retry_base_seconds", 300)),
+            )
+            maximum = max(
+                base,
+                int(getattr(self.settings, "source_retry_max_seconds", 21_600)),
+            )
+        # The task passed to this method is the row before fail_source_task
+        # increments its consecutive failure counter.
+        exponent = min(consecutive, 30)
+        return min(maximum, base * (2**exponent))
 
     def sync_source(self, source: dict[str, Any]) -> SourceSyncResult:
         self.database.recover_stale_crawl_runs(
@@ -866,11 +903,7 @@ class JobPipeline:
             )
         else:
             blocked = result.status == "skipped" or self._is_policy_error(result.error)
-            retry_after = (
-                max(3600, self.settings.source_sync_interval_minutes * 60)
-                if blocked
-                else max(60, min(1800, self.settings.source_sync_interval_minutes * 60))
-            )
+            retry_after = self._source_retry_after_seconds(claimed, blocked=blocked)
             self.database.fail_source_task(
                 source["id"],
                 error=result.error or "source task failed",

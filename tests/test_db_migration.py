@@ -87,6 +87,53 @@ def test_initialize_adds_v03_columns_to_a_v02_jobs_table(tmp_path) -> None:
     assert "open_matching_count" in crawl_run_names
 
 
+def test_initialize_adds_source_retry_state_to_legacy_queue(tmp_path) -> None:
+    path = tmp_path / "legacy-queue.sqlite3"
+    connection = sqlite3.connect(path)
+    connection.executescript(
+        """
+        CREATE TABLE sources (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            publisher TEXT NOT NULL,
+            homepage_url TEXT NOT NULL,
+            source_type TEXT NOT NULL,
+            category TEXT NOT NULL,
+            source_tier TEXT NOT NULL,
+            enabled INTEGER NOT NULL DEFAULT 1,
+            config_json TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE TABLE source_tasks (
+            source_id TEXT PRIMARY KEY,
+            priority INTEGER NOT NULL DEFAULT 100,
+            status TEXT NOT NULL DEFAULT 'pending',
+            attempts INTEGER NOT NULL DEFAULT 0,
+            next_attempt_at TEXT NOT NULL,
+            lease_until TEXT,
+            last_started_at TEXT,
+            last_finished_at TEXT,
+            last_error TEXT,
+            last_error_class TEXT,
+            last_run_id INTEGER,
+            updated_at TEXT NOT NULL
+        );
+        """
+    )
+    connection.commit()
+    connection.close()
+
+    database = Database(path)
+    database.initialize()
+
+    with database.connect() as migrated:
+        columns = {
+            row["name"] for row in migrated.execute("PRAGMA table_info(source_tasks)")
+        }
+    assert "consecutive_failures" in columns
+
+
 def test_update_job_normalization_reports_and_persists_a_change(tmp_path) -> None:
     path = tmp_path / "jobs.sqlite3"
     database = Database(path)
