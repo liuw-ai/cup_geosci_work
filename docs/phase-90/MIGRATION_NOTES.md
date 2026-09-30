@@ -13,3 +13,9 @@ consecutive_failures INTEGER NOT NULL DEFAULT 0
 ## 回退
 
 回退到 Phase 89 代码时，保留新增字段不会影响旧代码读取。部署前后的 SQLite 备份必须保留；回退只替换应用镜像，不删除 `job_hub_data` volume。
+
+## 服务器镜像
+
+本阶段快速部署文件为 `deploy/Dockerfile.phase90-fast` 和
+`deploy/docker-compose.phase90-fast.yml`，镜像标签为
+`cupb-geoscience-job-hub:phase90-fast`。

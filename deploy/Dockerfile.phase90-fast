@@ -1,0 +1,7 @@
+# Phase 90 server rollout: reuse the verified dependency image and replace
+# only the application code and versioned data.
+FROM cupb-geoscience-job-hub:latest
+
+WORKDIR /app
+COPY job_hub /app/job_hub
+COPY data /app/data

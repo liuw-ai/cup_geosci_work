@@ -32,4 +32,5 @@ pytest -q
 python -m job_hub.cli source-run-ledger --date <YYYY-MM-DD>
 ```
 
-服务器部署必须先备份 SQLite，再滚动重建 `web` 和 `worker`。Caddy、域名和 DNS 不属于本阶段；IP 临时入口也不被标记为正式公网域名。
+服务器部署必须先备份 SQLite，再使用 `deploy/Dockerfile.phase90-fast` 和
+`deploy/docker-compose.phase90-fast.yml` 滚动重建 `web` 和 `worker`。Caddy、域名和 DNS 不属于本阶段；IP 临时入口也不被标记为正式公网域名。

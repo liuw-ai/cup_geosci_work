@@ -1,0 +1,8 @@
+name: cupb-geoscience-job-hub
+services:
+  web:
+    image: cupb-geoscience-job-hub:phase90-fast
+    build: null
+  worker:
+    image: cupb-geoscience-job-hub:phase90-fast
+    build: null
