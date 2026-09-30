@@ -395,19 +395,35 @@ class _ClosingConnection(sqlite3.Connection):
 
 
 class Database:
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, *, read_only: bool = False):
         self.path = path
+        self.read_only = read_only
 
     def connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(
-            self.path,
-            timeout=30,
-            detect_types=sqlite3.PARSE_DECLTYPES,
-            factory=_ClosingConnection,
-        )
+        if self.read_only:
+            # Read-only reports must not switch journal mode or otherwise
+            # acquire a writer lock while workers are bootstrapping sources.
+            # Use SQLite's URI mode so a typo or missing database fails
+            # clearly instead of silently creating a new empty file.
+            database_uri = f"{self.path.resolve().as_uri()}?mode=ro"
+            connection = sqlite3.connect(
+                database_uri,
+                uri=True,
+                timeout=30,
+                detect_types=sqlite3.PARSE_DECLTYPES,
+                factory=_ClosingConnection,
+            )
+        else:
+            connection = sqlite3.connect(
+                self.path,
+                timeout=30,
+                detect_types=sqlite3.PARSE_DECLTYPES,
+                factory=_ClosingConnection,
+            )
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
-        connection.execute("PRAGMA journal_mode = WAL")
+        if not self.read_only:
+            connection.execute("PRAGMA journal_mode = WAL")
         connection.execute("PRAGMA busy_timeout = 5000")
         return connection
 

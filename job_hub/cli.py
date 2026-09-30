@@ -1121,6 +1121,66 @@ def main() -> None:
             args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
+
+    # These commands inspect versioned source metadata or perform transient
+    # HTTP checks.  They must not call services(), whose bootstrap writes to
+    # the shared SQLite database and makes concurrent provincial probes race.
+    if args.command == "cross-ledger-audit":
+        try:
+            result = build_government_ledger_consistency_audit(
+                today=args.today,
+                max_age_hours=args.max_age_hours,
+            )
+        except (OSError, ValueError) as error:
+            print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if not result["ok"]:
+            raise SystemExit(1)
+        return
+
+    if args.command == "provincial-entry-probe":
+        settings = Settings.from_env()
+        settings.ensure_runtime_paths()
+        result = run_provincial_entry_probe(
+            settings,
+            provinces=args.province,
+            roles=args.role,
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "provincial-matrix-audit":
+        settings = Settings.from_env()
+        settings.ensure_runtime_paths()
+        # The audit reads runtime state but must not initialize or bootstrap
+        # it.  This allows it to run beside workers and parallel probes.
+        readonly_database = Database(settings.database_path, read_only=True)
+        result = build_provincial_matrix_audit(
+            source_records=readonly_database.list_sources(),
+            health_records=readonly_database.list_source_health(),
+            latest_runs=readonly_database.list_latest_crawl_runs(),
+            provinces=args.province,
+            roles=args.role,
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+
     # Browser capture commands need the registered source and runtime paths.
     # Keep this initialization before their early-return branches; the common
     # service setup below is intentionally later for lightweight read-only
@@ -1277,24 +1337,6 @@ def main() -> None:
                 encoding="utf-8",
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
-        return
-    if args.command == "cross-ledger-audit":
-        try:
-            result = build_government_ledger_consistency_audit(
-                today=args.today,
-                max_age_hours=args.max_age_hours,
-            )
-        except (OSError, ValueError) as error:
-            print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
-            raise SystemExit(1)
-        if args.output:
-            args.output.parent.mkdir(parents=True, exist_ok=True)
-            args.output.write_text(
-                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
-            )
-        print(json.dumps(result, ensure_ascii=False, indent=2))
-        if not result["ok"]:
-            raise SystemExit(1)
         return
     if args.command == "organization-matrix":
         registry = load_organization_registry()
@@ -1560,34 +1602,6 @@ def main() -> None:
             args.output.write_text(
                 json.dumps(result, ensure_ascii=False, indent=2),
                 encoding="utf-8",
-            )
-        print(json.dumps(result, ensure_ascii=False, indent=2))
-        return
-    if args.command == "provincial-entry-probe":
-        result = run_provincial_entry_probe(
-            settings,
-            provinces=args.province,
-            roles=args.role,
-        )
-        if args.output:
-            args.output.parent.mkdir(parents=True, exist_ok=True)
-            args.output.write_text(
-                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
-            )
-        print(json.dumps(result, ensure_ascii=False, indent=2))
-        return
-    if args.command == "provincial-matrix-audit":
-        result = build_provincial_matrix_audit(
-            source_records=database.list_sources(),
-            health_records=database.list_source_health(),
-            latest_runs=database.list_latest_crawl_runs(),
-            provinces=args.province,
-            roles=args.role,
-        )
-        if args.output:
-            args.output.parent.mkdir(parents=True, exist_ok=True)
-            args.output.write_text(
-                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return

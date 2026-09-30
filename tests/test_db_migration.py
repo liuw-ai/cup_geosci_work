@@ -2,7 +2,27 @@ from __future__ import annotations
 
 import sqlite3
 
+import pytest
+
 from job_hub.db import Database
+
+
+def test_read_only_database_does_not_create_writer_lock(tmp_path) -> None:
+    path = tmp_path / "read-only.sqlite3"
+    writable = Database(path)
+    writable.initialize()
+
+    readonly = Database(path, read_only=True)
+    with readonly.connect() as connection:
+        assert connection.execute("SELECT COUNT(*) FROM sources").fetchone()[0] == 0
+        with pytest.raises(sqlite3.OperationalError):
+            connection.execute("CREATE TABLE should_not_exist (id INTEGER)")
+        assert (
+            connection.execute(
+                "SELECT COUNT(*) FROM sqlite_master WHERE name = 'should_not_exist'"
+            ).fetchone()[0]
+            == 0
+        )
 
 
 def test_initialize_adds_v03_columns_to_a_v02_jobs_table(tmp_path) -> None:

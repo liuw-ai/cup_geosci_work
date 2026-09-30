@@ -114,6 +114,12 @@ def test_provincial_probe_cli_writes_an_explicitly_requested_private_report(
             str(output),
         ],
     )
+    monkeypatch.setattr(
+        "job_hub.cli.services",
+        lambda: (_ for _ in ()).throw(
+            AssertionError("read-only probe must not bootstrap services")
+        ),
+    )
 
     cli_main()
 
