@@ -1,12 +1,28 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
+from pathlib import Path
 
 import pytest
 
 from job_hub.sources import OfficialSourceCollector, SourceCollectionError
 
 from conftest import make_settings
+
+
+def test_production_cnooc_source_is_a_daily_monitor_not_a_static_snapshot() -> None:
+    project_root = Path(__file__).resolve().parents[1]
+    sources = json.loads(
+        (project_root / "data" / "sources.json").read_text(encoding="utf-8")
+    )
+    source = next(item for item in sources if item["id"] == "cnooc-career")
+
+    assert source["enabled"] is True
+    assert source["source_type"] == "zhaopin_campus"
+    assert source["config"]["scan_policy"] == "daily_public_api_monitor"
+    assert source["config"]["automation_status"].endswith("20260930_direct")
+    assert source["config"]["last_server_scan"] == "2026-09-30"
 
 
 @dataclass
