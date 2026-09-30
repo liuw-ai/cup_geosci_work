@@ -29,6 +29,7 @@ from bs4 import BeautifulSoup
 from job_hub.config import Settings
 from job_hub.contracts import is_http_url
 from job_hub.db import Database
+from job_hub.government_artifacts import government_artifact_processing_block_reason
 from job_hub.matching import (
     extract_deadline,
     extract_degree_levels,
@@ -304,6 +305,21 @@ class OfficialAttachmentProcessor:
         artifact = self.database.get_source_artifact(artifact_id)
         if artifact is None:
             raise ValueError("Source artifact does not exist")
+        manifest_block_reason = government_artifact_processing_block_reason(
+            artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else None
+        )
+        if manifest_block_reason:
+            # ``force_download`` deliberately cannot override manifest policy.
+            # It only controls a redownload for an otherwise eligible artifact.
+            self.database.update_source_artifact_processing(
+                artifact_id,
+                extraction_status="skipped",
+                metadata_updates={
+                    "processing_skip_reason": manifest_block_reason,
+                    "processing_skipped_at": _utc_now(),
+                },
+            )
+            return AttachmentResult(artifact_id, "skipped", detail=manifest_block_reason)
         try:
             if (
                 artifact.get("extraction_status") in {"downloaded", "extracted"}
@@ -1651,13 +1667,23 @@ def process_pending_attachments(
         oldest_first=True,
         extraction_statuses=eligible_statuses,
     )
-    selected = [
+    source_scoped_artifacts = [
         artifact
         for artifact in artifacts
         if (
             source_ids is None
             or str(artifact.get("source_id") or "") in source_ids
         )
+    ]
+    policy_skipped = [
+        artifact
+        for artifact in source_scoped_artifacts
+        if government_artifact_processing_block_reason(
+            artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else None
+        )
+    ]
+    selected = [
+        artifact for artifact in source_scoped_artifacts if artifact not in policy_skipped
     ]
     summary: dict[str, object] = {
         "selected": len(selected),
@@ -1669,6 +1695,18 @@ def process_pending_attachments(
         "candidates_created": 0,
         "candidates_rejected": 0,
         "retry_failed": bool(retry_failed),
+        "policy_skipped": len(policy_skipped),
+        "policy_skip_items": [
+            {
+                "artifact_id": int(artifact["id"]),
+                "source_id": str(artifact.get("source_id") or ""),
+                "status": "skipped",
+                "detail": government_artifact_processing_block_reason(
+                    artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else None
+                ),
+            }
+            for artifact in policy_skipped
+        ],
         "items": [],
     }
     items = summary["items"]

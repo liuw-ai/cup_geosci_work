@@ -8,6 +8,7 @@ import pytest
 from job_hub.app import create_app
 from job_hub.attachments import OfficialAttachmentProcessor
 from job_hub.db import Database
+from job_hub.government_artifacts import register_government_artifacts
 
 from conftest import make_settings, make_settings_with_artifact_path, source
 
@@ -511,6 +512,47 @@ def test_attachment_download_rejects_cross_host_and_robots_denied(tmp_path) -> N
     assert result.status == "skipped"
     assert "robots.txt" in result.detail
     assert database2.get_source_artifact(artifact2["id"])["extraction_status"] == "skipped"
+
+
+def test_manifest_manual_only_artifact_cannot_be_downloaded_by_direct_processor(tmp_path) -> None:
+    session = FakeSession(_xlsx_bytes())
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    artifact = register_government_artifacts(
+        database,
+        {
+            "as_of": "2026-09-30",
+            "artifacts": [
+                {
+                    "id": "manual-government-artifact",
+                    "source_id": "official-test-source",
+                    "province": "全国",
+                    "position_type": "public_institution",
+                    "notice_url": "https://careers.example.edu.cn/notice/1",
+                    "attachment_url": "https://careers.example.edu.cn/files/positions.xlsx",
+                    "artifact_kind": "position_table",
+                    "deadline_date": "2099-12-31",
+                    "deadline_policy": "fixed_date",
+                    "observed_on": "2026-09-30",
+                    "status": "manual_verified",
+                    "note": "manual review only",
+                }
+            ],
+        },
+    )[0]
+    processor = OfficialAttachmentProcessor(settings, database, session=session)
+
+    result = processor.process(int(artifact["id"]), force_download=True)
+
+    assert result.status == "skipped"
+    assert "manual evidence confirmation" in result.detail
+    assert session.calls == []
+    stored = database.get_source_artifact(int(artifact["id"]))
+    assert stored is not None
+    assert stored["extraction_status"] == "skipped"
+    assert "manual evidence confirmation" in stored["metadata"]["processing_skip_reason"]
 
 
 def test_discovery_registers_only_official_file_links_without_downloading(tmp_path) -> None:

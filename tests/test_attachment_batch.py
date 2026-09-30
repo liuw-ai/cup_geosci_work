@@ -89,3 +89,37 @@ def test_batch_retry_failed_is_explicit_and_keeps_errors_auditable() -> None:
             "error": "temporary HTTP failure",
         }
     ]
+
+
+def test_batch_excludes_manifest_artifacts_with_non_automatic_policy() -> None:
+    database = FakeDatabase(
+        [
+            {
+                "id": 1,
+                "source_id": "source-a",
+                "extraction_status": "registered",
+                "metadata": {
+                    "government_artifact_id": "manual-source",
+                    "manifest_status": "manual_verified",
+                },
+            },
+            {
+                "id": 2,
+                "source_id": "source-b",
+                "extraction_status": "failed",
+                "metadata": {
+                    "government_artifact_id": "student-scope-excluded",
+                    "manifest_status": "current_non_student_eligible",
+                },
+            },
+            {"id": 3, "source_id": "source-c", "extraction_status": "registered"},
+        ]
+    )
+    processor = FakeProcessor({3: AttachmentResult(3, "extracted")})
+
+    summary = process_pending_attachments(database, processor, retry_failed=True)
+
+    assert processor.calls == [3]
+    assert summary["selected"] == 1
+    assert summary["policy_skipped"] == 2
+    assert {item["artifact_id"] for item in summary["policy_skip_items"]} == {1, 2}

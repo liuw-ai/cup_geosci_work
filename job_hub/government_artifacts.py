@@ -24,9 +24,22 @@ ARTIFACT_STATUSES = frozenset(
         "manual_verified",
         "historical_closed",
         "source_unavailable",
+        "current_non_student_eligible",
     }
 )
 DEADLINE_POLICIES = frozenset({"fixed_date", "open_until_filled"})
+
+# Manifest state is a control-plane decision, not a descriptive note. Only
+# artifacts explicitly marked for server processing may enter the automated
+# download queue.
+MANIFEST_PROCESSING_POLICIES = {
+    "server_download_pending": "automatic",
+    "manual_verified": "manual_only",
+    "historical_closed": "historical_closed",
+    "source_unavailable": "source_unavailable",
+    "current_non_student_eligible": "student_scope_excluded",
+}
+AUTOMATIC_MANIFEST_PROCESSING_POLICIES = frozenset({"automatic"})
 
 
 class GovernmentArtifactContractError(ValueError):
@@ -136,10 +149,54 @@ def load_government_artifact_manifest(
     }
 
 
+def government_artifact_processing_policy(metadata: dict[str, Any] | None) -> str | None:
+    """Return the non-bypassable processing policy for a manifest artifact.
+
+    Non-manifest attachment discoveries return ``None`` and continue through
+    the ordinary controlled attachment workflow. An old or malformed manifest
+    row is deliberately manual-only instead of becoming an unexpected
+    automated download.
+    """
+    metadata = metadata or {}
+    if not metadata.get("government_artifact_id"):
+        return None
+    status = str(metadata.get("manifest_status") or "").strip()
+    return MANIFEST_PROCESSING_POLICIES.get(status, "manual_only")
+
+
+def government_artifact_processing_block_reason(
+    metadata: dict[str, Any] | None,
+) -> str | None:
+    """Explain why a manifest-backed artifact cannot be auto-processed."""
+    policy = government_artifact_processing_policy(metadata)
+    if policy in (None, "automatic"):
+        return None
+    reasons = {
+        "manual_only": (
+            "Government manifest requires manual evidence confirmation; "
+            "automatic attachment download is disabled"
+        ),
+        "historical_closed": (
+            "Government manifest marks this attachment as historical and closed; "
+            "automatic processing is disabled"
+        ),
+        "source_unavailable": (
+            "Government manifest records this official attachment as unavailable; "
+            "automatic retry is disabled"
+        ),
+        "student_scope_excluded": (
+            "Government manifest marks this current recruitment as outside the "
+            "student-facing eligibility scope; automatic processing is disabled"
+        ),
+    }
+    return reasons.get(policy, "Government manifest disables automatic attachment processing")
+
+
 def register_government_artifacts(database: Any, manifest: dict[str, Any]) -> list[dict[str, Any]]:
     """Register manifest rows in the private attachment ledger only."""
     registered: list[dict[str, Any]] = []
     for item in manifest["artifacts"]:
+        processing_policy = MANIFEST_PROCESSING_POLICIES[item["status"]]
         registered.append(
             database.upsert_source_artifact(
                 {
@@ -148,7 +205,11 @@ def register_government_artifacts(database: Any, manifest: dict[str, Any]) -> li
                     "artifact_url": item["attachment_url"],
                     "artifact_kind": item["artifact_kind"],
                     "media_type": None,
-                    "extraction_status": "registered",
+                    "extraction_status": (
+                        "registered"
+                        if processing_policy in AUTOMATIC_MANIFEST_PROCESSING_POLICIES
+                        else "skipped"
+                    ),
                     "metadata": {
                         "government_artifact_id": item["id"],
                         "position_type": item["position_type"],
@@ -157,6 +218,7 @@ def register_government_artifacts(database: Any, manifest: dict[str, Any]) -> li
                         "deadline_policy": item["deadline_policy"],
                         "observed_on": item["observed_on"],
                         "manifest_status": item["status"],
+                        "manifest_processing_policy": processing_policy,
                         "note": item["note"],
                     },
                 }
@@ -187,6 +249,7 @@ def government_artifact_refresh_summary(
             artifacts.append(item)
     extraction_counts: dict[str, int] = {}
     manifest_counts: dict[str, int] = {}
+    policy_counts: dict[str, int] = {}
     current = historical = 0
     for artifact in artifacts:
         extraction = str(artifact.get("extraction_status") or "unknown")
@@ -194,6 +257,8 @@ def government_artifact_refresh_summary(
         metadata = artifact.get("metadata") or {}
         status = str(metadata.get("manifest_status") or "unknown")
         manifest_counts[status] = manifest_counts.get(status, 0) + 1
+        processing_policy = government_artifact_processing_policy(metadata) or "not_manifest_backed"
+        policy_counts[processing_policy] = policy_counts.get(processing_policy, 0) + 1
         deadline = str(metadata.get("deadline_date") or "").strip()
         policy = str(metadata.get("deadline_policy") or "fixed_date").strip()
         if policy == "open_until_filled" and not deadline:
@@ -212,11 +277,13 @@ def government_artifact_refresh_summary(
     for candidate in candidates:
         status = str(candidate.get("review_status") or "unknown")
         candidate_counts[status] = candidate_counts.get(status, 0) + 1
-    source_failures = sum(
-        count
-        for status, count in extraction_counts.items()
-        if status in {"failed", "skipped", "source_unavailable"}
-    ) + manifest_counts.get("source_unavailable", 0) + (1 if manifest_error else 0)
+    # A policy-driven ``skipped`` status is intentional, not a source failure.
+    source_failures = manifest_counts.get("source_unavailable", 0) + (1 if manifest_error else 0)
+    for artifact in artifacts:
+        extraction = str(artifact.get("extraction_status") or "unknown")
+        processing_policy = government_artifact_processing_policy(artifact.get("metadata") or {})
+        if extraction == "failed" or (extraction == "skipped" and processing_policy == "automatic"):
+            source_failures += 1
     return {
         "as_of": (manifest or {}).get("as_of"),
         "declared_artifacts": len(declared),
@@ -225,6 +292,7 @@ def government_artifact_refresh_summary(
         "historical_deadline_artifacts": historical,
         "extraction_status": dict(sorted(extraction_counts.items())),
         "manifest_status": dict(sorted(manifest_counts.items())),
+        "processing_policy": dict(sorted(policy_counts.items())),
         "candidate_review_status": dict(sorted(candidate_counts.items())),
         "source_failures_or_unavailable": source_failures,
         "manifest_error": manifest_error,

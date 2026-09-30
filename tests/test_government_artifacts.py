@@ -27,7 +27,13 @@ def test_provincial_manifest_contains_real_official_attachments() -> None:
     assert len(manifest["artifacts"]) == 13
     assert {item["province"] for item in manifest["artifacts"]} == {"全国", "北京", "安徽", "山东", "河南", "天津", "甘肃", "宁夏", "湖北", "湖南"}
     assert all(
-        item["status"] in {"historical_closed", "server_download_pending", "manual_verified"}
+        item["status"]
+        in {
+            "historical_closed",
+            "server_download_pending",
+            "manual_verified",
+            "current_non_student_eligible",
+        }
         for item in manifest["artifacts"]
     )
     cea = next(item for item in manifest["artifacts"] if item["id"] == "cea-2027-recruitment-position-table")
@@ -37,6 +43,8 @@ def test_provincial_manifest_contains_real_official_attachments() -> None:
     ccgc = next(item for item in manifest["artifacts"] if item["id"] == "ccgc-mature-talent-2026-position-table")
     assert ccgc["source_id"] == "ccgc-careers"
     assert ccgc["deadline_date"] == "2026-10-31"
+    assert ccgc["status"] == "current_non_student_eligible"
+    assert "人员调配" in ccgc["note"]
     assert ccgc["notice_url"].startswith("https://dzjt.ccgc.cn/")
 
 
@@ -90,7 +98,7 @@ class FakeDatabase:
         return {"id": len(self.items), **item}
 
 
-def test_registration_only_creates_private_artifact_rows() -> None:
+def test_registration_enforces_manifest_processing_policies() -> None:
     manifest = load_government_artifact_manifest(
         PROJECT_ROOT / "data" / "government_artifact_manifest.json"
     )
@@ -99,7 +107,17 @@ def test_registration_only_creates_private_artifact_rows() -> None:
 
     assert len(rows) == 13
     assert len(database.items) == 13
-    assert all(item["extraction_status"] == "registered" for item in database.items)
+    assert all("manifest_processing_policy" in item["metadata"] for item in database.items)
+    assert all(
+        item["extraction_status"] == "registered"
+        for item in database.items
+        if item["metadata"]["manifest_status"] == "server_download_pending"
+    )
+    assert all(
+        item["extraction_status"] == "skipped"
+        for item in database.items
+        if item["metadata"]["manifest_status"] != "server_download_pending"
+    )
     assert all("government_artifact_id" in item["metadata"] for item in database.items)
 
 
