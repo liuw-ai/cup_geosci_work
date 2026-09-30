@@ -40,6 +40,19 @@ def test_provincial_source_matrix_covers_all_mainland_provinces() -> None:
         for item in sources
         if item["id"] in validated
     )
+    attachment_feeds = {
+        item["id"]
+        for item in sources
+        if item["config"]["automation_status"] == "attachment_discovery_only"
+    }
+    assert attachment_feeds == {"sichuan-geology-bureau"}
+    assert all(
+        item["enabled"]
+        and item["source_type"] == "attachment_discovery_feed"
+        and item["config"]["attachment_discovery_enabled"]
+        for item in sources
+        if item["id"] in attachment_feeds
+    )
 
 
 def test_multiple_registries_reject_duplicate_source_ids(tmp_path) -> None:

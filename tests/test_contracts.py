@@ -104,6 +104,12 @@ def test_attachment_discovery_source_requires_explicit_official_bounds() -> None
         "attachment_allowed_hosts"
     ] == ["official.example.edu.cn"]
 
+    discovery_only = copy.deepcopy(record)
+    discovery_only["source_type"] = "attachment_discovery_feed"
+    assert validate_source_registry([discovery_only])[0]["source_type"] == (
+        "attachment_discovery_feed"
+    )
+
     malformed = copy.deepcopy(record)
     malformed["config"]["attachment_discovery_max_notices"] = 0
     with pytest.raises(ContractValidationError, match="max_notices"):

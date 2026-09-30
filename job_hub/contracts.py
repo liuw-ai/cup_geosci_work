@@ -35,6 +35,7 @@ SOURCE_TYPES = frozenset(
         "cgs_dynamic_json",
         "slb_coveo_search",
         "html_notice",
+        "attachment_discovery_feed",
         "official_table_rows",
         "official_xlsx_rows",
         "official_snapshot_rows",
@@ -475,9 +476,15 @@ def validate_source_record(value: Any, *, context: str = "Source") -> dict[str, 
             f"{context} config attachment_discovery_enabled must be true or false"
         )
     if attachment_discovery:
-        if source["source_type"] not in {"html_notice", "landing_page", "cgs_dynamic_json"}:
+        if source["source_type"] not in {
+            "html_notice",
+            "landing_page",
+            "cgs_dynamic_json",
+            "attachment_discovery_feed",
+        }:
             raise ContractValidationError(
-                f"{context} attachment discovery only supports html_notice, landing_page or cgs_dynamic_json"
+                f"{context} attachment discovery only supports html_notice, landing_page, "
+                "cgs_dynamic_json or attachment_discovery_feed"
             )
         allowed_hosts = source["config"].get("allowed_hosts")
         if not isinstance(allowed_hosts, list) or not allowed_hosts:

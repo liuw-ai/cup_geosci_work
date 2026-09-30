@@ -420,7 +420,10 @@ def main() -> None:
     government_position_parser.add_argument(
         "--max-age-hours",
         type=float,
-        help="可选：将超过该核验快照年龄的岗位标记为 stale",
+        help=(
+            "可选：覆盖 GOVERNMENT_POSITION_MAX_AGE_HOURS；未指定时使用"
+            "生产发布相同的证据新鲜度门禁"
+        ),
     )
     government_position_parser.add_argument(
         "--output",
@@ -1591,10 +1594,19 @@ def main() -> None:
     if args.command == "government-position-audit":
         try:
             registry = load_position_registry(args.path)
+            # An operator-facing quality report must make the same freshness
+            # decision as the daily worker.  Leaving this as ``None`` made a
+            # stale static ledger look current in the CLI while production had
+            # already withdrawn its rows.
+            max_age_hours = (
+                args.max_age_hours
+                if args.max_age_hours is not None
+                else settings.government_position_max_age_hours
+            )
             result = government_position_quality_report(
                 registry,
                 today=args.today,
-                max_age_hours=args.max_age_hours,
+                max_age_hours=max_age_hours,
                 source_verifications={
                     str(item["source_id"]): item
                     for item in database.list_government_source_verifications()

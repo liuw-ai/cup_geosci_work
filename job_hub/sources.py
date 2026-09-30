@@ -406,6 +406,12 @@ class OfficialSourceCollector:
             return self._collect_cmgb_browser_rows(source)
         if source_type == "sinopec_spa_rows":
             return self._collect_sinopec_spa_rows(source)
+        if source_type == "attachment_discovery_feed":
+            # This source family is intentionally unable to create a posting.
+            # Its filtered official notices are consumed solely by the
+            # attachment-discovery queue, where each table row is reviewed
+            # before it can reach students.
+            return []
         if source_type in {"html_notice", "landing_page"}:
             return self._collect_html_notice(source)
         raise SourceCollectionError(f"Unsupported source type: {source_type}")
@@ -1714,9 +1720,10 @@ class OfficialSourceCollector:
                     source, limit=notice_limit
                 )
             ]
-        if source_type not in {"html_notice", "landing_page"}:
+        if source_type not in {"html_notice", "landing_page", "attachment_discovery_feed"}:
             raise SourceSkipped(
-                "attachment discovery supports only html_notice, landing_page or cgs_dynamic_json sources"
+                "attachment discovery supports only html_notice, landing_page, "
+                "attachment_discovery_feed or cgs_dynamic_json sources"
             )
         config = source.get("config")
         if not isinstance(config, dict) or not config.get(

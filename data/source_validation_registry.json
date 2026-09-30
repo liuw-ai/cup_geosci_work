@@ -382,6 +382,25 @@
       },
       "fixture_path": "tests/fixtures/source_validation/hunan_geology_institute_detail.html",
       "regression_test": "tests/test_government_positions.py::test_hunan_closed_batch_is_not_publishable"
+    },
+    {
+      "id": "sichuan-geology-bureau-entry-check-v1",
+      "source_id": "sichuan-geology-bureau",
+      "province": "四川",
+      "role": "geology_bureau_or_institute",
+      "validation_stage": "entry_checked_no_recruitment_sample",
+      "official_entry_url": "http://dkj.sc.gov.cn/scdkj/tggg/15.shtml",
+      "backup_entry_urls": [
+        "http://dkj.sc.gov.cn/",
+        "https://rst.sc.gov.cn/"
+      ],
+      "last_checked_on": "2026-09-30",
+      "access_assessment": {
+        "observed_access": "server_direct_public_page_accessible",
+        "robots_assessment": "server_direct_allowed",
+        "note": "服务器 direct 模式可访问四川省地质局官网主页与通知公告栏目；当前列表内容可读取，未发现符合招聘标题白名单的原始招聘公告。"
+      },
+      "finding": "当前栏目扫描成功但没有可作为岗位证据的招聘公告。该来源已启用仅附件发现队列；未来发现招聘公告后先登记官方附件并逐行复核，不能把本次无样本解释为四川没有岗位。"
     }
   ]
 }

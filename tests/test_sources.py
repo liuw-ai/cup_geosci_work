@@ -80,6 +80,48 @@ class FakeJsonResponse:
         return self.payload
 
 
+def test_attachment_discovery_feed_can_discover_official_notices_but_never_create_jobs(
+    tmp_path, monkeypatch
+) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    listing_url = "https://official.example.cn/notices"
+    detail_url = "https://official.example.cn/notices/2026-recruitment.html"
+    source = {
+        "id": "official-attachment-feed",
+        "publisher": "测试地质局",
+        "homepage_url": listing_url,
+        "source_type": "attachment_discovery_feed",
+        "config": {
+            "attachment_discovery_enabled": True,
+            "attachment_discovery_max_notices": 4,
+            "listing_urls": [listing_url],
+            "allowed_hosts": ["official.example.cn"],
+            "listing_selector": "a",
+            "require_recruitment_word": True,
+            "include_patterns": ["招聘"],
+            "exclude_patterns": ["拟聘|公示"],
+            "request_interval_seconds": 0,
+        },
+    }
+
+    def get(url, _source):
+        assert url == listing_url
+        return FakeResponse(
+            text=(
+                '<a href="/notices/2026-recruitment.html">2026年公开招聘公告</a>'
+                '<a href="/notices/results.html">2026年拟聘用人员公示</a>'
+            ),
+            url=listing_url,
+        )
+
+    monkeypatch.setattr(collector, "_get", get)
+
+    assert collector.collect(source) == []
+    assert collector.discover_notice_pages(source) == [
+        ("2026年公开招聘公告", detail_url)
+    ]
+
+
 def test_official_xlsx_rows_preserves_reviewed_location_and_merged_employer(
     tmp_path, monkeypatch
 ) -> None:

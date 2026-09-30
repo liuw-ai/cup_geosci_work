@@ -172,7 +172,12 @@
     "四川": {
       "human_resources_or_exam": {"state": "unlocated", "discovery_hint": "四川省人力资源和社会保障厅公开招聘"},
       "natural_resources": {"state": "candidate", "official_entry_url": "https://dnr.sc.gov.cn/scdnr/rsxx/"},
-      "geology_bureau_or_institute": {"state": "candidate", "official_entry_url": "http://dkj.sc.gov.cn"},
+      "geology_bureau_or_institute": {
+        "state": "candidate",
+        "candidate_source_id": "sichuan-geology-bureau",
+        "official_entry_url": "http://dkj.sc.gov.cn/scdkj/tggg/15.shtml",
+        "discovery_hint": "2026-09-30 direct 核验入口和通知公告栏目可访问；当前栏目没有仍开放的学生招聘公告。已启用仅发现官方招聘公告附件的私有队列，岗位表逐行复核后才可升级来源状态。"
+      },
       "public_institution_recruitment": {"state": "unlocated", "discovery_hint": "四川省事业单位公开招聘"},
       "civil_service": {"state": "unlocated", "discovery_hint": "四川省公务员考试录用"}
     },

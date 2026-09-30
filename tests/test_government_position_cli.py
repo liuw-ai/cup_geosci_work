@@ -46,6 +46,68 @@ def test_government_position_audit_uses_persisted_source_verifications(
         "source_unavailable"
     )
     assert captured["registry"] == {"records": []}
+    assert captured["max_age_hours"] == 48
+
+
+def test_government_position_audit_uses_configured_freshness_gate_by_default(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    database_path = tmp_path / "jobs.sqlite3"
+    Database(database_path).initialize()
+    captured: dict[str, object] = {}
+
+    def fake_report(_registry, **kwargs):
+        captured.update(kwargs)
+        return {"max_age_hours": kwargs["max_age_hours"]}
+
+    monkeypatch.setenv("APP_DATABASE_PATH", str(database_path))
+    monkeypatch.setenv("GOVERNMENT_POSITION_MAX_AGE_HOURS", "12")
+    monkeypatch.setattr("job_hub.cli.load_position_registry", lambda _path: {"records": []})
+    monkeypatch.setattr("job_hub.cli.government_position_quality_report", fake_report)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["job_hub.cli", "government-position-audit", "--today", "2026-09-29"],
+    )
+
+    cli_main()
+
+    assert json.loads(capsys.readouterr().out)["max_age_hours"] == 12
+    assert captured["max_age_hours"] == 12
+
+
+def test_government_position_audit_explicit_freshness_override_wins(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    database_path = tmp_path / "jobs.sqlite3"
+    Database(database_path).initialize()
+    captured: dict[str, object] = {}
+
+    def fake_report(_registry, **kwargs):
+        captured.update(kwargs)
+        return {"max_age_hours": kwargs["max_age_hours"]}
+
+    monkeypatch.setenv("APP_DATABASE_PATH", str(database_path))
+    monkeypatch.setenv("GOVERNMENT_POSITION_MAX_AGE_HOURS", "12")
+    monkeypatch.setattr("job_hub.cli.load_position_registry", lambda _path: {"records": []})
+    monkeypatch.setattr("job_hub.cli.government_position_quality_report", fake_report)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "job_hub.cli",
+            "government-position-audit",
+            "--today",
+            "2026-09-29",
+            "--max-age-hours",
+            "36",
+        ],
+    )
+
+    cli_main()
+
+    assert json.loads(capsys.readouterr().out)["max_age_hours"] == 36
+    assert captured["max_age_hours"] == 36
 
 
 def test_manual_government_evidence_confirmation_requires_explicit_operator_action(
