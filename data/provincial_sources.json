@@ -573,8 +573,9 @@
       "minimum_relevance": 40,
       "max_items": 20,
       "undated_open_window_days": 45,
+      "skip_expired_before_persist": true,
       "request_interval_seconds": 1.2,
-      "note": "已核验湖南省地质院政府网站通知公告栏目、robots 规则和详情正文容器。汇总招聘公告只有出现地学专业证据时才发布。"
+      "note": "已核验湖南省地质院政府网站通知公告栏目、robots 规则和详情正文容器。汇总招聘公告只有出现地学专业证据时才发布；已由官方截止日期或45天无期限窗口判定过期的历史公告只计入扫描指标，不进入私有复核队列。"
     }
   },
   {

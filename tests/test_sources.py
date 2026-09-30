@@ -43,6 +43,27 @@ def test_cea_attachment_stays_manual_when_robots_blocks_automated_download() -> 
     assert source["config"]["official_attachment_url"].endswith(".xlsx")
 
 
+def test_observed_historical_notice_feeds_skip_expired_rows_before_review() -> None:
+    """Long-lived official listings must not consume the private review queue.
+
+    This configuration is opt-in: it is enabled only after a real scan has
+    shown that the official listing retains expired recruitment notices.
+    """
+    project_root = Path(__file__).resolve().parents[1]
+    primary_sources = json.loads(
+        (project_root / "data" / "sources.json").read_text(encoding="utf-8")
+    )
+    provincial_sources = json.loads(
+        (project_root / "data" / "provincial_sources.json").read_text(encoding="utf-8")
+    )
+    sources = {item["id"]: item for item in [*primary_sources, *provincial_sources]}
+
+    for source_id in ("ccgc-careers", "hunan-geology-institute"):
+        config = sources[source_id]["config"]
+        assert config["undated_open_window_days"] == 45
+        assert config["skip_expired_before_persist"] is True
+
+
 @dataclass
 class FakeResponse:
     text: str
