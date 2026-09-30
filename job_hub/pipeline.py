@@ -284,6 +284,15 @@ class JobPipeline:
                 if normalized["relevance_score"] < minimum_score:
                     result.skipped += 1
                     continue
+                if self._skip_expired_before_persist(normalized, source):
+                    # A dynamic listing can retain years of closed announcements.
+                    # Keep the scan auditable, but do not turn known-expired rows
+                    # into private-review work.  Preserve its ID for complete-list
+                    # reconciliation should this source opt into that behavior.
+                    if posting.external_id:
+                        current_external_ids.add(str(posting.external_id))
+                    result.skipped += 1
+                    continue
                 if (
                     normalized["status"] == "open"
                     and normalized["publication_status"]
@@ -444,6 +453,11 @@ class JobPipeline:
             for posting in postings:
                 normalized = self.normalize_posting(posting, source)
                 if normalized["relevance_score"] < minimum_score:
+                    result.skipped += 1
+                    continue
+                if self._skip_expired_before_persist(normalized, source):
+                    if posting.external_id:
+                        current_external_ids.add(str(posting.external_id))
                     result.skipped += 1
                     continue
                 if (
@@ -708,6 +722,23 @@ class JobPipeline:
         if "robots" in normalized or "permit" in normalized:
             return "source_blocked"
         return "source_degraded"
+
+    @staticmethod
+    def _skip_expired_before_persist(
+        normalized: dict[str, Any],
+        source: dict[str, Any],
+    ) -> bool:
+        """Keep source-specific historical archives out of the review queue.
+
+        This is opt-in because some official sources are intentionally imported
+        as historical parser fixtures.  Dynamic notice feeds that continuously
+        expose old pages can enable it after their date semantics have been
+        verified.  It never changes a source failure into a no-vacancy result.
+        """
+        return bool(
+            source.get("config", {}).get("skip_expired_before_persist", False)
+            and normalized.get("status") == "expired"
+        )
 
     @staticmethod
     def _job_status(

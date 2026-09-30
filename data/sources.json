@@ -226,8 +226,10 @@
       ],
       "minimum_relevance": 40,
       "max_items": 24,
+      "undated_open_window_days": 45,
+      "skip_expired_before_persist": true,
       "request_interval_seconds": 1.0,
-      "note": "主入口为中国地质调查局官网“招聘信息”栏目；只从官方公告中保留明确招聘、人才引进、博士后、科研助理或实习信息。发现的官方附件先进入私有复核队列，采购、招标和流程公示会被排除。"
+      "note": "主入口为中国地质调查局官网“招聘信息”栏目；只从官方公告中保留明确招聘、人才引进、博士后、科研助理或实习信息。动态目录会长期保留旧公告：有明确截止日或超过45天且未说明期限的条目只计入扫描过滤，不写入私有复核队列。发现的官方附件先进入私有复核队列，采购、招标和流程公示会被排除。"
     }
   },
   {
@@ -283,12 +285,13 @@
       "exclude_patterns": ["财务", "法务", "行政", "人力资源", "审计"],
       "minimum_relevance": 40,
       "max_items": 40,
+      "skip_expired_before_persist": true,
       "request_interval_seconds": 0.8,
       "allow_shared_source_url": true,
       "coverage_scope": "全国",
       "source_role": "national_natural_resources_recruitment",
       "automation_status": "validated_public_api",
-      "note": "已核验为平台公开网页自身调用的只读招聘公告和岗位接口；仅发布具备地学专业证据的公开职位行。"
+      "note": "已核验为平台公开网页自身调用的只读招聘公告和岗位接口；仅发布具备地学专业证据的公开职位行。公告接口保留已结束批次时，明确超过截止日期的行只计入扫描过滤，不写入私有复核队列。"
     }
   },
   {

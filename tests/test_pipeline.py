@@ -101,6 +101,78 @@ def test_pipeline_deduplicates_and_creates_daily_change(tmp_path) -> None:
         assert connection.execute("SELECT COUNT(*) FROM job_events").fetchone()[0] == 0
 
 
+def test_opt_in_expired_dynamic_rows_do_not_enter_private_review_queue(tmp_path) -> None:
+    """Historical dynamic-list entries must not consume reviewer capacity."""
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    official_source["config"] = {
+        **official_source["config"],
+        "skip_expired_before_persist": True,
+        "undated_open_window_days": 45,
+    }
+    database.upsert_source(official_source)
+    posting = RawPosting(
+        title="历史地质调查招聘公告",
+        employer="测试地质调查机构",
+        source_url="https://careers.example.edu.cn/jobs/expired-notice",
+        application_url=None,
+        text="历史公告，未附岗位级专业和学历字段。",
+        summary="历史公告。",
+        published_date="2000-01-01",
+        deadline_date=None,
+        location=None,
+        external_id="expired-notice",
+    )
+
+    result = JobPipeline(settings, database, FakeCollector(posting)).sync_source(
+        database.get_source("official-test-source")
+    )
+
+    assert result.status == "finished"
+    assert result.discovered == 1
+    assert result.skipped == 1
+    assert result.created == 0
+    assert database.count_jobs_for_source("official-test-source") == 0
+    latest_run = database.list_latest_crawl_runs()[0]
+    assert latest_run["manual_review_count"] == 0
+
+
+def test_atomic_sync_applies_opt_in_expired_dynamic_row_filter(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    official_source["config"] = {
+        **official_source["config"],
+        "skip_expired_before_persist": True,
+    }
+    database.upsert_source(official_source)
+    posting = RawPosting(
+        title="已截止地质招聘岗位",
+        employer="测试地质调查机构",
+        source_url="https://careers.example.edu.cn/jobs/expired-atomic",
+        application_url=None,
+        text="地质工程硕士岗位，报名截止时间为2000年1月1日。",
+        summary="已截止岗位。",
+        published_date="1999-12-01",
+        deadline_date="2000-01-01",
+        location="北京",
+        external_id="expired-atomic",
+    )
+
+    result = JobPipeline(settings, database, FakeCollector(posting)).sync_source_atomically(
+        database.get_source("official-test-source")
+    )
+
+    assert result.status == "finished"
+    assert result.discovered == 1
+    assert result.skipped == 1
+    assert result.created == 0
+    assert database.count_jobs_for_source("official-test-source") == 0
+
+
 def test_sync_all_reports_progress_without_changing_results(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
