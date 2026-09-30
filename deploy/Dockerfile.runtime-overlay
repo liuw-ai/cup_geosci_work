@@ -1,0 +1,8 @@
+ARG RUNTIME_BASE_IMAGE
+FROM ${RUNTIME_BASE_IMAGE}
+
+# Emergency production release path: when requirements.txt is unchanged, use
+# a previously verified immutable runtime image and overlay only application
+# code. Runtime data stays in the named volume and versioned data remains a
+# read-only Compose bind mount.
+COPY --chown=jobhub:jobhub job_hub /app/job_hub

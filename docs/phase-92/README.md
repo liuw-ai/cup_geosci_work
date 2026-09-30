@@ -19,3 +19,14 @@
 PYTHONPATH=. pytest -q tests/test_government_positions.py tests/test_sources.py tests/test_government_artifacts.py
 python -m compileall -q job_hub tests
 ```
+
+## 受限网络发布
+
+常规发布仍使用 `docker compose up -d --build`。若服务器在该版本发布时
+无法及时从 PyPI 下载依赖，且经 Git diff 确认 `requirements.txt`、主
+`Dockerfile` 和 Compose 运行时契约均未变，可用一个已验证、带不可变标签
+的旧镜像作为基础，构建 `deploy/Dockerfile.runtime-overlay`。该覆盖镜像只
+替换 `/app/job_hub`；岗位数据目录继续由 Compose 只读挂载，SQLite 继续
+由既有 Docker volume 管理。浏览器 worker 对应使用
+`deploy/Dockerfile.browser-overlay`。此路径不得用于依赖变更、基础镜像
+变更或数据库迁移版本。

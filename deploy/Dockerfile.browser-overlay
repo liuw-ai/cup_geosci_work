@@ -1,0 +1,7 @@
+ARG BROWSER_BASE_IMAGE
+FROM ${BROWSER_BASE_IMAGE}
+
+# The isolated browser worker has its own image. Its Playwright dependency is
+# already present in the validated base, so a source-only release does not
+# need to contact PyPI again.
+COPY --chown=jobhub:jobhub job_hub /app/job_hub
