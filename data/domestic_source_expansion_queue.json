@@ -1,13 +1,14 @@
 {
   "version": 1,
-  "as_of": "2026-09-24",
-  "description": "国内官方来源扩展队列。它把单位层级、官方入口、备用入口和当前证据状态分开记录；队列记录本身不会产生学生端岗位。",
+  "as_of": "2026-09-30",
+  "description": "国内官方来源扩展队列。它把单位层级、官方入口、备用入口和当前证据状态分开记录；队列记录本身不会产生学生端岗位。状态须与官方岗位台账和附件生命周期一致。",
   "status_definitions": {
     "official_job_sample_verified": "已取得单位官网、政府官网、高校官网或官方招聘系统的具体岗位样例，并保留岗位级字段证据。",
     "official_identity_only": "官方主体和入口已确认，但尚未取得可发布的岗位级专业/学历证据。",
     "scan_success_no_match": "当前栏目和附件已成功扫描且可访问，但在观察窗口内没有符合地球科学学院专业边界的在招岗位。",
     "access_limited": "入口或附件受 TLS、robots、网关或业务策略限制；不能解释为无岗位。",
-    "manual_review_required": "需要管理员在服务器或浏览器环境完成当前栏目、公告和附件复核。"
+    "manual_review_required": "需要管理员在服务器或浏览器环境完成当前栏目、公告和附件复核。",
+    "current_non_student_eligible": "当前官方招聘已核验，但公告整体或岗位资格明确面向有经验人员、内部调配等，不适合在校本科、硕士或博士学生，不能自动下载或发布。"
   },
   "records": [
     {
@@ -322,8 +323,11 @@
       "backup_urls": ["https://www.mnr.gov.cn/gk/tzgg/"],
       "source_id": "mnr-public-recruitment",
       "channel_type": "public_institution_recruitment",
-      "status": "access_limited",
-      "next_action": "服务器复测公开岗位列表和职位表附件；逐岗位验证专业代码、学历和截止日期。"
+      "status": "scan_success_no_match",
+      "observed_on": "2026-09-30",
+      "scan_conclusion": "scan_success_no_match",
+      "field_validation": "2026-09-30 直连复测自然资源部公开只读 API：GetAfficheList 返回4个正式批次，最新为2026年度第二批；GetAfficheInfo 显示报名截止2026-04-14 17:00。接口可访问，但没有仍在报名的当期岗位，不能误记为访问受限或学生端岗位。",
+      "next_action": "每日读取公开公告和岗位接口；当2027年度公告出现后，再逐岗位验证专业代码、学历、地点、人数和截止日期。"
     },
     {
       "id": "cgs-recruitment",
@@ -335,10 +339,12 @@
       "backup_urls": ["https://m.cgs.gov.cn/zpxx/"],
       "source_id": "cgs-notices",
       "channel_type": "official_announcement",
-      "status": "scan_success_no_match",
-      "observed_on": "2026-09-28",
-      "scan_conclusion": "scan_success_no_match",
-      "next_action": "每日读取官网招聘信息栏目并发现官方职位表附件；拟聘、资格审查等流程公告不得作为学生端岗位。"
+      "status": "official_job_sample_verified",
+      "observed_on": "2026-09-30",
+      "sample_announcement_url": "http://www.drc.cgs.gov.cn/ggl/202609/t20260921_869371.html",
+      "sample_job_ids": ["government-position:cgs-drc-postdoc-2026:1", "government-position:cgs-drc-postdoc-2026:9"],
+      "field_validation": "中国地质调查局发展研究中心2026年度博士后招收公告正文表格已逐行核验9个地学相关博士后岗位的岗位名称、专业、博士学历、北京地点、每岗1人和2026-10-16 17:00截止时间；该批次由政府职位表台账按独立博士后类型管理。",
+      "next_action": "每日读取官网招聘信息栏目并复核本批公告状态；拟聘、资格审查等流程公告不得作为学生端岗位。"
     },
     {
       "id": "ccgc-mature-talent-2026",
@@ -350,11 +356,13 @@
       "backup_urls": ["https://www.ccgc.cn/?mod=zhaopin&tid=129", "https://zhaopin.ccgc.cn/"],
       "source_id": "ccgc-careers",
       "channel_type": "official_attachment",
-      "status": "manual_review_required",
-      "observed_on": "2026-09-28",
+      "status": "current_non_student_eligible",
+      "observed_on": "2026-09-30",
       "sample_announcement_url": "https://dzjt.ccgc.cn/xxgk/tzgg/9856.html",
-      "field_validation": "官方公告正文和附件1已定位；报名截止2026-10-31 17:00。岗位级专业、学历、人数、地点和单位需从 XLS 逐行提取并人工复核后发布。",
-      "next_action": "服务器受控下载附件1并解析；仅通过地学院专业/学历门禁的岗位进入学生端，访问或解析失败不得标记为无岗位。"
+      "student_eligible": false,
+      "student_scope_reason": "官方附件为人员调配/成熟人才计划，8行13个计划名额普遍要求既有项目经验、工作年限、职称或职业资格；不面向在校本科、硕士、博士学生。",
+      "field_validation": "2026-09-30 服务器直连核验官方公告和 XLS（HTTP 200；SHA-256 4d23a2558d490f32f1c31b1ac9c7f365949a48d2fe7a60964109acc80b1aa40f）。公告报名截止2026-10-31 17:00，但附件性质为人员调配计划，不得因包含地质词汇而进入学生端。",
+      "next_action": "保留该官方来源和证据，不自动下载或发布；持续寻找该集团面向应届生、博士后或无工作经验要求的后续正式公告。"
     },
     {
       "id": "provincial-geology-bureaus-batch",

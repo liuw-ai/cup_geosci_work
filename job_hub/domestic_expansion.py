@@ -26,6 +26,7 @@ QUEUE_STATUSES = frozenset(
         "scan_success_no_match",
         "access_limited",
         "manual_review_required",
+        "current_non_student_eligible",
     }
 )
 
@@ -97,6 +98,23 @@ def load_domestic_expansion_queue(
                 raise ValueError(
                     f"{record_id}: scan_success_no_match requires matching scan_conclusion"
                 )
+        if status == "current_non_student_eligible":
+            if not str(record.get("observed_on") or "").strip():
+                raise ValueError(
+                    f"{record_id}: current_non_student_eligible requires observed_on"
+                )
+            if not str(record.get("field_validation") or "").strip():
+                raise ValueError(
+                    f"{record_id}: current_non_student_eligible requires field_validation"
+                )
+            if record.get("student_eligible") is not False:
+                raise ValueError(
+                    f"{record_id}: current_non_student_eligible requires student_eligible=false"
+                )
+            if not str(record.get("student_scope_reason") or "").strip():
+                raise ValueError(
+                    f"{record_id}: current_non_student_eligible requires student_scope_reason"
+                )
         normalized_record = {
             **record,
             "id": record_id,
@@ -152,10 +170,14 @@ def domestic_expansion_summary(queue: dict[str, Any]) -> dict[str, Any]:
         else 0.0,
         "official_job_sample_verified": verified,
         "scan_success_no_match": by_status.get("scan_success_no_match", 0),
+        "current_non_student_eligible": by_status.get(
+            "current_non_student_eligible", 0
+        ),
         "by_status": dict(sorted(by_status.items())),
         "by_system": dict(sorted(by_system.items())),
         "scope_note": (
             "队列是扩源任务台账，不是岗位数据；只有来源通过官方原文、"
-            "岗位级专业/学历证据和发布审计后，才会进入学生端。"
+            "岗位级专业/学历证据和发布审计后，才会进入学生端。当前但不适合"
+            "在校生的招聘必须显式标记，不能作为学生岗位或无岗位结论。"
         ),
     }

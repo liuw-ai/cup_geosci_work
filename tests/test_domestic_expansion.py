@@ -42,9 +42,28 @@ def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
         item for item in queue["records"] if item["id"] == "cgs-recruitment"
     )
     assert cgs_row["official_url"] == "https://www.cgs.gov.cn/tzgg/zpxx/"
-    assert cgs_row["status"] == "scan_success_no_match"
-    assert cgs_row["observed_on"] == "2026-09-28"
-    assert cgs_row["scan_conclusion"] == "scan_success_no_match"
+    assert cgs_row["status"] == "official_job_sample_verified"
+    assert cgs_row["observed_on"] == "2026-09-30"
+    assert cgs_row["sample_announcement_url"].startswith("http://www.drc.cgs.gov.cn/")
+    assert cgs_row["sample_job_ids"] == [
+        "government-position:cgs-drc-postdoc-2026:1",
+        "government-position:cgs-drc-postdoc-2026:9",
+    ]
+
+    mnr_row = next(
+        item for item in queue["records"] if item["id"] == "mnr-public-recruitment"
+    )
+    assert mnr_row["status"] == "scan_success_no_match"
+    assert mnr_row["observed_on"] == "2026-09-30"
+    assert "2026-04-14" in mnr_row["field_validation"]
+
+    ccgc_row = next(
+        item for item in queue["records"] if item["id"] == "ccgc-mature-talent-2026"
+    )
+    assert ccgc_row["status"] == "current_non_student_eligible"
+    assert ccgc_row["student_eligible"] is False
+    assert "成熟人才" in ccgc_row["student_scope_reason"]
+    assert summary["current_non_student_eligible"] == 1
 
     cnpc_rows = [
         item
@@ -195,4 +214,32 @@ def test_verified_queue_row_requires_auditable_sample(tmp_path) -> None:
         encoding="utf-8",
     )
     with pytest.raises(ValueError, match="sample_announcement_url"):
+        load_domestic_expansion_queue(path)
+
+
+def test_student_scope_excluded_queue_row_requires_explicit_reason(tmp_path) -> None:
+    path = tmp_path / "queue.json"
+    path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "records": [
+                    {
+                        "id": "excluded-without-reason",
+                        "system": "中央地勘国企",
+                        "official_url": "https://example.cn/",
+                        "backup_urls": ["https://example.cn/backup"],
+                        "status": "current_non_student_eligible",
+                        "observed_on": "2026-09-30",
+                        "student_eligible": False,
+                        "field_validation": "Official table was reviewed.",
+                    }
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="student_scope_reason"):
         load_domestic_expansion_queue(path)
