@@ -6,6 +6,7 @@ import pytest
 
 from job_hub.government_positions import (
     GovernmentPositionContractError,
+    current_publishable_position_records,
     government_position_quality_report,
     load_position_registry,
     position_record_to_posting,
@@ -45,6 +46,43 @@ def test_upcoming_records_are_separate_from_current_publishable_rows() -> None:
     assert all(row["opening_date"] == "2026-10-10" for row in rows)
     assert all(row["record_status"] == "verified_open" for row in rows)
     assert not [row for row in rows if row["deadline_date"] < "2026-09-28"]
+
+
+def test_cea_rows_activate_on_opening_date_and_expire_after_deadline() -> None:
+    """The upcoming ledger must transition without manual data edits.
+
+    The China Earthquake Administration table is intentionally held out until
+    2026-10-10. Once the official evidence was revalidated, the same reviewed
+    rows must become current; after 2026-10-26 they must disappear again.
+    """
+    registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
+    verified_at_opening = {
+        "cea-2027-recruitment": {
+            "status": "verified",
+            "last_success_at": "2026-10-10T01:00:00Z",
+        }
+    }
+
+    opening_rows = current_publishable_position_records(
+        registry,
+        today="2026-10-10",
+        max_age_hours=48,
+        source_verifications=verified_at_opening,
+    )
+    assert len([row for row in opening_rows if row["source_id"] == "cea-2027-recruitment"]) == 91
+
+    closed_rows = current_publishable_position_records(
+        registry,
+        today="2026-10-27",
+        max_age_hours=48,
+        source_verifications={
+            "cea-2027-recruitment": {
+                "status": "verified",
+                "last_success_at": "2026-10-26T23:00:00Z",
+            }
+        },
+    )
+    assert not [row for row in closed_rows if row["source_id"] == "cea-2027-recruitment"]
 
 
 def test_stale_registry_report_excludes_rows_from_current_open_count() -> None:
