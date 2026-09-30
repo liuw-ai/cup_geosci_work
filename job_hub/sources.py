@@ -1995,6 +1995,7 @@ class OfficialSourceCollector:
             ) from error
 
         postings: list[RawPosting] = []
+        last_employer = ""
         try:
             for row_number, values in enumerate(row_iterator, start=1):
                 if row_number not in allowed_rows:
@@ -2006,23 +2007,46 @@ class OfficialSourceCollector:
                 duties_index = int(config.get("duties_column", 3))
                 requirements_index = int(config.get("requirements_column", 4))
                 quantity_index = int(config.get("quantity_column", 5))
+                major_index = int(config.get("major_column", duties_index))
+                degree_index = int(config.get("degree_column", requirements_index))
                 employer_index = int(config.get("employer_column", 0))
                 location_index = int(config.get("location_column", 0))
+                notes_index = int(config.get("notes_column", 0))
                 title = cells[title_index - 1] if len(cells) >= title_index else ""
                 duties = cells[duties_index - 1] if len(cells) >= duties_index else ""
                 requirements = cells[requirements_index - 1] if len(cells) >= requirements_index else ""
                 quantity = cells[quantity_index - 1] if len(cells) >= quantity_index else ""
+                major = cells[major_index - 1] if len(cells) >= major_index else ""
+                degree = cells[degree_index - 1] if len(cells) >= degree_index else ""
+                notes = cells[notes_index - 1] if len(cells) >= notes_index else ""
                 employer = (
                     cells[employer_index - 1]
                     if employer_index > 0 and len(cells) >= employer_index
                     else ""
                 )
+                if employer:
+                    last_employer = employer
+                elif config.get("carry_forward_employer"):
+                    employer = last_employer
                 location = (
                     cells[location_index - 1]
                     if location_index > 0 and len(cells) >= location_index
                     else ""
                 )
-                evidence_text = clean_text(" ".join(filter(None, (title, duties, requirements))))
+                reviewed_employer_locations = config.get("location_by_employer") or {}
+                if isinstance(reviewed_employer_locations, dict) and employer:
+                    location = str(
+                        reviewed_employer_locations.get(employer, location) or location
+                    ).strip()
+                reviewed_locations = config.get("location_by_row") or {}
+                if isinstance(reviewed_locations, dict):
+                    location = str(
+                        reviewed_locations.get(str(row_number), reviewed_locations.get(row_number, location))
+                        or location
+                    ).strip()
+                evidence_text = clean_text(
+                    " ".join(filter(None, (title, duties, requirements, major, degree, notes)))
+                )
                 if not title or not self._accept_candidate(evidence_text, source):
                     continue
                 postings.append(
@@ -2052,9 +2076,13 @@ class OfficialSourceCollector:
                             "岗位": title,
                             "岗位职责": duties,
                             "岗位要求": requirements,
-                            "学历要求": requirements,
+                            "专业范围": major,
+                            "学历要求": degree,
                             "招聘人数": quantity,
                             "工作地点": location,
+                            "官方备注": notes,
+                            "官方公告": page_url,
+                            "官方附件": attachment_url,
                         },
                     )
                 )

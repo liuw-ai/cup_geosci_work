@@ -154,8 +154,8 @@
       "deadline_date": "2026-10-26",
       "deadline_policy": "fixed_date",
       "observed_on": "2026-09-27",
-      "status": "server_download_pending",
-      "note": "中国地震局2027年度事业单位公开招聘官方岗位信息表。云服务器直连下载成功；岗位台账已逐行保留70条地学匹配行、89个计划名额及Excel行号，附件仍由受控流水线登记。"
+      "status": "manual_verified",
+      "note": "中国地震局2027年度事业单位公开招聘官方岗位信息表。官方公告、附件 SHA-256（646e153605e06596c21601695b1072ba1a74a8f24ec18321fd54b3d184589729）和岗位行已人工核验：学生端台账保留91条明确匹配岗位、112个计划名额及 Excel 行号。该附件的自动下载受 robots 限制，不能作为自动采集成功或无岗位结论。"
     },
     {
       "id": "hunan-provincial-fourth-2026-position-table",

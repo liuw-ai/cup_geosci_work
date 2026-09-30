@@ -26,7 +26,13 @@ def test_provincial_manifest_contains_real_official_attachments() -> None:
     )
     assert len(manifest["artifacts"]) == 13
     assert {item["province"] for item in manifest["artifacts"]} == {"全国", "北京", "安徽", "山东", "河南", "天津", "甘肃", "宁夏", "湖北", "湖南"}
-    assert all(item["status"] in {"historical_closed", "server_download_pending"} for item in manifest["artifacts"])
+    assert all(
+        item["status"] in {"historical_closed", "server_download_pending", "manual_verified"}
+        for item in manifest["artifacts"]
+    )
+    cea = next(item for item in manifest["artifacts"] if item["id"] == "cea-2027-recruitment-position-table")
+    assert cea["status"] == "manual_verified"
+    assert "91条" in cea["note"]
     assert all(item["attachment_url"].lower().endswith((".xlsx", ".xls", ".pdf")) for item in manifest["artifacts"])
     ccgc = next(item for item in manifest["artifacts"] if item["id"] == "ccgc-mature-talent-2026-position-table")
     assert ccgc["source_id"] == "ccgc-careers"

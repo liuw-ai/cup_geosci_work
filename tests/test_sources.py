@@ -29,6 +29,20 @@ def test_production_slb_budget_covers_bounded_detail_scan() -> None:
     assert budget >= candidates * timeout
 
 
+def test_cea_attachment_stays_manual_when_robots_blocks_automated_download() -> None:
+    sources = json.loads(
+        (Path(__file__).resolve().parents[1] / "data" / "sources.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    source = next(item for item in sources if item["id"] == "cea-2027-recruitment")
+
+    assert source["source_type"] == "manual"
+    assert source["enabled"] is False
+    assert source["config"]["government_evidence_recheck"] is True
+    assert source["config"]["official_attachment_url"].endswith(".xlsx")
+
+
 @dataclass
 class FakeResponse:
     text: str
@@ -42,6 +56,70 @@ class FakeJsonResponse:
 
     def json(self) -> object:
         return self.payload
+
+
+def test_official_xlsx_rows_preserves_reviewed_location_and_merged_employer(
+    tmp_path, monkeypatch
+) -> None:
+    openpyxl = pytest.importorskip("openpyxl")
+    from io import BytesIO
+
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.append(["序号", "单位", "岗位", "人数", "职级", "学历学位", "专业", "备注"])
+    sheet.append([None] * 8)
+    sheet.append([None] * 8)
+    sheet.append([None] * 8)
+    sheet.append([1, "中国地震局某中心", "地质监测岗", 1, "专业技术", "硕士研究生", "地质学（0709）", "需野外工作"])
+    sheet.append([None, None, "地球物理岗", 2, "专业技术", "博士研究生", "地球物理学（0708）", ""])
+    content = BytesIO()
+    workbook.save(content)
+    workbook.close()
+
+    settings = make_settings(tmp_path)
+    collector = OfficialSourceCollector(settings)
+    source = {
+        "id": "cea-test",
+        "name": "官方附件测试",
+        "publisher": "中国地震局",
+        "homepage_url": "https://www.cea.gov.cn/notice/1.html",
+        "source_type": "official_xlsx_rows",
+        "category": "事业单位与人才引进",
+        "source_tier": "A",
+        "config": {
+            "notice_url": "https://www.cea.gov.cn/notice/1.html",
+            "attachment_url": "https://www.cea.gov.cn/notice/1.xlsx",
+            "allowed_hosts": ["www.cea.gov.cn"],
+            "verified_rows": [5, 6],
+            "title_column": 3,
+            "requirements_column": 6,
+            "duties_column": 7,
+            "quantity_column": 4,
+            "employer_column": 2,
+            "notes_column": 8,
+            "location_by_row": {"5": "河北", "6": "河北"},
+            "carry_forward_employer": True,
+            "deadline_date": "2026-10-26",
+            "require_major_match": True,
+            "max_items": 10,
+        },
+    }
+
+    def get(url, _source):
+        assert url == source["config"]["attachment_url"]
+        return type("BinaryResponse", (), {"content": content.getvalue()})()
+
+    monkeypatch.setattr(collector, "_get", get)
+    postings = collector.collect(source)
+
+    assert len(postings) == 2
+    assert postings[0].employer == "中国地震局某中心"
+    assert postings[1].employer == "中国地震局某中心"
+    assert all(item.location == "河北" for item in postings)
+    assert postings[0].field_evidence["官方备注"] == "需野外工作"
+    assert postings[0].field_evidence["专业范围"] == "地质学（0709）"
+    assert postings[0].field_evidence["学历要求"] == "硕士研究生"
+    assert postings[0].field_evidence["官方公告"] == source["homepage_url"]
 
 
 def test_cupb_adapter_keeps_vacancies_and_skips_recruitment_events(tmp_path, monkeypatch) -> None:

@@ -19,7 +19,12 @@ from urllib.parse import urlparse
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_MANIFEST_PATH = PROJECT_ROOT / "data" / "government_artifact_manifest.json"
 ARTIFACT_STATUSES = frozenset(
-    {"server_download_pending", "historical_closed", "source_unavailable"}
+    {
+        "server_download_pending",
+        "manual_verified",
+        "historical_closed",
+        "source_unavailable",
+    }
 )
 DEADLINE_POLICIES = frozenset({"fixed_date", "open_until_filled"})
 

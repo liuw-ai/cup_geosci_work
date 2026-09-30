@@ -8,9 +8,11 @@ from job_hub.government_positions import (
     GovernmentPositionContractError,
     government_position_quality_report,
     load_position_registry,
+    position_record_to_posting,
     upcoming_position_records,
     validate_position_record,
 )
+from job_hub.profiles import evaluate_student_publication
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -21,9 +23,9 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
     report = government_position_quality_report(registry, today="2026-09-25")
 
     assert report["source_assessments"] == 12
-    assert report["records"] == 136
+    assert report["records"] == 157
     assert report["verified_open_records"] == 52
-    assert report["verified_upcoming_records"] == 70
+    assert report["verified_upcoming_records"] == 91
     assert report["explicit_student_matches"] == 52
     assert report["source_failures_or_pending"] == 0
     assert report["verified_scan_no_current_match"] == 3
@@ -38,7 +40,7 @@ def test_upcoming_records_are_separate_from_current_publishable_rows() -> None:
         max_age_hours=48,
     )
 
-    assert len(rows) == 70
+    assert len(rows) == 91
     assert {row["source_id"] for row in rows} == {"cea-2027-recruitment"}
     assert all(row["opening_date"] == "2026-10-10" for row in rows)
     assert all(row["record_status"] == "verified_open" for row in rows)
@@ -103,13 +105,74 @@ def test_cea_batch_expands_verified_rows_with_unit_and_location_evidence() -> No
     registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
     rows = [item for item in registry["records"] if item["source_id"] == "cea-2027-recruitment"]
 
-    assert len(rows) == 70
-    assert sum(item["headcount"] for item in rows) == 89
+    assert len(rows) == 91
+    assert sum(item["headcount"] for item in rows) == 112
     assert all(item["employer"] for item in rows)
     assert all(item["location"] for item in rows)
     assert all(item["deadline_date"] == "2026-10-26" for item in rows)
     assert all("Excel第" in item["evidence_locator"] for item in rows)
-    assert {item["position_code"] for item in rows} >= {"R010", "R142", "R157"}
+    assert {item["position_code"] for item in rows} >= {"R010", "R144", "R157"}
+    assert next(item for item in rows if item["position_code"] == "R144")["province"] == "河南"
+    decisions = []
+    for item in rows:
+        posting = position_record_to_posting(item)
+        decisions.append(
+            evaluate_student_publication(
+                {
+                    "title": posting.title,
+                    "source_id": item["source_id"],
+                    "category": "事业单位与人才引进",
+                    "location": posting.location,
+                    "field_evidence": posting.field_evidence,
+                }
+            )
+        )
+    assert all(decision.status == "student_eligible" for decision in decisions)
+
+
+def test_position_batch_can_keep_row_level_province_when_one_notice_is_national() -> None:
+    registry = {
+        "version": 1,
+        "as_of": "2026-09-30",
+        "position_batches": [
+            {
+                "id": "national-test",
+                "source_id": "national-test-source",
+                "position_type": "public_institution",
+                "province": "北京",
+                "location": "北京市",
+                "deadline_date": "2026-10-31",
+                "deadline_policy": "fixed_date",
+                "official_notice_url": "https://example.gov.cn/notice",
+                "official_attachment_url": "https://example.gov.cn/table.xlsx",
+                "record_status": "verified_open",
+                "match_status": "explicit_match",
+                "rows": [
+                    [
+                        "A01",
+                        "测试单位",
+                        "地质技术岗",
+                        "地质学",
+                        "硕士研究生",
+                        1,
+                        "岗位表第2行",
+                        "郑州市",
+                        "河南",
+                    ]
+                ],
+            }
+        ],
+        "records": [],
+    }
+    path = PROJECT_ROOT / ".tmp_test_row_province_registry.json"
+    try:
+        path.write_text(__import__("json").dumps(registry, ensure_ascii=False), encoding="utf-8")
+        loaded = load_position_registry(path)
+    finally:
+        path.unlink(missing_ok=True)
+
+    assert loaded["records"][0]["province"] == "河南"
+    assert loaded["records"][0]["location"] == "郑州市"
 
 
 def test_hunan_closed_batch_is_not_publishable() -> None:

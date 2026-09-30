@@ -208,16 +208,19 @@ def _expand_position_batches(payload: dict[str, Any]) -> list[dict[str, Any]]:
                 f"registry.position_batches[{batch_index}].rows must be a list"
             )
         for row_index, row in enumerate(rows):
-            if not isinstance(row, list) or len(row) not in {7, 8}:
+            if not isinstance(row, list) or len(row) not in {7, 8, 9}:
                 raise GovernmentPositionContractError(
                     f"{batch_id}.rows[{row_index}] must contain code, employer, title, "
-                    "major, degree, headcount and evidence locator, with an optional location"
+                    "major, degree, headcount and evidence locator, with optional location "
+                    "and province"
                 )
             code, employer, title, major, degree, headcount, locator = row[:7]
-            row_location = row[7] if len(row) == 8 else shared_fields["location"]
+            row_location = row[7] if len(row) >= 8 else shared_fields["location"]
+            row_province = row[8] if len(row) == 9 else shared_fields["province"]
             expanded.append(
                 {
                     **shared_fields,
+                    "province": row_province,
                     "location": row_location,
                     "id": f"{batch_id}-{str(code).strip().lower()}",
                     "employer": employer,

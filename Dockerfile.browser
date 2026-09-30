@@ -1,5 +1,4 @@
-ARG BROWSER_BASE_IMAGE=cupb-geoscience-job-hub:latest
-FROM ${BROWSER_BASE_IMAGE}
+FROM cupb-geoscience-job-hub:latest
 
 # The public web/worker image deliberately has no browser client.  This image
 # is built only for the isolated read-only browser workers, which connect to
