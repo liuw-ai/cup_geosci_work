@@ -14,6 +14,9 @@ RUN if [ "$INSTALL_BROWSER_DEPS" = "1" ]; then \
       pip install --no-cache-dir -r /tmp/requirements-browser.txt; \
     fi \
     && rm -f /tmp/requirements-browser.txt
+# Copy the application package explicitly so a cached browser base image can
+# receive the same source revision as the web/worker image.
+COPY --chown=jobhub:jobhub job_hub /app/job_hub
 USER jobhub
 
 CMD ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
