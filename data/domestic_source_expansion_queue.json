@@ -342,7 +342,7 @@
       "status": "official_job_sample_verified",
       "observed_on": "2026-09-30",
       "sample_announcement_url": "http://www.drc.cgs.gov.cn/ggl/202609/t20260921_869371.html",
-      "sample_job_ids": ["government-position:cgs-drc-postdoc-2026:1", "government-position:cgs-drc-postdoc-2026:9"],
+      "sample_job_ids": ["government-position:cgs-drc-postdoc-2026-1:1", "government-position:cgs-drc-postdoc-2026-9:9"],
       "field_validation": "中国地质调查局发展研究中心2026年度博士后招收公告正文表格已逐行核验9个地学相关博士后岗位的岗位名称、专业、博士学历、北京地点、每岗1人和2026-10-16 17:00截止时间；该批次由政府职位表台账按独立博士后类型管理。",
       "next_action": "每日读取官网招聘信息栏目并复核本批公告状态；拟聘、资格审查等流程公告不得作为学生端岗位。"
     },
@@ -360,6 +360,7 @@
       "observed_on": "2026-09-30",
       "sample_announcement_url": "https://dzjt.ccgc.cn/xxgk/tzgg/9856.html",
       "student_eligible": false,
+      "related_artifact_id": "ccgc-mature-talent-2026-position-table",
       "student_scope_reason": "官方附件为人员调配/成熟人才计划，8行13个计划名额普遍要求既有项目经验、工作年限、职称或职业资格；不面向在校本科、硕士、博士学生。",
       "field_validation": "2026-09-30 服务器直连核验官方公告和 XLS（HTTP 200；SHA-256 4d23a2558d490f32f1c31b1ac9c7f365949a48d2fe7a60964109acc80b1aa40f）。公告报名截止2026-10-31 17:00，但附件性质为人员调配计划，不得因包含地质词汇而进入学生端。",
       "next_action": "保留该官方来源和证据，不自动下载或发布；持续寻找该集团面向应届生、博士后或无工作经验要求的后续正式公告。"

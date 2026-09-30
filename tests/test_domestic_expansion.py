@@ -46,8 +46,8 @@ def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
     assert cgs_row["observed_on"] == "2026-09-30"
     assert cgs_row["sample_announcement_url"].startswith("http://www.drc.cgs.gov.cn/")
     assert cgs_row["sample_job_ids"] == [
-        "government-position:cgs-drc-postdoc-2026:1",
-        "government-position:cgs-drc-postdoc-2026:9",
+        "government-position:cgs-drc-postdoc-2026-1:1",
+        "government-position:cgs-drc-postdoc-2026-9:9",
     ]
 
     mnr_row = next(
@@ -62,6 +62,7 @@ def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
     )
     assert ccgc_row["status"] == "current_non_student_eligible"
     assert ccgc_row["student_eligible"] is False
+    assert ccgc_row["related_artifact_id"] == "ccgc-mature-talent-2026-position-table"
     assert "成熟人才" in ccgc_row["student_scope_reason"]
     assert summary["current_non_student_eligible"] == 1
 
@@ -242,4 +243,33 @@ def test_student_scope_excluded_queue_row_requires_explicit_reason(tmp_path) -> 
     )
 
     with pytest.raises(ValueError, match="student_scope_reason"):
+        load_domestic_expansion_queue(path)
+
+
+def test_student_scope_excluded_queue_row_requires_artifact_link(tmp_path) -> None:
+    path = tmp_path / "queue.json"
+    path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "records": [
+                    {
+                        "id": "excluded-without-artifact",
+                        "system": "中央地勘国企",
+                        "official_url": "https://example.cn/",
+                        "backup_urls": ["https://example.cn/backup"],
+                        "status": "current_non_student_eligible",
+                        "observed_on": "2026-09-30",
+                        "student_eligible": False,
+                        "student_scope_reason": "Mature talent recruitment is not for current students.",
+                        "field_validation": "Official table was reviewed.",
+                    }
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="related_artifact_id"):
         load_domestic_expansion_queue(path)

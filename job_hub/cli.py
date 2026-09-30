@@ -64,6 +64,9 @@ from job_hub.domestic_expansion import (
     domestic_expansion_summary,
     load_domestic_expansion_queue,
 )
+from job_hub.government_ledger_audit import (
+    build_government_ledger_consistency_audit,
+)
 from job_hub.discovery import (
     discovery_funnel,
     discovery_source_rows,
@@ -483,6 +486,25 @@ def main() -> None:
         "--output",
         type=Path,
         help="可选：将完整队列 JSON 写入指定文件",
+    )
+    government_ledger_parser = subparsers.add_parser(
+        "cross-ledger-audit",
+        help="审计政府附件、职位表、扩源队列和来源注册表的一致性",
+    )
+    government_ledger_parser.add_argument(
+        "--today",
+        help="覆盖审计日期，格式 YYYY-MM-DD",
+    )
+    government_ledger_parser.add_argument(
+        "--max-age-hours",
+        type=float,
+        default=48,
+        help="岗位台账证据新鲜度窗口，默认 48 小时",
+    )
+    government_ledger_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整 JSON 审计报告写入指定文件",
     )
     cnpc_matrix_parser = subparsers.add_parser(
         "cnpc-matrix",
@@ -1252,6 +1274,24 @@ def main() -> None:
                 encoding="utf-8",
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "cross-ledger-audit":
+        try:
+            result = build_government_ledger_consistency_audit(
+                today=args.today,
+                max_age_hours=args.max_age_hours,
+            )
+        except (OSError, ValueError) as error:
+            print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if not result["ok"]:
+            raise SystemExit(1)
         return
     if args.command == "organization-matrix":
         registry = load_organization_registry()

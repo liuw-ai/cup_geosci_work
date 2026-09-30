@@ -14,9 +14,10 @@ otherwise it can direct a later worker toward an obsolete or unsuitable task.
   `scan_success_no_match`, not `access_limited`.
 - China Geological Survey: the Development Research Center's official notice
   contains nine explicitly matched doctoral postdoctoral positions in Beijing,
-  with a `2026-10-16 17:00` deadline. The queue now points to two stable
-  job-level identifiers; the full nine rows remain in the government position
-  registry.
+  with a `2026-10-16 17:00` deadline. The queue points to two stable
+  job-level identifiers (`government-position:cgs-drc-postdoc-2026-1:1` and
+  `government-position:cgs-drc-postdoc-2026-9:9`); the full nine rows remain
+  in the government position registry.
 - China Coal Geology Group: the current mature-talent attachment was directly
   checked from the official server. It remains an official recruitment record,
   but is explicitly `current_non_student_eligible`, consistent with Phase 97.

@@ -115,6 +115,10 @@ def load_domestic_expansion_queue(
                 raise ValueError(
                     f"{record_id}: current_non_student_eligible requires student_scope_reason"
                 )
+            if not str(record.get("related_artifact_id") or "").strip():
+                raise ValueError(
+                    f"{record_id}: current_non_student_eligible requires related_artifact_id"
+                )
         normalized_record = {
             **record,
             "id": record_id,
@@ -123,6 +127,9 @@ def load_domestic_expansion_queue(
             "source_id": str(source_id).strip() if source_id is not None else None,
             "sample_announcement_url": (
                 str(sample_url).strip() if sample_url is not None else None
+            ),
+            "related_artifact_id": (
+                str(record.get("related_artifact_id") or "").strip() or None
             ),
             "official_host": (urlparse(official_url).hostname or "").lower(),
         }
