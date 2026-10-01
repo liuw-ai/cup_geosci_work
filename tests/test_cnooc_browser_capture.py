@@ -3,7 +3,10 @@ from datetime import datetime, timezone
 
 import pytest
 
-from job_hub.cnooc_browser_capture import load_cnooc_browser_capture
+from job_hub.cnooc_browser_capture import (
+    load_cnooc_browser_capture,
+    persist_cnooc_browser_capture,
+)
 from job_hub.browser_capture import BrowserCaptureError
 
 
@@ -67,6 +70,21 @@ def test_cnooc_partial_capture_never_becomes_empty_success(tmp_path) -> None:
 
     with pytest.raises(BrowserCaptureError, match="not publishable"):
         load_cnooc_browser_capture(path)
+
+
+def test_cnooc_partial_capture_does_not_replace_success_snapshot(tmp_path) -> None:
+    path = tmp_path / "cnooc.json"
+    success = _payload()
+    persist_cnooc_browser_capture(output=path, payload=success)
+    before = path.read_text(encoding="utf-8")
+
+    partial = _payload(failed=1, status="partial")
+    persist_cnooc_browser_capture(output=path, payload=partial)
+
+    assert path.read_text(encoding="utf-8") == before
+    failure = path.with_suffix(".failure.json")
+    assert failure.is_file()
+    assert json.loads(failure.read_text(encoding="utf-8"))["status"] == "partial"
 
 
 def test_cnooc_capture_rejects_non_official_detail_url(tmp_path) -> None:

@@ -279,12 +279,72 @@ def run_cnooc_browser_capture(
     except Exception as error:
         raise BrowserCaptureError(f"CNOOC browser capture failed: {error}") from error
 
-    payload = {"version": 1, "status": "success" if pagination_complete and not failures else "partial", "platform_url": listing_url, "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"), "scan": {"pages_scanned": pages, "pagination_complete": pagination_complete, "listing_total": listing_total, "candidate_rows": len(candidates), "detail_discovered": len(candidates), "detail_succeeded": len(rows), "detail_failed": len(failures), "rows_exported": len(rows)}, "rows": rows, "failure_records": failures}
-    destination = Path(output)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    temporary = destination.with_suffix(destination.suffix + ".tmp")
+    payload = {
+        "version": 1,
+        "status": "success" if pagination_complete and not failures else "partial",
+        "platform_url": listing_url,
+        "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "scan": {
+            "pages_scanned": pages,
+            "pagination_complete": pagination_complete,
+            "listing_total": listing_total,
+            "candidate_rows": len(candidates),
+            "detail_discovered": len(candidates),
+            "detail_succeeded": len(rows),
+            "detail_failed": len(failures),
+            "rows_exported": len(rows),
+            "failure_records": failures,
+        },
+        "rows": rows,
+        "failure_records": failures,
+    }
+    return persist_cnooc_browser_capture(output=output, payload=payload)
+
+
+def _write_capture(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    temporary.replace(destination)
+    temporary.replace(path)
+    return payload
+
+
+def persist_cnooc_browser_capture(
+    *, output: Path | str, payload: dict[str, Any]
+) -> dict[str, Any]:
+    """Keep the canonical CNOOC path success-only.
+
+    A partial browser pass is useful diagnostic evidence but cannot replace a
+    previously complete snapshot.  The source collector reads ``output`` as
+    the publication pointer, so non-success payloads are written beside it
+    and the prior success remains available until a complete pass succeeds.
+    """
+
+    destination = Path(output)
+    status = _text(payload.get("status"))
+    if status not in CAPTURE_STATUSES:
+        raise BrowserCaptureError(f"unsupported CNOOC capture status: {status}")
+    if status == "success":
+        scan = payload.get("scan")
+        if not isinstance(scan, dict):
+            raise BrowserCaptureError("successful CNOOC capture is missing scan metrics")
+        if (
+            not bool(scan.get("pagination_complete"))
+            or int(scan.get("detail_failed", 0)) != 0
+            or int(scan.get("detail_succeeded", 0)) != int(scan.get("detail_discovered", 0))
+        ):
+            raise BrowserCaptureError("successful CNOOC capture is incomplete")
+        rows = payload.get("rows")
+        if not isinstance(rows, list) or not rows:
+            raise BrowserCaptureError("successful CNOOC capture rows must be non-empty")
+        return _write_capture(destination, payload)
+
+    # Keep a deterministic diagnostic path for the next targeted retry.  The
+    # canonical success-only file is intentionally untouched.
+    failure_path = destination.with_suffix(".failure.json")
+    diagnostic = dict(payload)
+    diagnostic["diagnostic_for"] = destination.name
+    _write_capture(failure_path, diagnostic)
     return payload
 
 
@@ -326,6 +386,7 @@ def write_cnooc_capture_failure(
 __all__ = [
     "CNOOC_HOSTS",
     "load_cnooc_browser_capture",
+    "persist_cnooc_browser_capture",
     "run_cnooc_browser_capture",
     "write_cnooc_capture_failure",
 ]
