@@ -111,6 +111,7 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     assert client.get("/api/jobs?province=北京").get_json()["total"] == 1
     assert client.get("/api/jobs?province=山东").get_json()["total"] == 0
     assert client.get("/api/coverage").status_code == 200
+    assert client.get("/about").status_code == 200
     coverage_payload = client.get("/api/coverage").get_json()
     assert coverage_payload["organization_registry"]["organization_count"] > 0
     assert "source_bindings" not in coverage_payload["organization_registry"]

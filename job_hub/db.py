@@ -2565,6 +2565,7 @@ class Database:
         job_id: int,
         *,
         student_visible: bool = False,
+        as_of_date: str | None = None,
     ) -> dict[str, Any] | None:
         with self.connect() as connection:
             where = "id = ?"
@@ -2572,14 +2573,22 @@ class Database:
             if student_visible:
                 where += " AND status = 'open' AND publication_status IN (?, ?)"
                 values.extend(("student_eligible", "unrestricted_eligible"))
+                if as_of_date is not None:
+                    date.fromisoformat(as_of_date)
+                    where += " AND (deadline_date IS NULL OR deadline_date >= ?)"
+                    values.append(as_of_date)
             row = connection.execute(
                 f"SELECT * FROM jobs WHERE {where}", values
             ).fetchone()
         return self._job_row(row) if row else None
 
-    def find_public_job(self, job_id: int) -> dict[str, Any] | None:
+    def find_public_job(
+        self, job_id: int, *, as_of_date: str | None = None
+    ) -> dict[str, Any] | None:
         """Return one currently open job that passed the student gate."""
-        return self.find_job(job_id, student_visible=True)
+        return self.find_job(
+            job_id, student_visible=True, as_of_date=as_of_date
+        )
 
     def update_derived_job_fields(
         self,
@@ -2859,6 +2868,7 @@ class Database:
         page_size: int | None = 20,
         only_open: bool = True,
         student_visible: bool = True,
+        as_of_date: str | None = None,
     ) -> tuple[list[dict[str, Any]], int]:
         clauses: list[str] = []
         values: list[Any] = []
@@ -2867,6 +2877,10 @@ class Database:
         if student_visible:
             clauses.append("publication_status IN (?, ?)")
             values.extend(("student_eligible", "unrestricted_eligible"))
+            if as_of_date is not None:
+                date.fromisoformat(as_of_date)
+                clauses.append("(deadline_date IS NULL OR deadline_date >= ?)")
+                values.append(as_of_date)
         if category:
             clauses.append("category = ?")
             values.append(category)
@@ -2913,17 +2927,25 @@ class Database:
                 ).fetchall()
         return [self._job_row(row) for row in rows], int(count)
 
-    def list_categories(self) -> list[dict[str, Any]]:
+    def list_categories(self, *, as_of_date: str | None = None) -> list[dict[str, Any]]:
+        values: list[Any] = []
+        deadline_clause = ""
+        if as_of_date is not None:
+            date.fromisoformat(as_of_date)
+            deadline_clause = " AND (deadline_date IS NULL OR deadline_date >= ?)"
+            values.append(as_of_date)
         with self.connect() as connection:
             rows = connection.execute(
-                """
+                f"""
                 SELECT category, COUNT(*) AS count
                 FROM jobs
                 WHERE status = 'open'
                   AND publication_status IN ('student_eligible', 'unrestricted_eligible')
+                  {deadline_clause}
                 GROUP BY category
                 ORDER BY count DESC, category
-                """
+                """,
+                values,
             ).fetchall()
         return [dict(row) for row in rows]
 
@@ -2956,9 +2978,10 @@ class Database:
                   AND job_events.occurred_at < ?
                   AND jobs.status = 'open'
                   AND jobs.publication_status IN ('student_eligible', 'unrestricted_eligible')
+                  AND (jobs.deadline_date IS NULL OR jobs.deadline_date >= ?)
                 ORDER BY jobs.relevance_score DESC, jobs.deadline_date ASC
                 """,
-                (start_value, end_value),
+                (start_value, end_value, report_date),
             ).fetchall()
         created: list[dict[str, Any]] = []
         updated: list[dict[str, Any]] = []
@@ -2986,12 +3009,20 @@ class Database:
             ).fetchall()
         return [self._job_row(row) for row in rows]
 
-    def count_open_jobs(self) -> int:
+    def count_open_jobs(self, *, as_of_date: str | None = None) -> int:
+        values: list[Any] = []
+        deadline_clause = ""
+        if as_of_date is not None:
+            date.fromisoformat(as_of_date)
+            deadline_clause = " AND (deadline_date IS NULL OR deadline_date >= ?)"
+            values.append(as_of_date)
         with self.connect() as connection:
             return int(
                 connection.execute(
                     "SELECT COUNT(*) FROM jobs WHERE status = 'open' "
                     "AND publication_status IN ('student_eligible', 'unrestricted_eligible')"
+                    + deadline_clause,
+                    values,
                 ).fetchone()[0]
             )
 

@@ -138,7 +138,7 @@ def build_daily_report(
             "updated": len(updated),
             "expired": expired_today,
             "deadline_soon": len(deadline_jobs),
-            "open_total": database.count_open_jobs(),
+            "open_total": database.count_open_jobs(as_of_date=target),
             "source_run_count": source_runs["summary"]["run_count"],
             "source_runs_with_matches": source_runs["summary"]["success_with_matches"],
             "source_runs_unavailable": (

@@ -157,6 +157,85 @@ def test_coverage_never_interprets_a_failed_latest_scan_as_no_opening(tmp_path) 
     assert "不能把零岗位解释为无招聘" in shandong["scan_interpretation"]
 
 
+def test_coverage_separates_retired_source_errors_from_active_health(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    database.upsert_source(
+        {
+            **source(),
+            "id": "retired-source",
+            "name": "已停用旧适配器",
+            "enabled": False,
+            "config": {
+                "automation_status": "retired_legacy_api",
+                "replacement_source_id": "official-test-source",
+                "retired_reason": "已由详情浏览器采集接管。",
+            },
+        }
+    )
+    database.record_source_health(
+        "official-test-source", status="source_active", detail="当前可用。", successful=True
+    )
+    database.record_source_health(
+        "retired-source", status="source_error", detail="历史接口失败。"
+    )
+
+    report = build_coverage_report(database)
+    health = report["source_health"]
+
+    assert health["enabled_distribution"] == {"source_active": 1}
+    assert [item["id"] for item in health["unhealthy_sources"]] == []
+    assert health["disabled_sources"] == [
+        {
+            "id": "retired-source",
+            "name": "已停用旧适配器",
+            "status": "source_error",
+            "replacement_source_id": "official-test-source",
+            "retired_reason": "已由详情浏览器采集接管。",
+        }
+    ]
+
+
+def test_public_job_reads_apply_deadline_gate_before_worker_expiry(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    registered_source = source()
+    database.upsert_source(registered_source)
+    pipeline = JobPipeline(settings, database)
+    posting = RawPosting(
+        title="地质工程师",
+        employer="测试地质单位",
+        source_url="https://careers.example.edu.cn/jobs/deadline-read-gate",
+        application_url=None,
+        text="资源勘查工程本科，报名截止时间为2026年10月5日。",
+        summary="官方岗位公告。",
+        published_date="2026-09-01",
+        deadline_date="2026-10-05",
+        location="北京市",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程师",
+            "专业范围": "资源勘查工程",
+            "学历要求": "本科",
+        },
+    )
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+    )
+
+    assert database.list_jobs(
+        page_size=None, as_of_date="2026-10-04"
+    )[1] == 1
+    assert database.list_jobs(
+        page_size=None, as_of_date="2026-10-06"
+    )[1] == 0
+    assert database.find_public_job(job_id, as_of_date="2026-10-06") is None
+    assert database.count_open_jobs(as_of_date="2026-10-06") == 0
+
+
 def test_snapshot_trend_skips_a_replaceable_current_day_snapshot(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)

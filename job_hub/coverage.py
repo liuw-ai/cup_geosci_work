@@ -155,6 +155,11 @@ def build_coverage_report(
         str(health_by_id.get(source["id"], {}).get("status", "unknown"))
         for source in sources
     )
+    enabled_health_distribution = Counter(
+        str(health_by_id.get(source["id"], {}).get("status", "unknown"))
+        for source in sources
+        if source.get("enabled")
+    )
     enabled_latest_runs = {
         source_id: run
         for source_id, run in latest_runs_by_id.items()
@@ -183,6 +188,11 @@ def build_coverage_report(
             "registered_sources": len(sources),
             "enabled_sources": sum(1 for source in sources if source["enabled"]),
             "distribution": dict(sorted(health_distribution.items())),
+            # Keep the historical distribution for administrators, but make
+            # the current operational distribution explicit.  A retired
+            # source can retain its last error record for audit purposes and
+            # must not make the active network look unhealthy.
+            "enabled_distribution": dict(sorted(enabled_health_distribution.items())),
             "sources_without_health_record": sorted(
                 source["id"] for source in sources if source["id"] not in health_by_id
             ),
@@ -199,8 +209,28 @@ def build_coverage_report(
                     "detail": health_by_id.get(source["id"], {}).get("detail", ""),
                 }
                 for source in sources
+                if source.get("enabled")
                 if health_by_id.get(source["id"], {}).get("status", "unknown")
                 in UNHEALTHY_SOURCE_STATUSES
+            ],
+            "disabled_sources": [
+                {
+                    "id": source["id"],
+                    "name": source["name"],
+                    "status": health_by_id.get(source["id"], {}).get("status", "unknown"),
+                    "replacement_source_id": source.get("config", {}).get(
+                        "replacement_source_id"
+                    ),
+                    "retired_reason": source.get("config", {}).get("retired_reason"),
+                }
+                for source in sources
+                if not source.get("enabled")
+                and (
+                    str(source.get("config", {}).get("automation_status", ""))
+                    .lower()
+                    .startswith(("retired", "replaced", "deprecated"))
+                    or source.get("config", {}).get("replacement_source_id")
+                )
             ],
         },
         "source_resilience": _source_resilience(

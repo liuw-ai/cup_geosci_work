@@ -145,7 +145,14 @@
               <td>{{ category_display_names.get(source.category, source.category) }}</td>
               <td>{{ source.source_tier }} 级</td>
               <td>
-                {% if source.enabled %}已启用{% else %}待核验{% endif %}
+                {% if source.enabled %}
+                  已启用
+                {% elif source.config.replacement_source_id or (source.config.automation_status and ("retired" in source.config.automation_status|lower or "replaced" in source.config.automation_status|lower or "deprecated" in source.config.automation_status|lower)) %}
+                  已停用
+                  {% if source.config.replacement_source_id %}<small>由替代来源接管</small>{% endif %}
+                {% else %}
+                  待核验
+                {% endif %}
                 {% if source.last_synced_at %}<small>最近同步：{{ source.last_synced_at|local_timestamp_date }}</small>{% endif %}
                 {% set health = source_health.get(source.id, {}) %}
                 <small>{{ health_labels.get(health.status, "尚未检查") }}</small>

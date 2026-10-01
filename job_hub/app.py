@@ -182,11 +182,17 @@ def create_app(settings: Settings | None = None) -> Flask:
         public report pages.
         """
         displayed = dict(report)
+        business_date = local_today(settings).isoformat()
         for key in ("new_jobs", "updated_jobs", "deadline_jobs"):
             displayed[key] = [
                 job
                 for item in report.get(key, [])
-                if (job := database.find_public_job(int(item["id"]))) is not None
+                if (
+                    job := database.find_public_job(
+                        int(item["id"]), as_of_date=business_date
+                    )
+                )
+                is not None
             ]
         stats = dict(report.get("stats", {}))
         stats.update(
@@ -194,7 +200,7 @@ def create_app(settings: Settings | None = None) -> Flask:
                 "new": len(displayed["new_jobs"]),
                 "updated": len(displayed["updated_jobs"]),
                 "deadline_soon": len(displayed["deadline_jobs"]),
-                "open_total": database.count_open_jobs(),
+                "open_total": database.count_open_jobs(as_of_date=business_date),
             }
         )
         displayed["stats"] = stats
@@ -257,6 +263,7 @@ def create_app(settings: Settings | None = None) -> Flask:
         profile: StudentProfile | None,
         match_filter: str,
     ) -> tuple[list[dict[str, Any]], int]:
+        business_date = local_today(settings).isoformat()
         if profile is None:
             return database.list_jobs(
                 category=category,
@@ -265,6 +272,7 @@ def create_app(settings: Settings | None = None) -> Flask:
                 relevance_band=relevance_band,
                 q=query,
                 page=page,
+                as_of_date=business_date,
             )
 
         # A profile match requires the raw announcement as well as derived tags.
@@ -275,6 +283,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             relevance_band=relevance_band,
             q=query,
             page_size=None,
+            as_of_date=business_date,
         )
         annotated = [annotate_profile_match(job, profile) for job in candidates]
         visible = [
@@ -308,13 +317,17 @@ def create_app(settings: Settings | None = None) -> Flask:
             key=lambda item: (-item["relevance_score"], item["deadline_date"] or "9999-12-31"),
         )[:6]
         if not featured:
-            featured, _ = database.list_jobs(page_size=6)
+            featured, _ = database.list_jobs(
+                page_size=6, as_of_date=local_today(settings).isoformat()
+            )
         return render_template(
             "home.html",
             report=report,
             is_preview=is_preview,
             featured=featured,
-            categories=database.list_categories(),
+            categories=database.list_categories(
+                as_of_date=local_today(settings).isoformat()
+            ),
             report_dates=database.list_report_dates(14),
             upcoming_positions=upcoming_government_positions(),
         )
@@ -402,13 +415,17 @@ def create_app(settings: Settings | None = None) -> Flask:
                 "profile": profile.id if profile else "",
                 "match": match_filter,
             },
-            categories=database.list_categories(),
+            categories=database.list_categories(
+                as_of_date=local_today(settings).isoformat()
+            ),
             profile=profile,
         )
 
     @app.get("/jobs/<int:job_id>")
     def job_detail(job_id: int) -> str:
-        job = database.find_public_job(job_id)
+        job = database.find_public_job(
+            job_id, as_of_date=local_today(settings).isoformat()
+        )
         if job is None:
             abort(404)
         profile = requested_profile()
@@ -459,7 +476,9 @@ def create_app(settings: Settings | None = None) -> Flask:
         return jsonify(
             {
                 "status": "ok",
-                "open_jobs": database.count_open_jobs(),
+                "open_jobs": database.count_open_jobs(
+                    as_of_date=local_today(settings).isoformat()
+                ),
                 "latest_report": (
                     database.latest_daily_report() or {}
                 ).get("report_date"),
