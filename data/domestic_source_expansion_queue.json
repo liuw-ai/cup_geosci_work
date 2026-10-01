@@ -290,13 +290,13 @@
       "backup_urls": ["https://www.cnooc.com.cn/"],
       "source_id": "cnooc-career",
       "channel_type": "campus_recruitment",
-      "status": "scan_success_no_match",
-      "observed_on": "2026-09-30",
-      "server_scan": "direct",
-      "server_observation": "HTTP 200; public API code=200 totalNum=0; no publishable rows",
-      "scan_conclusion": "scan_success_no_match",
-      "field_validation": "官方招聘页可访问并返回‘暂无数据’；2026届官方通知报名截止日为 2026-05-08，已排除过期岗位，不将当前无匹配解释为访问故障。",
-      "next_action": "下一招聘批次出现后重新扫描动态列表和详情字段；若接口返回策略限制则改记 access_limited。"
+      "status": "official_job_sample_verified",
+      "observed_on": "2026-10-01",
+      "server_scan": "direct+browser",
+      "server_observation": "HTTP 200; public API campaign=105147 code=200 totalNum=350 totalPage=4; 地学关键词候选292；明确可报48，待详情证据214，专业不适合30。",
+      "scan_conclusion": "scan_success_with_open_matches",
+      "field_validation": "服务器浏览器首轮完成官方 API 4 页、350 条列表和 343 条候选详情；343/343 详情成功解析岗位级专业、学历、地点、截止日期、人数语义和 xiaoyuan.zhaopin.com 证据。通过地学院专业/学历门禁的 43 条已进入学生端；256 条保留待证据，44 条专业不适合。",
+      "next_action": "按 180 分钟浏览器周期和 30 小时捕获新鲜度每日复核；截止日清退，详情挑战或分页失败写入旁路复核，不解释为无岗位。"
     },
     {
       "id": "pipechina-regional-units",

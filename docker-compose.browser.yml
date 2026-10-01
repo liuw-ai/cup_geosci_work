@@ -84,5 +84,46 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  cnooc-headless-shell:
+    image: chromedp/headless-shell:latest
+    command:
+      - --no-sandbox
+      - --disable-gpu
+    init: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  cnooc-browser:
+    build:
+      context: .
+      dockerfile: Dockerfile.browser
+    image: cupb-geoscience-job-hub-browser:latest
+    depends_on:
+      - cnooc-headless-shell
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      BROWSER_WORKER_KIND: cnooc
+      CNOOC_BROWSER_SOURCE_ID: cnooc-career-browser
+      CNOOC_BROWSER_INTERVAL_MINUTES: 180
+      CNOOC_BROWSER_CDP_URL: http://cnooc-headless-shell:9222
+      CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+    command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   job_hub_data:

@@ -21,8 +21,11 @@ def test_production_cnooc_source_is_a_daily_monitor_not_a_static_snapshot() -> N
     assert source["enabled"] is True
     assert source["source_type"] == "zhaopin_campus"
     assert source["config"]["scan_policy"] == "daily_public_api_monitor"
-    assert source["config"]["automation_status"].endswith("20260930_direct")
-    assert source["config"]["last_server_scan"] == "2026-09-30"
+    assert source["config"]["automation_status"].endswith("20261001_direct")
+    assert source["config"]["last_server_scan"] == "2026-10-01"
+    assert source["config"]["company_id"] == "105147"
+    assert source["config"]["prefer_page_campaign_id"] is True
+    assert "xiaoyuan.zhaopin.com" in source["config"]["allowed_hosts"]
 
 
 @dataclass
@@ -199,6 +202,107 @@ def test_zhaopin_metadata_can_be_read_from_public_asset(tmp_path, monkeypatch) -
 
     assert metadata["companyId"] == "CZ123"
     assert metadata["companyNumber"] == "123"
+
+
+def test_zhaopin_metadata_maps_annual_company_out_id(tmp_path) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = _source()
+    source["config"].pop("company_id")  # type: ignore[index]
+    metadata = collector._zhaopin_campaign_metadata(
+        'const app={companyOutId:"105147"}',
+        source["config"],  # type: ignore[index]
+        source["config"]["listing_url"],  # type: ignore[index]
+    )
+
+    assert metadata["xiaozhaoId"] == "105147"
+
+
+def test_zhaopin_adapter_scans_all_pages_and_preserves_job_fields(
+    tmp_path, monkeypatch
+) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = _source()
+    source["config"].update(  # type: ignore[index]
+        {
+            "company_id": "105147",
+            "max_items": 10,
+            "page_size": 1,
+            "allowed_hosts": ["xiaoyuan.zhaopin.com"],
+        }
+    )
+    landing_url = source["config"]["listing_url"]  # type: ignore[index]
+    api_url = "https://fe.zhaopin.com/grace/api/dsc/search-job-list"
+    page_calls: list[int] = []
+    rows = [
+        {
+            "company": {"campusOrgName": "中海油研究总院有限责任公司"},
+            "job": {
+                "jobNumber": "CC258591510J101",
+                "title": "勘探地质助理工程师",
+                "cityName": "北京",
+                "address": "北京市朝阳区",
+                "detail": "学历要求：硕士研究生及以上；专业要求：地质学类、地质资源与地质工程。",
+                "url": "https://xiaoyuan.zhaopin.com/job/CC258591510J101",
+                "dateEnd": 1793548799999,
+                "modifiedTime": 1790776686314,
+                "quantity": 0,
+                "minEducationName": "硕士",
+            },
+        },
+        {
+            "company": {"campusOrgName": "中海油田服务股份有限公司"},
+            "job": {
+                "jobNumber": "CC258591510J102",
+                "title": "地球物理助理工程师",
+                "cityName": "天津",
+                "detail": "学历要求：硕士研究生及以上；专业要求：地球物理学、地质工程。",
+                "url": "https://xiaoyuan.zhaopin.com/job/CC258591510J102",
+                "dateEnd": 1793548799999,
+                "modifiedTime": 1790776686314,
+                "quantity": 0,
+                "minEducationName": "硕士",
+            },
+        },
+    ]
+
+    monkeypatch.setattr(
+        collector,
+        "_get",
+        lambda _url, _source: FakeResponse("<html></html>", landing_url),
+    )
+
+    def post(_url, payload, *, headers=None):
+        page_calls.append(payload["pageIndex"])
+        assert payload["orgNumbers"] == ["105147"]
+        assert payload["pageSize"] == 1
+        page = payload["pageIndex"]
+        return FakeResponse(
+            "",
+            api_url,
+            {
+                "code": 200,
+                "data": {
+                    "jobList": [rows[page - 1]],
+                    "pageInfo": {"totalNum": 2, "totalPage": 2, "pageIndex": page},
+                },
+            },
+        )
+
+    monkeypatch.setattr(collector, "_post_json", post)
+    postings = collector.collect(source)
+
+    assert page_calls == [1, 2]
+    assert len(postings) == 2
+    assert {item.employer for item in postings} == {
+        "中海油研究总院有限责任公司",
+        "中海油田服务股份有限公司",
+    }
+    assert all(item.deadline_date == "2026-11-01" for item in postings)
+    assert all(
+        item.field_evidence["招聘人数"] == "若干（官方未披露具体人数）"
+        for item in postings
+    )
+    assert all(item.field_evidence["官方岗位详情"].startswith("https://xiaoyuan.zhaopin.com/") for item in postings)
 
 
 def test_zhaopin_missing_campaign_id_is_not_the_literal_none(tmp_path, monkeypatch) -> None:

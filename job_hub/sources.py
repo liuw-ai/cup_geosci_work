@@ -49,6 +49,7 @@ from job_hub.transport import (
 )
 from job_hub.browser_capture import BrowserCaptureError, load_browser_capture
 from job_hub.cnpc_browser_capture import CnpcJobCaptureError, load_cnpc_job_capture
+from job_hub.cnooc_browser_capture import load_cnooc_browser_capture
 from job_hub.cmgb_browser_capture import (
     CmgbBrowserCaptureError,
     load_cmgb_browser_capture,
@@ -402,6 +403,8 @@ class OfficialSourceCollector:
             return self._collect_official_browser_rows(source)
         if source_type == "cnpc_browser_rows":
             return self._collect_cnpc_browser_rows(source)
+        if source_type == "cnooc_browser_rows":
+            return self._collect_cnooc_browser_rows(source)
         if source_type == "cmgb_browser_rows":
             return self._collect_cmgb_browser_rows(source)
         if source_type == "sinopec_spa_rows":
@@ -3388,12 +3391,18 @@ class OfficialSourceCollector:
             config,
             landing.url,
         )
-        company_id = str(
-            config.get("company_id")
-            or metadata.get("companyId")
-            or metadata.get("xiaozhaoId")
-            or ""
+        configured_company_id = str(config.get("company_id") or "").strip()
+        page_company_id = str(
+            metadata.get("companyId") or metadata.get("xiaozhaoId") or ""
         ).strip()
+        # Annual Zhaopin campaigns change their public organization number.
+        # A source may opt into page-first resolution so a stale configured
+        # number cannot turn a newly published campaign into a false zero.
+        company_id = (
+            page_company_id
+            if config.get("prefer_page_campaign_id") and page_company_id
+            else configured_company_id or page_company_id
+        )
         if not company_id:
             raise SourceCollectionError(
                 "Zhaopin public campaign is missing companyId/xiaozhaoId"
@@ -3416,56 +3425,69 @@ class OfficialSourceCollector:
                 f"Zhaopin API host is not allowlisted: {parsed_api_host or api_url}"
             )
         job_source = 2 if scene == "cam" else 1
-        page_size = min(self._item_limit(source), 100)
-        request_payload = {
-            "orgNumbers": [company_id],
-            "jobSource": job_source,
-            "pageIndex": 1,
-            "pageSize": page_size,
-            "orgDepartmentIds": [],
-            "workRegionIds": "",
-            "jobTypes": "",
-            "priorityMajors": "",
-            "customTags": "",
-        }
-        self._wait(source)
-        response = self._post_json(
-            api_url,
-            request_payload,
-            headers={
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "Origin": f"{urlparse(landing.url).scheme}://{urlparse(landing.url).netloc}",
-                "Referer": landing.url,
-            },
+        page_size = min(
+            max(1, int(config.get("page_size", 100))),
+            100,
         )
+        max_items = self._item_limit(source)
         try:
-            payload = response.json()
-        except ValueError as error:
-            raise SourceCollectionError(
-                "Zhaopin public job API did not return JSON"
-            ) from error
-        if not isinstance(payload, dict):
-            raise SourceCollectionError("Zhaopin public job API returned an unexpected payload")
-        code = payload.get("code")
-        if str(code) != "200":
-            message = clean_text(str(payload.get("message") or payload.get("msg") or ""))
-            detail = f"; message={message}" if message else ""
-            raise SourceCollectionError(
-                f"Zhaopin public job API business error code={code}{detail}"
-            )
-        data = payload.get("data")
-        if not isinstance(data, dict):
-            raise SourceCollectionError("Zhaopin public job API data is not an object")
-        jobs = data.get("jobList")
-        page_info = data.get("pageInfo")
-        if not isinstance(jobs, list) or not isinstance(page_info, dict):
-            raise SourceCollectionError(
-                "Zhaopin public job API is missing jobList/pageInfo"
-            )
-        # An empty list is only a valid no-match result when the public page
-        # explicitly reports a zero total.  Missing or inconsistent counts are
-        # treated as an adapter regression instead of silently publishing none.
+            max_pages = max(1, min(int(config.get("max_pages", 20)), 100))
+        except (TypeError, ValueError) as error:
+            raise SourceCollectionError("Zhaopin max_pages must be an integer") from error
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Origin": f"{urlparse(landing.url).scheme}://{urlparse(landing.url).netloc}",
+            "Referer": landing.url,
+        }
+
+        def fetch_page(page_index: int) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+            request_payload = {
+                "orgNumbers": [company_id],
+                "jobSource": job_source,
+                "pageIndex": page_index,
+                "pageSize": page_size,
+                "orgDepartmentIds": [],
+                "workRegionIds": "",
+                "jobTypes": "",
+                "priorityMajors": "",
+                "customTags": "",
+            }
+            self._wait(source)
+            response = self._post_json(api_url, request_payload, headers=headers)
+            try:
+                payload = response.json()
+            except ValueError as error:
+                raise SourceCollectionError(
+                    "Zhaopin public job API did not return JSON"
+                ) from error
+            if not isinstance(payload, dict):
+                raise SourceCollectionError(
+                    "Zhaopin public job API returned an unexpected payload"
+                )
+            code = payload.get("code")
+            if str(code) != "200":
+                message = clean_text(
+                    str(payload.get("message") or payload.get("msg") or "")
+                )
+                detail = f"; message={message}" if message else ""
+                raise SourceCollectionError(
+                    f"Zhaopin public job API business error code={code}{detail}"
+                )
+            data = payload.get("data")
+            if not isinstance(data, dict):
+                raise SourceCollectionError(
+                    "Zhaopin public job API data is not an object"
+                )
+            jobs = data.get("jobList")
+            page_info = data.get("pageInfo")
+            if not isinstance(jobs, list) or not isinstance(page_info, dict):
+                raise SourceCollectionError(
+                    "Zhaopin public job API is missing jobList/pageInfo"
+                )
+            return [item for item in jobs if isinstance(item, dict)], page_info
+
+        jobs, page_info = fetch_page(1)
         try:
             total = int(page_info.get("totalNum", -1))
         except (TypeError, ValueError):
@@ -3474,20 +3496,123 @@ class OfficialSourceCollector:
             raise SourceCollectionError(
                 "Zhaopin public job API returned inconsistent pageInfo/jobList"
             )
+        if total == 0:
+            return []
+        try:
+            total_pages = int(page_info.get("totalPage", 0))
+        except (TypeError, ValueError):
+            total_pages = 0
+        if total_pages <= 0:
+            total_pages = (total + page_size - 1) // page_size
+        if total_pages > max_pages:
+            raise SourceCollectionError(
+                f"Zhaopin pagination exceeds configured max_pages: {total_pages}"
+            )
+
+        all_items = list(jobs)
+        for page_index in range(2, total_pages + 1):
+            page_jobs, page_info = fetch_page(page_index)
+            if not page_jobs:
+                raise SourceCollectionError(
+                    f"Zhaopin public job API returned an empty page {page_index}"
+                )
+            all_items.extend(page_jobs)
+        if len(all_items) != total:
+            raise SourceCollectionError(
+                "Zhaopin public job API pagination is incomplete: "
+                f"expected {total}, received {len(all_items)}"
+            )
+
         postings: list[RawPosting] = []
-        for item in jobs:
-            if not isinstance(item, dict):
-                continue
+        for item in all_items:
             job = item.get("job") if isinstance(item.get("job"), dict) else item
-            posting = self._zhaopin_posting(job, source, listing_url)
-            if posting is not None:
+            company = item.get("company") if isinstance(item.get("company"), dict) else {}
+            posting = self._zhaopin_posting(
+                job,
+                source,
+                listing_url,
+                company=company,
+                api_url=api_url,
+            )
+            if posting is not None and len(postings) < max_items:
                 postings.append(posting)
-            if len(postings) >= page_size:
-                break
-        if jobs and not postings:
+        if all_items and not postings:
             raise SourceCollectionError(
                 "Zhaopin public job API returned rows but no row had publishable evidence"
             )
+        return postings
+
+    def _collect_cnooc_browser_rows(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Convert a complete CNOOC list-plus-detail browser capture.
+
+        CNOOC's public list API omits the deadline and may expose only a
+        generic summary.  This source accepts rows only after the isolated
+        Chromium worker has parsed the official detail ``INITIAL_DATA``.
+        """
+
+        config = source["config"]
+        capture_path = Path(self.settings.data_dir) / str(config["capture_path"])
+        try:
+            payload = load_cnooc_browser_capture(
+                capture_path,
+                allowed_hosts=list(config.get("allowed_hosts", [])),
+                max_age_hours=float(config.get("max_age_hours", 30)),
+                require_complete_scan=bool(config.get("require_complete_scan", True)),
+            )
+        except BrowserCaptureError as error:
+            message = str(error)
+            if "not publishable" in message or "incomplete" in message or "stale" in message:
+                raise SourceSkipped(message) from error
+            raise SourceCollectionError(message) from error
+
+        postings: list[RawPosting] = []
+        max_items = min(self._item_limit(source), 2_000)
+        for item in payload["rows"][:max_items]:
+            major = str(item["major"]).strip()
+            degree = str(item["degree"]).strip()
+            location = str(item["location"]).strip()
+            deadline = parse_date_value(str(item["deadline"]).strip())
+            if not deadline:
+                raise SourceCollectionError(
+                    f"CNOOC job {item['external_id']} has no parseable deadline"
+                )
+            evidence = {
+                "evidence_scope": "official_cnooc_browser_detail",
+                "captured_at": str(payload["captured_at"]),
+                "岗位": str(item["title"]),
+                "招聘单位": str(item["employer"]),
+                "专业范围": major,
+                "学历要求": degree,
+                "工作地点": location,
+                "招聘人数": str(item["headcount"]),
+                "报名截止": str(item["deadline"]),
+                **{str(key): str(value) for key, value in item["field_evidence"].items()},
+            }
+            postings.append(
+                RawPosting(
+                    title=str(item["title"]).strip(),
+                    employer=str(item["employer"]).strip(),
+                    source_url=str(item["detail_url"]).strip(),
+                    application_url=str(item.get("application_url") or config["application_url"]).strip(),
+                    text=clean_text(
+                        f"{item['title']}；专业要求：{major}；学历要求：{degree}；"
+                        f"工作地点：{location}；截止时间：{item['deadline']}；{item.get('description', '')}"
+                    ),
+                    summary=clean_text(
+                        f"{item['title']}；{item['employer']}；{location}；截止 {item['deadline']}"
+                    ),
+                    published_date=str(item.get("published_date") or "").strip() or None,
+                    deadline_date=deadline,
+                    location=location,
+                    external_id=str(item["external_id"]).strip(),
+                    match_text=clean_text(f"{item['title']} {major} {degree}"),
+                    official_evidence_url=str(item["evidence_url"]).strip(),
+                    field_evidence=evidence,
+                    qualification_text=clean_text(f"学历要求：{degree}；专业要求：{major}"),
+                )
+            )
+        if not postings:
+            raise SourceCollectionError("CNOOC browser capture contains no rows")
         return postings
 
     def _collect_beisen_job_portal(self, source: dict[str, Any]) -> list[RawPosting]:
@@ -3870,6 +3995,16 @@ class OfficialSourceCollector:
                 )
                 if match and match.group(1).strip():
                     metadata[key] = clean_text(match.group(1))
+            # Current Zhaopin campaign bundles expose the annual public
+            # organization number as ``companyOutId`` rather than
+            # ``xiaozhaoId``. Treat it as the same read-only campaign id.
+            if not metadata.get("xiaozhaoId"):
+                match = re.search(
+                    r"[\"']?companyOutId[\"']?\s*[:=]\s*[\"']?([A-Za-z0-9_-]+)",
+                    candidate,
+                )
+                if match and match.group(1).strip():
+                    metadata["xiaozhaoId"] = clean_text(match.group(1))
         return metadata
 
     def _zhaopin_posting(
@@ -3877,6 +4012,9 @@ class OfficialSourceCollector:
         job: dict[str, Any],
         source: dict[str, Any],
         listing_url: str,
+        *,
+        company: dict[str, Any] | None = None,
+        api_url: str = "",
     ) -> RawPosting | None:
         title = clean_text(str(job.get("title") or ""))
         detail_html = str(job.get("detail") or job.get("jobDetail") or "")
@@ -3886,7 +4024,17 @@ class OfficialSourceCollector:
             categories = "、".join(clean_text(str(value)) for value in category_value)
         else:
             categories = clean_text(str(category_value or ""))
+        company = company or {}
+        employer = clean_text(
+            str(
+                company.get("campusOrgName")
+                or company.get("campusOrgShortName")
+                or source["publisher"]
+            )
+        )
         city = clean_text(str(job.get("cityName") or job.get("workCity") or ""))
+        address = clean_text(str(job.get("address") or job.get("workAddress") or ""))
+        location = address or city or extract_location_hint(detail)
         evidence_url = normalize_url(str(job.get("url") or "")) if job.get("url") else ""
         if evidence_url:
             allowed_hosts = {
@@ -3907,23 +4055,49 @@ class OfficialSourceCollector:
         if not self._accept_candidate(match_text, source):
             return None
         job_number = clean_text(str(job.get("jobNumber") or job.get("id") or ""))
+        published_date = self._zhaopin_epoch_date(
+            job.get("modifiedTime") or job.get("positionPublishTime") or job.get("dateStart")
+        ) or extract_published_date(detail)
+        deadline_date = self._zhaopin_epoch_date(
+            job.get("dateEnd") or job.get("applyEndTime")
+        ) or extract_deadline(detail)
+        if source["config"].get("require_detail_fields") and not deadline_date:
+            # The list API is intentionally discovery-only for sources whose
+            # public detail page carries the authoritative closing date.  A
+            # missing date goes to the browser/detail queue instead of being
+            # published as an apparently open vacancy.
+            return None
+        degree = clean_text(
+            str(job.get("minEducationName") or job.get("education") or "")
+        )
+        raw_quantity = job.get("recruitNumber")
+        if raw_quantity in (None, "", 0, "0", "0.0"):
+            raw_quantity = job.get("recruitPosition")
+        if raw_quantity in (None, "", 0, "0", "0.0"):
+            raw_quantity = job.get("quantity")
+        quantity = clean_text(str(raw_quantity or ""))
+        if quantity in {"", "0", "0.0"}:
+            quantity = "若干（官方未披露具体人数）"
         fields = [
             f"职位类别：{categories}" if categories else "",
-            f"工作地点：{city}" if city else "",
+            f"工作地点：{location}" if location else "",
+            f"学历要求：{degree}" if degree else "",
+            f"招聘人数：{quantity}" if quantity else "",
+            f"截止日期：{deadline_date}" if deadline_date else "",
         ]
         summary = clean_text("；".join(value for value in fields if value))
         if detail:
             summary = clean_text(f"{summary}；{detail}" if summary else detail)[:420]
         return RawPosting(
             title=title,
-            employer=source["publisher"],
+            employer=employer,
             source_url=evidence_url,
             application_url=evidence_url,
             text=match_text,
             summary=summary or title,
-            published_date=extract_published_date(detail),
-            deadline_date=extract_deadline(detail),
-            location=city or extract_location_hint(detail),
+            published_date=published_date,
+            deadline_date=deadline_date,
+            location=location,
             external_id=job_number or self._external_id_from_url(evidence_url),
             match_text=match_text,
             official_evidence_url=evidence_url,
@@ -3931,10 +4105,38 @@ class OfficialSourceCollector:
                 "evidence_scope": "official_detail_block",
                 "岗位": title,
                 "岗位要求": detail,
-                "学历要求": detail,
-                "工作地点": city or extract_location_hint(detail) or "",
+                "专业要求": detail,
+                "学历要求": degree or detail,
+                "工作地点": location,
+                "招聘人数": quantity,
+                "截止日期": deadline_date or "",
+                "岗位编号": job_number,
+                "官方岗位详情": evidence_url,
+                "官方招聘接口": api_url,
             },
         )
+
+    @staticmethod
+    def _zhaopin_epoch_date(value: Any) -> str | None:
+        """Normalize Zhaopin millisecond timestamps without guessing dates."""
+        if value is None or value == "":
+            return None
+        if isinstance(value, (int, float)):
+            timestamp = float(value)
+        else:
+            text = clean_text(str(value))
+            if not text:
+                return None
+            try:
+                timestamp = float(text)
+            except ValueError:
+                return parse_date_value(text)
+        if timestamp > 100_000_000_000:
+            timestamp /= 1000
+        try:
+            return datetime.fromtimestamp(timestamp, timezone.utc).date().isoformat()
+        except (OverflowError, OSError, ValueError):
+            return None
 
     def _mokahr_api_json(
         self,
@@ -5502,9 +5704,10 @@ class OfficialSourceCollector:
     def _item_limit(self, source: dict[str, Any]) -> int:
         value = source["config"].get("max_items", self.settings.max_source_items)
         try:
-            return max(1, min(int(value), self.settings.max_source_items))
+            configured_cap = 2_000 if source["config"].get("allow_large_item_limit") else self.settings.max_source_items
+            return max(1, min(int(value), configured_cap))
         except (TypeError, ValueError):
-            return self.settings.max_source_items
+            return 2_000 if source["config"].get("allow_large_item_limit") else self.settings.max_source_items
 
     @staticmethod
     def _external_id_from_url(url: str) -> str:

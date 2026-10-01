@@ -66,6 +66,8 @@ def main() -> None:
     worker_kind = os.getenv("BROWSER_WORKER_KIND", "cnpc").strip().lower()
     if worker_kind == "cmgb":
         from job_hub.cmgb_browser_worker import main as worker_main
+    elif worker_kind == "cnooc":
+        from job_hub.cnooc_browser_worker import main as worker_main
     else:
         from job_hub.cnpc_browser_worker import main as worker_main
 

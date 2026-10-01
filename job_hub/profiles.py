@@ -146,6 +146,11 @@ JOB_LEVEL_EVIDENCE_SCOPES = frozenset(
         # The capture manifest binds the title, major, degree, location,
         # headcount and deadline to the same official detail URL.
         "official_cmgb_browser_detail",
+        # CNOOC's Zhaopin detail page exposes the same job-level fields in
+        # window.__INITIAL_DATA__; the browser manifest preserves that URL and
+        # title binding before this scope reaches the publication gate.
+        "official_cnooc_browser_detail",
+        "official_zhaopin_detail_initial_data",
         "admin_verified_official_record",
     }
 )

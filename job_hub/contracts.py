@@ -41,6 +41,7 @@ SOURCE_TYPES = frozenset(
         "official_snapshot_rows",
         "official_browser_rows",
         "cnpc_browser_rows",
+        "cnooc_browser_rows",
         "cmgb_browser_rows",
         "sinopec_spa_rows",
         "structured_opening_page",
