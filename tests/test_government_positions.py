@@ -230,6 +230,53 @@ def test_stale_registry_report_excludes_rows_from_current_open_count() -> None:
     assert report["registry_freshness"] == "stale"
     assert report["verified_open_records"] == 0
     assert report["explicit_student_matches"] == 0
+    assert "hunan-geology-institute" in report["pending_evidence_sources"]
+    assert report["source_failures_or_pending"] > 0
+    assert "不能把缺少岗位解释为无岗位" in report["scan_interpretation"]
+
+
+def test_stale_source_verification_is_reported_as_pending_without_duplicate_failure() -> None:
+    registry = {
+        "as_of": "2026-09-28",
+        "records": [
+            {
+                "id": "stale-source-row",
+                "source_id": "official-test-source",
+                "position_type": "public_institution",
+                "province": "测试省",
+                "employer": "测试地质调查院",
+                "position_code": "A-001",
+                "title": "地质技术岗",
+                "major_requirement": "地质学",
+                "degree_requirement": "硕士研究生",
+                "location": "测试市",
+                "headcount": 1,
+                "deadline_date": "2099-12-31",
+                "deadline_policy": "fixed_date",
+                "official_notice_url": "https://careers.example.edu.cn/notice.html",
+                "official_attachment_url": "https://careers.example.edu.cn/table.xlsx",
+                "evidence_locator": "岗位表!2",
+                "record_status": "verified_open",
+                "match_status": "explicit_match",
+            }
+        ],
+    }
+    report = government_position_quality_report(
+        registry,
+        today="2026-10-02",
+        max_age_hours=48,
+        source_verifications={
+            "official-test-source": {
+                "status": "verified",
+                "last_success_at": "2026-09-29T00:00:00Z",
+            }
+        },
+        now=datetime.fromisoformat("2026-10-02T00:00:00+00:00"),
+    )
+
+    assert report["pending_evidence_sources"] == ["official-test-source"]
+    assert report["source_failures_or_pending"] == 1
+    assert report["verified_open_records"] == 0
 
 
 def test_provincial_civil_service_scans_keep_closed_or_non_student_entries_out() -> None:

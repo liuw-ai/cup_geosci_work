@@ -404,6 +404,43 @@ def government_position_quality_report(
         reference = reference.replace(tzinfo=timezone.utc)
     reference = reference.astimezone(timezone.utc)
     fallback_fresh = _registry_fresh(str(payload.get("as_of") or ""), reference, max_age_hours)
+    # A stale reviewed ledger correctly removes rows from the student-facing
+    # list, but that must not be reported as a successful empty scan.  Track
+    # the source IDs whose otherwise eligible rows now need a fresh official
+    # check.  This also catches a source whose last successful verification
+    # has aged out while its old snapshot remains in the registry.
+    pending_evidence_sources = sorted(
+        {
+            str(item.get("source_id") or "")
+            for item in records
+            if item.get("record_status") == "verified_open"
+            and item.get("match_status") in {"explicit_match", "unrestricted_match"}
+            and _record_is_in_current_window(
+                item, today_date, payload.get("source_opening_dates") or {}
+            )
+            and not _source_evidence_is_current(
+                str(item.get("source_id") or ""),
+                source_verifications or {},
+                reference,
+                max_age_hours,
+                fallback_fresh,
+                requires_manual_confirmation=(
+                    str(item.get("source_id") or "") in manual_only_sources
+                ),
+            )
+        }
+    )
+    record_failure_sources = {
+        str(item.get("source_id") or "")
+        for item in failures
+        if str(item.get("source_id") or "")
+    }
+    verification_failure_sources = {
+        str(source_id)
+        for source_id, verification in (source_verifications or {}).items()
+        if str(verification.get("status") or "")
+        in {"source_unavailable", "not_configured"}
+    }
     manual_confirmation_required_sources = sorted(
         {
             str(item.get("source_id") or "")
@@ -420,6 +457,8 @@ def government_position_quality_report(
             )
         }
     )
+    pending_source_ids = set(pending_evidence_sources)
+    manual_source_ids = set(manual_confirmation_required_sources)
     closed = [item for item in records if item["record_status"] == "verified_closed"]
     upcoming = upcoming_position_records(
         payload,
@@ -457,10 +496,14 @@ def government_position_quality_report(
         ),
         "explicit_student_matches": len(explicit_matches),
         "verified_closed_records": len(closed),
-        "source_failures_or_pending": (
-            len(failures) + verification_failures + len(manual_confirmation_required_sources)
+        "source_failures_or_pending": len(
+            record_failure_sources
+            | verification_failure_sources
+            | manual_source_ids
+            | pending_source_ids
         ),
         "manual_confirmation_required_sources": manual_confirmation_required_sources,
+        "pending_evidence_sources": pending_evidence_sources,
         "verified_scan_no_current_match": scan_no_current_match,
         "source_activation_tasks": source_activation_tasks(
             payload,
@@ -506,7 +549,10 @@ def government_position_quality_report(
         },
         "scan_interpretation": (
             "存在来源故障或待核验记录，不能把缺少岗位解释为无岗位。"
-            if failures or verification_failures or manual_confirmation_required_sources
+            if failures
+            or verification_failures
+            or manual_confirmation_required_sources
+            or pending_evidence_sources
             else "部分官方来源已扫描成功但当前无可发布匹配；这不是来源故障。"
             if scan_no_current_match
             else "台账中的正式来源均已完成当前记录核验。"
@@ -645,8 +691,7 @@ def current_publishable_position_records(
             continue
         if item["match_status"] not in {"explicit_match", "unrestricted_match"}:
             continue
-        opening_date = _opening_date_for_record(item, source_opening_dates)
-        if opening_date and opening_date > target:
+        if not _record_is_in_current_window(item, target, source_opening_dates):
             continue
         if not _source_evidence_is_current(
             str(item.get("source_id") or ""),
@@ -658,9 +703,6 @@ def current_publishable_position_records(
                 str(item.get("source_id") or "") in manual_only_sources
             ),
         ):
-            continue
-        deadline = str(item.get("deadline_date") or "").strip()
-        if deadline and date.fromisoformat(deadline) < target:
             continue
         rows.append(dict(item))
     return rows
@@ -738,6 +780,19 @@ def _opening_date_for_record(
         or ""
     ).strip()
     return date.fromisoformat(raw) if raw else None
+
+
+def _record_is_in_current_window(
+    record: dict[str, Any],
+    target: date,
+    source_opening_dates: dict[str, Any],
+) -> bool:
+    """Return whether a reviewed row is inside its official date window."""
+    opening_date = _opening_date_for_record(record, source_opening_dates)
+    if opening_date and opening_date > target:
+        return False
+    deadline = str(record.get("deadline_date") or "").strip()
+    return not deadline or date.fromisoformat(deadline) >= target
 
 
 def _registry_fresh(
