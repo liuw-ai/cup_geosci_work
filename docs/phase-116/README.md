@@ -37,6 +37,10 @@ deadline for the closed regression notice.
   is activated by this change. Discovered files remain private until download,
   extraction, row-level evidence review, and lifecycle checks succeed.
 
+For deployment, the release includes a lightweight overlay image based on the
+already verified `phase110-overlay` runtime. It avoids reinstalling unchanged
+OS packages and keeps the full image available as a rollback target.
+
 ## Acceptance
 
 This fixes a concrete attachment-ingestion blocker but does not claim a new

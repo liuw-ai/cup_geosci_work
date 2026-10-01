@@ -1,0 +1,12 @@
+name: cupb-geoscience-job-hub
+services:
+  web:
+    image: cupb-geoscience-job-hub:phase116-overlay
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.phase116-overlay
+  worker:
+    image: cupb-geoscience-job-hub:phase116-overlay
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.phase116-overlay

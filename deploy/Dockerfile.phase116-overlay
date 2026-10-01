@@ -1,0 +1,8 @@
+# Reuse the already verified production runtime. The full Dockerfile installs
+# OS packages and can be blocked by an external apt mirror; this release only
+# changes Python source and therefore does not need a second system-package
+# installation.
+FROM cupb-geoscience-job-hub:phase110-overlay
+WORKDIR /app
+COPY job_hub/attachments.py /app/job_hub/attachments.py
+COPY job_hub/matching.py /app/job_hub/matching.py
