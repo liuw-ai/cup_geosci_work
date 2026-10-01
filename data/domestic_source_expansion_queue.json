@@ -292,6 +292,11 @@
       "channel_type": "campus_recruitment",
       "status": "official_job_sample_verified",
       "observed_on": "2026-10-01",
+      "sample_announcement_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972459115",
+      "sample_job_ids": [
+        "CC258591510J40972459115",
+        "CC258591510J40972459215"
+      ],
       "server_scan": "direct+browser",
       "server_observation": "HTTP 200; public API campaign=105147 code=200 totalNum=350 totalPage=4; 地学关键词候选292；明确可报48，待详情证据214，专业不适合30。",
       "scan_conclusion": "scan_success_with_open_matches",
