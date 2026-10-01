@@ -43,7 +43,7 @@ Phase 62 为该队列补上附件用途和岗位行语义门禁：报名表、�
 
 最新的中国石油官方浏览器索引捕获与安徽事业编附件队列见 [docs/phase-33/README.md](docs/phase-33/README.md)。浏览器捕获只记录 13 页、122 条官方公告索引和重点详情状态；详情字段缺失时不把公告索引当作学生端岗位。
 
-当前最新本地交付基线为 Phase 53；后续实时扩源仍以单位矩阵审计通过、官方岗位证据完整和学生端专业门禁通过为前提。Phase 53 已新增国聘动态浏览器采集契约、独立 worker 和失败隔离，但尚未在云服务器完成首轮真实捕获，来源默认关闭，详见 [docs/phase-53/README.md](docs/phase-53/README.md)。Phase 52 的 8 页分页人工核验快照仍作为学生端当前证据基线，详见 [docs/phase-52/README.md](docs/phase-52/README.md)。
+当前最新本地交付基线为 Phase 106；后续实时扩源仍以单位矩阵审计通过、官方岗位证据完整和学生端专业门禁通过为前提。Phase 106 修复了中国石油旧快照详情页缺少 `postName` 导致官方页面空壳的问题：采集新记录和读取旧记录时都会生成可渲染的官方深链接，岗位字段和证据内容不被改写。Phase 105 的专业类别门禁修复和生产验收记录见 [docs/phase-105/README.md](docs/phase-105/README.md) 与 [docs/phase-106/README.md](docs/phase-106/README.md)。
 
 Phase 40 已增加中国石油“公告列表分页 -> 公告详情 -> 多岗位表格”的专用浏览器采集链路。见 [docs/phase-40/README.md](docs/phase-40/README.md)。浏览器采集运行在独立 Chromium Worker 中，完整捕获才允许进入现有发布门禁；维护窗口、详情异常或扫描不完整均记录为来源受限，不写成无岗位。
 
