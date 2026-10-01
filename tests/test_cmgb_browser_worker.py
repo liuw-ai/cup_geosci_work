@@ -10,6 +10,7 @@ import pytest
 import job_hub.cmgb_browser_worker as worker_module
 from job_hub.cmgb_browser_capture import (
     CmgbBrowserCaptureError,
+    _close_browser_connection,
     _detail_retry_needs_session_reset,
     _detail_retryable,
 )
@@ -138,3 +139,15 @@ def test_cmgb_detail_retry_resets_session_only_for_browser_runtime_failures() ->
     assert _detail_retry_needs_session_reset(RuntimeError("Execution context was destroyed"))
     assert not _detail_retry_needs_session_reset(RuntimeError("detail page timed out"))
     assert not _detail_retry_needs_session_reset(RuntimeError("HTTP 412"))
+
+
+def test_cmgb_browser_connection_cleanup_disconnects_remote_playwright_session() -> None:
+    calls: list[str] = []
+
+    class FakeBrowser:
+        def close(self) -> None:
+            calls.append("closed")
+
+    _close_browser_connection(FakeBrowser())
+    _close_browser_connection(None)
+    assert calls == ["closed"]

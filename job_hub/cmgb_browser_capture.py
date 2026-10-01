@@ -986,6 +986,27 @@ def _close_context_pages(context: Any) -> None:
             pass
 
 
+def _close_browser_connection(browser: Any) -> None:
+    """Close a Playwright connection without stopping a remote CDP browser.
+
+    Playwright's ``Browser.close`` has different ownership semantics for a
+    launched browser and a browser obtained with ``connect_over_cdp``: the
+    former is stopped, while the latter is disconnected after its contexts
+    are cleared. Calling it in both modes prevents long-running workers from
+    accumulating Playwright websocket sessions.
+    """
+
+    if browser is None:
+        return
+    try:
+        browser.close()
+    except Exception:
+        # A crashed renderer may already have disposed the connection. Cleanup
+        # is best effort and must not replace the capture result or failure
+        # evidence.
+        pass
+
+
 def run_cmgb_browser_capture(
     *,
     url: str,
@@ -1035,7 +1056,6 @@ def run_cmgb_browser_capture(
     pagination_complete = False
     browser = None
     context = None
-    uses_remote_browser = False
     try:
         with sync_playwright() as playwright:
             cdp_url = str(config.get("cdp_url") or "").strip()
@@ -1051,7 +1071,6 @@ def run_cmgb_browser_capture(
                 # its list page. No other worker shares this CDP browser.
                 context = browser.contexts[0]
                 _close_context_pages(context)
-                uses_remote_browser = True
             else:
                 browser = playwright.chromium.launch(headless=True)
                 context = browser.new_context(user_agent=user_agent)
@@ -1231,11 +1250,7 @@ def run_cmgb_browser_capture(
         # later official SPA captures fail with resource-exhaustion errors.
         if context is not None:
             _close_context_pages(context)
-        if browser is not None and not uses_remote_browser:
-            try:
-                browser.close()
-            except Exception:
-                pass
+        _close_browser_connection(browser)
 
     status = "success" if pagination_complete and failed_rows == 0 else "partial"
     payload = {
@@ -1300,7 +1315,6 @@ def run_cmgb_detail_retry(
     retry_failures: list[dict[str, Any]] = []
     browser = None
     context = None
-    uses_remote_browser = False
     try:
         with sync_playwright() as playwright:
             cdp_url = str(config.get("cdp_url") or "").strip()
@@ -1308,7 +1322,7 @@ def run_cmgb_detail_retry(
             def open_session() -> None:
                 """Attach a clean Playwright context for the next detail."""
 
-                nonlocal browser, context, uses_remote_browser
+                nonlocal browser, context
                 if cdp_url:
                     browser = playwright.chromium.connect_over_cdp(
                         _resolve_cdp_websocket(cdp_url)
@@ -1319,11 +1333,9 @@ def run_cmgb_detail_retry(
                         )
                     context = browser.contexts[0]
                     _close_context_pages(context)
-                    uses_remote_browser = True
                 else:
                     browser = playwright.chromium.launch(headless=True)
                     context = browser.new_context(user_agent=user_agent)
-                    uses_remote_browser = False
 
             def reset_session() -> None:
                 """Drop a poisoned renderer without touching the capture file."""
@@ -1331,14 +1343,10 @@ def run_cmgb_detail_retry(
                 nonlocal browser, context
                 if context is not None:
                     _close_context_pages(context)
-                # A connected CDP browser belongs to the dedicated headless
-                # service. Do not send Browser.close to that service; dropping
-                # the Playwright connection and reattaching is sufficient.
-                if browser is not None and not uses_remote_browser:
-                    try:
-                        browser.close()
-                    except Exception:
-                        pass
+                # For a connected CDP browser this disconnects Playwright but
+                # leaves the dedicated headless service running. For a local
+                # browser it also stops the owned process.
+                _close_browser_connection(browser)
                 browser = None
                 context = None
                 open_session()
@@ -1453,11 +1461,7 @@ def run_cmgb_detail_retry(
     finally:
         if context is not None:
             _close_context_pages(context)
-        if browser is not None and not uses_remote_browser:
-            try:
-                browser.close()
-            except Exception:
-                pass
+        _close_browser_connection(browser)
 
     payload = build_cmgb_detail_retry_payload(
         retry_capture,
