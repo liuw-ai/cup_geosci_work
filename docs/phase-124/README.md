@@ -5,7 +5,7 @@
 - Deployed the already-reviewed CNOOC legacy-API retirement and Sinopec
   browser-only source isolation to the server through an isolated worktree at
   `/home/ubuntu/cup_geosci_work_phase123`.
-- Rebuilt the web, worker, and browser-worker images from commit `9e4ced3`.
+- Rebuilt the web, worker, and browser-worker images from commit `d4b9ded`.
 - Took a SQLite backup before the deployment and kept the existing production
   volume and the dirty legacy worktree untouched.
 - Added a readiness regression for the CNPC official `00:00-06:00` maintenance
