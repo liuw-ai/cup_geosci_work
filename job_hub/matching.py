@@ -443,7 +443,7 @@ def extract_deadline(text: str) -> str | None:
     implicit_year_range = re.compile(
         r"(?:报名|申请|网申|投递|应聘).{0,24}?(?:时间|期间|日期)"
         r".{0,32}?(?P<start_year>20\d{2})\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*日"
-        r"(?:\s*\d{1,2}:\d{2})?\s*(?:至|到|-|—|~)\s*"
+        r"(?:\s*\d{1,2}[:：∶]\d{2})?\s*(?:至|到|-|—|~)\s*"
         r"(?:(?P<end_year>20\d{2})\s*年\s*)?"
         r"(?P<end_month>\d{1,2})\s*月\s*(?P<end_day>\d{1,2})\s*日",
         re.IGNORECASE,

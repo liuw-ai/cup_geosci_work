@@ -67,6 +67,12 @@ def test_deadline_extraction_handles_same_year_application_window_with_times() -
     assert extract_deadline(text) == "2026-09-16"
 
 
+def test_deadline_extraction_accepts_fullwidth_ratio_time_separator() -> None:
+    text = "报名时间为2026年3月17日10∶00至3月24日8∶00"
+
+    assert extract_deadline(text) == "2026-03-24"
+
+
 def test_deadline_extraction_prefers_overall_rolling_window_over_first_batch() -> None:
     text = (
         "报名时间：自公告发布之日起至2026年10月31日止，拟分批次进行。"
