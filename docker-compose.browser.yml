@@ -22,6 +22,7 @@ services:
     environment:
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
       CNPC_BROWSER_SOURCE_ID: cnpc-career-browser
       CNPC_BROWSER_INTERVAL_MINUTES: 180
       CNPC_BROWSER_CDP_URL: http://headless-shell:9222
@@ -62,6 +63,7 @@ services:
     environment:
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
       BROWSER_WORKER_KIND: cmgb
       CMGB_BROWSER_SOURCE_ID: cmgb-iguopin-browser
       CMGB_BROWSER_INTERVAL_MINUTES: 180
@@ -106,6 +108,7 @@ services:
     environment:
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
       BROWSER_WORKER_KIND: cnooc
       CNOOC_BROWSER_SOURCE_ID: cnooc-career-browser
       CNOOC_BROWSER_INTERVAL_MINUTES: 180
@@ -147,6 +150,7 @@ services:
     environment:
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
       BROWSER_WORKER_KIND: sinopec
       SINOPEC_BROWSER_SOURCE_ID: sinopec-career
       SINOPEC_BROWSER_INTERVAL_MINUTES: 180
