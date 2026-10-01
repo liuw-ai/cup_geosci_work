@@ -66,6 +66,25 @@ DEGREE_EVIDENCE_KEYS = frozenset(
 )
 ELIGIBILITY_EVIDENCE_KEYS = frozenset(
     {
+        # Some official portals expose the whole requirement block in their
+        # degree field (for example, ``学历要求`` may also contain a minimum
+        # years-of-experience clause).  Read the degree-labelled fields for
+        # the student-only experience veto as well; major matching remains
+        # restricted to ``qualification_evidence_text`` below.
+        "学历要求",
+        "学历",
+        "学历层次",
+        "学位要求",
+        "学历及学位",
+        "学历学位",
+        "学历条件",
+        "最低学历",
+        "学位",
+        "education",
+        "degree",
+        "degree requirement",
+        "education requirement",
+        "minimum education",
         "岗位要求",
         "任职要求",
         "任职条件",
@@ -113,7 +132,8 @@ EXPERIENCE_REQUIREMENT_PATTERNS = (
         r"(?:不少于|至少)?\s*(?:[一二三四五六七八九十百千\d]+)\s*年"
     ),
     re.compile(
-        r"(?:at least|minimum of|over)?\s*\d+\+?\s*years?\s+of\s+experience",
+        r"(?:at least|minimum(?: of)?|over)?\s*\d+\+?\s*years?"
+        r"(?:\s+of\s+[^.;\n]{0,80})?\s+experience",
         re.I,
     ),
 )

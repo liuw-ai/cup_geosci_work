@@ -369,6 +369,28 @@ def test_publication_gate_rejects_experienced_role_for_current_students() -> Non
     assert decision.matched_profile_ids == ()
 
 
+def test_publication_gate_reads_experience_embedded_in_degree_field() -> None:
+    """Portals must not hide an experience clause inside ``学历要求``."""
+    decision = evaluate_student_publication(
+        job(
+            title="Seismic Data Processing Geophysicist (Experienced)",
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": "Seismic Data Processing Geophysicist (Experienced)",
+                "专业范围": "Geophysics, Exploration Geophysics",
+                "学历要求": (
+                    "Bachelor's degree or above in Geophysics; "
+                    "Minimum 3+ years of professional seismic data processing experience."
+                ),
+            },
+        )
+    )
+
+    assert decision.status == "out_of_scope"
+    assert decision.label == "需工作经验"
+    assert decision.matched_profile_ids == ()
+
+
 def test_publication_gate_rejects_profession_qualified_experience_requirement() -> None:
     decision = evaluate_student_publication(
         job(
