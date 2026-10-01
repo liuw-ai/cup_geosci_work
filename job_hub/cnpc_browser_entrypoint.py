@@ -68,6 +68,8 @@ def main() -> None:
         from job_hub.cmgb_browser_worker import main as worker_main
     elif worker_kind == "cnooc":
         from job_hub.cnooc_browser_worker import main as worker_main
+    elif worker_kind == "sinopec":
+        from job_hub.sinopec_browser_worker import main as worker_main
     else:
         from job_hub.cnpc_browser_worker import main as worker_main
 

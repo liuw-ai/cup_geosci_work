@@ -125,5 +125,46 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  sinopec-headless-shell:
+    image: chromedp/headless-shell:latest
+    command:
+      - --no-sandbox
+      - --disable-gpu
+    init: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  sinopec-browser:
+    build:
+      context: .
+      dockerfile: Dockerfile.browser
+    image: cupb-geoscience-job-hub-browser:latest
+    depends_on:
+      - sinopec-headless-shell
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      BROWSER_WORKER_KIND: sinopec
+      SINOPEC_BROWSER_SOURCE_ID: sinopec-career
+      SINOPEC_BROWSER_INTERVAL_MINUTES: 180
+      SINOPEC_BROWSER_CDP_URL: http://sinopec-headless-shell:9222
+      CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+    command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   job_hub_data:

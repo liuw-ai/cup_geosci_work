@@ -17,6 +17,7 @@ _BROWSER_SERVICE_BY_SOURCE_TYPE = {
     "cnooc_browser_rows": "cnooc-browser",
     "cmgb_browser_rows": "cmgb-browser",
     "official_browser_rows": "pipechina-browser",
+    "sinopec_spa_rows": "sinopec-browser",
 }
 
 

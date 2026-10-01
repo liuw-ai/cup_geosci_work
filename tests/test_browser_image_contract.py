@@ -16,10 +16,10 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     assert "FROM cupb-geoscience-job-hub:latest" in dockerfile
     assert "requirements-browser.txt" in dockerfile
     assert "pip install --no-cache-dir" in dockerfile
-    assert compose.count("dockerfile: Dockerfile.browser") == 3
+    assert compose.count("dockerfile: Dockerfile.browser") == 4
     assert "cnooc-browser:" in compose
     assert "BROWSER_WORKER_KIND: cnooc" in compose
-    assert compose.count("image: cupb-geoscience-job-hub-browser:latest") == 3
+    assert compose.count("image: cupb-geoscience-job-hub-browser:latest") == 4
     # chromedp/headless-shell's entrypoint starts Chrome on 9223 and exposes
     # its internal socat proxy on 9222. Passing another 9222 flag here makes
     # Chrome and socat race for the same port and breaks CDP readiness.

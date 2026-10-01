@@ -55,6 +55,7 @@ from job_hub.cmgb_browser_capture import (
     load_cmgb_browser_capture,
 )
 from job_hub.sinopec import load_sinopec_capture
+from job_hub.sinopec_browser_capture import load_sinopec_browser_capture
 
 
 REQUEST_ERRORS = request_exception_types()
@@ -924,14 +925,34 @@ class OfficialSourceCollector:
         decide whether each row is suitable for the geoscience audience.
         """
         config = source["config"]
-        snapshot_path = Path(__file__).resolve().parent.parent / str(
-            config["snapshot_path"]
-        )
-        payload = load_sinopec_capture(
-            snapshot_path,
-            allowed_hosts=list(config.get("allowed_hosts", [])),
-            require_complete_manifest=bool(config.get("require_complete_manifest", False)),
-        )
+        capture_path = str(config.get("capture_path") or "").strip()
+        if capture_path:
+            runtime_path = Path(self.settings.data_dir) / capture_path
+            try:
+                payload = load_sinopec_browser_capture(
+                    runtime_path,
+                    allowed_hosts=list(config.get("allowed_hosts", [])),
+                    max_age_hours=(
+                        float(config["max_age_hours"])
+                        if config.get("max_age_hours") is not None
+                        else None
+                    ),
+                    require_complete_scan=bool(config.get("require_complete_manifest", True)),
+                )
+            except BrowserCaptureError as error:
+                message = str(error)
+                if "stale" in message or "incomplete" in message or "missing" in message:
+                    raise SourceSkipped(message) from error
+                raise SourceCollectionError(message) from error
+        else:
+            snapshot_path = Path(__file__).resolve().parent.parent / str(
+                config["snapshot_path"]
+            )
+            payload = load_sinopec_capture(
+                snapshot_path,
+                allowed_hosts=list(config.get("allowed_hosts", [])),
+                require_complete_manifest=bool(config.get("require_complete_manifest", False)),
+            )
         max_age_hours = config.get("max_age_hours")
         if max_age_hours is not None:
             captured_text = str(payload.get("captured_at") or "").strip().replace("Z", "+00:00")
