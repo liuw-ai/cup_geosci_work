@@ -316,6 +316,26 @@ def test_discovery_carries_official_notice_dates_into_xls_artifact(tmp_path) -> 
     assert discovered[0]["metadata"]["official_notice_title"] == "2026年公开招聘公告"
 
 
+def test_discovery_reads_dates_from_script_rendered_notice_body(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    processor = OfficialAttachmentProcessor(settings, database, session=FakeSession(_xlsx_bytes()))
+
+    discovered = processor.discover_from_page(
+        "official-test-source",
+        "https://careers.example.edu.cn/notice/2",
+        html=(
+            "<html><head><title>公开招聘</title></head><body>"
+            "<script>var article='报名时间为2026年3月17日至3月24日';</script>"
+            "<a href='/files/positions.xlsx'>岗位表</a></body></html>"
+        ),
+    )
+
+    assert discovered[0]["metadata"]["deadline_date"] == "2026-03-24"
+
+
 def test_discovery_accepts_allowlisted_extensionless_download_endpoint(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)

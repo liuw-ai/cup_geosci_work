@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import html as html_lib
 import io
 import mimetypes
 import os
@@ -244,6 +245,13 @@ class OfficialAttachmentProcessor:
             html = response.content.decode(encoding or "utf-8", errors="replace")
         soup = BeautifulSoup(html, "html.parser")
         page_text = " ".join(soup.get_text(" ", strip=True).split())
+        # Some government CMS pages place the announcement body inside a
+        # script/JSON renderer.  BeautifulSoup intentionally excludes script
+        # text from ``get_text``; retain a tag-stripped raw fallback so dates
+        # and application windows are not silently lost from the artifact
+        # lifecycle metadata.
+        raw_visible_fallback = re.sub(r"<[^>]+>", " ", html_lib.unescape(html))
+        page_text = " ".join(f"{page_text} {raw_visible_fallback}".split())
         page_metadata = {
             "employer": str(source.get("publisher") or ""),
             "category": str(source.get("category") or ""),
