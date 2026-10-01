@@ -182,6 +182,13 @@ def _robots_permit(url: str, *, user_agent: str) -> None:
     # Use an explicit session so the transport choice applies to this gate too.
     session = requests.Session()
     session.trust_env = str(os.getenv("HTTP_TRANSPORT_MODE", "environment")).strip().lower() != "direct"
+    # ``trust_env=False`` also suppresses REQUESTS_CA_BUNDLE. Allow an
+    # explicitly configured CA bundle while still ignoring proxy variables.
+    ca_bundle = str(
+        os.getenv("REQUESTS_CA_BUNDLE") or os.getenv("CURL_CA_BUNDLE") or ""
+    ).strip()
+    if ca_bundle:
+        session.verify = ca_bundle
     try:
         response = session.get(robots_url, headers={"User-Agent": user_agent}, timeout=15)
     except requests.RequestException as error:

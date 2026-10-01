@@ -3,12 +3,20 @@ services:
   cnpc-browser:
     image: cupb-geoscience-job-hub-browser:phase109-overlay
     build: null
+    environment:
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
   cnooc-browser:
     image: cupb-geoscience-job-hub-browser:phase109-overlay
     build: null
+    environment:
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
   sinopec-browser:
     image: cupb-geoscience-job-hub-browser:phase109-overlay
     build: null
+    environment:
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
   cmgb-browser:
     image: cupb-geoscience-job-hub-browser:phase109-overlay
     build: null
+    environment:
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt

@@ -65,12 +65,15 @@ def test_robots_probe_honors_direct_transport(monkeypatch: pytest.MonkeyPatch) -
 
     class FakeSession:
         trust_env = True
+        verify = True
 
         def get(self, *_args: object, **_kwargs: object) -> FakeResponse:
             assert self.trust_env is False
+            assert self.verify == "/etc/ssl/certs/ca-certificates.crt"
             return FakeResponse()
 
     monkeypatch.setenv("HTTP_TRANSPORT_MODE", "direct")
+    monkeypatch.setenv("REQUESTS_CA_BUNDLE", "/etc/ssl/certs/ca-certificates.crt")
     monkeypatch.setattr("job_hub.browser_capture.requests.Session", FakeSession)
     _robots_permit("https://official.example.edu.cn/jobs", user_agent="test-agent")
 
