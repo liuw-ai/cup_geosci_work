@@ -78,6 +78,7 @@ APPLICATION_ATTACHMENT_MARKERS = (
 )
 POSITION_TABLE_MARKERS = (
     "岗位表", "职位表", "岗位计划", "招聘计划", "需求计划", "职位一览", "岗位一览",
+    "岗位和条件", "岗位条件", "招聘工作人员岗位",
 )
 
 

@@ -17,6 +17,10 @@ the response content type and rejects HTML/unsupported files. Only the
 Sichuan source registers `/front/download-`, so arbitrary extensionless links
 from other sources remain ignored.
 
+The attachment-purpose classifier also recognises the official wording
+“岗位和条件要求一览表” as a position table instead of a generic
+announcement attachment.
+
 ## Verification
 
 - The server source discovery now finds the Sichuan official announcement.

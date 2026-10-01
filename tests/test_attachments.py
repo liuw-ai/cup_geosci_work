@@ -347,6 +347,16 @@ def test_discovery_accepts_allowlisted_extensionless_download_endpoint(tmp_path)
     assert discovered[0]["artifact_url"].endswith("/front/download-abc123")
 
 
+def test_position_conditions_title_is_classified_as_position_table() -> None:
+    kind, intent = OfficialAttachmentProcessor._discovered_artifact_kind(
+        "四川省地质局公开招聘工作人员岗位和条件要求一览表",
+        "https://www.scpta.com.cn/front/download-abc123",
+    )
+
+    assert kind == "position_table"
+    assert intent == "position_table_hint"
+
+
 def test_attachment_candidate_requires_review_then_publishes_with_evidence(tmp_path) -> None:
     session = FakeSession(_xlsx_bytes())
     settings, database, artifact, processor = _registered_artifact(
