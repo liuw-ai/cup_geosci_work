@@ -1127,8 +1127,13 @@ def main() -> None:
     # the shared SQLite database and makes concurrent provincial probes race.
     if args.command == "cross-ledger-audit":
         try:
+            # Government evidence is dated in the site's business timezone.
+            # Do not fall back to the host/container's UTC calendar date at
+            # the China-local midnight boundary, otherwise an operator can
+            # see yesterday's freshness and opening-window decision.
+            settings = Settings.from_env()
             result = build_government_ledger_consistency_audit(
-                today=args.today,
+                today=args.today or coverage_snapshot_date(settings),
                 max_age_hours=args.max_age_hours,
             )
         except (OSError, ValueError) as error:
@@ -1619,7 +1624,7 @@ def main() -> None:
             )
             result = government_position_quality_report(
                 registry,
-                today=args.today,
+                today=args.today or coverage_snapshot_date(settings),
                 max_age_hours=max_age_hours,
                 source_verifications={
                     str(item["source_id"]): item
