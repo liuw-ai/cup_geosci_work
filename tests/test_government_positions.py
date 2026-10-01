@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from pathlib import Path
 
@@ -66,6 +67,70 @@ def test_upcoming_records_are_separate_from_current_publishable_rows() -> None:
     assert all(row["opening_date"] == "2026-10-10" for row in rows)
     assert all(row["record_status"] == "verified_open" for row in rows)
     assert not [row for row in rows if row["deadline_date"] < "2026-09-28"]
+
+
+def test_invalid_row_opening_date_is_rejected_during_registry_validation() -> None:
+    record = {
+        "id": "bad-opening-date",
+        "source_id": "official-test-source",
+        "position_type": "public_institution",
+        "province": "测试省",
+        "employer": "测试地质调查院",
+        "position_code": "A-001",
+        "title": "地质技术岗",
+        "major_requirement": "地质学",
+        "degree_requirement": "硕士研究生",
+        "location": "测试市",
+        "headcount": 1,
+        "opening_date": "2026/10/10",
+        "deadline_date": "2026-10-31",
+        "deadline_policy": "fixed_date",
+        "official_notice_url": "https://example.gov.cn/notice.html",
+        "official_attachment_url": "https://example.gov.cn/table.xlsx",
+        "evidence_locator": "岗位表!2",
+        "record_status": "verified_open",
+        "match_status": "explicit_match",
+    }
+
+    with pytest.raises(GovernmentPositionContractError, match="opening_date"):
+        validate_position_record(record)
+
+
+def test_batch_opening_date_is_carried_into_lifecycle_gate() -> None:
+    payload = {
+        "version": 1,
+        "as_of": "2026-09-28",
+        "records": [],
+        "position_batches": [
+            {
+                "id": "scheduled-batch",
+                "source_id": "official-test-source",
+                "position_type": "public_institution",
+                "province": "测试省",
+                "location": "测试市",
+                "opening_date": "2026-10-10",
+                "deadline_date": "2026-10-31",
+                "deadline_policy": "fixed_date",
+                "official_notice_url": "https://example.gov.cn/notice.html",
+                "official_attachment_url": "https://example.gov.cn/table.xlsx",
+                "record_status": "verified_open",
+                "match_status": "explicit_match",
+                "rows": [["A-001", "测试地质调查院", "地质技术岗", "地质学", "硕士研究生", 1, "岗位表!2"]],
+            }
+        ],
+    }
+
+    registry_path = PROJECT_ROOT / "tests" / "_temporary_government_registry.json"
+    try:
+        registry_path.write_text(json.dumps(payload), encoding="utf-8")
+        registry = load_position_registry(registry_path)
+    finally:
+        registry_path.unlink(missing_ok=True)
+
+    assert current_publishable_position_records(registry, today="2026-10-09") == []
+    assert [row["id"] for row in current_publishable_position_records(registry, today="2026-10-10")] == [
+        "scheduled-batch-a-001"
+    ]
 
 
 def test_cea_rows_activate_on_opening_date_and_expire_after_deadline() -> None:

@@ -142,6 +142,15 @@ def validate_position_record(value: Any, *, context: str = "position") -> dict[s
         raise GovernmentPositionContractError(f"{context}.headcount must be a non-negative integer")
     normalized["headcount"] = headcount
     normalized["deadline_date"] = _date(normalized["deadline_date"], f"{context}.deadline_date", allow_empty=True)
+    # ``opening_date`` is optional because most official tables open as soon
+    # as they are published.  When present, however, it participates in the
+    # public lifecycle gate and must be rejected at load time rather than
+    # failing later inside date.fromisoformat() during a worker cycle.
+    normalized["opening_date"] = _date(
+        normalized.get("opening_date"),
+        f"{context}.opening_date",
+        allow_empty=True,
+    )
     normalized["deadline_policy"] = _text(normalized["deadline_policy"], f"{context}.deadline_policy")
     if normalized["deadline_policy"] not in DEADLINE_POLICIES:
         raise GovernmentPositionContractError(
@@ -196,6 +205,7 @@ def _expand_position_batches(payload: dict[str, Any]) -> list[dict[str, Any]]:
             "province": batch.get("province"),
             "location": batch.get("location"),
             "deadline_date": batch.get("deadline_date", ""),
+            "opening_date": batch.get("opening_date", ""),
             "deadline_policy": batch.get("deadline_policy"),
             "official_notice_url": batch.get("official_notice_url"),
             "official_attachment_url": batch.get("official_attachment_url"),
