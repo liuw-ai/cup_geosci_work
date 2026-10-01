@@ -8,6 +8,7 @@ WORKDIR /app
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
+        ca-certificates \
         poppler-utils \
         tesseract-ocr \
         tesseract-ocr-chi-sim \

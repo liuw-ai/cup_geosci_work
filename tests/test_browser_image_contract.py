@@ -10,10 +10,15 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> None:
+    app_dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
     dockerfile = (ROOT / "Dockerfile.browser").read_text(encoding="utf-8")
     compose = (ROOT / "docker-compose.browser.yml").read_text(encoding="utf-8")
 
     assert "FROM cupb-geoscience-job-hub:latest" in dockerfile
+    # Official browser workers must verify the public CA chain before a
+    # robots/access result is classified. The slim base image has no
+    # guaranteed system trust store unless this package is explicit.
+    assert "ca-certificates" in app_dockerfile
     assert "requirements-browser.txt" in dockerfile
     assert "pip install --no-cache-dir" in dockerfile
     assert compose.count("dockerfile: Dockerfile.browser") == 4
