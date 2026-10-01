@@ -264,6 +264,23 @@ def test_explicit_official_withdrawal_immediately_blocks_publication() -> None:
     assert records == []
 
 
+def test_unconfigured_source_immediately_blocks_publication() -> None:
+    records = current_publishable_position_records(
+        _registry(),
+        today="2026-09-28",
+        max_age_hours=48,
+        source_verifications={
+            "official-test-source": {
+                "status": "not_configured",
+                "last_success_at": "2026-09-28T00:00:00Z",
+            }
+        },
+        now=datetime(2026, 9, 28, 1, tzinfo=timezone.utc),
+    )
+
+    assert records == []
+
+
 def test_recheck_stops_after_the_configured_range_limit(tmp_path) -> None:
     settings = make_settings(tmp_path)
     source_record = source()

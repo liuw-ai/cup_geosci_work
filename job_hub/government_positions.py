@@ -767,7 +767,11 @@ def _source_evidence_is_current(
         return fallback_fresh
     if requires_manual_confirmation and str(verification.get("status") or "") != "verified":
         return False
-    if str(verification.get("status") or "") == "withdrawn":
+    # A withdrawn or unconfigured source has no current publication authority.
+    # Do not fall back to the static ledger in either case: otherwise removing
+    # a broken source configuration could leave its old rows visible until the
+    # registry age window happens to expire.
+    if str(verification.get("status") or "") in {"withdrawn", "not_configured"}:
         return False
     raw_success = str(verification.get("last_success_at") or "").strip()
     if not raw_success:

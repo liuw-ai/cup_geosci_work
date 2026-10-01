@@ -12,10 +12,15 @@
   carry its official application opening boundary without duplicating it in
   every row.
 - Added regressions for malformed row dates and batch opening-date activation.
+- Found and fixed a second lifecycle regression during the same audit:
+  `not_configured` verification results now fail closed instead of falling
+  back to the static registry snapshot.  `source_unavailable` keeps its
+  existing short-lived last-success behavior, while an unconfigured source
+  has no publication authority.
 
 ## Verification
 
-- Government lifecycle tests: `36 passed`.
+- Government lifecycle tests: `37 passed`.
 - Full local suite: `484 passed, 2 skipped`.
 - `python -m compileall -q job_hub`: passed.
 - Flask application import and route registration: passed (`39` routes).
