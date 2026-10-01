@@ -18,6 +18,8 @@ the 35 geoscience candidate units had no vacancies.
 - `sinopec-browser` remains the only producer for this dynamic source. Its
   `access_limited` heartbeat and adjacent failure capture remain visible to
   operations; no access restriction is converted into an empty result.
+- Production readiness still monitors a disabled `browser_worker_only` source
+  heartbeat, so disabling ordinary synchronization cannot hide a dead worker.
 - The organization registry explains the worker-only runtime mode.
 - No stale Sinopec snapshot was promoted and no new job was imported.
 

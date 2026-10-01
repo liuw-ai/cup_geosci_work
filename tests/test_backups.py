@@ -206,7 +206,9 @@ def test_browser_worker_access_limit_does_not_block_other_sources(tmp_path) -> N
             "id": "sinopec-career",
             "source_type": "sinopec_spa_rows",
             "name": "测试受限浏览器来源",
+            "enabled": False,
             "config": {
+                "runtime_mode": "browser_worker_only",
                 "snapshot_path": "data/verified/sinopec.json",
                 "official_evidence_url": "https://job.sinopec.com/",
                 "application_url": "https://job.sinopec.com/",

@@ -82,7 +82,9 @@ def browser_worker_health(
 
     required: dict[str, str] = {}
     for source in database.list_sources():
-        if not source.get("enabled"):
+        config = source.get("config") if isinstance(source.get("config"), dict) else {}
+        worker_only = str(config.get("runtime_mode") or "").strip() == "browser_worker_only"
+        if not source.get("enabled") and not worker_only:
             continue
         service_name = _BROWSER_SERVICE_BY_SOURCE_TYPE.get(
             str(source.get("source_type") or "")
