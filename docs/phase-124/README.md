@@ -13,6 +13,9 @@
   now visible as an expected access limitation and does not block unaffected
   official sources. It still keeps the browser worker `ok=false` so the
   limitation is not hidden.
+- Configured the Linux system CA bundle for every Docker collector. This keeps
+  certificate verification enabled while allowing the Sinopec container to
+  reach its official endpoint and record the real `403` robots response.
 - Executed a direct single-source refresh for the Sichuan geology bureau. The
   official entry was reachable, but the current page produced no row passing
   the recruitment, field-evidence, professional-match, and deadline gates:
@@ -27,9 +30,10 @@
   six sources have at least two successful immutable refresh events. The CEA
   2027 table remains scheduled for its official opening on `2026-10-10` and is
   not published early.
-- CNPC maintenance is reported as an expected limitation. Sinopec remains
-  explicitly degraded because the current browser container could not verify
-  its TLS certificate chain; this is not treated as an empty result.
+- CNPC maintenance and Sinopec `robots.txt HTTP 403` are reported as expected
+  limitations. CMGB's stale CDP session was isolated by restarting only its
+  headless/browser pair; the final server readiness report has
+  `internal_ready=true` and `browser_workers.release_ok=true`.
 
 ## Not claimed
 
