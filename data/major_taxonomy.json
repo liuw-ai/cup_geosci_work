@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "as_of": "2026-09-24",
+  "version": 2,
+  "as_of": "2026-10-01",
   "scope": "中国石油大学（北京）地球科学学院学生画像与岗位专业证据",
   "authority_note": "目录代码用于专业归类和证据解释，不替代具体公告的报考资格；岗位是否可报以官方原文为准。",
   "majors": [
@@ -90,6 +90,38 @@
       "category_terms": ["地质资源与地质工程类"],
       "english_exact_terms": ["geological resources and engineering"],
       "related_terms": ["矿产普查与勘探", "地球探测与信息技术", "资源勘查", "地质工程"]
+    },
+    {
+      "id": "geophysics",
+      "name": "地球物理学",
+      "student_levels": ["本科", "硕士", "博士"],
+      "classification": {
+        "discipline_category": "理学",
+        "undergraduate_category": "地球物理学类",
+        "undergraduate_code": "070801",
+        "graduate_first_level_discipline": "地球物理学",
+        "graduate_code": "0708"
+      },
+      "exact_terms": [
+        "地球物理学",
+        "固体地球物理学",
+        "空间物理学",
+        "海洋地球物理",
+        "地球物理测井",
+        "地球物理勘查",
+        "0708",
+        "070800",
+        "070801",
+        "070802"
+      ],
+      "category_terms": ["地球物理学类"],
+      "english_exact_terms": ["geophysics", "geophysical science"],
+      "related_terms": [
+        "地球探测与信息技术",
+        "应用地球物理",
+        "勘查技术与工程",
+        "地震学"
+      ]
     }
   ]
 }

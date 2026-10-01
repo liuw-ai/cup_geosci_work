@@ -138,8 +138,11 @@ def get_major_definition(major_id: str, path: Path | None = None) -> MajorDefini
 def profile_major_definition(profile_id: str, path: Path | None = None) -> MajorDefinition:
     profile_major_ids = {
         "undergraduate-resource-exploration": "resource-exploration-engineering",
+        "undergraduate-geophysics": "geophysics",
         "master-geology": "geology",
+        "master-geophysics": "geophysics",
         "doctoral-geology": "geology",
+        "doctoral-geophysics": "geophysics",
         "master-geological-engineering": "geological-engineering",
         "doctoral-geological-engineering": "geological-engineering",
         "master-geological-resources-engineering": "geological-resources-and-engineering",

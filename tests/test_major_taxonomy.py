@@ -13,7 +13,7 @@ from job_hub.matching import extract_major_tags
 from job_hub.profiles import get_student_profile
 
 
-def test_taxonomy_contains_the_four_requested_majors_with_distinct_boundaries() -> None:
+def test_taxonomy_contains_requested_majors_with_distinct_boundaries() -> None:
     definitions = {item.id: item for item in list_major_definitions()}
 
     assert set(definitions) == {
@@ -21,6 +21,7 @@ def test_taxonomy_contains_the_four_requested_majors_with_distinct_boundaries() 
         "geology",
         "geological-engineering",
         "geological-resources-and-engineering",
+        "geophysics",
     }
     assert definitions["resource-exploration-engineering"].classification["undergraduate_code"] == "081403"
     assert definitions["geology"].classification["graduate_code"] == "0709"
@@ -29,6 +30,9 @@ def test_taxonomy_contains_the_four_requested_majors_with_distinct_boundaries() 
     assert definitions["resource-exploration-engineering"].category_terms == ("地质类",)
     assert definitions["geology"].category_terms == ("地质学类",)
     assert definitions["geological-resources-and-engineering"].category_terms == ("地质资源与地质工程类",)
+    assert definitions["geophysics"].classification["undergraduate_code"] == "070801"
+    assert definitions["geophysics"].classification["graduate_code"] == "0708"
+    assert definitions["geophysics"].category_terms == ("地球物理学类",)
 
 
 def test_profile_aliases_do_not_promote_adjacent_majors_to_exact() -> None:
@@ -51,6 +55,9 @@ def test_profile_major_ids_resolve_to_taxonomy_records() -> None:
         "resource-exploration-engineering"
     )
     assert profile_major_definition("doctoral-geology").id == "geology"
+    assert profile_major_definition("undergraduate-geophysics").id == "geophysics"
+    assert profile_major_definition("master-geophysics").id == "geophysics"
+    assert profile_major_definition("doctoral-geophysics").id == "geophysics"
 
 
 def test_taxonomy_validation_rejects_duplicate_exact_terms() -> None:

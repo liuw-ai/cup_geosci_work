@@ -34,12 +34,39 @@ def job(**overrides: object) -> dict[str, object]:
 def test_supported_profiles_exactly_cover_requested_tracks() -> None:
     profiles = list_student_profiles()
 
-    assert len(profiles) == 7
+    assert len(profiles) == 10
     assert get_student_profile("undergraduate-resource-exploration").label == (
         "本科 · 资源勘查工程"
     )
-    assert sum(item.degree == "硕士" for item in profiles) == 3
-    assert sum(item.degree == "博士" for item in profiles) == 3
+    assert get_student_profile("undergraduate-geophysics").label == (
+        "本科 · 地球物理学"
+    )
+    assert sum(item.degree == "硕士" for item in profiles) == 4
+    assert sum(item.degree == "博士" for item in profiles) == 4
+
+
+def test_geophysics_profile_requires_explicit_job_level_evidence() -> None:
+    profile = get_student_profile("master-geophysics")
+    assert profile is not None
+
+    result = evaluate_student_publication(
+        job(
+            title="岩石物理工程师",
+            description="专业要求：测井、岩石物理、地球物理学等相关专业。学历要求：硕士研究生及以上。",
+            degree_levels=["硕士"],
+            major_tags=["地球物理学"],
+            field_evidence={
+                "evidence_scope": "official_zhaopin_detail_initial_data",
+                "岗位": "岩石物理工程师",
+                "专业范围": "测井、岩石物理、地球物理学等相关专业",
+                "学历要求": "硕士研究生及以上",
+                "官方岗位详情": "https://xiaoyuan.zhaopin.com/job/verified-geophysics",
+            },
+        )
+    )
+
+    assert result.is_public
+    assert "master-geophysics" in result.matched_profile_ids
 
 
 def test_profile_match_requires_both_explicit_major_and_degree_evidence() -> None:
@@ -250,7 +277,7 @@ def test_publication_gate_accepts_explicit_undergraduate_geology_category() -> N
     assert "undergraduate-resource-exploration" in decision.matched_profile_ids
 
 
-def test_adjacent_geophysical_category_is_not_promoted_without_taxonomy_mapping() -> None:
+def test_geophysical_category_is_promoted_only_after_explicit_taxonomy_mapping() -> None:
     decision = evaluate_student_publication(
         job(
             title="物探工程师",
@@ -264,7 +291,8 @@ def test_adjacent_geophysical_category_is_not_promoted_without_taxonomy_mapping(
         )
     )
 
-    assert decision.status == "pending_evidence"
+    assert decision.status == "student_eligible"
+    assert "master-geophysics" in decision.matched_profile_ids
 
 
 def test_government_position_without_row_location_stays_private() -> None:

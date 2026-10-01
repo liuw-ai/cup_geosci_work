@@ -165,8 +165,8 @@ def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) 
     normalized = [pipeline.normalize_posting(posting, source) for posting in postings]
     assert len(normalized) == 33
     statuses = [item["publication_status"] for item in normalized]
-    assert statuses.count("student_eligible") == 22
-    assert statuses.count("pending_evidence") == 8
+    assert statuses.count("student_eligible") == 25
+    assert statuses.count("pending_evidence") == 5
     assert statuses.count("out_of_scope") == 3
     assert all(
         posting.field_evidence["招聘人数"]
@@ -181,6 +181,7 @@ def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) 
         item["publication_status"] != "student_eligible"
         or "地质" in item["field_evidence"]["专业范围"]
         or "资源勘查工程" in item["field_evidence"]["专业范围"]
+        or "地球物理学" in item["field_evidence"]["专业范围"]
         for item in normalized
     )
 

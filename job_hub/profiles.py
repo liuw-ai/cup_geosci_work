@@ -216,7 +216,7 @@ class PublicationDecision:
         return payload
 
 
-# These seven profiles mirror the programs specified for CUPB Geoscience School.
+# These ten profiles mirror the programs specified for CUPB Geoscience School.
 # The aliases only make an announcement easier to recognize; they never create a
 # claim that a student is eligible when the original notice says otherwise.
 def _profile(profile_id: str, degree: str, major: str) -> StudentProfile:
@@ -235,10 +235,13 @@ def _profile(profile_id: str, degree: str, major: str) -> StudentProfile:
 
 STUDENT_PROFILES = (
     _profile("undergraduate-resource-exploration", "本科", "资源勘查工程"),
+    _profile("undergraduate-geophysics", "本科", "地球物理学"),
     _profile("master-geology", "硕士", "地质学"),
+    _profile("master-geophysics", "硕士", "地球物理学"),
     _profile("master-geological-engineering", "硕士", "地质工程"),
     _profile("master-geological-resources-engineering", "硕士", "地质资源与地质工程"),
     _profile("doctoral-geology", "博士", "地质学"),
+    _profile("doctoral-geophysics", "博士", "地球物理学"),
     _profile("doctoral-geological-engineering", "博士", "地质工程"),
     _profile("doctoral-geological-resources-engineering", "博士", "地质资源与地质工程"),
 )
