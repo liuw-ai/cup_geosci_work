@@ -21,6 +21,11 @@ The attachment-purpose classifier also recognises the official wording
 “岗位和条件要求一览表” as a position table instead of a generic
 announcement attachment.
 
+The lifecycle parser also accepts fullwidth time separators used by the
+Sichuan notice (`10∶00至3月24日8∶00`) and recovers dates from script-rendered
+announcement bodies. The server now records the verified March 24, 2026
+deadline for the closed regression notice.
+
 ## Verification
 
 - The server source discovery now finds the Sichuan official announcement.
