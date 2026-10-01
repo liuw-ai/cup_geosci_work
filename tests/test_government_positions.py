@@ -35,6 +35,24 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
     assert "扫描成功" in report["scan_interpretation"]
 
 
+def test_refresh_gate_requires_two_immutable_successful_events() -> None:
+    registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
+    report = government_position_quality_report(
+        registry,
+        today="2026-09-25",
+        source_refresh_counts={
+            "anhui-geology-bureau": {"total_refreshes": 2, "successful_refreshes": 2},
+            "gansu-geology-bureau": {"total_refreshes": 1, "successful_refreshes": 1},
+        },
+    )
+
+    gate = report["source_refresh_gate"]
+    assert gate["required_successful_refreshes"] == 2
+    assert gate["by_source"]["anhui-geology-bureau"]["passed_two_successes"] is True
+    assert gate["by_source"]["gansu-geology-bureau"]["passed_two_successes"] is False
+    assert gate["passed_sources"] == 1
+
+
 def test_upcoming_records_are_separate_from_current_publishable_rows() -> None:
     registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
     rows = upcoming_position_records(

@@ -270,6 +270,23 @@ CREATE TABLE IF NOT EXISTS government_source_verifications (
 CREATE INDEX IF NOT EXISTS idx_government_source_verifications_status
 ON government_source_verifications(status, checked_at DESC);
 
+-- Keep an immutable history of government evidence checks.  The current
+-- verification table is intentionally a latest-state projection used by the
+-- publication gate; this event table is the audit trail needed to prove that
+-- a source was refreshed repeatedly rather than merely read once.
+CREATE TABLE IF NOT EXISTS government_source_verification_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_id TEXT NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
+    status TEXT NOT NULL,
+    checked_at TEXT NOT NULL,
+    last_success_at TEXT,
+    detail TEXT NOT NULL DEFAULT '',
+    evidence_fingerprint TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_government_source_verification_events_source
+ON government_source_verification_events(source_id, checked_at DESC);
+
 -- A durable per-source queue keeps one slow or blocked domain from stopping
 -- the rest of the nationwide scan.  The queue is operational state, not job
 -- content, and can be rebuilt from the versioned source registry.
@@ -965,6 +982,22 @@ class Database:
                     last_success_at=excluded.last_success_at,
                     detail=excluded.detail,
                     evidence_fingerprint=excluded.evidence_fingerprint
+                """,
+                (
+                    source_id,
+                    status,
+                    checked_at,
+                    last_success_at,
+                    detail[:2000],
+                    evidence_fingerprint[:128],
+                ),
+            )
+            connection.execute(
+                """
+                INSERT INTO government_source_verification_events (
+                    source_id, status, checked_at, last_success_at, detail,
+                    evidence_fingerprint
+                ) VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
                     source_id,
@@ -1698,6 +1731,59 @@ class Database:
                 """
             ).fetchall()
         return [dict(row) for row in rows]
+
+    def list_government_source_verification_events(
+        self,
+        source_id: str | None = None,
+        *,
+        limit: int = 500,
+    ) -> list[dict[str, Any]]:
+        """Return immutable official-evidence refresh events newest first."""
+        if limit < 1:
+            raise ValueError("limit must be greater than zero")
+        with self.connect() as connection:
+            if source_id:
+                rows = connection.execute(
+                    """
+                    SELECT * FROM government_source_verification_events
+                    WHERE source_id = ?
+                    ORDER BY checked_at DESC, id DESC
+                    LIMIT ?
+                    """,
+                    (source_id, limit),
+                ).fetchall()
+            else:
+                rows = connection.execute(
+                    """
+                    SELECT * FROM government_source_verification_events
+                    ORDER BY checked_at DESC, id DESC
+                    LIMIT ?
+                    """,
+                    (limit,),
+                ).fetchall()
+        return [dict(row) for row in rows]
+
+    def government_source_refresh_counts(self) -> dict[str, dict[str, int]]:
+        """Summarize successful and total evidence refresh events per source."""
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT source_id,
+                       COUNT(*) AS total_refreshes,
+                       SUM(CASE WHEN status = 'verified' THEN 1 ELSE 0 END)
+                           AS successful_refreshes
+                FROM government_source_verification_events
+                GROUP BY source_id
+                ORDER BY source_id
+                """
+            ).fetchall()
+        return {
+            str(row["source_id"]): {
+                "total_refreshes": int(row["total_refreshes"] or 0),
+                "successful_refreshes": int(row["successful_refreshes"] or 0),
+            }
+            for row in rows
+        }
 
     def update_source_artifact_processing(
         self,

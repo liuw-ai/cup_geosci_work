@@ -330,6 +330,7 @@ def government_position_quality_report(
     today: str | None = None,
     max_age_hours: float | None = None,
     source_verifications: dict[str, dict[str, Any]] | None = None,
+    source_refresh_counts: dict[str, dict[str, int]] | None = None,
     manual_confirmation_source_ids: set[str] | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
@@ -347,6 +348,26 @@ def government_position_quality_report(
     type_counts = Counter(str(item["position_type"]) for item in records)
     province_counts = Counter(str(item["province"]) for item in records)
     source_counts = Counter(str(item["source_id"]) for item in records)
+    refresh_counts = source_refresh_counts or {}
+    refresh_gate = {
+        source_id: {
+            "successful_refreshes": int(
+                (refresh_counts.get(source_id) or {}).get("successful_refreshes", 0)
+            ),
+            "total_refreshes": int(
+                (refresh_counts.get(source_id) or {}).get("total_refreshes", 0)
+            ),
+            "passed_two_successes": int(
+                (refresh_counts.get(source_id) or {}).get("successful_refreshes", 0)
+            ) >= 2,
+        }
+        for source_id in sorted(source_counts)
+        if any(
+            str(item.get("record_status") or "") == "verified_open"
+            for item in records
+            if str(item.get("source_id") or "") == source_id
+        )
+    }
     manual_only_sources = set(manual_confirmation_source_ids or ())
     open_records = current_publishable_position_records(
         payload,
@@ -443,6 +464,14 @@ def government_position_quality_report(
             "total": sum(verification_counts.values()),
             "by_status": dict(sorted(verification_counts.items())),
             "note": "来源复核失败不等于无岗位；超过新鲜度窗口后才会从学生端清退。",
+        },
+        "source_refresh_gate": {
+            "required_successful_refreshes": 2,
+            "by_source": refresh_gate,
+            "passed_sources": sum(
+                1 for item in refresh_gate.values() if item["passed_two_successes"]
+            ),
+            "note": "仅统计不可变复核事件；静态台账日期或单次成功不能满足连续刷新门槛。",
         },
         "field_completeness": {
             field: {

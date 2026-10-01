@@ -1630,6 +1630,7 @@ def main() -> None:
                     str(item["source_id"]): item
                     for item in database.list_government_source_verifications()
                 },
+                source_refresh_counts=database.government_source_refresh_counts(),
                 manual_confirmation_source_ids={
                     str(source["id"])
                     for source in database.list_sources()

@@ -219,6 +219,14 @@ def test_source_recheck_failure_preserves_last_success_but_eventually_expires(tm
     )
     verification = database.list_government_source_verifications()[0]
     assert verification["last_success_at"] == "2026-09-28T00:00:00Z"
+    events = database.list_government_source_verification_events("official-test-source")
+    assert [event["status"] for event in events] == [
+        "source_unavailable",
+        "verified",
+    ]
+    assert database.government_source_refresh_counts() == {
+        "official-test-source": {"total_refreshes": 2, "successful_refreshes": 1}
+    }
 
     fresh = current_publishable_position_records(
         _registry(),
