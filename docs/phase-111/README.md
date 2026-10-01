@@ -20,6 +20,11 @@ configured capture path as a success-only pointer:
   adjacent `.failure.json` diagnostic path;
 - an incomplete run can never replace the last complete evidence snapshot.
 
+The CNOOC worker also now has a configurable 900-second process-level capture
+deadline (`CNOOC_BROWSER_CAPTURE_TIMEOUT_SECONDS`).  A stalled CDP session
+therefore becomes an explicit degraded run instead of leaving the service in
+`capturing` forever; the canonical success file is still retained.
+
 The behavior is covered by a regression test that writes a success, writes a
 partial run, and verifies that the success file remains unchanged.
 

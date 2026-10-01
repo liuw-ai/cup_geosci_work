@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import signal
+from contextlib import contextmanager
 from threading import Event
 
 from job_hub.cnooc_browser_capture import run_cnooc_browser_capture, write_cnooc_capture_failure
@@ -16,6 +17,31 @@ from job_hub.pipeline import JobPipeline
 LOGGER = logging.getLogger("job_hub.cnooc_browser_worker")
 
 
+@contextmanager
+def _capture_deadline(seconds: int):
+    """Bound one CNOOC capture so a stuck CDP/detail page cannot run forever."""
+
+    bounded = max(0, int(seconds))
+    if bounded <= 0 or not hasattr(signal, "SIGALRM"):
+        yield
+        return
+    previous_handler = signal.getsignal(signal.SIGALRM)
+    previous_timer = signal.setitimer(signal.ITIMER_REAL, 0)
+
+    def raise_timeout(_signum: int, _frame: object) -> None:
+        raise TimeoutError(f"CNOOC browser capture exceeded {bounded}s deadline")
+
+    signal.signal(signal.SIGALRM, raise_timeout)
+    signal.setitimer(signal.ITIMER_REAL, float(bounded))
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous_handler)
+        if previous_timer[0] > 0:
+            signal.setitimer(signal.ITIMER_REAL, *previous_timer)
+
+
 class CnoocBrowserWorker:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
@@ -25,6 +51,9 @@ class CnoocBrowserWorker:
         self.stop_event = Event()
         self.source_id = os.getenv("CNOOC_BROWSER_SOURCE_ID", "cnooc-career-browser")
         self.interval_seconds = max(900, int(os.getenv("CNOOC_BROWSER_INTERVAL_MINUTES", "180")) * 60)
+        self.capture_timeout_seconds = max(
+            0, int(os.getenv("CNOOC_BROWSER_CAPTURE_TIMEOUT_SECONDS", "900"))
+        )
         self.run_once = os.getenv("CNOOC_BROWSER_ONCE", "").strip().lower() in {"1", "true", "yes", "on"}
 
     def run_forever(self) -> None:
@@ -52,13 +81,14 @@ class CnoocBrowserWorker:
         output = self.settings.data_dir / str(config["capture_path"])
         self._heartbeat("capturing", f"capturing {self.source_id}")
         try:
-            payload = run_cnooc_browser_capture(
-                listing_url=str(source["homepage_url"] if not config.get("application_url") else config["application_url"]),
-                output=output,
-                config=config,
-                allowed_hosts=list(config["allowed_hosts"]),
-                user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
-            )
+            with _capture_deadline(self.capture_timeout_seconds):
+                payload = run_cnooc_browser_capture(
+                    listing_url=str(source["homepage_url"] if not config.get("application_url") else config["application_url"]),
+                    output=output,
+                    config=config,
+                    allowed_hosts=list(config["allowed_hosts"]),
+                    user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
+                )
             if payload.get("status") != "success":
                 self._heartbeat("degraded", f"partial detail capture: {payload.get('scan')}")
                 return
