@@ -32,6 +32,10 @@
   true. Public readiness remains false solely because the formal domain/DNS
   check is intentionally not configured.
 
+The honest project score remains approximately **74/100**. This phase closes
+the CMGB runtime-reliability defect but adds no new source or vacancy count, so
+it does not claim the 75-point expansion gate.
+
 ## Not claimed
 
 This phase does not add historical or inferred jobs and does not treat the
