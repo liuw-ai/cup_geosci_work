@@ -1,0 +1,7 @@
+# Lightweight production overlay for timezone-safe government audit defaults.
+# The server already carries the phase119 dependency and student-gate image;
+# copy only the changed application module to avoid a second apt/pip build.
+FROM cupb-geoscience-job-hub:phase119-experience-gate
+
+WORKDIR /app
+COPY job_hub/cli.py /app/job_hub/cli.py
