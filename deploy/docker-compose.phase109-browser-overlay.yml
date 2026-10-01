@@ -1,0 +1,14 @@
+name: cupb-geoscience-job-hub
+services:
+  cnpc-browser:
+    image: cupb-geoscience-job-hub-browser:phase109-overlay
+    build: null
+  cnooc-browser:
+    image: cupb-geoscience-job-hub-browser:phase109-overlay
+    build: null
+  sinopec-browser:
+    image: cupb-geoscience-job-hub-browser:phase109-overlay
+    build: null
+  cmgb-browser:
+    image: cupb-geoscience-job-hub-browser:phase109-overlay
+    build: null

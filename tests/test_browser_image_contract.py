@@ -12,6 +12,8 @@ ROOT = Path(__file__).resolve().parent.parent
 def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> None:
     app_dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
     dockerfile = (ROOT / "Dockerfile.browser").read_text(encoding="utf-8")
+    overlay = (ROOT / "deploy" / "Dockerfile.browser-overlay").read_text(encoding="utf-8")
+    compose_overlay = (ROOT / "deploy" / "docker-compose.phase109-browser-overlay.yml").read_text(encoding="utf-8")
     compose = (ROOT / "docker-compose.browser.yml").read_text(encoding="utf-8")
 
     assert "FROM cupb-geoscience-job-hub:latest" in dockerfile
@@ -20,6 +22,9 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     # guaranteed system trust store unless this package is explicit.
     assert "ca-certificates" in app_dockerfile
     assert "requirements-browser.txt" in dockerfile
+    assert "ARG BROWSER_BASE_IMAGE" in overlay
+    assert "COPY --chown=jobhub:jobhub job_hub /app/job_hub" in overlay
+    assert compose_overlay.count("phase109-overlay") == 4
     assert "pip install --no-cache-dir" in dockerfile
     assert compose.count("dockerfile: Dockerfile.browser") == 4
     assert "cnooc-browser:" in compose
