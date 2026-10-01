@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import logging
+import json
 from dataclasses import asdict, dataclass
 from datetime import date, datetime, timezone
+from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import parse_qs, urlparse
 from zoneinfo import ZoneInfo
@@ -984,8 +986,14 @@ class JobPipeline:
                 continue
             if max_age_hours < 0:
                 continue
-            last_success = str(source.get("last_synced_at") or "").strip()
+            last_success = self._source_capture_timestamp(source)
             if not last_success:
+                count = self.database.withdraw_stale_source_jobs(
+                    source_id,
+                    reason="官方捕获文件缺失、未完成或未提供捕获时间，无法证明岗位仍然新鲜。",
+                )
+                if count:
+                    results[source_id] = count
                 continue
             try:
                 captured_at = datetime.fromisoformat(last_success.replace("Z", "+00:00"))
@@ -1007,6 +1015,28 @@ class JobPipeline:
             if count:
                 results[source_id] = count
         return results
+
+    def _source_capture_timestamp(self, source: dict[str, Any]) -> str:
+        """Return evidence capture time, never the later sync time.
+
+        Snapshot/browser sources can successfully read an already-old file.
+        Their declared capture timestamp is therefore the only safe freshness
+        boundary. A missing or non-success capture is intentionally stale.
+        """
+
+        config = source.get("config") if isinstance(source.get("config"), dict) else {}
+        declared = str(config.get("snapshot_captured_at") or "").strip()
+        capture_path = str(config.get("capture_path") or "").strip()
+        if capture_path:
+            path = Path(self.settings.data_dir) / capture_path
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                return ""
+            if not isinstance(payload, dict) or str(payload.get("status") or "") != "success":
+                return ""
+            declared = str(payload.get("captured_at") or "").strip()
+        return declared
 
     def _government_reindex_context(self) -> dict[str, Any] | None:
         """Build the current government-table publication boundary.

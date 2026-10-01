@@ -25,6 +25,7 @@ def test_stale_snapshot_rows_are_withdrawn_and_auditable(tmp_path) -> None:
     official_source["config"] = {
         **official_source["config"],
         "max_age_hours": 1,
+        "snapshot_captured_at": datetime.now(timezone.utc).isoformat(),
     }
     database.upsert_source(official_source)
     posting = RawPosting(
@@ -53,15 +54,15 @@ def test_stale_snapshot_rows_are_withdrawn_and_auditable(tmp_path) -> None:
     assert total == 1
 
     old = (datetime.now(timezone.utc) - timedelta(hours=3)).replace(microsecond=0)
-    with database.transaction() as connection:
-        connection.execute(
-            "UPDATE sources SET last_synced_at = ?, updated_at = ? WHERE id = ?",
-            (
-                old.isoformat().replace("+00:00", "Z"),
-                old.isoformat().replace("+00:00", "Z"),
-                "official-test-source",
-            ),
-        )
+    database.upsert_source(
+        {
+            **official_source,
+            "config": {
+                **official_source["config"],
+                "snapshot_captured_at": old.isoformat().replace("+00:00", "Z"),
+            },
+        }
+    )
 
     withdrawn = pipeline.expire_stale_source_jobs()
     assert withdrawn == {"official-test-source": 1}

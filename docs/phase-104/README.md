@@ -12,9 +12,10 @@ especially unsafe for dynamic CNPC, Sinopec, PipeChina and browser captures.
 
 - `JobPipeline.expire_stale_source_jobs()` checks only sources that explicitly
   declare `config.max_age_hours`.
-- Freshness is measured from `sources.last_synced_at`, which is updated only
-  after a complete successful source sync; a robots/HTTP/parse failure cannot
-  refresh it.
+- Freshness is measured from the exact capture timestamp: static snapshots use
+  `snapshot_captured_at`, while browser captures use the JSON `captured_at`
+  field. A successful read of an already-old file cannot refresh its evidence.
+  A missing, malformed or non-success capture is treated as stale.
 - Once the window expires, only currently student-visible rows are marked
   `withdrawn` and an auditable `job_events` record explains the retirement.
   Historical rows and official evidence remain in the database.
