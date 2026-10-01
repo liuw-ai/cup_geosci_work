@@ -28,13 +28,18 @@ produced by real server worker cycles after deployment.
 - Local full test suite: `476 passed, 2 skipped`.
 - The production database schema is created by the existing idempotent
   `Database.initialize()` path; no data migration or job rewrite is needed.
+- Server deployment on 2026-10-02 completed from commit `bff58c6` with a
+  verified SQLite backup. Web and worker are healthy; the production audit
+  reports `1856` records and `152` student-visible open jobs.
+- Two real official-evidence refreshes have now completed for six current
+  government sources: Anhui, Gansu, Hubei, Ningxia, Hunan and China
+  Geological Survey. The CLI reports `passed_sources: 6`; the China Earthquake
+  Agency remains scheduled for its official 2026-10-10 opening date.
 
 ## Next acceptance work
 
-1. Deploy this change with the existing rollback image.
-2. Allow at least two genuine successful refresh cycles for one current
-   provincial source, then verify `government-position-audit` reports
-   `passed_two_successes: true`.
-3. On 2026-10-10 re-fetch the China Earthquake Agency notice and attachment;
+1. Keep the worker's normal three-hour cycle running and retain the refresh
+   event history as the acceptance evidence.
+2. On 2026-10-10 re-fetch the China Earthquake Agency notice and attachment;
    activate only rows whose opening window is confirmed.
-4. Continue the independent current Three-Barrel-Oil subsidiary detail chain.
+3. Continue the independent current Three-Barrel-Oil subsidiary detail chain.
