@@ -2600,13 +2600,17 @@ class Database:
             if student_visible:
                 where += " AND jobs.status = 'open' AND jobs.publication_status IN (?, ?)"
                 values.extend(("student_eligible", "unrestricted_eligible"))
+                # A source can be retired or disabled while its historical
+                # rows remain in the database for audit.  Public reads must
+                # never expose those rows during that transition window.
+                source_join = (
+                    " JOIN sources AS source_meta "
+                    "ON source_meta.id = jobs.source_id "
+                    "AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')"
+                )
                 if as_of_date is not None:
                     freshness_sql, freshness_values = self._public_freshness_filter(
                         as_of_date
-                    )
-                    source_join = (
-                        " LEFT JOIN sources AS source_meta "
-                        "ON source_meta.id = jobs.source_id"
                     )
                     where += f" AND {freshness_sql}"
                     values.extend(freshness_values)
@@ -2911,13 +2915,16 @@ class Database:
         if student_visible:
             clauses.append("jobs.publication_status IN (?, ?)")
             values.extend(("student_eligible", "unrestricted_eligible"))
+            # Keep disabled/retired source snapshots private even before the
+            # background worker has materialized their withdrawn status.
+            source_join = (
+                " JOIN sources AS source_meta "
+                "ON source_meta.id = jobs.source_id "
+                "AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')"
+            )
             if as_of_date is not None:
                 freshness_sql, freshness_values = self._public_freshness_filter(
                     as_of_date
-                )
-                source_join = (
-                    " LEFT JOIN sources AS source_meta "
-                    "ON source_meta.id = jobs.source_id"
                 )
                 clauses.append(freshness_sql)
                 values.extend(freshness_values)
@@ -2971,14 +2978,14 @@ class Database:
     def list_categories(self, *, as_of_date: str | None = None) -> list[dict[str, Any]]:
         values: list[Any] = []
         deadline_clause = ""
-        source_join = ""
+        source_join = (
+            " JOIN sources AS source_meta "
+            "ON source_meta.id = jobs.source_id "
+            "AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')"
+        )
         if as_of_date is not None:
             deadline_clause, freshness_values = self._public_freshness_filter(
                 as_of_date
-            )
-            source_join = (
-                " LEFT JOIN sources AS source_meta "
-                "ON source_meta.id = jobs.source_id"
             )
             values.extend(freshness_values)
         with self.connect() as connection:
@@ -3022,7 +3029,9 @@ class Database:
                 SELECT DISTINCT jobs.*, job_events.event_type, job_events.occurred_at
                 FROM job_events
                 JOIN jobs ON jobs.id = job_events.job_id
-                LEFT JOIN sources AS source_meta ON source_meta.id = jobs.source_id
+                JOIN sources AS source_meta
+                  ON source_meta.id = jobs.source_id
+                 AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')
                 WHERE job_events.occurred_at >= ?
                   AND job_events.occurred_at < ?
                   AND jobs.status = 'open'
@@ -3046,7 +3055,11 @@ class Database:
         with self.connect() as connection:
             rows = connection.execute(
                 """
-                SELECT * FROM jobs
+                SELECT jobs.*
+                FROM jobs
+                JOIN sources AS source_meta
+                  ON source_meta.id = jobs.source_id
+                 AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')
                 WHERE status = 'open'
                   AND publication_status IN ('student_eligible', 'unrestricted_eligible')
                   AND deadline_date IS NOT NULL
@@ -3061,14 +3074,14 @@ class Database:
     def count_open_jobs(self, *, as_of_date: str | None = None) -> int:
         values: list[Any] = []
         deadline_clause = ""
-        source_join = ""
+        source_join = (
+            " JOIN sources AS source_meta "
+            "ON source_meta.id = jobs.source_id "
+            "AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')"
+        )
         if as_of_date is not None:
             deadline_clause, freshness_values = self._public_freshness_filter(
                 as_of_date
-            )
-            source_join = (
-                " LEFT JOIN sources AS source_meta "
-                "ON source_meta.id = jobs.source_id"
             )
             values.extend(freshness_values)
         with self.connect() as connection:
