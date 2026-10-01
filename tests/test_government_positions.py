@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,7 @@ from job_hub.government_positions import (
     government_position_quality_report,
     load_position_registry,
     position_record_to_posting,
+    source_activation_tasks,
     upcoming_position_records,
     validate_position_record,
 )
@@ -83,6 +85,55 @@ def test_cea_rows_activate_on_opening_date_and_expire_after_deadline() -> None:
         },
     )
     assert not [row for row in closed_rows if row["source_id"] == "cea-2027-recruitment"]
+
+
+def test_source_activation_tasks_make_future_batches_operationally_visible() -> None:
+    registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
+
+    before_opening = source_activation_tasks(
+        registry,
+        today="2026-10-01",
+        max_age_hours=48,
+    )
+    cea_before = next(item for item in before_opening if item["source_id"] == "cea-2027-recruitment")
+    assert cea_before["status"] == "scheduled"
+    assert cea_before["matching_row_count"] == 91
+    assert cea_before["headcount"] == 112
+
+    due_at_opening = source_activation_tasks(
+        registry,
+        today="2026-10-10",
+        max_age_hours=48,
+        # Manual-only sources must not be treated as fresh merely because the
+        # reviewed registry itself is recent enough.
+        manual_confirmation_source_ids={"cea-2027-recruitment"},
+    )
+    cea_due = next(item for item in due_at_opening if item["source_id"] == "cea-2027-recruitment")
+    assert cea_due["status"] == "due_revalidation"
+
+    verified_at_opening = source_activation_tasks(
+        registry,
+        today="2026-10-10",
+        max_age_hours=48,
+        source_verifications={
+            "cea-2027-recruitment": {
+                "status": "verified",
+                "last_success_at": "2026-10-10T01:00:00Z",
+            }
+        },
+        manual_confirmation_source_ids={"cea-2027-recruitment"},
+        now=datetime.fromisoformat("2026-10-10T02:00:00+00:00"),
+    )
+    cea_verified = next(item for item in verified_at_opening if item["source_id"] == "cea-2027-recruitment")
+    assert cea_verified["status"] == "verified"
+
+    after_deadline = source_activation_tasks(
+        registry,
+        today="2026-10-27",
+        max_age_hours=48,
+    )
+    cea_expired = next(item for item in after_deadline if item["source_id"] == "cea-2027-recruitment")
+    assert cea_expired["status"] == "expired"
 
 
 def test_stale_registry_report_excludes_rows_from_current_open_count() -> None:

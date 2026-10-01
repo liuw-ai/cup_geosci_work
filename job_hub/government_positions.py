@@ -431,6 +431,14 @@ def government_position_quality_report(
         ),
         "manual_confirmation_required_sources": manual_confirmation_required_sources,
         "verified_scan_no_current_match": scan_no_current_match,
+        "source_activation_tasks": source_activation_tasks(
+            payload,
+            today=today_date.isoformat(),
+            max_age_hours=max_age_hours,
+            source_verifications=source_verifications,
+            manual_confirmation_source_ids=manual_only_sources,
+            now=reference,
+        ),
         "source_evidence_verifications": {
             "total": sum(verification_counts.values()),
             "by_status": dict(sorted(verification_counts.items())),
@@ -465,6 +473,104 @@ def government_position_quality_report(
             else "台账中的正式来源均已完成当前记录核验。"
         ),
     }
+
+
+def source_activation_tasks(
+    registry: dict[str, Any],
+    *,
+    today: str,
+    max_age_hours: float | None = None,
+    source_verifications: dict[str, dict[str, Any]] | None = None,
+    manual_confirmation_source_ids: set[str] | None = None,
+    now: datetime | None = None,
+) -> list[dict[str, Any]]:
+    """Return explicit operator tasks for position batches with opening dates.
+
+    A reviewed table can be published before applications open.  That is
+    useful planning evidence, but it must not silently become a current job
+    when the opening day arrives.  This function turns that lifecycle edge
+    into a visible, source-level task: ``scheduled`` before opening,
+    ``due_revalidation`` on/after opening until the official source is
+    freshly confirmed, ``verified`` after confirmation, and ``expired`` once
+    every row in the batch has passed its deadline.
+
+    The result is reporting-only.  It never enables a source or publishes a
+    row; the normal evidence gate remains the only publication path.
+    """
+    target = date.fromisoformat(today)
+    verification_map = source_verifications or {}
+    reference = now or datetime.combine(target, time.min, tzinfo=timezone.utc)
+    if reference.tzinfo is None:
+        reference = reference.replace(tzinfo=timezone.utc)
+    reference = reference.astimezone(timezone.utc)
+    raw_as_of = str(registry.get("as_of") or "").strip()
+    fallback_fresh = _registry_fresh(raw_as_of, reference, max_age_hours)
+    opening_dates = registry.get("source_opening_dates") or {}
+    manual_only_sources = set(manual_confirmation_source_ids or ())
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for item in registry.get("records", []):
+        if item.get("record_status") != "verified_open":
+            continue
+        if item.get("match_status") not in {"explicit_match", "unrestricted_match"}:
+            continue
+        source_id = str(item.get("source_id") or "").strip()
+        if source_id in opening_dates or item.get("opening_date"):
+            grouped.setdefault(source_id, []).append(item)
+
+    tasks: list[dict[str, Any]] = []
+    for source_id, rows in grouped.items():
+        opening_values = [
+            value
+            for value in (
+                _opening_date_for_record(row, opening_dates) for row in rows
+            )
+            if value is not None
+        ]
+        if not opening_values:
+            continue
+        opening = min(opening_values)
+        deadlines = [
+            date.fromisoformat(str(row["deadline_date"]))
+            for row in rows
+            if str(row.get("deadline_date") or "").strip()
+        ]
+        deadline = max(deadlines) if deadlines else None
+        if deadline is not None and deadline < target:
+            status = "expired"
+        elif opening > target:
+            status = "scheduled"
+        else:
+            fresh = _source_evidence_is_current(
+                source_id,
+                verification_map,
+                reference,
+                max_age_hours,
+                fallback_fresh,
+                requires_manual_confirmation=source_id in manual_only_sources,
+            )
+            status = "verified" if fresh else "due_revalidation"
+        verification = verification_map.get(source_id) or {}
+        tasks.append(
+            {
+                "source_id": source_id,
+                "status": status,
+                "opening_date": opening.isoformat(),
+                "deadline_date": deadline.isoformat() if deadline else "",
+                "matching_row_count": len(rows),
+                "headcount": sum(int(row.get("headcount") or 0) for row in rows),
+                "last_success_at": str(verification.get("last_success_at") or ""),
+                "action": (
+                    "开放日前不发布；在开放日重新核验官方公告和附件。"
+                    if status == "scheduled"
+                    else "立即复核官方公告/附件；复核成功后岗位才可进入学生端。"
+                    if status == "due_revalidation"
+                    else "已完成最近一次官方证据复核。"
+                    if status == "verified"
+                    else "报名窗口已结束，确认学生端岗位已清退。"
+                ),
+            }
+        )
+    return sorted(tasks, key=lambda item: (item["status"], item["opening_date"], item["source_id"]))
 
 
 def current_publishable_position_records(
