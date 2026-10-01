@@ -158,6 +158,12 @@ JOB_LEVEL_EVIDENCE_SCOPES = frozenset(
         "official_attachment_row",
         "official_role_section",
         "official_detail_block",
+        # Browser workers bind the extracted fields to the same official
+        # detail/list row. Keep these scopes in the same publication contract
+        # as HTML and attachment rows; otherwise a valid browser capture is
+        # silently downgraded to ``pending_evidence``.
+        "official_browser_capture_row",
+        "official_cnpc_browser_job_row",
         # The Sinopec SPA is captured from each official enterprise detail
         # route and then replayed from a versioned, administrator-verified
         # snapshot.  It is still job-level evidence: the capture stores the

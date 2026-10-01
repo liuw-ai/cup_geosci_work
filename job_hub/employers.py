@@ -40,6 +40,66 @@ CATEGORY_DISPLAY_NAMES = {
     "油气上游业主与研究机构": "油气勘探开发运营与研究机构",
 }
 
+_JOB_LEVEL_EVIDENCE_SCOPES = frozenset(
+    {
+        "official_html_table_row",
+        "official_role_section",
+        "official_detail_block",
+        "official_browser_capture_row",
+        "official_cnpc_browser_job_row",
+        "official_sinopec_detail_snapshot",
+        "official_cmgb_browser_detail",
+        "official_cnooc_browser_detail",
+        "official_zhaopin_detail_initial_data",
+        "admin_verified_official_record",
+    }
+)
+
+
+def _is_http_url(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    parsed = urlparse(value.strip())
+    return parsed.scheme in {"http", "https"} and bool(parsed.hostname)
+
+
+def official_job_link(job: dict[str, Any]) -> tuple[str, str]:
+    """Choose the student-facing official link without hiding the evidence type.
+
+    ``application_url`` is intentionally not considered here: it is often a
+    portal entry or a listing page, while this link must lead to the detail
+    page or the official attachment that proves the displayed row.  Government
+    attachment rows therefore open the attachment; browser/detail captures
+    open their row-bound detail URL.
+    """
+    evidence = job.get("field_evidence")
+    if not isinstance(evidence, dict):
+        evidence = {}
+
+    for key in (
+        "官方详情链接",
+        "官方岗位详情",
+        "官方岗位详情链接",
+        "官方详情页",
+    ):
+        value = str(evidence.get(key) or "").strip()
+        if _is_http_url(value):
+            return value, "打开官方岗位详情"
+
+    scope = str(evidence.get("evidence_scope") or "").strip()
+    official_evidence_url = str(job.get("official_evidence_url") or "").strip()
+    source_url = str(job.get("source_url") or "").strip()
+    if scope == "official_attachment_row":
+        if _is_http_url(official_evidence_url):
+            return official_evidence_url, "打开官方职位表/公告附件"
+    if scope in _JOB_LEVEL_EVIDENCE_SCOPES and _is_http_url(source_url):
+        return source_url, "打开官方岗位详情"
+    if _is_http_url(official_evidence_url):
+        return official_evidence_url, "打开官方原文"
+    if _is_http_url(source_url):
+        return source_url, "打开官方原文"
+    return "", "打开官方原文"
+
 PUBLICATION_STATUS_LABELS = {
     "student_eligible": "目标专业明确匹配",
     "unrestricted_eligible": "不限专业可报",
@@ -305,7 +365,10 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
     )
     identity_values = (job.get("title"), job.get("employer"))
     identity = resolve_employer(str(job.get("employer") or ""))
-    field_evidence = job.get("field_evidence") or {}
+    field_evidence = enriched.get("field_evidence") or {}
+    official_link, official_link_label = official_job_link(enriched)
+    enriched["official_link_url"] = official_link
+    enriched["official_link_label"] = official_link_label
     evidence_values = [
         field_evidence.get(key)
         for key in ("岗位", "专业范围", "专业要求", "面向对象", "学历要求", "工作地点")

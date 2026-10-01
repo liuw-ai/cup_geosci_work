@@ -199,6 +199,8 @@ def test_enrich_job_repairs_legacy_cnpc_detail_navigation() -> None:
     repaired = job["source_url"]
     assert parse_qs(urlparse(repaired).query)["postName"] == [job["title"]]
     assert job["field_evidence"]["官方详情链接"] == repaired
+    assert job["official_link_url"] == repaired
+    assert job["official_link_label"] == "打开官方岗位详情"
 
 
 def test_operator_affiliation_uses_employer_before_body_mentions() -> None:

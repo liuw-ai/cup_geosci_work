@@ -136,6 +136,32 @@ def audit_database(
                     "message": "公开岗位缺少可访问的官方原文证据链接。",
                 }
             )
+        elif source.get("source_type") != "manual":
+            # ``source_url`` is checked below, but the link students actually
+            # need may be an attachment or a detail host declared separately
+            # by the adapter.  Validate that evidence URL against the same
+            # source boundary so a bad import cannot silently point elsewhere.
+            evidence_allowed_hosts = {
+                str(host).lower().rstrip(".")
+                for host in (
+                    list(source.get("config", {}).get("allowed_hosts", []))
+                    + list(source.get("config", {}).get("detail_allowed_hosts", []))
+                    + list(source.get("config", {}).get("attachment_allowed_hosts", []))
+                )
+            }
+            homepage_host = urlparse(str(source.get("homepage_url", ""))).hostname
+            if homepage_host:
+                evidence_allowed_hosts.add(homepage_host.lower().rstrip("."))
+            evidence_host = evidence.hostname.lower().rstrip(".")
+            if evidence_allowed_hosts and evidence_host not in evidence_allowed_hosts:
+                issues.append(
+                    {
+                        "code": "official_evidence_host_mismatch",
+                        "job_id": job_id,
+                        "source_id": source_id,
+                        "message": f"官方证据链接域名 {evidence.hostname} 不在来源白名单中。",
+                    }
+                )
         if job_id not in verified_evidence_job_ids:
             issues.append(
                 {

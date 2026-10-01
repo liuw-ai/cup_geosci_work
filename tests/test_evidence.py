@@ -7,6 +7,7 @@ import pytest
 from job_hub.app import create_app
 from job_hub.audit import audit_database
 from job_hub.db import Database
+from job_hub.employers import official_job_link
 from job_hub.pipeline import JobPipeline
 from job_hub.sources import RawPosting
 
@@ -52,6 +53,31 @@ def test_saved_public_job_automatically_receives_verified_official_evidence(tmp_
     assert evidence[0]["verification_status"] == "verified"
     assert evidence[0]["evidence_url"].endswith("/jobs/1")
     assert database.has_verified_official_evidence(job_id) is True
+
+
+def test_official_link_prefers_detail_and_attachment_evidence_over_portal_entry() -> None:
+    detail_url, detail_label = official_job_link(
+        {
+            "source_url": "https://official.example/jobs/list",
+            "official_evidence_url": "https://official.example/jobs/list",
+            "field_evidence": {
+                "evidence_scope": "official_browser_capture_row",
+                "官方详情链接": "https://official.example/jobs/detail/42",
+            },
+        }
+    )
+    assert detail_url.endswith("/jobs/detail/42")
+    assert detail_label == "打开官方岗位详情"
+
+    attachment_url, attachment_label = official_job_link(
+        {
+            "source_url": "https://official.example/notices/42",
+            "official_evidence_url": "https://official.example/files/positions.xlsx",
+            "field_evidence": {"evidence_scope": "official_attachment_row"},
+        }
+    )
+    assert attachment_url.endswith("/files/positions.xlsx")
+    assert attachment_label == "打开官方职位表/公告附件"
 
 
 def test_initialize_backfills_legacy_job_evidence_idempotently(tmp_path) -> None:
@@ -269,6 +295,36 @@ def test_audit_rejects_public_job_without_verified_evidence(tmp_path) -> None:
     assert audit["ok"] is False
     assert any(
         issue["code"] == "missing_verified_official_evidence"
+        for issue in audit["issues"]
+    )
+
+
+def test_audit_rejects_official_evidence_from_unregistered_host(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    source_record = source()
+    source_record.update(
+        {
+            "source_type": "landing_page",
+            "config": {
+                "allowed_hosts": ["careers.example.edu.cn"],
+                "minimum_relevance": 0,
+            },
+        }
+    )
+    database.upsert_source(source_record)
+    job_id = _saved_job(database, settings)
+    with database.transaction() as connection:
+        connection.execute(
+            "UPDATE jobs SET official_evidence_url = ? WHERE id = ?",
+            ("https://untrusted.example/jobs/42", job_id),
+        )
+
+    audit = audit_database(database, settings)
+    assert audit["ok"] is False
+    assert any(
+        issue["code"] == "official_evidence_host_mismatch"
         for issue in audit["issues"]
     )
 

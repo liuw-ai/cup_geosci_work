@@ -69,6 +69,22 @@ def test_geophysics_profile_requires_explicit_job_level_evidence() -> None:
     assert "master-geophysics" in result.matched_profile_ids
 
 
+def test_browser_detail_scopes_pass_the_same_job_level_gate() -> None:
+    """A complete browser capture must not be downgraded to pending evidence."""
+    for scope in ("official_browser_capture_row", "official_cnpc_browser_job_row"):
+        result = evaluate_student_publication(
+            job(
+                field_evidence={
+                    "evidence_scope": scope,
+                    "岗位": "油气勘探地质工程师",
+                    "专业范围": "地质工程",
+                    "学历要求": "硕士研究生",
+                }
+            )
+        )
+        assert result.status == "student_eligible"
+
+
 def test_profile_match_requires_both_explicit_major_and_degree_evidence() -> None:
     profile = get_student_profile("master-geological-engineering")
     assert profile is not None
