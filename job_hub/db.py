@@ -2579,10 +2579,10 @@ class Database:
             "date(jobs.published_date, '+' || CAST(" + window + " AS INTEGER) || ' days')"
         )
         predicate = (
-            "(jobs.deadline_date >= ? OR (jobs.deadline_date IS NULL AND ("
+            "(jobs.deadline_date >= ? OR (jobs.deadline_date IS NULL OR jobs.deadline_date = '') AND ("
             f"{window} IS NULL OR {window} = '' OR jobs.published_date IS NULL "
             f"OR jobs.published_date = '' OR {published_expiry} IS NULL "
-            f"OR {published_expiry} >= ?)))"
+            f"OR {published_expiry} >= ?))"
         )
         return predicate, [as_of_date, as_of_date]
 

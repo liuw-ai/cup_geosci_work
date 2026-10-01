@@ -17,10 +17,14 @@
   back to the static registry snapshot.  `source_unavailable` keeps its
   existing short-lived last-success behavior, while an unconfigured source
   has no publication authority.
+- Normalized public read-side lifecycle SQL so legacy empty-string deadlines
+  follow the same undated-window rule as `NULL` deadlines.
 
 ## Verification
 
 - Government lifecycle tests: `37 passed`.
+- Public lifecycle/read-side regressions include explicit, undated, and
+  legacy empty-string deadline representations.
 - Full local suite: `484 passed, 2 skipped`.
 - `python -m compileall -q job_hub`: passed.
 - Flask application import and route registration: passed (`39` routes).
