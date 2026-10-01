@@ -145,7 +145,12 @@ def discover_configured_government_artifacts(
         source_results.append(result)
 
     summary["requested_source_ids"] = sorted(selected_ids) if selected_ids else None
-    summary["ok"] = int(summary["failed"]) == 0
+    # A blocked source is not a successful discovery cycle.  Keeping ``ok``
+    # true for robots/access failures makes an all-blocked run look healthy
+    # and can mislead operators into treating an empty queue as authoritative.
+    # A completed scan with no notices remains healthy because it increments
+    # ``no_notice_sources`` rather than ``blocked`` or ``failed``.
+    summary["ok"] = int(summary["failed"]) == 0 and int(summary["blocked"]) == 0
     return summary
 
 

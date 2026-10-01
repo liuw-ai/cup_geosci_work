@@ -19,6 +19,9 @@
   has no publication authority.
 - Normalized public read-side lifecycle SQL so legacy empty-string deadlines
   follow the same undated-window rule as `NULL` deadlines.
+- Corrected government attachment discovery health reporting: a blocked source
+  now makes the cycle non-OK, while a completed scan with no notices remains
+  a valid successful empty result.
 
 ## Verification
 

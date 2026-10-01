@@ -118,6 +118,7 @@ def test_discovery_reports_blocked_and_failed_sources_without_false_zero_result(
     assert result["no_notice_sources"] == 1
     assert result["blocked"] == 1
     assert result["failed"] == 1
+    assert result["ok"] is False
     assert by_source["available"]["status"] == "ok"
     assert by_source["blocked"]["status"] == "blocked"
     assert by_source["failed"]["status"] == "failed"
