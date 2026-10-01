@@ -858,6 +858,7 @@
       "attachment_allowed_hosts": ["dkj.sc.gov.cn", "www.scpta.com.cn"],
       "attachment_discovery_enabled": true,
       "attachment_discovery_max_notices": 8,
+      "attachment_url_patterns": ["/front/download-"],
       "listing_selector": "a[href*='/scdkj/tggg/20'], a[href*='/front/News/info/']",
       "detail_path_patterns": ["/scdkj/tggg/20\\d{2}/", "/front/News/info/"],
       "require_recruitment_word": true,

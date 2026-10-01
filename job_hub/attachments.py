@@ -264,7 +264,20 @@ class OfficialAttachmentProcessor:
                 continue
             label = " ".join(anchor.get_text(" ", strip=True).split())
             suffix = Path(urlparse(artifact_url).path).suffix.lower()
-            if suffix not in SUPPORTED_SUFFIXES:
+            # Some official recruitment portals expose downloads through
+            # tokenised endpoints (for example ``/front/download-<token>``)
+            # without a filename extension.  A source may explicitly
+            # register such a path pattern; the response content type is
+            # still checked during the later download step.
+            configured_patterns = source.get("config", {}).get(
+                "attachment_url_patterns", []
+            )
+            tokenised_attachment = any(
+                re.search(str(pattern), artifact_url, re.IGNORECASE)
+                for pattern in configured_patterns
+                if str(pattern).strip()
+            )
+            if suffix not in SUPPORTED_SUFFIXES and not tokenised_attachment:
                 continue
             try:
                 self._assert_official_hosts(source, parent_url, artifact_url)

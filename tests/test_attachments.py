@@ -316,6 +316,37 @@ def test_discovery_carries_official_notice_dates_into_xls_artifact(tmp_path) -> 
     assert discovered[0]["metadata"]["official_notice_title"] == "2026年公开招聘公告"
 
 
+def test_discovery_accepts_allowlisted_extensionless_download_endpoint(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    extensionless_source = source() | {
+        "config": {
+            "minimum_relevance": 0,
+            "allowed_hosts": ["careers.example.edu.cn"],
+            "attachment_allowed_hosts": ["careers.example.edu.cn"],
+            "attachment_url_patterns": [r"/front/download-"],
+        }
+    }
+    database.upsert_source(extensionless_source)
+    processor = OfficialAttachmentProcessor(
+        settings, database, session=FakeSession(_xlsx_bytes())
+    )
+
+    discovered = processor.discover_from_page(
+        "official-test-source",
+        "https://careers.example.edu.cn/notice/1",
+        html=(
+            "<html><body>2026年公开招聘公告"
+            "<a href='/front/download-abc123'>岗位和条件要求一览表</a>"
+            "</body></html>"
+        ),
+    )
+
+    assert len(discovered) == 1
+    assert discovered[0]["artifact_url"].endswith("/front/download-abc123")
+
+
 def test_attachment_candidate_requires_review_then_publishes_with_evidence(tmp_path) -> None:
     session = FakeSession(_xlsx_bytes())
     settings, database, artifact, processor = _registered_artifact(
