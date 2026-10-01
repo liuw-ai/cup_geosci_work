@@ -295,6 +295,23 @@ def test_geophysical_category_is_promoted_only_after_explicit_taxonomy_mapping()
     assert "master-geophysics" in decision.matched_profile_ids
 
 
+def test_geophysical_direction_without_formal_major_stays_private() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="地球物理勘查工程师",
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": "地球物理勘查工程师",
+                "专业范围": "地球物理勘查、应用地球物理",
+                "学历要求": "硕士研究生及以上",
+                "工作地点": "北京",
+            },
+        )
+    )
+
+    assert decision.status == "out_of_scope"
+
+
 def test_government_position_without_row_location_stays_private() -> None:
     decision = evaluate_student_publication(
         job(
