@@ -11,8 +11,10 @@ degree, location, application lifecycle and student eligibility.
 
 ## Server evidence
 
-The 2026-10-01 production ledger recorded 225 runs. The current public
-snapshot remains 146 jobs. The worker heartbeat is healthy and CNOOC's
+The first audit on 2026-10-01 recorded 225 runs. After the scheduled worker
+cycle completed, the final ledger contained 253 runs; the additional 28 runs
+were source refreshes and attachment checks, not fabricated vacancies. The
+current public snapshot remains 146 jobs. The worker heartbeat is healthy and CNOOC's
 browser detail capture completed 343/343 details with 46 explicit student
 matches.
 
