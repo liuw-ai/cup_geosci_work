@@ -43,7 +43,7 @@ Phase 62 为该队列补上附件用途和岗位行语义门禁：报名表、�
 
 最新的中国石油官方浏览器索引捕获与安徽事业编附件队列见 [docs/phase-33/README.md](docs/phase-33/README.md)。浏览器捕获只记录 13 页、122 条官方公告索引和重点详情状态；详情字段缺失时不把公告索引当作学生端岗位。
 
-当前最新本地交付基线为 Phase 107；后续实时扩源仍以单位矩阵审计通过、官方岗位证据完整和学生端专业门禁通过为前提。Phase 107 为带未来报名开始日的官方职位表增加了显式激活任务：开放前不发布，开放日未完成官方复核时进入待复核任务，复核成功后才允许按原有门禁发布，截止后进入清退确认。Phase 106 修复了中国石油旧快照详情页缺少 `postName` 导致官方页面空壳的问题：采集新记录和读取旧记录时都会生成可渲染的官方深链接，岗位字段和证据内容不被改写。Phase 105 的专业类别门禁修复和生产验收记录见 [docs/phase-105/README.md](docs/phase-105/README.md)、[docs/phase-106/README.md](docs/phase-106/README.md) 与 [docs/phase-107/README.md](docs/phase-107/README.md)。
+当前最新本地交付基线为 Phase 108；后续实时扩源仍以单位矩阵审计通过、官方岗位证据完整和学生端专业门禁通过为前提。Phase 108 增加受管理员令牌保护的 `/api/admin/government-position-tasks`，直接展示官方职位表的开放排期、待复核、已核验和清退状态。Phase 107 为带未来报名开始日的官方职位表增加了显式激活任务：开放前不发布，开放日未完成官方复核时进入待复核任务，复核成功后才允许按原有门禁发布，截止后进入清退确认。Phase 106 修复了中国石油旧快照详情页缺少 `postName` 导致官方页面空壳的问题：采集新记录和读取旧记录时都会生成可渲染的官方深链接，岗位字段和证据内容不被改写。Phase 105 的专业类别门禁修复和生产验收记录见 [docs/phase-105/README.md](docs/phase-105/README.md)、[docs/phase-106/README.md](docs/phase-106/README.md)、[docs/phase-107/README.md](docs/phase-107/README.md) 与 [docs/phase-108/README.md](docs/phase-108/README.md)。
 
 Phase 40 已增加中国石油“公告列表分页 -> 公告详情 -> 多岗位表格”的专用浏览器采集链路。见 [docs/phase-40/README.md](docs/phase-40/README.md)。浏览器采集运行在独立 Chromium Worker 中，完整捕获才允许进入现有发布门禁；维护窗口、详情异常或扫描不完整均记录为来源受限，不写成无岗位。
 

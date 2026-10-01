@@ -75,7 +75,11 @@ from job_hub.source_validation import (
 )
 from job_hub.backups import DatabaseBackupManager
 from job_hub.operations import backup_health_payload
-from job_hub.government_positions import load_position_registry, upcoming_position_records
+from job_hub.government_positions import (
+    load_position_registry,
+    source_activation_tasks,
+    upcoming_position_records,
+)
 from job_hub.government_revalidation import requires_manual_government_evidence_confirmation
 from job_hub.reports import build_daily_report, local_today, publish_daily_report
 from job_hub.sources import RawPosting
@@ -784,6 +788,48 @@ def create_app(settings: Settings | None = None) -> Flask:
                     "due_only": due_only,
                 },
                 "items": tasks,
+            }
+        )
+
+    @app.get("/api/admin/government-position-tasks")
+    @require_admin
+    def government_position_tasks_api() -> Any:
+        """Expose official position-table activation tasks to administrators."""
+        path = settings.government_position_registry_path
+        if path is None:
+            return jsonify({"items": [], "error": "position registry is not configured"}), 503
+        try:
+            registry = load_position_registry(path)
+        except (OSError, ValueError) as error:
+            return jsonify({"items": [], "error": str(error)}), 503
+        now = datetime.now(ZoneInfo(settings.timezone))
+        items = source_activation_tasks(
+            registry,
+            today=now.date().isoformat(),
+            max_age_hours=settings.government_position_max_age_hours,
+            source_verifications={
+                str(item["source_id"]): item
+                for item in database.list_government_source_verifications()
+            },
+            manual_confirmation_source_ids={
+                str(source["id"])
+                for source in database.list_sources()
+                if requires_manual_government_evidence_confirmation(source)
+            },
+            now=now,
+        )
+        return jsonify(
+            {
+                "as_of": registry.get("as_of"),
+                "checked_at": now.isoformat(),
+                "items": items,
+                "summary": {
+                    "total": len(items),
+                    "scheduled": sum(item["status"] == "scheduled" for item in items),
+                    "due_revalidation": sum(item["status"] == "due_revalidation" for item in items),
+                    "verified": sum(item["status"] == "verified" for item in items),
+                    "expired": sum(item["status"] == "expired" for item in items),
+                },
             }
         )
 

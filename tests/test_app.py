@@ -145,6 +145,28 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     assert response.get_json()["outcome"] == "created"
 
 
+def test_government_position_activation_tasks_are_admin_only(tmp_path) -> None:
+    settings = replace(
+        make_settings(tmp_path),
+        government_position_registry_path=Path("data/government_position_registry.json"),
+        government_position_max_age_hours=None,
+    )
+    app = create_app(settings)
+    client = app.test_client()
+
+    assert client.get("/api/admin/government-position-tasks").status_code == 403
+    response = client.get(
+        "/api/admin/government-position-tasks",
+        headers={"X-Admin-Token": "test-admin-token"},
+    )
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["summary"]["total"] >= 1
+    cea = next(item for item in payload["items"] if item["source_id"] == "cea-2027-recruitment")
+    assert cea["status"] == "scheduled"
+    assert cea["matching_row_count"] == 91
+
+
 def test_sinopec_capture_admin_endpoint_is_private_and_reports_complete_manifest(tmp_path) -> None:
     settings = make_settings(tmp_path)
     app = create_app(settings)
