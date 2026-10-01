@@ -13,6 +13,7 @@ from job_hub.matching import (
 from job_hub.major_taxonomy import (
     english_exact_terms_for_profile,
     exact_terms_for_profile,
+    category_terms_for_profile,
     profile_major_definition,
     related_terms_for_profile,
 )
@@ -175,6 +176,7 @@ class StudentProfile:
     degree: str
     major: str
     exact_major_terms: tuple[str, ...]
+    category_major_terms: tuple[str, ...] = ()
     english_exact_major_terms: tuple[str, ...] = ()
     related_major_terms: tuple[str, ...] = ()
     taxonomy_id: str = ""
@@ -224,6 +226,7 @@ def _profile(profile_id: str, degree: str, major: str) -> StudentProfile:
         degree=degree,
         major=major,
         exact_major_terms=exact_terms_for_profile(profile_id),
+        category_major_terms=category_terms_for_profile(profile_id),
         english_exact_major_terms=english_exact_terms_for_profile(profile_id),
         related_major_terms=related_terms_for_profile(profile_id),
         taxonomy_id=profile_major_definition(profile_id).id,
@@ -606,6 +609,10 @@ def _profile_is_explicitly_eligible(
         _contains_exact_major_term(qualification_text, term)
         for term in profile.exact_major_terms
     )
+    has_category = any(
+        _contains_explicit_category_term(qualification_text, term)
+        for term in profile.category_major_terms
+    )
     # English role text frequently mentions a field in responsibilities or in
     # a neighbouring discipline name. Treat it as an eligibility condition
     # only when the same official requirement block gives it degree context.
@@ -613,12 +620,15 @@ def _profile_is_explicitly_eligible(
         _english_major_requirement_is_explicit(job, term)
         for term in profile.english_exact_major_terms
     )
-    return (has_major or has_english_major) and _degree_status(job, profile)[0] == "explicit"
+    return (has_major or has_category or has_english_major) and _degree_status(job, profile)[0] == "explicit"
 
 
 def _matched_profile_term(profile: StudentProfile, qualification_text: str) -> str:
     for term in profile.exact_major_terms:
         if _contains_exact_major_term(qualification_text, term):
+            return term
+    for term in profile.category_major_terms:
+        if _contains_explicit_category_term(qualification_text, term):
             return term
     lowered = qualification_text.casefold()
     for term in profile.english_exact_major_terms:
@@ -669,6 +679,11 @@ def _contains_exact_major_term(qualification_text: str, term: str) -> bool:
         remainder = lowered.replace("地质资源与地质工程", "")
         return candidate in remainder
     return True
+
+
+def _contains_explicit_category_term(qualification_text: str, term: str) -> bool:
+    """Match a versioned discipline category in structured job evidence."""
+    return term.casefold() in qualification_text.casefold()
 
 
 def _contains_english_exact_major_term(text: str, term: str) -> bool:

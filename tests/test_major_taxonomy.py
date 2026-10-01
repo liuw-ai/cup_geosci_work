@@ -26,6 +26,9 @@ def test_taxonomy_contains_the_four_requested_majors_with_distinct_boundaries() 
     assert definitions["geology"].classification["graduate_code"] == "0709"
     assert definitions["geological-engineering"].classification["graduate_professional_code"] == "085703"
     assert definitions["geological-resources-and-engineering"].classification["graduate_code"] == "0818"
+    assert definitions["resource-exploration-engineering"].category_terms == ("地质类",)
+    assert definitions["geology"].category_terms == ("地质学类",)
+    assert definitions["geological-resources-and-engineering"].category_terms == ("地质资源与地质工程类",)
 
 
 def test_profile_aliases_do_not_promote_adjacent_majors_to_exact() -> None:
@@ -61,6 +64,7 @@ def test_taxonomy_validation_rejects_duplicate_exact_terms() -> None:
                 "student_levels": ["本科"],
                 "classification": {"discipline_category": "工学"},
                 "exact_terms": ["相同"],
+                "category_terms": [],
                 "english_exact_terms": ["same"],
                 "related_terms": ["相关"],
             },
@@ -70,6 +74,7 @@ def test_taxonomy_validation_rejects_duplicate_exact_terms() -> None:
                 "student_levels": ["硕士"],
                 "classification": {"discipline_category": "理学"},
                 "exact_terms": ["相同"],
+                "category_terms": [],
                 "english_exact_terms": ["same-two"],
                 "related_terms": ["相关二"],
             },

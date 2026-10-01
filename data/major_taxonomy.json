@@ -16,6 +16,7 @@
         "graduate_reference_code": "0818"
       },
       "exact_terms": ["资源勘查工程", "资源勘探工程", "081403", "081403K"],
+      "category_terms": ["地质类"],
       "english_exact_terms": ["resource exploration engineering"],
       "related_terms": ["勘查技术与工程", "矿产普查与勘探", "矿产勘查"]
     },
@@ -46,6 +47,7 @@
         "070905",
         "第四纪地质学"
       ],
+      "category_terms": ["地质学类"],
       "english_exact_terms": ["geology", "geological science", "geological sciences"],
       "related_terms": ["石油地质", "地球科学", "地质调查", "沉积学", "矿物学"]
     },
@@ -63,6 +65,7 @@
         "graduate_professional_code": "085703"
       },
       "exact_terms": ["地质工程", "081803", "085703"],
+      "category_terms": [],
       "english_exact_terms": ["geological engineering"],
       "related_terms": ["工程地质", "水文地质", "环境地质", "地质灾害"]
     },
@@ -84,6 +87,7 @@
         "081802",
         "地球探测与信息技术"
       ],
+      "category_terms": ["地质资源与地质工程类"],
       "english_exact_terms": ["geological resources and engineering"],
       "related_terms": ["矿产普查与勘探", "地球探测与信息技术", "资源勘查", "地质工程"]
     }

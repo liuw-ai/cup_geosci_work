@@ -26,6 +26,7 @@ class MajorDefinition:
     student_levels: tuple[str, ...]
     classification: dict[str, Any]
     exact_terms: tuple[str, ...]
+    category_terms: tuple[str, ...]
     english_exact_terms: tuple[str, ...]
     related_terms: tuple[str, ...]
 
@@ -36,6 +37,7 @@ class MajorDefinition:
             "student_levels": list(self.student_levels),
             "classification": dict(self.classification),
             "exact_terms": list(self.exact_terms),
+            "category_terms": list(self.category_terms),
             "english_exact_terms": list(self.english_exact_terms),
             "related_terms": list(self.related_terms),
         }
@@ -72,7 +74,7 @@ def validate_major_taxonomy(payload: Any) -> dict[str, Any]:
     for index, value in enumerate(majors):
         if not isinstance(value, dict):
             raise ContractValidationError(f"major taxonomy item {index} must be an object")
-        required = ("id", "name", "student_levels", "classification", "exact_terms", "english_exact_terms", "related_terms")
+        required = ("id", "name", "student_levels", "classification", "exact_terms", "category_terms", "english_exact_terms", "related_terms")
         missing = [field for field in required if field not in value]
         if missing:
             raise ContractValidationError(f"major taxonomy item {index} missing: {', '.join(missing)}")
@@ -89,7 +91,7 @@ def validate_major_taxonomy(payload: Any) -> dict[str, Any]:
             raise ContractValidationError(f"major taxonomy {item_id} student_levels is invalid")
         if not isinstance(item["classification"], dict) or not item["classification"]:
             raise ContractValidationError(f"major taxonomy {item_id} classification is invalid")
-        for field in ("exact_terms", "english_exact_terms", "related_terms"):
+        for field in ("exact_terms", "category_terms", "english_exact_terms", "related_terms"):
             terms = item[field]
             if not isinstance(terms, list) or any(not str(term).strip() for term in terms):
                 raise ContractValidationError(f"major taxonomy {item_id} {field} is invalid")
@@ -118,6 +120,7 @@ def list_major_definitions(path: Path | None = None) -> tuple[MajorDefinition, .
             student_levels=tuple(item["student_levels"]),
             classification=dict(item["classification"]),
             exact_terms=tuple(item["exact_terms"]),
+            category_terms=tuple(item["category_terms"]),
             english_exact_terms=tuple(item["english_exact_terms"]),
             related_terms=tuple(item["related_terms"]),
         )
@@ -148,6 +151,11 @@ def profile_major_definition(profile_id: str, path: Path | None = None) -> Major
 
 def exact_terms_for_profile(profile_id: str, path: Path | None = None) -> tuple[str, ...]:
     return profile_major_definition(profile_id, path).exact_terms
+
+
+def category_terms_for_profile(profile_id: str, path: Path | None = None) -> tuple[str, ...]:
+    """Return explicit discipline-category terms for a supported profile."""
+    return profile_major_definition(profile_id, path).category_terms
 
 
 def english_exact_terms_for_profile(profile_id: str, path: Path | None = None) -> tuple[str, ...]:

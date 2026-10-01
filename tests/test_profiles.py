@@ -232,6 +232,41 @@ def test_publication_gate_accepts_named_geological_resources_direction() -> None
     assert "master-geological-resources-engineering" in decision.matched_profile_ids
 
 
+def test_publication_gate_accepts_explicit_undergraduate_geology_category() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="勘探地质现场操作岗",
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": "勘探地质现场操作岗",
+                "专业范围": "地质类、地质学类、地球物理学类等相关专业",
+                "学历要求": "大学本科及以上学历",
+                "工作地点": "天津、海南",
+            },
+        )
+    )
+
+    assert decision.status == "student_eligible"
+    assert "undergraduate-resource-exploration" in decision.matched_profile_ids
+
+
+def test_adjacent_geophysical_category_is_not_promoted_without_taxonomy_mapping() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="物探工程师",
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": "物探工程师",
+                "专业范围": "地球物理学类等相关专业",
+                "学历要求": "硕士研究生及以上",
+                "工作地点": "上海",
+            },
+        )
+    )
+
+    assert decision.status == "pending_evidence"
+
+
 def test_government_position_without_row_location_stays_private() -> None:
     decision = evaluate_student_publication(
         job(
