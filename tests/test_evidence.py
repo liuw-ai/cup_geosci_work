@@ -79,6 +79,16 @@ def test_official_link_prefers_detail_and_attachment_evidence_over_portal_entry(
     assert attachment_url.endswith("/files/positions.xlsx")
     assert attachment_label == "打开官方职位表/公告附件"
 
+    notice_url, notice_label = official_job_link(
+        {
+            "source_url": "https://official.example/notices/42",
+            "official_evidence_url": "https://official.example/notices/42",
+            "field_evidence": {"evidence_scope": "official_html_table_row"},
+        }
+    )
+    assert notice_url.endswith("/notices/42")
+    assert notice_label == "打开官方原文"
+
 
 def test_initialize_backfills_legacy_job_evidence_idempotently(tmp_path) -> None:
     path = tmp_path / "legacy.sqlite3"

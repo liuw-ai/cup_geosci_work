@@ -42,7 +42,6 @@ CATEGORY_DISPLAY_NAMES = {
 
 _JOB_LEVEL_EVIDENCE_SCOPES = frozenset(
     {
-        "official_html_table_row",
         "official_role_section",
         "official_detail_block",
         "official_browser_capture_row",
