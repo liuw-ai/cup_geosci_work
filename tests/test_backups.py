@@ -196,6 +196,39 @@ def test_browser_worker_health_accepts_recent_capture_heartbeat(tmp_path) -> Non
     assert result["workers"]["cnooc-browser"]["age_seconds"] < 10
 
 
+def test_browser_worker_access_limit_does_not_block_other_sources(tmp_path) -> None:
+    settings = _settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    browser_source = source()
+    browser_source.update(
+        {
+            "id": "sinopec-career",
+            "source_type": "sinopec_spa_rows",
+            "name": "测试受限浏览器来源",
+            "config": {
+                "snapshot_path": "data/verified/sinopec.json",
+                "official_evidence_url": "https://job.sinopec.com/",
+                "application_url": "https://job.sinopec.com/",
+                "allowed_hosts": ["job.sinopec.com"],
+                "enterprise_total": 0,
+                "candidate_enterprise_total": 0,
+            },
+        }
+    )
+    database.upsert_source(browser_source)
+    database.record_service_heartbeat(
+        "sinopec-browser", "degraded", "robots.txt returned HTTP 403"
+    )
+
+    result = browser_worker_health(database)
+
+    assert result["ok"] is False
+    assert result["release_ok"] is True
+    assert result["expected_access_limited"] == ["sinopec-browser"]
+    assert result["workers"]["sinopec-browser"]["expected_access_limited"] is True
+
+
 def test_health_endpoint_reports_backup_state_without_private_path(tmp_path) -> None:
     settings = _settings(tmp_path)
     app = create_app(settings)

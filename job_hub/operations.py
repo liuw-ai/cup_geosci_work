@@ -20,6 +20,15 @@ _BROWSER_SERVICE_BY_SOURCE_TYPE = {
     "sinopec_spa_rows": "sinopec-browser",
 }
 
+_EXPECTED_BROWSER_LIMITATION_MARKERS = (
+    "robots.txt returned http 403",
+    "robots.txt returned http 412",
+    "access-limited",
+    "access limited",
+    "listing returned http 400",
+    "listing returned http 412",
+)
+
 
 def worker_health(database: Database, max_age_seconds: int) -> dict[str, Any]:
     """Return the Worker liveness contract used by Docker and readiness checks."""
@@ -87,6 +96,8 @@ def browser_worker_health(
     healthy_statuses = {"starting", "running", "capturing"}
     workers: dict[str, dict[str, Any]] = {}
     overall_ok = True
+    release_ok = True
+    expected_limitations: list[str] = []
     for service_name, source_id in sorted(required.items()):
         heartbeat = database.get_service_heartbeat(service_name)
         item: dict[str, Any] = {
@@ -97,6 +108,7 @@ def browser_worker_health(
         if heartbeat is None:
             item["message"] = "尚未收到浏览器 worker 心跳。"
             overall_ok = False
+            release_ok = False
             workers[service_name] = item
             continue
         item["heartbeat"] = heartbeat
@@ -113,14 +125,32 @@ def browser_worker_health(
         except (KeyError, TypeError, ValueError):
             item["message"] = "浏览器 worker 心跳时间格式无效。"
             overall_ok = False
+            release_ok = False
             workers[service_name] = item
             continue
         item["age_seconds"] = age_seconds
         item["ok"] = age_seconds <= maximum and heartbeat.get("status") in healthy_statuses
         if not item["ok"]:
             overall_ok = False
+            detail = str(heartbeat.get("detail") or "").strip().lower()
+            expected = any(marker in detail for marker in _EXPECTED_BROWSER_LIMITATION_MARKERS)
+            item["expected_access_limited"] = expected
+            if expected:
+                expected_limitations.append(service_name)
+            else:
+                release_ok = False
         workers[service_name] = item
-    return {"ok": overall_ok, "required": True, "workers": workers}
+    return {
+        "ok": overall_ok,
+        # A policy/robots denial is a source-level limitation, not a broken
+        # service. It remains visible through ``ok`` and the worker detail,
+        # while ``release_ok`` lets unaffected official sources continue to
+        # serve students.
+        "release_ok": release_ok,
+        "expected_access_limited": sorted(expected_limitations),
+        "required": True,
+        "workers": workers,
+    }
 
 
 def backup_health_payload(status: BackupStatus) -> dict[str, Any]:
@@ -173,7 +203,7 @@ def build_production_readiness(
     internal_ready = (
         bool(audit.get("ok"))
         and bool(worker.get("ok"))
-        and bool(browser_workers.get("ok"))
+        and bool(browser_workers.get("release_ok", browser_workers.get("ok")))
         and backup.ok
     )
     public_ready = internal_ready and bool(domain and domain.get("ready"))
