@@ -45,8 +45,10 @@ cycle and the 30-hour capture freshness gate remains active.
 ```text
 pytest -q tests/test_zhaopin_detail.py tests/test_cnooc_browser_capture.py \
   tests/test_zhaopin.py tests/test_contracts.py tests/test_source_validation.py
-35 targeted tests passed; the full repository regression remains 446 passed,
-1 skipped.
+35 targeted tests passed; the full repository regression now passes 447 tests
+with 1 skipped. The regression includes the verified CNOOC sample URL and job
+IDs in the domestic source-expansion ledger; a verified source without those
+fields is rejected instead of being treated as a complete source.
 ```
 
 The browser capture remains separate from the ordinary HTTP worker because the
