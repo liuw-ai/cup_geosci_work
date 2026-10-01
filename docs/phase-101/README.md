@@ -33,12 +33,15 @@ failure and never become an empty result.
 
 ## Current gate
 
-The first server browser run completed successfully: 350 list rows across four
-pages, 343 candidate detail pages, and 343 successful detail parses. The
-student publication gate admitted 43 rows, kept 256 rows as pending evidence,
-and rejected 44 rows as out of scope. The source queue record is now
-`official_job_sample_verified`; the browser worker continues on its 180-minute
-cycle and the 30-hour capture freshness gate remains active.
+The first two server browser runs completed successfully: each saw 350 list
+rows across four pages, opened 343 candidate detail pages, and parsed 343/343
+detail pages. Each run admitted 43 rows through the student publication gate,
+kept 256 rows as pending evidence, and rejected 44 rows as out of scope. The
+second run was synchronized through the ordinary source pipeline and created
+no duplicates. A separate CDP timeout during a restart was retained as a
+failure diagnostic and was not counted as a successful scan. The source queue
+record remains `official_job_sample_verified`; the browser worker continues on
+its 180-minute cycle and the 30-hour capture freshness gate remains active.
 
 ## Verification
 
