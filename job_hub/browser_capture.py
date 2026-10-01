@@ -10,6 +10,7 @@ rejected instead of being presented as a successful empty scan.
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -174,20 +175,30 @@ def _robots_permit(url: str, *, user_agent: str) -> None:
     parsed = urlparse(url)
     root = f"{parsed.scheme}://{parsed.netloc}"
     robots_url = urljoin(root, "/robots.txt")
+    # The browser worker is deployed on the same host as the direct HTTP
+    # worker.  A module-level ``requests.get`` would silently honor proxy
+    # environment variables even when ``HTTP_TRANSPORT_MODE=direct`` is set,
+    # causing proxy TLS errors to be reported as robots/access restrictions.
+    # Use an explicit session so the transport choice applies to this gate too.
+    session = requests.Session()
+    session.trust_env = str(os.getenv("HTTP_TRANSPORT_MODE", "environment")).strip().lower() != "direct"
     try:
-        response = requests.get(robots_url, headers={"User-Agent": user_agent}, timeout=15)
+        response = session.get(robots_url, headers={"User-Agent": user_agent}, timeout=15)
     except requests.RequestException as error:
         raise BrowserCaptureError(f"robots.txt cannot be verified: {error}") from error
-    if response.status_code == 404:
-        return
-    if not response.ok:
-        raise BrowserCaptureError(f"robots.txt returned HTTP {response.status_code}")
-    from urllib.robotparser import RobotFileParser
+    try:
+        if response.status_code == 404:
+            return
+        if not response.ok:
+            raise BrowserCaptureError(f"robots.txt returned HTTP {response.status_code}")
+        from urllib.robotparser import RobotFileParser
 
-    parser = RobotFileParser()
-    parser.parse(response.text.splitlines())
-    if not parser.can_fetch(user_agent, url):
-        raise BrowserCaptureError("robots.txt does not permit browser capture")
+        parser = RobotFileParser()
+        parser.parse(response.text.splitlines())
+        if not parser.can_fetch(user_agent, url):
+            raise BrowserCaptureError("robots.txt does not permit browser capture")
+    finally:
+        response.close()
 
 
 def _field_text(row: Any, selector: str, field: str) -> str:

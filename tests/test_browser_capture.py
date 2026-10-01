@@ -9,6 +9,7 @@ import pytest
 
 from job_hub.browser_capture import (
     BrowserCaptureError,
+    _robots_permit,
     extract_rendered_rows,
     load_browser_capture,
 )
@@ -51,6 +52,27 @@ def _copy_capture(tmp_path: Path) -> Path:
     target.parent.mkdir(parents=True)
     target.write_text(FIXTURE.read_text(encoding="utf-8"), encoding="utf-8")
     return target
+
+
+def test_robots_probe_honors_direct_transport(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeResponse:
+        status_code = 404
+        ok = False
+        text = ""
+
+        def close(self) -> None:
+            pass
+
+    class FakeSession:
+        trust_env = True
+
+        def get(self, *_args: object, **_kwargs: object) -> FakeResponse:
+            assert self.trust_env is False
+            return FakeResponse()
+
+    monkeypatch.setenv("HTTP_TRANSPORT_MODE", "direct")
+    monkeypatch.setattr("job_hub.browser_capture.requests.Session", FakeSession)
+    _robots_permit("https://official.example.edu.cn/jobs", user_agent="test-agent")
 
 
 def test_browser_capture_requires_complete_pagination_and_fresh_rows(tmp_path: Path) -> None:
