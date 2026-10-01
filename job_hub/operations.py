@@ -12,6 +12,14 @@ from job_hub.db import Database
 from job_hub.domain_probe import DomainProbeResult, probe_public_domain
 
 
+_BROWSER_SERVICE_BY_SOURCE_TYPE = {
+    "cnpc_browser_rows": "cnpc-browser",
+    "cnooc_browser_rows": "cnooc-browser",
+    "cmgb_browser_rows": "cmgb-browser",
+    "official_browser_rows": "pipechina-browser",
+}
+
+
 def worker_health(database: Database, max_age_seconds: int) -> dict[str, Any]:
     """Return the Worker liveness contract used by Docker and readiness checks."""
     maximum = max(1, int(max_age_seconds))
@@ -46,6 +54,72 @@ def worker_health(database: Database, max_age_seconds: int) -> dict[str, Any]:
         "max_age_seconds": maximum,
         "heartbeat": heartbeat,
     }
+
+
+def browser_worker_health(
+    database: Database,
+    max_age_seconds: int = 14_400,
+) -> dict[str, Any]:
+    """Check enabled browser capture workers separately from the main worker.
+
+    Browser captures run in isolated containers and may be blocked or stuck
+    while the ordinary source worker remains healthy.  A missing or stale
+    browser heartbeat must therefore fail the internal release gate instead
+    of silently presenting an old dynamic snapshot as continuously refreshed.
+    The four-hour default covers the configured three-hour capture interval
+    plus startup and scan overhead.
+    """
+
+    required: dict[str, str] = {}
+    for source in database.list_sources():
+        if not source.get("enabled"):
+            continue
+        service_name = _BROWSER_SERVICE_BY_SOURCE_TYPE.get(
+            str(source.get("source_type") or "")
+        )
+        if service_name:
+            required[service_name] = str(source.get("id") or service_name)
+    if not required:
+        return {"ok": True, "required": False, "workers": {}}
+
+    maximum = max(1, int(max_age_seconds))
+    healthy_statuses = {"starting", "running", "capturing"}
+    workers: dict[str, dict[str, Any]] = {}
+    overall_ok = True
+    for service_name, source_id in sorted(required.items()):
+        heartbeat = database.get_service_heartbeat(service_name)
+        item: dict[str, Any] = {
+            "source_id": source_id,
+            "ok": False,
+            "max_age_seconds": maximum,
+        }
+        if heartbeat is None:
+            item["message"] = "尚未收到浏览器 worker 心跳。"
+            overall_ok = False
+            workers[service_name] = item
+            continue
+        item["heartbeat"] = heartbeat
+        try:
+            updated_at = datetime.fromisoformat(
+                str(heartbeat["updated_at"]).replace("Z", "+00:00")
+            )
+            if updated_at.tzinfo is None:
+                updated_at = updated_at.replace(tzinfo=timezone.utc)
+            age_seconds = max(
+                0,
+                int((datetime.now(timezone.utc) - updated_at).total_seconds()),
+            )
+        except (KeyError, TypeError, ValueError):
+            item["message"] = "浏览器 worker 心跳时间格式无效。"
+            overall_ok = False
+            workers[service_name] = item
+            continue
+        item["age_seconds"] = age_seconds
+        item["ok"] = age_seconds <= maximum and heartbeat.get("status") in healthy_statuses
+        if not item["ok"]:
+            overall_ok = False
+        workers[service_name] = item
+    return {"ok": overall_ok, "required": True, "workers": workers}
 
 
 def backup_health_payload(status: BackupStatus) -> dict[str, Any]:
@@ -85,6 +159,7 @@ def build_production_readiness(
     """
     audit = audit_database(database, settings)
     worker = worker_health(database, worker_max_age_seconds)
+    browser_workers = browser_worker_health(database)
     backup = DatabaseBackupManager(settings).latest_status(
         max_age_seconds=backup_max_age_seconds
     )
@@ -94,13 +169,19 @@ def build_production_readiness(
             domain_hostname,
             expected_ip=expected_ip,
         ).as_dict()
-    internal_ready = bool(audit.get("ok")) and bool(worker.get("ok")) and backup.ok
+    internal_ready = (
+        bool(audit.get("ok"))
+        and bool(worker.get("ok"))
+        and bool(browser_workers.get("ok"))
+        and backup.ok
+    )
     public_ready = internal_ready and bool(domain and domain.get("ready"))
     return {
         "internal_ready": internal_ready,
         "public_ready": public_ready,
         "audit": audit,
         "worker": worker,
+        "browser_workers": browser_workers,
         "backup": backup.as_dict(),
         "domain": domain,
         "publication_policy": (

@@ -12,7 +12,7 @@ from job_hub.app import create_app
 import job_hub.cli as cli
 from job_hub.db import Database
 from job_hub.domain_probe import DomainProbeResult
-from job_hub.operations import build_production_readiness, worker_health
+from job_hub.operations import browser_worker_health, build_production_readiness, worker_health
 from job_hub.worker import DailyWorker
 
 from conftest import make_settings, source
@@ -152,6 +152,48 @@ def test_production_readiness_requires_audit_worker_and_verified_backup(tmp_path
     assert result["internal_ready"] is True
     assert result["public_ready"] is True
     assert result["backup"]["ok"] is True
+
+
+def test_browser_worker_health_fails_when_enabled_capture_has_no_heartbeat(tmp_path) -> None:
+    settings = _settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    browser_source = source()
+    browser_source.update(
+        {
+            "id": "cnooc-career-browser",
+            "source_type": "cnooc_browser_rows",
+            "name": "测试浏览器来源",
+        }
+    )
+    database.upsert_source(browser_source)
+
+    result = browser_worker_health(database)
+
+    assert result["required"] is True
+    assert result["ok"] is False
+    assert result["workers"]["cnooc-browser"]["source_id"] == "cnooc-career-browser"
+
+
+def test_browser_worker_health_accepts_recent_capture_heartbeat(tmp_path) -> None:
+    settings = _settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    browser_source = source()
+    browser_source.update(
+        {
+            "id": "cnooc-career-browser",
+            "source_type": "cnooc_browser_rows",
+            "name": "测试浏览器来源",
+        }
+    )
+    database.upsert_source(browser_source)
+    database.record_service_heartbeat("cnooc-browser", "running", "captured")
+
+    result = browser_worker_health(database)
+
+    assert result["ok"] is True
+    assert result["workers"]["cnooc-browser"]["age_seconds"] < 10
 
 
 def test_health_endpoint_reports_backup_state_without_private_path(tmp_path) -> None:
