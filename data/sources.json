@@ -431,7 +431,7 @@
     "source_type": "zhaopin_campus",
     "category": "油气上游业主与研究机构",
     "source_tier": "A",
-    "enabled": true,
+    "enabled": false,
     "config": {
       "employer_hint": "中国海洋石油集团有限公司",
       "allowed_hosts": ["cnooc.zhaopin.com", "xiaoyuan.zhaopin.com"],
@@ -459,12 +459,14 @@
       "allow_large_item_limit": true,
       "request_interval_seconds": 1.2,
       "allow_shared_source_url": false,
-      "automation_status": "validated_public_api_2027_pagination_350_20261001_direct",
+      "automation_status": "retired_legacy_api_replaced_by_browser_details_20261002",
+      "replacement_source_id": "cnooc-career-browser",
+      "retired_reason": "2026-10-02 服务器直连复核：公开 API 可返回列表行，但当前仅为面试信息采集/缺少可发布详情字段；详情浏览器源已完整扫描并承担学生端发布。停用旧链路避免每日 parse_failed 阻塞生产门禁。",
       "last_server_scan": "2026-10-01",
       "scan_policy": "daily_public_api_monitor",
       "last_server_observation": "2026-10-01 public read-only API: campaign 105147, code=200, totalNum=350, totalPage=4; page-level geoscience filtering remains subject to the student publication gate",
       "minimum_relevance": 20,
-      "note": "2027 届官方校招页公开调用只读 Zhaopin 接口；页面脚本动态暴露组织号 105147，适配器优先使用页面编号并完整扫描分页。岗位详情位于 xiaoyuan.zhaopin.com；只有岗位级专业、学历、地点、截止日期和官方详情证据完整且通过学生门禁后才发布。接口业务错误、分页不完整或详情缺失均进入来源故障/复核，不解释为无岗位。"
+      "note": "历史只读 API 适配器已保留用于审计和回归测试，不再参与生产同步；当前学生端唯一发布链路为 cnooc-career-browser 的完整 Chromium 详情捕获。"
     }
   },
   {

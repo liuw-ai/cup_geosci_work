@@ -450,9 +450,9 @@
           "channel_type": "campus_recruitment",
           "official_url": "https://cnooc.zhaopin.com/",
           "backup_urls": ["https://www.cnooc.com.cn/"],
-          "source_id": "cnooc-career",
+          "source_id": "cnooc-career-browser",
           "verification_status": "official_confirmed",
-          "evidence_note": "中国海油招聘平台；当前来源记录为停用，需在招聘周期重新验证。"
+          "evidence_note": "中国海油招聘平台；学生端使用已通过详情字段门禁的浏览器捕获源，旧 API 源仅保留审计。"
         }
       ]
     },
@@ -556,7 +556,7 @@
           "channel_type": "campus_recruitment",
           "official_url": "https://cnooc.zhaopin.com/",
           "backup_urls": ["https://www.cosl.com.cn/"],
-          "source_id": "cnooc-career",
+          "source_id": "cnooc-career-browser",
           "verification_status": "official_confirmed",
           "evidence_note": "集团招聘入口；服务区域和岗位方向需从职位原文提取。"
         }
@@ -586,7 +586,7 @@
           "channel_type": "campus_recruitment",
           "official_url": "https://cnooc.zhaopin.com/",
           "backup_urls": ["https://www.cnoocet.com/"],
-          "source_id": "cnooc-career",
+          "source_id": "cnooc-career-browser",
           "verification_status": "official_confirmed",
           "evidence_note": "集团招聘入口；具体岗位需核验公告主体。"
         }

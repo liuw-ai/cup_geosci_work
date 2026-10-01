@@ -11,20 +11,19 @@ from job_hub.sources import OfficialSourceCollector, SourceCollectionError
 from conftest import make_settings
 
 
-def test_production_cnooc_source_is_a_daily_monitor_not_a_static_snapshot() -> None:
+def test_legacy_cnooc_api_source_is_retired_in_favor_of_detail_capture() -> None:
     project_root = Path(__file__).resolve().parents[1]
     sources = json.loads(
         (project_root / "data" / "sources.json").read_text(encoding="utf-8")
     )
     source = next(item for item in sources if item["id"] == "cnooc-career")
 
-    assert source["enabled"] is True
+    assert source["enabled"] is False
     assert source["source_type"] == "zhaopin_campus"
-    assert source["config"]["scan_policy"] == "daily_public_api_monitor"
-    assert source["config"]["automation_status"].endswith("20261001_direct")
-    assert source["config"]["last_server_scan"] == "2026-10-01"
+    assert source["config"]["replacement_source_id"] == "cnooc-career-browser"
+    assert source["config"]["automation_status"].startswith("retired_legacy_api")
     assert source["config"]["company_id"] == "105147"
-    assert source["config"]["prefer_page_campaign_id"] is True
+    assert "API" in source["config"]["retired_reason"]
     assert "xiaoyuan.zhaopin.com" in source["config"]["allowed_hosts"]
 
 

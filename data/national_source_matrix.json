@@ -87,6 +87,30 @@
       "note": "入口返回 200，公开脚本确认只读岗位接口；Phase 7 适配器夹具已通过，但 2026-09-22 接口返回业务 code=500，不能解释为无岗位，来源继续停用。"
     },
     {
+      "source_id": "cnooc-career-browser",
+      "official_url": "https://cnooc.zhaopin.com/",
+      "backup_urls": [
+        "https://www.cnooc.com.cn/"
+      ],
+      "acquisition_mode": "public_dynamic_portal",
+      "runtime_status": "verified_public",
+      "scan_conclusion": "scan_success_with_open_matches",
+      "observed_on": "2026-10-01",
+      "observed_http_status": 200,
+      "observed_error_class": "not_applicable",
+      "sample_announcement_url": "https://cnooc.zhaopin.com/",
+      "field_validation": {
+        "title": true,
+        "employer": true,
+        "degree": true,
+        "major": true,
+        "location": true,
+        "deadline": true,
+        "application_url": true
+      },
+      "note": "服务器 Chromium 完成中国海油招聘平台分页与详情捕获；2026-10-01 捕获 187 条详情，38 条通过地学专业、学历、地点、截止日期和官方详情证据门禁。该详情源是学生端唯一生产发布链路，旧 API 源仅保留审计。"
+    },
+    {
       "source_id": "pipechina-career",
       "official_url": "https://zhaopin.pipechina.com.cn/",
       "backup_urls": [
