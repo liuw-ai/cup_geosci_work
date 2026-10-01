@@ -2560,6 +2560,32 @@ class Database:
             raise RuntimeError("Job evidence could not be persisted")
         return Database._evidence_row(row)
 
+    @staticmethod
+    def _public_freshness_filter(as_of_date: str) -> tuple[str, list[str]]:
+        """Return the read-side freshness predicate for student-visible rows.
+
+        Dynamic feeds often omit a fixed deadline and instead configure a
+        bounded open window from the official publication date. The worker
+        normally materializes that lifecycle state, but public reads must also
+        enforce it when a worker is restarting or temporarily unavailable.
+        ``source_meta`` is a fixed internal SQL alias, never user input.
+        """
+        date.fromisoformat(as_of_date)
+        window = (
+            "json_extract(source_meta.config_json, "
+            "'$.undated_open_window_days')"
+        )
+        published_expiry = (
+            "date(jobs.published_date, '+' || CAST(" + window + " AS INTEGER) || ' days')"
+        )
+        predicate = (
+            "(jobs.deadline_date >= ? OR (jobs.deadline_date IS NULL AND ("
+            f"{window} IS NULL OR {window} = '' OR jobs.published_date IS NULL "
+            f"OR jobs.published_date = '' OR {published_expiry} IS NULL "
+            f"OR {published_expiry} >= ?)))"
+        )
+        return predicate, [as_of_date, as_of_date]
+
     def find_job(
         self,
         job_id: int,
@@ -2568,17 +2594,24 @@ class Database:
         as_of_date: str | None = None,
     ) -> dict[str, Any] | None:
         with self.connect() as connection:
-            where = "id = ?"
+            where = "jobs.id = ?"
             values: list[Any] = [job_id]
+            source_join = ""
             if student_visible:
-                where += " AND status = 'open' AND publication_status IN (?, ?)"
+                where += " AND jobs.status = 'open' AND jobs.publication_status IN (?, ?)"
                 values.extend(("student_eligible", "unrestricted_eligible"))
                 if as_of_date is not None:
-                    date.fromisoformat(as_of_date)
-                    where += " AND (deadline_date IS NULL OR deadline_date >= ?)"
-                    values.append(as_of_date)
+                    freshness_sql, freshness_values = self._public_freshness_filter(
+                        as_of_date
+                    )
+                    source_join = (
+                        " LEFT JOIN sources AS source_meta "
+                        "ON source_meta.id = jobs.source_id"
+                    )
+                    where += f" AND {freshness_sql}"
+                    values.extend(freshness_values)
             row = connection.execute(
-                f"SELECT * FROM jobs WHERE {where}", values
+                f"SELECT jobs.* FROM jobs{source_join} WHERE {where}", values
             ).fetchone()
         return self._job_row(row) if row else None
 
@@ -2872,50 +2905,58 @@ class Database:
     ) -> tuple[list[dict[str, Any]], int]:
         clauses: list[str] = []
         values: list[Any] = []
+        source_join = ""
         if only_open:
-            clauses.append("status = 'open'")
+            clauses.append("jobs.status = 'open'")
         if student_visible:
-            clauses.append("publication_status IN (?, ?)")
+            clauses.append("jobs.publication_status IN (?, ?)")
             values.extend(("student_eligible", "unrestricted_eligible"))
             if as_of_date is not None:
-                date.fromisoformat(as_of_date)
-                clauses.append("(deadline_date IS NULL OR deadline_date >= ?)")
-                values.append(as_of_date)
+                freshness_sql, freshness_values = self._public_freshness_filter(
+                    as_of_date
+                )
+                source_join = (
+                    " LEFT JOIN sources AS source_meta "
+                    "ON source_meta.id = jobs.source_id"
+                )
+                clauses.append(freshness_sql)
+                values.extend(freshness_values)
         if category:
-            clauses.append("category = ?")
+            clauses.append("jobs.category = ?")
             values.append(category)
         if degree:
-            clauses.append("degree_levels_json LIKE ?")
+            clauses.append("jobs.degree_levels_json LIKE ?")
             values.append(f'%"{degree}"%')
         if province:
-            clauses.append("province = ?")
+            clauses.append("jobs.province = ?")
             values.append(province)
         if relevance_band:
-            clauses.append("relevance_band = ?")
+            clauses.append("jobs.relevance_band = ?")
             values.append(relevance_band)
         if q:
             clauses.append(
-                "(title LIKE ? OR employer LIKE ? OR canonical_employer_name LIKE ? "
-                "OR location LIKE ? OR description LIKE ?)"
+                "(jobs.title LIKE ? OR jobs.employer LIKE ? "
+                "OR jobs.canonical_employer_name LIKE ? OR jobs.location LIKE ? "
+                "OR jobs.description LIKE ?)"
             )
             search = f"%{q.strip()}%"
             values.extend([search, search, search, search, search])
         where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
         with self.connect() as connection:
             count = connection.execute(
-                f"SELECT COUNT(*) FROM jobs{where}", values
+                f"SELECT COUNT(*) FROM jobs{source_join}{where}", values
             ).fetchone()[0]
             query = f"""
-                SELECT * FROM jobs{where}
+                SELECT jobs.* FROM jobs{source_join}{where}
                 ORDER BY
-                    CASE relevance_band
+                    CASE jobs.relevance_band
                         WHEN '强相关' THEN 1
                         WHEN '相关机会' THEN 2
                         ELSE 3
                     END,
-                    CASE WHEN deadline_date IS NULL THEN 1 ELSE 0 END,
-                    deadline_date ASC,
-                    updated_at DESC
+                    CASE WHEN jobs.deadline_date IS NULL THEN 1 ELSE 0 END,
+                    jobs.deadline_date ASC,
+                    jobs.updated_at DESC
             """
             if page_size is None:
                 rows = connection.execute(query, values).fetchall()
@@ -2930,20 +2971,26 @@ class Database:
     def list_categories(self, *, as_of_date: str | None = None) -> list[dict[str, Any]]:
         values: list[Any] = []
         deadline_clause = ""
+        source_join = ""
         if as_of_date is not None:
-            date.fromisoformat(as_of_date)
-            deadline_clause = " AND (deadline_date IS NULL OR deadline_date >= ?)"
-            values.append(as_of_date)
+            deadline_clause, freshness_values = self._public_freshness_filter(
+                as_of_date
+            )
+            source_join = (
+                " LEFT JOIN sources AS source_meta "
+                "ON source_meta.id = jobs.source_id"
+            )
+            values.extend(freshness_values)
         with self.connect() as connection:
             rows = connection.execute(
                 f"""
-                SELECT category, COUNT(*) AS count
-                FROM jobs
-                WHERE status = 'open'
-                  AND publication_status IN ('student_eligible', 'unrestricted_eligible')
-                  {deadline_clause}
-                GROUP BY category
-                ORDER BY count DESC, category
+                SELECT jobs.category, COUNT(*) AS count
+                FROM jobs{source_join}
+                WHERE jobs.status = 'open'
+                  AND jobs.publication_status IN ('student_eligible', 'unrestricted_eligible')
+                  {(' AND ' + deadline_clause) if deadline_clause else ''}
+                GROUP BY jobs.category
+                ORDER BY count DESC, jobs.category
                 """,
                 values,
             ).fetchall()
@@ -2968,20 +3015,22 @@ class Database:
         end_utc = end.astimezone(timezone.utc).replace(microsecond=0)
         start_value = start_utc.isoformat().replace("+00:00", "Z")
         end_value = end_utc.isoformat().replace("+00:00", "Z")
+        freshness_sql, freshness_values = self._public_freshness_filter(report_date)
         with self.connect() as connection:
             rows = connection.execute(
                 """
                 SELECT DISTINCT jobs.*, job_events.event_type, job_events.occurred_at
                 FROM job_events
                 JOIN jobs ON jobs.id = job_events.job_id
+                LEFT JOIN sources AS source_meta ON source_meta.id = jobs.source_id
                 WHERE job_events.occurred_at >= ?
                   AND job_events.occurred_at < ?
                   AND jobs.status = 'open'
                   AND jobs.publication_status IN ('student_eligible', 'unrestricted_eligible')
-                  AND (jobs.deadline_date IS NULL OR jobs.deadline_date >= ?)
+                  AND """ + freshness_sql + """
                 ORDER BY jobs.relevance_score DESC, jobs.deadline_date ASC
                 """,
-                (start_value, end_value, report_date),
+                (start_value, end_value, *freshness_values),
             ).fetchall()
         created: list[dict[str, Any]] = []
         updated: list[dict[str, Any]] = []
@@ -3012,16 +3061,24 @@ class Database:
     def count_open_jobs(self, *, as_of_date: str | None = None) -> int:
         values: list[Any] = []
         deadline_clause = ""
+        source_join = ""
         if as_of_date is not None:
-            date.fromisoformat(as_of_date)
-            deadline_clause = " AND (deadline_date IS NULL OR deadline_date >= ?)"
-            values.append(as_of_date)
+            deadline_clause, freshness_values = self._public_freshness_filter(
+                as_of_date
+            )
+            source_join = (
+                " LEFT JOIN sources AS source_meta "
+                "ON source_meta.id = jobs.source_id"
+            )
+            values.extend(freshness_values)
         with self.connect() as connection:
             return int(
                 connection.execute(
-                    "SELECT COUNT(*) FROM jobs WHERE status = 'open' "
-                    "AND publication_status IN ('student_eligible', 'unrestricted_eligible')"
-                    + deadline_clause,
+                    "SELECT COUNT(*) FROM jobs"
+                    + source_join
+                    + " WHERE jobs.status = 'open' "
+                    "AND jobs.publication_status IN ('student_eligible', 'unrestricted_eligible')"
+                    + (" AND " + deadline_clause if deadline_clause else ""),
                     values,
                 ).fetchone()[0]
             )

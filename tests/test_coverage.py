@@ -236,6 +236,48 @@ def test_public_job_reads_apply_deadline_gate_before_worker_expiry(tmp_path) -> 
     assert database.count_open_jobs(as_of_date="2026-10-06") == 0
 
 
+def test_public_job_reads_apply_undated_source_window_before_worker_expiry(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    configured_source = source()
+    configured_source["config"] = {
+        "minimum_relevance": 0,
+        "undated_open_window_days": 10,
+    }
+    database.upsert_source(configured_source)
+    pipeline = JobPipeline(settings, database)
+    posting = RawPosting(
+        title="地质调查技术岗",
+        employer="测试地质调查单位",
+        source_url="https://careers.example.edu.cn/jobs/undated-read-gate",
+        application_url=None,
+        text="地质学硕士，公告未注明截止日期。",
+        summary="官方岗位公告。",
+        published_date="2026-09-01",
+        deadline_date=None,
+        location="北京市",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质调查技术岗",
+            "专业范围": "地质学",
+            "学历要求": "硕士",
+        },
+    )
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+    )
+    # Simulate a worker outage after a row was published: the lifecycle column
+    # is still open even though the source-specific undated window has passed.
+    with database.transaction() as connection:
+        connection.execute("UPDATE jobs SET status = 'open' WHERE id = ?", (job_id,))
+
+    assert database.list_jobs(page_size=None, as_of_date="2026-09-05")[1] == 1
+    assert database.list_jobs(page_size=None, as_of_date="2026-10-02")[1] == 0
+    assert database.find_public_job(job_id, as_of_date="2026-10-02") is None
+    assert database.count_open_jobs(as_of_date="2026-10-02") == 0
+
+
 def test_snapshot_trend_skips_a_replaceable_current_day_snapshot(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
