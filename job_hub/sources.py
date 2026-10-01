@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from html import unescape
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs, quote, urlencode, urljoin, urlparse
+from urllib.parse import parse_qs, parse_qsl, quote, urlencode, urljoin, urlparse, urlunparse
 from urllib.robotparser import RobotFileParser
 
 import requests
@@ -806,6 +806,12 @@ class OfficialSourceCollector:
                     )
                 field_evidence.setdefault("官方岗位编号", str(detail["job_id"]))
                 field_evidence.setdefault("官方详情链接", source_url)
+            if source["id"] == "cnpc-career" and "recruitInfoshow.html" in source_url:
+                source_url = self._cnpc_detail_deep_link(
+                    source_url,
+                    str(item.get("title") or "").strip(),
+                )
+                field_evidence.setdefault("官方详情链接", source_url)
             search_url = str(config.get("official_search_url") or "").strip()
             if search_url:
                 field_evidence.setdefault("官方地质筛选入口", search_url)
@@ -883,6 +889,23 @@ class OfficialSourceCollector:
                 "department_id": department_id,
             }
         return result
+
+    @staticmethod
+    def _cnpc_detail_deep_link(url: str, title: str) -> str:
+        """Carry CNPC's title hint into the official detail route.
+
+        The public ``recruitInfoshow.html`` page can render an empty shell when
+        its ``postName`` query parameter is absent, even when the opaque ``id``
+        identifies a real vacancy. The title is already present in the
+        administrator-verified snapshot, so adding it to the official route
+        fixes navigation without inferring or changing any job field.
+        """
+
+        parsed = urlparse(url)
+        query = parse_qsl(parsed.query, keep_blank_values=True)
+        if not any(key == "postName" and value.strip() for key, value in query):
+            query.append(("postName", str(title or "").strip()))
+        return urlunparse(parsed._replace(query=urlencode(query, doseq=True)))
 
     @staticmethod
     def _build_official_detail_url(

@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 import pytest
 
@@ -66,6 +67,26 @@ def test_pipechina_snapshot_builds_job_detail_links_and_search_fallback(tmp_path
     assert "_HB4_eyJpZCI6NTQ2NDcs" in geology.source_url
     assert "search_key=%E5%9C%B0%E8%B4%A8" in geology.field_evidence["官方地质筛选入口"]
     assert geology.field_evidence["官方详情链接"] == geology.source_url
+
+
+def test_cnpc_snapshot_builds_renderable_post_name_deep_links(tmp_path) -> None:
+    registry = json.loads(
+        (PROJECT_ROOT / "data" / "sources.json").read_text(encoding="utf-8")
+    )
+    source = next(item for item in registry if item["id"] == "cnpc-career")
+    source = {
+        **source,
+        "config": {**source["config"], "max_age_hours": 100_000},
+    }
+
+    postings = OfficialSourceCollector(make_settings(tmp_path)).collect(source)
+    posting = postings[0]
+    parsed = urlparse(posting.source_url)
+
+    assert parsed.path.endswith("/web/recruitInfoshow.html")
+    assert parse_qs(parsed.query)["id"] == ["8b8b6c9ea05aee4d01a08013d5ef0061"]
+    assert parse_qs(parsed.query)["postName"] == [posting.title]
+    assert posting.field_evidence["官方详情链接"] == posting.source_url
 
 
 def test_official_snapshot_rows_preserves_non_matching_rows_for_gate(tmp_path) -> None:
