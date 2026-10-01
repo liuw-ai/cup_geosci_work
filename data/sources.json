@@ -352,7 +352,7 @@
     "source_type": "sinopec_spa_rows",
     "category": "油气上游业主与研究机构",
     "source_tier": "A",
-    "enabled": true,
+    "enabled": false,
     "config": {
       "employer_hint": "中国石油化工集团有限公司",
       "allowed_hosts": ["job.sinopec.com"],
@@ -372,6 +372,8 @@
       "max_age_hours": 30,
       "require_complete_manifest": true,
       "reconcile_missing_external_ids": true,
+      "runtime_mode": "browser_worker_only",
+      "disabled_reason": "普通同步不再读取浏览器捕获路径；由 sinopec-browser 独立 worker 负责动态 SPA 捕获。服务器 403/robots 失败保留 access_limited 心跳和失败快照，不能解释为无岗位。",
       "note": "2026-09-29 服务器隔离 Chromium 通过官方只读 SPA 接口捕获确认 132 个单位，35 个候选单位、363 条岗位行；132 个单位清单和 35 个候选单位详情均完成分页扫描，失败行为 0。学生端只展示岗位级专业/学历明确匹配，捕获文件必须在 max_age_hours 内重新核验。"
     }
   },
@@ -1043,7 +1045,7 @@
     "source_type": "cmgb_browser_rows",
     "category": "自然资源、地调与地勘",
     "source_tier": "A",
-    "enabled": false,
+    "enabled": true,
     "config": {
       "runtime_enabled_control": "cmgb-iguopin-browser-production",
       "reconcile_missing_external_ids": true,
