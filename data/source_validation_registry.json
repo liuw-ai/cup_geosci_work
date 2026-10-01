@@ -394,13 +394,14 @@
         "http://dkj.sc.gov.cn/",
         "https://rst.sc.gov.cn/"
       ],
-      "last_checked_on": "2026-09-30",
+      "last_checked_on": "2026-10-01",
+      "official_detail_url": "https://www.scpta.com.cn/front/News/info/e8bc770cc1184debaede1117b6e6a294",
       "access_assessment": {
         "observed_access": "server_direct_public_page_accessible",
         "robots_assessment": "server_direct_allowed",
-        "note": "服务器 direct 模式可访问四川省地质局官网主页与通知公告栏目；当前列表内容可读取，未发现符合招聘标题白名单的原始招聘公告。"
+        "note": "服务器 direct 模式可访问四川省地质局官网主页与通知公告栏目。官方检索结果已核实可转到四川省人事考试网详情页，详情页含岗位表附件；该公告报名已于2026-03-24截止，仅作为跨域链路回归证据，不能发布为当前岗位。"
       },
-      "finding": "当前栏目扫描成功但没有可作为岗位证据的招聘公告。该来源已启用仅附件发现队列；未来发现招聘公告后先登记官方附件并逐行复核，不能把本次无样本解释为四川没有岗位。"
+      "finding": "当前栏目扫描成功但没有仍在报名的学生岗位。来源已启用仅附件发现队列，并允许同一官方招聘流程的 www.scpta.com.cn 详情与附件；未来发现新公告后先登记官方附件并逐行复核，不能把本次过期样本解释为四川没有岗位。"
     }
   ]
 }

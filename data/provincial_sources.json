@@ -844,21 +844,28 @@
       "fallback_entry_urls": ["http://dkj.sc.gov.cn/", "https://rst.sc.gov.cn/"],
       "automation_status": "attachment_discovery_only",
       "healthcheck_url": "http://dkj.sc.gov.cn/scdkj/tggg/15.shtml",
-      "listing_urls": ["http://dkj.sc.gov.cn/scdkj/tggg/15.shtml"],
+      "listing_urls": [
+        "http://dkj.sc.gov.cn/scdkj/tggg/15.shtml",
+        "http://dkj.sc.gov.cn/guestweb4/s?uc=1&siteCode=5100000099&column=%E5%85%A8%E9%83%A8&searchWord=%E6%8B%9B%E8%81%98"
+      ],
+      "direct_notice_urls": [
+        "https://www.scpta.com.cn/front/News/info/e8bc770cc1184debaede1117b6e6a294"
+      ],
+      "direct_title_hint": "四川省地质矿产勘查开发局关于下属事业单位2026年上半年公开考试招聘工作人员公告",
       "healthcheck_enabled": true,
       "target_active_sources": 3,
-      "allowed_hosts": ["dkj.sc.gov.cn"],
-      "attachment_allowed_hosts": ["dkj.sc.gov.cn"],
+      "allowed_hosts": ["dkj.sc.gov.cn", "www.scpta.com.cn"],
+      "attachment_allowed_hosts": ["dkj.sc.gov.cn", "www.scpta.com.cn"],
       "attachment_discovery_enabled": true,
       "attachment_discovery_max_notices": 8,
-      "listing_selector": "a[href*='/scdkj/tggg/20']",
-      "detail_path_patterns": ["/scdkj/tggg/20\\d{2}/"],
+      "listing_selector": "a[href*='/scdkj/tggg/20'], a[href*='/front/News/info/']",
+      "detail_path_patterns": ["/scdkj/tggg/20\\d{2}/", "/front/News/info/"],
       "require_recruitment_word": true,
       "include_patterns": ["(?:公开)?招聘(?:人员)?(?:公告|启事|简章)|人才引进|博士后|科研助理|实习"],
       "exclude_patterns": ["拟聘|拟录用|录用公示|进入面试范围|面试名单|递补|资格审查|资格复审|笔试|考试通知|取消招聘|核减招聘|体检|考察|采购|招标|中标|职称"],
       "max_items": 16,
       "request_interval_seconds": 1.2,
-      "note": "2026-09-30 通过 direct 模式核验四川省地质局官方主页、robots 入口与通知公告栏目。当前列表未发现仍开放的学生招聘公告；本来源只发现符合标题白名单的官方公告及附件，绝不把公告本身生成学生端岗位。"
+      "note": "2026-10-01 通过服务器 direct 模式核验四川省地质局官方主页、通知公告栏目及四川省人事考试网的官方详情页。四川省地质局公告会把岗位表转链到 www.scpta.com.cn；两个域名均属于同一公开招聘流程，必须纳入官方白名单才能解析附件。已登记的 2026 年上半年公告报名已于 2026-03-24 截止，仅用于回归和生命周期清退，不得作为当前岗位发布。未来公告仍须逐岗位核验专业、学历、地点、人数和截止日期。"
     }
   },
   {

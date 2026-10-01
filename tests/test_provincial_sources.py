@@ -76,3 +76,22 @@ def test_multiple_registries_reject_duplicate_source_ids(tmp_path) -> None:
         assert "Duplicate source id" in str(error)
     else:  # pragma: no cover - assertion form makes the failure unambiguous
         raise AssertionError("duplicate source id was accepted")
+
+
+def test_sichuan_recruitment_chain_allows_official_exam_host() -> None:
+    path = Path(__file__).resolve().parent.parent / "data" / "provincial_sources.json"
+    source = next(
+        item
+        for item in json.loads(path.read_text(encoding="utf-8"))
+        if item["id"] == "sichuan-geology-bureau"
+    )
+    config = source["config"]
+
+    assert "dkj.sc.gov.cn" in config["allowed_hosts"]
+    assert "www.scpta.com.cn" in config["allowed_hosts"]
+    assert "www.scpta.com.cn" in config["attachment_allowed_hosts"]
+    assert any(
+        "www.scpta.com.cn/front/News/info/" in url
+        for url in config["direct_notice_urls"]
+    )
+    assert any("/front/News/info/" in pattern for pattern in config["detail_path_patterns"])
