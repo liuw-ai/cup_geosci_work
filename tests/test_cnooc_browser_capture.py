@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import pytest
 
 from job_hub.cnooc_browser_capture import (
+    _candidate_job,
     load_cnooc_browser_capture,
     persist_cnooc_browser_capture,
 )
@@ -95,3 +96,20 @@ def test_cnooc_capture_rejects_non_official_detail_url(tmp_path) -> None:
 
     with pytest.raises(BrowserCaptureError, match="allowlisted"):
         load_cnooc_browser_capture(path)
+
+
+def test_cnooc_candidate_filter_excludes_non_geoscience_function_with_broad_keyword() -> None:
+    row = {
+        "job": {
+            "title": "审计中心审计岗",
+            "detail": "专业要求：工商管理类、经济学类；热爱海洋石油事业。",
+            "jobCategories": ["非一线岗位"],
+            "url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972505615",
+        }
+    }
+
+    assert _candidate_job(
+        row,
+        ["地质|勘查|油气|海洋"],
+        ["财务|法务|行政|人力资源|审计|采购|市场|风控|合规|法律"],
+    ) is None

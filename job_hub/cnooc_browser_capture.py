@@ -153,7 +153,11 @@ def load_cnooc_browser_capture(
     }
 
 
-def _candidate_job(row: dict[str, Any], patterns: list[str]) -> tuple[str, str] | None:
+def _candidate_job(
+    row: dict[str, Any],
+    patterns: list[str],
+    exclude_patterns: list[str] | None = None,
+) -> tuple[str, str] | None:
     job = row.get("job") if isinstance(row.get("job"), dict) else row
     title = _text(job.get("title") or job.get("positionName"))
     url = _text(job.get("url") or job.get("positionURL") or job.get("positionUrl"))
@@ -161,6 +165,10 @@ def _candidate_job(row: dict[str, Any], patterns: list[str]) -> tuple[str, str] 
         return None
     searchable = " ".join(_text(str(job.get(key) or "")) for key in ("title", "detail", "jobDetail", "jobCategories"))
     if patterns and not any(re.search(pattern, searchable, re.IGNORECASE) for pattern in patterns):
+        return None
+    if exclude_patterns and any(
+        re.search(pattern, searchable, re.IGNORECASE) for pattern in exclude_patterns
+    ):
         return None
     return title, url
 
@@ -195,6 +203,9 @@ def run_cnooc_browser_capture(
     page_size = max(1, min(int(config.get("page_size", 100)), 100))
     max_pages = max(1, min(int(config.get("max_pages", 20)), 100))
     patterns = [str(item) for item in config.get("include_patterns", []) if str(item)]
+    exclude_patterns = [
+        str(item) for item in config.get("exclude_patterns", []) if str(item)
+    ]
     headers = {"Accept": "application/json", "Content-Type": "application/json", "Origin": "https://cnooc.zhaopin.com", "Referer": listing_url, "User-Agent": user_agent}
     candidates: list[dict[str, str]] = []
     pages = 0
@@ -220,7 +231,7 @@ def run_cnooc_browser_capture(
         for raw in rows:
             if not isinstance(raw, dict):
                 continue
-            candidate = _candidate_job(raw, patterns)
+            candidate = _candidate_job(raw, patterns, exclude_patterns)
             if not candidate:
                 continue
             title, url = candidate
