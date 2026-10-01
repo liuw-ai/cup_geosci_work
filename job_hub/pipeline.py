@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import asdict, dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Any, Callable
 from urllib.parse import parse_qs, urlparse
 from zoneinfo import ZoneInfo
@@ -38,6 +39,9 @@ from job_hub.sources import (
     load_source_registries,
 )
 from job_hub.run_ledger import classify_run_outcome
+
+
+LOGGER = logging.getLogger("job_hub.pipeline")
 
 
 @dataclass
@@ -945,6 +949,64 @@ class JobPipeline:
                 run_id=result.run_id,
             )
         return result
+
+    def expire_stale_source_jobs(
+        self,
+        *,
+        source_ids: set[str] | None = None,
+        now: datetime | None = None,
+    ) -> dict[str, int]:
+        """Withdraw public rows whose configured capture freshness expired.
+
+        A source-specific ``max_age_hours`` is an explicit contract for a
+        snapshot/browser capture. Live sources without that setting are not
+        affected. Missing health history is left untouched because it cannot
+        prove that an existing source has become stale.
+        """
+
+        current = now or datetime.now(timezone.utc)
+        if current.tzinfo is None:
+            current = current.replace(tzinfo=timezone.utc)
+        current = current.astimezone(timezone.utc)
+        results: dict[str, int] = {}
+        for source in self.database.list_sources():
+            source_id = str(source.get("id") or "")
+            if source_ids is not None and source_id not in source_ids:
+                continue
+            config = source.get("config") if isinstance(source.get("config"), dict) else {}
+            raw_limit = config.get("max_age_hours")
+            if raw_limit is None:
+                continue
+            try:
+                max_age_hours = float(raw_limit)
+            except (TypeError, ValueError):
+                LOGGER.warning("Ignoring invalid max_age_hours for source %s", source_id)
+                continue
+            if max_age_hours < 0:
+                continue
+            last_success = str(source.get("last_synced_at") or "").strip()
+            if not last_success:
+                continue
+            try:
+                captured_at = datetime.fromisoformat(last_success.replace("Z", "+00:00"))
+            except ValueError:
+                LOGGER.warning("Ignoring invalid source freshness timestamp for %s", source_id)
+                continue
+            if captured_at.tzinfo is None:
+                continue
+            age_hours = (current - captured_at.astimezone(timezone.utc)).total_seconds() / 3600
+            if age_hours <= max_age_hours:
+                continue
+            count = self.database.withdraw_stale_source_jobs(
+                source_id,
+                reason=(
+                    f"官方捕获证据已超过 {max_age_hours:g} 小时新鲜度窗口，"
+                    "来源恢复并完成完整成功扫描后可重新发布。"
+                ),
+            )
+            if count:
+                results[source_id] = count
+        return results
 
     def _government_reindex_context(self) -> dict[str, Any] | None:
         """Build the current government-table publication boundary.

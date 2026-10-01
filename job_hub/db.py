@@ -3040,6 +3040,61 @@ class Database:
             )
             return len(missing)
 
+    def withdraw_stale_source_jobs(
+        self,
+        source_id: str,
+        *,
+        reason: str,
+    ) -> int:
+        """Hide student-visible rows whose source freshness window expired.
+
+        Snapshot/browser adapters reject stale captures before persistence, but
+        a failed run must also retire the previous public rows. The rows and
+        their evidence remain in the database for audit and are re-opened by a
+        later successful sync using the same fingerprint.
+        """
+
+        now = utc_now()
+        with self.transaction() as connection:
+            rows = connection.execute(
+                """
+                SELECT id, title, external_id
+                FROM jobs
+                WHERE source_id = ?
+                  AND status = 'open'
+                  AND publication_status IN ('student_eligible', 'unrestricted_eligible')
+                """,
+                (source_id,),
+            ).fetchall()
+            if not rows:
+                return 0
+            connection.executemany(
+                "UPDATE jobs SET status = 'withdrawn', updated_at = ? WHERE id = ? AND status = 'open'",
+                [(now, int(row["id"])) for row in rows],
+            )
+            connection.executemany(
+                """
+                INSERT INTO job_events (job_id, event_type, occurred_at, payload_json)
+                VALUES (?, 'withdrawn', ?, ?)
+                """,
+                [
+                    (
+                        int(row["id"]),
+                        now,
+                        json.dumps(
+                            {
+                                "title": row["title"],
+                                "external_id": row["external_id"],
+                                "reason": reason,
+                            },
+                            ensure_ascii=False,
+                        ),
+                    )
+                    for row in rows
+                ],
+            )
+            return len(rows)
+
     def complete_source_transition(
         self,
         *,

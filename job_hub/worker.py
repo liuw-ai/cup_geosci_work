@@ -109,6 +109,7 @@ class DailyWorker:
         try:
             manifest_summary = self._register_government_artifacts()
             summary = self.pipeline.sync_all(progress_callback=self._sync_progress)
+            stale_source_withdrawals = self.pipeline.expire_stale_source_jobs()
             # Matching and taxonomy rules are versioned code, while persisted
             # publication fields are derived data.  Rebuild them after each
             # source cycle so a rule fix repairs existing official rows even
@@ -146,6 +147,7 @@ class DailyWorker:
                 "Source synchronization complete: %s; coverage snapshot recorded for %s.",
                 {
                     "sources": summary.as_dict(),
+                    "stale_source_withdrawals": stale_source_withdrawals,
                     "reindex": reindex_summary,
                     "government_positions": government_jobs,
                     "government_evidence_recheck": government_verification,
