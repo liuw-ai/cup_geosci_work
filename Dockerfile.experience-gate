@@ -1,0 +1,7 @@
+# Small production overlay for deployments where the full dependency image is
+# already present.  It avoids reinstalling system packages while replacing
+# only the student eligibility gate changed in this phase.
+FROM cupb-geoscience-job-hub:phase117-geophysics-overlay
+
+WORKDIR /app
+COPY job_hub/profiles.py /app/job_hub/profiles.py
