@@ -17,6 +17,7 @@ import os
 import re
 import subprocess
 import tempfile
+import zipfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -436,7 +437,10 @@ class OfficialAttachmentProcessor:
             self._robots_allowed(response.url)
             content_type = self._content_type(response.headers.get("Content-Type"))
             suffix = self._suffix(response.url, content_type)
-            if suffix not in SUPPORTED_SUFFIXES:
+            extensionless_allowlisted = self._extensionless_endpoint_allowed(
+                source, response.url
+            )
+            if suffix not in SUPPORTED_SUFFIXES and not extensionless_allowlisted:
                 raise AttachmentSkipped(
                     f"Unsupported attachment type: {content_type or 'unknown'}"
                 )
@@ -463,6 +467,12 @@ class OfficialAttachmentProcessor:
                         digest.update(chunk)
                         handle.write(chunk)
                 hexdigest = digest.hexdigest()
+                if suffix not in SUPPORTED_SUFFIXES:
+                    suffix = self._sniff_suffix(Path(temporary_name))
+                    if suffix not in SUPPORTED_SUFFIXES:
+                        raise AttachmentSkipped(
+                            "Allowlisted extensionless endpoint returned an unknown file format"
+                        )
                 relative_path = Path("sha256") / hexdigest[:2] / f"{hexdigest}{suffix}"
                 destination = root / relative_path
                 destination.parent.mkdir(parents=True, exist_ok=True)
@@ -1644,6 +1654,35 @@ class OfficialAttachmentProcessor:
             "application/msword": ".doc",
         }
         return mapping.get(content_type or "", suffix or ".bin")
+
+    @staticmethod
+    def _extensionless_endpoint_allowed(source: dict[str, object], url: str) -> bool:
+        config = source.get("config") or {}
+        patterns = config.get("attachment_url_patterns", []) if isinstance(config, dict) else []
+        return any(
+            re.search(str(pattern), url, re.IGNORECASE)
+            for pattern in patterns
+            if str(pattern).strip()
+        )
+
+    @staticmethod
+    def _sniff_suffix(path: Path) -> str:
+        header = path.read_bytes()[:8]
+        if header.startswith(b"%PDF-"):
+            return ".pdf"
+        if header.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"):
+            return ".xls"
+        if header.startswith(b"PK\x03\x04"):
+            try:
+                with zipfile.ZipFile(path) as archive:
+                    names = set(archive.namelist())
+                if any(name.startswith("xl/") for name in names):
+                    return ".xlsx"
+                if any(name.startswith("word/") for name in names):
+                    return ".docx"
+            except (OSError, zipfile.BadZipFile):
+                return ".bin"
+        return ".bin"
 
     @staticmethod
     def _looks_like_html(chunk: bytes) -> bool:

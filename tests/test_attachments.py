@@ -357,6 +357,13 @@ def test_position_conditions_title_is_classified_as_position_table() -> None:
     assert intent == "position_table_hint"
 
 
+def test_extensionless_download_sniffs_xlsx_format(tmp_path) -> None:
+    path = tmp_path / "download-token"
+    path.write_bytes(_xlsx_bytes())
+
+    assert OfficialAttachmentProcessor._sniff_suffix(path) == ".xlsx"
+
+
 def test_attachment_candidate_requires_review_then_publishes_with_evidence(tmp_path) -> None:
     session = FakeSession(_xlsx_bytes())
     settings, database, artifact, processor = _registered_artifact(
