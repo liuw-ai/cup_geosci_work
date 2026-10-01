@@ -497,6 +497,30 @@ def _detail_retryable(error: BaseException) -> bool:
     return not any(non_retryable)
 
 
+def _detail_retry_needs_session_reset(error: BaseException) -> bool:
+    """Return whether a failed detail attempt likely poisoned its browser target.
+
+    A normal field timeout can be retried in the same context.  Chromium/CDP
+    renderer failures are different: keeping the context alive tends to make
+    every subsequent page inherit the broken target.  Reconnecting is bounded
+    to these explicit browser-runtime signals and never changes the evidence
+    or access-policy gates.
+    """
+
+    message = str(error).lower()
+    return any(
+        marker in message
+        for marker in (
+            "target crashed",
+            "target closed",
+            "browser has been closed",
+            "browser disconnected",
+            "execution context was destroyed",
+            "connect_over_cdp",
+        )
+    )
+
+
 def _body_text(page: Any) -> str:
     return " ".join(str(page.locator("body").inner_text() or "").split()).strip()
 
@@ -1280,18 +1304,46 @@ def run_cmgb_detail_retry(
     try:
         with sync_playwright() as playwright:
             cdp_url = str(config.get("cdp_url") or "").strip()
-            if cdp_url:
-                browser = playwright.chromium.connect_over_cdp(
-                    _resolve_cdp_websocket(cdp_url)
-                )
-                if not browser.contexts:
-                    raise BrowserCaptureError("CMGB CDP browser has no default context")
-                context = browser.contexts[0]
-                _close_context_pages(context)
-                uses_remote_browser = True
-            else:
-                browser = playwright.chromium.launch(headless=True)
-                context = browser.new_context(user_agent=user_agent)
+
+            def open_session() -> None:
+                """Attach a clean Playwright context for the next detail."""
+
+                nonlocal browser, context, uses_remote_browser
+                if cdp_url:
+                    browser = playwright.chromium.connect_over_cdp(
+                        _resolve_cdp_websocket(cdp_url)
+                    )
+                    if not browser.contexts:
+                        raise BrowserCaptureError(
+                            "CMGB CDP browser has no default context"
+                        )
+                    context = browser.contexts[0]
+                    _close_context_pages(context)
+                    uses_remote_browser = True
+                else:
+                    browser = playwright.chromium.launch(headless=True)
+                    context = browser.new_context(user_agent=user_agent)
+                    uses_remote_browser = False
+
+            def reset_session() -> None:
+                """Drop a poisoned renderer without touching the capture file."""
+
+                nonlocal browser, context
+                if context is not None:
+                    _close_context_pages(context)
+                # A connected CDP browser belongs to the dedicated headless
+                # service. Do not send Browser.close to that service; dropping
+                # the Playwright connection and reattaching is sufficient.
+                if browser is not None and not uses_remote_browser:
+                    try:
+                        browser.close()
+                    except Exception:
+                        pass
+                browser = None
+                context = None
+                open_session()
+
+            open_session()
 
             retry_attempts = max(
                 1, min(5, int(config.get("detail_retry_attempts", 3)))
@@ -1299,10 +1351,24 @@ def run_cmgb_detail_retry(
             retry_delay_ms = max(
                 0, min(5_000, int(config.get("detail_retry_delay_ms", 500)))
             )
+            reconnect_on_crash = bool(
+                config.get("detail_retry_reconnect_on_crash", True)
+            )
+            reconnect_delay_ms = max(
+                0,
+                min(
+                    5_000,
+                    int(config.get("detail_retry_reconnect_delay_ms", 750)),
+                ),
+            )
             for target in retry_capture["retry_targets"]:
                 last_error: Exception | None = None
                 completed = False
                 for attempt in range(1, retry_attempts + 1):
+                    if context is None:
+                        raise BrowserCaptureError(
+                            "CMGB detail retry has no active browser context"
+                        )
                     page = context.new_page()
                     try:
                         detail_url = _official_url(
@@ -1346,6 +1412,17 @@ def run_cmgb_detail_retry(
                     except Exception as error:
                         last_error = error
                         if attempt < retry_attempts and _detail_retryable(error):
+                            if reconnect_on_crash and _detail_retry_needs_session_reset(error):
+                                try:
+                                    reset_session()
+                                except Exception as recovery_error:
+                                    last_error = BrowserCaptureError(
+                                        "CMGB detail retry could not restore browser "
+                                        f"session after {error}: {recovery_error}"
+                                    )
+                                    break
+                                if reconnect_delay_ms:
+                                    time.sleep(reconnect_delay_ms / 1000)
                             if retry_delay_ms:
                                 time.sleep((retry_delay_ms * attempt) / 1000)
                             continue

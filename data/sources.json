@@ -1058,6 +1058,8 @@
         "detail_retry_max_age_hours": 12,
         "detail_retry_attempts": 3,
         "detail_retry_delay_ms": 500,
+        "detail_retry_reconnect_on_crash": true,
+        "detail_retry_reconnect_delay_ms": 750,
         "require_complete_scan": true,
       "minimum_relevance": 40,
       "max_items": 2000,
