@@ -15,6 +15,7 @@ from dataclasses import asdict, dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from job_hub.contracts import ContractValidationError, validate_employer_registry
 
@@ -276,6 +277,26 @@ def classify_employment(
 def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
     """Add non-persistent display attributes to a database or report job row."""
     enriched = dict(job)
+    # Older CNPC snapshot rows were stored with only the opaque ``id`` query
+    # parameter.  The public route may render an empty shell without its
+    # title hint, so repair the navigation at read time as well as in the
+    # collector.  This does not change evidence, qualification, lifecycle, or
+    # any persisted vacancy field.
+    if str(enriched.get("source_id") or "") == "cnpc-career":
+        source_url = str(enriched.get("source_url") or "").strip()
+        if "recruitInfoshow.html" in source_url:
+            parsed = urlparse(source_url)
+            query = parse_qsl(parsed.query, keep_blank_values=True)
+            if not any(key == "postName" and value.strip() for key, value in query):
+                query.append(("postName", str(enriched.get("title") or "").strip()))
+                repaired_url = urlunparse(parsed._replace(query=urlencode(query, doseq=True)))
+                enriched["source_url"] = repaired_url
+                evidence = enriched.get("field_evidence")
+                if isinstance(evidence, dict) and evidence.get("官方详情链接") == source_url:
+                    enriched["field_evidence"] = {
+                        **evidence,
+                        "官方详情链接": repaired_url,
+                    }
     enriched["category_label"] = CATEGORY_DISPLAY_NAMES.get(
         str(job.get("category") or ""), str(job.get("category") or "")
     )

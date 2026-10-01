@@ -171,6 +171,30 @@ def test_upstream_category_uses_precise_student_facing_label() -> None:
     assert job["category_label"] == "油气勘探开发运营与研究机构"
 
 
+def test_enrich_job_repairs_legacy_cnpc_detail_navigation() -> None:
+    from urllib.parse import parse_qs, urlparse
+
+    from job_hub.employers import enrich_job
+
+    old_url = (
+        "https://zhaopin.cnpc.com.cn/web/recruitInfoshow.html?"
+        "id=8b8b6c9ea05aee4d01a08013d5ef0061"
+    )
+    job = enrich_job(
+        {
+            "source_id": "cnpc-career",
+            "source_url": old_url,
+            "title": "油气田地质勘探技术支持（27011103）",
+            "employer": "中国石油天然气集团有限公司",
+            "field_evidence": {"官方详情链接": old_url},
+        }
+    )
+
+    repaired = job["source_url"]
+    assert parse_qs(urlparse(repaired).query)["postName"] == [job["title"]]
+    assert job["field_evidence"]["官方详情链接"] == repaired
+
+
 def test_operator_affiliation_uses_employer_before_body_mentions() -> None:
     from job_hub.employers import classify_employment
 
