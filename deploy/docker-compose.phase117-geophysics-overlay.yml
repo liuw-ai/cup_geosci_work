@@ -1,0 +1,12 @@
+name: cupb-geoscience-job-hub
+services:
+  web:
+    image: cupb-geoscience-job-hub:phase117-geophysics-overlay
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.phase117-geophysics-overlay
+  worker:
+    image: cupb-geoscience-job-hub:phase117-geophysics-overlay
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.phase117-geophysics-overlay

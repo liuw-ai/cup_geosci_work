@@ -1,0 +1,8 @@
+# Reuse the verified phase 116 runtime and replace only the student taxonomy
+# and publication gate. The source data directory remains a read-only compose
+# mount so the versioned taxonomy is visible to both web and worker.
+FROM cupb-geoscience-job-hub:phase116-overlay
+WORKDIR /app
+COPY job_hub/major_taxonomy.py /app/job_hub/major_taxonomy.py
+COPY job_hub/profiles.py /app/job_hub/profiles.py
+COPY job_hub/simulation.py /app/job_hub/simulation.py
