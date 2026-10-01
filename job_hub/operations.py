@@ -23,6 +23,8 @@ _BROWSER_SERVICE_BY_SOURCE_TYPE = {
 _EXPECTED_BROWSER_LIMITATION_MARKERS = (
     "robots.txt returned http 403",
     "robots.txt returned http 412",
+    "maintenance window",
+    "maintenance_window",
     "access-limited",
     "access limited",
     "listing returned http 400",

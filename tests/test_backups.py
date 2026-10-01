@@ -231,6 +231,36 @@ def test_browser_worker_access_limit_does_not_block_other_sources(tmp_path) -> N
     assert result["workers"]["sinopec-browser"]["expected_access_limited"] is True
 
 
+def test_browser_worker_maintenance_window_does_not_block_other_sources(tmp_path) -> None:
+    settings = _settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    browser_source = source()
+    browser_source.update(
+        {
+            "id": "cnpc-career-browser",
+            "source_type": "cnpc_browser_rows",
+            "name": "测试维护窗口来源",
+            "config": {
+                "capture_path": "verified/cnpc.json",
+                "application_url": "https://zhaopin.cnpc.com.cn/",
+                "allowed_hosts": ["zhaopin.cnpc.com.cn"],
+            },
+        }
+    )
+    database.upsert_source(browser_source)
+    database.record_service_heartbeat(
+        "cnpc-browser", "waiting", "CNPC maintenance window 00:00-06:00"
+    )
+
+    result = browser_worker_health(database)
+
+    assert result["ok"] is False
+    assert result["release_ok"] is True
+    assert result["expected_access_limited"] == ["cnpc-browser"]
+    assert result["workers"]["cnpc-browser"]["expected_access_limited"] is True
+
+
 def test_health_endpoint_reports_backup_state_without_private_path(tmp_path) -> None:
     settings = _settings(tmp_path)
     app = create_app(settings)
