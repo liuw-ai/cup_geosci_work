@@ -46,7 +46,11 @@ services:
     command:
       - --no-sandbox
       - --disable-gpu
+      # 国聘 SPA 在详情页渲染时会消耗较多共享内存；Docker 默认 64 MB
+      # 会导致 renderer 直接崩溃，Playwright 只能看到 Target crashed。
+      - --disable-dev-shm-usage
     init: true
+    shm_size: "512m"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
