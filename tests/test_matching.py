@@ -82,6 +82,12 @@ def test_deadline_extraction_prefers_overall_rolling_window_over_first_batch() -
     assert extract_deadline(text) == "2026-10-31"
 
 
+def test_deadline_extraction_handles_announcement_start_window() -> None:
+    text = "报名时间。公告发布之日起至2026年3月4日17：00。"
+
+    assert extract_deadline(text) == "2026-03-04"
+
+
 def test_expiry_label_is_a_deadline_not_a_publication_date() -> None:
     text = "中国石油东方物探公司招聘公告 过期时间：2026-11-17"
 

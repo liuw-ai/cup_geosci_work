@@ -1,0 +1,5 @@
+# Small production overlay for the CGS announcement-window deadline parser.
+# Reuse the validated phase-142 runtime image and keep the SQLite volume intact.
+FROM cupb-geoscience-job-hub:latest
+
+COPY --chown=jobhub:jobhub job_hub/matching.py /app/job_hub/matching.py

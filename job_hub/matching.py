@@ -414,6 +414,21 @@ def parse_date_value(value: str | None) -> str | None:
 
 def extract_deadline(text: str) -> str | None:
     normalized = _normalize_date_text(text)
+    # Some official notices use a full stop after "报名时间" and omit the
+    # optional "自" before the announcement-start window, e.g.
+    # "报名时间。公告发布之日起至2026年3月4日17：00".  Keep this pattern
+    # anchored to an explicit application marker so ordinary publication
+    # dates are never mistaken for deadlines.
+    announcement_window = re.compile(
+        r"(?:报名|申请|网申|投递|应聘).{0,24}?(?:时间|期间|日期)"
+        r"\s*[。:：]?\s*(?:自\s*)?(?:公告发布之日起\s*)?"
+        r"(?:至|到)\s*"
+        r"(20\d{2}\s*[年./-]\s*\d{1,2}\s*[月./-]\s*\d{1,2})",
+        re.IGNORECASE,
+    )
+    match = announcement_window.search(normalized)
+    if match:
+        return parse_date_value(match.group(1))
     # Some rolling announcements describe a short first batch and then a
     # later overall closing date. Prefer the explicit overall "至 YYYY-MM-DD"
     # boundary over an earlier nested "第一批次截止" date.
