@@ -365,30 +365,44 @@ def run_cnooc_browser_capture(
                 context = browser.new_context(user_agent=user_agent)
                 owned = True
             try:
+                detail_retries = max(0, min(int(config.get("detail_retries", 1)), 3))
                 for candidate in candidates:
-                    page = context.new_page()
-                    try:
-                        detail_url = _official_url(candidate["url"], "CNOOC detail URL", hosts)
-                        # Anti-automation responses can keep subresources open
-                        # indefinitely while still returning HTTP 200.  The
-                        # server-rendered detail only needs the committed HTML;
-                        # a short bounded poll distinguishes it from a
-                        # challenge page without blocking the whole batch.
-                        response = page.goto(detail_url, wait_until="commit", timeout=timeout_ms)
-                        if response is not None and response.status >= 400:
-                            raise BrowserCaptureError(f"CNOOC detail returned HTTP {response.status}")
-                        html = ""
-                        for _ in range(4):
-                            html = page.content()
-                            if "window.__INITIAL_DATA__" in html:
-                                break
-                            page.wait_for_timeout(250)
-                        parsed = parse_zhaopin_detail_html(html, detail_url=page.url, expected_job_number=candidate["job_number"] or None, allowed_hosts=hosts)
-                        rows.append({"external_id": parsed["job_number"], "title": parsed["title"], "employer": parsed["employer"], "major": parsed["major_text"], "degree": parsed["degree"], "location": parsed["location"], "headcount": parsed["quantity"], "deadline": parsed["deadline"], "published_date": parsed.get("published"), "detail_url": parsed["detail_url"], "evidence_url": parsed["detail_url"], "description": parsed["description"], "field_evidence": parsed["evidence"]})
-                    except Exception as error:
-                        failures.append({"detail_url": candidate["url"], "title": candidate["title"], "reason": str(error)[:500]})
-                    finally:
-                        page.close()
+                    detail_url = _official_url(candidate["url"], "CNOOC detail URL", hosts)
+                    last_error: Exception | None = None
+                    for attempt in range(detail_retries + 1):
+                        page = context.new_page()
+                        try:
+                            # Anti-automation responses can keep subresources
+                            # open indefinitely while still returning HTTP 200.
+                            # A fresh page on one bounded retry recovers the
+                            # occasional missing initial-data response without
+                            # weakening the complete-scan publication gate.
+                            response = page.goto(detail_url, wait_until="commit", timeout=timeout_ms)
+                            if response is not None and response.status >= 400:
+                                raise BrowserCaptureError(f"CNOOC detail returned HTTP {response.status}")
+                            html = ""
+                            for _ in range(4):
+                                html = page.content()
+                                if "window.__INITIAL_DATA__" in html:
+                                    break
+                                page.wait_for_timeout(250)
+                            parsed = parse_zhaopin_detail_html(
+                                html,
+                                detail_url=page.url,
+                                expected_job_number=candidate["job_number"] or None,
+                                allowed_hosts=hosts,
+                            )
+                            rows.append({"external_id": parsed["job_number"], "title": parsed["title"], "employer": parsed["employer"], "major": parsed["major_text"], "degree": parsed["degree"], "location": parsed["location"], "headcount": parsed["quantity"], "deadline": parsed["deadline"], "published_date": parsed.get("published"), "detail_url": parsed["detail_url"], "evidence_url": parsed["detail_url"], "description": parsed["description"], "field_evidence": parsed["evidence"]})
+                            last_error = None
+                            break
+                        except Exception as error:
+                            last_error = error
+                            if attempt < detail_retries:
+                                page.wait_for_timeout(500)
+                        finally:
+                            page.close()
+                    if last_error is not None:
+                        failures.append({"detail_url": candidate["url"], "title": candidate["title"], "reason": str(last_error)[:500]})
             finally:
                 if owned:
                     browser.close()
