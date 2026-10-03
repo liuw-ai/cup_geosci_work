@@ -47,7 +47,8 @@ class CnoocBrowserWorker:
         self.settings = settings
         self.database = Database(settings.database_path)
         self.database.initialize()
-        JobPipeline(settings, self.database).bootstrap_sources()
+        self.pipeline = JobPipeline(settings, self.database)
+        self.pipeline.bootstrap_sources()
         self.stop_event = Event()
         self.source_id = os.getenv("CNOOC_BROWSER_SOURCE_ID", "cnooc-career-browser")
         self.interval_seconds = max(900, int(os.getenv("CNOOC_BROWSER_INTERVAL_MINUTES", "180")) * 60)
@@ -92,7 +93,20 @@ class CnoocBrowserWorker:
             if payload.get("status") != "success":
                 self._heartbeat("degraded", f"partial detail capture: {payload.get('scan')}")
                 return
-            self._heartbeat("running", f"captured {len(payload.get('rows', []))} CNOOC detail rows")
+            # A successful browser snapshot must reach the public database in
+            # the same run.  Waiting for the general worker's next interval
+            # made a valid capture invisible to students for up to three
+            # hours and left the source ledger on an old crawl timestamp.
+            sync_result = self.pipeline.sync_source_manual(source)
+            if sync_result.status != "finished":
+                raise RuntimeError(
+                    "CNOOC capture succeeded but source synchronization did not finish: "
+                    f"{sync_result.status}: {sync_result.error or 'unknown error'}"
+                )
+            self._heartbeat(
+                "running",
+                f"captured {len(payload.get('rows', []))} CNOOC detail rows and synchronized",
+            )
             LOGGER.info("CNOOC capture completed: %s", payload.get("scan"))
         except Exception as error:
             try:
