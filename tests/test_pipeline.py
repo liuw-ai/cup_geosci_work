@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta, timezone
 from dataclasses import replace
 
+import pytest
+
 from job_hub.audit import audit_database
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
@@ -414,6 +416,171 @@ def test_reindex_preserves_retired_job_lifecycle_status(tmp_path) -> None:
     retired = database.find_job(job_id, student_visible=False)
     assert retired is not None
     assert retired["status"] == "superseded"
+
+
+def test_reindex_repairs_legacy_cnooc_detail_evidence_before_publication(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    cnooc_source = source()
+    cnooc_source.update(
+        {
+            "id": "cnooc-career-browser",
+            "source_type": "cnooc_browser_rows",
+            "homepage_url": "https://cnooc.zhaopin.com/",
+        }
+    )
+    database.upsert_source(cnooc_source)
+    pipeline = JobPipeline(settings, database)
+    legacy_detail = (
+        "岗位职责：开展地质资料解释。"
+        "任职要求：1.学历要求：硕士研究生及以上 "
+        "2.专业要求：地质学、地球物理学 "
+        "3.外语要求：大学英语六级"
+    )
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(
+            RawPosting(
+                title="地质科研岗",
+                employer="中国海油测试单位",
+                source_url="https://xiaoyuan.zhaopin.com/job/CC258591510J40972459615",
+                application_url=None,
+                text=legacy_detail,
+                summary="中国海油官方岗位详情。",
+                published_date="2026-10-01",
+                deadline_date="2027-10-01",
+                location="湛江",
+                external_id="CC258591510J40972459615",
+                field_evidence={
+                    "evidence_scope": "official_zhaopin_detail_initial_data",
+                    "岗位": "地质科研岗",
+                    "专业要求": legacy_detail,
+                    "专业范围": legacy_detail,
+                    "学历要求": "硕士",
+                    "工作地点": "湛江",
+                },
+            ),
+            cnooc_source,
+        )
+    )
+
+    result = pipeline.reindex_jobs()
+    repaired = database.find_job(job_id, student_visible=False)
+
+    assert result["evidence_repaired"] == 1
+    assert result["evidence_repair_failed"] == 0
+    assert repaired is not None
+    assert repaired["field_evidence"]["专业范围"] == "地质学、地球物理学"
+    assert repaired["field_evidence"]["学历要求"] == "硕士研究生及以上"
+    assert repaired["publication_status"] == "student_eligible"
+
+
+def test_reindex_keeps_unrepairable_legacy_cnooc_detail_private(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    cnooc_source = source()
+    cnooc_source.update(
+        {
+            "id": "cnooc-career-browser",
+            "source_type": "cnooc_browser_rows",
+            "homepage_url": "https://cnooc.zhaopin.com/",
+        }
+    )
+    database.upsert_source(cnooc_source)
+    pipeline = JobPipeline(settings, database)
+    legacy_detail = "岗位职责：开展地质资料解释。学历要求：硕士研究生及以上。"
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(
+            RawPosting(
+                title="地质技术岗",
+                employer="中国海油测试单位",
+                source_url="https://xiaoyuan.zhaopin.com/job/CC258591510J40972459999",
+                application_url=None,
+                text=legacy_detail,
+                summary="中国海油官方岗位详情。",
+                published_date="2026-10-01",
+                deadline_date="2027-10-01",
+                location="北京",
+                external_id="CC258591510J40972459999",
+                field_evidence={
+                    "evidence_scope": "official_zhaopin_detail_initial_data",
+                    "岗位": "地质技术岗",
+                    "专业要求": legacy_detail,
+                    "专业范围": legacy_detail,
+                    "学历要求": "硕士",
+                    "工作地点": "北京",
+                },
+            ),
+            cnooc_source,
+        )
+    )
+
+    result = pipeline.reindex_jobs()
+    repaired = database.find_job(job_id, student_visible=False)
+
+    assert result["evidence_repaired"] == 0
+    assert result["evidence_repair_failed"] == 1
+    assert repaired is not None
+    assert repaired["publication_status"] == "pending_evidence"
+    assert database.list_jobs(page_size=None, student_visible=True)[1] == 0
+
+
+def test_reindex_rolls_back_all_rows_when_one_normalization_fails(tmp_path, monkeypatch) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    database.upsert_source(official_source)
+    pipeline = JobPipeline(settings, database)
+    for suffix in ("one", "two"):
+        database.save_job(
+            pipeline.normalize_posting(
+                RawPosting(
+                    title=f"地质工程技术岗-{suffix}",
+                    employer="测试能源集团",
+                    source_url=f"https://careers.example.edu.cn/jobs/{suffix}",
+                    application_url=None,
+                    text="专业要求：地质工程。学历要求：硕士。",
+                    summary="官方岗位。",
+                    published_date="2026-10-01",
+                    deadline_date="2027-10-01",
+                    location="北京",
+                    field_evidence={
+                        "evidence_scope": "official_html_table_row",
+                        "岗位": f"地质工程技术岗-{suffix}",
+                        "专业范围": "地质工程",
+                        "学历要求": "硕士",
+                        "工作地点": "北京",
+                    },
+                ),
+                official_source,
+            )
+        )
+    with database.connect() as connection:
+        before_events = connection.execute(
+            "SELECT COUNT(*) FROM job_events WHERE event_type = 'reclassified'"
+        ).fetchone()[0]
+    original = database.update_derived_job_fields
+    calls = 0
+
+    def fail_on_second(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise RuntimeError("simulated reindex failure")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(database, "update_derived_job_fields", fail_on_second)
+
+    with pytest.raises(RuntimeError, match="simulated reindex failure"):
+        pipeline.reindex_jobs()
+
+    with database.connect() as connection:
+        after_events = connection.execute(
+            "SELECT COUNT(*) FROM job_events WHERE event_type = 'reclassified'"
+        ).fetchone()[0]
+    assert after_events == before_events
 
 
 def test_delete_job_removes_only_the_exact_invalid_record(tmp_path) -> None:

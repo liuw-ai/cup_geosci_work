@@ -43,6 +43,8 @@ SOURCE_TYPES = frozenset(
         "cnpc_browser_rows",
         "cnooc_browser_rows",
         "cmgb_browser_rows",
+        "iguopin_browser_rows",
+        "iguopin_general_browser_rows",
         "sinopec_spa_rows",
         "structured_opening_page",
         "landing_page",
@@ -763,6 +765,153 @@ def validate_source_record(value: Any, *, context: str = "Source") -> dict[str, 
             raise ContractValidationError(
                 f"{context} config require_complete_scan must be true or false"
             )
+    if source["source_type"] in {
+        "cmgb_browser_rows",
+        "iguopin_browser_rows",
+        "iguopin_general_browser_rows",
+    }:
+        source["config"]["browser_url"] = validate_http_url(
+            source["config"].get("browser_url") or source["homepage_url"],
+            f"{context} config browser_url",
+        )
+        capture_path = _required_text(
+            source["config"].get("capture_path"),
+            f"{context} config capture_path",
+        )
+        capture = PurePosixPath(capture_path.replace("\\", "/"))
+        if capture.is_absolute() or ".." in capture.parts:
+            raise ContractValidationError(
+                f"{context} config capture_path must stay inside APP_DATA_DIR"
+            )
+        source["config"]["capture_path"] = capture.as_posix()
+        source["config"]["application_url"] = validate_http_url(
+            source["config"].get("application_url") or source["homepage_url"],
+            f"{context} config application_url",
+        )
+        allowed_hosts = source["config"].get("allowed_hosts")
+        if not isinstance(allowed_hosts, list) or not allowed_hosts:
+            raise ContractValidationError(
+                f"{context} 国聘 browser config allowed_hosts must be a non-empty list"
+            )
+        source["config"]["allowed_hosts"] = _validate_domains(
+            allowed_hosts,
+            f"{context} config allowed_hosts",
+        )
+        max_age = source["config"].get("max_age_hours", 30)
+        if isinstance(max_age, bool):
+            raise ContractValidationError(
+                f"{context} config max_age_hours must be a positive number"
+            )
+        try:
+            max_age_value = float(max_age)
+        except (TypeError, ValueError) as error:
+            raise ContractValidationError(
+                f"{context} config max_age_hours must be a positive number"
+            ) from error
+        if max_age_value <= 0:
+            raise ContractValidationError(
+                f"{context} config max_age_hours must be a positive number"
+            )
+        source["config"]["max_age_hours"] = max_age_value
+        for field_name in ("require_complete_scan", "require_capture_manifest"):
+            if not isinstance(source["config"].get(field_name), bool):
+                raise ContractValidationError(
+                    f"{context} config {field_name} must be true or false"
+                )
+        if source["source_type"] == "iguopin_browser_rows":
+            filters = source["config"].get("major_filters")
+            if not isinstance(filters, list) or not filters:
+                raise ContractValidationError(
+                    f"{context} config major_filters must be a non-empty list"
+                )
+            normalized_filters: list[dict[str, str]] = []
+            seen_filters: set[tuple[str, str]] = set()
+            for index, item in enumerate(filters, start=1):
+                if not isinstance(item, dict):
+                    raise ContractValidationError(
+                        f"{context} config major_filters[{index}] must be an object"
+                    )
+                parent = _required_text(
+                    item.get("parent"),
+                    f"{context} config major_filters[{index}].parent",
+                )
+                child = _required_text(
+                    item.get("child"),
+                    f"{context} config major_filters[{index}].child",
+                )
+                if (parent, child) in seen_filters:
+                    raise ContractValidationError(
+                        f"{context} config major_filters contains a duplicate filter"
+                    )
+                seen_filters.add((parent, child))
+                normalized_filters.append({"parent": parent, "child": child})
+            source["config"]["major_filters"] = normalized_filters
+            prefix = _required_text(
+                source["config"].get("external_id_prefix"),
+                f"{context} config external_id_prefix",
+            )
+            if not re.fullmatch(r"[a-z][a-z0-9-]{1,80}", prefix):
+                raise ContractValidationError(
+                    f"{context} config external_id_prefix must use lowercase letters, digits and hyphens"
+                )
+            source["config"]["external_id_prefix"] = prefix
+        if source["source_type"] == "iguopin_general_browser_rows":
+            keywords = source["config"].get("search_keywords")
+            if not isinstance(keywords, list) or not keywords:
+                raise ContractValidationError(
+                    f"{context} config search_keywords must be a non-empty list"
+                )
+            normalized_keywords: list[str] = []
+            seen_keywords: set[str] = set()
+            for index, value in enumerate(keywords, start=1):
+                if not isinstance(value, str):
+                    raise ContractValidationError(
+                        f"{context} config search_keywords[{index}] must be text"
+                    )
+                keyword = _required_text(
+                    value, f"{context} config search_keywords[{index}]"
+                )
+                if len(keyword) > 80:
+                    raise ContractValidationError(
+                        f"{context} config search_keywords[{index}] must be at most 80 characters"
+                    )
+                identity = re.sub(r"\s+", "", keyword).casefold()
+                if identity in seen_keywords:
+                    raise ContractValidationError(
+                        f"{context} config search_keywords contains a duplicate keyword"
+                    )
+                seen_keywords.add(identity)
+                normalized_keywords.append(keyword)
+            source["config"]["search_keywords"] = normalized_keywords
+            if source["config"].get("card_identity_mode") != "rendered_react_job_id":
+                raise ContractValidationError(
+                    f"{context} config card_identity_mode must be rendered_react_job_id"
+                )
+            prefix = _required_text(
+                source["config"].get("external_id_prefix"),
+                f"{context} config external_id_prefix",
+            )
+            if not re.fullmatch(r"[a-z][a-z0-9-]{1,80}", prefix):
+                raise ContractValidationError(
+                    f"{context} config external_id_prefix must use lowercase letters, digits and hyphens"
+                )
+            source["config"]["external_id_prefix"] = prefix
+            raw_page_limit = source["config"].get("max_pages_per_keyword")
+            if isinstance(raw_page_limit, bool):
+                raise ContractValidationError(
+                    f"{context} config max_pages_per_keyword must be an integer from 1 to 100"
+                )
+            try:
+                page_limit = int(raw_page_limit)
+            except (TypeError, ValueError) as error:
+                raise ContractValidationError(
+                    f"{context} config max_pages_per_keyword must be an integer from 1 to 100"
+                ) from error
+            if not 1 <= page_limit <= 100:
+                raise ContractValidationError(
+                    f"{context} config max_pages_per_keyword must be an integer from 1 to 100"
+                )
+            source["config"]["max_pages_per_keyword"] = page_limit
     if source["source_type"] == "cnpc_browser_rows":
         capture_path = _required_text(
             source["config"].get("capture_path"),

@@ -48,6 +48,7 @@ _JOB_LEVEL_EVIDENCE_SCOPES = frozenset(
         "official_cnpc_browser_job_row",
         "official_sinopec_detail_snapshot",
         "official_cmgb_browser_detail",
+        "official_iguopin_browser_detail",
         "official_cnooc_browser_detail",
         "official_zhaopin_detail_initial_data",
         "admin_verified_official_record",

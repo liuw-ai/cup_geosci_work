@@ -123,3 +123,33 @@ def test_batch_excludes_manifest_artifacts_with_non_automatic_policy() -> None:
     assert summary["selected"] == 1
     assert summary["policy_skipped"] == 2
     assert {item["artifact_id"] for item in summary["policy_skip_items"]} == {1, 2}
+
+
+def test_batch_reparses_only_extracted_artifacts_with_stale_parser() -> None:
+    database = FakeDatabase(
+        [
+            {
+                "id": 4,
+                "source_id": "source-d",
+                "extraction_status": "extracted",
+                "parser_version": "attachments-v3",
+            },
+            {
+                "id": 5,
+                "source_id": "source-e",
+                "extraction_status": "extracted",
+                "parser_version": "attachments-v4",
+            },
+        ]
+    )
+    processor = FakeProcessor({4: AttachmentResult(4, "extracted", rows_extracted=3)})
+
+    summary = process_pending_attachments(
+        database,
+        processor,
+        include_stale_extracted=True,
+    )
+
+    assert processor.calls == [4]
+    assert summary["reparsed"] == 1
+    assert summary["processed"] == 1

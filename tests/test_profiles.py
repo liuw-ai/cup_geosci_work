@@ -85,6 +85,15 @@ def test_browser_detail_scopes_pass_the_same_job_level_gate() -> None:
         assert result.status == "student_eligible"
 
 
+def test_pipeline_normalized_foreign_location_is_never_public() -> None:
+    result = evaluate_student_publication(
+        job(country_or_region="境内外混合", location="北京，非洲")
+    )
+
+    assert result.status == "out_of_scope"
+    assert result.label == "非中国大陆岗位"
+
+
 def test_profile_match_requires_both_explicit_major_and_degree_evidence() -> None:
     profile = get_student_profile("master-geological-engineering")
     assert profile is not None
@@ -95,6 +104,100 @@ def test_profile_match_requires_both_explicit_major_and_degree_evidence() -> Non
     assert result.label == "明确匹配"
     assert "地质工程" in result.reason
     assert "硕士" in result.reason
+
+
+def test_lower_education_floor_covers_higher_geoscience_students() -> None:
+    result = evaluate_student_publication(
+        job(
+            title="石油勘探岗",
+            description="专业要求：资源勘查工程、地球物理勘查技术。学历要求：大专（高职）。",
+            degree_levels=["大专"],
+            major_tags=["资源勘查工程", "地球物理"],
+            field_evidence={
+                "evidence_scope": "official_sinopec_detail_snapshot",
+                "岗位": "石油勘探岗",
+                "专业范围": "资源勘查工程、地球物理勘查技术",
+                "学历要求": "大专（高职）",
+            },
+        )
+    )
+
+    assert result.status == "student_eligible"
+
+
+def test_degree_floor_hierarchy_preserves_explicit_degree_boundaries() -> None:
+    """Official degree floors must not hide doctoral matches or widen exact rows."""
+    expected_profiles = {
+        "本科": {"undergraduate-geophysics"},
+        "本科及以上": {
+            "undergraduate-geophysics",
+            "master-geophysics",
+            "doctoral-geophysics",
+        },
+        "硕士": {"master-geophysics"},
+        "硕士研究生及以上": {"master-geophysics", "doctoral-geophysics"},
+        "研究生及以上": {"master-geophysics", "doctoral-geophysics"},
+        "博士": {"doctoral-geophysics"},
+        "本科、硕士": {"undergraduate-geophysics", "master-geophysics"},
+    }
+    for degree, expected in expected_profiles.items():
+        decision = evaluate_student_publication(
+            job(
+                title="地球物理研究岗",
+                field_evidence={
+                    "evidence_scope": "official_detail_block",
+                    "岗位": "地球物理研究岗",
+                    "专业范围": "地球物理学",
+                    "学历要求": degree,
+                },
+            )
+        )
+        assert decision.status == "student_eligible", degree
+        assert set(decision.matched_profile_ids) == expected, degree
+
+
+def test_degree_floor_accepts_common_above_wording_without_widening_exact_rows() -> None:
+    """Common official wording must preserve the same minimum-degree closure."""
+    expected_profiles = {
+        "本科以上学历": {"undergraduate-geophysics", "master-geophysics", "doctoral-geophysics"},
+        "硕士以上学历": {"master-geophysics", "doctoral-geophysics"},
+        "Bachelor's or higher": {
+            "undergraduate-geophysics",
+            "master-geophysics",
+            "doctoral-geophysics",
+        },
+        "Master's or higher": {"master-geophysics", "doctoral-geophysics"},
+    }
+    for degree, expected in expected_profiles.items():
+        decision = evaluate_student_publication(
+            job(
+                title="地球物理研究岗",
+                field_evidence={
+                    "evidence_scope": "official_detail_block",
+                    "岗位": "地球物理研究岗",
+                    "专业范围": "地球物理学",
+                    "学历要求": degree,
+                },
+            )
+        )
+        assert decision.status == "student_eligible", degree
+        assert set(decision.matched_profile_ids) == expected, degree
+
+
+def test_postdoctoral_title_is_not_treated_as_a_doctoral_degree() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="地球物理博士后",
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": "地球物理博士后",
+                "专业范围": "地球物理学",
+                "学历要求": "博士后研究人员",
+            },
+        )
+    )
+
+    assert decision.status == "pending_evidence"
 
 
 def test_profile_match_does_not_trust_unstructured_major_tags() -> None:
@@ -309,6 +412,24 @@ def test_geophysical_category_is_promoted_only_after_explicit_taxonomy_mapping()
 
     assert decision.status == "student_eligible"
     assert "master-geophysics" in decision.matched_profile_ids
+
+
+def test_bounded_geophysics_short_form_is_an_explicit_major() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="物探专业技术岗",
+            field_evidence={
+                "evidence_scope": "official_cmgb_browser_detail",
+                "岗位": "物探专业技术岗",
+                "专业范围": "地球物理、物探",
+                "学历要求": "本科",
+                "工作地点": "山东",
+            },
+        )
+    )
+
+    assert decision.status == "student_eligible"
+    assert decision.matched_profile_ids == ("undergraduate-geophysics",)
 
 
 def test_geophysical_direction_without_formal_major_stays_private() -> None:

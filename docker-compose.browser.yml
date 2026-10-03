@@ -1,4 +1,10 @@
 name: cupb-geoscience-job-hub
+x-browser-build: &browser-build
+  context: .
+  dockerfile: Dockerfile.browser
+  args:
+    RUNTIME_IMAGE: ${RUNTIME_IMAGE:-cupb-geoscience-job-hub:latest}
+
 services:
   headless-shell:
     image: chromedp/headless-shell:latest
@@ -11,10 +17,8 @@ services:
       - no-new-privileges:true
 
   cnpc-browser:
-    build:
-      context: .
-      dockerfile: Dockerfile.browser
-    image: cupb-geoscience-job-hub-browser:latest
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
     depends_on:
       - headless-shell
     env_file:
@@ -56,10 +60,8 @@ services:
       - no-new-privileges:true
 
   cmgb-browser:
-    build:
-      context: .
-      dockerfile: Dockerfile.browser
-    image: cupb-geoscience-job-hub-browser:latest
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
     depends_on:
       - cmgb-headless-shell
     env_file:
@@ -101,10 +103,8 @@ services:
       - no-new-privileges:true
 
   cnooc-browser:
-    build:
-      context: .
-      dockerfile: Dockerfile.browser
-    image: cupb-geoscience-job-hub-browser:latest
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
     depends_on:
       - cnooc-headless-shell
     env_file:
@@ -143,10 +143,8 @@ services:
       - no-new-privileges:true
 
   sinopec-browser:
-    build:
-      context: .
-      dockerfile: Dockerfile.browser
-    image: cupb-geoscience-job-hub-browser:latest
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
     depends_on:
       - sinopec-headless-shell
     env_file:
@@ -159,6 +157,91 @@ services:
       SINOPEC_BROWSER_SOURCE_ID: sinopec-career
       SINOPEC_BROWSER_INTERVAL_MINUTES: 180
       SINOPEC_BROWSER_CDP_URL: http://sinopec-headless-shell:9222
+      CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+    command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  pipechina-headless-shell:
+    image: chromedp/headless-shell:latest
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      - --disable-dev-shm-usage
+    init: true
+    shm_size: "512m"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  pipechina-browser:
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
+    depends_on:
+      - pipechina-headless-shell
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      BROWSER_WORKER_KIND: official
+      OFFICIAL_BROWSER_SOURCE_ID: pipechina-browser-capture
+      OFFICIAL_BROWSER_SERVICE_NAME: pipechina-browser
+      OFFICIAL_BROWSER_INTERVAL_MINUTES: 180
+      OFFICIAL_BROWSER_CDP_URL: http://pipechina-headless-shell:9222
+      CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+    command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  chinalco-headless-shell:
+    image: chromedp/headless-shell:latest
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      - --disable-dev-shm-usage
+    init: true
+    shm_size: "512m"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  chinalco-browser:
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
+    depends_on:
+      - chinalco-headless-shell
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      BROWSER_WORKER_KIND: iguopin
+      IGUOPIN_BROWSER_SOURCE_ID: chinalco-iguopin-browser
+      IGUOPIN_BROWSER_SERVICE_NAME: chinalco-iguopin-browser
+      IGUOPIN_BROWSER_INTERVAL_MINUTES: 180
+      IGUOPIN_BROWSER_CDP_URL: http://chinalco-headless-shell:9222
       CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
     command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
     volumes:

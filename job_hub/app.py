@@ -22,6 +22,8 @@ from job_hub.contracts import (
     is_http_url,
 )
 from job_hub.coverage import build_coverage_report
+from job_hub.expansion_targets import load_effective_job_target_plan
+from job_hub.source_funnel import build_source_funnel
 from job_hub.cnpc_matrix import CnpcMatrixError, build_cnpc_matrix_report
 from job_hub.cnpc_browser_capture import (
     CnpcBrowserCaptureError,
@@ -74,6 +76,7 @@ from job_hub.source_validation import (
     source_validation_summary,
 )
 from job_hub.backups import DatabaseBackupManager
+from job_hub.government_artifacts import load_government_artifact_manifest
 from job_hub.operations import backup_health_payload
 from job_hub.government_positions import (
     load_position_registry,
@@ -232,6 +235,13 @@ def create_app(settings: Settings | None = None) -> Flask:
             return []
         try:
             registry = load_position_registry(path)
+            artifact_manifest = None
+            artifact_manifest_available = settings.government_artifact_manifest_path is None
+            if settings.government_artifact_manifest_path is not None:
+                artifact_manifest = load_government_artifact_manifest(
+                    settings.government_artifact_manifest_path
+                )
+                artifact_manifest_available = True
             verifications = {
                 str(item["source_id"]): item
                 for item in database.list_government_source_verifications()
@@ -246,6 +256,8 @@ def create_app(settings: Settings | None = None) -> Flask:
                     for source in database.list_sources()
                     if requires_manual_government_evidence_confirmation(source)
                 },
+                artifact_manifest=artifact_manifest,
+                artifact_manifest_available=artifact_manifest_available,
                 now=datetime.now(timezone.utc),
             )
         except (OSError, ValueError, KeyError):
@@ -324,6 +336,9 @@ def create_app(settings: Settings | None = None) -> Flask:
             "home.html",
             report=report,
             is_preview=is_preview,
+            live_open_total=database.count_open_jobs(
+                as_of_date=local_today(settings).isoformat()
+            ),
             featured=featured,
             categories=database.list_categories(
                 as_of_date=local_today(settings).isoformat()
@@ -476,6 +491,7 @@ def create_app(settings: Settings | None = None) -> Flask:
         return jsonify(
             {
                 "status": "ok",
+                "release": settings.release_info(),
                 "open_jobs": database.count_open_jobs(
                     as_of_date=local_today(settings).isoformat()
                 ),
@@ -484,6 +500,16 @@ def create_app(settings: Settings | None = None) -> Flask:
                 ).get("report_date"),
                 "worker": database.get_service_heartbeat("worker"),
                 "backup": backup_health_payload(backup),
+            }
+        )
+
+    @app.get("/version")
+    def version() -> Any:
+        """Expose release identity for deployment and rollback verification."""
+        return jsonify(
+            {
+                "service": "cupb-geoscience-job-hub",
+                **settings.release_info(),
             }
         )
 
@@ -543,6 +569,26 @@ def create_app(settings: Settings | None = None) -> Flask:
             return view(*args, **kwargs)
 
         return wrapped
+
+    @app.get("/api/admin/source-funnel")
+    @require_admin
+    def source_funnel_api() -> Any:
+        """Expose the private source-throughput ledger for expansion work."""
+        sources = database.list_sources()
+        jobs, _ = database.list_jobs(page_size=None)
+        return jsonify(
+            build_source_funnel(
+                sources=sources,
+                jobs=jobs,
+                crawl_runs=database.list_crawl_runs(limit=10_000),
+                health_by_id={
+                    item["source_id"]: item for item in database.list_source_health()
+                },
+                source_tasks=database.list_source_tasks(),
+                artifact_status_counts=database.list_source_artifact_status_counts(),
+                target_plan=load_effective_job_target_plan(),
+            )
+        )
 
     @app.get("/api/admin/organization-matrix")
     @require_admin

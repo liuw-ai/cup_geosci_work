@@ -88,6 +88,8 @@ class CnpcBrowserWorker:
                     platform_url=str(config.get("browser_url") or source["homepage_url"]),
                     status="access_limited" if "HTTP 4" in str(error) or "access-limited" in str(error) else "parse_failed",
                     reason=str(error),
+                    source_id=str(config.get("source_id") or self.source_id),
+                    adapter_version=str(config.get("adapter_version") or "cnpc-browser-v1"),
                 )
             except Exception:
                 LOGGER.exception("Could not persist CNPC failure capture")

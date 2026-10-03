@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "as_of": "2026-10-03",
+  "target_total": 1000,
+  "description": "学生端当前有效岗位的扩容目标分解。target_jobs 是验收目标，不是已存在岗位，也不能由历史岗位填充。每个分段还要求独立来源、单位和省份证据。",
+  "segments": [
+    {
+      "id": "sinopec-subsidiaries",
+      "label": "中国石化及下属单位",
+      "target_jobs": 150,
+      "min_independent_sources": 2,
+      "min_units": 20,
+      "min_provinces": 8,
+      "source_ids": ["sinopec-career", "sinopec-2027-geoscience-snapshot", "sinopec-pepris-recruitment"],
+      "categories": ["油气上游业主与研究机构", "油气工程技术服务", "管网、炼化与综合能源"]
+    },
+    {
+      "id": "cnpc-subsidiaries",
+      "label": "中国石油及下属单位",
+      "target_jobs": 180,
+      "min_independent_sources": 3,
+      "min_units": 20,
+      "min_provinces": 10,
+      "source_ids": ["cnpc-career", "cnpc-career-browser", "cnpc-bgp-recruitment", "cnpc-logging-campus"],
+      "categories": ["油气上游业主与研究机构", "油气工程技术服务"]
+    },
+    {
+      "id": "cnooc-subsidiaries",
+      "label": "中国海油及下属单位",
+      "target_jobs": 150,
+      "min_independent_sources": 2,
+      "min_units": 12,
+      "min_provinces": 6,
+      "source_ids": ["cnooc-career-browser", "cosl-career"],
+      "categories": ["油气上游业主与研究机构", "油气工程技术服务"]
+    },
+    {
+      "id": "pipechina-and-energy",
+      "label": "国家管网及综合能源",
+      "target_jobs": 80,
+      "min_independent_sources": 2,
+      "min_units": 8,
+      "min_provinces": 6,
+      "source_ids": ["pipechina-career", "pipechina-browser-capture"],
+      "categories": ["管网、炼化与综合能源"]
+    },
+    {
+      "id": "central-geology-and-mining",
+      "label": "中央地勘、自然资源和矿业",
+      "target_jobs": 170,
+      "min_independent_sources": 6,
+      "min_units": 20,
+      "min_provinces": 12,
+      "source_ids": ["cgs-notices", "mnr-public-recruitment", "cea-2027-recruitment", "ccgc-careers", "cmgb-iguopin-2027-geoscience-snapshot", "cmgb-iguopin-browser", "cmgb-careers", "chinalco-iguopin-browser", "zijin-campus-career"],
+      "categories": ["自然资源、地调与地勘", "矿产资源与矿业", "科研院所、高校与博士后"]
+    },
+    {
+      "id": "provincial-public-institutions",
+      "label": "省级事业编和地质系统",
+      "target_jobs": 220,
+      "min_independent_sources": 12,
+      "min_units": 35,
+      "min_provinces": 20,
+      "source_ids": ["shandong-geology-bureau", "shandong-hrss-exam", "henan-geology-bureau", "hubei-natural-resources", "hunan-geology-institute", "gansu-geology-bureau", "ningxia-geology-bureau", "anhui-geology-bureau", "sichuan-geology-bureau"],
+      "categories": ["事业单位与人才引进", "自然资源、地调与地勘"]
+    },
+    {
+      "id": "civil-service",
+      "label": "公务员和选调官方职位表",
+      "target_jobs": 50,
+      "min_independent_sources": 5,
+      "min_units": 20,
+      "min_provinces": 10,
+      "source_ids": ["shandong-civil-service-2026", "zhejiang-civil-service-2026"],
+      "categories": ["公务员与选调"]
+    }
+  ]
+}

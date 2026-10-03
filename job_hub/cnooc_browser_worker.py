@@ -101,6 +101,8 @@ class CnoocBrowserWorker:
                     platform_url=str(config.get("application_url") or source["homepage_url"]),
                     status="access_limited" if "HTTP 4" in str(error) or "robots" in str(error).lower() else "parse_failed",
                     reason=str(error),
+                    source_id=str(config.get("source_id") or self.source_id),
+                    adapter_version=str(config.get("adapter_version") or "cnooc-browser-v1"),
                 )
             except Exception:
                 LOGGER.exception("Could not persist CNOOC failure capture")

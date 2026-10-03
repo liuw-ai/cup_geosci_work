@@ -104,10 +104,17 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
 
     assert len(rows) == 348
     assert statuses == {
-        "student_eligible": 70,
-        "pending_evidence": 98,
-        "out_of_scope": 180,
+        "student_eligible": 63,
+        "pending_evidence": 90,
+        "out_of_scope": 195,
     }
+    mixed_assignment = next(
+        row
+        for row in rows
+        if row["external_id"] == "sinopec-52A3CE39-F9D8-4309-B48E-F55580E8E11C-01"
+    )
+    assert mixed_assignment["country_or_region"] == "境内外混合"
+    assert mixed_assignment["publication_status"] == "out_of_scope"
     huadong_research = next(
         row
         for row in rows
@@ -148,7 +155,7 @@ def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
     result = pipeline.sync_source(source)
     assert result.status == "finished"
     assert result.discovered == 348
-    assert result.open_matches == 70
+    assert result.open_matches == 63
 
     public_rows, public_count = database.list_jobs(page_size=None)
     audit_rows, audit_count = database.list_jobs(
@@ -160,8 +167,8 @@ def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
         row for row in audit_rows if row["source_id"] == "sinopec-career"
     ]
 
-    assert public_count == 70
-    assert len(public_rows) == 70
+    assert public_count == 63
+    assert len(public_rows) == 63
     assert audit_count == 348
     assert len(source_audit_rows) == 348
     assert all(

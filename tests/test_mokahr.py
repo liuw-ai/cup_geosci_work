@@ -135,6 +135,39 @@ def test_mokahr_aes_payload_is_decrypted() -> None:
     assert decoded["data"]["jobs"] == []
 
 
+def test_mokahr_detail_does_not_copy_entire_requirement_into_degree_field(tmp_path) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "publisher": "紫金矿业集团股份有限公司",
+        "config": {},
+    }
+    posting = collector._mokahr_posting(
+        {
+            "id": "geo-campus-1",
+            "title": "地质类",
+            "jobDescription": (
+                "工作职责：从事矿产勘探工作。"
+                "任职资格：1.全日制本科或以上学历；"
+                "2.地质、资源勘探、水文地质相关专业。"
+            ),
+        },
+        source,
+        "https://join.zjky.cn/campus-recruitment/zijinmining/117957/?locale=zh-CN#/jobs",
+    )
+
+    evidence = posting.field_evidence
+    assert evidence["学历要求"] == "全日制本科或以上学历"
+    assert "工作职责" not in evidence["学历要求"]
+    assert posting.location is None
+
+
+def test_mokahr_label_extractors_only_return_bounded_values(tmp_path) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    description = "学历要求：硕士研究生；工作地点：福建省上杭县；其他条件：适应出国。"
+    assert collector._mokahr_education({}, description) == "硕士研究生"
+    assert collector._mokahr_description_location(description) == "福建省上杭县"
+
+
 def test_successfactors_title_filters_reject_software_roles() -> None:
     config = {
         "required_title_patterns": ["geology|geophysic|reservoir"],

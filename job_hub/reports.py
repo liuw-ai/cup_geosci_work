@@ -112,6 +112,8 @@ def build_daily_report(
                     for source in database.list_sources()
                     if requires_manual_government_evidence_confirmation(source)
                 },
+                artifact_manifest=manifest,
+                artifact_manifest_available=manifest_error is None,
                 now=datetime.now(ZoneInfo(settings.timezone)),
             )
         except (OSError, ValueError) as error:

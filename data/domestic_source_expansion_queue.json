@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "as_of": "2026-09-30",
+  "as_of": "2026-10-03",
   "description": "国内官方来源扩展队列。它把单位层级、官方入口、备用入口和当前证据状态分开记录；队列记录本身不会产生学生端岗位。状态须与官方岗位台账和附件生命周期一致。",
   "status_definitions": {
     "official_job_sample_verified": "已取得单位官网、政府官网、高校官网或官方招聘系统的具体岗位样例，并保留岗位级字段证据。",
@@ -11,6 +11,38 @@
     "current_non_student_eligible": "当前官方招聘已核验，但公告整体或岗位资格明确面向有经验人员、内部调配等，不适合在校本科、硕士或博士学生，不能自动下载或发布。"
   },
   "records": [
+    {
+      "id": "chinalco-iguopin-campus-2027",
+      "system": "中央地勘国企",
+      "organization": "中国铝业集团有限公司",
+      "parent_organization": "中国铝业集团有限公司",
+      "organization_role": "mining_and_resources_group",
+      "official_url": "https://chinalco2027.iguopin.com/job",
+      "backup_urls": ["https://chinalco2027.iguopin.com/notice", "https://www.chinalco.com.cn/"],
+      "source_id": "chinalco-iguopin-browser",
+      "channel_type": "official_recruitment_system",
+      "status": "official_job_sample_verified",
+      "observed_on": "2026-10-03",
+      "sample_announcement_url": "https://chinalco2027.iguopin.com/notice",
+      "sample_job_ids": ["chinalco-iguopin-218518701773684917"],
+      "field_validation": "中国铝业集团 2027 届校园招聘官方公告明确本国聘子站为报名平台，报名期为 2026-09-16 至 2027-03-07。独立服务器环境已完成两次全筛选、全分页、全详情捕获：每次 5 页、51 张卡片、35 个去重岗位详情且详情零失败，职位编号集合哈希一致。经国内地点、专业和学历门禁后，27 条岗位可公开；5 条专业不匹配及 3 条海外或境内外混合岗位不进入学生端。",
+      "next_action": "从干净版本化发布包切换到生产浏览器 worker；连续两次完整成功捕获并抽检岗位详情直达链接后，才计入生产覆盖。"
+    },
+    {
+      "id": "minmetals-campus-entry",
+      "system": "中央地勘国企",
+      "organization": "中国五矿集团有限公司",
+      "parent_organization": "中国五矿集团有限公司",
+      "organization_role": "mining_and_resources_group",
+      "official_url": "https://www.minmetals.com.cn/",
+      "backup_urls": ["https://www.minmetals.com/", "https://minmetals.iguopin.com/"],
+      "source_id": null,
+      "channel_type": "official_homepage",
+      "status": "official_identity_only",
+      "observed_on": "2026-10-03",
+      "field_validation": "服务器隔离 Chromium 直接渲染 https://minmetals.iguopin.com/jobCampus，页面标题为“中国五矿集团有限公司人才招聘”，但正文为“404 您访问的页面不存在”，没有岗位卡片、筛选器或岗位详情链接。该结果只能证明该候选子路径当前不可用，不能推断集团没有招聘。",
+      "next_action": "从中国五矿集团官网重新定位当前年度招聘公告或正式招聘系统；取得岗位级专业、学历、地点、截止日期和官方详情链接后再注册来源。"
+    },
     {
       "id": "cnpc-riped-campus",
       "system": "中国石油",

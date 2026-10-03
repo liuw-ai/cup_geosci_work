@@ -80,6 +80,25 @@ def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
     assert all(item.get("sample_job_ids") for item in cnpc_rows)
     assert all(item.get("field_validation") for item in cnpc_rows)
 
+    chinalco_row = next(
+        item
+        for item in queue["records"]
+        if item["id"] == "chinalco-iguopin-campus-2027"
+    )
+    assert chinalco_row["source_id"] == "chinalco-iguopin-browser"
+    assert chinalco_row["status"] == "official_job_sample_verified"
+    assert chinalco_row["sample_announcement_url"] == "https://chinalco2027.iguopin.com/notice"
+    assert chinalco_row["sample_job_ids"]
+    assert "两次" in chinalco_row["field_validation"]
+
+    minmetals_row = next(
+        item for item in queue["records"] if item["id"] == "minmetals-campus-entry"
+    )
+    assert minmetals_row["status"] == "official_identity_only"
+    assert minmetals_row["source_id"] is None
+    assert "404" in minmetals_row["field_validation"]
+    assert "不能推断" in minmetals_row["field_validation"]
+
     limited = domestic_expansion_rows(queue, status="access_limited")
     assert limited
     assert all(item["status"] == "access_limited" for item in limited)
@@ -152,7 +171,17 @@ def test_cnpc_snapshot_covers_ten_oilfields_and_all_rows_are_publishable(tmp_pat
     )
     settings.source_registry_path.write_text(
         json.dumps(
-            [item for item in source_registry if item["id"] == "cnpc-career"],
+            [
+                {
+                    **item,
+                    # The test validates row-level import shape. Use an
+                    # explicitly long fixture window; production keeps the
+                    # configured 30-hour freshness contract.
+                    "config": {**item.get("config", {}), "max_age_hours": 100_000},
+                }
+                for item in source_registry
+                if item["id"] == "cnpc-career"
+            ],
             ensure_ascii=False,
         ),
         encoding="utf-8",

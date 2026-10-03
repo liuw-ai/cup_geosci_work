@@ -32,10 +32,25 @@
         <p class="eyebrow">覆盖质量</p>
         <h2>当前数据状态</h2>
       </div>
-      <span class="section-count">{{ coverage.open_jobs }} 条在招</span>
+      <span class="section-count">{{ coverage.dual_axis.coverage_axis.domestic_effective_jobs }} / {{ coverage.dual_axis.coverage_axis.target_jobs }} 条国内在招</span>
     </div>
-    <p class="muted">已登记 {{ coverage.source_health.registered_sources }} 个官方入口。入口可访问不等于完成扫描；只有最近一次扫描成功且有开放匹配时，系统才把结果计入“在招”。</p>
+    <p class="muted">学生端当前共有 {{ coverage.open_jobs }} 条公开机会，其中 {{ coverage.dual_axis.coverage_axis.domestic_effective_jobs }} 条计入全国国内岗位目标。入口可访问不等于完成扫描；只有最近一次扫描成功且有开放匹配时，系统才把结果计入“在招”。</p>
     <div class="stats-grid quality-stats" aria-label="覆盖质量指标">
+      <div class="stat">
+        <span>国内岗位覆盖</span>
+        <strong>{{ (coverage.dual_axis.coverage_axis.completion_rate * 100)|round|int }}%</strong>
+        <small>距目标 {{ coverage.dual_axis.coverage_axis.gap_jobs }} 条</small>
+      </div>
+      <div class="stat">
+        <span>可靠性评分</span>
+        <strong>{{ coverage.dual_axis.reliability_axis.score|round(1) }}</strong>
+        <small>/ {{ coverage.dual_axis.reliability_axis.max_score }}，不代表岗位数量</small>
+      </div>
+      <div class="stat">
+        <span>全院数据门禁</span>
+        <strong>{{ "通过" if coverage.dual_axis.college_data_readiness.status == "ready" else "未达标" }}</strong>
+        <small>{{ coverage.dual_axis.college_data_readiness.failed_checks|length }} 项待完成</small>
+      </div>
       <div class="stat">
         <span>成功扫描来源</span>
         <strong>{{ coverage.scan_quality.successful_scan_sources }}</strong>
@@ -88,6 +103,8 @@
     <div class="coverage-risk-grid">
       <p class="muted">来源集中：{{ coverage.job_distribution.source_concentration.top_name or "暂无" }}（{{ (coverage.job_distribution.source_concentration.top_share * 100)|round|int }}%）</p>
       <p class="muted">类别集中：{{ coverage.job_distribution.category_concentration.top_key or "暂无" }}（{{ (coverage.job_distribution.category_concentration.top_share * 100)|round|int }}%）</p>
+      <p class="muted">前五来源占比：{{ (coverage.dual_axis.coverage_axis.top_five_source_share * 100)|round|int }}%</p>
+      <p class="muted">来源漏斗：待首次扫描 {{ coverage.source_funnel.summary.not_scanned_sources }}，运行中 {{ coverage.source_funnel.summary.running_sources }}，访问受限 {{ coverage.source_funnel.summary.access_limited_sources }}，运行失败 {{ coverage.source_funnel.summary.failed_sources }}；最近运行指标口径待补 {{ coverage.source_funnel.summary.metric_contract_incomplete_sources + coverage.source_funnel.summary.metric_contract_invalid_sources }}</p>
     </div>
   </section>
 

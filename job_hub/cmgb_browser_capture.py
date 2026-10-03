@@ -21,6 +21,8 @@ from typing import Any, Iterable
 from urllib.parse import parse_qs, urljoin, urlparse
 
 from job_hub.browser_capture import BrowserCaptureError, _robots_permit
+from job_hub.capture_evidence import ensure_capture_manifest
+from job_hub.capture_evidence import validate_capture_manifest
 from job_hub.cnpc_browser_runner import _resolve_cdp_websocket
 from job_hub.contracts import is_http_url
 
@@ -214,11 +216,17 @@ def load_cmgb_browser_capture(
     allowed_hosts: Iterable[str] | None = None,
     max_age_hours: float | None = 30,
     require_complete_scan: bool = True,
+    require_capture_manifest: bool = False,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     """Load and validate one server-generated CMGB browser manifest."""
 
     payload = _read_cmgb_capture_payload(path)
+    if require_capture_manifest:
+        try:
+            validate_capture_manifest(payload)
+        except ValueError as error:
+            raise CmgbBrowserCaptureError(str(error)) from error
     status = _text(payload.get("status"), "status")
     if status not in CMGB_CAPTURE_STATUSES:
         raise CmgbBrowserCaptureError(f"unsupported CMGB capture status: {status}")
@@ -266,6 +274,7 @@ def load_cmgb_detail_retry_capture(
     *,
     allowed_hosts: Iterable[str] | None = None,
     max_age_hours: float | None = 12,
+    require_capture_manifest: bool = False,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     """Load a recent, fully paginated partial capture for detail-only retry.
@@ -277,6 +286,11 @@ def load_cmgb_detail_retry_capture(
     """
 
     payload = _read_cmgb_capture_payload(path)
+    if require_capture_manifest:
+        try:
+            validate_capture_manifest(payload)
+        except ValueError as error:
+            raise CmgbBrowserCaptureError(str(error)) from error
     status = _text(payload.get("status"), "status")
     if status != "partial":
         raise CmgbBrowserCaptureError("CMGB detail retry requires a partial capture")
@@ -657,7 +671,26 @@ def _major_from_description(text: str) -> str:
         normalized,
         flags=re.IGNORECASE,
     )
-    return " ".join(condition.group(1).split()).strip(" ：:;；") if condition else ""
+    if condition:
+        return " ".join(condition.group(1).split()).strip(" ：:;；")
+
+    # Some public detail templates use a plain qualification sentence rather
+    # than a labelled field, e.g. ``地质类相关专业，本科及以上学历``.  Accept
+    # only an explicit target-discipline phrase ending in ``专业`` and only
+    # when the same sentence also contains a qualification marker.  This must
+    # not turn a responsibility or employer introduction into major evidence.
+    explicit = re.search(
+        r"([^。；;\n]{0,80}?(?:地质|地球物理|资源勘查|油气勘探|"
+        r"石油地质|地球化学|水文地质|工程地质|物探|测井|遥感地质)"
+        r"[^。；;\n]{0,80}?(?:相关)?专业[^。；;\n]{0,80})",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if explicit and re.search(
+        r"(?:本科|硕士|博士|学历|学位|任职|招聘|应聘|要求)", explicit.group(1)
+    ):
+        return " ".join(explicit.group(1).split()).strip(" ：:;；")
+    return ""
 
 
 def _label_value(text: str, labels: Iterable[str]) -> str:
@@ -827,6 +860,8 @@ def write_cmgb_capture_failure(
     scan: dict[str, Any] | None = None,
     rows: list[dict[str, Any]] | None = None,
     captured_at: str | None = None,
+    source_id: str = "cmgb-iguopin-browser",
+    adapter_version: str = "cmgb-browser-v1",
 ) -> dict[str, Any]:
     """Archive a non-publishable diagnostic without replacing a good capture.
 
@@ -877,13 +912,22 @@ def write_cmgb_capture_failure(
         "scan": diagnostics,
         "rows": rows or [],
     }
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=source_id,
+        adapter_version=adapter_version,
+    )
     _write_capture(archive_path, payload)
     _write_capture(destination.with_suffix(".failure.json"), payload)
     return payload
 
 
 def persist_cmgb_browser_capture(
-    *, output: Path | str, payload: dict[str, Any]
+    *,
+    output: Path | str,
+    payload: dict[str, Any],
+    source_id: str = "cmgb-iguopin-browser",
+    adapter_version: str = "cmgb-browser-v1",
 ) -> dict[str, Any]:
     """Persist a CMGB run while protecting the last complete evidence snapshot.
 
@@ -893,6 +937,11 @@ def persist_cmgb_browser_capture(
     replacement for the previous complete inventory. It is archived instead.
     """
 
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=source_id,
+        adapter_version=adapter_version,
+    )
     status = _text(payload.get("status"), "status")
     if status not in CMGB_CAPTURE_STATUSES:
         raise CmgbBrowserCaptureError(f"unsupported CMGB capture status: {status}")
@@ -928,6 +977,8 @@ def persist_cmgb_browser_capture(
         scan=scan,
         rows=rows,
         captured_at=str(payload.get("captured_at") or ""),
+        source_id=source_id,
+        adapter_version=adapter_version,
     )
 
 
@@ -1271,7 +1322,12 @@ def run_cmgb_browser_capture(
         },
         "rows": rows,
     }
-    return persist_cmgb_browser_capture(output=output, payload=payload)
+    return persist_cmgb_browser_capture(
+        output=output,
+        payload=payload,
+        source_id=str(config.get("source_id") or "cmgb-iguopin-browser"),
+        adapter_version=str(config.get("adapter_version") or "cmgb-browser-v1"),
+    )
 
 
 def run_cmgb_detail_retry(
@@ -1282,6 +1338,7 @@ def run_cmgb_detail_retry(
     allowed_hosts: Iterable[str],
     user_agent: str,
     max_age_hours: float | None = 12,
+    require_capture_manifest: bool = False,
     timeout_ms: int = 45_000,
 ) -> dict[str, Any]:
     """Retry only the failed official CMGB detail tabs from one frozen scan.
@@ -1297,6 +1354,7 @@ def run_cmgb_detail_retry(
         retry_capture_path,
         allowed_hosts=hosts,
         max_age_hours=max_age_hours,
+        require_capture_manifest=require_capture_manifest,
     )
     target_url = str(retry_capture["platform_url"])
     _robots_permit(target_url, user_agent=user_agent)
@@ -1469,4 +1527,9 @@ def run_cmgb_detail_retry(
         retry_failures=retry_failures,
         allowed_hosts=hosts,
     )
-    return persist_cmgb_browser_capture(output=output, payload=payload)
+    return persist_cmgb_browser_capture(
+        output=output,
+        payload=payload,
+        source_id=str(config.get("source_id") or "cmgb-iguopin-browser"),
+        adapter_version=str(config.get("adapter_version") or "cmgb-browser-v1"),
+    )

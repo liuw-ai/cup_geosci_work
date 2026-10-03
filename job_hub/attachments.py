@@ -48,12 +48,15 @@ from job_hub.transport import (
     RequestPolicy,
     configure_session,
     create_session,
+    looks_like_non_robots_document,
     request_exception_types,
 )
 
 
 USER_AGENT = "cupb-geoscience-job-hub-attachment-fetcher/0.1 (+official-public-source)"
-PARSER_VERSION = "attachments-v3"
+# Bump when extracted metadata or candidate derivation rules change.  The
+# worker uses this marker to reparse already-downloaded official files once.
+PARSER_VERSION = "attachments-v4"
 REQUEST_ERRORS = request_exception_types()
 
 SUPPORTED_SUFFIXES = {
@@ -82,6 +85,25 @@ POSITION_TABLE_MARKERS = (
     "岗位表", "职位表", "岗位计划", "招聘计划", "需求计划", "职位一览", "岗位一览",
     "岗位和条件", "岗位条件", "招聘工作人员岗位",
 )
+
+
+_POSITION_CODE_LABEL_RE = re.compile(
+    r"(?:岗位|职位)(?:代码|编号)\s*[:：]?\s*"
+    r"([A-Za-z0-9][A-Za-z0-9_.\-/]{1,39})",
+    re.IGNORECASE,
+)
+
+
+def infer_position_code(row_text: str) -> str | None:
+    """Recover a labeled position code when an attachment omits its code column.
+
+    Several government spreadsheets flatten a row into text while retaining a
+    labeled ``岗位代码`` value in the row text. The label is required on
+    purpose: extracting arbitrary numbers (dates, headcounts, phone numbers)
+    would create a false link to the government position ledger.
+    """
+    match = _POSITION_CODE_LABEL_RE.search(str(row_text or ""))
+    return match.group(1).strip() if match else None
 
 
 def build_attachment_field_evidence(
@@ -122,6 +144,16 @@ def build_attachment_field_evidence(
             and key_text not in {"evidence_scope", "岗位", "专业范围", "学历要求", "table_row", "artifact_url", "row_text"}
         ):
             evidence[key_text] = value_text
+    # Preserve a row-level code even when the spreadsheet parser could not
+    # expose a dedicated code column. This remains bounded by the explicit
+    # label check in ``infer_position_code`` and is therefore safe for dates
+    # and other numeric values appearing elsewhere in the row.
+    if not any(
+        key in evidence for key in ("职位代码", "岗位代码", "职位编号", "岗位编号")
+    ):
+        position_code = infer_position_code(row_text)
+        if position_code:
+            evidence["职位代码"] = position_code
     return {key: value for key, value in evidence.items() if value}
 
 
@@ -969,6 +1001,12 @@ class OfficialAttachmentProcessor:
                 "candidate_queue_retained_rows": retained_rows,
                 "candidate_queue_rejected_rows": rejected_rows,
                 "candidate_queue_checked_at": _utc_now(),
+                # A successful reconciliation supersedes a parser/runtime
+                # error recorded by an earlier container. Keep the diagnostic
+                # fields present but null so operators do not mistake stale
+                # failures for a current processing outage.
+                "last_error": None,
+                "last_error_at": None,
             },
         )
 
@@ -1060,7 +1098,17 @@ class OfficialAttachmentProcessor:
         )
         location = self._field(cells, ("工作地点", "工作区域", "工作城市", "所在地", "地点"))
         degree = self._field(
-            cells, ("学历", "学历要求", "学历层次", "学历及学位", "学位要求", "面向对象")
+            cells,
+            (
+                "学历",
+                "学历要求",
+                "学历层次",
+                "学历及学位",
+                "学历学位",
+                "学历或学位",
+                "学位要求",
+                "面向对象",
+            ),
         )
         major = self._field(
             cells,
@@ -1069,6 +1117,11 @@ class OfficialAttachmentProcessor:
                 "专业要求",
                 "需求专业",
                 "专业范围",
+                "专业及代码",
+                "岗位所需专业",
+                "专业条件要求",
+                "大学本科专业要求",
+                "研究生专业要求",
                 "所学专业",
                 "专业类别",
                 "专业名称",
@@ -1139,7 +1192,15 @@ class OfficialAttachmentProcessor:
         headcount_key = None
         headcount = self._field(
             cells,
-            ("招聘人数", "需求人数", "计划人数", "人数", "计划数"),
+            (
+                "招聘人数",
+                "招聘计划人数",
+                "计划招聘人数",
+                "需求人数",
+                "计划人数",
+                "人数",
+                "计划数",
+            ),
         )
         if not headcount:
             # The CCGC table labels the numeric demand column ``备注``.  It
@@ -1609,6 +1670,10 @@ class OfficialAttachmentProcessor:
             if response.status_code == 404:
                 parser.parse([])
             elif response.ok:
+                if looks_like_non_robots_document(response.text):
+                    raise AttachmentSkipped(
+                        f"Unable to verify robots.txt for {root}: received an HTML error document"
+                    )
                 parser.parse(response.text.splitlines())
             else:
                 raise AttachmentSkipped(
@@ -1705,6 +1770,7 @@ def process_pending_attachments(
     limit: int = 500,
     retry_failed: bool = False,
     source_ids: set[str] | None = None,
+    include_stale_extracted: bool = False,
 ) -> dict[str, object]:
     """Process a bounded, oldest-first slice of the private attachment queue.
 
@@ -1728,6 +1794,23 @@ def process_pending_attachments(
         oldest_first=True,
         extraction_statuses=eligible_statuses,
     )
+    # New files must remain first in the queue.  Add only enough extracted
+    # files with an older parser marker to fill the remaining batch capacity.
+    # This avoids starving newly discovered official attachments during a
+    # one-time parser migration.
+    if include_stale_extracted and len(artifacts) < bounded_limit:
+        known_ids = {int(item["id"]) for item in artifacts if item.get("id") is not None}
+        stale_candidates = database.list_source_artifacts(
+            limit=bounded_limit,
+            oldest_first=True,
+            extraction_statuses={"extracted"},
+        )
+        artifacts.extend(
+            item
+            for item in stale_candidates
+            if item.get("id") is not None and int(item["id"]) not in known_ids
+        )
+        artifacts = artifacts[:bounded_limit]
     source_scoped_artifacts = [
         artifact
         for artifact in artifacts
@@ -1743,9 +1826,19 @@ def process_pending_attachments(
             artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else None
         )
     ]
-    selected = [
-        artifact for artifact in source_scoped_artifacts if artifact not in policy_skipped
-    ]
+    selected = []
+    for artifact in source_scoped_artifacts:
+        status = str(artifact.get("extraction_status") or "")
+        stale_extracted = (
+            include_stale_extracted
+            and status == "extracted"
+            and str(artifact.get("parser_version") or "") != PARSER_VERSION
+        )
+        pending = status in {"registered", "downloaded"} or (
+            retry_failed and status == "failed"
+        )
+        if artifact not in policy_skipped and (pending or stale_extracted):
+            selected.append(artifact)
     summary: dict[str, object] = {
         "selected": len(selected),
         "processed": 0,
@@ -1755,6 +1848,8 @@ def process_pending_attachments(
         "rows_extracted": 0,
         "candidates_created": 0,
         "candidates_rejected": 0,
+        "reparsed": 0,
+        "include_stale_extracted": bool(include_stale_extracted),
         "retry_failed": bool(retry_failed),
         "policy_skipped": len(policy_skipped),
         "policy_skip_items": [
@@ -1774,6 +1869,7 @@ def process_pending_attachments(
     assert isinstance(items, list)
     for artifact in selected:
         artifact_id = int(artifact["id"])
+        was_stale_extracted = str(artifact.get("extraction_status") or "") == "extracted"
         summary["processed"] = int(summary["processed"]) + 1
         try:
             result = processor.process(artifact_id)
@@ -1781,6 +1877,8 @@ def process_pending_attachments(
             status = str(result_payload.get("status") or "")
             if status == "extracted":
                 summary["extracted"] = int(summary["extracted"]) + 1
+                if was_stale_extracted:
+                    summary["reparsed"] = int(summary["reparsed"]) + 1
             elif status == "skipped":
                 summary["skipped"] = int(summary["skipped"]) + 1
             elif status == "failed":

@@ -26,6 +26,7 @@ class MajorDefinition:
     student_levels: tuple[str, ...]
     classification: dict[str, Any]
     exact_terms: tuple[str, ...]
+    bounded_exact_terms: tuple[str, ...]
     category_terms: tuple[str, ...]
     english_exact_terms: tuple[str, ...]
     related_terms: tuple[str, ...]
@@ -37,6 +38,7 @@ class MajorDefinition:
             "student_levels": list(self.student_levels),
             "classification": dict(self.classification),
             "exact_terms": list(self.exact_terms),
+            "bounded_exact_terms": list(self.bounded_exact_terms),
             "category_terms": list(self.category_terms),
             "english_exact_terms": list(self.english_exact_terms),
             "related_terms": list(self.related_terms),
@@ -96,7 +98,22 @@ def validate_major_taxonomy(payload: Any) -> dict[str, Any]:
             if not isinstance(terms, list) or any(not str(term).strip() for term in terms):
                 raise ContractValidationError(f"major taxonomy {item_id} {field} is invalid")
             item[field] = list(dict.fromkeys(str(term).strip() for term in terms))
+        bounded_terms = item.get("bounded_exact_terms", [])
+        if not isinstance(bounded_terms, list) or any(
+            not str(term).strip() for term in bounded_terms
+        ):
+            raise ContractValidationError(
+                f"major taxonomy {item_id} bounded_exact_terms is invalid"
+            )
+        item["bounded_exact_terms"] = list(
+            dict.fromkeys(str(term).strip() for term in bounded_terms)
+        )
         for term in item["exact_terms"]:
+            folded = term.casefold()
+            if folded in exact_terms:
+                raise ContractValidationError(f"duplicate exact major term: {term}")
+            exact_terms.add(folded)
+        for term in item["bounded_exact_terms"]:
             folded = term.casefold()
             if folded in exact_terms:
                 raise ContractValidationError(f"duplicate exact major term: {term}")
@@ -120,6 +137,7 @@ def list_major_definitions(path: Path | None = None) -> tuple[MajorDefinition, .
             student_levels=tuple(item["student_levels"]),
             classification=dict(item["classification"]),
             exact_terms=tuple(item["exact_terms"]),
+            bounded_exact_terms=tuple(item["bounded_exact_terms"]),
             category_terms=tuple(item["category_terms"]),
             english_exact_terms=tuple(item["english_exact_terms"]),
             related_terms=tuple(item["related_terms"]),
@@ -159,6 +177,17 @@ def exact_terms_for_profile(profile_id: str, path: Path | None = None) -> tuple[
 def category_terms_for_profile(profile_id: str, path: Path | None = None) -> tuple[str, ...]:
     """Return explicit discipline-category terms for a supported profile."""
     return profile_major_definition(profile_id, path).category_terms
+
+
+def bounded_exact_terms_for_profile(
+    profile_id: str, path: Path | None = None
+) -> tuple[str, ...]:
+    """Return reviewed short-form major names requiring CJK boundaries.
+
+    An official table may abbreviate a formal discipline by dropping a suffix,
+    but a substring of a different discipline must never become a match.
+    """
+    return profile_major_definition(profile_id, path).bounded_exact_terms
 
 
 def english_exact_terms_for_profile(profile_id: str, path: Path | None = None) -> tuple[str, ...]:

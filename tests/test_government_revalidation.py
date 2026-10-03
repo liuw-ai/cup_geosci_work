@@ -33,8 +33,12 @@ class FakeSession:
         self.responses = responses
         self.headers: dict[str, str] = {}
         self.trust_env = False
+        self.calls: list[str] = []
 
     def get(self, url: str, **_kwargs: object) -> FakeResponse:
+        self.calls.append(url)
+        if url.endswith("/robots.txt") and url not in self.responses:
+            return FakeResponse(404, b"")
         return self.responses[url]
 
 
@@ -91,6 +95,71 @@ def test_recheck_reads_only_registered_official_notice_and_attachment(tmp_path) 
     assert results[0]["status"] == "verified"
     assert results[0]["checked_at"] == "2026-09-28T02:00:00Z"
     assert "2 official evidence" in results[0]["detail"]
+    assert session.calls == [
+        "https://careers.example.edu.cn/robots.txt",
+        "https://careers.example.edu.cn/notice/1",
+        "https://careers.example.edu.cn/notice/1.xlsx",
+    ]
+
+
+def test_recheck_stops_before_evidence_when_robots_disallows_access(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    source_record = source()
+    source_record["config"] = {
+        "government_evidence_recheck": True,
+        "allowed_hosts": ["careers.example.edu.cn"],
+    }
+    session = FakeSession(
+        {
+            "https://careers.example.edu.cn/robots.txt": FakeResponse(
+                200,
+                b"User-agent: *\nDisallow: /notice/\n",
+            ),
+            "https://careers.example.edu.cn/notice/1": FakeResponse(200, b"must not fetch"),
+            "https://careers.example.edu.cn/notice/1.xlsx": FakeResponse(200, b"must not fetch"),
+        }
+    )
+
+    result = revalidate_government_sources(
+        _registry(),
+        {"official-test-source": source_record},
+        settings,
+        session=session,
+    )[0]
+
+    assert result["status"] == "source_unavailable"
+    assert "robots.txt does not permit" in result["detail"]
+    assert session.calls == ["https://careers.example.edu.cn/robots.txt"]
+
+
+def test_recheck_rejects_html_error_document_at_robots_url(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    source_record = source()
+    source_record["config"] = {
+        "government_evidence_recheck": True,
+        "allowed_hosts": ["careers.example.edu.cn"],
+    }
+    session = FakeSession(
+        {
+            "https://careers.example.edu.cn/robots.txt": FakeResponse(
+                200,
+                b"<html><title>404 Not Found</title></html>",
+            ),
+            "https://careers.example.edu.cn/notice/1": FakeResponse(200, b"must not fetch"),
+            "https://careers.example.edu.cn/notice/1.xlsx": FakeResponse(200, b"must not fetch"),
+        }
+    )
+
+    result = revalidate_government_sources(
+        _registry(),
+        {"official-test-source": source_record},
+        settings,
+        session=session,
+    )[0]
+
+    assert result["status"] == "source_unavailable"
+    assert "HTML error document" in result["detail"]
+    assert session.calls == ["https://careers.example.edu.cn/robots.txt"]
 
 
 def test_recheck_distinguishes_explicit_cancellation_from_source_failure(tmp_path) -> None:
@@ -333,3 +402,32 @@ def test_conditional_position_cancellation_text_does_not_withdraw_the_notice(tmp
     )[0]
 
     assert result["status"] == "verified"
+
+
+def test_automatic_evidence_refresh_cannot_renew_current_vacancy_confirmation(tmp_path) -> None:
+    database = Database(tmp_path / "jobs.sqlite3")
+    database.initialize()
+    database.upsert_source(source())
+
+    database.record_government_source_verification(
+        "official-test-source",
+        status="verified",
+        checked_at="2026-10-03T00:00:00Z",
+        detail="Administrator checked the official current vacancy status.",
+        availability_confirmed_at="2026-10-03T00:00:00Z",
+        availability_confirmation_detail="Official status page still accepts applications.",
+    )
+    refreshed = database.record_government_source_verification(
+        "official-test-source",
+        status="verified",
+        checked_at="2026-10-04T00:00:00Z",
+        detail="Automated notice and attachment refresh succeeded.",
+    )
+
+    assert refreshed["last_success_at"] == "2026-10-04T00:00:00Z"
+    assert refreshed["availability_confirmed_at"] == "2026-10-03T00:00:00Z"
+    assert refreshed["availability_confirmation_detail"] == (
+        "Official status page still accepts applications."
+    )
+    events = database.list_government_source_verification_events("official-test-source")
+    assert events[0]["availability_confirmed_at"] == "2026-10-03T00:00:00Z"

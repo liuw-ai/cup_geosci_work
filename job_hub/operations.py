@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import os
 from datetime import datetime, timezone
 from typing import Any, Callable
 
@@ -23,6 +25,9 @@ _BROWSER_SERVICE_BY_SOURCE_TYPE = {
 _EXPECTED_BROWSER_LIMITATION_MARKERS = (
     "robots.txt returned http 403",
     "robots.txt returned http 412",
+    "robots.txt cannot be verified",
+    "certificate_verify_failed",
+    "certificate verify failed",
     "maintenance window",
     "maintenance_window",
     "access-limited",
@@ -30,6 +35,48 @@ _EXPECTED_BROWSER_LIMITATION_MARKERS = (
     "listing returned http 400",
     "listing returned http 412",
 )
+
+
+def release_configuration(
+    settings: Settings,
+    *,
+    require_pinned_images: bool = True,
+) -> dict[str, Any]:
+    """Validate the release identity required before a production switch.
+
+    This is a configuration gate, not a deployment driver. Web/Worker and
+    browser services may use different images, but the browser base must be
+    the exact application image selected for the release.
+    """
+    release = settings.release_info()
+    image_refs = {
+        "application": os.getenv("JOB_HUB_IMAGE", "").strip(),
+        "browser": os.getenv("JOB_HUB_BROWSER_IMAGE", "").strip(),
+        "runtime_base": os.getenv("RUNTIME_IMAGE", "").strip(),
+    }
+    issues: list[str] = []
+    if require_pinned_images:
+        for key, value in release.items():
+            if value in {"", "unknown", "dev"}:
+                issues.append(f"release.{key} 未注入生产身份")
+        for key, value in image_refs.items():
+            if not value:
+                issues.append(f"{key} 镜像引用为空")
+            elif value.endswith(":latest"):
+                issues.append(f"{key} 镜像仍使用 latest")
+        if (
+            image_refs["application"]
+            and image_refs["runtime_base"]
+            and image_refs["application"] != image_refs["runtime_base"]
+        ):
+            issues.append("浏览器 runtime_base 与 application 镜像不一致")
+    return {
+        "ok": not issues,
+        "release": release,
+        "images": image_refs,
+        "require_pinned_images": require_pinned_images,
+        "issues": issues,
+    }
 
 
 def worker_health(database: Database, max_age_seconds: int) -> dict[str, Any]:
@@ -183,6 +230,7 @@ def build_production_readiness(
     backup_max_age_seconds: int = 86_400,
     domain_hostname: str | None = None,
     expected_ip: str | None = None,
+    require_continuous_validation: bool = False,
     domain_probe: Callable[..., DomainProbeResult] = probe_public_domain,
 ) -> dict[str, Any]:
     """Build an auditable release gate without changing jobs or source state.
@@ -195,6 +243,8 @@ def build_production_readiness(
     audit = audit_database(database, settings)
     worker = worker_health(database, worker_max_age_seconds)
     browser_workers = browser_worker_health(database)
+    continuous = continuous_validation(database)
+    link_health = link_health_validation(settings)
     backup = DatabaseBackupManager(settings).latest_status(
         max_age_seconds=backup_max_age_seconds
     )
@@ -208,7 +258,9 @@ def build_production_readiness(
         bool(audit.get("ok"))
         and bool(worker.get("ok"))
         and bool(browser_workers.get("release_ok", browser_workers.get("ok")))
+        and bool(link_health.get("ok"))
         and backup.ok
+        and (continuous["ok"] or not require_continuous_validation)
     )
     public_ready = internal_ready and bool(domain and domain.get("ready"))
     return {
@@ -217,10 +269,179 @@ def build_production_readiness(
         "audit": audit,
         "worker": worker,
         "browser_workers": browser_workers,
+        "link_health": link_health,
         "backup": backup.as_dict(),
+        "continuous_validation": continuous,
         "domain": domain,
         "publication_policy": (
             "公网正式发布必须同时通过数据审计、worker 心跳、已验证备份和正式域名 HTTPS；"
             "任何一项失败均不得将系统标记为可正式服务学生。"
         ),
     }
+
+
+def link_health_validation(
+    settings: Settings,
+    *,
+    max_age_seconds: int = 90_000,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Validate the latest persisted official-link health report.
+
+    The link probe is read-only and independent from publication, but an
+    enabled production deployment must still prove that the daily probe
+    produced a usable report. A missing or malformed report is an operational
+    failure, not evidence that links are broken and not a reason to withdraw
+    jobs.
+    """
+    enabled = bool(getattr(settings, "link_health_enabled", False))
+    maximum = max(1, int(max_age_seconds))
+    if not enabled:
+        return {
+            "enabled": False,
+            "ok": True,
+            "max_age_seconds": maximum,
+            "message": "链接健康门禁未启用。",
+        }
+
+    root = settings.data_dir / "link-health"
+    try:
+        candidates = sorted(
+            root.glob("*.json"), key=lambda path: path.stat().st_mtime
+        )
+    except OSError:
+        candidates = []
+    if not candidates:
+        return {
+            "enabled": True,
+            "ok": False,
+            "max_age_seconds": maximum,
+            "report_date": None,
+            "age_seconds": None,
+            "message": "尚未生成官方链接健康报告。",
+        }
+    report_path = candidates[-1]
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        return {
+            "enabled": True,
+            "ok": False,
+            "max_age_seconds": maximum,
+            "report_date": report_path.stem,
+            "age_seconds": None,
+            "message": f"官方链接健康报告无法读取：{error.__class__.__name__}。",
+        }
+    if not isinstance(payload, dict):
+        return {
+            "enabled": True,
+            "ok": False,
+            "max_age_seconds": maximum,
+            "report_date": report_path.stem,
+            "age_seconds": None,
+            "message": "官方链接健康报告不是 JSON 对象。",
+        }
+    generated_at = str(payload.get("generated_at") or "").strip()
+    try:
+        observed = datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
+        if observed.tzinfo is None:
+            observed = observed.replace(tzinfo=timezone.utc)
+        reference = now or datetime.now(timezone.utc)
+        if reference.tzinfo is None:
+            reference = reference.replace(tzinfo=timezone.utc)
+        age_seconds = max(
+            0,
+            int((reference - observed.astimezone(timezone.utc)).total_seconds()),
+        )
+    except (TypeError, ValueError):
+        return {
+            "enabled": True,
+            "ok": False,
+            "max_age_seconds": maximum,
+            "report_date": str(payload.get("observed_on") or report_path.stem),
+            "age_seconds": None,
+            "message": "官方链接健康报告缺少有效 generated_at。",
+        }
+    status_counts = payload.get("status_counts")
+    checked = payload.get("checked")
+    valid_shape = (
+        isinstance(status_counts, dict)
+        and isinstance(checked, int)
+        and checked >= 0
+        and all(
+            isinstance(value, int) and value >= 0
+            for value in status_counts.values()
+        )
+    )
+    ok = age_seconds <= maximum and valid_shape
+    return {
+        "enabled": True,
+        "ok": ok,
+        "max_age_seconds": maximum,
+        "report_date": str(payload.get("observed_on") or report_path.stem),
+        "age_seconds": age_seconds,
+        "checked": checked if isinstance(checked, int) else None,
+        "status_counts": status_counts if isinstance(status_counts, dict) else {},
+        "message": (
+            "官方链接健康报告在连续运行窗口内。"
+            if ok
+            else "官方链接健康报告过期或结构无效；不能将链接可用性视为已验证。"
+        ),
+    }
+
+
+def continuous_validation(
+    database: Database,
+    *,
+    max_age_seconds: int = 90_000,
+) -> dict[str, Any]:
+    """Check that daily observability artifacts are actually being produced.
+
+    This is intentionally separate from worker liveness: a live process that
+    never records a coverage snapshot or daily report is not continuously
+    validating the service. The check is diagnostic by default; a release
+    command can opt into making it a hard gate.
+    """
+    maximum = max(1, int(max_age_seconds))
+    now = datetime.now(timezone.utc)
+    snapshot = database.list_coverage_snapshots(limit=1)
+    latest_snapshot = snapshot[0] if snapshot else None
+    snapshot_age = _age_seconds(latest_snapshot.get("captured_at") if latest_snapshot else None, now)
+    report = database.latest_daily_report()
+    report_age = _age_seconds(report.get("published_at") if report else None, now)
+    report_delivery = str(report.get("delivery_status") or "") if report else "missing"
+    snapshot_ok = snapshot_age is not None and snapshot_age <= maximum
+    report_ok = report_age is not None and report_age <= maximum and report_delivery in {"sent", "skipped", "pending"}
+    result = {
+        "ok": bool(snapshot_ok and report_ok),
+        "max_age_seconds": maximum,
+        "coverage_snapshot": {
+            "present": latest_snapshot is not None,
+            "age_seconds": snapshot_age,
+            "snapshot_date": latest_snapshot.get("snapshot_date") if latest_snapshot else None,
+        },
+        "daily_report": {
+            "present": report is not None,
+            "age_seconds": report_age,
+            "report_date": report.get("report_date") if report else None,
+            "delivery_status": report_delivery,
+        },
+        "message": (
+            "覆盖快照和日报均在连续运行窗口内。"
+            if snapshot_ok and report_ok
+            else "尚未形成近期覆盖快照和日报；不能把进程存活当成每日更新成功。"
+        ),
+    }
+    return result
+
+
+def _age_seconds(value: Any, now: datetime) -> int | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return max(0, int((now - parsed.astimezone(timezone.utc)).total_seconds()))
+    except (TypeError, ValueError):
+        return None

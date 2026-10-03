@@ -22,8 +22,10 @@ class ProbeSession:
     def __init__(self, responses: dict[str, ProbeResponse]) -> None:
         self.headers: dict[str, str] = {}
         self.responses = responses
+        self.calls: list[str] = []
 
     def get(self, url: str, **_kwargs):
+        self.calls.append(url)
         response = self.responses[url]
         response.url = response.url or url
         return response
@@ -68,6 +70,27 @@ def test_source_health_stops_when_robots_disallows_access(tmp_path) -> None:
     assert result.status == "source_blocked"
     assert result.successful is False
     assert result.checks["robots"]["status"] == "disallowed"
+
+
+def test_source_health_rejects_html_error_document_at_robots_url(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    entry = source()
+    entry["source_type"] = "landing_page"
+    session = ProbeSession(
+        {
+            "https://careers.example.edu.cn/robots.txt": ProbeResponse(
+                200,
+                "<html><title>404 Not Found</title></html>",
+            ),
+            "https://careers.example.edu.cn/": ProbeResponse(200),
+        }
+    )
+
+    result = SourceHealthProbe(settings, session).check(entry)
+
+    assert result.status == "source_degraded"
+    assert result.checks["robots"]["status"] == "non_robots_document"
+    assert session.calls == ["https://careers.example.edu.cn/robots.txt"]
 
 
 def test_source_health_checks_registered_listing_not_generic_homepage(tmp_path) -> None:

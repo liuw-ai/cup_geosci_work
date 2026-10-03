@@ -20,6 +20,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from job_hub.contracts import is_http_url
+from job_hub.capture_evidence import ensure_capture_manifest, validate_capture_manifest
 
 
 CAPTURE_STATUSES = frozenset({"success", "access_limited", "parse_failed", "partial"})
@@ -64,6 +65,7 @@ def load_browser_capture(
     allowed_hosts: list[str] | set[str],
     max_age_hours: float | None = None,
     require_complete_scan: bool = True,
+    require_capture_manifest: bool = False,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     """Load a browser capture and enforce its freshness and scan contract."""
@@ -77,6 +79,11 @@ def load_browser_capture(
         raise BrowserCaptureError(f"browser capture file cannot be read: {capture_path}") from error
     if not isinstance(payload, dict):
         raise BrowserCaptureError("browser capture must be a JSON object")
+    if require_capture_manifest:
+        try:
+            validate_capture_manifest(payload)
+        except ValueError as error:
+            raise BrowserCaptureError(str(error)) from error
 
     hosts = {str(host).strip().lower() for host in allowed_hosts if str(host).strip()}
     if not hosts:
@@ -292,10 +299,38 @@ def run_browser_capture(
     hosts = {str(host).strip().lower() for host in allowed_hosts if str(host).strip()}
     rows: list[dict[str, Any]] = []
     pages_scanned = 0
+    browser = None
+    context = None
+    owns_browser = False
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=True)
-            page = browser.new_page(user_agent=user_agent)
+            cdp_url = str(config.get("cdp_url") or "").strip()
+            if cdp_url:
+                # The browser worker image keeps Chromium in a separate
+                # container. Resolve its internal CDP endpoint instead of
+                # launching a second browser inside the worker container.
+                # Import lazily because cnpc_browser_runner imports this
+                # module for the shared capture contracts.
+                from job_hub.cnpc_browser_runner import _resolve_cdp_websocket
+
+                browser = playwright.chromium.connect_over_cdp(
+                    _resolve_cdp_websocket(cdp_url)
+                )
+                if not browser.contexts:
+                    raise BrowserCaptureError("CDP browser has no default context")
+                context = browser.contexts[0]
+                for opened_page in list(context.pages):
+                    try:
+                        if not opened_page.is_closed():
+                            opened_page.close()
+                    except Exception:
+                        pass
+                page = context.new_page()
+            else:
+                browser = playwright.chromium.launch(headless=True)
+                owns_browser = True
+                context = browser.new_context(user_agent=user_agent)
+                page = context.new_page()
             page.goto(target_url, wait_until="networkidle", timeout=timeout_ms)
             max_pages = max(1, int(config.get("max_pages", 20)))
             next_selector = str(config.get("next_selector") or "").strip()
@@ -320,7 +355,8 @@ def run_browser_capture(
                     break
                 next_button.click()
                 page.wait_for_load_state("networkidle", timeout=timeout_ms)
-            browser.close()
+            if owns_browser and browser is not None:
+                browser.close()
     except PlaywrightTimeoutError as error:
         raise BrowserCaptureError(f"browser page timed out: {error}") from error
     except BrowserCaptureError:
@@ -331,6 +367,7 @@ def run_browser_capture(
     if not rows:
         raise BrowserCaptureError("browser capture rendered no rows")
     payload = {
+        "version": 1,
         "status": "success",
         "platform_url": target_url,
         "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -343,7 +380,59 @@ def run_browser_capture(
         },
         "rows": rows,
     }
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=str(config.get("source_id") or "official-browser-source"),
+        adapter_version=str(config.get("adapter_version") or "browser-capture-v1"),
+    )
     destination = Path(output)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_suffix(destination.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary.replace(destination)
+    return payload
+
+
+def write_browser_capture_failure(
+    *,
+    output: Path | str,
+    platform_url: str,
+    status: str,
+    reason: str,
+    source_id: str = "official-browser-source",
+    adapter_version: str = "browser-capture-v1",
+) -> dict[str, Any]:
+    """Persist a manifest for a failed generic browser attempt.
+
+    The diagnostic is written beside the last successful capture.  It is
+    never used as a publication pointer, but its manifest makes an access or
+    parser failure auditable in the same way as a successful capture.
+    """
+
+    if status not in {"access_limited", "parse_failed", "partial"}:
+        raise ValueError("failure capture status must be access_limited, parse_failed or partial")
+    payload: dict[str, Any] = {
+        "version": 1,
+        "status": status,
+        "platform_url": platform_url,
+        "diagnostic_for": Path(output).name,
+        "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "scan": {
+            "pages_scanned": 0,
+            "pagination_complete": False,
+            "rows_discovered": 0,
+            "rows_exported": 0,
+            "failed_rows": 0,
+            "failure_reason": str(reason)[:1000],
+        },
+        "rows": [],
+    }
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=source_id,
+        adapter_version=adapter_version,
+    )
+    destination = Path(str(output) + ".failure.json")
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + ".tmp")
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

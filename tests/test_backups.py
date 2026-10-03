@@ -12,7 +12,13 @@ from job_hub.app import create_app
 import job_hub.cli as cli
 from job_hub.db import Database
 from job_hub.domain_probe import DomainProbeResult
-from job_hub.operations import browser_worker_health, build_production_readiness, worker_health
+from job_hub.operations import (
+    browser_worker_health,
+    build_production_readiness,
+    link_health_validation,
+    release_configuration,
+    worker_health,
+)
 from job_hub.worker import DailyWorker
 
 from conftest import make_settings, source
@@ -25,6 +31,43 @@ def _settings(tmp_path: Path):
         backup_retention_days=14,
         backup_min_interval_minutes=60,
     )
+
+
+def test_release_configuration_requires_one_pinned_application_base_and_browser_image(
+    tmp_path, monkeypatch
+) -> None:
+    settings = replace(
+        make_settings(tmp_path),
+        release_version="release-2026-10-04",
+        release_git_sha="abcdef123456",
+        release_image_sha="sha256:application",
+        release_built_at="2026-10-04T00:00:00Z",
+    )
+    monkeypatch.setenv("JOB_HUB_IMAGE", "registry.example/job-hub:release-2026-10-04")
+    monkeypatch.setenv(
+        "JOB_HUB_BROWSER_IMAGE", "registry.example/job-hub-browser:release-2026-10-04"
+    )
+    monkeypatch.setenv("RUNTIME_IMAGE", "registry.example/job-hub:release-2026-10-04")
+
+    result = release_configuration(settings)
+
+    assert result["ok"] is True
+    assert result["issues"] == []
+
+
+def test_release_configuration_rejects_latest_and_mismatched_browser_base(
+    tmp_path, monkeypatch
+) -> None:
+    settings = make_settings(tmp_path)
+    monkeypatch.setenv("JOB_HUB_IMAGE", "cupb-geoscience-job-hub:latest")
+    monkeypatch.setenv("JOB_HUB_BROWSER_IMAGE", "cupb-geoscience-job-hub-browser:latest")
+    monkeypatch.setenv("RUNTIME_IMAGE", "cupb-geoscience-job-hub:other")
+
+    result = release_configuration(settings)
+
+    assert result["ok"] is False
+    assert any("latest" in issue for issue in result["issues"])
+    assert any("runtime_base" in issue for issue in result["issues"])
 
 
 def test_sqlite_backup_is_verified_private_and_created_only_when_due(tmp_path) -> None:
@@ -154,6 +197,39 @@ def test_production_readiness_requires_audit_worker_and_verified_backup(tmp_path
     assert result["backup"]["ok"] is True
 
 
+def test_link_health_validation_is_opt_in_and_requires_fresh_valid_report(tmp_path) -> None:
+    settings = replace(make_settings(tmp_path), link_health_enabled=True)
+    reference = datetime(2026, 10, 2, 12, 0, tzinfo=timezone.utc)
+
+    missing = link_health_validation(settings, now=reference)
+    assert missing["enabled"] is True
+    assert missing["ok"] is False
+
+    report_dir = tmp_path / "link-health"
+    report_dir.mkdir()
+    (report_dir / "2026-10-02.json").write_text(
+        '{"observed_on":"2026-10-02","generated_at":"2026-10-02T11:00:00Z",'
+        '"checked":2,"status_counts":{"reachable":2}}',
+        encoding="utf-8",
+    )
+    fresh = link_health_validation(settings, now=reference)
+    assert fresh["ok"] is True
+    assert fresh["checked"] == 2
+
+    stale = link_health_validation(
+        settings,
+        now=reference.replace(day=4),
+        max_age_seconds=90_000,
+    )
+    assert stale["ok"] is False
+
+    disabled = link_health_validation(
+        replace(settings, link_health_enabled=False), now=reference
+    )
+    assert disabled["enabled"] is False
+    assert disabled["ok"] is True
+
+
 def test_browser_worker_health_fails_when_enabled_capture_has_no_heartbeat(tmp_path) -> None:
     settings = _settings(tmp_path)
     database = Database(settings.database_path)
@@ -259,6 +335,42 @@ def test_browser_worker_maintenance_window_does_not_block_other_sources(tmp_path
     assert result["release_ok"] is True
     assert result["expected_access_limited"] == ["cnpc-browser"]
     assert result["workers"]["cnpc-browser"]["expected_access_limited"] is True
+
+
+def test_browser_worker_tls_failure_is_an_expected_access_limitation(tmp_path) -> None:
+    settings = _settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    browser_source = source()
+    browser_source.update(
+        {
+            "id": "sinopec-career",
+            "source_type": "sinopec_spa_rows",
+            "name": "测试证书链受限来源",
+            "enabled": False,
+            "config": {
+                "runtime_mode": "browser_worker_only",
+                "snapshot_path": "data/verified/sinopec.json",
+                "official_evidence_url": "https://job.sinopec.com/",
+                "application_url": "https://job.sinopec.com/",
+                "allowed_hosts": ["job.sinopec.com"],
+                "enterprise_total": 0,
+                "candidate_enterprise_total": 0,
+            },
+        }
+    )
+    database.upsert_source(browser_source)
+    database.record_service_heartbeat(
+        "sinopec-browser",
+        "degraded",
+        "robots.txt cannot be verified: SSLCertVerificationError: certificate verify failed",
+    )
+
+    result = browser_worker_health(database)
+
+    assert result["ok"] is False
+    assert result["release_ok"] is True
+    assert result["expected_access_limited"] == ["sinopec-browser"]
 
 
 def test_health_endpoint_reports_backup_state_without_private_path(tmp_path) -> None:

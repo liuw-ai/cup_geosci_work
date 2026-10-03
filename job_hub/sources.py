@@ -44,6 +44,7 @@ from job_hub.transport import (
     ResponseCache,
     configure_session,
     create_session,
+    looks_like_non_robots_document,
     request_exception_types,
     transport_metadata,
 )
@@ -54,6 +55,7 @@ from job_hub.cmgb_browser_capture import (
     CmgbBrowserCaptureError,
     load_cmgb_browser_capture,
 )
+from job_hub.iguopin_browser_capture import load_iguopin_browser_capture
 from job_hub.sinopec import load_sinopec_capture
 from job_hub.sinopec_browser_capture import load_sinopec_browser_capture
 
@@ -82,6 +84,9 @@ NON_VACANCY_TITLE_PATTERNS = (
     r"体检(?:公告|名单|结果)",
     r"考察(?:公告|名单|结果)",
     r"录用(?:公示|名单|结果)",
+    # A public disclosure names candidates or recruitment results; it is not
+    # an application window even when its title still contains "公开招聘".
+    r"公示",
 )
 
 
@@ -177,6 +182,18 @@ class SourceHealthProbe:
             robots_allowed = True
             checks["robots"] = {"status": "not_found_assumed_allowed", "status_code": 404, "url": robots_url}
         elif robots_response.ok:
+            if looks_like_non_robots_document(robots_response.text):
+                checks["robots"] = {
+                    "status": "non_robots_document",
+                    "status_code": robots_response.status_code,
+                    "url": robots_url,
+                }
+                return SourceHealthResult(
+                    "source_degraded",
+                    "robots.txt returned an HTML error document; source policy cannot be verified.",
+                    robots_response.status_code,
+                    checks=checks,
+                )
             parser = RobotFileParser()
             parser.parse(robots_response.text.splitlines())
             robots_allowed = parser.can_fetch(USER_AGENT, entry_url)
@@ -408,6 +425,10 @@ class OfficialSourceCollector:
             return self._collect_cnooc_browser_rows(source)
         if source_type == "cmgb_browser_rows":
             return self._collect_cmgb_browser_rows(source)
+        if source_type == "iguopin_browser_rows":
+            return self._collect_iguopin_browser_rows(source)
+        if source_type == "iguopin_general_browser_rows":
+            return self._collect_iguopin_general_browser_rows(source)
         if source_type == "sinopec_spa_rows":
             return self._collect_sinopec_spa_rows(source)
         if source_type == "attachment_discovery_feed":
@@ -439,6 +460,7 @@ class OfficialSourceCollector:
                 allowed_hosts=list(config["allowed_hosts"]),
                 max_age_hours=float(config.get("max_age_hours", 30)),
                 require_complete_scan=bool(config.get("require_complete_scan", True)),
+                require_capture_manifest=bool(config.get("require_capture_manifest", False)),
             )
         except BrowserCaptureError as error:
             message = str(error)
@@ -509,6 +531,7 @@ class OfficialSourceCollector:
                 allowed_hosts=list(config["allowed_hosts"]),
                 max_age_hours=float(config.get("max_age_hours", 30)),
                 require_complete_scan=bool(config.get("require_complete_scan", True)),
+                require_capture_manifest=bool(config.get("require_capture_manifest", False)),
             )
         except CnpcJobCaptureError as error:
             message = str(error)
@@ -588,14 +611,71 @@ class OfficialSourceCollector:
         capture is a source failure, never a zero-result success.
         """
 
+        return self._collect_iguopin_detail_rows(
+            source,
+            load_capture=load_cmgb_browser_capture,
+            capture_label="CMGB",
+            evidence_scope="official_cmgb_browser_detail",
+        )
+
+    def _collect_iguopin_browser_rows(self, source: dict[str, Any]) -> list[RawPosting]:
+        """Consume a complete employer-owned 国聘 detail capture.
+
+        The source-specific browser adapter has already bounded discovery to
+        documented on-page major filters and read every official detail. This
+        method only turns its complete manifest into normal pipeline rows.
+        """
+
+        return self._collect_iguopin_detail_rows(
+            source,
+            load_capture=load_iguopin_browser_capture,
+            capture_label="国聘",
+            evidence_scope="official_iguopin_browser_detail",
+        )
+
+    def _collect_iguopin_general_browser_rows(
+        self, source: dict[str, Any]
+    ) -> list[RawPosting]:
+        """Consume a complete, keyword-bounded public 国聘 main-board capture.
+
+        The capture is subject to the same public-detail, evidence, expiry and
+        student-profile gates as an employer-owned 国聘 portal.  Its source type
+        is separate solely because discovery comes from a fixed visible search
+        vocabulary rather than an employer's visible programme filter.
+        """
+
+        return self._collect_iguopin_detail_rows(
+            source,
+            load_capture=load_iguopin_browser_capture,
+            capture_label="国聘主站",
+            evidence_scope="official_iguopin_browser_detail",
+        )
+
+    def _collect_iguopin_detail_rows(
+        self,
+        source: dict[str, Any],
+        *,
+        load_capture: Any,
+        capture_label: str,
+        evidence_scope: str,
+    ) -> list[RawPosting]:
+        """Apply one validated employer-portal manifest to the job contract.
+
+        CMGB and other official employer-owned 国聘 portals use the same
+        list/detail manifest, but must retain distinct source IDs and evidence
+        scopes. Keeping this conversion shared avoids drift in expiry,
+        professional matching and student-facing link behaviour.
+        """
+
         config = source["config"]
         capture_path = Path(self.settings.data_dir) / str(config["capture_path"])
         try:
-            payload = load_cmgb_browser_capture(
+            payload = load_capture(
                 capture_path,
                 allowed_hosts=list(config.get("allowed_hosts", [])),
                 max_age_hours=float(config.get("max_age_hours", 30)),
                 require_complete_scan=bool(config.get("require_complete_scan", True)),
+                require_capture_manifest=bool(config.get("require_capture_manifest", False)),
             )
         except CmgbBrowserCaptureError as error:
             message = str(error)
@@ -622,13 +702,13 @@ class OfficialSourceCollector:
             deadline_date = parse_date_value(raw_deadline)
             if not deadline_date:
                 raise SourceCollectionError(
-                    f"CMGB job {item['external_id']} has no parseable deadline"
+                    f"{capture_label} job {item['external_id']} has no parseable deadline"
                 )
             major = str(item["major"]).strip()
             degree = str(item["degree"]).strip()
             location = str(item["location"]).strip()
             evidence = {
-                "evidence_scope": "official_cmgb_browser_detail",
+                "evidence_scope": evidence_scope,
                 "captured_at": str(payload["captured_at"]),
                 "岗位": str(item["title"]).strip(),
                 "招聘单位": str(item["employer"]).strip(),
@@ -673,7 +753,9 @@ class OfficialSourceCollector:
                 )
             )
         if not postings:
-            raise SourceCollectionError("CMGB browser capture contains no publishable rows")
+            raise SourceCollectionError(
+                f"{capture_label} browser capture contains no publishable rows"
+            )
         return postings
 
     def _collect_official_snapshot_rows(
@@ -767,10 +849,17 @@ class OfficialSourceCollector:
                     f"official snapshot row {index} is missing field_evidence"
                 )
             source_url = str(item.get("source_url") or source["homepage_url"]).strip()
-            evidence_url = str(
+            # A dynamic portal's generated detail route is the only
+            # job-level evidence when the static announcement URL is merely
+            # a general notice (or has later been reused for another notice).
+            # PipeChina rows carry a verified job/dept identifier, so prefer
+            # that generated official detail URL rather than preserving a
+            # stale announcement link as the evidence URL.
+            configured_evidence_url = str(
                 item.get("official_evidence_url")
                 or config["official_evidence_url"]
             ).strip()
+            evidence_url = configured_evidence_url
             application_url = str(
                 item.get("application_url") or config["application_url"]
             ).strip()
@@ -806,6 +895,8 @@ class OfficialSourceCollector:
                     )
                 field_evidence.setdefault("官方岗位编号", str(detail["job_id"]))
                 field_evidence.setdefault("官方详情链接", source_url)
+                if config.get("prefer_detail_evidence_url"):
+                    evidence_url = source_url
             if source["id"] == "cnpc-career" and "recruitInfoshow.html" in source_url:
                 source_url = self._cnpc_detail_deep_link(
                     source_url,
@@ -961,6 +1052,7 @@ class OfficialSourceCollector:
                         else None
                     ),
                     require_complete_scan=bool(config.get("require_complete_manifest", True)),
+                    require_capture_manifest=bool(config.get("require_capture_manifest", False)),
                 )
             except BrowserCaptureError as error:
                 message = str(error)
@@ -2282,8 +2374,21 @@ class OfficialSourceCollector:
         tables = content_node.select(str(config.get("table_selector") or "table"))
         if not tables:
             raise SourceCollectionError("Official table page exposes no configured tables")
+        allowed_table_indexes: set[int] | None = None
+        raw_table_indexes = config.get("allowed_table_indexes")
+        if raw_table_indexes is not None:
+            if not isinstance(raw_table_indexes, list):
+                raise SourceCollectionError("allowed_table_indexes must be a list")
+            try:
+                allowed_table_indexes = {int(value) for value in raw_table_indexes}
+            except (TypeError, ValueError) as error:
+                raise SourceCollectionError(
+                    "allowed_table_indexes must contain integer table indexes"
+                ) from error
         postings: list[RawPosting] = []
         for table_index, table in enumerate(tables, start=1):
+            if allowed_table_indexes is not None and table_index not in allowed_table_indexes:
+                continue
             rows: list[list[str]] = []
             for row in table.select("tr"):
                 cells = [clean_text(cell.get_text(" ", strip=True)) for cell in row.select("th, td")]
@@ -2302,8 +2407,18 @@ class OfficialSourceCollector:
                     field: self._table_cell(cells, index)
                     for field, index in column_indexes.items()
                 }
-                title = clean_text(fields.get("title", ""))
-                if not title or self._is_non_vacancy_notice_title(title):
+                row_title = clean_text(fields.get("title", ""))
+                title = clean_text(
+                    f"{str(config.get('title_prefix') or '')}{row_title}"
+                    f"{str(config.get('title_suffix') or '')}"
+                )
+                if not row_title or self._is_non_vacancy_notice_title(title):
+                    continue
+                degree_requirement = clean_text(
+                    fields.get("degree", "")
+                    or str(config.get("degree_requirement") or "")
+                )
+                if config.get("require_degree_evidence", False) and not degree_requirement:
                     continue
                 row_evidence = clean_text(
                     " ".join(
@@ -2311,7 +2426,7 @@ class OfficialSourceCollector:
                         for value in (
                             title,
                             fields.get("major", ""),
-                            fields.get("degree", ""),
+                            degree_requirement,
                             fields.get("location", ""),
                         )
                         if value
@@ -2361,13 +2476,15 @@ class OfficialSourceCollector:
                     str(config.get("employer_hint") or source["publisher"])
                 )
                 location = clean_text(fields.get("location", "")) or context.get("location")
+                if config.get("require_location_evidence", False) and not location:
+                    continue
                 evidence_text = clean_text(
                     "；".join(
                         part
                         for part in (
                             f"岗位：{title}",
                             f"人数：{fields.get('quantity')}" if fields.get("quantity") else "",
-                            f"学历：{fields.get('degree')}" if fields.get("degree") else "",
+                            f"学历：{degree_requirement}" if degree_requirement else "",
                             f"专业：{fields.get('major')}" if fields.get("major") else "",
                             f"地点：{location}" if location else "",
                         )
@@ -2389,7 +2506,7 @@ class OfficialSourceCollector:
                             f"{self._external_id_from_url(source_url)}"
                             f"#table-{table_index}-row-{row_number}"
                         ),
-                        match_text=clean_text(f"{title} {fields.get('major', '')} {fields.get('degree', '')}"),
+                        match_text=clean_text(f"{title} {fields.get('major', '')} {degree_requirement}"),
                         official_evidence_url=normalize_url(source_url),
                         field_evidence={
                             "evidence_scope": "official_html_table_row",
@@ -2397,7 +2514,8 @@ class OfficialSourceCollector:
                             "table_row": str(row_number),
                             "岗位": title,
                             "专业范围": fields.get("major", ""),
-                            "学历要求": fields.get("degree", ""),
+                            "学历要求": degree_requirement,
+                            "招聘人数": fields.get("quantity", ""),
                             "工作地点": location,
                             "招聘单位": employer,
                         },
@@ -3602,6 +3720,7 @@ class OfficialSourceCollector:
                 allowed_hosts=list(config.get("allowed_hosts", [])),
                 max_age_hours=float(config.get("max_age_hours", 30)),
                 require_complete_scan=bool(config.get("require_complete_scan", True)),
+                require_capture_manifest=bool(config.get("require_capture_manifest", False)),
             )
         except BrowserCaptureError as error:
             message = str(error)
@@ -4337,6 +4456,70 @@ class OfficialSourceCollector:
         return "、".join(unique) or None
 
     @staticmethod
+    def _mokahr_description_field(
+        description: str,
+        labels: tuple[str, ...],
+    ) -> str | None:
+        """Extract one explicitly labelled field from a MokaHR detail block.
+
+        MokaHR tenants frequently omit a dedicated API property and put the
+        value in the HTML description.  Returning only the text after a known
+        label prevents the entire requirement block from being misreported as
+        an education field or a location.
+        """
+        text = clean_text(description)
+        if not text:
+            return None
+        label_pattern = "|".join(re.escape(label) for label in labels)
+        match = re.search(
+            rf"(?:{label_pattern})\s*[:：]\s*([^；;。\n]+)",
+            text,
+            re.IGNORECASE,
+        )
+        return clean_text(match.group(1)) if match else None
+
+    @classmethod
+    def _mokahr_education(
+        cls,
+        job: dict[str, Any],
+        description: str,
+    ) -> str:
+        """Return a bounded, explicit education phrase for one job detail."""
+        for key in (
+            "education",
+            "degree",
+            "degreeRequirement",
+            "educationRequirement",
+            "minimumEducation",
+        ):
+            value = cls._mokahr_named_value(job.get(key))
+            if value:
+                return value
+        labelled = cls._mokahr_description_field(
+            description,
+            ("学历要求", "学历条件", "最低学历", "学历及学位"),
+        )
+        if labelled:
+            return labelled
+        # A bare degree phrase in a requirement sentence is still useful as
+        # evidence, but keep only the phrase itself rather than the whole
+        # sentence.  The degree parser will reject text without a known level.
+        match = re.search(
+            r"(?:全日制)?(?:大专|本科|硕士研究生|硕士|博士研究生|博士)"
+            r"(?:及以上|或以上|以上)?学历",
+            description,
+            re.IGNORECASE,
+        )
+        return clean_text(match.group(0)) if match else ""
+
+    @classmethod
+    def _mokahr_description_location(cls, description: str) -> str | None:
+        return cls._mokahr_description_field(
+            description,
+            ("工作地点", "工作地", "工作城市", "工作区域", "任职地点"),
+        )
+
+    @staticmethod
     def _mokahr_detail_url(listing_url: str, job_id: str) -> str:
         return f"{listing_url.split('#', 1)[0]}#/job/{job_id}"
 
@@ -4358,17 +4541,18 @@ class OfficialSourceCollector:
                 str(job.get("jobDescription") or ""), "html.parser"
             ).get_text(" ", strip=True)
         )
-        education = clean_text(str(job.get("education") or ""))
+        education = self._mokahr_education(job, description)
         commitment = clean_text(str(job.get("commitment") or ""))
         function = self._mokahr_named_value(job.get("zhineng"))
         department = self._mokahr_named_value(job.get("department"))
         location = self._mokahr_location(job)
         if not location:
+            location = self._mokahr_description_location(description)
+        if not location:
             location = extract_location_hint(
                 " ".join(
                     value
                     for value in (
-                        description,
                         clean_text(str(job.get("content") or "")),
                         clean_text(str(job.get("detail") or "")),
                     )
@@ -4402,7 +4586,7 @@ class OfficialSourceCollector:
                 "evidence_scope": "official_detail_block",
                 "岗位": title,
                 "岗位要求": description,
-                "学历要求": education or description,
+                "学历要求": education,
                 "工作地点": location or "",
             },
         )
@@ -4553,6 +4737,33 @@ class OfficialSourceCollector:
         for title_hint, detail_url, listed_date in links:
             try:
                 detail_response = self._get(detail_url, source)
+                table_profile = self._cgs_detail_table_profile(
+                    detail_response.text,
+                    source,
+                    title_hint,
+                )
+                if table_profile is not None:
+                    rows = self._extract_cgs_profiled_table_rows(
+                        detail_response.text,
+                        detail_response.url,
+                        source,
+                        title_hint,
+                        listed_date,
+                        table_profile,
+                    )
+                    if not rows:
+                        # A configured profile must never silently fall back to
+                        # one broad announcement-shaped posting.  A layout
+                        # change is an adapter failure to investigate, not
+                        # evidence that every row in the notice is one vacancy.
+                        raise SourceCollectionError(
+                            "Configured CGS table profile produced no evidenced rows"
+                        )
+                    postings.extend(rows)
+                    if len(postings) >= item_limit:
+                        return postings[:item_limit]
+                    self._wait(source)
+                    continue
                 posting = self._extract_html_detail(
                     detail_response.text,
                     detail_response.url,
@@ -4636,6 +4847,146 @@ class OfficialSourceCollector:
                 "CGS recruitment list was readable, but every official detail page failed or was rejected"
             )
         return postings
+
+    def _cgs_detail_table_profile(
+        self,
+        document: str,
+        source: dict[str, Any],
+        title_hint: str,
+    ) -> dict[str, Any] | None:
+        """Select an explicitly registered row-table profile for a CGS notice.
+
+        The CGS listing is a notice feed and individual institutes use different
+        table layouts.  A profile is opted in only by a title expression and
+        required header labels.  This prevents a generic article table, such as
+        a contact or schedule table, from being guessed as a vacancy table.
+        """
+        config = source.get("config") if isinstance(source.get("config"), dict) else {}
+        profiles = config.get("detail_table_profiles") or []
+        if not isinstance(profiles, list):
+            raise SourceCollectionError("detail_table_profiles must be a list")
+        soup = BeautifulSoup(document, "html.parser")
+        title_node = self._select_first(soup, str(config.get("title_selector") or "h1, title"))
+        page_title = clean_text(
+            title_node.get_text(" ", strip=True) if title_node is not None else ""
+        )
+        title_text = clean_text(f"{title_hint} {page_title}")
+        for raw_profile in profiles:
+            if not isinstance(raw_profile, dict):
+                raise SourceCollectionError("CGS detail_table_profiles entries must be objects")
+            profile = dict(raw_profile)
+            pattern = str(profile.get("title_pattern") or "").strip()
+            if not pattern:
+                raise SourceCollectionError("CGS detail table profile requires title_pattern")
+            try:
+                if not re.search(pattern, title_text, re.IGNORECASE):
+                    continue
+            except re.error as error:
+                raise SourceCollectionError(
+                    f"Invalid CGS detail table title_pattern: {error}"
+                ) from error
+            try:
+                table_index = int(profile.get("table_index"))
+            except (TypeError, ValueError) as error:
+                raise SourceCollectionError(
+                    "CGS detail table profile requires integer table_index"
+                ) from error
+            tables = soup.select(str(profile.get("table_selector") or "table"))
+            if table_index < 1 or table_index > len(tables):
+                raise SourceCollectionError(
+                    f"CGS table profile expected table {table_index}, found {len(tables)}"
+                )
+            header_text = clean_text(tables[table_index - 1].get_text(" ", strip=True))
+            required_headers = [
+                clean_text(str(value))
+                for value in profile.get("required_headers", [])
+                if clean_text(str(value))
+            ]
+            if not required_headers:
+                raise SourceCollectionError(
+                    "CGS detail table profile requires explicit required_headers"
+                )
+            if not all(header in header_text for header in required_headers):
+                raise SourceCollectionError(
+                    "CGS table profile header did not match the registered vacancy layout"
+                )
+            return profile
+        return None
+
+    def _extract_cgs_profiled_table_rows(
+        self,
+        document: str,
+        source_url: str,
+        source: dict[str, Any],
+        title_hint: str,
+        listed_date: str | None,
+        profile: dict[str, Any],
+    ) -> list[RawPosting]:
+        """Extract an approved CGS notice table through the common row contract."""
+        config = source["config"]
+        profile_config = {
+            **config,
+            "table_selector": str(profile.get("table_selector") or "table"),
+            "allowed_table_indexes": [int(profile["table_index"])],
+            "table_contexts": [
+                {
+                    "table_index": int(profile["table_index"]),
+                    "employer": str(profile.get("employer") or ""),
+                    "location": str(profile.get("location") or ""),
+                }
+            ],
+            "column_aliases": dict(profile.get("column_aliases") or {}),
+            "title_prefix": str(profile.get("title_prefix") or ""),
+            "title_suffix": str(profile.get("title_suffix") or ""),
+            "degree_requirement": str(profile.get("degree_requirement") or ""),
+            "require_degree_evidence": bool(profile.get("require_degree_evidence", True)),
+            "require_location_evidence": bool(profile.get("require_location_evidence", True)),
+            "row_include_patterns": list(profile.get("row_include_patterns") or []),
+            "row_exclude_patterns": list(profile.get("row_exclude_patterns") or []),
+            "require_page_recruitment_word": True,
+        }
+        profile_source = {**source, "config": profile_config}
+        rows = self._extract_official_table_rows(
+            document,
+            source_url,
+            profile_source,
+            title_hint,
+        )
+        output: list[RawPosting] = []
+        for row in rows:
+            evidence = dict(row.field_evidence or {})
+            evidence.update(
+                {
+                    "evidence_scope": "official_cgs_profiled_table_row",
+                    "官方公告标题": title_hint,
+                    "官方列表日期": listed_date or "",
+                    "官方详情链接": normalize_url(source_url),
+                }
+            )
+            output.append(
+                replace(
+                    row,
+                    published_date=row.published_date or parse_date_value(listed_date or ""),
+                    official_evidence_url=normalize_url(source_url),
+                    field_evidence=evidence,
+                    qualification_text=clean_text(
+                        "；".join(
+                            part
+                            for part in (
+                                f"专业要求：{evidence.get('专业范围')}"
+                                if evidence.get("专业范围")
+                                else "",
+                                f"学历要求：{evidence.get('学历要求')}"
+                                if evidence.get("学历要求")
+                                else "",
+                            )
+                            if part
+                        )
+                    )
+                    or row.qualification_text,
+                )
+            )
+        return output
 
     def _cgs_dynamic_notice_links(
         self,
@@ -4928,6 +5279,13 @@ class OfficialSourceCollector:
                 for node in content_node.select(selector):
                     node.decompose()
         body_text = clean_text(content_node.get_text(" ", strip=True))
+        # CUPB's public job detail pages sometimes use private-use Unicode
+        # glyphs for separators/icons.  They are visible in the browser but
+        # survive HTML extraction as characters such as U+E50D, which makes
+        # label/value parsing and sentence splitting miss otherwise explicit
+        # major, degree, and location fields.  Normalize only the derived
+        # evidence view; retain the original body in ``text`` for auditability.
+        normalized_body_text = self._cupb_private_use_normalize(body_text)
         metadata_node = soup.select_one(".zp-details, .common-view")
         metadata_text = clean_text(
             metadata_node.get_text(" ", strip=True) if metadata_node else ""
@@ -5010,10 +5368,35 @@ class OfficialSourceCollector:
         # qualification.  A single-row notice may still put the precise major
         # in the prose body, so retain its bounded evidence as a supplement.
         major_evidence = (
-            self._cupb_major_evidence(body_text)
+            self._cupb_major_evidence(normalized_body_text)
             if len(records) <= 1
             else ""
         )
+        # A /job/view/id/... page is a single official position detail, not a
+        # multi-role announcement.  When its labels were damaged only by the
+        # portal's private-use separators, recover the bounded fields and bind
+        # them to the page title.  Campus announcements continue to require a
+        # structured row/table locator and are never promoted by this fallback.
+        is_single_job_detail = bool(
+            re.search(r"/job/view/id/", urlparse(source_url).path)
+        )
+        if is_single_job_detail:
+            # Merge rather than require an empty table result: some templates
+            # expose a title-only metadata row while the actual label/value
+            # fields live in the article body.
+            freeform_fields = self._cupb_freeform_fields(normalized_body_text)
+            for key, value in freeform_fields.items():
+                fields.setdefault(key, value)
+            fields.setdefault("岗位", title)
+            # Only use free-form sentence evidence when it explicitly carries
+            # a qualification label. A whole article containing the word
+            # “地质” is not a job-level major field.
+            if (
+                not fields.get("专业范围")
+                and major_evidence
+                and re.search(r"专业(?:要求|范围)|需求专业|所学专业", major_evidence)
+            ):
+                fields["专业范围"] = major_evidence
         # CUPB notices often start with a long employer introduction. When their
         # structured job table is present, use it as matching evidence so a unit's
         # industry description cannot masquerade as a candidate's qualification.
@@ -5024,6 +5407,11 @@ class OfficialSourceCollector:
         # only a broad discipline while the official announcement body lists
         # the precise geoscience majors; dropping either side creates false
         # negatives for otherwise eligible students.
+        matching_fields = " ".join(
+            value
+            for key, value in fields.items()
+            if key in {"岗位", "专业范围", "面向对象", "学历要求"}
+        )
         match_evidence = clean_text(" ".join(filter(None, (matching_fields, major_evidence))))
         match_text = clean_text(f"{title} {match_evidence}") or combined
         summary_fields = [
@@ -5031,6 +5419,17 @@ class OfficialSourceCollector:
             for key, value in fields.items()
             if key in {"岗位", "专业范围", "面向对象", "工作地点"}
         ]
+        field_evidence = {
+            key: value
+            for key, value in fields.items()
+            if key in {"岗位", "专业范围", "面向对象", "学历要求", "工作地点"}
+        }
+        if (
+            re.search(r"/job/view/id/", urlparse(source_url).path)
+            and fields.get("专业范围")
+            and fields.get("学历要求")
+        ):
+            field_evidence["evidence_scope"] = "official_detail_block"
         base_posting = RawPosting(
             title=title,
             employer=employer,
@@ -5048,7 +5447,7 @@ class OfficialSourceCollector:
             deadline_date=extract_deadline(clean_text(f"{metadata_text} {body_text}")),
             location=(
                 self._label_value(
-                    body_text,
+                    normalized_body_text,
                     "工作地点",
                     (
                         "岗位职责",
@@ -5070,17 +5469,13 @@ class OfficialSourceCollector:
                 # The outer job-board table may contain the publisher's
                 # default city rather than the hiring unit's location. Prefer
                 # an explicit address/location statement in the notice body.
-                or self._cupb_location_evidence(body_text)
+                or self._cupb_location_evidence(normalized_body_text)
                 or fields.get("工作地点")
             ),
             external_id=self._external_id_from_url(source_url),
             match_text=match_text,
             qualification_text=match_evidence,
-            field_evidence={
-                key: value
-                for key, value in fields.items()
-                if key in {"岗位", "专业范围", "面向对象", "学历要求", "工作地点"}
-            },
+            field_evidence=field_evidence,
         )
         # A label/value table can represent one concrete role just as a
         # conventional header table can. Preserve that row identity instead
@@ -5211,6 +5606,77 @@ class OfficialSourceCollector:
             return None
         # The page's helper leaves a short view marker before the HTML fragment.
         return re.sub(r"^view\d+d\s*", "", html).strip() or None
+
+    @staticmethod
+    def _cupb_private_use_normalize(text: str) -> str:
+        """Replace portal icon/separator glyphs with whitespace for parsing.
+
+        The CUPB portal emits several layout separators from the Unicode
+        private-use area. They have no semantic value and are not stable
+        across portal deployments, so only the derived parsing text removes
+        them; the original HTML-derived text remains stored for audit.
+        """
+        return re.sub(r"[\ue000-\uf8ff]", " ", text or "")
+
+    @staticmethod
+    def _cupb_freeform_fields(text: str) -> dict[str, str]:
+        """Extract bounded label/value fields from a single CUPB job detail.
+
+        This is deliberately limited to one ``/job/view/id/`` page. It does
+        not infer fields from a general announcement or from the job title.
+        """
+        aliases = {
+            "专业范围": ("专业要求", "专业范围", "需求专业", "所学专业"),
+            "学历要求": (
+                "学历及学位",
+                "学历要求",
+                "最低学历",
+                "学历层次",
+                "学历",
+                "学位要求",
+            ),
+            "工作地点": ("工作地点", "工作地区", "工作城市", "工作地址"),
+        }
+        boundary_labels = sorted(
+            {
+                label
+                for values in aliases.values()
+                for label in values
+            }
+            | {
+                "岗位职责",
+                "任职要求",
+                "任职资格",
+                "外语水平",
+                "招聘人数",
+                "报名方式",
+                "报名截止",
+                "截止时间",
+                "其他要求",
+                "福利待遇",
+                "薪酬待遇",
+            },
+            key=len,
+            reverse=True,
+        )
+        boundary = "|".join(re.escape(label) for label in boundary_labels)
+        result: dict[str, str] = {}
+        for canonical, labels in aliases.items():
+            label_pattern = "|".join(
+                re.escape(label) for label in sorted(labels, key=len, reverse=True)
+            )
+            match = re.search(
+                rf"(?:{label_pattern})\s*(?::|：|\s+)\s*"
+                rf"(?P<value>.*?)(?=\s*(?:{boundary})\s*(?::|：|\s+)|$)",
+                text or "",
+                re.IGNORECASE,
+            )
+            if not match:
+                continue
+            value = clean_text(match.group("value")).strip(" ：:;；,，")
+            if value:
+                result[canonical] = value[:2400]
+        return result
 
     @staticmethod
     def _cupb_table_fields(soup: BeautifulSoup) -> dict[str, str]:
@@ -5652,6 +6118,10 @@ class OfficialSourceCollector:
                 if response.status_code == 404:
                     parser.parse([])
                 elif response.ok:
+                    if looks_like_non_robots_document(response.text):
+                        raise SourceSkipped(
+                            f"Unable to verify robots.txt for {root}: received an HTML error document"
+                        )
                     parser.parse(response.text.splitlines())
                 else:
                     raise SourceSkipped(

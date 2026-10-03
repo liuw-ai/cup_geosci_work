@@ -15,9 +15,15 @@ from datetime import datetime, timezone
 from pathlib import PurePosixPath
 from typing import Any, Iterable
 from urllib.parse import urlparse
+from urllib.robotparser import RobotFileParser
 
 from job_hub.config import Settings
-from job_hub.transport import RequestPolicy, create_session, request_exception_types
+from job_hub.transport import (
+    RequestPolicy,
+    create_session,
+    looks_like_non_robots_document,
+    request_exception_types,
+)
 
 
 VERIFICATION_STATUSES = frozenset(
@@ -30,6 +36,7 @@ VERIFICATION_STATUSES = frozenset(
     }
 )
 MANUAL_EVIDENCE_RECHECK_MODE = "manual_only"
+GOVERNMENT_REVALIDATION_USER_AGENT = "CUP-Geosci-OfficialEvidence/1.0"
 _EXPLICIT_CANCELLATION_PATTERNS = (
     re.compile(r"本(?:公告|次(?:公开)?招聘(?:公告)?).{0,40}(?:已)?(?:取消|作废|终止|停止|撤销)"),
     re.compile(r"(?:取消|作废|终止|停止|撤销).{0,40}本(?:公告|次(?:公开)?招聘(?:公告)?)"),
@@ -58,7 +65,7 @@ def revalidate_government_sources(
     policy = RequestPolicy(
         session or create_session(
             settings.http_transport_mode,
-            headers={"User-Agent": "CUP-Geosci-OfficialEvidence/1.0"},
+            headers={"User-Agent": GOVERNMENT_REVALIDATION_USER_AGENT},
             client=settings.http_client,
         ),
         timeout=settings.request_timeout_seconds,
@@ -68,6 +75,7 @@ def revalidate_government_sources(
         jitter_seconds=settings.http_jitter_seconds,
         transport_mode=settings.http_transport_mode,
     )
+    robots_cache: dict[str, RobotFileParser | str] = {}
     records_by_source: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for record in registry.get("records", []):
         if str(record.get("record_status") or "") == "verified_open":
@@ -122,6 +130,10 @@ def revalidate_government_sources(
             if host not in allowed_hosts:
                 failures.append(f"{url}: evidence host is outside this source allowlist")
                 continue
+            robots_outcome = _robots_permits(policy, url, robots_cache)
+            if robots_outcome["status"] != "verified":
+                failures.append(f"{url}: {robots_outcome['detail']}")
+                continue
             outcome = _check_url(policy, url, _url_is_attachment(url))
             if outcome["status"] == "withdrawn":
                 cancellations.append(f"{url}: {outcome['detail']}")
@@ -155,6 +167,74 @@ def revalidate_government_sources(
                 )
             )
     return results
+
+
+def _robots_permits(
+    policy: RequestPolicy,
+    url: str,
+    cache: dict[str, RobotFileParser | str],
+) -> dict[str, str]:
+    """Require a verified robots policy before refreshing official evidence.
+
+    A reviewed URL is not an exemption from a source's current access policy.
+    A missing robots file follows the project-wide collector policy; all other
+    policy, transport, or HTTP errors leave the source unrefreshed.
+    """
+    parsed = urlparse(url)
+    root = f"{parsed.scheme}://{parsed.netloc}"
+    cached = cache.get(root)
+    if isinstance(cached, str):
+        return {"status": "source_unavailable", "detail": cached}
+    if isinstance(cached, RobotFileParser):
+        if cached.can_fetch(GOVERNMENT_REVALIDATION_USER_AGENT, url):
+            return {"status": "verified", "detail": "robots.txt permits access"}
+        return {
+            "status": "source_unavailable",
+            "detail": "robots.txt does not permit evidence recheck",
+        }
+
+    robots_url = f"{root}/robots.txt"
+    try:
+        response = policy.request("GET", robots_url)
+    except request_exception_types() as error:
+        detail = f"unable to verify robots.txt: {error.__class__.__name__}"
+        cache[root] = detail
+        return {"status": "source_unavailable", "detail": detail}
+
+    try:
+        status_code = int(getattr(response, "status_code", 0) or 0)
+        if status_code == 404:
+            parser = RobotFileParser()
+            parser.parse([])
+            cache[root] = parser
+            return {
+                "status": "verified",
+                "detail": "robots.txt not found; access allowed by policy",
+            }
+        if not 200 <= status_code < 400:
+            detail = f"unable to verify robots.txt: HTTP {status_code}"
+            cache[root] = detail
+            return {"status": "source_unavailable", "detail": detail}
+        content = bytes(getattr(response, "content", b"") or b"")
+        text = content.decode("utf-8", errors="replace")
+        if looks_like_non_robots_document(text):
+            detail = "unable to verify robots.txt: received an HTML error document"
+            cache[root] = detail
+            return {"status": "source_unavailable", "detail": detail}
+        parser = RobotFileParser()
+        parser.parse(text.splitlines())
+        cache[root] = parser
+    finally:
+        close = getattr(response, "close", None)
+        if callable(close):
+            close()
+
+    if parser.can_fetch(GOVERNMENT_REVALIDATION_USER_AGENT, url):
+        return {"status": "verified", "detail": "robots.txt permits access"}
+    return {
+        "status": "source_unavailable",
+        "detail": "robots.txt does not permit evidence recheck",
+    }
 
 
 def requires_manual_government_evidence_confirmation(source: dict[str, Any]) -> bool:

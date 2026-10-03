@@ -89,6 +89,7 @@ def test_position_record_preserves_notice_attachment_and_row_evidence() -> None:
     record = {
         "id": "anhui-2026-2026113",
         "position_type": "public_institution",
+        "province": "安徽",
         "position_code": "2026113",
         "title": "专业技术岗位（地质资源与地质工程等）",
         "employer": "安徽工业经济职业技术学院",
@@ -107,6 +108,7 @@ def test_position_record_preserves_notice_attachment_and_row_evidence() -> None:
     assert posting.source_url == record["official_notice_url"]
     assert posting.official_evidence_url == record["official_attachment_url"]
     assert posting.field_evidence["表格定位"] == "岗位表!17"
+    assert posting.field_evidence["官方职位表省份"] == "安徽"
     assert posting.field_evidence["evidence_scope"] == "official_attachment_row"
     assert posting.field_evidence["岗位"] == record["title"]
     assert "地质资源与地质工程" in (posting.qualification_text or "")
@@ -138,7 +140,7 @@ def test_government_sync_keeps_equivalent_attachment_candidate_current(tmp_path)
         "id": "current-geology-row",
         "source_id": "official-test-source",
         "position_type": "public_institution",
-        "province": "测试省",
+        "province": "河南",
         "position_code": "A-001",
         "title": "地质工程技术岗",
         "employer": "测试地质调查院",
@@ -191,7 +193,7 @@ def test_reindex_keeps_future_government_window_private(tmp_path) -> None:
         "id": "future-geology-row",
         "source_id": "official-test-source",
         "position_type": "public_institution",
-        "province": "测试省",
+        "province": "河南",
         "position_code": "A-001",
         "title": "地质工程技术岗",
         "employer": "测试地质调查院",
@@ -248,7 +250,7 @@ def test_reindex_keeps_current_attachment_candidate_public(tmp_path) -> None:
         "id": "current-geology-row",
         "source_id": "official-test-source",
         "position_type": "public_institution",
-        "province": "测试省",
+        "province": "河南",
         "position_code": "A-001",
         "title": "地质工程技术岗",
         "employer": "测试地质调查院",

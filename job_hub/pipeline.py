@@ -10,7 +10,11 @@ from urllib.parse import parse_qs, urlparse
 from zoneinfo import ZoneInfo
 
 from job_hub.config import Settings
+from job_hub.cnooc_browser_capture import (
+    repair_cnooc_detail_requirement_evidence,
+)
 from job_hub.db import Database
+from job_hub.government_artifacts import load_government_artifact_manifest
 from job_hub.employers import resolve_employer
 from job_hub.government_positions import (
     current_publishable_position_records,
@@ -33,6 +37,7 @@ from job_hub.profiles import (
     PublicationDecision,
     evaluate_student_publication,
 )
+from job_hub.official_identity import official_detail_key
 from job_hub.sources import (
     OfficialSourceCollector,
     RawPosting,
@@ -140,10 +145,50 @@ class JobPipeline:
         sources = load_source_registries(registry_paths)
         for source in sources:
             self.database.upsert_source(source)
+        self._backfill_capture_freshness_from_manifests(sources)
         self.database.ensure_source_tasks(
             [source for source in sources if source.get("enabled", True)]
         )
         return len(sources)
+
+    def _backfill_capture_freshness_from_manifests(
+        self,
+        sources: list[dict[str, Any]],
+    ) -> None:
+        """Register existing complete capture evidence after a restart.
+
+        This is intentionally a one-way bootstrap of the read-side projection:
+        a missing or partial file contributes nothing, and an existing newer
+        runtime record is never replaced by an older registry declaration.
+        The subsequent age predicate still decides whether the source is
+        currently publishable.
+        """
+
+        for source in sources:
+            config = source.get("config") if isinstance(source.get("config"), dict) else {}
+            if config.get("max_age_hours") is None:
+                continue
+            source_id = str(source.get("id") or "").strip()
+            if not source_id or self.database.get_source_capture_freshness(source_id):
+                continue
+            captured_at = self._source_capture_timestamp(source)
+            if not captured_at:
+                continue
+            try:
+                self.database.record_source_capture_freshness(
+                    source_id,
+                    captured_at=captured_at,
+                    evidence_kind=(
+                        "capture_manifest"
+                        if str(config.get("capture_path") or "").strip()
+                        else "declared_snapshot"
+                    ),
+                )
+            except ValueError:
+                LOGGER.warning(
+                    "Ignoring invalid bootstrap capture timestamp for source %s",
+                    source_id,
+                )
 
     def sync_all(
         self,
@@ -328,6 +373,7 @@ class JobPipeline:
             if source["config"].get("deduplicate_by_title"):
                 self.database.supersede_duplicate_jobs(source["id"])
             self.database.mark_source_synced(source["id"])
+            self._record_successful_source_capture(source, run_id=run_id)
             self.database.record_source_health(
                 source["id"],
                 status="source_active",
@@ -504,6 +550,7 @@ class JobPipeline:
                 if before_commit is not None:
                     before_commit()
                 self.database.mark_source_synced(source["id"])
+                self._record_successful_source_capture(source, run_id=run_id)
                 self.database.record_source_health(
                     source["id"],
                     status="source_active",
@@ -584,6 +631,40 @@ class JobPipeline:
             )
         )
 
+    @staticmethod
+    def _official_government_province(field_evidence: Any) -> str | None:
+        """Return only row-level government province evidence for location fallback."""
+
+        if not isinstance(field_evidence, dict):
+            return None
+        if str(field_evidence.get("政府岗位类型") or "").strip() not in {
+            "public_institution",
+            "civil_service",
+            "postdoctoral",
+        }:
+            return None
+        province = str(field_evidence.get("官方职位表省份") or "").strip()
+        return province or None
+
+    @staticmethod
+    def _official_detail_precedence(source: dict[str, Any]) -> int:
+        """Return a bounded display preference for duplicate official details.
+
+        Lower values win only when two source records point to the exact same
+        official detail.  Employer-specific adapters use the neutral default;
+        a broad discovery source can be assigned a larger value so it remains
+        an auditable fallback instead of replacing richer specialist evidence.
+        """
+
+        raw = (source.get("config") or {}).get("official_detail_precedence", 100)
+        if isinstance(raw, bool):
+            return 100
+        try:
+            value = int(raw)
+        except (TypeError, ValueError):
+            return 100
+        return value if 0 <= value <= 10_000 else 100
+
     def normalize_posting(
         self,
         posting: RawPosting,
@@ -642,7 +723,10 @@ class JobPipeline:
                 "postdoctoral": "博士后与科研助理",
             }[government_type]
         location_text = posting.location or extract_location_hint(posting.text)
-        location = normalize_location(location_text)
+        location = normalize_location(
+            location_text,
+            official_province=self._official_government_province(field_evidence),
+        )
         relevance_score, relevance_band, major_tags = score_relevance(
             matching_text,
             source["source_tier"],
@@ -666,6 +750,12 @@ class JobPipeline:
         fingerprint = stable_hash(
             source["id"],
             posting.external_id or posting.source_url,
+        )
+        detail_key = official_detail_key(
+            source_url=posting.source_url,
+            application_url=posting.application_url,
+            official_evidence_url=posting.official_evidence_url,
+            field_evidence=field_evidence,
         )
         content_hash = stable_hash(
             posting.title,
@@ -707,6 +797,8 @@ class JobPipeline:
             **location,
             "verification_status": "published_official",
             "official_evidence_url": posting.official_evidence_url or posting.source_url,
+            "official_detail_key": detail_key,
+            "official_detail_precedence": self._official_detail_precedence(source),
             "published_date": posting.published_date,
             "deadline_date": posting.deadline_date,
             "degree_levels": degree_levels,
@@ -777,6 +869,16 @@ class JobPipeline:
         update events while recording a dedicated internal ``reclassified`` event
         only when a derived value actually changes.
         """
+        # The individual database helpers reuse this outer transaction.  A
+        # reindex touches both derived fields and evidence repairs, so committing
+        # one row at a time turns a small maintenance operation into thousands
+        # of SQLite fsyncs and can leave a partially reindexed production view.
+        # One transaction is faster and gives the operation an all-or-nothing
+        # publication boundary.
+        with self.database.transaction():
+            return self._reindex_jobs_in_transaction()
+
+    def _reindex_jobs_in_transaction(self) -> dict[str, int]:
         sources = {source["id"]: source for source in self.database.list_sources()}
         jobs, _ = self.database.list_jobs(
             page_size=None,
@@ -787,11 +889,45 @@ class JobPipeline:
             "checked": len(jobs),
             "reclassified": 0,
             "normalized": 0,
+            "evidence_repaired": 0,
+            "evidence_repair_failed": 0,
             "unchanged": 0,
         }
         government_context = self._government_reindex_context()
         for job in jobs:
             source = sources.get(job.get("source_id"))
+            cnooc_repair_error: str | None = None
+            # The first CNOOC browser snapshot stored an entire job description
+            # in the major field.  Reindexing used to bypass the snapshot
+            # loader, so that legacy text could be evaluated as a major
+            # condition a second time.  Use the same strict parser here and
+            # keep rows private when the job-level condition cannot be rebuilt.
+            if (
+                source is not None
+                and source.get("source_type") == "cnooc_browser_rows"
+                and isinstance(job.get("field_evidence"), dict)
+                and str(job["field_evidence"].get("evidence_scope") or "")
+                == "official_zhaopin_detail_initial_data"
+            ):
+                repaired_job = dict(job)
+                repaired_evidence = dict(job["field_evidence"])
+                repaired_job["field_evidence"] = repaired_evidence
+                try:
+                    repair_cnooc_detail_requirement_evidence(
+                        repaired_job,
+                        repaired_evidence,
+                        index=int(job["id"]),
+                    )
+                except ValueError as error:
+                    cnooc_repair_error = str(error)
+                    result["evidence_repair_failed"] += 1
+                else:
+                    if repaired_evidence != job["field_evidence"]:
+                        self.database.update_job_field_evidence(
+                            int(job["id"]), repaired_evidence
+                        )
+                        result["evidence_repaired"] += 1
+                    job = repaired_job
             source_tier = (
                 source["source_tier"] if source else str(job["source_tier"])
             )
@@ -851,6 +987,16 @@ class JobPipeline:
             # transitions; recomputing it here could reopen a superseded or
             # withdrawn historical row and expose a retired source again.
             status = str(job.get("status") or "open")
+            existing_location = str(job.get("location") or "").strip() or None
+            location_text = existing_location or extract_location_hint(
+                f"{job.get('summary', '')} {job.get('description', '')}"
+            )
+            location = normalize_location(
+                location_text,
+                official_province=self._official_government_province(
+                    job.get("field_evidence")
+                ),
+            )
             normalized = {
                 **job,
                 "category": category,
@@ -859,8 +1005,20 @@ class JobPipeline:
                 "relevance_score": relevance_score,
                 "relevance_band": relevance_band,
                 "status": status,
+                "location": location_text,
+                **location,
             }
             publication = evaluate_student_publication(normalized)
+            if cnooc_repair_error:
+                publication = PublicationDecision(
+                    status=PUBLICATION_PENDING_EVIDENCE,
+                    label="待补岗位级证据",
+                    reason=(
+                        "海油历史岗位详情无法恢复明确的专业/学历条件，"
+                        "不作为学生端岗位发布。"
+                    ),
+                    matched_profile_ids=(),
+                )
             government_publication = self._government_reindex_publication(
                 job,
                 government_context,
@@ -878,11 +1036,6 @@ class JobPipeline:
                 publication_status=publication.status,
                 publication_basis=publication.as_dict(),
             )
-            existing_location = str(job.get("location") or "").strip() or None
-            location_text = existing_location or extract_location_hint(
-                f"{job.get('summary', '')} {job.get('description', '')}"
-            )
-            location = normalize_location(location_text)
             normalized = self.database.update_job_normalization(
                 int(job["id"]),
                 canonical_employer_id=(
@@ -975,6 +1128,22 @@ class JobPipeline:
             source_id = str(source.get("id") or "")
             if source_ids is not None and source_id not in source_ids:
                 continue
+            # A disabled non-manual source is no longer an approved live
+            # publication channel. Retire its visible rows during the same
+            # lifecycle pass that handles stale captures; otherwise a source
+            # disabled for robots/access or an adapter replacement can leave
+            # old vacancies in the student feed indefinitely.
+            if (
+                source.get("source_type") != "manual"
+                and not source.get("enabled", False)
+            ):
+                count = self.database.withdraw_stale_source_jobs(
+                    source_id,
+                    reason="来源已停用，岗位保留为历史审计记录，不再作为学生端在招岗位展示。",
+                )
+                if count:
+                    results[source_id] = count
+                continue
             config = source.get("config") if isinstance(source.get("config"), dict) else {}
             raw_limit = config.get("max_age_hours")
             if raw_limit is None:
@@ -1038,6 +1207,36 @@ class JobPipeline:
             declared = str(payload.get("captured_at") or "").strip()
         return declared
 
+    def _record_successful_source_capture(
+        self,
+        source: dict[str, Any],
+        *,
+        run_id: int | None,
+    ) -> None:
+        """Persist capture evidence after, and only after, a successful sync."""
+
+        config = source.get("config") if isinstance(source.get("config"), dict) else {}
+        if config.get("max_age_hours") is None:
+            return
+        captured_at = self._source_capture_timestamp(source)
+        if not captured_at:
+            return
+        try:
+            self.database.record_source_capture_freshness(
+                str(source["id"]),
+                captured_at=captured_at,
+                crawl_run_id=run_id,
+                evidence_kind=(
+                    "capture_file" if str(config.get("capture_path") or "").strip()
+                    else "declared_snapshot"
+                ),
+            )
+        except ValueError:
+            LOGGER.warning(
+                "Source %s completed without a valid capture timestamp",
+                source.get("id"),
+            )
+
     def _government_reindex_context(self) -> dict[str, Any] | None:
         """Build the current government-table publication boundary.
 
@@ -1063,6 +1262,18 @@ class JobPipeline:
             str(item["source_id"]): item
             for item in self.database.list_government_source_verifications()
         }
+        artifact_manifest = None
+        artifact_manifest_available = self.settings.government_artifact_manifest_path is None
+        if self.settings.government_artifact_manifest_path is not None:
+            try:
+                artifact_manifest = load_government_artifact_manifest(
+                    self.settings.government_artifact_manifest_path
+                )
+                artifact_manifest_available = True
+            except (OSError, ValueError):
+                # Reindexing is a publication operation. Table-backed rows
+                # are held private when their lifecycle contract is missing.
+                artifact_manifest_available = False
         current_records = current_publishable_position_records(
             registry,
             today=now.date().isoformat(),
@@ -1073,6 +1284,8 @@ class JobPipeline:
                 for source in self.database.list_sources()
                 if requires_manual_government_evidence_confirmation(source)
             },
+            artifact_manifest=artifact_manifest,
+            artifact_manifest_available=artifact_manifest_available,
             now=now,
         )
         records = list(registry.get("records", []))

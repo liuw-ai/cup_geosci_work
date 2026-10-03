@@ -113,6 +113,7 @@ def test_coverage_distinguishes_successful_no_match_from_source_failure(tmp_path
     assert "deadline_quality" in report
     assert report["source_target_matrix"]["province_count"] == 31
     assert report["quality_gate"]["status"] in {"pass", "needs_attention"}
+    assert "employer_concentration" in report["job_distribution"]
     assert report["job_distribution"]["source_concentration"]["risk"] == "high"
     assert (
         report["job_distribution"]["category_source_concentration"]
@@ -198,6 +199,17 @@ def test_coverage_separates_retired_source_errors_from_active_health(tmp_path) -
     ]
 
 
+def test_concentration_risk_flags_top_five_source_monopoly() -> None:
+    metric = coverage_module._concentration(
+        coverage_module.Counter({"a": 3, "b": 2, "c": 2, "d": 2, "e": 2, "f": 1}),
+        12,
+    )
+
+    assert metric["top_share"] == 0.25
+    assert metric["top_5_share"] == 0.9167
+    assert metric["risk"] == "high"
+
+
 def test_public_job_reads_apply_deadline_gate_before_worker_expiry(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
@@ -234,6 +246,41 @@ def test_public_job_reads_apply_deadline_gate_before_worker_expiry(tmp_path) -> 
     )[1] == 0
     assert database.find_public_job(job_id, as_of_date="2026-10-06") is None
     assert database.count_open_jobs(as_of_date="2026-10-06") == 0
+
+
+def test_coverage_report_uses_same_deadline_gate_as_student_reads(tmp_path) -> None:
+    """Coverage totals must never include rows hidden from the student API."""
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    pipeline = JobPipeline(settings, database)
+    posting = RawPosting(
+        title="已截止地质岗位",
+        employer="测试地质单位",
+        source_url="https://careers.example.edu.cn/jobs/expired-coverage",
+        application_url=None,
+        text="资源勘查工程本科，报名截止时间为2026年10月5日。",
+        summary="官方岗位公告。",
+        published_date="2026-09-01",
+        deadline_date="2026-10-05",
+        location="北京市",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "已截止地质岗位",
+            "专业范围": "资源勘查工程",
+            "学历要求": "本科",
+        },
+    )
+    database.save_job(
+        pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+    )
+
+    report = build_coverage_report(database, snapshot_date="2026-10-06")
+
+    assert database.count_open_jobs(as_of_date="2026-10-06") == 0
+    assert report["open_jobs"] == 0
+    assert report["domestic_open_jobs"] == 0
 
 
 def test_public_job_reads_apply_undated_source_window_before_worker_expiry(tmp_path) -> None:

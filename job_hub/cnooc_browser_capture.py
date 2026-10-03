@@ -18,8 +18,18 @@ from urllib.parse import urlparse
 import requests
 
 from job_hub.browser_capture import BrowserCaptureError, _robots_permit
+from job_hub.capture_evidence import (
+    attach_capture_manifest,
+    ensure_capture_manifest,
+    validate_capture_manifest,
+)
 from job_hub.cnpc_browser_runner import _resolve_cdp_websocket
-from job_hub.zhaopin_detail import ZhaopinDetailError, parse_zhaopin_detail_html
+from job_hub.zhaopin_detail import (
+    ZhaopinDetailError,
+    extract_zhaopin_degree_requirement,
+    extract_zhaopin_major_requirement,
+    parse_zhaopin_detail_html,
+)
 
 
 CNOOC_HOSTS = {"cnooc.zhaopin.com", "xiaoyuan.zhaopin.com"}
@@ -61,12 +71,74 @@ def _age_hours(captured_at: str, max_age_hours: float | None) -> float:
     return max(0.0, age)
 
 
+def repair_cnooc_detail_requirement_evidence(
+    row: dict[str, Any],
+    evidence: dict[str, str],
+    *,
+    index: int,
+) -> None:
+    """Recover precise fields from a legacy CNOOC job-level detail snapshot.
+
+    Earlier capture versions persisted a complete ``jobDesc`` in the major
+    field and an ATS education enum such as ``硕士`` in the degree field.  The
+    underlying text is still a single official detail block for this row, so
+    it can be repaired deterministically.  This is deliberately not a
+    keyword fallback: a missing labelled major condition remains a capture
+    error and cannot become a public record.
+    """
+
+    detail_text = _text(
+        " ".join(
+            str(value or "")
+            for value in (
+                row.get("description"),
+                evidence.get("专业要求"),
+                evidence.get("专业范围"),
+                evidence.get("学历要求"),
+            )
+        )
+    )
+    major = extract_zhaopin_major_requirement(detail_text)
+    if not major:
+        # Current captures already carry a bounded job-level major field.  It
+        # is safe only when it is not an old full description.
+        fallback_major = _text(
+            evidence.get("专业要求")
+            or evidence.get("专业范围")
+            or row.get("major")
+        )
+        if not fallback_major or any(
+            marker in fallback_major
+            for marker in ("岗位职责", "任职要求", "学历要求", "专业要求")
+        ):
+            raise BrowserCaptureError(
+                f"CNOOC row {index} is missing a bounded job-level major requirement"
+            )
+        major = fallback_major
+
+    degree = extract_zhaopin_degree_requirement(
+        detail_text,
+        _text(evidence.get("学历要求") or row.get("degree")),
+    )
+    if not degree:
+        raise BrowserCaptureError(
+            f"CNOOC row {index} is missing a job-level degree requirement"
+        )
+
+    row["major"] = major
+    row["degree"] = degree
+    evidence["专业要求"] = major
+    evidence["专业范围"] = major
+    evidence["学历要求"] = degree
+
+
 def load_cnooc_browser_capture(
     path: Path | str,
     *,
     allowed_hosts: list[str] | set[str] | None = None,
     max_age_hours: float | None = 30,
     require_complete_scan: bool = True,
+    require_capture_manifest: bool = False,
 ) -> dict[str, Any]:
     """Validate a server-produced CNOOC detail manifest fail-closed."""
 
@@ -76,6 +148,11 @@ def load_cnooc_browser_capture(
         raise BrowserCaptureError(f"cannot read CNOOC browser capture: {path}") from error
     if not isinstance(payload, dict):
         raise BrowserCaptureError("CNOOC browser capture must be an object")
+    if require_capture_manifest:
+        try:
+            validate_capture_manifest(payload)
+        except ValueError as error:
+            raise BrowserCaptureError(str(error)) from error
     status = _text(payload.get("status"))
     if status not in CAPTURE_STATUSES:
         raise BrowserCaptureError(f"unsupported CNOOC capture status: {status}")
@@ -140,7 +217,15 @@ def load_cnooc_browser_capture(
         for key in ("岗位", "专业范围", "学历要求", "工作地点", "招聘人数", "报名截止", "官方岗位详情"):
             if not _text(evidence.get(key)):
                 raise BrowserCaptureError(f"CNOOC row {index}.field_evidence.{key} is required")
-        row["field_evidence"] = {str(key): _text(value) for key, value in evidence.items()}
+        normalized_evidence = {
+            str(key): _text(value) for key, value in evidence.items()
+        }
+        repair_cnooc_detail_requirement_evidence(
+            row,
+            normalized_evidence,
+            index=index,
+        )
+        row["field_evidence"] = normalized_evidence
         normalized_rows.append(row)
     return {
         **payload,
@@ -157,6 +242,8 @@ def _candidate_job(
     row: dict[str, Any],
     patterns: list[str],
     exclude_patterns: list[str] | None = None,
+    *,
+    allow_unrestricted_candidates: bool = False,
 ) -> tuple[str, str] | None:
     job = row.get("job") if isinstance(row.get("job"), dict) else row
     title = _text(job.get("title") or job.get("positionName"))
@@ -164,10 +251,26 @@ def _candidate_job(
     if not title or not url:
         return None
     searchable = " ".join(_text(str(job.get(key) or "")) for key in ("title", "detail", "jobDetail", "jobCategories"))
-    if patterns and not any(re.search(pattern, searchable, re.IGNORECASE) for pattern in patterns):
+    has_included_pattern = any(
+        re.search(pattern, searchable, re.IGNORECASE) for pattern in patterns
+    )
+    # Some official listings omit the major field from the index row. Keep
+    # those rows for detail-level verification when the source explicitly
+    # opts into unrestricted-major discovery; the publication gate still
+    # requires the official detail to say ``不限专业`` and expose a supported
+    # degree. This widens discovery without weakening publication.
+    if patterns and not has_included_pattern and not allow_unrestricted_candidates:
         return None
+    # Exclusion terms are intentionally evaluated against the title and
+    # category only. Detailed responsibilities frequently mention generic
+    # words such as "合规" or "市场" even for drilling/geoscience roles;
+    # applying the exclusion to the full body silently drops valid jobs.
+    exclusion_text = " ".join(
+        _text(str(job.get(key) or "")) for key in ("title", "jobCategories")
+    )
     if exclude_patterns and any(
-        re.search(pattern, searchable, re.IGNORECASE) for pattern in exclude_patterns
+        re.search(pattern, exclusion_text, re.IGNORECASE)
+        for pattern in exclude_patterns
     ):
         return None
     return title, url
@@ -203,6 +306,7 @@ def run_cnooc_browser_capture(
     page_size = max(1, min(int(config.get("page_size", 100)), 100))
     max_pages = max(1, min(int(config.get("max_pages", 20)), 100))
     patterns = [str(item) for item in config.get("include_patterns", []) if str(item)]
+    allow_unrestricted_candidates = bool(config.get("allow_unrestricted_candidates", False))
     exclude_patterns = [
         str(item) for item in config.get("exclude_patterns", []) if str(item)
     ]
@@ -231,7 +335,12 @@ def run_cnooc_browser_capture(
         for raw in rows:
             if not isinstance(raw, dict):
                 continue
-            candidate = _candidate_job(raw, patterns, exclude_patterns)
+            candidate = _candidate_job(
+                raw,
+                patterns,
+                exclude_patterns,
+                allow_unrestricted_candidates=allow_unrestricted_candidates,
+            )
             if not candidate:
                 continue
             title, url = candidate
@@ -309,7 +418,17 @@ def run_cnooc_browser_capture(
         "rows": rows,
         "failure_records": failures,
     }
-    return persist_cnooc_browser_capture(output=output, payload=payload)
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=str(config.get("source_id") or "cnooc-career-browser"),
+        adapter_version=str(config.get("adapter_version") or "cnooc-browser-v1"),
+    )
+    return persist_cnooc_browser_capture(
+        output=output,
+        payload=payload,
+        source_id=str(config.get("source_id") or "cnooc-career-browser"),
+        adapter_version=str(config.get("adapter_version") or "cnooc-browser-v1"),
+    )
 
 
 def _write_capture(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
@@ -321,7 +440,11 @@ def _write_capture(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def persist_cnooc_browser_capture(
-    *, output: Path | str, payload: dict[str, Any]
+    *,
+    output: Path | str,
+    payload: dict[str, Any],
+    source_id: str = "cnooc-career-browser",
+    adapter_version: str = "cnooc-browser-v1",
 ) -> dict[str, Any]:
     """Keep the canonical CNOOC path success-only.
 
@@ -331,6 +454,11 @@ def persist_cnooc_browser_capture(
     and the prior success remains available until a complete pass succeeds.
     """
 
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=source_id,
+        adapter_version=adapter_version,
+    )
     destination = Path(output)
     status = _text(payload.get("status"))
     if status not in CAPTURE_STATUSES:
@@ -360,7 +488,13 @@ def persist_cnooc_browser_capture(
 
 
 def write_cnooc_capture_failure(
-    *, output: Path | str, platform_url: str, status: str, reason: str
+    *,
+    output: Path | str,
+    platform_url: str,
+    status: str,
+    reason: str,
+    source_id: str = "cnooc-career-browser",
+    adapter_version: str = "cnooc-browser-v1",
 ) -> dict[str, Any]:
     """Write a diagnostic beside the last successful capture."""
 
@@ -386,6 +520,11 @@ def write_cnooc_capture_failure(
         "rows": [],
         "failure_records": [],
     }
+    payload = attach_capture_manifest(
+        payload,
+        source_id=source_id,
+        adapter_version=adapter_version,
+    )
     destination = Path(str(output) + ".failure.json")
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + ".tmp")
@@ -398,6 +537,7 @@ __all__ = [
     "CNOOC_HOSTS",
     "load_cnooc_browser_capture",
     "persist_cnooc_browser_capture",
+    "repair_cnooc_detail_requirement_evidence",
     "run_cnooc_browser_capture",
     "write_cnooc_capture_failure",
 ]

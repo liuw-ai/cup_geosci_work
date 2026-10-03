@@ -11,15 +11,17 @@ from job_hub.matching import (
     qualification_evidence_text,
 )
 from job_hub.major_taxonomy import (
+    bounded_exact_terms_for_profile,
     english_exact_terms_for_profile,
     exact_terms_for_profile,
     category_terms_for_profile,
     profile_major_definition,
     related_terms_for_profile,
 )
+from job_hub.locations import MAINLAND_COUNTRY_LABELS
 
 
-DEGREE_ORDER = ("本科", "硕士", "博士")
+DEGREE_ORDER = ("大专", "本科", "硕士", "博士")
 DEGREE_RANK = {degree: index for index, degree in enumerate(DEGREE_ORDER)}
 
 # These values answer a different question from ``relevance_band``.  The
@@ -173,6 +175,9 @@ JOB_LEVEL_EVIDENCE_SCOPES = frozenset(
         # The capture manifest binds the title, major, degree, location,
         # headcount and deadline to the same official detail URL.
         "official_cmgb_browser_detail",
+        # Other employer-owned GuoPin portals use the same complete-detail
+        # contract, but retain their own source scope for traceability.
+        "official_iguopin_browser_detail",
         # CNOOC's Zhaopin detail page exposes the same job-level fields in
         # window.__INITIAL_DATA__; the browser manifest preserves that URL and
         # title binding before this scope reaches the publication gate.
@@ -202,6 +207,7 @@ class StudentProfile:
     degree: str
     major: str
     exact_major_terms: tuple[str, ...]
+    bounded_exact_major_terms: tuple[str, ...] = ()
     category_major_terms: tuple[str, ...] = ()
     english_exact_major_terms: tuple[str, ...] = ()
     related_major_terms: tuple[str, ...] = ()
@@ -252,6 +258,7 @@ def _profile(profile_id: str, degree: str, major: str) -> StudentProfile:
         degree=degree,
         major=major,
         exact_major_terms=exact_terms_for_profile(profile_id),
+        bounded_exact_major_terms=bounded_exact_terms_for_profile(profile_id),
         category_major_terms=category_terms_for_profile(profile_id),
         english_exact_major_terms=english_exact_terms_for_profile(profile_id),
         related_major_terms=related_terms_for_profile(profile_id),
@@ -316,6 +323,10 @@ def evaluate_student_publication(job: dict[str, Any]) -> PublicationDecision:
             reason="官方岗位行未提供可识别的学历层次。",
             matched_profile_ids=(),
         )
+
+    location_scope = _domestic_location_scope_decision(job)
+    if location_scope is not None:
+        return location_scope
 
     required_experience = _student_blocking_work_experience(
         _eligibility_evidence_text(job)
@@ -389,6 +400,33 @@ def evaluate_student_publication(job: dict[str, Any]) -> PublicationDecision:
         status=PUBLICATION_OUT_OF_SCOPE,
         label="专业不匹配",
         reason="官方岗位级专业要求未覆盖本院目标专业。",
+        matched_profile_ids=(),
+    )
+
+
+def _domestic_location_scope_decision(
+    job: dict[str, Any],
+) -> PublicationDecision | None:
+    """Keep non-mainland or unclassified pipeline rows out of public results."""
+
+    # Direct unit tests can intentionally omit normalised location fields.
+    # Pipeline rows always have country_or_region from normalize_location.
+    if "country_or_region" not in job:
+        return None
+    country = str(job.get("country_or_region") or "").strip()
+    if country in MAINLAND_COUNTRY_LABELS:
+        return None
+    if not country:
+        return PublicationDecision(
+            status=PUBLICATION_PENDING_EVIDENCE,
+            label="待补岗位地点",
+            reason="官方岗位地点尚未能确认属于中国大陆，不作为国内岗位公开。",
+            matched_profile_ids=(),
+        )
+    return PublicationDecision(
+        status=PUBLICATION_OUT_OF_SCOPE,
+        label="非中国大陆岗位",
+        reason=f"官方岗位地点标明为“{country}”，不纳入国内岗位库。",
         matched_profile_ids=(),
     )
 
@@ -486,6 +524,13 @@ def _major_status(
     ]
     if exact:
         return "explicit", f"专业范围明确包含“{exact[0]}”"
+    bounded = [
+        term
+        for term in profile.bounded_exact_major_terms
+        if _contains_bounded_exact_major_term(qualification_text, term)
+    ]
+    if bounded:
+        return "explicit", f"专业范围明确包含“{bounded[0]}”"
     explicit_english = [
         term
         for term in profile.english_exact_major_terms
@@ -638,6 +683,10 @@ def _profile_is_explicitly_eligible(
         _contains_exact_major_term(qualification_text, term)
         for term in profile.exact_major_terms
     )
+    has_bounded_major = any(
+        _contains_bounded_exact_major_term(qualification_text, term)
+        for term in profile.bounded_exact_major_terms
+    )
     has_category = any(
         _contains_explicit_category_term(qualification_text, term)
         for term in profile.category_major_terms
@@ -649,12 +698,17 @@ def _profile_is_explicitly_eligible(
         _english_major_requirement_is_explicit(job, term)
         for term in profile.english_exact_major_terms
     )
-    return (has_major or has_category or has_english_major) and _degree_status(job, profile)[0] == "explicit"
+    return (
+        has_major or has_bounded_major or has_category or has_english_major
+    ) and _degree_status(job, profile)[0] == "explicit"
 
 
 def _matched_profile_term(profile: StudentProfile, qualification_text: str) -> str:
     for term in profile.exact_major_terms:
         if _contains_exact_major_term(qualification_text, term):
+            return term
+    for term in profile.bounded_exact_major_terms:
+        if _contains_bounded_exact_major_term(qualification_text, term):
             return term
     for term in profile.category_major_terms:
         if _contains_explicit_category_term(qualification_text, term):
@@ -708,6 +762,24 @@ def _contains_exact_major_term(qualification_text: str, term: str) -> bool:
         remainder = lowered.replace("地质资源与地质工程", "")
         return candidate in remainder
     return True
+
+
+def _contains_bounded_exact_major_term(qualification_text: str, term: str) -> bool:
+    """Match a reviewed short-form Chinese discipline only as a full token.
+
+    This deliberately rejects a longer neighbouring direction, for example
+    ``应用地球物理`` or ``地球物理勘查`` for the ``地球物理`` short form.
+    """
+    candidate = term.casefold()
+    if not candidate:
+        return False
+    lowered = qualification_text.casefold()
+    boundary = r"[\s、，,；;。/()（）]"
+    pattern = re.compile(
+        rf"(?<![\u4e00-\u9fff]){re.escape(candidate)}"
+        rf"(?=$|{boundary}|专业(?=$|{boundary})|类(?=$|{boundary}))"
+    )
+    return bool(pattern.search(lowered))
 
 
 def _contains_explicit_category_term(qualification_text: str, term: str) -> bool:
@@ -784,6 +856,12 @@ def _degree_status(
     if profile.degree in listed:
         return "explicit", f"学历要求明确列出“{profile.degree}”"
 
+    # A minimum junior-college floor is lower than every supported student
+    # profile. Keep the raw wording in the job card while recognizing that
+    # higher-degree students satisfy the minimum.
+    if "大专" in listed and profile.degree in {"本科", "硕士", "博士"}:
+        return "explicit", "公告最低学历为“大专/高职”，高学历学生满足学历门槛"
+
     source_text = degree_text.lower()
     if _accepts_degree_or_above(source_text, profile.degree):
         return "explicit", f"公告写明“{profile.degree}及以上”或更低学历及以上"
@@ -805,25 +883,36 @@ def _accepts_degree_or_above(text: str, profile_degree: str) -> bool:
     """Recognize common degree-floor wording without guessing unlisted eligibility."""
     variants = {
         "本科": ("本科", "学士", "bachelor", "undergraduate"),
-        "硕士": ("硕士", "master"),
-        "博士": ("博士", "ph.d", "phd", "doctoral"),
+        # Chinese official tables commonly write the full degree name rather
+        # than the abbreviated floor.  ``硕士研究生及以上`` and ``研究生及以上``
+        # both include doctoral graduates; the latter must not be applied to
+        # a phrase already qualified as ``博士研究生``.
+        "硕士": ("硕士", "硕士研究生", "研究生", "master"),
+        "博士": ("博士", "博士研究生", "ph.d", "phd", "doctoral"),
     }
     profile_rank = DEGREE_RANK[profile_degree]
     for degree, words in variants.items():
         if DEGREE_RANK[degree] > profile_rank:
             continue
         for word in words:
+            if word == "研究生" and "博士研究生" in text:
+                continue
             if word in text and any(
                 phrase in text
                 for phrase in (
                     f"{word}及以上",
+                    f"{word}以上",
                     f"{word}学历及以上",
+                    f"{word}学历以上",
                     f"{word}学位及以上",
+                    f"{word}学位以上",
                     f"{word}或以上",
                     f"{word}学历或以上",
                     f"{word}学位或以上",
                     f"{word}以上学历",
                     f"{word}以上学位",
+                    f"{word} or higher",
+                    f"{word}'s or higher",
                     f"{word}'s degree or above",
                     f"{word} degree or above",
                 )

@@ -28,12 +28,22 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
 
     assert report["source_assessments"] == 12
     assert report["records"] == 157
-    assert report["verified_open_records"] == 52
+    # The 41 rolling "招满即止" rows have official table evidence, but an
+    # unchanged notice cannot prove that a seat remains. They stay out of the
+    # public current count until an explicit, fresh availability confirmation.
+    assert report["verified_open_records"] == 9
     assert report["verified_upcoming_records"] == 91
-    assert report["explicit_student_matches"] == 52
-    assert report["source_failures_or_pending"] == 0
+    assert report["explicit_student_matches"] == 9
+    assert report["source_failures_or_pending"] == 5
+    assert report["availability_confirmation_required_sources"] == [
+        "gansu-geology-bureau",
+        "hubei-natural-resources",
+        "hunan-geology-institute",
+        "ningxia-geology-bureau",
+    ]
+    assert report["open_until_filled_policy"]["blocked_records"] == 41
     assert report["verified_scan_no_current_match"] == 3
-    assert "扫描成功" in report["scan_interpretation"]
+    assert "不能把缺少岗位解释为无岗位" in report["scan_interpretation"]
 
 
 def test_refresh_gate_requires_two_immutable_successful_events() -> None:
@@ -42,14 +52,14 @@ def test_refresh_gate_requires_two_immutable_successful_events() -> None:
         registry,
         today="2026-09-25",
         source_refresh_counts={
-            "anhui-geology-bureau": {"total_refreshes": 2, "successful_refreshes": 2},
+            "cea-2027-recruitment": {"total_refreshes": 2, "successful_refreshes": 2},
             "gansu-geology-bureau": {"total_refreshes": 1, "successful_refreshes": 1},
         },
     )
 
     gate = report["source_refresh_gate"]
     assert gate["required_successful_refreshes"] == 2
-    assert gate["by_source"]["anhui-geology-bureau"]["passed_two_successes"] is True
+    assert gate["by_source"]["cea-2027-recruitment"]["passed_two_successes"] is True
     assert gate["by_source"]["gansu-geology-bureau"]["passed_two_successes"] is False
     assert gate["passed_sources"] == 1
 
@@ -233,6 +243,114 @@ def test_stale_registry_report_excludes_rows_from_current_open_count() -> None:
     assert "hunan-geology-institute" in report["pending_evidence_sources"]
     assert report["source_failures_or_pending"] > 0
     assert "不能把缺少岗位解释为无岗位" in report["scan_interpretation"]
+
+
+def test_pending_manifest_attachment_cannot_bypass_row_evidence_gate() -> None:
+    """A reachable table URL is not equivalent to a reviewed table row."""
+    record = {
+        "id": "pending-table-row",
+        "source_id": "official-test-source",
+        "position_type": "public_institution",
+        "province": "测试省",
+        "employer": "测试地质调查院",
+        "position_code": "A-001",
+        "title": "地质技术岗",
+        "major_requirement": "地质学",
+        "degree_requirement": "硕士研究生",
+        "location": "测试市",
+        "headcount": 1,
+        "deadline_date": "2026-10-31",
+        "deadline_policy": "fixed_date",
+        "official_notice_url": "https://example.gov.cn/notice.html",
+        "official_attachment_url": "https://example.gov.cn/table.xlsx",
+        "evidence_locator": "岗位表!2",
+        "record_status": "verified_open",
+        "match_status": "explicit_match",
+    }
+    registry = {"as_of": "2026-10-03", "records": [record]}
+    verification = {
+        "official-test-source": {
+            "status": "verified",
+            "last_success_at": "2026-10-03T01:00:00Z",
+        }
+    }
+    pending_manifest = {
+        "artifacts": [
+            {
+                "attachment_url": record["official_attachment_url"],
+                "status": "server_download_pending",
+            }
+        ]
+    }
+
+    assert current_publishable_position_records(
+        registry,
+        today="2026-10-03",
+        max_age_hours=48,
+        source_verifications=verification,
+        artifact_manifest=pending_manifest,
+    ) == []
+
+    report = government_position_quality_report(
+        registry,
+        today="2026-10-03",
+        max_age_hours=48,
+        source_verifications=verification,
+        artifact_manifest=pending_manifest,
+    )
+    assert report["verified_open_records"] == 0
+    assert report["attachment_manifest_gate"]["blocked_records"] == 1
+    assert report["attachment_manifest_gate"]["blocked_sources"] == ["official-test-source"]
+
+    reviewed_manifest = {
+        "artifacts": [
+            {
+                "attachment_url": record["official_attachment_url"],
+                "status": "manual_verified",
+            }
+        ]
+    }
+    assert [item["id"] for item in current_publishable_position_records(
+        registry,
+        today="2026-10-03",
+        max_age_hours=48,
+        source_verifications=verification,
+        artifact_manifest=reviewed_manifest,
+    )] == ["pending-table-row"]
+
+
+def test_missing_configured_manifest_fails_closed_for_table_backed_rows() -> None:
+    registry = {
+        "as_of": "2026-10-03",
+        "records": [
+            {
+                "id": "table-row",
+                "source_id": "official-test-source",
+                "record_status": "verified_open",
+                "match_status": "explicit_match",
+                "deadline_date": "2026-10-31",
+                "deadline_policy": "fixed_date",
+                "official_notice_url": "https://example.gov.cn/notice.html",
+                "official_attachment_url": "https://example.gov.cn/table.xlsx",
+            },
+            {
+                "id": "direct-detail-row",
+                "source_id": "official-test-source",
+                "record_status": "verified_open",
+                "match_status": "explicit_match",
+                "deadline_date": "2026-10-31",
+                "deadline_policy": "fixed_date",
+                "official_notice_url": "https://example.gov.cn/detail.html",
+                "official_attachment_url": "https://example.gov.cn/detail.html",
+            },
+        ],
+    }
+
+    assert [item["id"] for item in current_publishable_position_records(
+        registry,
+        today="2026-10-03",
+        artifact_manifest_available=False,
+    )] == ["direct-detail-row"]
 
 
 def test_stale_source_verification_is_reported_as_pending_without_duplicate_failure() -> None:
@@ -528,3 +646,66 @@ def test_open_until_filled_row_rejects_invented_fixed_deadline() -> None:
     }
     with pytest.raises(GovernmentPositionContractError, match="must not invent"):
         validate_position_record(record)
+
+
+def test_open_until_filled_rows_require_fresh_current_availability_confirmation() -> None:
+    registry = {
+        "as_of": "2026-10-03",
+        "records": [
+            {
+                "id": "rolling-position",
+                "source_id": "official-test-source",
+                "position_type": "public_institution",
+                "province": "测试省",
+                "employer": "测试地质调查院",
+                "position_code": "A-001",
+                "title": "地质技术岗",
+                "major_requirement": "地质学",
+                "degree_requirement": "硕士研究生",
+                "location": "测试市",
+                "headcount": 1,
+                "deadline_date": "",
+                "deadline_policy": "open_until_filled",
+                "official_notice_url": "https://careers.example.edu.cn/notice.html",
+                "official_attachment_url": "https://careers.example.edu.cn/table.xlsx",
+                "evidence_locator": "岗位表!2",
+                "record_status": "verified_open",
+                "match_status": "explicit_match",
+            }
+        ],
+    }
+    source_verifications = {
+        "official-test-source": {
+            "status": "verified",
+            "last_success_at": "2026-10-03T00:00:00Z",
+        }
+    }
+
+    assert current_publishable_position_records(
+        registry,
+        today="2026-10-03",
+        max_age_hours=48,
+        source_verifications=source_verifications,
+        now=datetime.fromisoformat("2026-10-03T01:00:00+00:00"),
+    ) == []
+
+    source_verifications["official-test-source"]["availability_confirmed_at"] = (
+        "2026-10-03T00:30:00Z"
+    )
+    published = current_publishable_position_records(
+        registry,
+        today="2026-10-03",
+        max_age_hours=48,
+        source_verifications=source_verifications,
+        now=datetime.fromisoformat("2026-10-03T01:00:00+00:00"),
+    )
+    assert [row["id"] for row in published] == ["rolling-position"]
+
+    expired_confirmation = current_publishable_position_records(
+        registry,
+        today="2026-10-06",
+        max_age_hours=48,
+        source_verifications=source_verifications,
+        now=datetime.fromisoformat("2026-10-06T01:00:00+00:00"),
+    )
+    assert expired_confirmation == []

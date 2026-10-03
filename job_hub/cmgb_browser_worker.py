@@ -116,6 +116,8 @@ class CmgbBrowserWorker:
                     platform_url=str(config.get("browser_url") or source["homepage_url"]),
                     status="access_limited" if "HTTP 4" in str(error) or "robots" in str(error).lower() else "parse_failed",
                     reason=str(error),
+                    source_id=str(config.get("source_id") or self.source_id),
+                    adapter_version=str(config.get("adapter_version") or "cmgb-browser-v1"),
                 )
             except Exception:
                 LOGGER.exception("Could not persist CMGB failure capture")
@@ -151,6 +153,7 @@ class CmgbBrowserWorker:
                 allowed_hosts=list(config["allowed_hosts"]),
                 user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
                 max_age_hours=float(config.get("detail_retry_max_age_hours", 12)),
+                require_capture_manifest=bool(config.get("require_capture_manifest", False)),
             )
         except CmgbBrowserCaptureError as error:
             message = str(error)
@@ -160,6 +163,7 @@ class CmgbBrowserWorker:
                 "requires a completed pagination pass",
                 "has no failed detail rows",
                 "failure_records do not match",
+                "capture_evidence manifest is required",
                 "detail_url must be non-empty",
                 "must be a concrete CMGB job detail URL",
             )
@@ -176,6 +180,8 @@ class CmgbBrowserWorker:
                     platform_url=str(config.get("browser_url") or source["homepage_url"]),
                     status="parse_failed",
                     reason=f"CMGB targeted detail retry failed: {error}",
+                    source_id=str(config.get("source_id") or self.source_id),
+                    adapter_version=str(config.get("adapter_version") or "cmgb-browser-v1"),
                 )
             except Exception:
                 LOGGER.exception("Could not archive CMGB targeted retry failure")

@@ -46,6 +46,9 @@ PROVINCES = (
 )
 
 
+MAINLAND_COUNTRY_LABELS = frozenset({"中国大陆", "中国"})
+
+
 _PROVINCE_ALIASES = {
     "北京市": "北京",
     "北京": "北京",
@@ -121,8 +124,15 @@ _CITY_TO_PROVINCE = {
     "石家庄": ("河北", "石家庄"),
     "唐山": ("河北", "唐山"),
     "廊坊": ("河北", "廊坊"),
+    "秦皇岛": ("河北", "秦皇岛"),
+    "承德": ("河北", "承德"),
+    "邢台": ("河北", "邢台"),
+    "保定": ("河北", "保定"),
     "太原": ("山西", "太原"),
     "大同": ("山西", "大同"),
+    "晋城": ("山西", "晋城"),
+    "运城": ("山西", "运城"),
+    "吕梁": ("山西", "吕梁"),
     "呼和浩特": ("内蒙古", "呼和浩特"),
     "鄂尔多斯": ("内蒙古", "鄂尔多斯"),
     "沈阳": ("辽宁", "沈阳"),
@@ -136,8 +146,14 @@ _CITY_TO_PROVINCE = {
     "南京": ("江苏", "南京"),
     "苏州": ("江苏", "苏州"),
     "徐州": ("江苏", "徐州"),
+    "常州": ("江苏", "常州"),
+    "金坛": ("江苏", "常州"),
+    "无锡": ("江苏", "无锡"),
+    "扬州": ("江苏", "扬州"),
+    "淮安": ("江苏", "淮安"),
     "杭州": ("浙江", "杭州"),
     "宁波": ("浙江", "宁波"),
+    "衢州": ("浙江", "衢州"),
     "合肥": ("安徽", "合肥"),
     "福州": ("福建", "福州"),
     "厦门": ("福建", "厦门"),
@@ -146,9 +162,14 @@ _CITY_TO_PROVINCE = {
     "青岛": ("山东", "青岛"),
     "东营": ("山东", "东营"),
     "烟台": ("山东", "烟台"),
+    "德州": ("山东", "德州"),
     "郑州": ("河南", "郑州"),
+    "南阳": ("河南", "南阳"),
+    "濮阳": ("河南", "濮阳"),
     "武汉": ("湖北", "武汉"),
     "宜昌": ("湖北", "宜昌"),
+    "荆州": ("湖北", "荆州"),
+    "潜江": ("湖北", "潜江"),
     "长沙": ("湖南", "长沙"),
     "广州": ("广东", "广州"),
     "深圳": ("广东", "深圳"),
@@ -158,25 +179,42 @@ _CITY_TO_PROVINCE = {
     "海口": ("海南", "海口"),
     "三亚": ("海南", "三亚"),
     "重庆": ("重庆", "重庆"),
+    "涪陵": ("重庆", "涪陵"),
     "成都": ("四川", "成都"),
     "绵阳": ("四川", "绵阳"),
+    "巴中": ("四川", "巴中"),
+    "凉山彝族自治州": ("四川", "凉山"),
+    "凉山": ("四川", "凉山"),
     "贵阳": ("贵州", "贵阳"),
+    "毕节": ("贵州", "毕节"),
     "昆明": ("云南", "昆明"),
+    "昭通": ("云南", "昭通"),
     "拉萨": ("西藏", "拉萨"),
+    "阿里": ("西藏", "阿里"),
     "西安": ("陕西", "西安"),
     "延安": ("陕西", "延安"),
     "榆林": ("陕西", "榆林"),
     "兰州": ("甘肃", "兰州"),
     "庆阳": ("甘肃", "庆阳"),
     "西宁": ("青海", "西宁"),
+    "海西蒙古族藏族自治州": ("青海", "海西"),
+    "海西": ("青海", "海西"),
     "银川": ("宁夏", "银川"),
     "乌鲁木齐": ("新疆", "乌鲁木齐"),
     "克拉玛依": ("新疆", "克拉玛依"),
     "库尔勒": ("新疆", "库尔勒"),
+    "阿勒泰": ("新疆", "阿勒泰"),
+    "塔河油田": ("新疆", "塔河油田"),
 }
 
 
 _OVERSEAS_ALIASES = {
+    "国内外": "境内外混合",
+    "刚果（金）": "刚果民主共和国",
+    "刚果(金)": "刚果民主共和国",
+    "刚果民主共和国": "刚果民主共和国",
+    "刚果共和国": "刚果共和国",
+    "圭亚那": "圭亚那",
     "安哥拉": "安哥拉",
     "阿根廷": "阿根廷",
     "哥伦比亚": "哥伦比亚",
@@ -202,6 +240,19 @@ _OVERSEAS_ALIASES = {
     "巴西": "巴西",
     "印度尼西亚": "印度尼西亚",
     "印度": "印度",
+    "蒙古国": "蒙古国",
+    # These are not countries, but in a work-location field they are explicit
+    # non-mainland evidence. A domestic office city must not mask them.
+    "非洲": "海外",
+    "南美洲": "海外",
+    "北美洲": "海外",
+    "欧洲": "海外",
+    "大洋洲": "海外",
+    "东南亚": "海外",
+    "中东": "海外",
+    "海外": "海外",
+    "境外": "海外",
+    "国外": "海外",
 }
 
 # Public international career systems often provide ISO-like country codes
@@ -285,12 +336,33 @@ _ENGLISH_COUNTRIES = (
 )
 
 
-def normalize_location(value: str | None) -> dict[str, Any]:
+_MAINLAND_REGIONAL_MARKERS = (
+    "华北",
+    "东北",
+    "华东",
+    "华中",
+    "华南",
+    "西北",
+    "西南",
+)
+
+
+def normalize_location(
+    value: str | None,
+    *,
+    official_province: str | None = None,
+) -> dict[str, Any]:
     """Return structured location fields from explicit announcement text.
 
     ``explicit`` means the announcement itself names a province/region.  A
     city maps to its province as ``normalized`` because the province is a
     deterministic geographic normalization, rather than a claim in the source.
+
+    ``official_province`` is reserved for a province column on the same
+    official government position-table row. It is only considered after the
+    raw work-location field has no non-mainland evidence and cannot otherwise
+    be mapped. Callers must not pass an employer's registration province or a
+    source-level province as a substitute for a row-level work location.
     """
     raw = _clean(value)
     result: dict[str, Any] = {
@@ -301,6 +373,49 @@ def normalize_location(value: str | None) -> dict[str, Any]:
         "location_evidence": None,
     }
     if not raw:
+        return result
+
+    # A location can name both a domestic office and an overseas assignment,
+    # such as "北京，非洲". The public corpus is mainland-only, so foreign
+    # evidence must take precedence over a domestic token.
+    foreign = _foreign_location_evidence(raw)
+    if foreign is not None:
+        foreign_evidence, country = foreign
+        mainland_evidence = _mainland_location_evidence(raw)
+        if mainland_evidence:
+            result.update(
+                {
+                    "country_or_region": "境内外混合",
+                    "location_confidence": "explicit",
+                    "location_evidence": f"{mainland_evidence}；{foreign_evidence}",
+                }
+            )
+        else:
+            result.update(
+                {
+                    "city": (
+                        _city_from_overseas_location(raw)
+                        if re.search(r"[A-Za-z]", raw)
+                        else None
+                    ),
+                    "country_or_region": country,
+                    "location_confidence": "explicit",
+                    "location_evidence": foreign_evidence,
+                }
+            )
+        return result
+
+    # A location field that explicitly says "全国" describes a mainland-wide
+    # opportunity.  It is domestic evidence, but deliberately has no province
+    # so it cannot inflate any individual province's coverage.
+    if raw in {"全国", "全国项目地", "全国范围", "全国各地"}:
+        result.update(
+            {
+                "country_or_region": "中国大陆",
+                "location_confidence": "explicit",
+                "location_evidence": "全国",
+            }
+        )
         return result
 
     province_match: tuple[str, str] | None = None
@@ -337,48 +452,42 @@ def normalize_location(value: str | None) -> dict[str, Any]:
         )
         return result
 
-    for alias, country in _sorted_aliases(_OVERSEAS_ALIASES):
-        if alias in raw:
+    # A field such as "长期驻外，如西北、西南等" is still an explicit
+    # mainland-region statement when it contains no foreign marker. It has no
+    # single province, so it must not contribute to province coverage.
+    for marker in _MAINLAND_REGIONAL_MARKERS:
+        if marker in raw:
             result.update(
                 {
-                    "country_or_region": country,
+                    "country_or_region": "中国大陆",
                     "location_confidence": "explicit",
-                    "location_evidence": alias,
+                    "location_evidence": marker,
                 }
             )
             return result
 
-    lowered = raw.lower()
-    for pattern, country in _ENGLISH_COUNTRIES:
-        match = re.search(pattern, lowered)
-        if match:
-            city = _city_from_overseas_location(raw)
-            result.update(
-                {
-                    "city": city,
-                    "country_or_region": country,
-                    "location_confidence": "explicit",
-                    "location_evidence": match.group(0),
-                }
-            )
-            return result
+    province_from_row = _official_province(official_province)
+    if province_from_row is not None:
+        evidence = _clean(official_province)
+        result.update(
+            {
+                "province": province_from_row,
+                "city": (
+                    province_from_row
+                    if province_from_row in {"北京", "天津", "上海", "重庆"}
+                    else None
+                ),
+                "country_or_region": "中国大陆",
+                "location_confidence": "official_row_province",
+                "location_evidence": f"官方职位表省份：{evidence}",
+            }
+        )
+        return result
 
-    # Job boards such as SuccessFactors and SLB commonly use a two-letter
-    # country code as the penultimate comma-separated token.
-    for code, country in _COUNTRY_CODE_ALIASES.items():
-        if re.search(rf"(?<![A-Z]){re.escape(code)}(?![A-Z])", raw.upper()):
-            city = _city_from_overseas_location(raw)
-            result.update(
-                {
-                    "city": city,
-                    "country_or_region": country,
-                    "location_confidence": "explicit",
-                    "location_evidence": code,
-                }
-            )
-            return result
-
-    city = _city_from_overseas_location(raw)
+    # An arbitrary Chinese place name may not yet be in the city map. It must
+    # remain unclassified until reviewed, not become "海外" because it has a
+    # comma. The fallback below is only for Latin job-board locations.
+    city = _city_from_overseas_location(raw) if re.search(r"[A-Za-z]", raw) else None
     if city:
         result.update(
             {
@@ -390,15 +499,50 @@ def normalize_location(value: str | None) -> dict[str, Any]:
         )
         return result
 
-    if "海外" in raw or "境外" in raw:
-        result.update(
-            {
-                "country_or_region": "海外",
-                "location_confidence": "explicit",
-                "location_evidence": "海外" if "海外" in raw else "境外",
-            }
-        )
     return result
+
+
+def _mainland_location_evidence(raw: str) -> str | None:
+    """Return an explicit mainland marker without inferring it from employer text."""
+
+    if raw in {"全国", "全国项目地", "全国范围", "全国各地"}:
+        return "全国"
+    for alias, _province in _sorted_aliases(_PROVINCE_ALIASES):
+        if alias in raw:
+            return alias
+    for alias, _location in _sorted_aliases(_CITY_TO_PROVINCE):
+        if alias in raw:
+            return alias
+    return None
+
+
+def _official_province(value: str | None) -> str | None:
+    """Normalize an exact province field from one official position-table row."""
+
+    cleaned = _clean(value)
+    if not cleaned:
+        return None
+    for alias, province in _sorted_aliases(_PROVINCE_ALIASES):
+        if cleaned == alias:
+            return province
+    return None
+
+
+def _foreign_location_evidence(raw: str) -> tuple[str, str] | None:
+    """Find explicit non-mainland evidence before domestic normalization."""
+
+    for alias, country in _sorted_aliases(_OVERSEAS_ALIASES):
+        if alias in raw:
+            return alias, country
+    lowered = raw.lower()
+    for pattern, country in _ENGLISH_COUNTRIES:
+        match = re.search(pattern, lowered)
+        if match:
+            return match.group(0), country
+    for code, country in _COUNTRY_CODE_ALIASES.items():
+        if re.search(rf"(?<![A-Z]){re.escape(code)}(?![A-Z])", raw.upper()):
+            return code, country
+    return None
 
 
 def _clean(value: str | None) -> str:

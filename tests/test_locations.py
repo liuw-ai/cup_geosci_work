@@ -7,6 +7,8 @@ from job_hub.locations import extract_location_hint, normalize_location
 def test_location_normalization_uses_explicit_location_evidence() -> None:
     direct = normalize_location("北京市海淀区 / 西安")
     city = normalize_location("克拉玛依市")
+    nationwide = normalize_location("全国项目地")
+    jincheng = normalize_location("晋城-沁水县")
     unknown = normalize_location(None)
 
     assert direct == {
@@ -19,6 +21,17 @@ def test_location_normalization_uses_explicit_location_evidence() -> None:
     assert city["province"] == "新疆"
     assert city["city"] == "克拉玛依"
     assert city["location_confidence"] == "normalized"
+    assert nationwide == {
+        "province": None,
+        "city": None,
+        "country_or_region": "中国大陆",
+        "location_confidence": "explicit",
+        "location_evidence": "全国",
+    }
+    assert normalize_location("全国油气地质大赛")["country_or_region"] != "中国大陆"
+    assert jincheng["province"] == "山西"
+    assert jincheng["city"] == "晋城"
+    assert jincheng["country_or_region"] == "中国大陆"
     assert unknown["province"] is None
     assert unknown["location_confidence"] == "unknown"
 
@@ -44,3 +57,69 @@ def test_location_normalization_supports_international_codes_and_labeled_body_te
     assert overseas["country_or_region"] == "加拿大"
     assert overseas["province"] is None
     assert labeled == "新疆克拉玛依"
+
+
+def test_foreign_evidence_precedes_domestic_prefix_and_known_chinese_cities() -> None:
+    mixed = normalize_location("北京，非洲")
+    congo = normalize_location("刚果（金）")
+    domestic_cities = normalize_location("邢台，保定")
+
+    assert mixed["country_or_region"] == "境内外混合"
+    assert mixed["province"] is None
+    assert mixed["location_evidence"] == "北京；非洲"
+    assert congo["country_or_region"] == "刚果民主共和国"
+    assert domestic_cities["country_or_region"] == "中国大陆"
+    assert domestic_cities["province"] == "河北"
+
+
+def test_official_position_table_province_is_narrow_fallback_only() -> None:
+    official_row = normalize_location("未收录工作地", official_province="河南")
+    foreign_row = normalize_location("Calgary, AB, CA", official_province="北京")
+    mixed_row = normalize_location("北京，非洲", official_province="北京")
+
+    assert official_row == {
+        "province": "河南",
+        "city": None,
+        "country_or_region": "中国大陆",
+        "location_confidence": "official_row_province",
+        "location_evidence": "官方职位表省份：河南",
+    }
+    assert foreign_row["country_or_region"] == "加拿大"
+    assert mixed_row["country_or_region"] == "境内外混合"
+
+
+def test_verified_operational_locations_keep_mixed_assignments_private() -> None:
+    expected = {
+        "塔河油田": "新疆",
+        "南阳": "河南",
+        "荆州、潜江": "湖北",
+        "扬州、淮安及油田业务所在地": "江苏",
+        "阿勒泰-哈巴河县": "新疆",
+    }
+
+    for raw, province in expected.items():
+        normalized = normalize_location(raw)
+        assert normalized["country_or_region"] == "中国大陆"
+        assert normalized["province"] == province
+
+    assert normalize_location("国内外项目现场")["country_or_region"] == "境内外混合"
+    regional = normalize_location("长期驻外，如西北、西南等")
+    assert regional["country_or_region"] == "中国大陆"
+    assert regional["province"] is None
+    assert normalize_location("蒙古国")["country_or_region"] == "蒙古国"
+
+
+def test_verified_city_and_autonomous_prefecture_aliases_normalize_to_mainland() -> None:
+    expected = {
+        "运城-河津市": "山西",
+        "昭通-昭阳区": "云南",
+        "毕节-赫章县": "贵州",
+        "海西蒙古族藏族自治州-格尔木市": "青海",
+        "凉山彝族自治州-会理市": "四川",
+        "阿里-改则县": "西藏",
+    }
+
+    for raw, province in expected.items():
+        normalized = normalize_location(raw)
+        assert normalized["province"] == province
+        assert normalized["country_or_region"] == "中国大陆"

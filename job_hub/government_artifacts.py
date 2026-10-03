@@ -40,6 +40,11 @@ MANIFEST_PROCESSING_POLICIES = {
     "current_non_student_eligible": "student_scope_excluded",
 }
 AUTOMATIC_MANIFEST_PROCESSING_POLICIES = frozenset({"automatic"})
+# A manifest entry represents a controlled evidence lifecycle.  Only a table
+# explicitly marked as manually verified may authorize pre-built ledger rows
+# for student-facing publication.  In particular, a URL that is merely queued
+# for a server download has not yet established row-level evidence.
+MANIFEST_PUBLICATION_READY_STATUSES = frozenset({"manual_verified"})
 
 
 class GovernmentArtifactContractError(ValueError):
@@ -190,6 +195,42 @@ def government_artifact_processing_block_reason(
         ),
     }
     return reasons.get(policy, "Government manifest disables automatic attachment processing")
+
+
+def government_artifact_publication_block_reason(
+    attachment_url: str,
+    manifest: dict[str, Any] | None,
+) -> str | None:
+    """Return why a known manifest attachment cannot authorize publication.
+
+    The artifact manifest is deliberately the source of truth for files that
+    have entered the controlled attachment workflow.  A reviewed government
+    ledger may contain a row derived from such a file, but it must not bypass
+    the file lifecycle simply because a short HTTP evidence recheck succeeds.
+    URLs absent from the manifest are left to the ordinary reviewed-ledger
+    gate; this preserves direct official-detail records that have no attached
+    position table.
+    """
+    if manifest is None:
+        return None
+    target = str(attachment_url or "").strip()
+    if not target:
+        return None
+    matches = [
+        item
+        for item in manifest.get("artifacts", [])
+        if str(item.get("attachment_url") or "").strip() == target
+    ]
+    if not matches:
+        return None
+    statuses = {str(item.get("status") or "").strip() for item in matches}
+    if statuses.issubset(MANIFEST_PUBLICATION_READY_STATUSES):
+        return None
+    status_text = "、".join(sorted(status for status in statuses if status)) or "unknown"
+    return (
+        "官方附件尚未完成受控下载、哈希和逐行复核，"
+        f"当前清单状态为 {status_text}。"
+    )
 
 
 def register_government_artifacts(database: Any, manifest: dict[str, Any]) -> list[dict[str, Any]]:

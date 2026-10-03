@@ -131,6 +131,8 @@ Phase 10 新增的 `structured_opening_page` 适配器用于少量已核验、�
 
 `python -m job_hub.cli coverage` 和 `/api/coverage` 输出以下可量化检查，而不是只显示岗位总数：省份已登记/入口可访问/成功扫描来源与备用入口、五类角色目标状态、最近一次扫描是否有开放匹配、官方原文完整率、专业/学历/地点/截止日期或来源期限规则完整率、来源和类别集中度，以及匿名 100 人队列的明确匹配与需核验数量。地点指标区分国内省份和海外国家/地区；截止日指标区分明确日期、官方系统未公布固定期限和完全未说明。页面和报告不会把未扫描或失败来源解释成“当地没有岗位”。
 
+`source_diversity` 是 1,000 条目标的增量门禁。它只消费当前学生端已发布行，按来源、单位和省份计算集中度，并为目标计划中的每个来源给出 `capture_and_verify`、`hold_dominant_source`、`register_official_source` 或 `reactivate_or_build_adapter` 状态。每个扩容批次最多 50 条，优先没有现有岗位的已登记独立来源；来源的岗位级详情、专业、学历、地点和期限门禁仍由各适配器执行。这样不会用同一来源的快照堆高总数，也不会把候选队列误算成有效岗位。
+
 ### 省级来源核验阶段
 
 `data/source_validation_registry.json` 的阶段含义如下：
@@ -163,13 +165,15 @@ Phase 10 新增的 `structured_opening_page` 适配器用于少量已核验、�
 
 ## 专业画像与匹配边界
 
-学生端可选的画像严格限于用户指定的七种组合：
+学生端可选的画像严格限于当前学院培养方向对应的十种组合：
 
 | 学历 | 专业 |
 | --- | --- |
-| 本科 | 资源勘查工程 |
-| 硕士 | 地质学、地质工程、地质资源与地质工程 |
-| 博士 | 地质学、地质工程、地质资源与地质工程 |
+| 本科 | 资源勘查工程、地球物理学 |
+| 硕士 | 地质学、地球物理学、地质工程、地质资源与地质工程 |
+| 博士 | 地质学、地球物理学、地质工程、地质资源与地质工程 |
+
+学历匹配采用“官方原文优先、最低学历闭包有限推导”的规则：岗位字段保留公告原文，`degree_levels` 只表示原文中识别出的学历层次，不把“本科及以上”改写成所有学历；只有原文明确写出“及以上/以上/或以上”时，才将更高学历纳入 `matched_profile_ids`。公告只列“本科、硕士”等离散层次时，未列出的博士保持“需核验”，不会自行推断；“博士研究生”不会被“研究生”误判为硕士，“博士后”也不会自动视为博士学历。大专/高职最低学历可以覆盖更高学历学生，但系统不创建大专学生画像。
 
 匹配不是录用或报名资格判定。页面只使用三种结果：
 
@@ -233,3 +237,12 @@ Docker Compose 运行两个无 root 服务，共享本地 Docker named volume �
 ## 仍需人工维护的部分
 
 中国石油、中国石化、中国海油是上游业主/运营主体；东方物探、长城钻探、川庆钻探、渤海钻探、石化石油工程技术服务、中海油服、中海油能源发展是相应体系内的工程技术服务单位；杰瑞、安东、中曼、海隆、贝肯、通源是独立或民营油服；SLB、Halliburton、Baker Hughes、Weatherford 是国际油服。系统在展示和分类时保持这些产业链角色分离。SLB 当前通过官网公开职位检索和详情页适配器接入；Baker Hughes 和 Weatherford 仍因自动访问保护或网络限制保持待核验。中国海油当前年度公开岗位接口返回业务错误，不能解释为暂无岗位，来源保持停用。国家管网、国考和各地人社平台等重点入口已登记，但不少存在 robots 限制、动态验证、登录要求或年度变化。系统不会绕过这些限制。只有确认公开访问规则、稳定解析字段并在本地审核候选结果后，才应新增专用自动采集器；无法自动接入但具备单位官网原文的岗位可以通过人工核验入口补录。
+### Student-read freshness gate
+
+Sources that declare `config.max_age_hours` must have a complete successful
+capture timestamp in `source_capture_freshness`. The worker writes that
+projection only after the source transaction succeeds; manual snapshot imports
+write it only after the complete file has been imported. Student-facing reads
+apply the same age window without writing to SQLite, so an unavailable worker
+cannot leave an old snapshot visible. Rows remain in the private audit corpus
+until the lifecycle worker withdraws them and records the reason.

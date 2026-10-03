@@ -31,8 +31,8 @@ def test_default_government_ledgers_are_consistent_but_evidence_is_stale() -> No
     assert report["ok"] is True
     assert report["error_count"] == 0
     assert report["registry_evidence"]["state"] == "verified_positions_stale"
-    assert report["registry_evidence"]["verified_position_records"] == 157
-    assert report["registry_evidence"]["verified_open_position_records"] == 143
+    assert report["registry_evidence"]["verified_position_records"] == 155
+    assert report["registry_evidence"]["verified_open_position_records"] == 141
 
 
 def test_audit_rejects_no_match_status_when_verified_rows_exist() -> None:

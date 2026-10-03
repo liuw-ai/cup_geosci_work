@@ -35,9 +35,9 @@
       <small>条需要关注</small>
     </div>
     <div class="stat">
-      <span>{% if is_preview %}当前在招{% else %}日报时在招{% endif %}</span>
-      <strong>{{ report.stats.open_total }}</strong>
-      <small>{% if is_preview %}条可检索岗位{% else %}条日报快照岗位{% endif %}</small>
+      <span>当前在招</span>
+      <strong>{{ live_open_total }}</strong>
+      <small>条实时可检索岗位</small>
     </div>
   </section>
 

@@ -113,6 +113,34 @@ def test_worker_falls_back_to_full_scan_only_when_partial_retry_is_stale(
     assert heartbeats[-1][0] == "running"
 
 
+def test_worker_falls_back_to_full_scan_for_legacy_partial_without_manifest(
+    monkeypatch, tmp_path
+) -> None:
+    worker, _source, heartbeats = _worker_with_source(tmp_path)
+    failure = tmp_path / "captures" / "cmgb.failure.json"
+    failure.parent.mkdir(parents=True)
+    failure.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(
+        worker_module,
+        "run_cmgb_detail_retry",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            CmgbBrowserCaptureError("capture_evidence manifest is required")
+        ),
+    )
+    calls = []
+
+    def fake_full_capture(**kwargs):
+        calls.append(kwargs)
+        return {"status": "success", "scan": {"detail_failed": 0}}
+
+    monkeypatch.setattr(worker_module, "run_cmgb_browser_capture", fake_full_capture)
+
+    worker._run_once()
+
+    assert len(calls) == 1
+    assert heartbeats[-1][0] == "running"
+
+
 def test_cmgb_retry_configuration_is_scoped_to_the_cmgb_source() -> None:
     registry = json.loads(
         (Path(__file__).parent.parent / "data" / "sources.json").read_text(encoding="utf-8")

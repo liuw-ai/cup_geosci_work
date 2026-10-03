@@ -6,11 +6,33 @@ from pathlib import Path
 import pytest
 
 from job_hub.app import create_app
-from job_hub.attachments import OfficialAttachmentProcessor
+from job_hub.attachments import OfficialAttachmentProcessor, infer_position_code
 from job_hub.db import Database
 from job_hub.government_artifacts import register_government_artifacts
 
 from conftest import make_settings, make_settings_with_artifact_path, source
+
+
+def test_infer_position_code_requires_an_explicit_label() -> None:
+    assert infer_position_code("岗位代码：2026113；专业：地质学") == "2026113"
+    assert infer_position_code("职位编号 A-07，学历：硕士") == "A-07"
+    assert infer_position_code("报名截止：2026-10-31；招聘人数：1") is None
+
+
+def test_attachment_evidence_recovers_code_from_flattened_row() -> None:
+    from job_hub.attachments import build_attachment_field_evidence
+
+    evidence = build_attachment_field_evidence(
+        title="专业技术岗位",
+        major="地质学",
+        degree="博士研究生",
+        location="合肥市",
+        artifact={"artifact_url": "https://dkj.ah.gov.cn/positions.xls"},
+        row={"sheet_name": "岗位表", "row_number": 17},
+        row_text="岗位代码：2026113；专业：地质学；学历：博士研究生",
+    )
+
+    assert evidence["职位代码"] == "2026113"
 
 
 def test_relative_artifact_storage_is_resolved_below_app_data(tmp_path: Path) -> None:
@@ -729,6 +751,45 @@ def test_combined_enterprise_condition_columns_are_mapped_without_relaxing_gates
     assert candidate["field_evidence"]["招聘人数原字段"] == "备注"
 
 
+@pytest.mark.parametrize(
+    ("headers", "values", "expected_major"),
+    [
+        (
+            ["序号", "单位名称", "岗位名称", "招聘人数", "学历学位", "专业及代码"],
+            ["1", "中国地质科学院", "深地大数据科研岗A", "1", "硕士研究生", "地质资源与地质工程（0818）"],
+            "地质资源与地质工程",
+        ),
+        (
+            ["岗位代码", "招聘单位名称", "岗位名称", "招聘计划人数", "学历", "岗位所需专业"],
+            ["420001", "湖北省自然资源厅", "矿产资源管理岗", "2", "本科及以上", "地质学类、地质资源与地质工程类"],
+            "地质资源与地质工程",
+        ),
+        (
+            ["招聘单位", "岗位名称", "岗位编码", "招聘人数", "学历或学位", "专业条件要求"],
+            ["四川省第一地质大队", "地质技术岗", "200004001002", "1", "研究生学历及以上相应学位", "地质工程专业、岩土工程专业"],
+            "地质工程",
+        ),
+    ],
+)
+def test_official_position_table_aliases_cover_government_field_labels(
+    tmp_path, headers, values, expected_major
+) -> None:
+    """Common government-table labels must reach the private review queue."""
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path,
+        session=FakeSession(_position_xlsx_bytes(headers, values)),
+    )
+
+    result = processor.process(artifact["id"])
+    candidates = database.list_artifact_job_candidates(artifact_id=artifact["id"])
+
+    assert result.candidates_created == 1
+    assert len(candidates) == 1
+    assert candidates[0]["review_status"] == "needs_review"
+    assert expected_major in candidates[0]["field_evidence"]["专业范围"]
+    assert candidates[0]["field_evidence"]["招聘人数"] == values[3]
+
+
 def test_reconcile_rejects_old_candidates_from_an_application_form(tmp_path) -> None:
     settings, database, artifact, processor = _registered_artifact(
         tmp_path, session=FakeSession(_xlsx_bytes())
@@ -738,7 +799,11 @@ def test_reconcile_rejects_old_candidates_from_an_application_form(tmp_path) -> 
     database.update_source_artifact_processing(
         artifact["id"],
         extraction_status="extracted",
-        metadata_updates={"display_name": "公开招聘报名表"},
+        metadata_updates={
+            "display_name": "公开招聘报名表",
+            "last_error": "旧容器缺少候选拒绝方法",
+            "last_error_at": "2026-09-28T10:01:11Z",
+        },
     )
 
     result = processor.reconcile_candidates(artifact["id"])
@@ -750,3 +815,5 @@ def test_reconcile_rejects_old_candidates_from_an_application_form(tmp_path) -> 
     assert refreshed["review_status"] == "rejected"
     assert "Phase 62 附件用途识别" in refreshed["review_note"]
     assert stored["metadata"]["candidate_queue_status"] == "rejected_non_position_attachment"
+    assert stored["metadata"]["last_error"] is None
+    assert stored["metadata"]["last_error_at"] is None

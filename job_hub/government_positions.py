@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from job_hub.government_artifacts import government_artifact_publication_block_reason
 from job_hub.sources import RawPosting
 
 
@@ -342,6 +343,8 @@ def government_position_quality_report(
     source_verifications: dict[str, dict[str, Any]] | None = None,
     source_refresh_counts: dict[str, dict[str, int]] | None = None,
     manual_confirmation_source_ids: set[str] | None = None,
+    artifact_manifest: dict[str, Any] | None = None,
+    artifact_manifest_available: bool = True,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     payload = registry or load_position_registry()
@@ -385,6 +388,8 @@ def government_position_quality_report(
         max_age_hours=max_age_hours,
         source_verifications=source_verifications,
         manual_confirmation_source_ids=manual_only_sources,
+        artifact_manifest=artifact_manifest,
+        artifact_manifest_available=artifact_manifest_available,
         now=now,
     )
     explicit_matches = [
@@ -430,6 +435,23 @@ def government_position_quality_report(
             )
         }
     )
+    availability_confirmation_required_sources = sorted(
+        {
+            str(item.get("source_id") or "")
+            for item in records
+            if item.get("record_status") == "verified_open"
+            and item.get("match_status") in {"explicit_match", "unrestricted_match"}
+            and _record_is_in_current_window(
+                item, today_date, payload.get("source_opening_dates") or {}
+            )
+            and _requires_current_availability_confirmation(item)
+            and not _source_current_availability_is_fresh(
+                (source_verifications or {}).get(str(item.get("source_id") or "")),
+                reference,
+                max_age_hours,
+            )
+        }
+    )
     record_failure_sources = {
         str(item.get("source_id") or "")
         for item in failures
@@ -466,8 +488,23 @@ def government_position_quality_report(
         max_age_hours=max_age_hours,
         source_verifications=source_verifications,
         manual_confirmation_source_ids=manual_only_sources,
+        artifact_manifest=artifact_manifest,
+        artifact_manifest_available=artifact_manifest_available,
         now=reference,
     )
+    manifest_blocks = {
+        str(item.get("id") or ""): _artifact_publication_block_reason(
+            item,
+            artifact_manifest=artifact_manifest,
+            artifact_manifest_available=artifact_manifest_available,
+        )
+        for item in records
+    }
+    manifest_blocks = {
+        record_id: reason
+        for record_id, reason in manifest_blocks.items()
+        if record_id and reason
+    }
     scan_no_current_match = sum(
         1
         for item in payload.get("source_assessments", [])
@@ -488,6 +525,19 @@ def government_position_quality_report(
         "by_source": dict(sorted(source_counts.items())),
         "verified_open_records": len(open_records),
         "verified_upcoming_records": len(upcoming),
+        "attachment_manifest_gate": {
+            "available": artifact_manifest_available,
+            "blocked_records": len(manifest_blocks),
+            "blocked_sources": sorted(
+                {
+                    str(item.get("source_id") or "")
+                    for item in records
+                    if str(item.get("id") or "") in manifest_blocks
+                }
+                - {""}
+            ),
+            "rule": "已登记附件必须完成受控下载、哈希和逐行复核后才可发布。",
+        },
         "open_until_filled_records": sum(
             1 for item in open_records if item.get("deadline_policy") == "open_until_filled"
         ),
@@ -501,9 +551,34 @@ def government_position_quality_report(
             | verification_failure_sources
             | manual_source_ids
             | pending_source_ids
+            | set(availability_confirmation_required_sources)
         ),
         "manual_confirmation_required_sources": manual_confirmation_required_sources,
         "pending_evidence_sources": pending_evidence_sources,
+        "availability_confirmation_required_sources": availability_confirmation_required_sources,
+        "open_until_filled_policy": {
+            "current_records": sum(
+                1
+                for item in open_records
+                if _requires_current_availability_confirmation(item)
+            ),
+            "blocked_records": sum(
+                1
+                for item in records
+                if item.get("record_status") == "verified_open"
+                and item.get("match_status") in {"explicit_match", "unrestricted_match"}
+                and _record_is_in_current_window(
+                    item, today_date, payload.get("source_opening_dates") or {}
+                )
+                and _requires_current_availability_confirmation(item)
+                and not _source_current_availability_is_fresh(
+                    (source_verifications or {}).get(str(item.get("source_id") or "")),
+                    reference,
+                    max_age_hours,
+                )
+            ),
+            "rule": "招满即止岗位必须有未过期的当前名额确认；公告或附件仍可访问不足以发布。",
+        },
         "verified_scan_no_current_match": scan_no_current_match,
         "source_activation_tasks": source_activation_tasks(
             payload,
@@ -547,16 +622,39 @@ def government_position_quality_report(
                 "evidence_locator",
             )
         },
+        "row_evidence_quality": _row_evidence_quality(records),
         "scan_interpretation": (
             "存在来源故障或待核验记录，不能把缺少岗位解释为无岗位。"
             if failures
             or verification_failures
             or manual_confirmation_required_sources
             or pending_evidence_sources
+            or availability_confirmation_required_sources
             else "部分官方来源已扫描成功但当前无可发布匹配；这不是来源故障。"
             if scan_no_current_match
             else "台账中的正式来源均已完成当前记录核验。"
         ),
+    }
+
+
+def _row_evidence_quality(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Report whether each row retains a usable attachment/table locator.
+
+    Contract validation already requires a non-empty locator. This additional
+    metric catches weak locators that merely repeat a filename or notice title
+    and therefore cannot guide a reviewer back to a page, sheet, row, or code.
+    """
+    locator_ok = 0
+    for record in records:
+        locator = str(record.get("evidence_locator") or "").strip().lower()
+        if any(token in locator for token in ("!", "page", "页", "row", "行", "code", "代码")):
+            locator_ok += 1
+    total = len(records)
+    return {
+        "usable_locator": locator_ok,
+        "total": total,
+        "rate": round(locator_ok / total, 4) if total else 0.0,
+        "rule": "定位信息应包含页码、工作表/行号或岗位代码；仅有文件名不计为充分证据。",
     }
 
 
@@ -665,6 +763,8 @@ def current_publishable_position_records(
     max_age_hours: float | None = None,
     source_verifications: dict[str, dict[str, Any]] | None = None,
     manual_confirmation_source_ids: set[str] | None = None,
+    artifact_manifest: dict[str, Any] | None = None,
+    artifact_manifest_available: bool = True,
     now: datetime | None = None,
 ) -> list[dict[str, Any]]:
     """Return current rows with per-source official-evidence freshness.
@@ -693,6 +793,12 @@ def current_publishable_position_records(
             continue
         if not _record_is_in_current_window(item, target, source_opening_dates):
             continue
+        if _artifact_publication_block_reason(
+            item,
+            artifact_manifest=artifact_manifest,
+            artifact_manifest_available=artifact_manifest_available,
+        ):
+            continue
         if not _source_evidence_is_current(
             str(item.get("source_id") or ""),
             verification_map,
@@ -702,6 +808,18 @@ def current_publishable_position_records(
             requires_manual_confirmation=(
                 str(item.get("source_id") or "") in manual_only_sources
             ),
+        ):
+            continue
+        # A surviving notice and attachment prove that the official recruitment
+        # material still exists.  For "招满即止" rows, however, they do not prove
+        # that this particular position still has a vacancy.  Require a separate,
+        # expiring confirmation of current availability before showing the row to
+        # students.  This deliberately fails closed instead of treating a missing
+        # status update as an open position.
+        if _requires_current_availability_confirmation(item) and not _source_current_availability_is_fresh(
+            verification_map.get(str(item.get("source_id") or "")),
+            reference,
+            max_age_hours,
         ):
             continue
         rows.append(dict(item))
@@ -715,6 +833,8 @@ def upcoming_position_records(
     max_age_hours: float | None = None,
     source_verifications: dict[str, dict[str, Any]] | None = None,
     manual_confirmation_source_ids: set[str] | None = None,
+    artifact_manifest: dict[str, Any] | None = None,
+    artifact_manifest_available: bool = True,
     now: datetime | None = None,
 ) -> list[dict[str, Any]]:
     """Return verified student-matching rows whose official window is upcoming.
@@ -744,6 +864,12 @@ def upcoming_position_records(
             continue
         deadline = str(item.get("deadline_date") or "").strip()
         if deadline and date.fromisoformat(deadline) < target:
+            continue
+        if _artifact_publication_block_reason(
+            item,
+            artifact_manifest=artifact_manifest,
+            artifact_manifest_available=artifact_manifest_available,
+        ):
             continue
         if not _source_evidence_is_current(
             str(item.get("source_id") or ""),
@@ -806,6 +932,29 @@ def _registry_fresh(
     return max(0.0, (reference - as_of).total_seconds() / 3600) <= float(max_age_hours)
 
 
+def _artifact_publication_block_reason(
+    record: dict[str, Any],
+    *,
+    artifact_manifest: dict[str, Any] | None,
+    artifact_manifest_available: bool,
+) -> str | None:
+    """Keep table-backed rows behind the attachment evidence lifecycle.
+
+    Direct official-detail records intentionally use the same URL for notice
+    and evidence and do not require a table manifest.  A configured manifest
+    that cannot be loaded is different from no manifest being configured: in
+    that case table-backed rows fail closed rather than using a stale static
+    ledger as an implicit substitute.
+    """
+    attachment_url = str(record.get("official_attachment_url") or "").strip()
+    notice_url = str(record.get("official_notice_url") or "").strip()
+    if not artifact_manifest_available:
+        if attachment_url and attachment_url != notice_url:
+            return "官方附件清单不可用，表格岗位暂不对学生端发布。"
+        return None
+    return government_artifact_publication_block_reason(attachment_url, artifact_manifest)
+
+
 def _source_evidence_is_current(
     source_id: str,
     verifications: dict[str, dict[str, Any]],
@@ -843,6 +992,52 @@ def _source_evidence_is_current(
     return age_hours <= float(max_age_hours)
 
 
+def _requires_current_availability_confirmation(record: dict[str, Any]) -> bool:
+    """Return whether source evidence alone cannot establish a live vacancy.
+
+    A fixed official deadline supplies a public time boundary.  "Open until
+    filled" does not: an unchanged notice may remain online after every seat is
+    taken.  These records therefore need an explicit, fresh confirmation that
+    the source still accepts applications for the recorded vacancies.
+    """
+    return str(record.get("deadline_policy") or "") == "open_until_filled"
+
+
+def _source_current_availability_is_fresh(
+    verification: dict[str, Any] | None,
+    reference: datetime,
+    max_age_hours: float | None,
+) -> bool:
+    """Check the separately recorded current-vacancy confirmation.
+
+    There is intentionally no static-ledger fallback.  A dated spreadsheet or
+    reachable notice is not availability evidence for a rolling, fill-until-
+    full recruitment run.  Production provides a finite freshness window; the
+    ``None`` branch exists for explicit diagnostic callers that intentionally
+    disable age expiry, matching the established source-evidence API.
+    """
+    if not verification:
+        return False
+    if str(verification.get("status") or "") in {"withdrawn", "not_configured"}:
+        return False
+    raw_confirmation = str(verification.get("availability_confirmed_at") or "").strip()
+    if not raw_confirmation:
+        return False
+    try:
+        confirmed = datetime.fromisoformat(raw_confirmation.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    if confirmed.tzinfo is None:
+        confirmed = confirmed.replace(tzinfo=timezone.utc)
+    if max_age_hours is None:
+        return True
+    age_hours = max(
+        0.0,
+        (reference - confirmed.astimezone(timezone.utc)).total_seconds() / 3600,
+    )
+    return age_hours <= float(max_age_hours)
+
+
 def position_record_to_posting(record: dict[str, Any]) -> RawPosting:
     """Convert one verified government table row into the normal job contract."""
     major = str(record["major_requirement"]).strip()
@@ -854,6 +1049,7 @@ def position_record_to_posting(record: dict[str, Any]) -> RawPosting:
         "evidence_scope": "official_attachment_row",
         "岗位": str(record["title"]).strip(),
         "政府岗位类型": str(record["position_type"]),
+        "官方职位表省份": str(record.get("province") or "").strip(),
         "职位代码": code,
         "专业要求": major,
         "学历要求": degree,

@@ -67,6 +67,7 @@ def test_pipechina_snapshot_builds_job_detail_links_and_search_fallback(tmp_path
     assert "_HB4_eyJpZCI6NTQ2NDcs" in geology.source_url
     assert "search_key=%E5%9C%B0%E8%B4%A8" in geology.field_evidence["官方地质筛选入口"]
     assert geology.field_evidence["官方详情链接"] == geology.source_url
+    assert geology.official_evidence_url == geology.source_url
 
 
 def test_cnpc_snapshot_builds_renderable_post_name_deep_links(tmp_path) -> None:
@@ -144,6 +145,10 @@ def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) 
     source = next(
         item for item in registry if item["id"] == "cmgb-iguopin-2027-geoscience-snapshot"
     )
+    # This case validates row parsing and evidence fields. Freshness is covered
+    # by the lifecycle tests; use a long fixture window so an old committed
+    # artifact does not make the parser test depend on the wall clock.
+    source["config"] = {**source["config"], "max_age_hours": 100_000}
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
     database.initialize()
@@ -166,8 +171,13 @@ def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) 
     assert len(normalized) == 33
     statuses = [item["publication_status"] for item in normalized]
     assert statuses.count("student_eligible") == 25
-    assert statuses.count("pending_evidence") == 5
-    assert statuses.count("out_of_scope") == 3
+    assert statuses.count("pending_evidence") == 4
+    assert statuses.count("out_of_scope") == 4
+    mixed_assignment = next(
+        item for item in normalized if item["location"] == "蒙古国、山东"
+    )
+    assert mixed_assignment["country_or_region"] == "境内外混合"
+    assert mixed_assignment["publication_status"] == "out_of_scope"
     assert all(
         posting.field_evidence["招聘人数"]
         and posting.field_evidence["学历要求"]

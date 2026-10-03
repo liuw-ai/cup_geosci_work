@@ -1,4 +1,5 @@
-FROM cupb-geoscience-job-hub:latest
+ARG RUNTIME_IMAGE=cupb-geoscience-job-hub:latest
+FROM ${RUNTIME_IMAGE}
 
 # The public web/worker image deliberately has no browser client.  This image
 # is built only for the isolated read-only browser workers, which connect to
@@ -13,9 +14,13 @@ RUN if [ "$INSTALL_BROWSER_DEPS" = "1" ]; then \
       pip install --no-cache-dir -r /tmp/requirements-browser.txt; \
     fi \
     && rm -f /tmp/requirements-browser.txt
-# Copy the application package explicitly so a cached browser base image can
-# receive the same source revision as the web/worker image.
-COPY --chown=jobhub:jobhub job_hub /app/job_hub
+# Copy only the generic browser contracts and dispatcher. The base runtime
+# image already contains the coherent application package; copying the whole
+# worktree here can combine a newer pipeline module with older dependencies
+# when a server workspace is being updated incrementally.
+COPY --chown=jobhub:jobhub job_hub/browser_capture.py /app/job_hub/browser_capture.py
+COPY --chown=jobhub:jobhub job_hub/official_browser_worker.py /app/job_hub/official_browser_worker.py
+COPY --chown=jobhub:jobhub job_hub/cnpc_browser_entrypoint.py /app/job_hub/cnpc_browser_entrypoint.py
 USER jobhub
 
 CMD ["python", "-m", "job_hub.cnpc_browser_entrypoint"]

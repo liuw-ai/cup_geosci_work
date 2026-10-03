@@ -17,6 +17,35 @@ from job_hub.source_validation import load_source_validation_registry
 from conftest import make_settings, source
 
 
+def test_version_and_health_report_release_identity(tmp_path) -> None:
+    settings = replace(
+        make_settings(tmp_path),
+        release_version="release-test",
+        release_git_sha="abc1234",
+        release_image_sha="sha256:image",
+        release_built_at="2026-10-04T00:00:00Z",
+    )
+    app = create_app(settings)
+    client = app.test_client()
+
+    version = client.get("/version")
+    health = client.get("/healthz")
+
+    assert version.status_code == 200
+    version_payload = version.get_json()
+    assert version_payload == {
+        "service": "cupb-geoscience-job-hub",
+        "version": "release-test",
+        "git_sha": "abc1234",
+        "image_sha": "sha256:image",
+        "built_at": "2026-10-04T00:00:00Z",
+    }
+    assert health.status_code == 200
+    assert health.get_json()["release"] == {
+        key: value for key, value in version_payload.items() if key != "service"
+    }
+
+
 def test_home_uses_today_preview_when_latest_frozen_report_is_stale(
     tmp_path, monkeypatch
 ) -> None:
@@ -115,6 +144,17 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     coverage_payload = client.get("/api/coverage").get_json()
     assert coverage_payload["organization_registry"]["organization_count"] > 0
     assert "source_bindings" not in coverage_payload["organization_registry"]
+    assert coverage_payload["domestic_open_jobs"] == 1
+    assert coverage_payload["dual_axis"]["coverage_axis"]["domestic_effective_jobs"] == 1
+    assert coverage_payload["open_jobs"] == client.get("/api/jobs").get_json()["total"]
+    assert "rows" not in coverage_payload["source_funnel"]
+    assert client.get("/api/admin/source-funnel").status_code == 403
+    funnel_payload = client.get(
+        "/api/admin/source-funnel",
+        headers={"X-Admin-Token": "test-admin-token"},
+    ).get_json()
+    assert funnel_payload["summary"]["registered_sources"] >= 1
+    assert funnel_payload["rows"]
     landscape_response = client.get("/landscape")
     assert landscape_response.status_code == 200
     assert "油气工程技术服务" in landscape_response.get_data(as_text=True)
@@ -144,6 +184,44 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     )
     assert response.status_code == 201
     assert response.get_json()["outcome"] == "created"
+
+
+def test_public_pages_hide_legacy_non_mainland_rows_even_if_marked_eligible(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    pipeline = app.extensions["pipeline"]
+    database.upsert_source(source())
+    posting = RawPosting(
+        title="境外地质工程师",
+        employer="测试能源集团",
+        source_url="https://careers.example.edu.cn/jobs/overseas",
+        application_url=None,
+        text="专业要求：地质工程。学历要求：硕士。",
+        summary="海外岗位。",
+        published_date="2026-09-17",
+        deadline_date="2026-12-20",
+        location="北京",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "境外地质工程师",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+        },
+    )
+    normalized = pipeline.normalize_posting(
+        posting, database.get_source("official-test-source")
+    )
+    # This represents old rows created before the domestic public-read guard.
+    normalized["country_or_region"] = "美国"
+    normalized["province"] = None
+    normalized["publication_status"] = "student_eligible"
+    job_id, _ = database.save_job(normalized)
+
+    client = app.test_client()
+    assert client.get("/api/jobs").get_json()["total"] == 0
+    assert database.count_open_jobs() == 0
+    assert client.get(f"/jobs/{job_id}").status_code == 404
 
 
 def test_government_position_activation_tasks_are_admin_only(tmp_path) -> None:
@@ -205,6 +283,10 @@ def test_cnpc_detail_page_discloses_degraded_official_detail_endpoint(tmp_path) 
         for item in load_source_registries(["data/sources.json"])
         if item["id"] == "cnpc-career"
     )
+    # This test exercises the detail-page disclosure contract, not production
+    # snapshot freshness. Keep the fixture inside its freshness window so the
+    # read-side stale-capture gate does not intentionally hide the old sample.
+    source["config"] = {**source["config"], "max_age_hours": 100_000}
     database.upsert_source(source)
     pipeline = JobPipeline(settings, database)
     snapshot_path = Path("data/verified/cnpc-geoscience-20260924.json")

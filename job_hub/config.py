@@ -84,6 +84,18 @@ class Settings:
     source_retry_max_seconds: int = 21_600
     source_blocked_retry_base_seconds: int = 21_600
     source_blocked_retry_max_seconds: int = 86_400
+    # Production readiness can require a fresh daily official-link report.
+    # This remains opt-in so local development does not fail with an empty
+    # runtime directory.
+    link_health_enabled: bool = False
+    link_health_sample_size: int = 20
+    # Release identity is injected by the deployment pipeline.  Keeping it
+    # in Settings makes the running Web/Worker/browser bundle observable
+    # without coupling the application to Git or Docker at runtime.
+    release_version: str = "dev"
+    release_git_sha: str = "unknown"
+    release_image_sha: str = "unknown"
+    release_built_at: str = "unknown"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -193,7 +205,27 @@ class Settings:
             source_blocked_retry_max_seconds=_env_int(
                 "SOURCE_BLOCKED_RETRY_MAX_SECONDS", 86_400
             ),
+            link_health_enabled=_env_bool("LINK_HEALTH_ENABLED", False),
+            link_health_sample_size=max(
+                1, min(_env_int("LINK_HEALTH_SAMPLE_SIZE", 20), 500)
+            ),
+            release_version=os.getenv("APP_RELEASE_VERSION", "dev").strip() or "dev",
+            release_git_sha=os.getenv("APP_RELEASE_GIT_SHA", "unknown").strip()
+            or "unknown",
+            release_image_sha=os.getenv("APP_RELEASE_IMAGE_SHA", "unknown").strip()
+            or "unknown",
+            release_built_at=os.getenv("APP_RELEASE_BUILT_AT", "unknown").strip()
+            or "unknown",
         )
+
+    def release_info(self) -> dict[str, str]:
+        """Return the immutable identity of the currently running bundle."""
+        return {
+            "version": self.release_version,
+            "git_sha": self.release_git_sha,
+            "image_sha": self.release_image_sha,
+            "built_at": self.release_built_at,
+        }
 
     def ensure_runtime_paths(self) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)

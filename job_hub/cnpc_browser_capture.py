@@ -15,6 +15,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from job_hub.contracts import is_http_url
+from job_hub.capture_evidence import validate_capture_manifest
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -246,6 +247,7 @@ def load_cnpc_job_capture(
     allowed_hosts: list[str] | set[str],
     max_age_hours: float | None = None,
     require_complete_scan: bool = True,
+    require_capture_manifest: bool = False,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     """Load a CNPC list-plus-detail browser capture.
@@ -265,6 +267,11 @@ def load_cnpc_job_capture(
         raise CnpcJobCaptureError(f"CNPC job capture file cannot be read: {capture_path}") from error
     if not isinstance(payload, dict):
         raise CnpcJobCaptureError("CNPC job capture must be an object")
+    if require_capture_manifest:
+        try:
+            validate_capture_manifest(payload)
+        except ValueError as error:
+            raise CnpcJobCaptureError(str(error)) from error
     status = _job_text(payload.get("status"), "status")
     if status not in JOB_CAPTURE_STATUSES:
         raise CnpcJobCaptureError(f"unsupported CNPC job capture status: {status}")

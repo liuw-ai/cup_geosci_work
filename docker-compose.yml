@@ -3,7 +3,7 @@ services:
   web:
     build:
       context: .
-    image: cupb-geoscience-job-hub:latest
+    image: ${JOB_HUB_IMAGE:-cupb-geoscience-job-hub:latest}
     env_file:
       - .env
     environment:
@@ -55,7 +55,7 @@ services:
   worker:
     build:
       context: .
-    image: cupb-geoscience-job-hub:latest
+    image: ${JOB_HUB_IMAGE:-cupb-geoscience-job-hub:latest}
     env_file:
       - .env
     environment:

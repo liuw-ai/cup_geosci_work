@@ -30,6 +30,10 @@ def test_doctoral_postgraduate_does_not_become_masters_requirement() -> None:
     assert extract_degree_levels("硕士研究生、博士研究生") == ["硕士", "博士"]
 
 
+def test_lower_education_floor_is_preserved() -> None:
+    assert extract_degree_levels("大专（高职）") == ["大专"]
+
+
 def test_unverified_body_keywords_cannot_be_strong_match() -> None:
     score, band, tags = score_relevance(
         "中国石油炼化设备技术招聘，正文提到油气地质大赛和地球物理大赛。",

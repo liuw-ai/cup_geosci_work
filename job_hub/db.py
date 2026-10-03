@@ -23,6 +23,7 @@ from job_hub.contracts import (
     validate_source_record,
 )
 from job_hub.employers import enrich_job
+from job_hub.official_identity import official_detail_key
 from job_hub.discovery import (
     lead_fingerprint,
     normalize_lead_url,
@@ -74,6 +75,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     location_evidence TEXT,
     verification_status TEXT NOT NULL DEFAULT 'published_official',
     official_evidence_url TEXT,
+    official_detail_key TEXT,
+    official_detail_precedence INTEGER NOT NULL DEFAULT 100,
     published_date TEXT,
     deadline_date TEXT,
     degree_levels_json TEXT NOT NULL DEFAULT '[]',
@@ -255,6 +258,22 @@ CREATE TABLE IF NOT EXISTS source_health (
 CREATE INDEX IF NOT EXISTS idx_source_health_status
 ON source_health(status, checked_at DESC);
 
+-- Student-facing reads must be able to enforce the same capture-freshness
+-- contract as the worker. ``source_health.last_success_at`` is deliberately
+-- not used here: it records when a sync finished and can therefore be newer
+-- than an old snapshot that was merely re-read. This table stores the
+-- evidence capture time from a complete successful source run.
+CREATE TABLE IF NOT EXISTS source_capture_freshness (
+    source_id TEXT PRIMARY KEY REFERENCES sources(id) ON DELETE CASCADE,
+    captured_at TEXT NOT NULL,
+    recorded_at TEXT NOT NULL,
+    crawl_run_id INTEGER,
+    evidence_kind TEXT NOT NULL DEFAULT 'capture_manifest'
+);
+
+CREATE INDEX IF NOT EXISTS idx_source_capture_freshness_captured
+ON source_capture_freshness(captured_at DESC);
+
 -- Government position ledgers are reviewed source snapshots. Their source
 -- evidence is rechecked independently of ordinary crawl runs so a static JSON
 -- ``as_of`` date cannot be mistaken for a perpetual live scan.
@@ -263,6 +282,8 @@ CREATE TABLE IF NOT EXISTS government_source_verifications (
     status TEXT NOT NULL,
     checked_at TEXT NOT NULL,
     last_success_at TEXT,
+    availability_confirmed_at TEXT,
+    availability_confirmation_detail TEXT NOT NULL DEFAULT '',
     detail TEXT NOT NULL DEFAULT '',
     evidence_fingerprint TEXT NOT NULL DEFAULT ''
 );
@@ -280,6 +301,8 @@ CREATE TABLE IF NOT EXISTS government_source_verification_events (
     status TEXT NOT NULL,
     checked_at TEXT NOT NULL,
     last_success_at TEXT,
+    availability_confirmed_at TEXT,
+    availability_confirmation_detail TEXT NOT NULL DEFAULT '',
     detail TEXT NOT NULL DEFAULT '',
     evidence_fingerprint TEXT NOT NULL DEFAULT ''
 );
@@ -480,6 +503,8 @@ class Database:
             "location_evidence": "TEXT",
             "verification_status": "TEXT NOT NULL DEFAULT 'published_official'",
             "official_evidence_url": "TEXT",
+            "official_detail_key": "TEXT",
+            "official_detail_precedence": "INTEGER NOT NULL DEFAULT 100",
             "field_evidence_json": "TEXT NOT NULL DEFAULT '{}'",
             "publication_status": "TEXT NOT NULL DEFAULT 'pending_evidence'",
             "publication_basis_json": "TEXT NOT NULL DEFAULT '{}'",
@@ -531,6 +556,27 @@ class Database:
                 connection.execute(
                     f"ALTER TABLE source_tasks ADD COLUMN {name} {definition}"
                 )
+        # Rolling "招满即止" recruitment has a different proof obligation from
+        # a normal notice/attachment refresh.  Keep the latest manual current-
+        # vacancy confirmation separately so an automatic evidence recheck
+        # cannot accidentally renew that stronger assertion.
+        government_verification_additions = {
+            "availability_confirmed_at": "TEXT",
+            "availability_confirmation_detail": "TEXT NOT NULL DEFAULT ''",
+        }
+        for table_name in (
+            "government_source_verifications",
+            "government_source_verification_events",
+        ):
+            verification_columns = {
+                row["name"]
+                for row in connection.execute(f"PRAGMA table_info({table_name})").fetchall()
+            }
+            for name, definition in government_verification_additions.items():
+                if name not in verification_columns:
+                    connection.execute(
+                        f"ALTER TABLE {table_name} ADD COLUMN {name} {definition}"
+                    )
         lead_columns = {
             row["name"]
             for row in connection.execute("PRAGMA table_info(candidate_leads)").fetchall()
@@ -581,6 +627,10 @@ class Database:
             "CREATE INDEX IF NOT EXISTS idx_jobs_canonical_employer "
             "ON jobs(canonical_employer_id, status)"
         )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_jobs_official_detail "
+            "ON jobs(official_detail_key, official_detail_precedence, status)"
+        )
         if added_official_evidence_url:
             connection.execute(
                 "UPDATE jobs SET official_evidence_url = source_url "
@@ -592,6 +642,33 @@ class Database:
                 "WHERE (official_evidence_url IS NULL OR official_evidence_url = '') "
                 "AND source_url IS NOT NULL AND source_url != ''"
             )
+        # Previous releases already kept direct 国聘 detail links in their
+        # source/evidence fields. Backfill only this narrow, URL-proven global
+        # identity; no historical row is merged, deleted or reclassified.
+        identity_rows = connection.execute(
+            """
+            SELECT id, source_url, application_url, official_evidence_url,
+                   field_evidence_json
+            FROM jobs
+            WHERE official_detail_key IS NULL OR official_detail_key = ''
+            """
+        ).fetchall()
+        for row in identity_rows:
+            try:
+                evidence = json.loads(str(row["field_evidence_json"] or "{}"))
+            except (TypeError, ValueError):
+                evidence = {}
+            key = official_detail_key(
+                source_url=row["source_url"],
+                application_url=row["application_url"],
+                official_evidence_url=row["official_evidence_url"],
+                field_evidence=evidence if isinstance(evidence, dict) else None,
+            )
+            if key is not None:
+                connection.execute(
+                    "UPDATE jobs SET official_detail_key = ? WHERE id = ?",
+                    (key, int(row["id"])),
+                )
         Database._backfill_job_evidence(connection)
         Database._backfill_candidate_lead_events(connection)
 
@@ -942,6 +1019,64 @@ class Database:
             ).fetchone()
         return dict(row) if row else None
 
+    def record_source_capture_freshness(
+        self,
+        source_id: str,
+        *,
+        captured_at: str,
+        crawl_run_id: int | None = None,
+        evidence_kind: str = "capture_manifest",
+    ) -> None:
+        """Persist a proven complete-capture timestamp for public reads.
+
+        A successful HTTP request or source sync is not enough to prove a
+        snapshot is current. Callers may write this projection only after a
+        complete capture has supplied its own evidence timestamp.
+        """
+
+        raw_timestamp = str(captured_at or "").strip()
+        try:
+            parsed = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
+        except ValueError as error:
+            raise ValueError("captured_at must be an ISO-8601 timestamp") from error
+        if parsed.tzinfo is None:
+            raise ValueError("captured_at must include a timezone")
+        normalized_timestamp = (
+            parsed.astimezone(timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
+        with self.transaction() as connection:
+            connection.execute(
+                """
+                INSERT INTO source_capture_freshness (
+                    source_id, captured_at, recorded_at, crawl_run_id, evidence_kind
+                )
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(source_id) DO UPDATE SET
+                    captured_at=excluded.captured_at,
+                    recorded_at=excluded.recorded_at,
+                    crawl_run_id=excluded.crawl_run_id,
+                    evidence_kind=excluded.evidence_kind
+                """,
+                (
+                    source_id,
+                    normalized_timestamp,
+                    utc_now(),
+                    crawl_run_id,
+                    str(evidence_kind or "capture_manifest")[:100],
+                ),
+            )
+
+    def get_source_capture_freshness(self, source_id: str) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT * FROM source_capture_freshness WHERE source_id = ?",
+                (source_id,),
+            ).fetchone()
+        return dict(row) if row else None
+
     def list_source_health(self) -> list[dict[str, Any]]:
         with self.connect() as connection:
             rows = connection.execute(
@@ -957,13 +1092,25 @@ class Database:
         checked_at: str,
         detail: str = "",
         evidence_fingerprint: str = "",
+        availability_confirmed_at: str | None = None,
+        availability_confirmation_detail: str = "",
     ) -> dict[str, Any]:
-        """Persist a controlled recheck without treating a failure as no jobs."""
+        """Persist official evidence and optional current-vacancy confirmation.
+
+        ``availability_confirmed_at`` is intentionally distinct from a normal
+        URL recheck.  It is written only after an operator confirms that an
+        open-until-filled source still accepts applications; ordinary automated
+        refreshes preserve, but never renew, that assertion.
+        """
         if status not in {"verified", "source_unavailable", "withdrawn", "not_configured"}:
             raise ValueError(f"Unsupported government source verification status: {status}")
         with self.transaction() as connection:
             existing = connection.execute(
-                "SELECT last_success_at FROM government_source_verifications WHERE source_id = ?",
+                """
+                SELECT last_success_at, availability_confirmed_at,
+                       availability_confirmation_detail
+                FROM government_source_verifications WHERE source_id = ?
+                """,
                 (source_id,),
             ).fetchone()
             last_success_at = (
@@ -971,15 +1118,29 @@ class Database:
                 if status == "verified"
                 else (existing["last_success_at"] if existing else None)
             )
+            persisted_availability_confirmed_at = (
+                availability_confirmed_at
+                if availability_confirmed_at is not None
+                else (existing["availability_confirmed_at"] if existing else None)
+            )
+            persisted_availability_detail = (
+                availability_confirmation_detail
+                if availability_confirmed_at is not None
+                else (existing["availability_confirmation_detail"] if existing else "")
+            )
             connection.execute(
                 """
                 INSERT INTO government_source_verifications (
-                    source_id, status, checked_at, last_success_at, detail, evidence_fingerprint
-                ) VALUES (?, ?, ?, ?, ?, ?)
+                    source_id, status, checked_at, last_success_at,
+                    availability_confirmed_at, availability_confirmation_detail,
+                    detail, evidence_fingerprint
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(source_id) DO UPDATE SET
                     status=excluded.status,
                     checked_at=excluded.checked_at,
                     last_success_at=excluded.last_success_at,
+                    availability_confirmed_at=excluded.availability_confirmed_at,
+                    availability_confirmation_detail=excluded.availability_confirmation_detail,
                     detail=excluded.detail,
                     evidence_fingerprint=excluded.evidence_fingerprint
                 """,
@@ -988,6 +1149,8 @@ class Database:
                     status,
                     checked_at,
                     last_success_at,
+                    persisted_availability_confirmed_at,
+                    persisted_availability_detail[:2000],
                     detail[:2000],
                     evidence_fingerprint[:128],
                 ),
@@ -996,8 +1159,9 @@ class Database:
                 """
                 INSERT INTO government_source_verification_events (
                     source_id, status, checked_at, last_success_at, detail,
-                    evidence_fingerprint
-                ) VALUES (?, ?, ?, ?, ?, ?)
+                    evidence_fingerprint, availability_confirmed_at,
+                    availability_confirmation_detail
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     source_id,
@@ -1006,6 +1170,8 @@ class Database:
                     last_success_at,
                     detail[:2000],
                     evidence_fingerprint[:128],
+                    persisted_availability_confirmed_at,
+                    persisted_availability_detail[:2000],
                 ),
             )
             row = connection.execute(
@@ -1052,6 +1218,7 @@ class Database:
                 "totals", {}
             ),
             "quality_gate": report.get("quality_gate", {}),
+            "scorecard": report.get("scorecard", {}),
         }
         values = (
             snapshot_date,
@@ -1299,6 +1466,13 @@ class Database:
 
     def save_job(self, job: dict[str, Any]) -> tuple[int, str]:
         now = utc_now()
+        raw_precedence = job.get("official_detail_precedence", 100)
+        try:
+            detail_precedence = int(raw_precedence)
+        except (TypeError, ValueError):
+            detail_precedence = 100
+        if isinstance(raw_precedence, bool) or not 0 <= detail_precedence <= 10_000:
+            detail_precedence = 100
         json_fields = {
             "degree_levels_json": json.dumps(
                 job.get("degree_levels", []), ensure_ascii=False
@@ -1327,13 +1501,14 @@ class Database:
                         parent_employer_name, province, city, country_or_region,
                         location_confidence, location_evidence, verification_status,
                         official_evidence_url, published_date,
+                        official_detail_key, official_detail_precedence,
                          deadline_date, degree_levels_json, major_tags_json,
                          field_evidence_json, publication_status, publication_basis_json,
                          summary,
                         description, relevance_score, relevance_band, status,
                         first_seen_at, last_seen_at, created_at, updated_at
                     )
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         job.get("source_id"),
@@ -1360,6 +1535,8 @@ class Database:
                         job.get("verification_status", "published_official"),
                         job.get("official_evidence_url", job["source_url"]),
                         job.get("published_date"),
+                        job.get("official_detail_key"),
+                        detail_precedence,
                         job.get("deadline_date"),
                         json_fields["degree_levels_json"],
                         json_fields["major_tags_json"],
@@ -1401,7 +1578,8 @@ class Database:
                         country_or_region = ?, location_confidence = ?,
                         location_evidence = ?, verification_status = ?,
                         official_evidence_url = ?,
-                        published_date = ?, deadline_date = ?, degree_levels_json = ?,
+                        published_date = ?, official_detail_key = ?,
+                        official_detail_precedence = ?, deadline_date = ?, degree_levels_json = ?,
                          major_tags_json = ?, field_evidence_json = ?,
                          publication_status = ?, publication_basis_json = ?,
                          summary = ?, description = ?,
@@ -1431,6 +1609,8 @@ class Database:
                         job.get("verification_status", "published_official"),
                         job.get("official_evidence_url", job["source_url"]),
                         job.get("published_date"),
+                        job.get("official_detail_key"),
+                        detail_precedence,
                         job.get("deadline_date"),
                         json_fields["degree_levels_json"],
                         json_fields["major_tags_json"],
@@ -1460,7 +1640,8 @@ class Database:
                     country_or_region = ?, location_confidence = ?,
                     location_evidence = ?, verification_status = ?,
                     official_evidence_url = ?,
-                    published_date = ?, deadline_date = ?, degree_levels_json = ?,
+                    published_date = ?, official_detail_key = ?,
+                    official_detail_precedence = ?, deadline_date = ?, degree_levels_json = ?,
                      major_tags_json = ?, field_evidence_json = ?,
                      publication_status = ?, publication_basis_json = ?,
                      summary = ?, description = ?,
@@ -1491,6 +1672,8 @@ class Database:
                     job.get("verification_status", "published_official"),
                     job.get("official_evidence_url", job["source_url"]),
                     job.get("published_date"),
+                    job.get("official_detail_key"),
+                    detail_precedence,
                     job.get("deadline_date"),
                     json_fields["degree_levels_json"],
                         json_fields["major_tags_json"],
@@ -2586,6 +2769,110 @@ class Database:
         )
         return predicate, [as_of_date, as_of_date]
 
+    @staticmethod
+    def _source_capture_freshness_filter(
+        as_of_date: str | None,
+    ) -> tuple[str, list[str]]:
+        """Return a read-side gate for sources with a capture-age contract.
+
+        The worker still withdraws stale rows and records why. This predicate
+        is deliberately read-only so a stopped worker can never turn an old
+        snapshot into a student-facing vacancy. Sources without an explicit
+        ``max_age_hours`` contract retain their existing lifecycle behavior.
+        """
+
+        max_age = "json_extract(source_meta.config_json, '$.max_age_hours')"
+        if as_of_date is None:
+            reference = "julianday('now')"
+            values: list[str] = []
+        else:
+            date.fromisoformat(as_of_date)
+            # The public read API is date-based. Historical reads use the end
+            # of the requested date, but a read for the current business day
+            # must use the actual current time. Otherwise a source captured at
+            # 02:00 can be compared with 23:59 and be hidden for the rest of
+            # the day before its configured freshness window expires. SQLite's
+            # MIN keeps historical reads deterministic while capping today's
+            # reference at the clock time of the read.
+            reference = "MIN(julianday(?), julianday('now'))"
+            # ``reference`` occurs twice below, therefore it needs two
+            # bindings. Keeping this explicit avoids a runtime-only SQL error
+            # in dated reports and historical public reads.
+            values = [f"{as_of_date}T23:59:59Z"] * 2
+        predicate = f"""
+            (
+                {max_age} IS NULL
+                OR trim(CAST({max_age} AS TEXT)) = ''
+                OR CAST({max_age} AS REAL) < 0
+                OR EXISTS (
+                    SELECT 1
+                    FROM source_capture_freshness AS source_capture
+                    WHERE source_capture.source_id = jobs.source_id
+                      AND julianday(source_capture.captured_at) IS NOT NULL
+                      AND {reference} >= julianday(source_capture.captured_at)
+                      AND ({reference} - julianday(source_capture.captured_at)) * 24
+                          <= CAST({max_age} AS REAL)
+                )
+            )
+        """
+        return predicate, values
+
+    def _student_visible_jobs_cte(
+        self,
+        *,
+        as_of_date: str | None = None,
+    ) -> tuple[str, list[Any]]:
+        """Build the one canonical public row per official detail page.
+
+        The underlying records are intentionally retained one-per-source for
+        evidence, source reconciliation and fallback.  This read-side rank
+        removes only URL-proven duplicates from student-facing results.  A
+        source with lower ``official_detail_precedence`` wins; if it becomes
+        disabled, stale or withdrawn it leaves the candidate set and another
+        live observation takes over automatically.
+        """
+
+        clauses = [
+            "jobs.status = 'open'",
+            "jobs.publication_status IN ('student_eligible', 'unrestricted_eligible')",
+            "jobs.country_or_region IN ('中国大陆', '中国')",
+        ]
+        values: list[Any] = []
+        if as_of_date is not None:
+            freshness_sql, freshness_values = self._public_freshness_filter(
+                as_of_date
+            )
+            clauses.append(freshness_sql)
+            values.extend(freshness_values)
+        source_freshness_sql, source_freshness_values = (
+            self._source_capture_freshness_filter(as_of_date)
+        )
+        clauses.append(source_freshness_sql)
+        values.extend(source_freshness_values)
+        where = " AND ".join(clauses)
+        return (
+            """
+            WITH student_visible_ranked AS (
+                SELECT jobs.*,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY COALESCE(
+                               NULLIF(jobs.official_detail_key, ''),
+                               '__job:' || jobs.id
+                           )
+                           ORDER BY jobs.official_detail_precedence ASC,
+                                    jobs.updated_at DESC,
+                                    jobs.id DESC
+                       ) AS _official_detail_rank
+                FROM jobs
+                JOIN sources AS source_meta
+                  ON source_meta.id = jobs.source_id
+                 AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')
+                WHERE """
+            + where
+            + "\n            )\n",
+            values,
+        )
+
     def find_job(
         self,
         job_id: int,
@@ -2593,29 +2880,37 @@ class Database:
         student_visible: bool = False,
         as_of_date: str | None = None,
     ) -> dict[str, Any] | None:
+        if student_visible:
+            cte, values = self._student_visible_jobs_cte(as_of_date=as_of_date)
+            # When a previously preferred source becomes stale, an old detail
+            # link can still resolve to its live, same-detail fallback. This
+            # preserves a shared student link without exposing a duplicate.
+            with self.connect() as connection:
+                row = connection.execute(
+                    cte
+                    + """
+                    SELECT jobs.*
+                    FROM student_visible_ranked AS jobs
+                    WHERE jobs._official_detail_rank = 1
+                      AND (
+                          jobs.id = ?
+                          OR (
+                              jobs.official_detail_key IS NOT NULL
+                              AND jobs.official_detail_key <> ''
+                              AND jobs.official_detail_key = (
+                                  SELECT official_detail_key FROM jobs WHERE id = ?
+                              )
+                          )
+                      )
+                    ORDER BY CASE WHEN jobs.id = ? THEN 0 ELSE 1 END
+                    LIMIT 1
+                    """,
+                    [*values, job_id, job_id, job_id],
+                ).fetchone()
+            return self._job_row(row) if row else None
         with self.connect() as connection:
-            where = "jobs.id = ?"
-            values: list[Any] = [job_id]
-            source_join = ""
-            if student_visible:
-                where += " AND jobs.status = 'open' AND jobs.publication_status IN (?, ?)"
-                values.extend(("student_eligible", "unrestricted_eligible"))
-                # A source can be retired or disabled while its historical
-                # rows remain in the database for audit.  Public reads must
-                # never expose those rows during that transition window.
-                source_join = (
-                    " JOIN sources AS source_meta "
-                    "ON source_meta.id = jobs.source_id "
-                    "AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')"
-                )
-                if as_of_date is not None:
-                    freshness_sql, freshness_values = self._public_freshness_filter(
-                        as_of_date
-                    )
-                    where += f" AND {freshness_sql}"
-                    values.extend(freshness_values)
             row = connection.execute(
-                f"SELECT jobs.* FROM jobs{source_join} WHERE {where}", values
+                "SELECT jobs.* FROM jobs WHERE jobs.id = ?", (job_id,)
             ).fetchone()
         return self._job_row(row) if row else None
 
@@ -2909,25 +3204,17 @@ class Database:
     ) -> tuple[list[dict[str, Any]], int]:
         clauses: list[str] = []
         values: list[Any] = []
-        source_join = ""
+        base_query = "jobs"
+        cte = ""
         if only_open:
             clauses.append("jobs.status = 'open'")
         if student_visible:
-            clauses.append("jobs.publication_status IN (?, ?)")
-            values.extend(("student_eligible", "unrestricted_eligible"))
-            # Keep disabled/retired source snapshots private even before the
-            # background worker has materialized their withdrawn status.
-            source_join = (
-                " JOIN sources AS source_meta "
-                "ON source_meta.id = jobs.source_id "
-                "AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')"
+            cte, cte_values = self._student_visible_jobs_cte(
+                as_of_date=as_of_date
             )
-            if as_of_date is not None:
-                freshness_sql, freshness_values = self._public_freshness_filter(
-                    as_of_date
-                )
-                clauses.append(freshness_sql)
-                values.extend(freshness_values)
+            base_query = "student_visible_ranked AS jobs"
+            values.extend(cte_values)
+            clauses.append("jobs._official_detail_rank = 1")
         if category:
             clauses.append("jobs.category = ?")
             values.append(category)
@@ -2951,10 +3238,10 @@ class Database:
         where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
         with self.connect() as connection:
             count = connection.execute(
-                f"SELECT COUNT(*) FROM jobs{source_join}{where}", values
+                cte + f"SELECT COUNT(*) FROM {base_query}{where}", values
             ).fetchone()[0]
             query = f"""
-                SELECT jobs.* FROM jobs{source_join}{where}
+                {cte}SELECT jobs.* FROM {base_query}{where}
                 ORDER BY
                     CASE jobs.relevance_band
                         WHEN '强相关' THEN 1
@@ -2976,26 +3263,14 @@ class Database:
         return [self._job_row(row) for row in rows], int(count)
 
     def list_categories(self, *, as_of_date: str | None = None) -> list[dict[str, Any]]:
-        values: list[Any] = []
-        deadline_clause = ""
-        source_join = (
-            " JOIN sources AS source_meta "
-            "ON source_meta.id = jobs.source_id "
-            "AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')"
-        )
-        if as_of_date is not None:
-            deadline_clause, freshness_values = self._public_freshness_filter(
-                as_of_date
-            )
-            values.extend(freshness_values)
+        cte, values = self._student_visible_jobs_cte(as_of_date=as_of_date)
         with self.connect() as connection:
             rows = connection.execute(
-                f"""
+                cte
+                + """
                 SELECT jobs.category, COUNT(*) AS count
-                FROM jobs{source_join}
-                WHERE jobs.status = 'open'
-                  AND jobs.publication_status IN ('student_eligible', 'unrestricted_eligible')
-                  {(' AND ' + deadline_clause) if deadline_clause else ''}
+                FROM student_visible_ranked AS jobs
+                WHERE jobs._official_detail_rank = 1
                 GROUP BY jobs.category
                 ORDER BY count DESC, jobs.category
                 """,
@@ -3022,24 +3297,22 @@ class Database:
         end_utc = end.astimezone(timezone.utc).replace(microsecond=0)
         start_value = start_utc.isoformat().replace("+00:00", "Z")
         end_value = end_utc.isoformat().replace("+00:00", "Z")
-        freshness_sql, freshness_values = self._public_freshness_filter(report_date)
+        cte, freshness_values = self._student_visible_jobs_cte(
+            as_of_date=report_date
+        )
         with self.connect() as connection:
             rows = connection.execute(
-                """
+                cte
+                + """
                 SELECT DISTINCT jobs.*, job_events.event_type, job_events.occurred_at
                 FROM job_events
-                JOIN jobs ON jobs.id = job_events.job_id
-                JOIN sources AS source_meta
-                  ON source_meta.id = jobs.source_id
-                 AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')
+                JOIN student_visible_ranked AS jobs ON jobs.id = job_events.job_id
                 WHERE job_events.occurred_at >= ?
                   AND job_events.occurred_at < ?
-                  AND jobs.status = 'open'
-                  AND jobs.publication_status IN ('student_eligible', 'unrestricted_eligible')
-                  AND """ + freshness_sql + """
+                  AND jobs._official_detail_rank = 1
                 ORDER BY jobs.relevance_score DESC, jobs.deadline_date ASC
                 """,
-                (start_value, end_value, *freshness_values),
+                (*freshness_values, start_value, end_value),
             ).fetchall()
         created: list[dict[str, Any]] = []
         updated: list[dict[str, Any]] = []
@@ -3052,46 +3325,31 @@ class Database:
         return {"new": created, "updated": updated}
 
     def upcoming_deadlines(self, start_date: str, end_date: str) -> list[dict[str, Any]]:
+        cte, values = self._student_visible_jobs_cte(as_of_date=start_date)
         with self.connect() as connection:
             rows = connection.execute(
-                """
+                cte
+                + """
                 SELECT jobs.*
-                FROM jobs
-                JOIN sources AS source_meta
-                  ON source_meta.id = jobs.source_id
-                 AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')
-                WHERE status = 'open'
-                  AND publication_status IN ('student_eligible', 'unrestricted_eligible')
-                  AND deadline_date IS NOT NULL
-                  AND deadline_date >= ?
-                  AND deadline_date <= ?
-                ORDER BY deadline_date ASC, relevance_score DESC
+                FROM student_visible_ranked AS jobs
+                WHERE jobs._official_detail_rank = 1
+                  AND jobs.deadline_date IS NOT NULL
+                  AND jobs.deadline_date >= ?
+                  AND jobs.deadline_date <= ?
+                ORDER BY jobs.deadline_date ASC, jobs.relevance_score DESC
                 """,
-                (start_date, end_date),
+                (*values, start_date, end_date),
             ).fetchall()
         return [self._job_row(row) for row in rows]
 
     def count_open_jobs(self, *, as_of_date: str | None = None) -> int:
-        values: list[Any] = []
-        deadline_clause = ""
-        source_join = (
-            " JOIN sources AS source_meta "
-            "ON source_meta.id = jobs.source_id "
-            "AND (source_meta.enabled = 1 OR source_meta.source_type = 'manual')"
-        )
-        if as_of_date is not None:
-            deadline_clause, freshness_values = self._public_freshness_filter(
-                as_of_date
-            )
-            values.extend(freshness_values)
+        cte, values = self._student_visible_jobs_cte(as_of_date=as_of_date)
         with self.connect() as connection:
             return int(
                 connection.execute(
-                    "SELECT COUNT(*) FROM jobs"
-                    + source_join
-                    + " WHERE jobs.status = 'open' "
-                    "AND jobs.publication_status IN ('student_eligible', 'unrestricted_eligible')"
-                    + (" AND " + deadline_clause if deadline_clause else ""),
+                    cte
+                    + "SELECT COUNT(*) FROM student_visible_ranked AS jobs "
+                    "WHERE jobs._official_detail_rank = 1",
                     values,
                 ).fetchone()[0]
             )
@@ -3163,6 +3421,7 @@ class Database:
                 WHERE source_id = ?
                   AND status = 'open'
                   AND publication_status IN ('student_eligible', 'unrestricted_eligible')
+                  AND country_or_region IN ('中国大陆', '中国')
                   AND external_id IS NOT NULL
                   AND external_id <> ''
                 """,

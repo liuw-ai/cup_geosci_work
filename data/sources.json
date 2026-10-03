@@ -224,6 +224,27 @@
         "考察",
         "录用公示"
       ],
+      "detail_table_profiles": [
+        {
+          "title_pattern": "发展研究中心.*博士后",
+          "table_selector": "table",
+          "table_index": 1,
+          "required_headers": ["专业", "研究方向", "招收人数"],
+          "column_aliases": {
+            "title": ["研究方向"],
+            "major": ["专业"],
+            "quantity": ["招收人数"]
+          },
+          "title_prefix": "博士后研究人员（",
+          "title_suffix": "）",
+          "degree_requirement": "博士研究生（相关专业博士学位）",
+          "employer": "中国地质调查局发展研究中心",
+          "location": "北京市西城区",
+          "require_degree_evidence": true,
+          "require_location_evidence": true,
+          "note": "仅匹配已核验的中国地质调查局发展研究中心博士后岗位表。表头、岗位方向、专业、人数均须同时命中；其他中国地质调查局公告仍进入普通公告或附件复核流程。"
+        }
+      ],
       "minimum_relevance": 40,
       "max_items": 24,
       "undated_open_window_days": 45,
@@ -339,6 +360,9 @@
       "max_pages": 30,
       "max_age_hours": 30,
       "require_complete_scan": true,
+      "require_capture_manifest": true,
+      "source_id": "cnpc-career-browser",
+      "adapter_version": "cnpc-browser-v1",
       "max_items": 2000,
       "maintenance_window": "00:00-06:00 Asia/Shanghai",
       "note": "独立浏览器任务负责公告分页和岗位详情表；浏览器不可用、详情字段不完整、维护窗口或扫描未完成时保持停用，不把访问故障写成无岗位。启用前必须完成服务器 Chromium 运行回归。"
@@ -371,10 +395,37 @@
       "max_items": 1000,
       "max_age_hours": 30,
       "require_complete_manifest": true,
+      "require_capture_manifest": true,
+      "source_id": "sinopec-career",
+      "adapter_version": "sinopec-browser-v1",
       "reconcile_missing_external_ids": true,
       "runtime_mode": "browser_worker_only",
       "disabled_reason": "普通同步不再读取浏览器捕获路径；由 sinopec-browser 独立 worker 负责动态 SPA 捕获。服务器 403/robots 失败保留 access_limited 心跳和失败快照，不能解释为无岗位。",
       "note": "2026-09-29 服务器隔离 Chromium 通过官方只读 SPA 接口捕获确认 132 个单位，35 个候选单位、363 条岗位行；132 个单位清单和 35 个候选单位详情均完成分页扫描，失败行为 0。学生端只展示岗位级专业/学历明确匹配，捕获文件必须在 max_age_hours 内重新核验。"
+    }
+  },
+  {
+    "id": "sinopec-2027-geoscience-snapshot",
+    "name": "中国石化2027届地学岗位官方快照（人工核验过渡源）",
+    "publisher": "中国石油化工集团有限公司",
+    "homepage_url": "https://job.sinopec.com/#/school/recruitmentPositions",
+    "source_type": "manual",
+    "category": "油气上游业主与研究机构",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allowed_hosts": ["job.sinopec.com"],
+      "snapshot_path": "data/verified/sinopec-geoscience-20260929.json",
+      "max_age_hours": 30,
+      "official_evidence_url": "https://job.sinopec.com/#/school/recruitmentPositions",
+      "application_url": "https://job.sinopec.com/",
+      "snapshot_captured_at": "2026-09-29T07:08:24.607107Z",
+      "enterprise_total": 132,
+      "candidate_enterprise_total": 35,
+      "captured_job_rows": 363,
+      "publication_mode": "verified_snapshot_manual_activation",
+      "dynamic_replacement_source_id": "sinopec-career",
+      "note": "官方 SPA 完整捕获的人工核验过渡源。仅通过岗位级专业、学历、地点、截止日期和官方详情门禁的行进入学生端；动态源成功刷新后必须原子替换并清理本过渡源。该源不宣称每日实时更新。"
     }
   },
   {
@@ -488,6 +539,7 @@
       "api_host": "https://fe.zhaopin.com",
       "api_path": "/grace/api/dsc/search-job-list",
       "include_patterns": ["地质|勘查|物探|化探|测井|地球物理|油气|石油|资源|储层|海洋"],
+      "allow_unrestricted_candidates": true,
       "exclude_patterns": ["财务|法务|行政|人力资源|审计|采购|市场|风控|合规|法律"],
       "page_size": 100,
       "max_pages": 20,
@@ -495,6 +547,10 @@
       "allow_large_item_limit": true,
       "max_age_hours": 30,
       "require_complete_scan": true,
+      "require_capture_manifest": true,
+      "reconcile_missing_external_ids": true,
+      "source_id": "cnooc-career-browser",
+      "adapter_version": "cnooc-browser-v1",
       "automation_status": "browser_detail_pipeline_ready_20261001",
       "scan_policy": "daily_browser_detail_monitor",
       "note": "列表 API 只负责发现候选；学生端只消费完整 Chromium 详情捕获。详情挑战、分页失败或字段缺失进入复核，不显示为无岗位。"
@@ -518,6 +574,7 @@
       "detail_base_url": "https://zhaopin.pipechina.com.cn/recruit",
       "detail_board_category": "_HB4_NDA%253D",
       "detail_job_meta_state": "new_portal_campus",
+      "prefer_detail_evidence_url": true,
       "max_age_hours": 30,
       "snapshot_captured_at": "2026-09-24T08:00:00+08:00",
       "official_search_url": "https://zhaopin.pipechina.com.cn/recruit#/portal_job_list?job_class=_HB4_Y2FtcHVz&search_key=%E5%9C%B0%E8%B4%A8&filter_dict=_HB4_eyJfam9iX2NsYXNzIjoiY2FtcHVzIiwic2VsZWN0X2RlcGFydCI6bnVsbH0%253D",
@@ -538,6 +595,7 @@
     "config": {
       "allowed_hosts": ["zhaopin.pipechina.com.cn", "www.pipechina.com.cn"],
       "capture_path": "captures/pipechina-career.json",
+      "cdp_url": "http://pipechina-headless-shell:9222",
       "browser_url": "https://zhaopin.pipechina.com.cn/recruit#/portal_job_list?job_class=_HB4_Y2FtcHVz&search_key=%E5%9C%B0%E8%B4%A8",
       "row_selector": "div.table-row[hcm-key]",
       "id_attribute": "hcm-key",
@@ -555,6 +613,10 @@
       "application_url": "https://zhaopin.pipechina.com.cn/recruit",
       "max_age_hours": 30,
       "require_complete_scan": true,
+      "require_capture_manifest": true,
+      "source_id": "pipechina-browser-capture",
+      "adapter_version": "browser-capture-v1",
+      "runtime_mode": "browser_worker_only",
       "note": "服务器安装并授权使用公开 Chromium 后启用。捕获任务必须完成地质关键词结果的分页扫描，并逐岗位保留官方详情 URL、专业、学历、地点和截止日期；浏览器不可用、robots 无法核验或扫描不完整时保持停用并继续使用 2026-09-24 官方快照。"
     }
   },
@@ -576,6 +638,8 @@
       ],
       "minimum_relevance": 20,
       "snapshot_path": "data/verified/cupb-geoscience-20260924.json",
+      "max_age_hours": 30,
+      "snapshot_captured_at": "2026-09-24T08:00:00+08:00",
       "official_evidence_url": "https://career.cup.edu.cn/campus/view/id/460426",
       "application_url": "https://career.cup.edu.cn/campus",
       "note": "2026-09-24 浏览器只读核验的中国石油大学（北京）就业网公开岗位快照。每条记录保留具体公告、岗位级专业/学历字段和报名入口；动态列表因本机 robots/TLS 不稳定不直接绕过，快照仅作为管理员复核桥接。无岗位级证据的公告总述不进入快照。"
@@ -1031,6 +1095,8 @@
       "allowed_hosts": ["www.cmgb.com.cn", "cmgb.iguopin.com", "www.iguopin.com"],
       "minimum_relevance": 40,
       "snapshot_path": "data/verified/cmgb-iguopin-geoscience-20260927.json",
+      "max_age_hours": 30,
+      "snapshot_captured_at": "2026-09-27T14:07:41Z",
       "official_evidence_url": "https://www.cmgb.com.cn/content/2026/09-25/7509048960149884928.html",
       "application_url": "https://cmgb.iguopin.com/jobCampus",
       "official_search_url": "https://cmgb.iguopin.com/jobCampus",
@@ -1054,6 +1120,9 @@
       "capture_path": "captures/cmgb-iguopin-browser.json",
       "allowed_hosts": ["cmgb.iguopin.com", "www.iguopin.com", "iguopin.com", "www.cmgb.com.cn"],
       "max_age_hours": 30,
+      "require_capture_manifest": true,
+      "source_id": "cmgb-iguopin-browser",
+      "adapter_version": "cmgb-browser-v1",
         "retry_partial_first": true,
         "detail_retry_max_age_hours": 12,
         "detail_retry_attempts": 3,
@@ -1067,6 +1136,80 @@
       "next_selector": ".ant-pagination-next",
       "detail_button_selector": "button",
       "note": "2026-09-27 已在服务器逐页捕获 8 页、146/146 条详情，字段完整率 100%。启用前必须通过 cmgb-production-transition：完整捕获、明确匹配不低于现有快照、原子同步后才停用快照；捕获失败或分页不完整时旧快照保持可见。partial 归档在 12 小时内优先只重试其失败的官方详情，全部补齐前绝不覆盖正式快照；归档过期或不适用才恢复完整列表扫描。启用后每次完整动态清单会撤回已消失的岗位，保留原始事件审计。"
+    }
+  },
+  {
+    "id": "chinalco-iguopin-browser",
+      "name": "中国铝业集团2027届校园招聘国聘动态岗位（已完成隔离复核，待生产切换）",
+    "publisher": "中国铝业集团有限公司",
+    "homepage_url": "https://chinalco2027.iguopin.com/job",
+    "source_type": "iguopin_browser_rows",
+    "category": "矿产资源与矿业",
+    "source_tier": "A",
+      "enabled": true,
+    "config": {
+      "runtime_enabled_control": "chinalco-iguopin-browser-production",
+      "browser_url": "https://chinalco2027.iguopin.com/job",
+      "application_url": "https://chinalco2027.iguopin.com/job",
+      "capture_path": "captures/chinalco-iguopin-browser.json",
+      "previous_capture_path": "captures/chinalco-iguopin-browser.first.json",
+      "allowed_hosts": ["chinalco2027.iguopin.com", "www.iguopin.com", "iguopin.com"],
+      "major_filters": [
+        {"parent": "理学", "child": "地质学类"},
+        {"parent": "理学", "child": "地球物理学类"},
+        {"parent": "工学", "child": "地质类"},
+        {"parent": "工学", "child": "地质资源与地质工程类"}
+      ],
+      "external_id_prefix": "chinalco-iguopin",
+      "max_pages_per_filter": 20,
+      "max_items": 2000,
+      "max_age_hours": 30,
+      "require_complete_scan": true,
+      "require_capture_manifest": true,
+      "reconcile_missing_external_ids": true,
+      "minimum_relevance": 0,
+      "source_id": "chinalco-iguopin-browser",
+      "adapter_version": "iguopin-browser-v1",
+      "official_announcement_url": "https://chinalco2027.iguopin.com/notice",
+        "note": "中国铝业集团2027年度高校毕业生招聘官方公告明确报名平台为本国聘子站，报名期为 2026-09-16 至 2027-03-07。2026-10-03 已在独立服务器数据库完成两次全筛选、全分页、全详情零失败捕获：每次 5 页、51 张卡片、35 个去重详情、35/35 详情成功，外部编号集合哈希一致；其中 27 条经国内地点和专业学历门禁后可公开，5 条专业不匹配、3 条海外或境内外混合岗位保持私有。生产切换必须复用独立浏览器容器，并以新鲜完整捕获替代隔离候选快照；任何部分或失败捕获均不得覆盖最后一次成功清单。"
+    }
+  },
+  {
+    "id": "iguopin-general-geoscience-browser",
+    "name": "国聘主站地学岗位动态浏览器采集（候选，待两轮完整复核）",
+    "publisher": "国聘网",
+    "homepage_url": "https://www.iguopin.com/job",
+    "source_type": "iguopin_general_browser_rows",
+    "category": "综合央国企与公共就业",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "runtime_enabled_control": "iguopin-general-geoscience-browser-production",
+      "browser_url": "https://www.iguopin.com/job",
+      "application_url": "https://www.iguopin.com/job",
+      "capture_path": "captures/iguopin-general-geoscience-browser.json",
+      "allowed_hosts": ["www.iguopin.com", "iguopin.com"],
+      "search_keywords": [
+        "地质",
+        "地球物理",
+        "资源勘查",
+        "油气勘探",
+        "测井",
+        "水文地质",
+        "遥感地质"
+      ],
+      "card_identity_mode": "rendered_react_job_id",
+      "external_id_prefix": "iguopin-general",
+      "max_pages_per_keyword": 20,
+      "max_items": 2000,
+      "max_age_hours": 30,
+      "require_complete_scan": true,
+      "require_capture_manifest": true,
+      "reconcile_missing_external_ids": true,
+      "minimum_relevance": 0,
+      "source_id": "iguopin-general-geoscience-browser",
+      "adapter_version": "iguopin-general-browser-v1",
+      "note": "仅通过国聘主站已渲染的关键词搜索卡片发现候选岗位；搜索卡片的 React job_id 仅用于构造官方公开详情页，且岗位名称、单位、专业、学历、地点、人数、截止日期必须逐条在该详情页核对。默认停用，必须在服务器隔离数据库连续两次完成所有关键词、全部分页、全部详情且岗位编号集合稳定后，才可提交生产启用；部分扫描、字段缺失、详情不一致或访问受限均只归档失败证据，绝不覆盖最后一次完整清单。"
     }
   },
   {
@@ -1207,6 +1350,26 @@
       "allow_shared_source_url": true,
       "fallback_entry_urls": ["https://www.zjzzgz.gov.cn/"],
       "note": "服务器直连核验官方公务员专题。页面当前展示2026年度招录、专项招录和面向基层遴选信息；遴选面向在编公务员，未发现面向本院社会毕业生的当前开放地学职位表。"
+    }
+  },
+  {
+    "id": "cnpc-logging-campus",
+    "name": "中国石油集团测井有限公司官方招聘入口",
+    "publisher": "中国石油集团测井有限公司",
+    "homepage_url": "https://cpl.cnpc.com.cn/",
+    "source_type": "landing_page",
+    "category": "油气工程技术服务",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "中国石油集团测井有限公司",
+      "allowed_hosts": ["cpl.cnpc.com.cn"],
+      "fallback_entry_urls": [
+        "https://zhaopin.cnpc.com.cn/",
+        "https://www.cnpc.com.cn/zh/rczp/"
+      ],
+      "automation_status": "official_identity_only",
+      "note": "集团测井单位主体和官方入口已确认，但当前没有经过岗位级专业、学历、地点和截止日期复核的公开职位表；保持停用，不把单位主页当作岗位。"
     }
   }
 ]

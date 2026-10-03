@@ -33,6 +33,7 @@ def test_taxonomy_contains_requested_majors_with_distinct_boundaries() -> None:
     assert definitions["geophysics"].classification["undergraduate_code"] == "070801"
     assert definitions["geophysics"].classification["graduate_code"] == "0708"
     assert definitions["geophysics"].category_terms == ("地球物理学类",)
+    assert definitions["geophysics"].bounded_exact_terms == ("地球物理",)
 
 
 def test_profile_aliases_do_not_promote_adjacent_majors_to_exact() -> None:

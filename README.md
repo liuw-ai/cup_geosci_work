@@ -66,7 +66,7 @@ Phase 21 的国家管网岗位级详情链接和字段展示见 [docs/phase-21/R
 - 岗位标准化：保留单位、岗位、原始地点、标准化省份/城市/国家地区、学历、专业标签、发布时间、截止日期、原始链接和报名链接；国际岗位使用官方地点中的国家代码，不从单位名称猜测省份。
 - 单位体系：用可审计的单位别名表区分油气上游运营单位、集团内技术服务、独立油服和国际油服；保留公告原始单位名，不对模糊名称强行归类。
 - 地学匹配：围绕资源勘查工程、地质工程、地质学、地质资源与地质工程，并识别石油地质、测井、储层、地球物理、地学数据、遥感、GIS 等相邻方向。
-- 学生画像筛选：提供 7 个不保存个人数据的“学历 × 专业”画像，分别覆盖资源勘查工程本科，以及地质学、地质工程、地质资源与地质工程的硕士和博士；页面明确区分“明确匹配”和“需核验原公告”。
+- 学生画像筛选：提供 10 个不保存个人数据的“学历 × 专业”画像，覆盖资源勘查工程、地球物理学本科，以及地质学、地球物理学、地质工程、地质资源与地质工程的硕士和博士；页面明确区分“明确匹配”和“需核验原公告”。
 - 队列验证：内置固定的匿名 100 人地球科学学院模拟队列，利用当前真实岗位库输出各培养方向的明确匹配、待核验、覆盖类别和未覆盖情况。
 - 岗位分类：油气上游业主与研究机构、油气工程技术服务、管网/炼化/综合能源、自然资源/地调/地勘、矿产资源与矿业、地质工程/环境/基础设施、科研院所/高校/博士后、事业单位与人才引进、公务员与选调、金融与央国企综合机会、能源与地学拓展。
 - 去重与更新记录：同一官方公告只保留一条岗位记录，内容变化会进入“信息更新”日报。
@@ -79,7 +79,9 @@ Phase 21 的国家管网岗位级详情链接和字段展示见 [docs/phase-21/R
 - 扩源矩阵：`data/source_targets.json` 按 31 个省和五类官方角色记录已核验、候选和待定位入口。候选入口只进入扩源排期，不会被 worker 抓取或在学生端显示。
 - 组织与入口矩阵：`data/organization_registry.json` 将集团、油田/区域运营单位、研究院、集团内技术服务、独立/国际油服、中央地勘、矿业、重点高校和政府招聘系统分层登记。每个频道独立记录正式入口、备用官方入口、来源绑定和验证状态；`official_confirmed` 不等于可抓取，只有 `automation_ready` 且来源健康的频道才可能进入自动同步。
 - 省级来源核验：`data/source_validation_registry.json` 记录已查看的官方入口、真实公告样例、字段证据、备用入口、离线解析夹具和回归测试节点。`adapter_fixture_verified` 只表示解析器能理解样例，不会自动启用来源；山东人事考试候选源在运行时健康检查通过前保持停用。
-- 质量报告与日报快照：`/api/coverage` 输出来源健康、每省有效/备用来源、来源角色矩阵、原文/专业/学历/地点/截止日完整率、来源与类别集中度，以及 100 人模拟中的明确匹配率；每次同步会记录当天可更新的质量快照，用于与前一个不同日期比较，而不是只看岗位总数。
+- 质量报告与日报快照：`/api/coverage` 输出来源健康、每省有效/备用来源、来源角色矩阵、原文/专业/学历/地点/截止日完整率、来源/单位/类别集中度、100 人模拟中的明确匹配率，以及 `expansion_targets` 的 1,000 条分段目标、当前有效数、缺口和未注册计划来源；每次同步会记录当天可更新的质量快照，用于与前一个不同日期比较，而不是只看岗位总数。
+- 扩容批次与来源分散门禁：`/api/coverage.source_diversity` 把 1,000 条目标拆成来源级批次，优先当前为零且已登记的独立官方来源；超过集中度阈值的来源进入 `hold_dominant_source`，未登记或停用来源分别进入注册/适配器门禁。该计划只排程，不会把候选线索或待复核岗位计入有效数。
+- 双轴完成度与来源漏斗：`/api/coverage.dual_axis` 将国内有效岗位覆盖和证据/运行可靠性分开报告，不能用高工程分数掩盖岗位覆盖不足；`python -m job_hub.cli source-funnel` 与管理员接口输出来源从发现、证据、复核到发布的最新运行漏斗，访问受限不等于无岗位。
 - 公开接口：/api/jobs 提供只读 JSON 数据，支持 `province` 省份筛选；/api/coverage 输出上述可观测指标。
 - 私有线索池：中公、华图、国聘、行业公众号等只可进入受保护的候选线索池，完成官方原文核验后才可发布为公开岗位。
 - 私有发现注册与漏斗：`data/discovery_sources.json` 记录第三方发现入口的用途和访问状态；规范化 URL 指纹合并重复线索，`candidate_lead_mentions` 保留多渠道归因，管理员可查看官方原文定位、内容核验和发布转化漏斗，学生端不接触这些记录。
@@ -144,6 +146,7 @@ PDF 职位表优先使用布局提取并按职位代码聚合跨行文本；低�
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 Copy-Item .env.example .env
 ~~~
 
@@ -214,6 +217,7 @@ python -m job_hub.cli simulate-cohort --output .\runtime\cohort-coverage.json
 python -m job_hub.cli coverage
 python -m job_hub.cli coverage --output .\runtime\coverage.json
 python -m job_hub.cli coverage --record --output .\runtime\coverage.json
+python -m job_hub.cli source-funnel --output .\runtime\source-funnel.json
 ~~~
 
 `sync` 和常驻 worker 会在同步后自动记录当天的质量快照；`coverage --record` 用于人工复核后的补记。同一天的快照可以被后一次同步替换，趋势比较只取前一个不同日期，避免同日重复执行制造虚假的“增长”。
@@ -249,6 +253,19 @@ python -m job_hub.cli source-health --source-id mnr-public-recruitment
 python -m job_hub.cli source-health --include-disabled
 ~~~
 
+学生端官方详情链接还可以做只读健康检查。它会先核验来源白名单和
+`robots.txt`，再区分可访问详情、动态壳、404、维护/反自动化限制和网络故障；
+受限结果不会自动清退岗位，也不能解释成来源没有岗位：
+
+~~~powershell
+python -m job_hub.cli link-health --limit 50 --output .\runtime\link-health.json
+python -m job_hub.cli link-health --source-id cnooc-career-browser --limit 20
+python -m job_hub.cli link-health --job-id 1234
+~~~
+
+该命令只生成诊断报告，不写入岗位状态。`reachable_dynamic` 表示官方路由可达但
+返回的是前端壳页面，仍需对应浏览器适配器提供字段证据；不能用它替代岗位采集。
+
 ## 每日自动运行
 
 生产环境运行独立 worker：
@@ -264,6 +281,12 @@ worker 每 30 秒更新一次心跳。若进程在单个来源采集期间异常
 ~~~bash
 docker compose exec worker python -m job_hub.cli worker-health --max-age 180
 ~~~
+
+生产服务器可设置 `LINK_HEALTH_ENABLED=true`，worker 会在每天第一次成功同步后，
+按来源轮询最多 `LINK_HEALTH_SAMPLE_SIZE`（默认 20）个学生端官方详情链接，并将
+只读报告写入 `APP_DATA_DIR/link-health/YYYY-MM-DD.json`。报告中的 404、动态壳、
+robots 拒绝、HTTP 412 或暂时性 5xx 不会自动清退岗位，也不会被解释为“没有岗位”；
+它们只用于安排对应来源的人工复核或浏览器重新捕获。
 
 ## 数据库备份与上线门禁
 
@@ -381,6 +404,7 @@ Content-Type: application/json
 ## 验证
 
 ~~~powershell
+$env:PYTHONPATH = (Get-Location).Path
 python -m pytest -q
 ~~~
 

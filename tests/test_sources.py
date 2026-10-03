@@ -65,6 +65,26 @@ def test_observed_historical_notice_feeds_skip_expired_rows_before_review() -> N
         assert config["skip_expired_before_persist"] is True
 
 
+def test_verified_provincial_position_sources_opt_into_daily_evidence_recheck() -> None:
+    """Reviewed provincial rows must not be stranded by a missing runtime gate."""
+    project_root = Path(__file__).resolve().parents[1]
+    provincial_sources = json.loads(
+        (project_root / "data" / "provincial_sources.json").read_text(encoding="utf-8")
+    )
+    sources = {item["id"]: item for item in provincial_sources}
+
+    for source_id in (
+        "anhui-geology-bureau",
+        "gansu-geology-bureau",
+        "hubei-natural-resources",
+        "hunan-geology-institute",
+        "ningxia-geology-bureau",
+    ):
+        config = sources[source_id]["config"]
+        assert config["government_evidence_recheck"] is True
+        assert config.get("government_evidence_recheck_mode") != "manual_only"
+
+
 @dataclass
 class FakeResponse:
     text: str
@@ -670,6 +690,45 @@ def test_cupb_adapter_keeps_free_form_major_evidence_and_real_employer(tmp_path)
     assert "地质工程" in (posting.match_text or "")
 
 
+def test_cupb_job_detail_recovers_private_use_separators(tmp_path) -> None:
+    """A single CUPB job page keeps explicit fields despite icon separators."""
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    source = {
+        "id": "cupb-career",
+        "name": "中国石油大学（北京）就业信息网",
+        "publisher": "中国石油大学（北京）",
+        "homepage_url": "https://career.cup.edu.cn/",
+        "source_type": "cupb_career",
+        "category": "能源、工程与地学拓展",
+        "source_tier": "B",
+        "config": {"request_interval_seconds": 0},
+    }
+    # The live portal uses private-use glyphs in place of visual separators.
+    document = (
+        '<div class="details-title"><h5>石油工程技术岗（三地生）</h5></div>'
+        '<main class="zp-details">'
+        '岗位类型\ue0c1具体专业岗位\ue436学历要求\ue0c1硕士研究生 '
+        '专业要求\ue0c1石油工程类、地质类、资源勘查工程、地质工程 '
+        '工作地点\ue0c1新疆、陕西、内蒙古'
+        '</main>'
+    )
+
+    postings = collector._extract_cupb_details(
+        document,
+        "https://career.cup.edu.cn/job/view/id/622609",
+        source,
+        "石油工程技术岗（三地生）",
+    )
+
+    assert len(postings) == 1
+    posting = postings[0]
+    assert posting.location == "新疆、陕西、内蒙古"
+    assert posting.field_evidence["evidence_scope"] == "official_detail_block"
+    assert posting.field_evidence["岗位"] == posting.title
+    assert "地质工程" in posting.field_evidence["专业范围"]
+    assert posting.field_evidence["学历要求"] == "硕士研究生"
+
+
 def test_cupb_adapter_prefers_announcement_over_position_duplicate() -> None:
     candidates = [
         ("中国石油集团经济技术研究院2026年招聘公告", "https://career.cup.edu.cn/job/view/id/1"),
@@ -1100,6 +1159,92 @@ def test_cgs_dynamic_json_collects_paginated_official_details_with_evidence(
     ]
 
 
+def test_cgs_profiled_table_splits_only_registered_official_vacancy_layout(
+    tmp_path, monkeypatch
+) -> None:
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    listing_url = "https://m.cgs.gov.cn/zpxx/news_4288.json"
+    detail_url = "https://www.drc.cgs.gov.cn/ggl/202610/t20261001_1.html"
+    source = {
+        "id": "cgs-notices",
+        "publisher": "中国地质调查局",
+        "homepage_url": "https://m.cgs.gov.cn/zpxx/",
+        "source_type": "cgs_dynamic_json",
+        "config": {
+            "listing_url": listing_url,
+            "listing_urls": [listing_url],
+            "page_size": 20,
+            "allowed_hosts": ["m.cgs.gov.cn", "www.drc.cgs.gov.cn"],
+            "detail_allowed_hosts": ["m.cgs.gov.cn", "www.drc.cgs.gov.cn"],
+            "required_title_patterns": ["招聘|博士后"],
+            "require_recruitment_word": True,
+            "max_items": 10,
+            "request_interval_seconds": 0,
+            "content_selector": "main",
+            "detail_table_profiles": [
+                {
+                    "title_pattern": "发展研究中心.*博士后",
+                    "table_selector": "table",
+                    "table_index": 1,
+                    "required_headers": ["专业", "研究方向", "招收人数"],
+                    "column_aliases": {
+                        "title": ["研究方向"],
+                        "major": ["专业"],
+                        "quantity": ["招收人数"],
+                    },
+                    "title_prefix": "博士后研究人员（",
+                    "title_suffix": "）",
+                    "degree_requirement": "博士研究生（相关专业博士学位）",
+                    "employer": "中国地质调查局发展研究中心",
+                    "location": "北京市西城区",
+                }
+            ],
+        },
+    }
+    responses = {
+        listing_url: FakeJsonResponse(
+            {
+                "lists": [
+                    {
+                        "title": "中国地质调查局发展研究中心2026年度博士后招收公告",
+                        "url": detail_url,
+                        "date": "2026-10-01",
+                    }
+                ]
+            },
+            url=listing_url,
+        ),
+        detail_url: FakeResponse(
+            text=(
+                "<main><h1>中国地质调查局发展研究中心2026年度博士后招收公告</h1>"
+                "报名截止时间：2026年10月16日17:00。"
+                "<table><tr><th>序号</th><th>专业</th><th>研究方向</th><th>招收人数</th></tr>"
+                "<tr><td>1</td><td>地质学</td><td>矿产勘查</td><td>1</td></tr>"
+                "<tr><td>2</td><td>地质工程</td><td>找矿预测</td><td>2</td></tr>"
+                "</table></main>"
+            ),
+            url=detail_url,
+        ),
+    }
+    monkeypatch.setattr(collector, "_get", lambda url, _source: responses[url])
+
+    postings = collector.collect(source)
+
+    assert [posting.title for posting in postings] == [
+        "博士后研究人员（矿产勘查）",
+        "博士后研究人员（找矿预测）",
+    ]
+    assert [posting.employer for posting in postings] == [
+        "中国地质调查局发展研究中心",
+        "中国地质调查局发展研究中心",
+    ]
+    assert [posting.deadline_date for posting in postings] == ["2026-10-16", "2026-10-16"]
+    assert all(posting.location == "北京市西城区" for posting in postings)
+    assert all(posting.field_evidence["学历要求"] == "博士研究生（相关专业博士学位）" for posting in postings)
+    assert [posting.field_evidence["招聘人数"] for posting in postings] == ["1", "2"]
+    assert all(posting.field_evidence["evidence_scope"] == "official_cgs_profiled_table_row" for posting in postings)
+
+
 def test_cgs_dynamic_json_never_returns_unregistered_detail_host(
     tmp_path, monkeypatch
 ) -> None:
@@ -1261,6 +1406,59 @@ def test_html_notice_applies_configured_title_filters(tmp_path, monkeypatch) -> 
 
     assert [posting.title for posting in postings] == ["2026年公开招聘公告"]
     assert requested == [listing_url, original_url]
+
+
+def test_html_notice_never_treats_hiring_public_disclosure_as_vacancy(
+    tmp_path, monkeypatch
+) -> None:
+    """A post-hiring public disclosure can retain a recent recruitment title."""
+    collector = OfficialSourceCollector(make_settings(tmp_path))
+    listing_url = "https://official.example.cn/notices"
+    opening_url = "https://official.example.cn/notices/opening.html"
+    source = {
+        "id": "official-notice",
+        "publisher": "测试地质局",
+        "homepage_url": listing_url,
+        "source_type": "html_notice",
+        "config": {
+            "listing_urls": [listing_url],
+            "allowed_hosts": ["official.example.cn"],
+            "listing_selector": "a",
+            "title_selector": "h1",
+            "content_selector": "article",
+            "require_recruitment_word": True,
+            "max_items": 10,
+            "request_interval_seconds": 0,
+        },
+    }
+    requested: list[str] = []
+
+    def get(url, _source):
+        requested.append(url)
+        if url == listing_url:
+            return FakeResponse(
+                text=(
+                    '<a href="/notices/opening.html">2026年公开招聘公告</a>'
+                    '<a href="/notices/result.html">2026年公开招聘工作人员公示公告（第三批）</a>'
+                ),
+                url=listing_url,
+            )
+        if url == opening_url:
+            return FakeResponse(
+                text=(
+                    "<h1>2026年公开招聘公告</h1>"
+                    "<article>面向地质工程、资源勘查工程毕业生。</article>"
+                ),
+                url=opening_url,
+            )
+        raise AssertionError(url)
+
+    monkeypatch.setattr(collector, "_get", get)
+
+    postings = collector.collect(source)
+
+    assert [posting.title for posting in postings] == ["2026年公开招聘公告"]
+    assert requested == [listing_url, opening_url]
 
 
 def test_mnr_public_api_adapter_uses_public_position_fields(tmp_path, monkeypatch) -> None:

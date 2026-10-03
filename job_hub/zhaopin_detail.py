@@ -24,6 +24,26 @@ class ZhaopinDetailError(ValueError):
 
 
 _INITIAL_DATA_RE = re.compile(r"window\.__INITIAL_DATA__\s*=\s*", re.IGNORECASE)
+_REQUIREMENT_VALUE_BOUNDARY = (
+    r"(?=[；;。\n]|"
+    r"\s+\d+\s*[.、．]\s*"
+    r"(?:学历|教育程度|专业|外语|英语|能力|任职|岗位|其他|工作地点|"
+    r"招聘人数|资格|工作经历|经验)(?:要求|条件)?\s*[:：]|$)"
+)
+_DEGREE_REQUIREMENT_RE = re.compile(
+    r"(?:学历要求|学历条件|最低学历|教育程度)\s*[:：]\s*"
+    r"(?P<value>[^；;。\n]{1,80}?)" + _REQUIREMENT_VALUE_BOUNDARY,
+    re.IGNORECASE,
+)
+_MAJOR_REQUIREMENT_RE = re.compile(
+    r"(?:专业要求|专业条件|所学专业|专业范围)\s*[:：]\s*"
+    r"(?P<value>[^；;。\n]{1,300}?)" + _REQUIREMENT_VALUE_BOUNDARY,
+    re.IGNORECASE,
+)
+_REQUIREMENT_SECTION_RE = re.compile(r"(?:任职要求|岗位要求)\s*[:：]?", re.IGNORECASE)
+_NUMBERED_REQUIREMENT_RE = re.compile(
+    r"(?:^|[；;。])\s*\d+\s*[.、．]\s*(?P<value>[^；;。\n]{1,300})"
+)
 
 
 def _text(value: Any) -> str:
@@ -35,6 +55,105 @@ def _date(value: Any) -> str | None:
     if not text:
         return None
     return parse_date_value(text) or extract_deadline(text)
+
+
+def _detail_location(detail: dict[str, Any], job_desc: str) -> str:
+    """Preserve the city and street address exposed by one official detail.
+
+    Zhaopin often provides a terse street address in ``workAddress`` and the
+    city separately in ``positionWorkCity``.  Preferring the street address
+    alone makes an otherwise domestic role impossible to classify.  All
+    values below belong to the same detail payload; no employer-level place
+    inference is involved.
+    """
+
+    city = _text(
+        detail.get("positionWorkCity")
+        or detail.get("positionCity")
+        or detail.get("positionCityDistrict")
+    )
+    if city in {"全国", "全国项目地", "全国范围", "全国各地"}:
+        return city
+
+    values = (
+        city,
+        _text(detail.get("positionCityDistrict")),
+        _text(detail.get("workAddress")),
+        _text(extract_location_hint(job_desc)),
+    )
+    unique: list[str] = []
+    for value in values:
+        if value and value not in unique:
+            unique.append(value)
+    return " ".join(unique)
+
+
+def extract_zhaopin_degree_requirement(job_desc: str, fallback: str) -> str:
+    """Preserve a detail's degree floor instead of trusting an ATS enum alone.
+
+    Zhaopin detail payloads commonly expose ``education=本科`` while the
+    authoritative requirement block says ``本科及以上``.  Keeping the
+    bounded phrase from that same detail block lets the publication gate
+    correctly include higher-degree students without inferring eligibility
+    from an unrelated announcement paragraph.
+    """
+
+    match = _DEGREE_REQUIREMENT_RE.search(job_desc)
+    if match:
+        value = _text(match.group("value"))
+        if value:
+            return value
+    return fallback
+
+
+def extract_zhaopin_major_requirement(job_desc: str) -> str:
+    """Extract only the detail's job-level major condition.
+
+    A job description commonly mentions geology, oil and gas, or geophysics
+    in its duties.  Those words do not prove that a Geoscience student can
+    apply.  The public evidence field must therefore be the explicit
+    ``专业要求`` clause, not the entire description.  A small subset of the
+    official CNOOC templates uses numbered conditions without a label; for
+    those, accept only the major-like item after the requirement-section
+    heading.
+    """
+
+    # A legacy database row may have been persisted as
+    # ``专业要求：<entire jobDesc>``.  Its first regex match is merely that
+    # synthetic wrapper around duties.  Continue to the bounded requirement
+    # inside the same official detail instead of accepting that wrapper.
+    for match in _MAJOR_REQUIREMENT_RE.finditer(job_desc):
+        value = _text(match.group("value"))
+        if value and not any(
+            marker in value
+            for marker in (
+                "岗位职责",
+                "任职要求",
+                "学历要求",
+                "外语要求",
+                "英语要求",
+                "工作地点",
+                "能力/素质",
+            )
+        ):
+            return value
+
+    section = _REQUIREMENT_SECTION_RE.search(job_desc)
+    if not section:
+        return ""
+    requirement_text = job_desc[section.end() :]
+    for match in _NUMBERED_REQUIREMENT_RE.finditer(requirement_text):
+        value = _text(match.group("value"))
+        if not value or any(
+            marker in value for marker in ("学历", "外语", "英语", "工作地点", "岗位职责")
+        ):
+            continue
+        # The unlabelled fallback is deliberately narrow.  It must still say
+        # that it is a discipline/major condition rather than merely mention
+        # a professional activity in a numbered duty.
+        if re.search(r"(?:相关|相近|所学)?专业(?:$|[，、,;；])", value):
+            return value
+    return ""
 
 
 def _extract_initial_data(html: str) -> dict[str, Any]:
@@ -99,12 +218,7 @@ def parse_zhaopin_detail_html(
         raise ZhaopinDetailError("official detail is missing title or jobDesc")
 
     degree = _text(detail.get("education"))
-    location = _text(
-        detail.get("workAddress")
-        or detail.get("positionWorkCity")
-        or detail.get("positionCityDistrict")
-        or extract_location_hint(job_desc)
-    )
+    location = _detail_location(detail, job_desc)
     if not degree:
         raise ZhaopinDetailError("official detail is missing education")
     if not location:
@@ -113,6 +227,10 @@ def parse_zhaopin_detail_html(
     deadline = _date(detail.get("dateEnd")) or _date(campus.get("applyEndTime")) or extract_deadline(job_desc)
     if not deadline:
         raise ZhaopinDetailError("official detail is missing a parseable deadline")
+    degree_requirement = extract_zhaopin_degree_requirement(job_desc, degree)
+    major_requirement = extract_zhaopin_major_requirement(job_desc)
+    if not major_requirement:
+        raise ZhaopinDetailError("official detail is missing a job-level major requirement")
     published = _date(detail.get("dateStart") or detail.get("positionPublishTime")) or extract_published_date(job_desc)
 
     quantity_value = detail.get("recruitNumber")
@@ -142,7 +260,9 @@ def parse_zhaopin_detail_html(
         "job_number": job_number,
         "detail_url": detail_url,
         "position_url": page_url,
-        "major_text": job_desc,
+        "major_text": major_requirement,
+        # Keep the portal's normalized enum for backwards-compatible display
+        # fields; the evidence object carries the authoritative degree floor.
         "degree": degree,
         "location": location,
         "deadline": deadline,
@@ -153,9 +273,9 @@ def parse_zhaopin_detail_html(
             "evidence_scope": "official_zhaopin_detail_initial_data",
             "岗位": title,
             "招聘单位": employer,
-            "专业要求": job_desc,
-            "专业范围": job_desc,
-            "学历要求": degree,
+            "专业要求": major_requirement,
+            "专业范围": major_requirement,
+            "学历要求": degree_requirement,
             "工作地点": location,
             "招聘人数": quantity,
             "报名截止": deadline,
@@ -166,4 +286,9 @@ def parse_zhaopin_detail_html(
     }
 
 
-__all__ = ["ZhaopinDetailError", "parse_zhaopin_detail_html"]
+__all__ = [
+    "ZhaopinDetailError",
+    "extract_zhaopin_degree_requirement",
+    "extract_zhaopin_major_requirement",
+    "parse_zhaopin_detail_html",
+]

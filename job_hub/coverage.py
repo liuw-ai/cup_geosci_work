@@ -17,6 +17,15 @@ from job_hub.source_validation import (
 )
 from job_hub.simulation import simulate_cohort
 from job_hub.source_targets import load_source_targets, target_matrix_summary
+from job_hub.scorecard import build_scorecard
+from job_hub.source_lifecycle import lifecycle_report
+from job_hub.expansion_targets import (
+    build_expansion_target_report,
+    load_effective_job_target_plan,
+)
+from job_hub.source_diversity import build_source_diversity_plan
+from job_hub.readiness_axes import build_dual_axis_readiness, is_domestic_job
+from job_hub.source_funnel import build_source_funnel
 
 
 HEALTHY_SOURCE_STATUSES = {"source_active"}
@@ -62,13 +71,35 @@ def build_coverage_report(
     latest_runs_by_id = {
         item["source_id"]: item for item in database.list_latest_crawl_runs()
     }
-    jobs, _ = database.list_jobs(page_size=None)
+    # Coverage must use the exact same dated public-read gate as the student
+    # endpoints.  Without ``as_of_date`` an expired deadline is still counted
+    # by the report, while ``/api/jobs`` correctly hides it, producing a false
+    # "后台有、前端无" total.
+    public_as_of_date = snapshot_date or date.today().isoformat()
+    jobs, _ = database.list_jobs(
+        page_size=None,
+        as_of_date=public_as_of_date,
+    )
+    # The public corpus may contain overseas opportunities for students who
+    # choose to consider them.  The expansion promise, however, is 1,000
+    # current domestic jobs, so every target and diversity calculation below
+    # keeps a separate mainland-only denominator.
+    domestic_jobs = [job for job in jobs if is_domestic_job(job)]
     enabled_source_ids = {
         str(source["id"]) for source in sources if source.get("enabled")
     }
 
     jobs_by_source = Counter(str(job.get("source_id") or "unknown") for job in jobs)
     jobs_by_category = Counter(str(job.get("category") or "未分类") for job in jobs)
+    jobs_by_employer = Counter(
+        str(
+            job.get("canonical_employer_name")
+            or job.get("employer")
+            or "未注明单位"
+        ).strip()
+        or "未注明单位"
+        for job in jobs
+    )
     jobs_by_province = Counter(str(job.get("province") or "未注明") for job in jobs)
     sources_by_category: dict[str, Counter[str]] = defaultdict(Counter)
     for job in jobs:
@@ -83,6 +114,11 @@ def build_coverage_report(
         else None
     )
     category_concentration = _concentration(jobs_by_category, total_jobs)
+    employer_concentration = _concentration(jobs_by_employer, total_jobs)
+    employer_concentration["top_names"] = [
+        {"name": key, "count": count, "share": round(count / total_jobs, 4) if total_jobs else 0.0}
+        for key, count in jobs_by_employer.most_common(5)
+    ]
 
     field_completeness = {
         field: _completion(total_jobs, jobs, field)
@@ -179,11 +215,74 @@ def build_coverage_report(
         and health_by_id.get(source_id, {}).get("status") in HEALTHY_SOURCE_STATUSES
         and int(run.get("open_matching_count") or 0) > 0
     )
+    quality_gate = _quality_gate(
+        field_completeness=field_completeness,
+        deadline_quality=deadline_quality,
+        location_quality=location_quality,
+        simulation=simulation,
+        province_coverage=province_coverage,
+        source_concentration=source_concentration,
+        category_concentration=category_concentration,
+        employer_concentration=employer_concentration,
+    )
+    scorecard = build_scorecard(
+        jobs,
+        sources=sources,
+        health_by_id=health_by_id,
+        crawl_runs=database.list_crawl_runs(limit=10000),
+        field_completeness=field_completeness,
+        deadline_quality=deadline_quality,
+        location_quality=location_quality,
+        quality_gate=quality_gate,
+        province_coverage=province_coverage,
+    )
+    source_lifecycle = lifecycle_report(
+        sources,
+        health_by_id=health_by_id,
+        latest_runs_by_id=latest_runs_by_id,
+    )
+    expansion_targets = build_expansion_target_report(
+        domestic_jobs,
+        plan=load_effective_job_target_plan(),
+        registered_source_ids=set(source_by_id),
+    )
+    source_diversity = build_source_diversity_plan(
+        domestic_jobs,
+        sources=sources,
+        target_plan=load_effective_job_target_plan(),
+    )
+    all_public_expansion_targets = build_expansion_target_report(
+        jobs,
+        plan=load_effective_job_target_plan(),
+        registered_source_ids=set(source_by_id),
+        include_non_domestic=True,
+    )
+    all_public_source_diversity = build_source_diversity_plan(
+        jobs,
+        sources=sources,
+        target_plan=load_effective_job_target_plan(),
+    )
+    dual_axis = build_dual_axis_readiness(
+        jobs,
+        reliability_scorecard=scorecard,
+        domestic_expansion_targets=expansion_targets,
+        quality_gate=quality_gate,
+    )
+    source_funnel = build_source_funnel(
+        sources=sources,
+        jobs=jobs,
+        crawl_runs=database.list_crawl_runs(limit=10_000),
+        health_by_id=health_by_id,
+        source_tasks=database.list_source_tasks(),
+        artifact_status_counts=database.list_source_artifact_status_counts(),
+        target_plan=load_effective_job_target_plan(),
+    )
 
     return {
         "generated_at": utc_now(),
         "scope": "公开学生端已发布官方岗位，不含内部候选线索",
         "open_jobs": total_jobs,
+        "domestic_open_jobs": len(domestic_jobs),
         "source_health": {
             "registered_sources": len(sources),
             "enabled_sources": sum(1 for source in sources if source["enabled"]),
@@ -291,15 +390,7 @@ def build_coverage_report(
         "field_completeness": field_completeness,
         "location_quality": location_quality,
         "deadline_quality": deadline_quality,
-        "quality_gate": _quality_gate(
-            field_completeness=field_completeness,
-            deadline_quality=deadline_quality,
-            location_quality=location_quality,
-            simulation=simulation,
-            province_coverage=province_coverage,
-            source_concentration=source_concentration,
-            category_concentration=category_concentration,
-        ),
+        "quality_gate": quality_gate,
         "job_distribution": {
             "by_province": dict(sorted(jobs_by_province.items())),
             "by_country_or_region": dict(
@@ -311,6 +402,7 @@ def build_coverage_report(
             "by_source": dict(jobs_by_source.most_common()),
             "source_concentration": source_concentration,
             "category_concentration": category_concentration,
+            "employer_concentration": employer_concentration,
             "category_source_concentration": {
                 category: _category_source_metric(
                     category,
@@ -322,6 +414,25 @@ def build_coverage_report(
             },
         },
         "profile_match_quality": profile_match_quality,
+        "scorecard": scorecard,
+        "dual_axis": dual_axis,
+        "expansion_targets": expansion_targets,
+        "source_diversity": source_diversity,
+        "all_public_expansion_targets": all_public_expansion_targets,
+        "all_public_source_diversity": all_public_source_diversity,
+        # The detailed source rows contain operational task state and are
+        # deliberately restricted to the administrator endpoint/CLI.  Public
+        # users receive only the aggregate bottleneck signals.
+        "source_funnel": {
+            "summary": source_funnel["summary"],
+            "stage_definitions": source_funnel["stage_definitions"],
+            "scope_note": source_funnel["scope_note"],
+        },
+        "source_lifecycle": {
+            "states": source_lifecycle["states"],
+            "registered": source_lifecycle["registered"],
+            "state_definitions": source_lifecycle["state_definitions"],
+        },
         "trend_since_last_snapshot": _coverage_snapshot_trend(
             open_jobs=total_jobs,
             profile_summary=profile_match_quality["cohort_summary"],
@@ -635,14 +746,36 @@ def _completion(total: int, jobs: list[dict[str, Any]], field: str) -> dict[str,
 
 def _concentration(counts: Counter[str], total: int) -> dict[str, Any]:
     if not total or not counts:
-        return {"top_key": None, "top_count": 0, "top_share": 0.0, "risk": "no_data"}
+        return {
+            "top_key": None,
+            "top_count": 0,
+            "top_share": 0.0,
+            "top_5_count": 0,
+            "top_5_share": 0.0,
+            "risk": "no_data",
+        }
     key, count = counts.most_common(1)[0]
     share = count / total
+    top_5_count = sum(item_count for _, item_count in counts.most_common(5))
+    top_5_share = top_5_count / total
+    # A corpus owned by five portals is still fragile even where no single
+    # portal passes the per-source threshold. Keep this status aligned with
+    # the 1,000-job programme's top-five ceiling, rather than presenting a
+    # reassuring label based only on the largest source.
+    risk = (
+        "high"
+        if share >= 0.5 or top_5_share >= 0.75
+        else "watch"
+        if share >= 0.3 or top_5_share >= 0.6
+        else "balanced"
+    )
     return {
         "top_key": key,
         "top_count": count,
         "top_share": round(share, 4),
-        "risk": "high" if share >= 0.5 else "watch" if share >= 0.3 else "balanced",
+        "top_5_count": top_5_count,
+        "top_5_share": round(top_5_share, 4),
+        "risk": risk,
     }
 
 
@@ -846,6 +979,7 @@ def _quality_gate(
     province_coverage: list[dict[str, Any]],
     source_concentration: dict[str, Any],
     category_concentration: dict[str, Any],
+    employer_concentration: dict[str, Any],
 ) -> dict[str, Any]:
     checks = {
         "official_evidence_url_complete": field_completeness["official_evidence_url"]["rate"] == 1.0,
@@ -855,6 +989,10 @@ def _quality_gate(
         "explicit_profile_match_exists": simulation["summary"].get("explicit_job_profile_matches", 0) > 0,
         "source_concentration_below_50_percent": source_concentration.get("top_share", 0) < 0.5,
         "category_concentration_below_70_percent": category_concentration.get("top_share", 0) < 0.7,
+        # A source can represent many subsidiaries, so source-level diversity
+        # alone is insufficient.  Keep the top employer below half of the
+        # public corpus before calling the distribution balanced.
+        "employer_concentration_below_50_percent": employer_concentration.get("top_share", 0) < 0.5,
         "no_province_marked_verified_during_source_failure": all(
             not item.get("no_match_is_verified") or not item.get("health_statuses", {}).get("source_error")
             for item in province_coverage

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import json
 import signal
 import time
 from dataclasses import replace
@@ -34,6 +35,7 @@ from job_hub.government_revalidation import (
     requires_manual_government_evidence_confirmation,
     revalidate_government_sources,
 )
+from job_hub.link_health import build_link_health_report
 from job_hub.pipeline import JobPipeline
 from job_hub.reports import publish_daily_report
 
@@ -55,6 +57,9 @@ class DailyWorker:
         self.timezone = ZoneInfo(settings.timezone)
         self.publish_time = self._parse_publish_time(settings.daily_publish_time)
         self.last_sync_monotonic = 0.0
+        self.link_health_enabled = settings.link_health_enabled
+        self.link_health_limit = settings.link_health_sample_size
+        self._last_link_health_date: str | None = None
 
     def run_forever(self) -> None:
         self.pipeline.bootstrap_sources()
@@ -142,6 +147,7 @@ class DailyWorker:
                 snapshot_date,
                 build_coverage_report(self.database, snapshot_date=snapshot_date),
             )
+            link_health = self._run_link_health_if_due(snapshot_date)
             self.last_sync_monotonic = time.monotonic()
             LOGGER.info(
                 "Source synchronization complete: %s; coverage snapshot recorded for %s.",
@@ -155,6 +161,7 @@ class DailyWorker:
                     "government_manifest": manifest_log,
                     "attachments": attachment_summary,
                     "government_quality": government_summary,
+                    "link_health": link_health,
                 },
                 snapshot_date,
             )
@@ -173,12 +180,63 @@ class DailyWorker:
                     "部分官方来源采集失败",
                     f"本次同步有 {summary.failed} 个来源失败。\n{summary.as_dict()}",
                 )
+            if link_health.get("status") == "failed":
+                self._send_failure_safely(
+                    "岗位官方链接健康检查失败",
+                    str(link_health.get("error") or link_health),
+                )
             self._heartbeat("running", "source synchronization completed")
         except Exception as error:
             self.last_sync_monotonic = time.monotonic()
             LOGGER.exception("Source synchronization failed")
             self._heartbeat("degraded", "source synchronization failed")
             self._send_failure_safely("官方来源同步失败", str(error))
+
+    def _run_link_health_if_due(self, report_date: str) -> dict[str, object]:
+        """Persist one bounded, diverse official-link audit per local day.
+
+        This is deliberately diagnostic: a 403/412, robots denial, dynamic
+        shell, or 5xx is recorded in the JSON report but never changes a job's
+        publication state. The source sync remains the authoritative mutation
+        path for vacancies.
+        """
+
+        if not self.link_health_enabled:
+            return {"status": "disabled"}
+        if self._last_link_health_date == report_date:
+            return {"status": "already_recorded", "report_date": report_date}
+        try:
+            report = build_link_health_report(
+                self.database,
+                self.settings,
+                limit=self.link_health_limit,
+            )
+            report = {
+                "observed_on": report_date,
+                "generated_at": datetime.now(self.timezone).isoformat(),
+                "sample_size": self.link_health_limit,
+                **report,
+            }
+            output_dir = self.settings.data_dir / "link-health"
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_path = output_dir / f"{report_date}.json"
+            temporary = output_path.with_suffix(".json.tmp")
+            temporary.write_text(
+                json.dumps(report, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            temporary.replace(output_path)
+            self._last_link_health_date = report_date
+            return {
+                "status": "ok",
+                "report_date": report_date,
+                "path": str(output_path),
+                "checked": int(report.get("checked") or 0),
+                "status_counts": report.get("status_counts", {}),
+            }
+        except Exception as error:  # noqa: BLE001 - diagnostics cannot block sync
+            LOGGER.exception("Official link health audit failed")
+            return {"status": "failed", "report_date": report_date, "error": str(error)}
 
     def _discover_configured_government_artifacts(self) -> dict[str, object]:
         """Discover new official position-table files before the parse queue runs."""
@@ -261,6 +319,20 @@ class DailyWorker:
             }
         now = datetime.now(self.timezone)
         today = now.date().isoformat()
+        artifact_manifest = None
+        artifact_manifest_available = self.settings.government_artifact_manifest_path is None
+        if self.settings.government_artifact_manifest_path is not None:
+            try:
+                artifact_manifest = load_government_artifact_manifest(
+                    self.settings.government_artifact_manifest_path
+                )
+                artifact_manifest_available = True
+            except (OSError, ValueError, GovernmentArtifactContractError) as error:
+                # A broken lifecycle manifest must not be replaced by an old
+                # static position ledger. Direct official-detail rows retain
+                # their ordinary evidence gate; attachment-backed rows fail
+                # closed in ``current_publishable_position_records``.
+                LOGGER.error("Government artifact manifest unavailable for position sync: %s", error)
         counts = {
             "created": 0,
             "updated": 0,
@@ -286,6 +358,8 @@ class DailyWorker:
                 for source in self.database.list_sources()
                 if requires_manual_government_evidence_confirmation(source)
             },
+            artifact_manifest=artifact_manifest,
+            artifact_manifest_available=artifact_manifest_available,
             now=now,
         )
         current_ids_by_source: dict[str, set[str]] = {}
@@ -446,6 +520,7 @@ class DailyWorker:
             self.database,
             self.attachment_processor,
             limit=self.settings.attachment_process_batch_limit,
+            include_stale_extracted=True,
         )
         return {
             key: int(summary.get(key, 0))
@@ -458,6 +533,7 @@ class DailyWorker:
                 "rows_extracted",
                 "candidates_created",
                 "candidates_rejected",
+                "reparsed",
             )
         }
 

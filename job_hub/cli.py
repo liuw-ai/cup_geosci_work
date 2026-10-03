@@ -15,6 +15,7 @@ from job_hub.browser_capture import (
     browser_capture_summary,
     load_browser_capture,
     run_browser_capture,
+    write_browser_capture_failure,
 )
 from job_hub.attachments import (
     AttachmentProcessingError,
@@ -47,6 +48,7 @@ from job_hub.cmgb_browser_capture import (
     run_cmgb_detail_retry,
 )
 from job_hub.cmgb_transition import transition_cmgb_browser_to_production
+from job_hub.iguopin_transition import transition_iguopin_source_to_production
 from job_hub.db import Database
 from job_hub.government_positions import (
     government_position_quality_report,
@@ -74,6 +76,8 @@ from job_hub.discovery import (
     load_discovery_source_registry,
 )
 from job_hub.domain_probe import probe_public_domain
+from job_hub.expansion_targets import build_expansion_target_report, load_effective_job_target_plan
+from job_hub.source_funnel import build_source_funnel
 from job_hub.entry_probes import (
     PublicEntryProbeRunner,
     load_national_entry_targets,
@@ -81,13 +85,18 @@ from job_hub.entry_probes import (
 )
 from job_hub.emailer import Mailer
 from job_hub.locations import PROVINCES
+from job_hub.link_health import build_link_health_report
 from job_hub.pipeline import JobPipeline
 from job_hub.organizations import (
     load_organization_registry,
     organization_matrix_rows,
     organization_matrix_summary,
 )
-from job_hub.operations import build_production_readiness, worker_health
+from job_hub.operations import (
+    build_production_readiness,
+    release_configuration,
+    worker_health,
+)
 from job_hub.national_sources import (
     load_national_source_matrix,
     national_source_matrix_rows,
@@ -110,6 +119,7 @@ from job_hub.sinopec_scan import (
     build_sinopec_scan_plan,
     validate_sinopec_scan_result,
 )
+from job_hub.snapshot_activation import activate_sinopec_snapshot
 from job_hub.source_targets import REQUIRED_ROLES
 from job_hub.provincial_matrix_audit import build_provincial_matrix_audit
 from job_hub.provincial_probe import run_provincial_entry_probe
@@ -143,6 +153,7 @@ def import_verified_jobs(
         payload = json.load(handle)
     items = payload if isinstance(payload, list) else [payload]
     results = {"created": 0, "updated": 0, "unchanged": 0}
+    imported_sources: dict[str, dict[str, Any]] = {}
     for item in items:
         if not isinstance(item, dict):
             raise ValueError("Each imported job must be a JSON object")
@@ -161,6 +172,7 @@ def import_verified_jobs(
         source = database.get_source(source_id)
         if source is None:
             raise ValueError(f"source_id is not registered in data/sources.json: {source_id}")
+        imported_sources[source_id] = source
         posting = RawPosting(
             title=str(item["title"]).strip(),
             employer=str(item["employer"]).strip(),
@@ -183,6 +195,18 @@ def import_verified_jobs(
         )
         _, outcome = database.save_job(pipeline.normalize_posting(posting, source))
         results[outcome] += 1
+    # Manual imports are still source captures. Persist their declared capture
+    # timestamp only after every row has passed validation and been saved, so a
+    # partially imported file can never make old rows look fresh to students.
+    for source_id, source in imported_sources.items():
+        config = source.get("config") if isinstance(source.get("config"), dict) else {}
+        captured_at = str(config.get("snapshot_captured_at") or "").strip()
+        if config.get("max_age_hours") is not None and captured_at:
+            database.record_source_capture_freshness(
+                source_id,
+                captured_at=captured_at,
+                evidence_kind="manual_import_snapshot",
+            )
     return results
 
 
@@ -250,6 +274,15 @@ def main() -> None:
         "--record",
         action="store_true",
         help="将当前质量指标写入当天可更新的快照，用于次日趋势比较",
+    )
+    source_funnel_parser = subparsers.add_parser(
+        "source-funnel",
+        help="输出管理员来源漏斗：发现、证据、复核、匹配、发布和访问受限状态",
+    )
+    source_funnel_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整管理员账本 JSON 写入指定文件",
     )
     organization_matrix_parser = subparsers.add_parser(
         "organization-matrix",
@@ -451,6 +484,14 @@ def main() -> None:
         action="store_true",
         help="确认该来源的官方公告、岗位表和报名状态均已人工核对且未变化",
     )
+    government_confirmation_parser.add_argument(
+        "--confirm-current-vacancies",
+        action="store_true",
+        help=(
+            "仅用于招满即止岗位：确认已从官方当前状态逐项核对仍有可报名名额；"
+            "公告仍存在本身不足以使用此项"
+        ),
+    )
     government_artifact_parser = subparsers.add_parser(
         "register-government-artifacts",
         help="将省级官方职位表附件登记到私有受控下载队列",
@@ -643,6 +684,29 @@ def main() -> None:
         type=Path,
         help="可选：导出 132 个单位的浏览器详情扫描计划 JSON",
     )
+    snapshot_activation_parser = subparsers.add_parser(
+        "activate-sinopec-snapshot",
+        help="激活人工核验的中石化官方快照，不启用动态采集",
+    )
+    snapshot_activation_parser.add_argument(
+        "--source-id",
+        default="sinopec-2027-geoscience-snapshot",
+        help="人工快照来源 ID",
+    )
+    snapshot_activation_parser.add_argument(
+        "--path",
+        type=Path,
+        help="可选：覆盖来源配置中的版本化快照路径",
+    )
+    expansion_target_parser = subparsers.add_parser(
+        "expansion-target-audit",
+        help="审计当前有效岗位到 1000 条目标的分段差距",
+    )
+    expansion_target_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将目标差距报告写入 JSON 文件",
+    )
     browser_capture_parser = subparsers.add_parser(
         "browser-capture-check",
         help="校验服务器浏览器生成的动态官方岗位捕获清单",
@@ -677,6 +741,35 @@ def main() -> None:
     )
     source_health_parser.add_argument(
         "--output", type=Path, help="将含传输、robots 和入口检查的诊断 JSON 写入文件"
+    )
+    link_health_parser = subparsers.add_parser(
+        "link-health",
+        help="只读检查学生端官方岗位详情链接，不修改岗位状态",
+    )
+    link_health_parser.add_argument(
+        "--source-id",
+        help="可选：只检查一个已注册来源",
+    )
+    link_health_parser.add_argument(
+        "--job-id",
+        type=int,
+        help="可选：只检查一个岗位 ID",
+    )
+    link_health_parser.add_argument(
+        "--limit",
+        type=int,
+        default=50,
+        help="最多检查岗位数（默认 50，最大 500）",
+    )
+    link_health_parser.add_argument(
+        "--include-non-public",
+        action="store_true",
+        help="同时检查待复核/历史岗位；默认只检查学生端公开岗位",
+    )
+    link_health_parser.add_argument(
+        "--output",
+        type=Path,
+        help="将诊断 JSON 写入文件",
     )
     source_tasks_parser = subparsers.add_parser(
         "source-tasks",
@@ -717,6 +810,26 @@ def main() -> None:
         "--confirm",
         action="store_true",
         help="预检通过后执行原子生产切换；未提供时只读检查",
+    )
+    iguopin_transition_parser = subparsers.add_parser(
+        "iguopin-production-transition",
+        help="验证两次完整国聘捕获后原子启用一个雇主国聘来源",
+    )
+    iguopin_transition_parser.add_argument(
+        "--source-id",
+        required=True,
+        help="已注册的 iguopin_browser_rows 来源 ID",
+    )
+    iguopin_transition_parser.add_argument(
+        "--previous-capture",
+        type=Path,
+        required=True,
+        help="上一次完整捕获 JSON；相对路径相对于 APP_DATA_DIR",
+    )
+    iguopin_transition_parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="预检通过后执行原子生产启用；未提供时只读检查",
     )
     publish_parser = subparsers.add_parser("publish", help="立即生成一份日报")
     publish_parser.add_argument(
@@ -838,6 +951,15 @@ def main() -> None:
         action="store_true",
         help="要求正式域名 DNS 与 HTTPS 同时通过，适用于全院公开发布前核验",
     )
+    release_parser = subparsers.add_parser(
+        "release-check",
+        help="检查发布身份和镜像引用，拒绝未固定的生产版本",
+    )
+    release_parser.add_argument(
+        "--allow-development",
+        action="store_true",
+        help="允许 dev/unknown/latest，仅用于本地开发检查",
+    )
     subparsers.add_parser("worker", help="启动持续同步和 20:00 发布任务")
     artifact_process_parser = subparsers.add_parser(
         "process-artifact",
@@ -923,6 +1045,16 @@ def main() -> None:
         if args.max_age < 1:
             parser.error("--max-age 必须大于 0")
         result = worker_health(database, args.max_age)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if not result["ok"]:
+            raise SystemExit(1)
+        return
+    if args.command == "release-check":
+        settings = Settings.from_env()
+        result = release_configuration(
+            settings,
+            require_pinned_images=not args.allow_development,
+        )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         if not result["ok"]:
             raise SystemExit(1)
@@ -1290,6 +1422,7 @@ def main() -> None:
                 allowed_hosts=list(config["allowed_hosts"]),
                 user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
                 max_age_hours=args.max_age_hours,
+                require_capture_manifest=bool(config.get("require_capture_manifest", False)),
             )
         except Exception as error:
             print(
@@ -1492,6 +1625,48 @@ def main() -> None:
         }
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
+    if args.command == "activate-sinopec-snapshot":
+        try:
+            result = activate_sinopec_snapshot(
+                settings,
+                database,
+                source_id=args.source_id,
+                snapshot_path=args.path,
+            )
+        except (OSError, ValueError, BrowserCaptureError) as error:
+            print(
+                json.dumps(
+                    {"error": str(error), "source_id": args.source_id},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "expansion-target-audit":
+        jobs, _ = database.list_jobs(page_size=None)
+        try:
+            result = build_expansion_target_report(
+                jobs,
+                plan=load_effective_job_target_plan(),
+                registered_source_ids={
+                    str(source["id"])
+                    for source in database.list_sources()
+                    if str(source.get("id") or "").strip()
+                },
+            )
+        except (OSError, ValueError) as error:
+            print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command == "browser-capture-check":
         source = database.get_source(args.source_id)
         if source is None:
@@ -1549,6 +1724,23 @@ def main() -> None:
                 user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
             )
         except BrowserCaptureError as error:
+            try:
+                write_browser_capture_failure(
+                    output=output,
+                    platform_url=browser_url,
+                    status=(
+                        "access_limited"
+                        if "HTTP 4" in str(error) or "robots" in str(error).lower()
+                        else "parse_failed"
+                    ),
+                    reason=str(error),
+                    source_id=str(config.get("source_id") or args.source_id),
+                    adapter_version=str(config.get("adapter_version") or "browser-capture-v1"),
+                )
+            except Exception:
+                # The original capture error is the actionable CLI result;
+                # failure-sidecar persistence is best effort and must not hide it.
+                pass
             print(json.dumps({"error": str(error), "source_id": args.source_id}, ensure_ascii=False, indent=2))
             raise SystemExit(1)
         print(
@@ -1613,6 +1805,17 @@ def main() -> None:
     if args.command == "government-position-audit":
         try:
             registry = load_position_registry(args.path)
+            artifact_manifest = None
+            artifact_manifest_available = settings.government_artifact_manifest_path is None
+            manifest_error = None
+            if settings.government_artifact_manifest_path is not None:
+                try:
+                    artifact_manifest = load_government_artifact_manifest(
+                        settings.government_artifact_manifest_path
+                    )
+                    artifact_manifest_available = True
+                except (OSError, ValueError) as error:
+                    manifest_error = str(error)
             # An operator-facing quality report must make the same freshness
             # decision as the daily worker.  Leaving this as ``None`` made a
             # stale static ledger look current in the CLI while production had
@@ -1636,7 +1839,11 @@ def main() -> None:
                     for source in database.list_sources()
                     if requires_manual_government_evidence_confirmation(source)
                 },
+                artifact_manifest=artifact_manifest,
+                artifact_manifest_available=artifact_manifest_available,
             )
+            if manifest_error:
+                result["attachment_manifest_gate"]["error"] = manifest_error
         except (OSError, ValueError) as error:
             print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
             raise SystemExit(1)
@@ -1651,10 +1858,6 @@ def main() -> None:
         source = database.get_source(args.source_id)
         if source is None:
             parser.error(f"source_id is not registered: {args.source_id}")
-        if not requires_manual_government_evidence_confirmation(source):
-            parser.error(
-                "source is not configured for manual-only government evidence confirmation"
-            )
         note = str(args.note or "").strip()
         if not note:
             parser.error("--note must describe the completed manual official-evidence check")
@@ -1674,6 +1877,19 @@ def main() -> None:
             parser.error(
                 "manual confirmation requires at least one verified_open official position record"
             )
+        requires_current_vacancy_confirmation = any(
+            str(item.get("deadline_policy") or "") == "open_until_filled"
+            for item in records
+        )
+        if not requires_manual_government_evidence_confirmation(source) and not requires_current_vacancy_confirmation:
+            parser.error(
+                "source is neither manual-only nor an open-until-filled position source"
+            )
+        if requires_current_vacancy_confirmation and not args.confirm_current_vacancies:
+            parser.error(
+                "open-until-filled positions require --confirm-current-vacancies after "
+                "checking the official current vacancy status; an unchanged notice is insufficient"
+            )
         checked_at = (
             datetime.now(ZoneInfo(settings.timezone))
             .astimezone(timezone.utc)
@@ -1686,6 +1902,12 @@ def main() -> None:
             status="verified",
             checked_at=checked_at,
             detail=f"Administrator manual confirmation: {note}",
+            availability_confirmed_at=(
+                checked_at if requires_current_vacancy_confirmation else None
+            ),
+            availability_confirmation_detail=(
+                note if requires_current_vacancy_confirmation else ""
+            ),
         )
         print(
             json.dumps(
@@ -1694,7 +1916,10 @@ def main() -> None:
                     "status": verification["status"],
                     "checked_at": verification["checked_at"],
                     "verified_open_records": len(records),
-                    "publication_policy": "仍受报名窗口、截止日期和证据新鲜度门禁约束。",
+                    "current_availability_confirmed": requires_current_vacancy_confirmation,
+                    "publication_policy": (
+                        "仍受报名窗口、截止日期、证据新鲜度和招满即止当前名额门禁约束。"
+                    ),
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -1829,6 +2054,27 @@ def main() -> None:
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
+    if args.command == "source-funnel":
+        jobs, _ = database.list_jobs(page_size=None)
+        result = build_source_funnel(
+            sources=database.list_sources(),
+            jobs=jobs,
+            crawl_runs=database.list_crawl_runs(limit=10_000),
+            health_by_id={
+                item["source_id"]: item for item in database.list_source_health()
+            },
+            source_tasks=database.list_source_tasks(),
+            artifact_status_counts=database.list_source_artifact_status_counts(),
+            target_plan=load_effective_job_target_plan(),
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command == "source-health":
         if args.source_id:
             requested = database.get_source(args.source_id)
@@ -1864,6 +2110,26 @@ def main() -> None:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(
                 json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return
+    if args.command == "link-health":
+        try:
+            payload = build_link_health_report(
+                database,
+                settings,
+                source_id=args.source_id,
+                job_id=args.job_id,
+                limit=args.limit,
+                include_non_public=bool(args.include_non_public),
+            )
+        except ValueError as error:
+            parser.error(str(error))
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(payload, ensure_ascii=False, indent=2),
+                encoding="utf-8",
             )
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return
@@ -2012,6 +2278,18 @@ def main() -> None:
         result = transition_cmgb_browser_to_production(
             database,
             pipeline,
+            activate=bool(args.confirm),
+        )
+        print(json.dumps(result.as_dict(), ensure_ascii=False, indent=2))
+        if result.status == "blocked":
+            raise SystemExit(1)
+        return
+    if args.command == "iguopin-production-transition":
+        result = transition_iguopin_source_to_production(
+            database,
+            pipeline,
+            source_id=args.source_id,
+            previous_capture_path=args.previous_capture,
             activate=bool(args.confirm),
         )
         print(json.dumps(result.as_dict(), ensure_ascii=False, indent=2))

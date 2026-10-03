@@ -16,7 +16,8 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     compose_overlay = (ROOT / "deploy" / "docker-compose.phase109-browser-overlay.yml").read_text(encoding="utf-8")
     compose = (ROOT / "docker-compose.browser.yml").read_text(encoding="utf-8")
 
-    assert "FROM cupb-geoscience-job-hub:latest" in dockerfile
+    assert "ARG RUNTIME_IMAGE=cupb-geoscience-job-hub:latest" in dockerfile
+    assert "FROM ${RUNTIME_IMAGE}" in dockerfile
     # Official browser workers must verify the public CA chain before a
     # robots/access result is classified. The slim base image has no
     # guaranteed system trust store unless this package is explicit.
@@ -24,12 +25,21 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     assert "requirements-browser.txt" in dockerfile
     assert "ARG BROWSER_BASE_IMAGE" in overlay
     assert "COPY --chown=jobhub:jobhub job_hub /app/job_hub" in overlay
+    assert "COPY --chown=jobhub:jobhub job_hub/browser_capture.py" in dockerfile
+    assert "COPY --chown=jobhub:jobhub job_hub/official_browser_worker.py" in dockerfile
     assert compose_overlay.count("phase109-overlay") == 4
     assert "pip install --no-cache-dir" in dockerfile
-    assert compose.count("dockerfile: Dockerfile.browser") == 4
+    # The shared build anchor keeps the Dockerfile declaration in one place.
+    assert compose.count("dockerfile: Dockerfile.browser") == 1
     assert "cnooc-browser:" in compose
     assert "BROWSER_WORKER_KIND: cnooc" in compose
-    assert compose.count("image: cupb-geoscience-job-hub-browser:latest") == 4
+    assert "pipechina-browser:" in compose
+    assert "BROWSER_WORKER_KIND: official" in compose
+    assert "chinalco-browser:" in compose
+    assert "BROWSER_WORKER_KIND: iguopin" in compose
+    assert "IGUOPIN_BROWSER_SOURCE_ID: chinalco-iguopin-browser" in compose
+    assert compose.count("build: *browser-build") == 6
+    assert compose.count("JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest") == 6
     # chromedp/headless-shell's entrypoint starts Chrome on 9223 and exposes
     # its internal socat proxy on 9222. Passing another 9222 flag here makes
     # Chrome and socat race for the same port and breaks CDP readiness.
@@ -37,6 +47,8 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     assert "--remote-debugging-port=9222" not in compose
     assert compose.count("CDP_URL: http://headless-shell:9222") == 1
     assert compose.count("CDP_URL: http://cmgb-headless-shell:9222") == 1
+    assert compose.count("CDP_URL: http://pipechina-headless-shell:9222") == 1
+    assert compose.count("CDP_URL: http://chinalco-headless-shell:9222") == 1
     assert "ports:" not in compose
     # The browser service must not fall back to installing packages in the
     # ordinary application container or depend on a writable wheel cache.

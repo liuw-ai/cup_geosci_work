@@ -66,10 +66,14 @@ def main() -> None:
     worker_kind = os.getenv("BROWSER_WORKER_KIND", "cnpc").strip().lower()
     if worker_kind == "cmgb":
         from job_hub.cmgb_browser_worker import main as worker_main
+    elif worker_kind == "iguopin":
+        from job_hub.iguopin_browser_worker import main as worker_main
     elif worker_kind == "cnooc":
         from job_hub.cnooc_browser_worker import main as worker_main
     elif worker_kind == "sinopec":
         from job_hub.sinopec_browser_worker import main as worker_main
+    elif worker_kind == "official":
+        from job_hub.official_browser_worker import main as worker_main
     else:
         from job_hub.cnpc_browser_worker import main as worker_main
 

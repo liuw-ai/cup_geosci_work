@@ -11,6 +11,7 @@ from job_hub.browser_capture import BrowserCaptureError
 from job_hub.cmgb_browser_capture import (
     CmgbBrowserCaptureError,
     _close_context_pages,
+    _major_from_description,
     build_cmgb_detail_retry_payload,
     extract_cmgb_detail,
     load_cmgb_detail_retry_capture,
@@ -23,6 +24,16 @@ from job_hub.profiles import evaluate_student_publication
 from job_hub.sources import OfficialSourceCollector
 
 from conftest import make_settings
+
+
+def test_major_parser_accepts_explicit_unlabelled_geoscience_qualification_only() -> None:
+    parsed = _major_from_description(
+        "从事野外试井、瓦斯压力测试。地质类相关专业，本科及以上学历，工程师以上职称。"
+    )
+    assert "地质类相关专业" in parsed
+    assert not _major_from_description(
+        "负责开展生态修复、环境地质相关项目的市场营销、项目统筹和技术管理工作。"
+    )
 
 
 HOSTS = ["cmgb.iguopin.com", "www.iguopin.com", "www.cmgb.com.cn"]
