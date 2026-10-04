@@ -53,8 +53,15 @@ def test_activation_keeps_manual_source_public_without_enabling_live_sync(
         "out_of_scope": 201,
     }
     assert result["visible_rows"] == 64
+    assert result["capture_freshness_recorded"] is True
     assert result["live_replacement_source_id"] is None
     assert database.get_source("sinopec-2027-geoscience-snapshot")["enabled"] is False
+    freshness = database.get_source_capture_freshness(
+        "sinopec-2027-geoscience-snapshot"
+    )
+    assert freshness is not None
+    assert freshness["captured_at"] == "2026-09-29T07:08:24Z"
+    assert freshness["evidence_kind"] == "manual_verified_snapshot"
 
 
 def test_activation_does_not_count_pending_or_out_of_scope_rows(tmp_path: Path) -> None:

@@ -85,6 +85,20 @@ def activate_sinopec_snapshot(
         outcomes[outcome] += 1
         publication[str(normalized.get("publication_status") or "unknown")] += 1
 
+    # Public reads enforce ``max_age_hours`` from the source registry through
+    # ``source_capture_freshness``.  Manual snapshot activation is a complete
+    # capture just like a browser worker run, so it must register the evidence
+    # timestamp or every otherwise eligible row will be hidden forever.  The
+    # timestamp comes from the versioned capture metadata, never from the
+    # activation time; re-running an old snapshot must not renew its freshness.
+    captured_at = str(config.get("snapshot_captured_at") or "").strip()
+    if captured_at:
+        database.record_source_capture_freshness(
+            source_id,
+            captured_at=captured_at,
+            evidence_kind="manual_verified_snapshot",
+        )
+
     public_rows, public_count = database.list_jobs(page_size=None)
     visible_rows = [row for row in public_rows if row.get("source_id") == source_id]
     return {
@@ -92,6 +106,7 @@ def activate_sinopec_snapshot(
         "snapshot_path": configured_path,
         "captured_at": config.get("snapshot_captured_at"),
         "captured_rows": len(postings),
+        "capture_freshness_recorded": bool(captured_at),
         "publication_status": dict(publication),
         "visible_rows": len(visible_rows),
         "public_total": public_count,
