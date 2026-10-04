@@ -152,3 +152,42 @@ def test_transition_activates_after_two_complete_captures(tmp_path, monkeypatch)
     jobs, total = database.list_jobs(student_visible=False)
     assert total == 1
     assert jobs[0]["source_id"] == "chinalco-iguopin-browser"
+
+
+def test_transition_accepts_general_board_source_after_same_capture_gate(
+    tmp_path, monkeypatch
+) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    source = _source(enabled=False)
+    source.update(
+        {
+            "id": "iguopin-general-geoscience-browser",
+            "source_type": "iguopin_general_browser_rows",
+        }
+    )
+    source["config"] = {
+        **source["config"],
+        "capture_path": "captures/general-current.json",
+        "external_id_prefix": "iguopin-general",
+        "search_keywords": ["地质"],
+        "card_identity_mode": "rendered_react_job_id",
+        "max_pages_per_keyword": 20,
+    }
+    database.upsert_source(source)
+    monkeypatch.setattr(
+        "job_hub.iguopin_transition.load_iguopin_browser_capture",
+        lambda *_args, **_kwargs: _payload("2026-10-03T15:00:00Z"),
+    )
+
+    result = transition_iguopin_source_to_production(
+        database,
+        JobPipeline(settings, database, _Collector()),
+        source_id="iguopin-general-geoscience-browser",
+        previous_capture_path=Path("captures/general-previous.json"),
+        activate=True,
+    )
+
+    assert result.status == "activated"
+    assert database.get_source("iguopin-general-geoscience-browser")["enabled"] is True

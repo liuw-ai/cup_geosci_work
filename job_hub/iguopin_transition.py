@@ -86,8 +86,14 @@ def transition_iguopin_source_to_production(
     source = database.get_source(source_id)
     if source is None:
         raise ValueError(f"国聘来源未注册: {source_id}")
-    if source.get("source_type") != "iguopin_browser_rows":
-        raise ValueError("国聘生产切换只接受 iguopin_browser_rows 来源")
+    if source.get("source_type") not in {
+        "iguopin_browser_rows",
+        "iguopin_general_browser_rows",
+    }:
+        raise ValueError(
+            "国聘生产切换只接受 iguopin_browser_rows 或 "
+            "iguopin_general_browser_rows 来源"
+        )
     config = dict(source.get("config") or {})
     current_path = Path(pipeline.settings.data_dir) / str(config.get("capture_path") or "")
     previous_path = Path(previous_capture_path)

@@ -31,6 +31,9 @@ def attach_capture_manifest(
     failures = payload.get("failure_records")
     if not isinstance(failures, list):
         failures = scan.get("failure_records") if isinstance(scan.get("failure_records"), list) else []
+    rejected = payload.get("rejected_records")
+    if not isinstance(rejected, list):
+        rejected = scan.get("rejected_records") if isinstance(scan.get("rejected_records"), list) else []
     manifest = {
         "capture_id": capture_id,
         "source_id": str(source_id),
@@ -45,6 +48,7 @@ def attach_capture_manifest(
         "detail_succeeded": _int_or_none(scan.get("detail_succeeded")),
         "detail_failed": _int_or_none(scan.get("detail_failed")),
         "failure_count": len(failures),
+        "rejected_count": len(rejected),
         "failure_locators": [
             str(item.get("detail_url") or item.get("unit") or item.get("page") or "")
             for item in failures

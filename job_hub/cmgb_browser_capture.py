@@ -108,20 +108,43 @@ def _scan_metrics(payload: dict[str, Any], *, require_complete: bool) -> dict[st
         "detail_succeeded",
         "detail_failed",
     )
-    normalized = {field: _int(scan.get(field), f"scan.{field}") for field in required if field != "pagination_complete"}
+    normalized = {
+        field: _int(scan.get(field), f"scan.{field}")
+        for field in required
+        if field != "pagination_complete"
+    }
+    # A browser can successfully open an official detail whose publisher did
+    # not provide enough row-level evidence for publication (for example, no
+    # location or headcount).  Those rows are inspected and rejected, not
+    # technical fetch failures.  Older manifests omit this optional counter.
+    normalized["rejected_rows"] = _int(scan.get("rejected_rows", 0), "scan.rejected_rows")
+    rejected_records = scan.get("rejected_records", [])
+    if not isinstance(rejected_records, list):
+        raise CmgbBrowserCaptureError("scan.rejected_records must be a list")
+    if len(rejected_records) != normalized["rejected_rows"]:
+        raise CmgbBrowserCaptureError(
+            "scan.rejected_rows does not match scan.rejected_records"
+        )
     if "pagination_complete" not in scan:
         raise CmgbBrowserCaptureError("scan.pagination_complete is required")
     normalized["pagination_complete"] = bool(scan["pagination_complete"])
     if normalized["rows_exported"] > normalized["rows_discovered"]:
         raise CmgbBrowserCaptureError("scan.rows_exported exceeds scan.rows_discovered")
-    if normalized["detail_succeeded"] + normalized["detail_failed"] > normalized["detail_discovered"]:
+    if (
+        normalized["detail_succeeded"]
+        + normalized["detail_failed"]
+        + normalized["rejected_rows"]
+        > normalized["detail_discovered"]
+    ):
         raise CmgbBrowserCaptureError("detail outcomes exceed detail_discovered")
     complete = (
         normalized["pagination_complete"]
         and normalized["failed_rows"] == 0
         and normalized["detail_failed"] == 0
-        and normalized["detail_succeeded"] == normalized["detail_discovered"]
-        and normalized["rows_exported"] == normalized["rows_discovered"]
+        and normalized["detail_succeeded"] + normalized["rejected_rows"]
+        == normalized["detail_discovered"]
+        and normalized["rows_exported"] + normalized["rejected_rows"]
+        == normalized["rows_discovered"]
     )
     if require_complete and not complete:
         raise CmgbBrowserCaptureError("CMGB capture is incomplete; publication is blocked")

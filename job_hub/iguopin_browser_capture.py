@@ -642,8 +642,11 @@ def run_iguopin_general_browser_capture(
     resulting page is visited until its visible final page, and every unique
     card is reopened on its official detail route.  A direct detail is trusted
     only after its title and employer agree with the card that produced it.
-    This makes broad discovery usable without letting generic search results
-    create anonymous, incomplete or duplicate student vacancies.
+    A readable official detail that lacks one of the required publication
+    fields is recorded as a rejected row; it is never emitted as a posting,
+    but it also does not make an otherwise complete scan look like a transport
+    failure.  This keeps broad discovery auditable without weakening the
+    student-publication gate.
     """
 
     hosts = {
@@ -684,7 +687,9 @@ def run_iguopin_general_browser_capture(
     pages_scanned = 0
     cards_seen = 0
     failed_rows = 0
+    rejected_rows = 0
     failure_records: list[dict[str, Any]] = []
+    rejected_records: list[dict[str, Any]] = []
     keyword_scans: list[dict[str, Any]] = []
     all_keywords_complete = True
     browser = None
@@ -780,7 +785,36 @@ def run_iguopin_general_browser_capture(
                                 if row is not None:
                                     rows.append(row)
                             except Exception as error:
-                                if failure_key not in seen_detail_ids and failure_key not in seen_failures:
+                                # A detail that opened normally but lacks one
+                                # of the required row fields is a valid scan
+                                # outcome, not a transport/parser outage. Keep
+                                # it out of rows while preserving an auditable
+                                # rejection record. Other exceptions remain
+                                # hard failures and keep the manifest partial.
+                                message = str(error)
+                                if (
+                                    message.startswith(
+                                        "CMGB detail is missing required fields:"
+                                    )
+                                    and detail_id
+                                ):
+                                    rejected_rows += 1
+                                    rejected_records.append(
+                                        {
+                                            "keyword": keyword,
+                                            "page": keyword_pages,
+                                            "row": index + 1,
+                                            "card_title": card_title,
+                                            "card_employer": card_employer,
+                                            "detail_id": detail_id,
+                                            "detail_url": detail_url,
+                                            "reason": message[:500],
+                                        }
+                                    )
+                                elif (
+                                    failure_key not in seen_detail_ids
+                                    and failure_key not in seen_failures
+                                ):
                                     seen_failures.add(failure_key)
                                     failed_rows += 1
                                     failure_records.append(
@@ -838,7 +872,7 @@ def run_iguopin_general_browser_capture(
         _close_browser_connection(browser)
 
     successful_details = len(rows)
-    detail_discovered = successful_details + failed_rows
+    detail_discovered = successful_details + rejected_rows + failed_rows
     payload = {
         "version": 1,
         "status": "success" if all_keywords_complete and failed_rows == 0 else "partial",
@@ -850,12 +884,14 @@ def run_iguopin_general_browser_capture(
             "rows_discovered": detail_discovered,
             "rows_exported": successful_details,
             "failed_rows": failed_rows,
+            "rejected_rows": rejected_rows,
             "detail_discovered": detail_discovered,
             "detail_succeeded": successful_details,
             "detail_failed": failed_rows,
             "cards_seen_before_deduplication": cards_seen,
             "keyword_scans": keyword_scans,
             "failure_records": failure_records,
+            "rejected_records": rejected_records,
         },
         "rows": rows,
     }

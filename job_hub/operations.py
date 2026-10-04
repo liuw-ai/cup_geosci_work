@@ -20,6 +20,7 @@ _BROWSER_SERVICE_BY_SOURCE_TYPE = {
     "cmgb_browser_rows": "cmgb-browser",
     "official_browser_rows": "pipechina-browser",
     "sinopec_spa_rows": "sinopec-browser",
+    "iguopin_general_browser_rows": "iguopin-general-browser",
 }
 
 _EXPECTED_BROWSER_LIMITATION_MARKERS = (

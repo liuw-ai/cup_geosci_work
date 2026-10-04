@@ -38,8 +38,8 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     assert "chinalco-browser:" in compose
     assert "BROWSER_WORKER_KIND: iguopin" in compose
     assert "IGUOPIN_BROWSER_SOURCE_ID: chinalco-iguopin-browser" in compose
-    assert compose.count("build: *browser-build") == 6
-    assert compose.count("JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest") == 6
+    assert compose.count("build: *browser-build") == 7
+    assert compose.count("JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest") == 7
     # chromedp/headless-shell's entrypoint starts Chrome on 9223 and exposes
     # its internal socat proxy on 9222. Passing another 9222 flag here makes
     # Chrome and socat race for the same port and breaks CDP readiness.

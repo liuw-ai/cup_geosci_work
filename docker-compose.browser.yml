@@ -257,5 +257,48 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  iguopin-general-headless-shell:
+    image: chromedp/headless-shell:latest
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      - --disable-dev-shm-usage
+    init: true
+    shm_size: "512m"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  iguopin-general-browser:
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
+    depends_on:
+      - iguopin-general-headless-shell
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      BROWSER_WORKER_KIND: iguopin
+      IGUOPIN_BROWSER_SOURCE_ID: iguopin-general-geoscience-browser
+      IGUOPIN_BROWSER_SERVICE_NAME: iguopin-general-browser
+      IGUOPIN_BROWSER_INTERVAL_MINUTES: 180
+      IGUOPIN_BROWSER_CDP_URL: http://iguopin-general-headless-shell:9222
+      CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+    command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   job_hub_data:

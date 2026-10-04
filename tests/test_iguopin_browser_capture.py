@@ -151,6 +151,41 @@ def _write_capture(tmp_path: Path, payload: dict[str, object]) -> Path:
     return path
 
 
+def test_general_capture_allows_audited_detail_rejections_without_publishing_them(
+    tmp_path: Path,
+) -> None:
+    payload = _payload()
+    payload["scan"] = {
+        **payload["scan"],
+        "rows_discovered": 2,
+        "rows_exported": 1,
+        "rejected_rows": 1,
+        "rejected_records": [
+            {
+                "keyword": "地质",
+                "page": 1,
+                "row": 2,
+                "detail_id": "217000000000000001",
+                "detail_url": "https://www.iguopin.com/job/detail?id=217000000000000001",
+                "reason": "CMGB detail is missing required fields: location",
+            }
+        ],
+        "detail_discovered": 2,
+        "detail_succeeded": 1,
+        "detail_failed": 0,
+    }
+    loaded = load_iguopin_browser_capture(
+        _write_capture(tmp_path, payload),
+        allowed_hosts=HOSTS,
+        max_age_hours=100_000,
+        require_complete_scan=True,
+    )
+
+    assert loaded["status"] == "success"
+    assert loaded["scan"]["rejected_rows"] == 1
+    assert len(loaded["rows"]) == 1
+
+
 def test_iguopin_source_contract_requires_bounded_filters_and_id_prefix() -> None:
     source = _source()
     validated = validate_source_registry([source])[0]
