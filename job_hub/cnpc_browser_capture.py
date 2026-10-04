@@ -267,14 +267,18 @@ def load_cnpc_job_capture(
         raise CnpcJobCaptureError(f"CNPC job capture file cannot be read: {capture_path}") from error
     if not isinstance(payload, dict):
         raise CnpcJobCaptureError("CNPC job capture must be an object")
-    if require_capture_manifest:
+    status = _job_text(payload.get("status"), "status")
+    if status not in JOB_CAPTURE_STATUSES:
+        raise CnpcJobCaptureError(f"unsupported CNPC job capture status: {status}")
+    # Failure diagnostics are deliberately written without a successful-run
+    # manifest.  They must still be classified as access_limited/partial so
+    # the scheduler does not turn a blocked portal into parse_failed.  Only a
+    # publishable success artifact needs the capture identity contract.
+    if require_capture_manifest and status == "success":
         try:
             validate_capture_manifest(payload)
         except ValueError as error:
             raise CnpcJobCaptureError(str(error)) from error
-    status = _job_text(payload.get("status"), "status")
-    if status not in JOB_CAPTURE_STATUSES:
-        raise CnpcJobCaptureError(f"unsupported CNPC job capture status: {status}")
     if status != "success":
         raise CnpcJobCaptureError(f"CNPC job capture is not publishable: {status}")
     hosts = {str(host).strip().lower().rstrip(".") for host in allowed_hosts if str(host).strip()}

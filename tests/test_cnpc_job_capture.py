@@ -303,3 +303,29 @@ def test_cnpc_job_capture_rejects_access_limited_before_empty_rows(tmp_path: Pat
             allowed_hosts=["zhaopin.cnpc.com.cn"],
             now=datetime(2026, 9, 26, 9, tzinfo=timezone.utc),
         )
+
+
+def test_cnpc_access_limited_diagnostic_does_not_require_success_manifest(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "capture.json"
+    payload = _payload()
+    payload["status"] = "access_limited"
+    payload["announcements"] = []
+    payload["jobs"] = []
+    payload["scan"].update(  # type: ignore[union-attr]
+        {
+            "announcements_discovered": 0,
+            "announcements_targeted": 0,
+            "jobs_discovered": 0,
+            "jobs_exported": 0,
+        }
+    )
+    path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    with pytest.raises(CnpcJobCaptureError, match="not publishable: access_limited"):
+        load_cnpc_job_capture(
+            path,
+            allowed_hosts=["zhaopin.cnpc.com.cn"],
+            require_capture_manifest=True,
+            now=datetime(2026, 9, 26, 9, tzinfo=timezone.utc),
+        )
