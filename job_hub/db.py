@@ -417,6 +417,12 @@ _ACTIVE_TRANSACTION: ContextVar[tuple[Path, sqlite3.Connection] | None] = Contex
     "job_hub_active_transaction", default=None
 )
 
+# Browser workers start together and each bootstraps the shared source
+# registry. A five-second busy window is too short for that legitimate
+# startup burst and turns a recoverable SQLite writer queue into a failed
+# capture.
+SQLITE_BUSY_TIMEOUT_MS = 30_000
+
 
 class _ClosingConnection(sqlite3.Connection):
     """Make ``with database.connect()`` release SQLite handles predictably.
@@ -464,7 +470,7 @@ class Database:
         connection.execute("PRAGMA foreign_keys = ON")
         if not self.read_only:
             connection.execute("PRAGMA journal_mode = WAL")
-        connection.execute("PRAGMA busy_timeout = 5000")
+        connection.execute(f"PRAGMA busy_timeout = {SQLITE_BUSY_TIMEOUT_MS}")
         return connection
 
     def initialize(self) -> None:
