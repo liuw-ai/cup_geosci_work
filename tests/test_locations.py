@@ -123,3 +123,25 @@ def test_verified_city_and_autonomous_prefecture_aliases_normalize_to_mainland()
         normalized = normalize_location(raw)
         assert normalized["province"] == province
         assert normalized["country_or_region"] == "中国大陆"
+
+
+def test_cnooc_detail_city_aliases_normalize_to_mainland() -> None:
+    expected = {
+        "荆门 钟祥市 胡集镇": "湖北",
+        "东方 八所镇园区": "海南",
+        "鹤岗 兴安区": "黑龙江",
+        "滨州 滨城区": "山东",
+        "汕尾": "广东",
+        "惠州 大亚湾区": "广东",
+        "珠海 金湾区": "广东",
+        "中山 横门路": "广东",
+        "盐城 滨海县": "江苏",
+        "绍兴 诸暨市": "浙江",
+        "营口 盖州市": "辽宁",
+        "洋浦市/洋浦经济开发区": "海南",
+    }
+
+    for raw, province in expected.items():
+        normalized = normalize_location(raw)
+        assert normalized["province"] == province
+        assert normalized["country_or_region"] == "中国大陆"
