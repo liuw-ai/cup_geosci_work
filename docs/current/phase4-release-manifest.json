@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-17T10:35:50Z",
+  "generated_at": "2026-10-17T10:36:39Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "bf7cb06910e9b1244abd16d7a60ab32ef8a12d61",
+  "git_sha": "6d4d1e8dc5b92c5b19dbde2b122d6612112b07c1",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
