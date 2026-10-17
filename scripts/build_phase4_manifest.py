@@ -12,6 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "docs" / "current" / "phase4-release-manifest.json"
+LOCAL_VALIDATION = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-17.json"
 
 
 def sha256(path: Path) -> str | None:
@@ -56,6 +57,16 @@ def db_facts(path: Path) -> dict[str, object]:
     }
 
 
+def local_validation_facts(path: Path = LOCAL_VALIDATION) -> dict[str, object] | None:
+    """Load the last isolated validation record without inventing test facts."""
+    if not path.is_file():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("local validation report must be an object")
+    return payload
+
+
 def main() -> None:
     sources = json.loads((ROOT / "data" / "discovery_sources.json").read_text(encoding="utf-8"))["sources"]
     adapters = json.loads((ROOT / "data" / "third_party_table_adapters.json").read_text(encoding="utf-8"))["adapters"]
@@ -63,19 +74,27 @@ def main() -> None:
         (ROOT / "docs" / "current" / "phase4-organization-reconciliation-2026-10-17.json").read_text(encoding="utf-8")
     )
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
+    validation = local_validation_facts()
     working_tree_dirty = dirty()
     release_blockers = []
     if working_tree_dirty:
         release_blockers.append("working_tree_contains_uncommitted_or_untracked_changes")
-    release_blockers.extend(
-        [
-            "official_site_browser_permission_blocked",
-            "no_audited_third_party_table_batch_imported",
-            "three_oil_external_identity_evidence_pending",
-            "three_oil_unit_entry_evidence_incomplete",
-            "local_phase4_validation_not_approved_for_server",
-        ]
-    )
+    if validation is not None:
+        release_blockers.extend(
+            str(item)
+            for item in validation.get("release_blockers", [])
+            if str(item).strip()
+        )
+    else:
+        release_blockers.append("local_validation_report_missing")
+    for blocker in (
+        "no_audited_third_party_table_batch_imported",
+        "three_oil_external_identity_evidence_pending",
+        "three_oil_unit_entry_evidence_incomplete",
+        "local_phase4_validation_not_approved_for_server",
+    ):
+        if blocker not in release_blockers:
+            release_blockers.append(blocker)
     manifest = {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "phase": "phase4",
@@ -99,6 +118,7 @@ def main() -> None:
             ),
         },
         "database": database,
+        "local_validation": validation,
         "third_party": {
             "registered_sources": len(sources),
             "batch_candidate_sources": sum(1 for item in sources if item.get("batch_candidate_allowed")),
