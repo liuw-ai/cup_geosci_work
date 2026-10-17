@@ -269,6 +269,60 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     assert response.get_json()["outcome"] == "created"
 
 
+def test_public_api_layer_filter_is_forwarded_without_profile(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    database.upsert_source(source())
+    pipeline = app.extensions["pipeline"]
+
+    def save(title: str, url: str) -> int:
+        posting = RawPosting(
+            title=title,
+            employer="测试能源集团",
+            source_url=url,
+            application_url=url,
+            text="官方招聘，面向地质工程硕士。",
+            summary="官方岗位。",
+            published_date="2026-10-01",
+            deadline_date="2026-12-31",
+            location="北京",
+            field_evidence={
+                "岗位": title,
+                "专业范围": "地质工程",
+                "学历要求": "硕士",
+                "工作地点": "北京",
+            },
+        )
+        job_id, _ = database.save_job(
+            pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+        )
+        return job_id
+
+    exact_id = save("精确岗位", "https://careers.example.edu.cn/jobs/exact")
+    broad_id = save("宽泛岗位", "https://careers.example.edu.cn/jobs/broad")
+    with database.transaction() as connection:
+        connection.execute(
+            "UPDATE jobs SET publication_layer = 'exact_match' WHERE id = ?",
+            (exact_id,),
+        )
+        connection.execute(
+            "UPDATE jobs SET publication_layer = 'broad_geoscience_match' WHERE id = ?",
+            (broad_id,),
+        )
+
+    payload = app.test_client().get("/api/jobs?layer=exact_match").get_json()
+    assert payload["total"] == 1
+    assert payload["items"][0]["id"] == exact_id
+    assert payload["items"][0]["publication_layer"] == "exact_match"
+
+    broad_payload = app.test_client().get(
+        "/api/jobs?layer=broad_geoscience_match"
+    ).get_json()
+    assert broad_payload["total"] == 1
+    assert broad_payload["items"][0]["id"] == broad_id
+
+
 def test_official_pending_scope_is_separate_from_current_public_jobs(tmp_path) -> None:
     settings = make_settings(tmp_path)
     app = create_app(settings)

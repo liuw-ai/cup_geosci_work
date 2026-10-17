@@ -320,6 +320,7 @@ def create_app(settings: Settings | None = None) -> Flask:
                 degree=degree,
                 province=province,
                 relevance_band=relevance_band,
+                publication_layer=publication_layer,
                 q=query,
                 page=page,
                 as_of_date=business_date,
