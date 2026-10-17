@@ -71,6 +71,7 @@ def main() -> None:
         [
             "official_site_browser_permission_blocked",
             "no_audited_third_party_table_batch_imported",
+            "three_oil_external_identity_evidence_pending",
             "three_oil_unit_entry_evidence_incomplete",
             "local_phase4_validation_not_approved_for_server",
         ]

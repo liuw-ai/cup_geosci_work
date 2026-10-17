@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-17T10:35:13Z",
+  "generated_at": "2026-10-17T10:35:38Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "fcaecfa6c176db6464df744253fe978073d4e217",
-  "working_tree_dirty": false,
+  "git_sha": "ac418c4b1e0b94165ca4713d0af5a827bbbfba09",
+  "working_tree_dirty": true,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
   "release_env_sha256": "49f2c7be91ff3cfadb0cc0f88a255e3e7d3ac2a1194f1e719d0207a85b79175d",
@@ -64,8 +64,10 @@
   "automation_status": "paused",
   "production_deployment": "not_performed",
   "release_blockers": [
+    "working_tree_contains_uncommitted_or_untracked_changes",
     "official_site_browser_permission_blocked",
     "no_audited_third_party_table_batch_imported",
+    "three_oil_external_identity_evidence_pending",
     "three_oil_unit_entry_evidence_incomplete",
     "local_phase4_validation_not_approved_for_server"
   ]
