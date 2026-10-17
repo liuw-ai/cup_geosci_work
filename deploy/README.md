@@ -12,4 +12,6 @@ this file.
 A release is not approved merely because Compose parses. Before deployment,
 create a Release Manifest binding the exact Git SHA, Compose SHA-256, image
 digests, configuration SHA-256, schema version, and verified database backup.
-This Phase 3 work does not authorize a server deployment.
+This Phase 4 local work does not authorize a server deployment. A server rollout still
+requires a clean local review and explicit user approval after the third-party evidence
+and three-oil entry evidence blockers are resolved.

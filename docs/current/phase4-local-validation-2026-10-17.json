@@ -1,0 +1,40 @@
+{
+  "phase": "phase4",
+  "validated_at": "2026-10-17",
+  "environment": "local",
+  "server_deployment": false,
+  "git_sha": "c1c613b",
+  "tests": {
+    "command": "python -m pytest -q",
+    "passed": 1050,
+    "skipped": 4,
+    "failed": 0,
+    "warnings": 1
+  },
+  "compose": {
+    "path": "deploy/compose.yaml",
+    "config_check": "passed"
+  },
+  "database": {
+    "path": "runtime/job_hub.sqlite3",
+    "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
+    "integrity_check": "ok",
+    "jobs": 3947,
+    "candidate_leads": 0,
+    "phase3_withdrawal_audits": 3947,
+    "sha256_before_and_after_test": "unchanged"
+  },
+  "student_layers": {
+    "exact_match": 210,
+    "broad_geoscience_match": 1,
+    "incomplete_but_basic_match": 615,
+    "source_unavailable": 166
+  },
+  "release_status": "not_publishable",
+  "release_blockers": [
+    "no_audited_third_party_table_batch_imported",
+    "three_oil_external_identity_evidence_pending",
+    "three_oil_unit_entry_evidence_incomplete",
+    "local_phase4_validation_not_approved_for_server"
+  ]
+}

@@ -35,6 +35,12 @@
     },
     "candidate_lead_count": 0
   },
+  "local_validation": {
+    "report_path": "docs/current/phase4-local-validation-2026-10-17.json",
+    "tests": "1050 passed, 4 skipped, 1 warning",
+    "compose_config_check": "passed",
+    "formal_database_sha_unchanged_by_tests": true
+  },
   "third_party": {
     "registered_sources": 12,
     "batch_candidate_sources": 5,

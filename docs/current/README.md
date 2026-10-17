@@ -102,7 +102,7 @@ runtime/
 - 根目录 `official-attachments/`、`runtime-probe/` 和 `archive/` 已移动到 `history/`；
 - `.worktrees/` 及仓库外活动 worktree 保留原位，以免破坏 Git worktree 元数据；
 - `docs/current/` 曾出现 SQLite 备份文件，后续应移出到受控 `backups/`，但本轮不执行移动；
-- 当前生产 Compose 尚未收敛为 `deploy/compose.yaml`。
+- 正式生产 Compose 入口已经收敛为 `deploy/compose.yaml`；根目录 Compose/Dockerfile 仅作为本地开发兼容入口保留，不得用于生产发布。
 
 这些仍是结构治理事项，不代表已经形成可发布版本。历史移动记录及逐文件哈希见 `HISTORY-MIGRATION-2026-10-17.json`。
 
