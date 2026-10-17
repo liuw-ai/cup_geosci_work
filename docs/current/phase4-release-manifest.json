@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-17T11:14:17Z",
+  "generated_at": "2026-10-17T11:25:43Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "499d00c8ca353c9511ac25cc0990c7810d4bbec8",
+  "git_sha": "c6c8963777eb0391a6edaadb627a6bad63842901",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -33,17 +33,26 @@
       "not_public": 2955,
       "source_unavailable": 166
     },
+    "student_read_as_of_date": "2026-10-17",
+    "student_visible_layer_counts": {
+      "broad_geoscience_match": 1,
+      "exact_match": 145,
+      "incomplete_but_basic_match": 368,
+      "not_public": 0,
+      "source_unavailable": 111
+    },
+    "student_visible_total": 625,
     "candidate_lead_count": 0
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-17T11:11:32Z",
+    "validated_at": "2026-10-17T11:25:09Z",
     "environment": "local",
     "server_deployment": false,
-    "git_sha": "e5fc42e0b7c01ce7be9a8e0ba4e1b1341ecd62f8",
+    "git_sha": "b6413226a53e94f8c7dbd8fdc50a8a4c0a3c6efc",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1053,
+      "passed": 1054,
       "skipped": 4,
       "failed": 0,
       "warnings": 1
@@ -87,6 +96,18 @@
       "candidate_leads": 0,
       "phase3_withdrawal_audits": 3947,
       "sha256_before_and_after_test": "unchanged"
+    },
+    "student_read": {
+      "as_of_date": "2026-10-17",
+      "total": 625,
+      "layer_counts": {
+        "exact_match": 145,
+        "broad_geoscience_match": 1,
+        "incomplete_but_basic_match": 368,
+        "source_unavailable": 111
+      },
+      "healthz_open_jobs": 625,
+      "endpoint_status": 200
     },
     "student_layers": {
       "exact_match": 210,
