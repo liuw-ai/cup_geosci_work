@@ -1645,6 +1645,26 @@ def main() -> None:
     if args.command == "three-oil-dns-audit":
         print(json.dumps(build_three_oil_dns_audit(), ensure_ascii=False, indent=2))
         return
+    if args.command == "three-oil-catalog-audit":
+        settings = Settings.from_env()
+        settings.ensure_runtime_paths()
+        # Catalog reconciliation only reads the current job snapshot.  Keep it
+        # out of services(), whose writable initialization can migrate the
+        # shared SQLite file even when the command itself performs no writes.
+        readonly_database = Database(settings.database_path, read_only=True)
+        jobs, _ = readonly_database.list_jobs(
+            page_size=None,
+            as_of_date=coverage_snapshot_date(settings),
+        )
+        result = build_three_oil_catalog_audit(job_records=jobs)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command == "cross-ledger-audit":
         try:
             # Government evidence is dated in the site's business timezone.
@@ -2078,20 +2098,6 @@ def main() -> None:
                 "organization_registry.json 的来源，才能进入自动采集。"
             ),
         }
-        if args.output:
-            args.output.parent.mkdir(parents=True, exist_ok=True)
-            args.output.write_text(
-                json.dumps(result, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-        print(json.dumps(result, ensure_ascii=False, indent=2))
-        return
-    if args.command == "three-oil-catalog-audit":
-        jobs, _ = database.list_jobs(
-            page_size=None,
-            as_of_date=coverage_snapshot_date(settings),
-        )
-        result = build_three_oil_catalog_audit(job_records=jobs)
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(

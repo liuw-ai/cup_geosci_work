@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import sys
 
@@ -8,6 +9,7 @@ import pytest
 
 from job_hub.contracts import ContractValidationError
 from job_hub.cli import main as cli_main
+from job_hub.db import Database
 from job_hub.three_oil_catalog import (
     build_three_oil_catalog_audit,
     build_three_oil_dns_audit,
@@ -92,6 +94,29 @@ def test_real_three_oil_catalog_units_are_all_mapped_to_the_registry() -> None:
     assert riped["fallback_entry_coverage"]["group_or_shared_recruitment_platform"] is True
     assert riped["unit_scoped_recruitment_entry_count"] == 0
     assert riped["shared_recruitment_entry_count"] == 1
+
+
+def test_three_oil_catalog_audit_cli_does_not_write_database(monkeypatch, tmp_path) -> None:
+    database_path = tmp_path / "job_hub.sqlite3"
+    Database(database_path).initialize()
+    before = hashlib.sha256(database_path.read_bytes()).hexdigest()
+    output = tmp_path / "three-oil-audit.json"
+    monkeypatch.setenv("APP_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("APP_DATABASE_PATH", str(database_path))
+    monkeypatch.setattr(
+        "job_hub.cli.services",
+        lambda: pytest.fail("read-only catalog audit must not initialize services"),
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["job_hub.cli", "three-oil-catalog-audit", "--output", str(output)],
+    )
+
+    cli_main()
+
+    assert output.is_file()
+    assert hashlib.sha256(database_path.read_bytes()).hexdigest() == before
 
 
 def test_three_oil_dns_audit_keeps_resolution_separate_from_identity() -> None:
