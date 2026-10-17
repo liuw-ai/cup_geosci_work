@@ -63,13 +63,25 @@ def main() -> None:
         (ROOT / "docs" / "current" / "phase4-organization-reconciliation-2026-10-17.json").read_text(encoding="utf-8")
     )
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
+    working_tree_dirty = dirty()
+    release_blockers = []
+    if working_tree_dirty:
+        release_blockers.append("working_tree_contains_uncommitted_or_untracked_changes")
+    release_blockers.extend(
+        [
+            "official_site_browser_permission_blocked",
+            "no_audited_third_party_table_batch_imported",
+            "three_oil_unit_entry_evidence_incomplete",
+            "local_phase4_validation_not_approved_for_server",
+        ]
+    )
     manifest = {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "phase": "phase4",
         "status": "local_audit_in_progress",
         "logical_baseline": "phase532-logical-phase1",
         "git_sha": git_sha(),
-        "working_tree_dirty": dirty(),
+        "working_tree_dirty": working_tree_dirty,
         "compose_path": "deploy/compose.yaml",
         "compose_sha256": sha256(ROOT / "deploy" / "compose.yaml"),
         "release_env_sha256": sha256(ROOT / ".release.env"),
@@ -96,13 +108,7 @@ def main() -> None:
         "automation_model": "gpt-5.6-terra",
         "automation_status": "paused",
         "production_deployment": "not_performed",
-        "release_blockers": [
-            "working_tree_contains_uncommitted_or_untracked_changes",
-            "official_site_browser_permission_blocked",
-            "no_audited_third_party_table_batch_imported",
-            "three_oil_unit_entry_evidence_incomplete",
-            "local_phase4_validation_not_approved_for_server",
-        ],
+        "release_blockers": release_blockers,
     }
     OUTPUT.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(OUTPUT)
