@@ -7,6 +7,7 @@ from job_hub import third_party_tables
 from job_hub.third_party_tables import (
     discover_table_links,
     fetch_and_normalize_third_party_table,
+    ingest_third_party_table_file,
     table_candidates,
 )
 
@@ -97,3 +98,75 @@ def test_fetch_retains_official_table_evidence_and_hash(monkeypatch, tmp_path):
     assert payload["candidates"][0]["official_table_url"] == (
         "https://www.gov.cn/notice/2026/positions.xlsx"
     )
+
+
+def test_operator_provided_table_file_uses_same_private_evidence_contract(tmp_path):
+    from openpyxl import Workbook
+
+    table = tmp_path / "provided.xlsx"
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.append(["岗位代码", "用人单位", "岗位名称", "专业要求", "学历要求", "招录人数", "工作地点"])
+    sheet.append(["B01", "自然资源局", "地质调查", "资源勘查工程", "本科", 1, "北京"])
+    workbook.save(table)
+
+    payload = ingest_third_party_table_file(
+        table_path=table,
+        source_id="offcn-discovery",
+        third_party_table_url="https://www.offcn.com/2026/positions.xlsx",
+        batch_id="offcn-provided-2026",
+        position_type="civil_service",
+        province="北京",
+        discovery_page_url="https://www.offcn.com/guide/2026",
+        storage_dir=tmp_path / "retained",
+    )
+
+    assert payload["download"]["capture_mode"] == "operator_provided_file"
+    assert payload["download"]["sha256"] == hashlib.sha256(table.read_bytes()).hexdigest()
+    assert payload["candidates"]
+    assert payload["candidates"][0]["official_url"] is None
+    assert payload["candidates"][0]["official_application_url"] is None
+
+
+def test_operator_provided_table_file_still_requires_registered_source_url(tmp_path):
+    table = tmp_path / "provided.csv"
+    table.write_text("岗位代码,用人单位,岗位名称,专业要求,学历要求,招录人数,工作地点\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="host is not allowed"):
+        ingest_third_party_table_file(
+            table_path=table,
+            source_id="offcn-discovery",
+            third_party_table_url="https://untrusted.example/table.xlsx",
+            batch_id="offcn-provided-invalid",
+            position_type="civil_service",
+            province="北京",
+        )
+
+
+def test_table_candidate_persists_discovery_source_for_funnel_audit(tmp_path):
+    from openpyxl import Workbook
+    from job_hub.db import Database
+
+    table = tmp_path / "provided.xlsx"
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.append(["岗位代码", "用人单位", "岗位名称", "专业要求", "学历要求", "招录人数", "工作地点"])
+    sheet.append(["B02", "自然资源局", "地质调查", "地质学", "本科", 1, "北京"])
+    workbook.save(table)
+
+    payload = ingest_third_party_table_file(
+        table_path=table,
+        source_id="offcn-discovery",
+        third_party_table_url="https://www.offcn.com/2026/positions.xlsx",
+        batch_id="offcn-funnel-2026",
+        position_type="civil_service",
+        province="北京",
+    )
+    database = Database(tmp_path / "isolated.sqlite3")
+    database.initialize()
+    stored = database.create_candidate_lead(payload["candidates"][0])
+
+    assert stored["discovery_source_id"] == "offcn-discovery"
+    assert stored["third_party_table_url"] == "https://www.offcn.com/2026/positions.xlsx"
+    assert stored["official_url"] is None
+    assert stored["verification_status"] == "candidate"

@@ -38,7 +38,24 @@ def git_sha() -> str | None:
 
 def dirty() -> bool:
     try:
-        result = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, text=True, capture_output=True, check=True)
+        # The manifest is generated after the source/config commit and then
+        # committed as a metadata-only follow-up.  Exclude only this output
+        # file so the recorded dirty flag describes the release inputs rather
+        # than the manifest being written itself.
+        result = subprocess.run(
+            [
+                "git",
+                "status",
+                "--porcelain",
+                "--",
+                ".",
+                ":!docs/current/phase4-release-manifest.json",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
     except (OSError, subprocess.CalledProcessError):
         return True
     return bool(result.stdout.strip())

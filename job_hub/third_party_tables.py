@@ -189,6 +189,109 @@ def _bounded_download(url: str, *, timeout: int, max_bytes: int) -> tuple[bytes,
         return b"".join(chunks), content_type
 
 
+_TABLE_SUFFIXES = {
+    ".xlsx",
+    ".xls",
+    ".xlsm",
+    ".csv",
+    ".tsv",
+    ".pdf",
+    ".docx",
+    ".json",
+    ".png",
+    ".jpg",
+    ".jpeg",
+}
+
+
+def _validate_table_url(source_id: str, third_party_table_url: str) -> dict[str, Any]:
+    if source_id not in BATCH_CANDIDATE_SOURCES:
+        raise ValueError("source is not approved for B-level batch candidates")
+    parsed_url = urlparse(str(third_party_table_url or ""))
+    adapter = load_table_adapters().get(source_id)
+    allowed_hosts = {
+        str(value).lower().rstrip(".")
+        for value in (adapter or {}).get("allowed_hosts", [])
+    }
+    if parsed_url.scheme not in {"http", "https"} or (
+        (parsed_url.hostname or "").lower().rstrip(".") not in allowed_hosts
+    ):
+        raise ValueError("third-party table URL host is not allowed for this source")
+    return parsed_url
+
+
+def _normalize_table_bytes(
+    body: bytes,
+    *,
+    content_type: str,
+    suffix: str,
+    source_id: str,
+    third_party_table_url: str,
+    batch_id: str,
+    position_type: str,
+    province: str,
+    official_notice_url: str = "",
+    official_table_url: str = "",
+    official_application_url: str = "",
+    discovery_page_url: str = "",
+    deadline_date: str = "",
+    location: str = "",
+    storage_dir: Path | None = None,
+    capture_mode: str = "network_download",
+) -> dict[str, Any]:
+    """Normalize retained bytes through one auditable path for network/file input."""
+    digest = hashlib.sha256(body).hexdigest()
+    normalized_suffix = suffix.lower()
+    if normalized_suffix not in _TABLE_SUFFIXES:
+        normalized_suffix = mimetypes.guess_extension(content_type) or ".bin"
+    with tempfile.TemporaryDirectory(prefix="phase4-third-party-") as temp_dir:
+        path = Path(temp_dir) / f"table{normalized_suffix}"
+        path.write_bytes(body)
+        loaded = load_position_table_with_report(path)
+    parsed = normalize_third_party_table(
+        loaded["rows"],
+        source_id=source_id,
+        third_party_table_url=third_party_table_url,
+        official_notice_url=official_notice_url,
+        official_table_url=official_table_url,
+        batch_id=batch_id,
+        position_type=position_type,
+        province=province,
+        deadline_date=deadline_date,
+        location=location,
+    )
+    parsed["download"] = {
+        "sha256": digest,
+        "bytes": len(body),
+        "content_type": content_type,
+        "captured_at": datetime.now(timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z"),
+        "source_id": source_id,
+        "batch_id": batch_id,
+        "table_url": third_party_table_url,
+        "discovery_page_url": discovery_page_url or None,
+        "retained_path": None,
+        "capture_mode": capture_mode,
+    }
+    if storage_dir is not None:
+        storage_dir.mkdir(parents=True, exist_ok=True)
+        retained = storage_dir / f"{batch_id}-{digest[:16]}{normalized_suffix}"
+        retained.write_bytes(body)
+        parsed["download"]["retained_path"] = str(retained)
+    parsed["candidates"] = table_candidates(
+        parsed,
+        source_id=source_id,
+        third_party_table_url=third_party_table_url,
+        official_notice_url=official_notice_url,
+        official_table_url=official_table_url,
+        official_application_url=official_application_url,
+        discovery_page_url=discovery_page_url,
+    )
+    return parsed
+
+
 def table_candidates(
     parsed: dict[str, Any],
     *,
@@ -224,6 +327,7 @@ def table_candidates(
             {
                 "lead_provider": source_id,
                 "lead_url": row_url,
+                "discovery_source_id": source_id,
                 "title": str(title or "").strip(),
                 "employer_hint": str(employer or "").strip(),
                 "location_hint": str(location or "").strip(),
@@ -275,72 +379,84 @@ def fetch_and_normalize_third_party_table(
     is published and the third-party URL is never used as an application URL.
     """
 
-    if source_id not in BATCH_CANDIDATE_SOURCES:
-        raise ValueError("source is not approved for B-level batch candidates")
-    parsed_url = urlparse(str(third_party_table_url or ""))
-    adapter = load_table_adapters().get(source_id)
-    allowed_hosts = {
-        str(value).lower().rstrip(".")
-        for value in (adapter or {}).get("allowed_hosts", [])
-    }
-    if parsed_url.scheme not in {"http", "https"} or (
-        (parsed_url.hostname or "").lower().rstrip(".") not in allowed_hosts
-    ):
-        raise ValueError("third-party table URL host is not allowed for this source")
+    parsed_url = _validate_table_url(source_id, third_party_table_url)
     body, content_type = _bounded_download(
         third_party_table_url, timeout=timeout, max_bytes=max_bytes
     )
-    digest = hashlib.sha256(body).hexdigest()
-    suffix = Path(third_party_table_url.split("?", 1)[0]).suffix.lower()
-    if suffix not in {".xlsx", ".xls", ".csv", ".tsv", ".pdf", ".docx", ".json", ".png", ".jpg", ".jpeg"}:
-        suffix = mimetypes.guess_extension(content_type) or ".bin"
-    with tempfile.TemporaryDirectory(prefix="phase3-third-party-") as temp_dir:
-        path = Path(temp_dir) / f"table{suffix}"
-        path.write_bytes(body)
-        loaded = load_position_table_with_report(path)
-    parsed = normalize_third_party_table(
-        loaded["rows"],
+    return _normalize_table_bytes(
+        body,
+        content_type=content_type,
+        suffix=Path(parsed_url.path).suffix.lower(),
         source_id=source_id,
         third_party_table_url=third_party_table_url,
-        official_notice_url=official_notice_url,
-        official_table_url=official_table_url,
         batch_id=batch_id,
         position_type=position_type,
         province=province,
-        deadline_date=deadline_date,
-        location=location,
-    )
-    parsed["download"] = {
-        "sha256": digest,
-        "bytes": len(body),
-        "content_type": content_type,
-        "captured_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "source_id": source_id,
-        "batch_id": batch_id,
-        "table_url": third_party_table_url,
-        "discovery_page_url": discovery_page_url or None,
-        "retained_path": None,
-    }
-    if storage_dir is not None:
-        storage_dir.mkdir(parents=True, exist_ok=True)
-        retained = storage_dir / f"{batch_id}-{digest[:16]}{suffix}"
-        retained.write_bytes(body)
-        parsed["download"]["retained_path"] = str(retained)
-    parsed["candidates"] = table_candidates(
-        parsed,
-        source_id=source_id,
-        third_party_table_url=third_party_table_url,
         official_notice_url=official_notice_url,
         official_table_url=official_table_url,
         official_application_url=official_application_url,
         discovery_page_url=discovery_page_url,
+        deadline_date=deadline_date,
+        location=location,
+        storage_dir=storage_dir,
     )
-    return parsed
+
+
+def ingest_third_party_table_file(
+    *,
+    table_path: Path,
+    source_id: str,
+    third_party_table_url: str,
+    batch_id: str,
+    position_type: str,
+    province: str,
+    official_notice_url: str = "",
+    official_table_url: str = "",
+    official_application_url: str = "",
+    discovery_page_url: str = "",
+    deadline_date: str = "",
+    location: str = "",
+    max_bytes: int = 25_000_000,
+    storage_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Process an operator-provided real table without fetching a blocked site.
+
+    The original third-party URL is still required and host-checked.  The file
+    is only evidence for a private candidate queue; it never becomes an
+    official URL or a publication authorization.
+    """
+    parsed_url = _validate_table_url(source_id, third_party_table_url)
+    path = Path(table_path)
+    if not path.is_file():
+        raise ValueError(f"provided third-party table does not exist: {path}")
+    body = path.read_bytes()
+    if len(body) > max_bytes:
+        raise ValueError(f"third-party table exceeds {max_bytes} bytes")
+    content_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    return _normalize_table_bytes(
+        body,
+        content_type=content_type,
+        suffix=path.suffix.lower() or Path(parsed_url.path).suffix.lower(),
+        source_id=source_id,
+        third_party_table_url=third_party_table_url,
+        batch_id=batch_id,
+        position_type=position_type,
+        province=province,
+        official_notice_url=official_notice_url,
+        official_table_url=official_table_url,
+        official_application_url=official_application_url,
+        discovery_page_url=discovery_page_url,
+        deadline_date=deadline_date,
+        location=location,
+        storage_dir=storage_dir,
+        capture_mode="operator_provided_file",
+    )
 
 
 __all__ = [
     "BATCH_CANDIDATE_SOURCES",
     "fetch_and_normalize_third_party_table",
+    "ingest_third_party_table_file",
     "normalize_third_party_table",
     "discover_table_links",
     "load_table_adapters",

@@ -10,13 +10,21 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from job_hub.db import Database
-from job_hub.third_party_tables import fetch_and_normalize_third_party_table
+from job_hub.third_party_tables import (
+    fetch_and_normalize_third_party_table,
+    ingest_third_party_table_file,
+)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-id", required=True)
     parser.add_argument("--table-url", required=True)
+    parser.add_argument(
+        "--table-file",
+        type=Path,
+        help="operator-provided real table file; avoids network access but keeps --table-url as provenance",
+    )
     parser.add_argument("--batch-id", required=True)
     parser.add_argument("--position-type", default="civil_service")
     parser.add_argument("--province", required=True)
@@ -36,20 +44,24 @@ def main() -> None:
     parser.add_argument("--apply", action="store_true", help="persist candidates into candidate_leads")
     args = parser.parse_args()
 
-    payload = fetch_and_normalize_third_party_table(
-        source_id=args.source_id,
-        third_party_table_url=args.table_url,
-        batch_id=args.batch_id,
-        position_type=args.position_type,
-        province=args.province,
-        official_notice_url=args.official_notice_url,
-        official_table_url=args.official_table_url,
-        official_application_url=args.official_application_url,
-        discovery_page_url=args.discovery_page_url,
-        deadline_date=args.deadline_date,
-        location=args.location,
-        storage_dir=args.retain_dir,
-    )
+    common = {
+        "source_id": args.source_id,
+        "third_party_table_url": args.table_url,
+        "batch_id": args.batch_id,
+        "position_type": args.position_type,
+        "province": args.province,
+        "official_notice_url": args.official_notice_url,
+        "official_table_url": args.official_table_url,
+        "official_application_url": args.official_application_url,
+        "discovery_page_url": args.discovery_page_url,
+        "deadline_date": args.deadline_date,
+        "location": args.location,
+        "storage_dir": args.retain_dir,
+    }
+    if args.table_file is not None:
+        payload = ingest_third_party_table_file(table_path=args.table_file, **common)
+    else:
+        payload = fetch_and_normalize_third_party_table(**common)
     inserted = 0
     if args.apply:
         if args.database is None:
