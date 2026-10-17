@@ -40,6 +40,12 @@
       "host": "www.gongkaoleida.com",
       "status": "blocked",
       "reason": "user_denied_browser_permission"
+    },
+    {
+      "source_id": "yingjiesheng-discovery",
+      "host": "www.yingjiesheng.com",
+      "status": "blocked",
+      "reason": "user_denied_browser_permission"
     }
   ],
   "database": {
