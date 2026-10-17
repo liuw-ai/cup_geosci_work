@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-17T10:46:30Z",
+  "generated_at": "2026-10-17T11:08:13Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "1686b0ab54ec61d8a29e587c4a1d7e6fc1a93f18",
+  "git_sha": "e5fc42e0b7c01ce7be9a8e0ba4e1b1341ecd62f8",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -36,10 +36,44 @@
     "candidate_lead_count": 0
   },
   "local_validation": {
-    "report_path": "docs/current/phase4-local-validation-2026-10-17.json",
-    "tests": "1051 passed, 4 skipped, 1 warning",
-    "compose_config_check": "passed",
-    "formal_database_sha_unchanged_by_tests": true
+    "phase": "phase4",
+    "validated_at": "2026-10-17",
+    "environment": "local",
+    "server_deployment": false,
+    "git_sha": "1686b0ab54ec61d8a29e587c4a1d7e6fc1a93f18",
+    "tests": {
+      "command": "python -m pytest -q",
+      "passed": 1051,
+      "skipped": 4,
+      "failed": 0,
+      "warnings": 1
+    },
+    "compose": {
+      "path": "deploy/compose.yaml",
+      "config_check": "passed"
+    },
+    "database": {
+      "path": "runtime/job_hub.sqlite3",
+      "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
+      "integrity_check": "ok",
+      "jobs": 3947,
+      "candidate_leads": 0,
+      "phase3_withdrawal_audits": 3947,
+      "sha256_before_and_after_test": "unchanged"
+    },
+    "student_layers": {
+      "exact_match": 210,
+      "broad_geoscience_match": 1,
+      "incomplete_but_basic_match": 615,
+      "source_unavailable": 166
+    },
+    "release_status": "not_publishable",
+    "release_blockers": [
+      "no_audited_third_party_table_batch_imported",
+      "three_oil_external_identity_evidence_pending",
+      "three_oil_unit_entry_evidence_incomplete",
+      "local_phase4_validation_not_approved_for_server"
+    ]
   },
   "third_party": {
     "registered_sources": 12,
@@ -70,7 +104,6 @@
   "automation_status": "paused",
   "production_deployment": "not_performed",
   "release_blockers": [
-    "official_site_browser_permission_blocked",
     "no_audited_third_party_table_batch_imported",
     "three_oil_external_identity_evidence_pending",
     "three_oil_unit_entry_evidence_incomplete",
