@@ -81,6 +81,9 @@ def main() -> None:
             "phase4_organization_reconciliation": sha256(
                 ROOT / "docs" / "current" / "phase4-organization-reconciliation-2026-10-17.json"
             ),
+            "phase4_three_oil_catalog_audit": sha256(
+                ROOT / "docs" / "current" / "phase4-three-oil-catalog-audit-2026-10-17.json"
+            ),
         },
         "database": database,
         "third_party": {

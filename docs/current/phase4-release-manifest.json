@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-17T10:03:53Z",
+  "generated_at": "2026-10-17T10:12:47Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "8aa8a3e55e0dacc7f31f7f4d9c2c9622bc091307",
-  "working_tree_dirty": false,
+  "git_sha": "f0cf5e009197b82d57a8be1ea285e07bb812d75c",
+  "working_tree_dirty": true,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
   "release_env_sha256": "49f2c7be91ff3cfadb0cc0f88a255e3e7d3ac2a1194f1e719d0207a85b79175d",
@@ -13,7 +13,8 @@
     "third_party_adapters": "95addd9a27b52713bdebfb8c6592ab390131588c4ade6ca6ddfff8e855a39400",
     "organization_registry": "6ee3339bce3088abd8b3ba3da120875220ec96db582b6777725375da80a897a3",
     "three_oil_catalog": "a6d1979d99b5b027590acb07d4883910bca074c301ed8dc0e134bfdf57991394",
-    "phase4_organization_reconciliation": "5e088ebef888c79539d975e639b530ee746724a4540726d5f786211d37f496c2"
+    "phase4_organization_reconciliation": "b81e3276160a5e89d203263796bae667ffdb44160afc949705e21393c19ba13d",
+    "phase4_three_oil_catalog_audit": "52f9035daf1e0310cdeb493f218653ecebd99e4e4af3b7c42155fc357794b110"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
