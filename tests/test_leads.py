@@ -103,6 +103,7 @@ def test_candidate_lead_rejects_non_http_official_application_url(tmp_path) -> N
     settings = make_settings(tmp_path)
     app = create_app(settings)
     database = app.extensions["database"]
+    database.upsert_source(source())
     lead = database.create_candidate_lead(
         {
             "lead_provider": "中公教育",
@@ -114,4 +115,40 @@ def test_candidate_lead_rejects_non_http_official_application_url(tmp_path) -> N
         database.update_candidate_lead(
             int(lead["id"]),
             {"official_application_url": "javascript:alert(1)"},
+        )
+
+
+def test_verified_candidate_rejects_third_party_application_url(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    database.upsert_source(source())
+    lead = database.create_candidate_lead(
+        {
+            "lead_provider": "中公教育",
+            "lead_url": "https://www.offcn.com/lead/official-link-check",
+            "title": "地质岗位",
+        }
+    )
+    lead_id = int(lead["id"])
+    database.update_candidate_lead(
+        lead_id,
+        {
+            "official_url": "https://careers.example.edu.cn/jobs/1",
+            "official_source_id": "official-test-source",
+            "verification_status": "official_url_found",
+        },
+    )
+    with __import__("pytest").raises(
+        ValueError, match="registered official application URL"
+    ):
+        database.update_candidate_lead(
+            lead_id,
+            {
+                "official_application_url": "https://www.offcn.com/apply/1",
+                "official_source_id": "official-test-source",
+                "official_domain_status": "registered_source_match",
+                "verification_status": "official_content_verified",
+                "verification_note": "已核验官方公告和岗位字段。",
+            },
         )

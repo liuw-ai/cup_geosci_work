@@ -4654,6 +4654,54 @@ class Database:
             official_source_id=official_source_id,
         )
 
+    @staticmethod
+    def _assess_registered_application_url(
+        connection: sqlite3.Connection,
+        application_url: str | None,
+        *,
+        preferred_source_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Require a student-facing application URL to belong to a registered source.
+
+        Third-party lead records may carry an unverified application hint while
+        they are private.  Once the lead is marked official-content-verified,
+        the hint must resolve to a registered official host (or be covered by
+        the same explicit manual-domain approval as the official detail URL).
+        """
+        if not application_url:
+            return {"status": "unverified", "source_id": preferred_source_id, "host": ""}
+        source_rows = connection.execute("SELECT * FROM sources ORDER BY id").fetchall()
+        records: list[dict[str, Any]] = []
+        for row in source_rows:
+            item = dict(row)
+            item["config"] = json.loads(item.pop("config_json", "{}"))
+            records.append(item)
+        ordered_ids: list[str] = []
+        if preferred_source_id:
+            ordered_ids.append(preferred_source_id)
+        ordered_ids.extend(
+            str(item.get("id") or "")
+            for item in records
+            if str(item.get("id") or "") not in ordered_ids
+        )
+        assessments = [
+            official_domain_assessment(
+                application_url,
+                records,
+                official_source_id=source_id,
+            )
+            for source_id in ordered_ids
+            if source_id
+        ]
+        for assessment in assessments:
+            if assessment.get("status") == "registered_source_match":
+                return assessment
+        return assessments[0] if assessments else {
+            "status": "manual_review_required",
+            "source_id": preferred_source_id,
+            "host": (urlparse(application_url).hostname or "").lower().rstrip("."),
+        }
+
     def list_candidate_leads(
         self,
         verification_status: str | None = None,
@@ -4835,6 +4883,29 @@ class Database:
                     "Official-content verification requires a registered source match "
                     "or explicit manual-domain approval"
                 )
+            if next_status in {"official_content_verified", "published"} and official_application_url:
+                application_assessment = self._assess_registered_application_url(
+                    connection,
+                    official_application_url,
+                    preferred_source_id=official_source_id,
+                )
+                official_host = (urlparse(official_url or "").hostname or "").lower().rstrip(".")
+                application_host = (
+                    urlparse(official_application_url).hostname or ""
+                ).lower().rstrip(".")
+                same_manually_approved_host = (
+                    domain_status == "manual_review_approved"
+                    and bool(official_host)
+                    and application_host == official_host
+                )
+                if (
+                    application_assessment.get("status") != "registered_source_match"
+                    and not same_manually_approved_host
+                ):
+                    raise ValueError(
+                        "Official-content verification requires a registered official "
+                        "application URL; third-party application links are not allowed"
+                    )
             checked_at = utc_now() if official_url else None
             connection.execute(
                 """
