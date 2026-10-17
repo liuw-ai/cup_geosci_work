@@ -8,6 +8,10 @@ import sqlite3
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
+
+from job_hub.db import Database
+from job_hub.phase3_policy import PUBLICATION_LAYERS
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -47,12 +51,29 @@ def db_facts(path: Path) -> dict[str, object]:
         statuses = dict(connection.execute("SELECT status, COUNT(*) FROM jobs GROUP BY status").fetchall())
         layers = dict(connection.execute("SELECT publication_layer, COUNT(*) FROM jobs GROUP BY publication_layer").fetchall())
         leads = int(connection.execute("SELECT COUNT(*) FROM candidate_leads").fetchone()[0])
+    as_of_date = datetime.now(ZoneInfo("Asia/Shanghai")).date().isoformat()
+    read_database = Database(path, read_only=True)
+    student_visible_counts = {
+        layer: read_database.list_jobs(
+            page_size=None,
+            as_of_date=as_of_date,
+            publication_layer=layer,
+        )[1]
+        for layer in sorted(PUBLICATION_LAYERS)
+    }
+    student_visible_total = read_database.list_jobs(
+        page_size=None,
+        as_of_date=as_of_date,
+    )[1]
     return {
         "path": "runtime/job_hub.sqlite3",
         "sha256": digest,
         "integrity_check": integrity,
         "job_status_counts": statuses,
         "publication_layer_counts": layers,
+        "student_read_as_of_date": as_of_date,
+        "student_visible_layer_counts": student_visible_counts,
+        "student_visible_total": student_visible_total,
         "candidate_lead_count": leads,
     }
 

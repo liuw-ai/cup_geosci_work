@@ -51,6 +51,18 @@
     "phase3_withdrawal_audits": 3947,
     "sha256_before_and_after_test": "unchanged"
   },
+  "student_read": {
+    "as_of_date": "2026-10-17",
+    "total": 625,
+    "layer_counts": {
+      "exact_match": 145,
+      "broad_geoscience_match": 1,
+      "incomplete_but_basic_match": 368,
+      "source_unavailable": 111
+    },
+    "healthz_open_jobs": 625,
+    "endpoint_status": 200
+  },
   "student_layers": {
     "exact_match": 210,
     "broad_geoscience_match": 1,

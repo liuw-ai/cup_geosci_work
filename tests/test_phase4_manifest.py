@@ -28,3 +28,18 @@ def test_phase4_manifest_builder_reads_isolated_validation_report(tmp_path: Path
 
 def test_phase4_manifest_builder_does_not_invent_missing_validation(tmp_path: Path) -> None:
     assert local_validation_facts(tmp_path / "missing.json") is None
+
+
+def test_phase4_manifest_database_facts_separate_full_layer_counts_from_student_read(
+    tmp_path: Path,
+) -> None:
+    from scripts.build_phase4_manifest import db_facts
+
+    source = Path("runtime/job_hub.sqlite3")
+    facts = db_facts(source)
+
+    assert facts["integrity_check"] == "ok"
+    assert facts["student_visible_total"] == sum(
+        facts["student_visible_layer_counts"].values()
+    )
+    assert facts["student_visible_total"] <= sum(facts["publication_layer_counts"].values())
