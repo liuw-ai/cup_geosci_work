@@ -633,6 +633,22 @@ def build_three_oil_catalog_audit(
         "missing_registry_unit_count": len(missing),
         "name_unverified_unit_count": len(name_unverified),
         "name_unverified_unit_ids": [row["catalog_id"] for row in name_unverified],
+        "name_match_semantics": (
+            "name_exact_match and name_evidence_status only describe the normalized "
+            "catalog-to-organization_registry mapping; they do not prove an external "
+            "legal-registration or independently archived official-name review. "
+            "This mapping does not prove that review."
+        ),
+        "external_identity_evidence_review": {
+            "status": "pending",
+            "pending_unit_count": int(three_oil_catalog_summary(payload)["unit_count"]),
+            "required_evidence": [
+                "official group or unit page",
+                "official recruitment notice or portal employer record",
+                "legal-registration record when the display name is abbreviated or ambiguous",
+            ],
+            "student_publication_effect": "none",
+        },
         "automation_ready_enabled_unit_count": len(ready),
         "missing_registry_unit_ids": [row["catalog_id"] for row in missing],
         "automation_ready_enabled_unit_ids": [row["catalog_id"] for row in ready],

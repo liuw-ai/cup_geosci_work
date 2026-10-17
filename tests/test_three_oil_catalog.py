@@ -51,6 +51,9 @@ def test_real_three_oil_catalog_units_are_all_mapped_to_the_registry() -> None:
     assert report["missing_registry_unit_count"] == 0
     assert report["name_unverified_unit_count"] == 0
     assert all(item["name_exact_match"] for item in report["items"])
+    assert report["external_identity_evidence_review"]["status"] == "pending"
+    assert report["external_identity_evidence_review"]["pending_unit_count"] == 64
+    assert "does not prove" in report["name_match_semantics"]
     assert report["gate"]["catalog_complete"] is True
     # Mapping a unit to a shared portal is an identity record only.  It must
     # not silently promote every unit to an independently verified adapter.

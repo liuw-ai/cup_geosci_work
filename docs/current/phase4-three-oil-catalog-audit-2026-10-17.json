@@ -30,6 +30,17 @@
   "missing_registry_unit_count": 0,
   "name_unverified_unit_count": 0,
   "name_unverified_unit_ids": [],
+  "name_match_semantics": "name_exact_match and name_evidence_status only describe the normalized catalog-to-organization_registry mapping; they do not prove an external legal-registration or independently archived official-name review. This mapping does not prove that review.",
+  "external_identity_evidence_review": {
+    "status": "pending",
+    "pending_unit_count": 64,
+    "required_evidence": [
+      "official group or unit page",
+      "official recruitment notice or portal employer record",
+      "legal-registration record when the display name is abbreviated or ambiguous"
+    ],
+    "student_publication_effect": "none"
+  },
   "automation_ready_enabled_unit_count": 1,
   "missing_registry_unit_ids": [],
   "automation_ready_enabled_unit_ids": [
