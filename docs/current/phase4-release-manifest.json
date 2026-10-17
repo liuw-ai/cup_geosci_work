@@ -3,7 +3,7 @@
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "c177fdb4975b50b4ab4f8d3ddfb9e8d6616f2d29",
+  "git_sha": "45e4ce3d39d19aa87dff0c822cb006ded3107f02",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
