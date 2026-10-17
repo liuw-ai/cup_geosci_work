@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-17T11:08:13Z",
+  "generated_at": "2026-10-17T11:09:42Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "e5fc42e0b7c01ce7be9a8e0ba4e1b1341ecd62f8",
+  "git_sha": "9bc630325c22ca64d718afc12a83eece4834b293",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -52,6 +52,13 @@
       "path": "deploy/compose.yaml",
       "config_check": "passed"
     },
+    "third_party_access_revalidation": {
+      "source_id": "offcn-discovery",
+      "checked_at": "2026-10-17T11:08:36Z",
+      "status": "blocked",
+      "access_policy": "saved_browser_permission_blocked",
+      "action_taken": "read_only_navigation_attempted; no download, login, captcha, CDP, curl, or robots bypass"
+    },
     "database": {
       "path": "runtime/job_hub.sqlite3",
       "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
@@ -69,6 +76,7 @@
     },
     "release_status": "not_publishable",
     "release_blockers": [
+      "official_site_browser_permission_blocked",
       "no_audited_third_party_table_batch_imported",
       "three_oil_external_identity_evidence_pending",
       "three_oil_unit_entry_evidence_incomplete",
@@ -104,6 +112,7 @@
   "automation_status": "paused",
   "production_deployment": "not_performed",
   "release_blockers": [
+    "official_site_browser_permission_blocked",
     "no_audited_third_party_table_batch_imported",
     "three_oil_external_identity_evidence_pending",
     "three_oil_unit_entry_evidence_incomplete",
