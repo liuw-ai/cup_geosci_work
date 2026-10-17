@@ -22,6 +22,26 @@
     "access_policy": "saved_browser_permission_blocked",
     "action_taken": "read_only_navigation_attempted; no download, login, captcha, CDP, curl, or robots bypass"
   },
+  "third_party_access_attempts": [
+    {
+      "source_id": "offcn-discovery",
+      "host": "www.offcn.com",
+      "status": "blocked",
+      "reason": "saved_browser_permission_blocked"
+    },
+    {
+      "source_id": "huatu-discovery",
+      "host": "www.huatu.com",
+      "status": "blocked",
+      "reason": "saved_browser_permission_blocked"
+    },
+    {
+      "source_id": "gongkaoleida-discovery",
+      "host": "www.gongkaoleida.com",
+      "status": "blocked",
+      "reason": "user_denied_browser_permission"
+    }
+  ],
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
