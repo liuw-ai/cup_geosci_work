@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-17T11:40:17Z",
+  "generated_at": "2026-10-17T11:48:36Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "f2e5ca499529a9445e9d769841e1d34e856fbe84",
+  "git_sha": "af8708d47a2dee90659cfebbd776d32e47af7b1a",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -92,6 +92,15 @@
         "host": "www.yingjiesheng.com",
         "status": "blocked",
         "reason": "user_denied_browser_permission"
+      }
+    ],
+    "official_entry_access_attempts": [
+      {
+        "organization_group": "cnpc",
+        "url": "https://zhaopin.cnpc.com.cn/",
+        "status": "blocked",
+        "reason": "saved_browser_permission_blocked",
+        "action_taken": "read_only_navigation_attempted; no download or policy bypass"
       }
     ],
     "database": {
