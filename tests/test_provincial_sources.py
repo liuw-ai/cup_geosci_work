@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from job_hub.locations import PROVINCES
+from job_hub.government_revalidation import _availability_match
 from job_hub.sources import load_source_registries
 
 
@@ -95,3 +96,44 @@ def test_sichuan_recruitment_chain_allows_official_exam_host() -> None:
         for url in config["direct_notice_urls"]
     )
     assert any("/front/News/info/" in pattern for pattern in config["detail_path_patterns"])
+
+
+def test_ningxia_current_availability_status_is_source_scoped() -> None:
+    path = Path(__file__).resolve().parent.parent / "data" / "provincial_sources.json"
+    sources = {
+        item["id"]: item
+        for item in json.loads(path.read_text(encoding="utf-8"))
+    }
+
+    ningxia_config = sources["ningxia-geology-bureau"]["config"]
+    anhui_config = sources["anhui-geology-bureau"]["config"]
+
+    assert ningxia_config["current_availability_url"].startswith(
+        "http://www.nxdizhiju.cn/"
+    )
+    assert "www.nxdizhiju.cn" in ningxia_config["allowed_hosts"]
+    assert ningxia_config["availability_open_patterns"]
+    assert ningxia_config["availability_closed_patterns"]
+    assert "current_availability_url" not in anhui_config
+    assert "availability_open_patterns" not in anhui_config
+    assert "availability_closed_patterns" not in anhui_config
+
+
+def test_gansu_current_availability_ignores_non_terminal_hiring_language() -> None:
+    path = Path(__file__).resolve().parent.parent / "data" / "provincial_sources.json"
+    source = next(
+        item
+        for item in json.loads(path.read_text(encoding="utf-8"))
+        if item["id"] == "gansu-geology-bureau"
+    )
+    config = source["config"]
+    page_text = (
+        "报名时间：自本公告发布之日起至2026年12月31日18:00前，"
+        "根据计划名额招满即止。按考核结果确定拟聘人员并进行公示。"
+    )
+
+    assert _availability_match(config, page_text)
+    assert not _availability_match(
+        config,
+        page_text + "拟聘人员名单已发布，招聘工作结束。",
+    )

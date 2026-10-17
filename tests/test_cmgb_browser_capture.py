@@ -11,6 +11,7 @@ from job_hub.browser_capture import BrowserCaptureError
 from job_hub.cmgb_browser_capture import (
     CmgbBrowserCaptureError,
     _close_context_pages,
+    _major_from_description,
     build_cmgb_detail_retry_payload,
     extract_cmgb_detail,
     load_cmgb_detail_retry_capture,
@@ -20,9 +21,20 @@ from job_hub.cmgb_browser_capture import (
     write_cmgb_capture_failure,
 )
 from job_hub.profiles import evaluate_student_publication
+from job_hub.matching import stable_hash
 from job_hub.sources import OfficialSourceCollector
 
 from conftest import make_settings
+
+
+def test_major_parser_accepts_explicit_unlabelled_geoscience_qualification_only() -> None:
+    parsed = _major_from_description(
+        "从事野外试井、瓦斯压力测试。地质类相关专业，本科及以上学历，工程师以上职称。"
+    )
+    assert "地质类相关专业" in parsed
+    assert not _major_from_description(
+        "负责开展生态修复、环境地质相关项目的市场营销、项目统筹和技术管理工作。"
+    )
 
 
 HOSTS = ["cmgb.iguopin.com", "www.iguopin.com", "www.cmgb.com.cn"]
@@ -142,6 +154,48 @@ def test_cmgb_capture_rejects_missing_evidence_field(tmp_path: Path) -> None:
     del row["field_evidence"]["专业范围"]
     path = _write(tmp_path, _payload(rows=[row]))
     with pytest.raises(CmgbBrowserCaptureError, match="专业范围"):
+        load_cmgb_browser_capture(
+            path,
+            allowed_hosts=HOSTS,
+            now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+        )
+
+
+def test_cmgb_capture_repairs_empty_identity_evidence_from_row_identity(tmp_path: Path) -> None:
+    row = _row()
+    row["field_evidence"]["岗位"] = ""
+    row["field_evidence"]["招聘单位"] = ""
+    path = _write(tmp_path, _payload(rows=[row]))
+
+    payload = load_cmgb_browser_capture(
+        path,
+        allowed_hosts=HOSTS,
+        now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+    )
+
+    evidence = payload["rows"][0]["field_evidence"]
+    assert evidence["岗位"] == row["title"]
+    assert evidence["招聘单位"] == row["employer"]
+
+
+def test_cmgb_capture_allows_explicitly_configured_rolling_deadline(tmp_path: Path) -> None:
+    row = _row()
+    row["deadline"] = ""
+    row["field_evidence"]["报名截止"] = ""
+    row["published_date"] = "2026-09-01"
+    path = _write(tmp_path, _payload(rows=[row]))
+
+    payload = load_cmgb_browser_capture(
+        path,
+        allowed_hosts=HOSTS,
+        allow_empty_fields=("deadline",),
+        now=datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc),
+    )
+
+    assert payload["rows"][0]["deadline"] == ""
+    assert payload["rows"][0]["published_date"] == "2026-09-01"
+
+    with pytest.raises(CmgbBrowserCaptureError, match="deadline"):
         load_cmgb_browser_capture(
             path,
             allowed_hosts=HOSTS,
@@ -496,6 +550,50 @@ def test_cmgb_source_routes_verified_rows_through_normal_pipeline(tmp_path: Path
     assert postings[0].official_evidence_url.startswith("https://www.iguopin.com/")
 
 
+def test_cmgb_source_splits_explicit_locations_with_source_independent_ids(
+    tmp_path: Path,
+) -> None:
+    row = _row("cmgb-location-row")
+    row["location"] = "河北邢台、内蒙古包头"
+    row["field_evidence"] = {
+        **row["field_evidence"],
+        "工作地点": row["location"],
+    }
+    _write(tmp_path, _payload(rows=[row], scan={
+        **_payload()["scan"],
+        "rows_discovered": 1,
+        "rows_exported": 1,
+        "detail_discovered": 1,
+        "detail_succeeded": 1,
+    }))
+    source = {
+        "id": "cmgb-browser-location-test",
+        "name": "国聘地点拆分测试来源",
+        "publisher": "中国冶金地质总局",
+        "homepage_url": "https://cmgb.iguopin.com/jobCampus",
+        "source_type": "cmgb_browser_rows",
+        "category": "自然资源、地调与地勘",
+        "source_tier": "A",
+        "enabled": True,
+        "config": {
+            "allowed_hosts": HOSTS,
+            "capture_path": "captures/cmgb.json",
+            "application_url": "https://cmgb.iguopin.com/jobCampus",
+            "max_age_hours": 100_000,
+            "require_complete_scan": True,
+            "split_location_rows": True,
+            "minimum_relevance": 0,
+        },
+    }
+    postings = OfficialSourceCollector(make_settings(tmp_path)).collect(source)
+    assert [posting.location for posting in postings] == ["河北邢台", "内蒙古包头"]
+    assert len({posting.external_id for posting in postings}) == 2
+    for posting in postings:
+        assert posting.external_id.endswith(
+            f"--location-{stable_hash(posting.location)[:12]}"
+        )
+
+
 def test_cmgb_browser_detail_evidence_passes_student_publication_gate(tmp_path: Path) -> None:
     """A captured official detail must not be stranded as pending evidence."""
     _write(tmp_path, _payload())
@@ -658,6 +756,63 @@ def test_cmgb_detail_parser_uses_rendered_text_for_generic_nodes() -> None:
     assert detail["headcount"] == "2"
 
 
+def test_cmgb_detail_parser_accepts_official_label_variants() -> None:
+    page = _HtmlFixturePage(
+        """
+        <main>
+          <div class="title">地球物理技术岗</div>
+          <div class="company-title">示例地质单位</div>
+          <div class="overview-item"><span class="overview-title">学科专业：</span><span class="overview-desc">地球物理学、地质工程</span></div>
+          <div class="overview-item"><span class="overview-title">学历层次：</span><span class="overview-desc">硕士研究生</span></div>
+          <div class="overview-item"><span class="overview-title">工作区域：</span><span class="overview-desc">新疆</span></div>
+          <div class="overview-item"><span class="overview-title">计划招聘人数：</span><span class="overview-desc">2人</span></div>
+          <div class="overview-item"><span class="overview-title">投递截止：</span><span class="overview-desc">2026-12-31</span></div>
+        </main>
+        """
+    )
+    detail = extract_cmgb_detail(
+        page,
+        detail_url="https://www.iguopin.com/job/detail?id=label-variants",
+        allowed_hosts=set(HOSTS),
+    )
+    assert detail["major"] == "地球物理学、地质工程"
+    assert detail["degree"] == "硕士研究生"
+    assert detail["location"] == "新疆"
+    assert detail["headcount"] == "2人"
+    assert detail["deadline"] == "2026-12-31"
+
+
+def test_cmgb_detail_parser_records_update_date_for_rolling_postings() -> None:
+    page = _FakePage(
+        "岗位名称：地质技术岗 招聘单位：示例单位 更新于 2026-09-01 "
+        "最低学历：本科 工作地点：北京 招聘人数：若干 "
+        "专业要求：地质工程"
+    )
+    detail = extract_cmgb_detail(
+        page,
+        detail_url="https://www.iguopin.com/job/detail?id=rolling-1",
+        allowed_hosts=set(HOSTS),
+        allow_missing_fields=("deadline",),
+    )
+    assert detail["published_date"] == "2026-09-01"
+    assert detail["deadline"] == ""
+
+
+def test_cmgb_detail_parser_keeps_missing_update_date_visible_to_fail_closed_gate() -> None:
+    page = _FakePage(
+        "岗位名称：地质技术岗 招聘单位：示例单位 最低学历：本科 "
+        "工作地点：北京 招聘人数：若干 专业要求：地质工程"
+    )
+    detail = extract_cmgb_detail(
+        page,
+        detail_url="https://www.iguopin.com/job/detail?id=rolling-2",
+        allowed_hosts=set(HOSTS),
+        allow_missing_fields=("deadline",),
+    )
+    assert detail["deadline"] == ""
+    assert detail["published_date"] == ""
+
+
 def test_cmgb_detail_parser_reads_live_iguopin_detail_fixture() -> None:
     fixture = Path(__file__).parent / "fixtures" / "domestic" / "cmgb_iguopin_detail.html"
     detail = extract_cmgb_detail(
@@ -718,6 +873,81 @@ def test_cmgb_detail_parser_extracts_major_from_condition_sentence() -> None:
         allowed_hosts=set(HOSTS),
     )
     assert detail["major"] == "地球化学等化探类相关专业"
+
+
+def test_cmgb_detail_parser_handles_bracketed_conditions_and_unlabelled_heading() -> None:
+    page = _HtmlFixturePage(
+        """
+        <main>
+          <div class="title">油气勘探开发与转化【博士后】</div>
+          <div class="company-title">示例实验室</div>
+          <span class="address">北京</span>
+          <div class="overview-item"><span class="overview-title">专业要求：</span><span class="overview-desc">详见职位描述</span></div>
+          <div class="overview-item"><span class="overview-title">最低学历：</span><span class="overview-desc">博士</span></div>
+          <div class="overview-item"><span class="overview-title">招聘人数：</span><span class="overview-desc">若干人</span></div>
+          <div class="overview-item"><span class="overview-title">报名截止：</span><span class="overview-desc">2026-11-15 23:59:59</span></div>
+          <div class="overview-item"><span class="overview-title">职位性质：</span><span class="overview-desc">社招</span></div>
+          <div class="job-duty">专业要求 地质资源与地质工程、地质学、流体力学等 工作职责 从事油气勘探开发研究。</div>
+        </main>
+        """
+    )
+    detail = extract_cmgb_detail(
+        page,
+        detail_url="https://www.iguopin.com/job/detail?id=heading-major",
+        allowed_hosts=set(HOSTS),
+    )
+
+    assert detail["major"] == "地质资源与地质工程、地质学、流体力学等"
+    assert detail["field_evidence"]["职位性质"] == "社招"
+    assert _major_from_description(
+        "【任职条件】 （1）原则上应具有博士学历。地球物理、资源勘查工程等相关专业；"
+    ).endswith("地球物理、资源勘查工程等相关专业")
+
+
+def test_cmgb_detail_parser_accepts_major_code_label() -> None:
+    page = _HtmlFixturePage(
+        """
+        <main>
+          <div class="title">核安保技术审评监督岗</div>
+          <div class="company-title">国家核安保技术中心</div>
+          <span class="address">北京</span>
+          <div class="overview-item"><span class="overview-title">专业要求：</span><span class="overview-desc">详见职位描述</span></div>
+          <div class="overview-item"><span class="overview-title">最低学历：</span><span class="overview-desc">硕士</span></div>
+          <div class="overview-item"><span class="overview-title">招聘人数：</span><span class="overview-desc">6人</span></div>
+          <div class="overview-item"><span class="overview-title">报名截止：</span><span class="overview-desc">2026-10-14 23:59:59</span></div>
+          <div class="job-duty">【岗位要求】1.专业（代码）:物理学（0702）、地质资源与地质工程（0818）、核科学与技术（0827）。</div>
+        </main>
+        """
+    )
+    detail = extract_cmgb_detail(
+        page,
+        detail_url="https://www.iguopin.com/job/detail?id=major-code",
+        allowed_hosts=set(HOSTS),
+    )
+    assert "地质资源与地质工程" in detail["major"]
+
+
+def test_cmgb_detail_parser_accepts_explicit_unrestricted_major_sentence() -> None:
+    page = _HtmlFixturePage(
+        """
+        <main>
+          <div class="title">综合管理岗</div>
+          <div class="company-title">示例地质单位</div>
+          <span class="address">北京</span>
+          <div class="overview-item"><span class="overview-title">专业要求：</span><span class="overview-desc">详见职位描述</span></div>
+          <div class="overview-item"><span class="overview-title">最低学历：</span><span class="overview-desc">本科</span></div>
+          <div class="overview-item"><span class="overview-title">招聘人数：</span><span class="overview-desc">1人</span></div>
+          <div class="overview-item"><span class="overview-title">报名截止：</span><span class="overview-desc">2026-11-06</span></div>
+          <div class="job-duty">任职要求：专业不限，欢迎各专业毕业生报名。</div>
+        </main>
+        """
+    )
+    detail = extract_cmgb_detail(
+        page,
+        detail_url="https://www.iguopin.com/job/detail?id=unrestricted-major",
+        allowed_hosts=set(HOSTS),
+    )
+    assert detail["major"] == "不限专业"
 
 
 def test_cmgb_detail_parser_prefers_precise_requirement_over_generic_overview() -> None:

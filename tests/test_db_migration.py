@@ -98,6 +98,7 @@ def test_initialize_adds_v03_columns_to_a_v02_jobs_table(tmp_path) -> None:
     assert {
         "canonical_employer_id",
         "province",
+        "provinces_json",
         "location_confidence",
         "official_evidence_url",
         "verification_status",
@@ -205,3 +206,53 @@ def test_update_job_normalization_reports_and_persists_a_change(tmp_path) -> Non
     )
     assert changed is True
     assert database.find_job(job_id)["city"] == "克拉玛依"
+
+
+def test_province_filter_matches_all_provinces_in_a_multi_location_job(tmp_path) -> None:
+    path = tmp_path / "multi-location.sqlite3"
+    database = Database(path)
+    database.initialize()
+    database.upsert_source(
+        {
+            "id": "source",
+            "name": "来源",
+            "publisher": "单位",
+            "homepage_url": "https://example.edu.cn/",
+            "source_type": "manual",
+            "category": "自然资源、地调与地勘",
+            "source_tier": "A",
+            "enabled": True,
+            "config": {},
+        }
+    )
+    database.save_job(
+        {
+            "source_id": "source",
+            "fingerprint": "multi-location",
+            "content_hash": "hash",
+            "title": "多地点地质岗位",
+            "employer": "单位",
+            "category": "自然资源、地调与地勘",
+            "source_tier": "A",
+            "source_name": "来源",
+            "source_url": "https://example.edu.cn/job",
+            "official_evidence_url": "https://example.edu.cn/job",
+            "province": "北京",
+            "provinces": ["北京", "山东"],
+            "degree_levels": [],
+            "major_tags": ["地质工程"],
+            "publication_status": "student_eligible",
+            "summary": "",
+            "description": "",
+            "relevance_score": 50,
+            "relevance_band": "强相关",
+        }
+    )
+    _, beijing_total = database.list_jobs(
+        province="北京", student_visible=False, page_size=None
+    )
+    _, shandong_total = database.list_jobs(
+        province="山东", student_visible=False, page_size=None
+    )
+    assert beijing_total == 1
+    assert shandong_total == 1

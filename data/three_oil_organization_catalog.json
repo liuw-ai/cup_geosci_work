@@ -1,0 +1,104 @@
+{
+  "version": 2,
+  "as_of": "2026-10-06",
+  "scope": "三桶油体系中与地质、勘探开发、地球科学、油田技术服务和应届生招聘相关的组织范围目录",
+  "authority_note": "本目录用于组织覆盖和来源扩展计划。group_roster_catalogued 只表示单位已纳入集团体系范围，不表示其招聘入口已经核验或可以自动采集；只有 organization_registry.json 中的 official_confirmed/automation_ready 频道才能进入来源运行链路。",
+  "exclusions": [
+    {
+      "id": "pipechina",
+      "name": "国家石油天然气管网集团有限公司",
+      "reason": "国家管网是独立中央企业，不属于中国石油、中国石化或中国海油三桶油体系；另列为管输与综合能源来源。"
+    }
+  ],
+  "groups": [
+    {
+      "id": "cnpc",
+      "name": "中国石油天然气集团有限公司",
+      "aliases": ["中国石油", "中石油", "CNPC"],
+      "official_identity_url": "https://www.cnpc.com.cn/",
+      "units": [
+        {"id": "cnpc", "name": "中国石油天然气集团有限公司", "role": "group"},
+        {"id": "cnpc-petrochina", "name": "中国石油天然气股份有限公司", "role": "operating_company"},
+        {"id": "cnpc-daqing", "name": "大庆油田有限责任公司", "role": "operating_company"},
+        {"id": "cnpc-changqing", "name": "中国石油长庆油田分公司", "role": "operating_company"},
+        {"id": "cnpc-liaohe", "name": "中国石油辽河油田分公司", "role": "operating_company"},
+        {"id": "cnpc-xinjiang", "name": "中国石油新疆油田分公司", "role": "operating_company"},
+        {"id": "cnpc-tarim", "name": "中国石油塔里木油田分公司", "role": "operating_company"},
+        {"id": "cnpc-southwest-gas", "name": "中国石油西南油气田分公司", "role": "operating_company"},
+        {"id": "cnpc-huabei", "name": "中国石油华北油田分公司", "role": "operating_company"},
+        {"id": "cnpc-jilin", "name": "中国石油吉林油田分公司", "role": "operating_company"},
+        {"id": "cnpc-tuha", "name": "中国石油吐哈油田分公司", "role": "operating_company"},
+        {"id": "cnpc-qinghai", "name": "中国石油青海油田分公司", "role": "operating_company"},
+        {"id": "cnpc-yumen", "name": "中国石油玉门油田分公司", "role": "operating_company"},
+        {"id": "cnpc-dagang", "name": "中国石油大港油田分公司", "role": "operating_company"},
+        {"id": "cnpc-jidong", "name": "中国石油冀东油田分公司", "role": "operating_company"},
+        {"id": "cnpc-riped", "name": "中国石油勘探开发研究院", "role": "research_institute"},
+        {"id": "cnpc-bgp", "name": "中国石油集团东方地球物理勘探有限责任公司", "role": "internal_service_unit"},
+        {"id": "cnpc-logging", "name": "中国石油集团测井有限公司", "role": "internal_service_unit"},
+        {"id": "cnpc-sichuan-changqing-drilling", "name": "中国石油集团川庆钻探工程有限公司", "role": "internal_service_unit"},
+        {"id": "cnpc-greatwall-drilling", "name": "中国石油集团长城钻探工程有限公司", "role": "internal_service_unit"},
+        {"id": "cnpc-bohai-drilling", "name": "中国石油集团渤海钻探工程有限公司", "role": "internal_service_unit"},
+        {"id": "cnpc-western-drilling", "name": "中国石油集团西部钻探工程有限公司", "role": "internal_service_unit"},
+        {"id": "cnpc-engineering-construction", "name": "中国石油工程建设有限公司", "role": "internal_service_unit"},
+        {"id": "cnpc-economic-research", "name": "中国石油集团经济技术研究院", "role": "research_institute"},
+        {"id": "cnpc-pipeline-engineering", "name": "中国石油管道局工程有限公司", "role": "internal_service_unit"},
+        {"id": "cnpc-cnodc", "name": "中国石油天然气勘探开发公司", "role": "internal_service_unit"},
+        {"id": "cnpc-hqccec", "name": "中国寰球工程有限公司", "role": "internal_service_unit"}
+      ]
+    },
+    {
+      "id": "sinopec",
+      "name": "中国石油化工集团有限公司",
+      "aliases": ["中国石化", "中石化", "Sinopec"],
+      "official_identity_url": "https://www.sinopecgroup.com/",
+      "units": [
+        {"id": "sinopec", "name": "中国石油化工集团有限公司", "role": "group"},
+        {"id": "sinopec-corp", "name": "中国石油化工股份有限公司", "role": "operating_company"},
+        {"id": "sinopec-shengli", "name": "中国石化胜利油田分公司", "role": "operating_company"},
+        {"id": "sinopec-zhongyuan", "name": "中国石化中原油田分公司", "role": "operating_company"},
+        {"id": "sinopec-jianghan", "name": "中国石化江汉油田分公司", "role": "operating_company"},
+        {"id": "sinopec-jiangsu", "name": "中国石化江苏油田分公司", "role": "operating_company"},
+        {"id": "sinopec-henan", "name": "中国石化河南油田分公司", "role": "operating_company"},
+        {"id": "sinopec-northwest", "name": "中国石化西北油田分公司", "role": "operating_company"},
+        {"id": "sinopec-northeast-gas", "name": "中国石化东北油气分公司", "role": "operating_company"},
+        {"id": "sinopec-huabei-gas", "name": "中国石化华北油气分公司", "role": "operating_company"},
+        {"id": "sinopec-east-gas", "name": "中国石化华东油气分公司", "role": "operating_company"},
+        {"id": "sinopec-petroleum-exploration-production-research", "name": "中国石化石油勘探开发研究院有限公司", "role": "research_institute"},
+        {"id": "sinopec-petroleum-engineering-research", "name": "中国石化石油工程技术研究院", "role": "research_institute"},
+        {"id": "sinopec-oilfield-service", "name": "中石化石油工程技术服务股份有限公司", "role": "internal_service_unit"},
+        {"id": "sinopec-international-exploration", "name": "中国石化集团国际石油勘探开发有限公司", "role": "internal_service_unit"},
+        {"id": "sinopec-petroleum-machinery", "name": "中石化石油机械股份有限公司", "role": "internal_service_unit"},
+        {"id": "sinopec-engineering-construction", "name": "中国石化工程建设有限公司", "role": "internal_service_unit"}
+      ]
+    },
+    {
+      "id": "cnooc",
+      "name": "中国海洋石油集团有限公司",
+      "aliases": ["中国海油", "中海油", "CNOOC"],
+      "official_identity_url": "https://www.cnooc.com.cn/",
+      "units": [
+        {"id": "cnooc", "name": "中国海洋石油集团有限公司", "role": "group"},
+        {"id": "cnooc-limited", "name": "中国海洋石油有限公司", "role": "operating_company"},
+        {"id": "cnooc-china", "name": "中海石油（中国）有限公司", "role": "operating_company"},
+        {"id": "cnooc-tianjin", "name": "中海石油（中国）有限公司天津分公司", "role": "operating_company"},
+        {"id": "cnooc-shanghai", "name": "中海石油（中国）有限公司上海分公司", "role": "operating_company"},
+        {"id": "cnooc-shenzhen", "name": "中海石油（中国）有限公司深圳分公司", "role": "operating_company"},
+        {"id": "cnooc-zhanjiang", "name": "中海石油（中国）有限公司湛江分公司", "role": "operating_company"},
+        {"id": "cnooc-hainan", "name": "中海石油（中国）有限公司海南分公司", "role": "operating_company"},
+        {"id": "cnooc-fujian", "name": "中海石油（中国）有限公司福建分公司", "role": "operating_company"},
+        {"id": "cnooc-research", "name": "中海油研究总院有限责任公司", "role": "research_institute"},
+        {"id": "cosl", "name": "中海油田服务股份有限公司", "role": "internal_service_unit"},
+        {"id": "cnooc-engineering", "name": "海洋石油工程股份有限公司", "role": "internal_service_unit"},
+        {"id": "cnooc-energy-development", "name": "中海油能源发展股份有限公司", "role": "internal_service_unit"},
+        {"id": "cnooc-international", "name": "中国海洋石油国际有限公司", "role": "internal_service_unit"},
+        {"id": "cnooc-beijing-new-energy", "name": "中海石油（中国）有限公司北京新能源分公司", "role": "internal_service_unit"},
+        {"id": "cnooc-chemicals", "name": "中海石油化学股份有限公司", "role": "internal_service_unit"},
+        {"id": "cnooc-refining", "name": "中海石油炼化有限责任公司", "role": "internal_service_unit"},
+        {"id": "cnooc-gas-power", "name": "中海石油气电集团有限责任公司", "role": "internal_service_unit"},
+        {"id": "cnooc-international-trade", "name": "中海油国际贸易有限责任公司", "role": "internal_service_unit"},
+        {"id": "cnooc-coalbed-gas", "name": "中联煤层气有限责任公司", "role": "internal_service_unit"}
+      ]
+    }
+  ]
+}
+

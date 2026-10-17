@@ -1,0 +1,5973 @@
+{
+  "version": 1,
+  "generated_at": "2026-10-17T09:44:34Z",
+  "purpose": "Phase 4 read-only reconciliation; non-catalog records are not production inputs.",
+  "external_evidence_policy": "Do not promote a display or registry name without an official group page, legal-registration record, or official recruitment evidence.",
+  "summary": {
+    "catalog_group_count": 3,
+    "catalog_unit_count": 64,
+    "registry_related_organization_count": 295,
+    "scope_status_counts": {
+      "formal_catalog": 64,
+      "display_candidate_unverified": 231
+    },
+    "catalog_units_by_group": {
+      "cnpc": 27,
+      "sinopec": 17,
+      "cnooc": 20
+    },
+    "registry_channel_verification_counts": {
+      "official_confirmed": 75,
+      "candidate": 238,
+      "automation_ready": 1
+    }
+  },
+  "records": [
+    {
+      "id": "cnooc",
+      "canonical_name": "中国海洋石油集团有限公司",
+      "parent_id": null,
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "group",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "official_confirmed": 2
+      },
+      "channel_ids": [
+        "cnooc-homepage",
+        "cnooc-campus-portal"
+      ],
+      "official_urls": [
+        "https://www.cnooc.com.cn/",
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-beijing-new-energy",
+      "canonical_name": "中海石油（中国）有限公司北京新能源分公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-beijing-new-energy-campus"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-chemicals",
+      "canonical_name": "中海石油化学股份有限公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-chemicals-campus"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-china",
+      "canonical_name": "中海石油（中国）有限公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-china-campus-portal"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-coalbed-gas",
+      "canonical_name": "中联煤层气有限责任公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-coalbed-gas-campus"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-energy-development",
+      "canonical_name": "中海油能源发展股份有限公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "official_confirmed": 2
+      },
+      "channel_ids": [
+        "cnooc-energy-development-homepage",
+        "cnooc-energy-development-campus"
+      ],
+      "official_urls": [
+        "https://www.cnoocet.com/",
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-engineering",
+      "canonical_name": "海洋石油工程股份有限公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-engineering-campus-portal"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-fujian",
+      "canonical_name": "中海石油（中国）有限公司福建分公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-fujian-campus-portal"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-gas-power",
+      "canonical_name": "中海石油气电集团有限责任公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-gas-power-campus"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-hainan",
+      "canonical_name": "中海石油（中国）有限公司海南分公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-hainan-homepage"
+      ],
+      "official_urls": [
+        "https://www.cnooc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-international",
+      "canonical_name": "中国海洋石油国际有限公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-international-campus-portal"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-international-trade",
+      "canonical_name": "中海油国际贸易有限责任公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-international-trade-campus"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-limited",
+      "canonical_name": "中国海洋石油有限公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-limited-campus-portal"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-refining",
+      "canonical_name": "中海石油炼化有限责任公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-refining-campus"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-research",
+      "canonical_name": "中海油研究总院有限责任公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-research-campus-portal"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-shanghai",
+      "canonical_name": "中海石油（中国）有限公司上海分公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-shanghai-homepage"
+      ],
+      "official_urls": [
+        "https://www.cnooc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-shenzhen",
+      "canonical_name": "中海石油（中国）有限公司深圳分公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-shenzhen-campus-portal"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-tianjin",
+      "canonical_name": "中海石油（中国）有限公司天津分公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-tianjin-homepage"
+      ],
+      "official_urls": [
+        "https://www.cnooc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnooc-zhanjiang",
+      "canonical_name": "中海石油（中国）有限公司湛江分公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnooc-zhanjiang-campus-portal"
+      ],
+      "official_urls": [
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cosl",
+      "canonical_name": "中海油田服务股份有限公司",
+      "parent_id": "cnooc",
+      "parent_name": null,
+      "affiliation": "中国海油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 3,
+      "channel_verification_statuses": {
+        "official_confirmed": 3
+      },
+      "channel_ids": [
+        "cosl-homepage",
+        "cosl-official-ats",
+        "cosl-campus"
+      ],
+      "official_urls": [
+        "https://www.cosl.com.cn/",
+        "http://cosl.zhiye.com/",
+        "https://cnooc.zhaopin.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec",
+      "canonical_name": "中国石油化工集团有限公司",
+      "parent_id": null,
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "group",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "official_confirmed": 2
+      },
+      "channel_ids": [
+        "sinopec-homepage",
+        "sinopec-campus-portal"
+      ],
+      "official_urls": [
+        "https://www.sinopecgroup.com/",
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-corp",
+      "canonical_name": "中国石油化工股份有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-corp-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-display-002-unit",
+      "canonical_name": "中原油田",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-002-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-003-unit",
+      "canonical_name": "河南油田",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-003-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-005-unit",
+      "canonical_name": "江苏油田",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-005-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-006-unit",
+      "canonical_name": "新星石油公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-006-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-007-unit",
+      "canonical_name": "上海海洋油气分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-007-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-008-unit",
+      "canonical_name": "华东石油局",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-008-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-009-unit",
+      "canonical_name": "华北石油局",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-009-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-010-unit",
+      "canonical_name": "西北石油局",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-010-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-011-unit",
+      "canonical_name": "东北石油局",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-011-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-012-unit",
+      "canonical_name": "西南石油局",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-012-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-013-unit",
+      "canonical_name": "勘探分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-013-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-014-unit",
+      "canonical_name": "天然气分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-014-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-015-unit",
+      "canonical_name": "胜利石油工程有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-015-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-016-unit",
+      "canonical_name": "中原石油工程有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-016-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-017-unit",
+      "canonical_name": "江汉石油工程有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-017-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-018-unit",
+      "canonical_name": "西南石油工程有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-018-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-019-unit",
+      "canonical_name": "华东石油工程有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-019-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-020-unit",
+      "canonical_name": "地球物理有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-020-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-022-unit",
+      "canonical_name": "国际石油工程公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-022-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-023-unit",
+      "canonical_name": "海洋石油工程公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-023-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-024-unit",
+      "canonical_name": "经纬有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-024-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-025-unit",
+      "canonical_name": "燕山石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-025-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-026-unit",
+      "canonical_name": "齐鲁石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-026-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-027-unit",
+      "canonical_name": "上海石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-027-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-028-unit",
+      "canonical_name": "金陵石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-028-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-029-unit",
+      "canonical_name": "茂名石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-029-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-030-unit",
+      "canonical_name": "天津石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-030-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-031-unit",
+      "canonical_name": "扬子石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-031-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-032-unit",
+      "canonical_name": "仪征化纤",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-032-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-033-unit",
+      "canonical_name": "镇海炼化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-033-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-034-unit",
+      "canonical_name": "福建炼化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-034-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-035-unit",
+      "canonical_name": "南京化工公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-035-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-036-unit",
+      "canonical_name": "广州石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-036-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-037-unit",
+      "canonical_name": "安庆石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-037-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-038-unit",
+      "canonical_name": "荆门石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-038-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-039-unit",
+      "canonical_name": "重庆川维化工有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-039-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-040-unit",
+      "canonical_name": "九江石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-040-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-041-unit",
+      "canonical_name": "石家庄炼化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-041-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-042-unit",
+      "canonical_name": "济南炼化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-042-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-043-unit",
+      "canonical_name": "中韩石化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-043-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-045-unit",
+      "canonical_name": "北海炼化",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-045-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-046-unit",
+      "canonical_name": "塔河炼化公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-046-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-047-unit",
+      "canonical_name": "化工销售有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-047-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-048-unit",
+      "canonical_name": "宁夏能源化工有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-048-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-049-unit",
+      "canonical_name": "炼油销售有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-049-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-050-unit",
+      "canonical_name": "中科（广东）炼化有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-050-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-051-unit",
+      "canonical_name": "北京石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-051-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-052-unit",
+      "canonical_name": "天津石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-052-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-053-unit",
+      "canonical_name": "河北石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-053-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-054-unit",
+      "canonical_name": "山西石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-054-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-055-unit",
+      "canonical_name": "上海石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-055-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-056-unit",
+      "canonical_name": "江苏石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-056-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-057-unit",
+      "canonical_name": "浙江石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-057-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-058-unit",
+      "canonical_name": "安徽石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-058-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-059-unit",
+      "canonical_name": "福建石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-059-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-060-unit",
+      "canonical_name": "江西石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-060-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-061-unit",
+      "canonical_name": "山东石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-061-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-062-unit",
+      "canonical_name": "河南石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-062-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-063-unit",
+      "canonical_name": "湖北石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-063-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-064-unit",
+      "canonical_name": "湖南石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-064-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-065-unit",
+      "canonical_name": "广东石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-065-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-066-unit",
+      "canonical_name": "广西石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-066-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-067-unit",
+      "canonical_name": "海南石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-067-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-068-unit",
+      "canonical_name": "贵州石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-068-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-069-unit",
+      "canonical_name": "云南石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-069-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-070-unit",
+      "canonical_name": "销售华北分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-070-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-071-unit",
+      "canonical_name": "销售华东分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-071-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-072-unit",
+      "canonical_name": "销售华中分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-072-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-073-unit",
+      "canonical_name": "销售华南分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-073-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-074-unit",
+      "canonical_name": "销售西北分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-074-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-075-unit",
+      "canonical_name": "辽宁石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-075-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-076-unit",
+      "canonical_name": "黑龙江石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-076-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-077-unit",
+      "canonical_name": "吉林石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-077-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-078-unit",
+      "canonical_name": "陕西石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-078-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-079-unit",
+      "canonical_name": "宁夏石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-079-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-080-unit",
+      "canonical_name": "新疆石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-080-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-081-unit",
+      "canonical_name": "内蒙古石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-081-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-082-unit",
+      "canonical_name": "青海石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-082-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-083-unit",
+      "canonical_name": "甘肃石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-083-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-084-unit",
+      "canonical_name": "四川石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-084-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-085-unit",
+      "canonical_name": "重庆石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-085-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-086-unit",
+      "canonical_name": "西藏石油分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-086-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-087-unit",
+      "canonical_name": "燃料油公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-087-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-088-unit",
+      "canonical_name": "第四建设公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-088-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-089-unit",
+      "canonical_name": "第五建设公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-089-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-090-unit",
+      "canonical_name": "第十建设公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-090-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-091-unit",
+      "canonical_name": "工程建设公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-091-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-092-unit",
+      "canonical_name": "广州工程公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-092-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-093-unit",
+      "canonical_name": "上海工程公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-093-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-094-unit",
+      "canonical_name": "宁波工程公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-094-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-095-unit",
+      "canonical_name": "南京工程公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-095-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-096-unit",
+      "canonical_name": "重型起重运输工程公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-096-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-097-unit",
+      "canonical_name": "洛阳技术研发中心",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-097-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-098-unit",
+      "canonical_name": "节能技术服务公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-098-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-100-unit",
+      "canonical_name": "石油化工科学研究院",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-100-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-101-unit",
+      "canonical_name": "北京化工研究院",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-101-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-102-unit",
+      "canonical_name": "大连石油化工研究院",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-102-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-103-unit",
+      "canonical_name": "上海石油化工研究院",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-103-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-104-unit",
+      "canonical_name": "安全工程研究院",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-104-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-106-unit",
+      "canonical_name": "石油物探技术研究院",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-106-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-107-unit",
+      "canonical_name": "催化剂公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-107-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-108-unit",
+      "canonical_name": "国际事业公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-108-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-111-unit",
+      "canonical_name": "联合石化公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-111-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-112-unit",
+      "canonical_name": "财务公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-112-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-113-unit",
+      "canonical_name": "百川公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-113-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-114-unit",
+      "canonical_name": "经济技术研究院",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-114-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-115-unit",
+      "canonical_name": "管理干部学院",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-115-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-116-unit",
+      "canonical_name": "石化报社",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-116-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-117-unit",
+      "canonical_name": "石化出版社",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-117-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-118-unit",
+      "canonical_name": "共享服务公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-118-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-119-unit",
+      "canonical_name": "项目管理公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-119-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-120-unit",
+      "canonical_name": "审计中心",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-120-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-121-unit",
+      "canonical_name": "中国航空油料有限责任公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-121-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-122-unit",
+      "canonical_name": "中国航油集团石油股份有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-122-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-123-unit",
+      "canonical_name": "中国航油集团物流有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-123-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-124-unit",
+      "canonical_name": "中国航油集团国际控股有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-124-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-125-unit",
+      "canonical_name": "中国航油集团通用航空发展有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-125-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-126-unit",
+      "canonical_name": "北京中航油工程建设有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-126-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-127-unit",
+      "canonical_name": "中航油石化管道有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-127-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-128-unit",
+      "canonical_name": "深圳承远航空油料有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-128-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-129-unit",
+      "canonical_name": "中国航油集团资产发展有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-129-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-130-unit",
+      "canonical_name": "中国航油集团投资有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-130-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-131-unit",
+      "canonical_name": "中国航油集团海南有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-131-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-east-gas",
+      "canonical_name": "中国石化华东油气分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-east-gas-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-engineering-construction",
+      "canonical_name": "中国石化工程建设有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-engineering-construction-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-henan",
+      "canonical_name": "中国石化河南油田分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-henan-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-huabei-gas",
+      "canonical_name": "中国石化华北油气分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-huabei-gas-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-international-exploration",
+      "canonical_name": "中国石化集团国际石油勘探开发有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-international-exploration-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-jianghan",
+      "canonical_name": "中国石化江汉油田分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "official_confirmed": 2
+      },
+      "channel_ids": [
+        "sinopec-jianghan-homepage",
+        "sinopec-jianghan-campus"
+      ],
+      "official_urls": [
+        "https://jhof.sinopec.com/",
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-jiangsu",
+      "canonical_name": "中国石化江苏油田分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-jiangsu-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-northeast-gas",
+      "canonical_name": "中国石化东北油气分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-northeast-gas-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-northwest",
+      "canonical_name": "中国石化西北油田分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-northwest-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-oilfield-service",
+      "canonical_name": "中石化石油工程技术服务股份有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "candidate": 1,
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-oss-homepage",
+        "sinopec-oss-campus"
+      ],
+      "official_urls": [
+        "https://www.sinopec-oss.com/",
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-petroleum-engineering-research",
+      "canonical_name": "中国石化石油工程技术研究院",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-petroleum-engineering-research-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-petroleum-exploration-production-research",
+      "canonical_name": "中国石化石油勘探开发研究院有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "official_confirmed": 2
+      },
+      "channel_ids": [
+        "sinopec-pepris-homepage",
+        "sinopec-pepris-2026-recruitment"
+      ],
+      "official_urls": [
+        "https://pepris.sinopec.com/",
+        "http://pepris.sinopec.com/pepris/careers/rwzl/2026/6/I1519026538069098496.shtml"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-petroleum-machinery",
+      "canonical_name": "中石化石油机械股份有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-petroleum-machinery-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-shengli",
+      "canonical_name": "中国石化胜利油田分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "official_confirmed": 2
+      },
+      "channel_ids": [
+        "sinopec-shengli-homepage",
+        "sinopec-shengli-campus"
+      ],
+      "official_urls": [
+        "https://slof.sinopec.com/",
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "sinopec-zhongyuan",
+      "canonical_name": "中国石化中原油田分公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "sinopec-zhongyuan-campus-portal"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc",
+      "canonical_name": "中国石油天然气集团有限公司",
+      "parent_id": null,
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "group",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "official_confirmed": 2
+      },
+      "channel_ids": [
+        "cnpc-homepage",
+        "cnpc-campus-portal"
+      ],
+      "official_urls": [
+        "https://www.cnpc.com.cn/",
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-bgp",
+      "canonical_name": "中国石油集团东方地球物理勘探有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 3,
+      "channel_verification_statuses": {
+        "official_confirmed": 2,
+        "automation_ready": 1
+      },
+      "channel_ids": [
+        "cnpc-bgp-homepage",
+        "cnpc-bgp-campus",
+        "cnpc-bgp-recruitment"
+      ],
+      "official_urls": [
+        "https://www.bgp.com.cn/",
+        "https://zhaopin.cnpc.com.cn/",
+        "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-bohai-drilling",
+      "canonical_name": "中国石油集团渤海钻探工程有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "candidate": 1,
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-bhdrilling-homepage",
+        "cnpc-bhdrilling-campus"
+      ],
+      "official_urls": [
+        "https://bhdrilling.cnpc.com.cn/",
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-changqing",
+      "canonical_name": "中国石油长庆油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "official_confirmed": 2
+      },
+      "channel_ids": [
+        "cnpc-changqing-homepage",
+        "cnpc-changqing-campus"
+      ],
+      "official_urls": [
+        "https://cqyt.cnpc.com.cn/",
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-cnodc",
+      "canonical_name": "中国石油天然气勘探开发公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-cnodc-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-dagang",
+      "canonical_name": "中国石油大港油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-dagang-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-daqing",
+      "canonical_name": "大庆油田有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-daqing-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-display-014-unit",
+      "canonical_name": "浙江油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-014-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-015-unit",
+      "canonical_name": "中石油煤层气有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-015-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-016-unit",
+      "canonical_name": "南方石油勘探开发有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-016-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-017-unit",
+      "canonical_name": "中油国际管道公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-017-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-019-unit",
+      "canonical_name": "中石油深圳新能源研究院有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-019-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-020-unit",
+      "canonical_name": "中国石油集团电能有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-020-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-021-unit",
+      "canonical_name": "大庆石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-021-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-022-unit",
+      "canonical_name": "吉林石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-022-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-023-unit",
+      "canonical_name": "抚顺石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-023-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-024-unit",
+      "canonical_name": "辽阳石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-024-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-025-unit",
+      "canonical_name": "兰州石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-025-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-026-unit",
+      "canonical_name": "独山子石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-026-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-027-unit",
+      "canonical_name": "乌鲁木齐石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-027-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-028-unit",
+      "canonical_name": "宁夏石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-028-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-029-unit",
+      "canonical_name": "大连石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-029-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-030-unit",
+      "canonical_name": "大连西太平洋石油化工有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-030-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-031-unit",
+      "canonical_name": "锦州石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-031-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-032-unit",
+      "canonical_name": "锦西石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-032-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-033-unit",
+      "canonical_name": "大庆炼化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-033-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-034-unit",
+      "canonical_name": "哈尔滨石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-034-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-035-unit",
+      "canonical_name": "广西石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-035-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-036-unit",
+      "canonical_name": "四川石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-036-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-037-unit",
+      "canonical_name": "广东石化有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-037-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-038-unit",
+      "canonical_name": "中石油云南石化有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-038-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-039-unit",
+      "canonical_name": "大港石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-039-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-040-unit",
+      "canonical_name": "华北石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-040-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-041-unit",
+      "canonical_name": "呼和浩特石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-041-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-042-unit",
+      "canonical_name": "辽河石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-042-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-043-unit",
+      "canonical_name": "长庆石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-043-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-044-unit",
+      "canonical_name": "中石油克拉玛依石化有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-044-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-045-unit",
+      "canonical_name": "庆阳石化分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-045-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-046-unit",
+      "canonical_name": "中国石油独山子石化产品有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-046-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-047-unit",
+      "canonical_name": "润滑油公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-047-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-048-unit",
+      "canonical_name": "中石油（上海）新材料研究院有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-048-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-049-unit",
+      "canonical_name": "蓝海新材料（通州湾）有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-049-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-050-unit",
+      "canonical_name": "东北化工销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-050-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-051-unit",
+      "canonical_name": "西北化工销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-051-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-052-unit",
+      "canonical_name": "华东化工销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-052-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-053-unit",
+      "canonical_name": "北京化工销售运营中心",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-053-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-054-unit",
+      "canonical_name": "华南化工销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-054-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-055-unit",
+      "canonical_name": "西南化工销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-055-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-056-unit",
+      "canonical_name": "北京销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-056-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-057-unit",
+      "canonical_name": "上海销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-057-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-058-unit",
+      "canonical_name": "湖北销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-058-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-059-unit",
+      "canonical_name": "广东销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-059-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-060-unit",
+      "canonical_name": "云南销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-060-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-061-unit",
+      "canonical_name": "辽宁销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-061-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-062-unit",
+      "canonical_name": "吉林销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-062-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-063-unit",
+      "canonical_name": "黑龙江销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-063-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-064-unit",
+      "canonical_name": "天津销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-064-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-065-unit",
+      "canonical_name": "河北销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-065-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-066-unit",
+      "canonical_name": "山西销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-066-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-067-unit",
+      "canonical_name": "内蒙古销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-067-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-068-unit",
+      "canonical_name": "陕西销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-068-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-069-unit",
+      "canonical_name": "甘肃销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-069-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-070-unit",
+      "canonical_name": "青海销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-070-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-071-unit",
+      "canonical_name": "宁夏销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-071-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-072-unit",
+      "canonical_name": "重庆销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-072-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-073-unit",
+      "canonical_name": "四川销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-073-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-074-unit",
+      "canonical_name": "贵州销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-074-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-075-unit",
+      "canonical_name": "西藏销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-075-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-076-unit",
+      "canonical_name": "江苏销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-076-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-077-unit",
+      "canonical_name": "浙江销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-077-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-078-unit",
+      "canonical_name": "安徽销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-078-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-079-unit",
+      "canonical_name": "福建销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-079-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-080-unit",
+      "canonical_name": "江西销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-080-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-081-unit",
+      "canonical_name": "山东销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-081-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-082-unit",
+      "canonical_name": "河南销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-082-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-083-unit",
+      "canonical_name": "湖南销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-083-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-084-unit",
+      "canonical_name": "广西销售分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-084-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-085-unit",
+      "canonical_name": "中石油新疆销售有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-085-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-086-unit",
+      "canonical_name": "中石油海南销售有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-086-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-093-unit",
+      "canonical_name": "海洋工程有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-093-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-095-unit",
+      "canonical_name": "大庆钻探工程有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-095-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-098-unit",
+      "canonical_name": "中国昆仑工程有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-098-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-099-unit",
+      "canonical_name": "中石油（北京）项目管理有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-099-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-100-unit",
+      "canonical_name": "中国石油技术开发有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-100-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-101-unit",
+      "canonical_name": "宝鸡石油机械有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-101-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-102-unit",
+      "canonical_name": "中国石油集团宝石管业有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-102-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-103-unit",
+      "canonical_name": "济柴动力有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-103-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-104-unit",
+      "canonical_name": "渤海石油装备制造有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-104-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-105-unit",
+      "canonical_name": "装备制造创新中心（北京石油机械有限公司）",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-105-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-106-unit",
+      "canonical_name": "石油化工研究院",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-106-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-107-unit",
+      "canonical_name": "规划总院",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-107-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-109-unit",
+      "canonical_name": "工程技术研究院有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-109-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-110-unit",
+      "canonical_name": "安全环保技术研究院有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-110-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-111-unit",
+      "canonical_name": "工程材料研究院有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-111-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-112-unit",
+      "canonical_name": "中石油（北京）数智研究院有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-112-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-113-unit",
+      "canonical_name": "昆仑数智科技有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-113-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-114-unit",
+      "canonical_name": "中国石油集团管理干部学院",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-114-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-115-unit",
+      "canonical_name": "石油工业出版社有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-115-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-116-unit",
+      "canonical_name": "《中国石油报》社有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-116-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-117-unit",
+      "canonical_name": "中国石油审计服务中心有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-117-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-118-unit",
+      "canonical_name": "中国石油物资有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-118-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-119-unit",
+      "canonical_name": "共享运营有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-119-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-120-unit",
+      "canonical_name": "昆仑物流有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-120-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-121-unit",
+      "canonical_name": "中国华油集团有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-121-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-122-unit",
+      "canonical_name": "云杉泽（北京）电子商务有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-122-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-123-unit",
+      "canonical_name": "昆仑能源有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-123-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-124-unit",
+      "canonical_name": "国际勘探开发有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-124-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-125-unit",
+      "canonical_name": "中国石油集团国际事业有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-125-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-126-unit",
+      "canonical_name": "中油财务有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-126-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-127-unit",
+      "canonical_name": "昆仑银行股份有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-127-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-128-unit",
+      "canonical_name": "昆仑信托有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-128-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-129-unit",
+      "canonical_name": "昆仑金融租赁有限责任公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-129-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-130-unit",
+      "canonical_name": "中石油专属财产保险股份有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-130-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-131-unit",
+      "canonical_name": "昆仑保险经纪股份有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-131-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-display-132-unit",
+      "canonical_name": "中国石油集团昆仑资本有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "cnpc-display-132-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "cnpc-economic-research",
+      "canonical_name": "中国石油集团经济技术研究院",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-economic-research-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-engineering-construction",
+      "canonical_name": "中国石油工程建设有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-engineering-construction-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-greatwall-drilling",
+      "canonical_name": "中国石油集团长城钻探工程有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "candidate": 1,
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-gwdrilling-homepage",
+        "cnpc-gwdrilling-campus"
+      ],
+      "official_urls": [
+        "https://gwdrilling.cnpc.com.cn/",
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-hqccec",
+      "canonical_name": "中国寰球工程有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-hqccec-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-huabei",
+      "canonical_name": "中国石油华北油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-huabei-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-jidong",
+      "canonical_name": "中国石油冀东油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-jidong-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-jilin",
+      "canonical_name": "中国石油吉林油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-jilin-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-liaohe",
+      "canonical_name": "中国石油辽河油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-liaohe-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-logging",
+      "canonical_name": "中国石油集团测井有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "candidate": 1,
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-logging-homepage",
+        "cnpc-logging-campus"
+      ],
+      "official_urls": [
+        "https://cpl.cnpc.com.cn/",
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-petrochina",
+      "canonical_name": "中国石油天然气股份有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-petrochina-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-pipeline-engineering",
+      "canonical_name": "中国石油管道局工程有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-pipeline-engineering-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-qinghai",
+      "canonical_name": "中国石油青海油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-qinghai-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-riped",
+      "canonical_name": "中国石油勘探开发研究院",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "candidate": 1,
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-riped-homepage",
+        "cnpc-riped-campus"
+      ],
+      "official_urls": [
+        "https://rip.ed.cnpc.com.cn/",
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-sichuan-changqing-drilling",
+      "canonical_name": "中国石油集团川庆钻探工程有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "candidate": 1,
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-cqdrilling-homepage",
+        "cnpc-cqdrilling-campus"
+      ],
+      "official_urls": [
+        "https://cqdrilling.cnpc.com.cn/",
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-southwest-gas",
+      "canonical_name": "中国石油西南油气田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-southwest-gas-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-tarim",
+      "canonical_name": "中国石油塔里木油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-tarim-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-tuha",
+      "canonical_name": "中国石油吐哈油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-tuha-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-western-drilling",
+      "canonical_name": "中国石油集团西部钻探工程有限公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "formal_catalog",
+      "channel_count": 2,
+      "channel_verification_statuses": {
+        "candidate": 1,
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-xbzk-homepage",
+        "cnpc-xbzk-campus"
+      ],
+      "official_urls": [
+        "https://xbzk.cnpc.com.cn/",
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-xinjiang",
+      "canonical_name": "中国石油新疆油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-xinjiang-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    },
+    {
+      "id": "cnpc-yumen",
+      "canonical_name": "中国石油玉门油田分公司",
+      "parent_id": "cnpc",
+      "parent_name": null,
+      "affiliation": "中国石油体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "formal_catalog",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "official_confirmed": 1
+      },
+      "channel_ids": [
+        "cnpc-yumen-campus-portal"
+      ],
+      "official_urls": [
+        "https://zhaopin.cnpc.com.cn/"
+      ],
+      "evidence_required": false
+    }
+  ]
+}

@@ -16,7 +16,12 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from job_hub.browser_capture import BrowserCaptureError, _robots_permit
+from job_hub.browser_capture import (
+    BrowserCaptureError,
+    _robots_permit,
+    launch_playwright_browser,
+)
+from job_hub.capture_evidence import ensure_capture_manifest, validate_capture_manifest
 from job_hub.cnpc_browser_runner import _resolve_cdp_websocket
 from job_hub.matching import CORE_MAJOR_KEYWORDS
 
@@ -143,6 +148,7 @@ def load_sinopec_browser_capture(
     allowed_hosts: list[str] | set[str] | None = None,
     max_age_hours: float | None = 30,
     require_complete_scan: bool = True,
+    require_capture_manifest: bool = False,
 ) -> dict[str, Any]:
     """Validate a browser-produced capture before the normal source adapter."""
 
@@ -152,6 +158,11 @@ def load_sinopec_browser_capture(
         raise BrowserCaptureError(f"cannot read Sinopec browser capture: {path}") from error
     if not isinstance(payload, dict):
         raise BrowserCaptureError("Sinopec browser capture must be an object")
+    if require_capture_manifest:
+        try:
+            validate_capture_manifest(payload)
+        except ValueError as error:
+            raise BrowserCaptureError(str(error)) from error
     if _text(payload.get("status")) != "success":
         raise BrowserCaptureError(
             f"Sinopec capture is not publishable: {_text(payload.get('status'))}"
@@ -282,7 +293,7 @@ def run_sinopec_browser_capture(
                 context = browser.contexts[0] if browser.contexts else browser.new_context(user_agent=user_agent)
                 owned = False
             else:
-                browser = playwright.chromium.launch(headless=True)
+                browser = launch_playwright_browser(playwright, config)
                 context = browser.new_context(user_agent=user_agent)
                 owned = True
             page = context.new_page()
@@ -397,6 +408,11 @@ def run_sinopec_browser_capture(
                         "jobs_exported": len(jobs),
                     },
                 }
+                payload = ensure_capture_manifest(
+                    payload,
+                    source_id=str(config.get("source_id") or "sinopec-career"),
+                    adapter_version=str(config.get("adapter_version") or "sinopec-browser-v1"),
+                )
                 if payload["status"] == "success":
                     destination = Path(output)
                     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -416,12 +432,25 @@ def run_sinopec_browser_capture(
         raise BrowserCaptureError(f"Sinopec browser capture failed: {error}") from error
 
 
-def write_sinopec_capture_failure(*, output: Path | str, platform_url: str, status: str, reason: str) -> dict[str, Any]:
+def write_sinopec_capture_failure(
+    *,
+    output: Path | str,
+    platform_url: str,
+    status: str,
+    reason: str,
+    source_id: str = "sinopec-career",
+    adapter_version: str = "sinopec-browser-v1",
+) -> dict[str, Any]:
     if status not in {"access_limited", "parse_failed", "partial"}:
         raise ValueError("Sinopec failure status must be access_limited, parse_failed or partial")
     destination = Path(str(output) + ".failure.json")
     destination.parent.mkdir(parents=True, exist_ok=True)
     payload = {"version": 1, "status": status, "platform_url": platform_url, "diagnostic_for": Path(output).name, "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"), "scan": {"failure_reason": str(reason)[:1000]}, "enterprises": [], "jobs": []}
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=source_id,
+        adapter_version=adapter_version,
+    )
     temporary = destination.with_suffix(destination.suffix + ".tmp")
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     temporary.replace(destination)

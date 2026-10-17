@@ -3,8 +3,32 @@ from __future__ import annotations
 import json
 from dataclasses import replace
 from pathlib import Path
+import pytest
 
 from job_hub.config import Settings
+
+
+@pytest.fixture(scope="session", autouse=True)
+def isolate_project_runtime(tmp_path_factory: pytest.TempPathFactory):
+    """Keep every test-created default runtime outside the project checkout.
+
+    A few CLI and integration paths intentionally construct ``Settings`` from
+    environment variables.  The session guard makes those paths use an
+    isolated SQLite file even when a test forgets to pass a temporary Settings
+    object, so a full suite cannot mutate ``runtime/job_hub.sqlite3``.
+    """
+
+    sandbox = tmp_path_factory.mktemp("project-runtime")
+    monkeypatch = pytest.MonkeyPatch()
+    monkeypatch.setenv("APP_DATA_DIR", str(sandbox))
+    monkeypatch.setenv("APP_DATABASE_PATH", str(sandbox / "job_hub.sqlite3"))
+    # Keep the default relative backup path relative to whichever APP_DATA_DIR
+    # an individual CLI test selects.  A fixed absolute value here would leak
+    # the session sandbox into tests that intentionally override APP_DATA_DIR.
+    try:
+        yield
+    finally:
+        monkeypatch.undo()
 
 
 def make_settings(tmp_path: Path) -> Settings:

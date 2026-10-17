@@ -15,6 +15,7 @@ import os
 import hashlib
 import json
 import random
+import re
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -64,6 +65,21 @@ PROXY_ENVIRONMENT_KEYS = (
     "https_proxy",
     "all_proxy",
 )
+
+
+def looks_like_non_robots_document(value: object) -> bool:
+    """Return whether a nominal robots response is clearly an HTML error page.
+
+    Some government CMS endpoints return their generic 200/302 error document
+    at ``/robots.txt``.  Parsing that HTML as an empty robots file would make a
+    collector assume permission that the publisher did not actually provide.
+    A response that contains real ``User-agent:`` directives remains valid even
+    when an upstream server supplies a loose content type.
+    """
+    text = str(value or "").lstrip().lower()
+    if "user-agent:" in text:
+        return False
+    return bool(re.search(r"<(?:!doctype\s+html|html)\b", text))
 
 
 def validate_transport_mode(value: str | None) -> str:

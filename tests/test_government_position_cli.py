@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import sys
 
+import pytest
+
 from job_hub.cli import main as cli_main
 from job_hub.db import Database
 
@@ -110,6 +112,66 @@ def test_government_position_audit_explicit_freshness_override_wins(
     assert captured["max_age_hours"] == 36
 
 
+def test_government_position_audit_passes_explicit_timezone_aware_now(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    database_path = tmp_path / "jobs.sqlite3"
+    Database(database_path).initialize()
+    captured: dict[str, object] = {}
+
+    def fake_report(_registry, **kwargs):
+        captured.update(kwargs)
+        return {"ok": True}
+
+    monkeypatch.setenv("APP_DATABASE_PATH", str(database_path))
+    monkeypatch.setattr("job_hub.cli.load_position_registry", lambda _path: {"records": []})
+    monkeypatch.setattr("job_hub.cli.government_position_quality_report", fake_report)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "job_hub.cli",
+            "government-position-audit",
+            "--today",
+            "2026-10-10",
+            "--now",
+            "2026-10-10T07:59:59+08:00",
+        ],
+    )
+
+    cli_main()
+
+    assert json.loads(capsys.readouterr().out)["ok"] is True
+    assert captured["now"].isoformat() == "2026-10-10T07:59:59+08:00"
+
+
+def test_government_position_audit_rejects_naive_now(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    database_path = tmp_path / "jobs.sqlite3"
+    Database(database_path).initialize()
+    monkeypatch.setenv("APP_DATABASE_PATH", str(database_path))
+    monkeypatch.setattr("job_hub.cli.load_position_registry", lambda _path: {"records": []})
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "job_hub.cli",
+            "government-position-audit",
+            "--today",
+            "2026-10-10",
+            "--now",
+            "2026-10-10T07:59:59",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as error:
+        cli_main()
+
+    assert error.value.code == 1
+    assert "时区" in json.loads(capsys.readouterr().out)["error"]
+
+
 def test_manual_government_evidence_confirmation_requires_explicit_operator_action(
     tmp_path, monkeypatch, capsys
 ) -> None:
@@ -156,3 +218,61 @@ def test_manual_government_evidence_confirmation_requires_explicit_operator_acti
     assert output["verified_open_records"] == 1
     assert verification["status"] == "verified"
     assert "Administrator manual confirmation" in verification["detail"]
+
+
+def test_open_until_filled_confirmation_requires_explicit_current_vacancy_flag(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    database_path = tmp_path / "jobs.sqlite3"
+    database = Database(database_path)
+    database.initialize()
+    database.upsert_source(source())
+    registry = {
+        "records": [
+            {
+                "source_id": "official-test-source",
+                "record_status": "verified_open",
+                "deadline_policy": "open_until_filled",
+            }
+        ]
+    }
+    monkeypatch.setenv("APP_DATABASE_PATH", str(database_path))
+    monkeypatch.setattr("job_hub.cli.load_position_registry", lambda _path: registry)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "job_hub.cli",
+            "confirm-government-source-evidence",
+            "official-test-source",
+            "--confirm",
+            "--note",
+            "只核验公告与附件存在。",
+        ],
+    )
+
+    with pytest.raises(SystemExit):
+        cli_main()
+    assert database.list_government_source_verifications() == []
+    capsys.readouterr()
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "job_hub.cli",
+            "confirm-government-source-evidence",
+            "official-test-source",
+            "--confirm",
+            "--confirm-current-vacancies",
+            "--note",
+            "管理员已从官方当前状态逐项确认岗位仍有可报名名额。",
+        ],
+    )
+    cli_main()
+
+    output = json.loads(capsys.readouterr().out)
+    verification = database.list_government_source_verifications()[0]
+    assert output["current_availability_confirmed"] is True
+    assert verification["availability_confirmed_at"]
+    assert "仍有可报名名额" in verification["availability_confirmation_detail"]

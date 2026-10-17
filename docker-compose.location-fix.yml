@@ -1,0 +1,19 @@
+services:
+  web:
+    image: cupb-geoscience-job-hub@sha256:46cd4a0b9b8eab04a999a54579cb4162de281909f10f3660c36b64ce1834c5ae
+    environment:
+      APP_RELEASE_VERSION: phase536-freshness2-location-fix
+      APP_RELEASE_GIT_SHA: c97aeb06a0fcf97515b7f6cf1bb6a352a4001aa6
+      APP_RELEASE_IMAGE_SHA: sha256:46cd4a0b9b8eab04a999a54579cb4162de281909f10f3660c36b64ce1834c5ae
+      APP_RELEASE_BUILT_AT: "2026-10-14T02:40:00Z"
+      JOB_HUB_IMAGE: cupb-geoscience-job-hub@sha256:46cd4a0b9b8eab04a999a54579cb4162de281909f10f3660c36b64ce1834c5ae
+      RUNTIME_IMAGE: cupb-geoscience-job-hub@sha256:46cd4a0b9b8eab04a999a54579cb4162de281909f10f3660c36b64ce1834c5ae
+  worker:
+    image: cupb-geoscience-job-hub@sha256:46cd4a0b9b8eab04a999a54579cb4162de281909f10f3660c36b64ce1834c5ae
+    environment:
+      APP_RELEASE_VERSION: phase536-freshness2-location-fix
+      APP_RELEASE_GIT_SHA: c97aeb06a0fcf97515b7f6cf1bb6a352a4001aa6
+      APP_RELEASE_IMAGE_SHA: sha256:46cd4a0b9b8eab04a999a54579cb4162de281909f10f3660c36b64ce1834c5ae
+      APP_RELEASE_BUILT_AT: "2026-10-14T02:40:00Z"
+      JOB_HUB_IMAGE: cupb-geoscience-job-hub@sha256:46cd4a0b9b8eab04a999a54579cb4162de281909f10f3660c36b64ce1834c5ae
+      RUNTIME_IMAGE: cupb-geoscience-job-hub@sha256:46cd4a0b9b8eab04a999a54579cb4162de281909f10f3660c36b64ce1834c5ae

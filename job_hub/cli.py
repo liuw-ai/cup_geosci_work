@@ -13,8 +13,10 @@ from job_hub.backups import BackupError, DatabaseBackupManager
 from job_hub.browser_capture import (
     BrowserCaptureError,
     browser_capture_summary,
+    check_playwright_runtime,
     load_browser_capture,
     run_browser_capture,
+    write_browser_capture_failure,
 )
 from job_hub.attachments import (
     AttachmentProcessingError,
@@ -22,14 +24,14 @@ from job_hub.attachments import (
     build_attachment_field_evidence,
     process_pending_attachments,
 )
-from job_hub.config import Settings
+from job_hub.config import Settings, load_project_env
 from job_hub.contracts import (
     NATIONAL_RUNTIME_STATUSES,
     ORGANIZATION_ROLES,
     SOURCE_VALIDATION_STAGES,
     is_http_url,
 )
-from job_hub.coverage import build_coverage_report
+from job_hub.coverage import build_coverage_report, _current_job_metrics
 from job_hub.cnpc_matrix import (
     CnpcMatrixError,
     build_cnpc_matrix_report,
@@ -46,7 +48,13 @@ from job_hub.cmgb_browser_capture import (
     quarantine_cmgb_partial_capture,
     run_cmgb_detail_retry,
 )
+from job_hub.cnooc_browser_capture import load_cnooc_browser_capture
 from job_hub.cmgb_transition import transition_cmgb_browser_to_production
+from job_hub.iguopin_transition import transition_iguopin_source_to_production
+from job_hub.iguopin_browser_capture import (
+    load_iguopin_browser_capture,
+    run_iguopin_rejected_detail_repair,
+)
 from job_hub.db import Database
 from job_hub.government_positions import (
     government_position_quality_report,
@@ -54,26 +62,46 @@ from job_hub.government_positions import (
 )
 from job_hub.government_artifacts import (
     load_government_artifact_manifest,
+    project_government_artifact_manifest,
     register_government_artifacts,
 )
 from job_hub.government_discovery import discover_configured_government_artifacts
 from job_hub.government_revalidation import requires_manual_government_evidence_confirmation
+from job_hub.government_table_parser import (
+    load_position_table_with_report,
+    parse_position_table_manifest,
+    parse_position_table_rows,
+)
 from job_hub.domestic_expansion import (
     QUEUE_STATUSES,
     domestic_expansion_rows,
     domestic_expansion_summary,
     load_domestic_expansion_queue,
 )
+from job_hub.domestic_entry_health import run_identity_only_entry_health
 from job_hub.government_ledger_audit import (
     build_government_ledger_consistency_audit,
 )
 from job_hub.discovery import (
     discovery_funnel,
+    reconcile_navigation_discovery_leads,
+    recover_persisted_official_url_candidates,
     discovery_source_rows,
     discovery_source_summary,
     load_discovery_source_registry,
 )
+from job_hub.discovery_scan import run_discovery_scan
 from job_hub.domain_probe import probe_public_domain
+from job_hub.expansion_targets import build_expansion_target_report, load_effective_job_target_plan
+from job_hub.pending_evidence_audit import build_pending_evidence_audit
+from job_hub.unrestricted_audit import build_unrestricted_role_audit
+from job_hub.recruitment_batches import (
+    build_recruitment_batch_report,
+    load_recruitment_batch_registry,
+)
+from job_hub.source_funnel import build_source_funnel
+from job_hub.source_fallbacks import build_fallback_audit, load_fallback_plan
+from job_hub.publication_revalidation import revalidate_persisted_publication_gates
 from job_hub.entry_probes import (
     PublicEntryProbeRunner,
     load_national_entry_targets,
@@ -81,13 +109,26 @@ from job_hub.entry_probes import (
 )
 from job_hub.emailer import Mailer
 from job_hub.locations import PROVINCES
+from job_hub.link_health import build_link_health_report
 from job_hub.pipeline import JobPipeline
 from job_hub.organizations import (
     load_organization_registry,
     organization_matrix_rows,
     organization_matrix_summary,
 )
-from job_hub.operations import build_production_readiness, worker_health
+from job_hub.three_oil_catalog import (
+    build_three_oil_catalog_audit,
+    build_three_oil_dns_audit,
+    load_three_oil_catalog,
+    three_oil_catalog_summary,
+    three_oil_units,
+)
+from job_hub.operations import (
+    browser_service_health,
+    build_production_readiness,
+    release_configuration,
+    worker_health,
+)
 from job_hub.national_sources import (
     load_national_source_matrix,
     national_source_matrix_rows,
@@ -110,6 +151,7 @@ from job_hub.sinopec_scan import (
     build_sinopec_scan_plan,
     validate_sinopec_scan_result,
 )
+from job_hub.snapshot_activation import activate_sinopec_snapshot
 from job_hub.source_targets import REQUIRED_ROLES
 from job_hub.provincial_matrix_audit import build_provincial_matrix_audit
 from job_hub.provincial_probe import run_provincial_entry_probe
@@ -120,7 +162,7 @@ from job_hub.source_validation import (
 )
 from job_hub.sources import RawPosting, SourceHealthProbe
 from job_hub.transport import TRANSPORT_MODES, validate_transport_mode
-from job_hub.worker import main as worker_main
+from job_hub.worker import DailyWorker, main as worker_main
 
 
 def services() -> tuple[Settings, Database, JobPipeline]:
@@ -143,6 +185,7 @@ def import_verified_jobs(
         payload = json.load(handle)
     items = payload if isinstance(payload, list) else [payload]
     results = {"created": 0, "updated": 0, "unchanged": 0}
+    imported_sources: dict[str, dict[str, Any]] = {}
     for item in items:
         if not isinstance(item, dict):
             raise ValueError("Each imported job must be a JSON object")
@@ -161,6 +204,7 @@ def import_verified_jobs(
         source = database.get_source(source_id)
         if source is None:
             raise ValueError(f"source_id is not registered in data/sources.json: {source_id}")
+        imported_sources[source_id] = source
         posting = RawPosting(
             title=str(item["title"]).strip(),
             employer=str(item["employer"]).strip(),
@@ -183,6 +227,18 @@ def import_verified_jobs(
         )
         _, outcome = database.save_job(pipeline.normalize_posting(posting, source))
         results[outcome] += 1
+    # Manual imports are still source captures. Persist their declared capture
+    # timestamp only after every row has passed validation and been saved, so a
+    # partially imported file can never make old rows look fresh to students.
+    for source_id, source in imported_sources.items():
+        config = source.get("config") if isinstance(source.get("config"), dict) else {}
+        captured_at = str(config.get("snapshot_captured_at") or "").strip()
+        if config.get("max_age_hours") is not None and captured_at:
+            database.record_source_capture_freshness(
+                source_id,
+                captured_at=captured_at,
+                evidence_kind="manual_import_snapshot",
+            )
     return results
 
 
@@ -213,6 +269,7 @@ def coverage_snapshot_date(settings: Settings) -> str:
 
 
 def main() -> None:
+    load_project_env()
     parser = argparse.ArgumentParser(description="地学就业信息站运维命令")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("init", help="初始化数据库和来源白名单")
@@ -251,6 +308,53 @@ def main() -> None:
         action="store_true",
         help="将当前质量指标写入当天可更新的快照，用于次日趋势比较",
     )
+    source_funnel_parser = subparsers.add_parser(
+        "source-funnel",
+        help="输出管理员来源漏斗：发现、证据、复核、匹配、发布和访问受限状态",
+    )
+    source_funnel_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整管理员账本 JSON 写入指定文件",
+    )
+    growth_metrics_parser = subparsers.add_parser(
+        "growth-metrics",
+        help="输出第三方线索与官方来源分开的真实增长指标",
+    )
+    growth_metrics_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整 JSON 写入指定文件",
+    )
+    publication_revalidation_parser = subparsers.add_parser(
+        "revalidate-publication-gates",
+        help="复核已持久化公开岗位的专业门禁；默认只读",
+    )
+    publication_revalidation_parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="写入降级结果；不指定时只输出审计报告",
+    )
+    publication_revalidation_parser.add_argument("--limit", type=int, default=50_000)
+    publication_revalidation_parser.add_argument("--output", type=Path)
+    fallback_audit_parser = subparsers.add_parser(
+        "source-fallback-audit",
+        help="审计 CNPC/Sinopec 官方公告、附件和授权平台备用入口台账",
+    )
+    fallback_audit_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整 JSON 写入指定文件",
+    )
+    batch_audit_parser = subparsers.add_parser(
+        "batch-audit",
+        help="输出招聘批次台账：官方入口、岗位证据、刷新次数和当前缺口",
+    )
+    batch_audit_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整批次审计 JSON 写入指定文件",
+    )
     organization_matrix_parser = subparsers.add_parser(
         "organization-matrix",
         help="输出组织层级、官方入口、备用入口和来源绑定状态",
@@ -268,6 +372,33 @@ def main() -> None:
         "--output",
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
+    )
+    three_oil_catalog_parser = subparsers.add_parser(
+        "three-oil-catalog",
+        help="输出三桶油地学相关组织范围目录，不代表来源已自动启用",
+    )
+    three_oil_catalog_parser.add_argument(
+        "--group",
+        choices=("cnpc", "sinopec", "cnooc"),
+        help="可选：只输出一个集团",
+    )
+    three_oil_catalog_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整 JSON 写入指定文件",
+    )
+    three_oil_audit_parser = subparsers.add_parser(
+        "three-oil-catalog-audit",
+        help="审计三桶油目录与组织注册表、官方来源绑定和启用状态",
+    )
+    three_oil_audit_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整 JSON 写入指定文件",
+    )
+    subparsers.add_parser(
+        "three-oil-dns-audit",
+        help="只读检查三桶油登记域名和入口主机的 DNS，不推断岗位或官方归属",
     )
     national_matrix_parser = subparsers.add_parser(
         "national-source-matrix",
@@ -418,6 +549,13 @@ def main() -> None:
         help="覆盖审计日期，格式 YYYY-MM-DD",
     )
     government_position_parser.add_argument(
+        "--now",
+        help=(
+            "可选：覆盖审计时刻，必须是带时区的 ISO-8601 时间；"
+            "用于验证报名开放日的时刻门禁"
+        ),
+    )
+    government_position_parser.add_argument(
         "--max-age-hours",
         type=float,
         help=(
@@ -430,6 +568,37 @@ def main() -> None:
         type=Path,
         help="可选：将完整 JSON 写入指定文件",
     )
+    parse_position_parser = subparsers.add_parser(
+        "parse-position-table",
+        help="批量解析公务员/事业编 CSV、XLSX、XLS 或 JSON 职位表（只生成待核验批次）",
+    )
+    parse_position_parser.add_argument("path", type=Path, help="官方职位表文件")
+    parse_position_parser.add_argument("--batch-id", required=True)
+    parse_position_parser.add_argument("--source-id", required=True)
+    parse_position_parser.add_argument(
+        "--position-type", choices=("civil_service", "public_institution"), required=True
+    )
+    parse_position_parser.add_argument("--province", required=True)
+    parse_position_parser.add_argument("--notice-url", required=True)
+    parse_position_parser.add_argument("--attachment-url", required=True)
+    parse_position_parser.add_argument("--deadline-date", default="")
+    parse_position_parser.add_argument(
+        "--deadline-policy", choices=("fixed_date", "open_until_filled"), default="fixed_date"
+    )
+    parse_position_parser.add_argument("--location", default="")
+    parse_position_parser.add_argument(
+        "--location-evidence-policy", choices=("row_exact", "registry_province"), default="row_exact"
+    )
+    parse_position_parser.add_argument("--sheet-name")
+    parse_position_parser.add_argument("--header-row", type=int)
+    parse_position_parser.add_argument("--first-data-row", type=int, default=2)
+    parse_position_parser.add_argument("--output", type=Path)
+    parse_manifest_parser = subparsers.add_parser(
+        "parse-position-table-manifest",
+        help="批量解析官方公务员/事业编职位表 manifest（只生成待核验批次）",
+    )
+    parse_manifest_parser.add_argument("path", type=Path, help="职位表 manifest JSON")
+    parse_manifest_parser.add_argument("--output", type=Path)
     government_confirmation_parser = subparsers.add_parser(
         "confirm-government-source-evidence",
         help="人工复核官方公告、附件和报名状态后续期一个受限政府职位表来源",
@@ -450,6 +619,30 @@ def main() -> None:
         "--confirm",
         action="store_true",
         help="确认该来源的官方公告、岗位表和报名状态均已人工核对且未变化",
+    )
+    government_confirmation_parser.add_argument(
+        "--confirm-current-vacancies",
+        action="store_true",
+        help=(
+            "仅用于招满即止岗位：确认已从官方当前状态逐项核对仍有可报名名额；"
+            "公告仍存在本身不足以使用此项"
+        ),
+    )
+    government_revalidate_parser = subparsers.add_parser(
+        "revalidate-government-source-evidence",
+        help="受控复核一个或多个政府职位来源；默认不激活来源",
+    )
+    government_revalidate_parser.add_argument(
+        "--source-id",
+        action="append",
+        dest="source_ids",
+        required=True,
+        help="只复核指定的已登记来源，可重复传入；不会触碰其他政府来源",
+    )
+    government_revalidate_parser.add_argument(
+        "--allow-activation",
+        action="store_true",
+        help="允许通过连续成功门槛后激活来源；默认只记录证据，不激活",
     )
     government_artifact_parser = subparsers.add_parser(
         "register-government-artifacts",
@@ -489,6 +682,20 @@ def main() -> None:
         "--output",
         type=Path,
         help="可选：将完整队列 JSON 写入指定文件",
+    )
+    domestic_entry_health_parser = subparsers.add_parser(
+        "domestic-entry-health",
+        help="只读检查待扩源官方入口和 robots.txt，不注册来源或采集岗位",
+    )
+    domestic_entry_health_parser.add_argument(
+        "--record-id",
+        action="append",
+        help="可选：只检查一个 official_identity_only 队列项，可重复传入",
+    )
+    domestic_entry_health_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将入口健康检查 JSON 写入指定文件",
     )
     government_ledger_parser = subparsers.add_parser(
         "cross-ledger-audit",
@@ -604,6 +811,26 @@ def main() -> None:
         default=12,
         help="冻结的列表捕获允许补齐的最长时限（默认 12 小时）",
     )
+    iguopin_repair_parser = subparsers.add_parser(
+        "iguopin-rejected-detail-repair",
+        help="仅重读国聘主站完整捕获中因字段缺失而拒绝的官方详情",
+    )
+    iguopin_repair_parser.add_argument(
+        "--source-id",
+        default="iguopin-general-geoscience-browser",
+        help="国聘主站来源 ID",
+    )
+    iguopin_repair_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：覆盖来源配置中的正式 success-only 捕获路径",
+    )
+    iguopin_repair_parser.add_argument(
+        "--max-age-hours",
+        type=float,
+        default=30,
+        help="原完整捕获允许定向重试的最长时限（默认 30 小时）",
+    )
     cmgb_quarantine_parser = subparsers.add_parser(
         "cmgb-quarantine-partial",
         help="归档并隔离旧版写入正式路径的国聘 partial 捕获",
@@ -643,11 +870,69 @@ def main() -> None:
         type=Path,
         help="可选：导出 132 个单位的浏览器详情扫描计划 JSON",
     )
+    snapshot_activation_parser = subparsers.add_parser(
+        "activate-sinopec-snapshot",
+        help="激活人工核验的中石化官方快照，不启用动态采集",
+    )
+    snapshot_activation_parser.add_argument(
+        "--source-id",
+        default="sinopec-2027-geoscience-snapshot",
+        help="人工快照来源 ID",
+    )
+    snapshot_activation_parser.add_argument(
+        "--path",
+        type=Path,
+        help="可选：覆盖来源配置中的版本化快照路径",
+    )
+    expansion_target_parser = subparsers.add_parser(
+        "expansion-target-audit",
+        help="审计当前有效岗位到招聘季 500 条目标的分段差距",
+    )
+    expansion_target_parser.add_argument(
+        "--as-of",
+        help="当前有效岗位核算日期（默认使用 Asia/Shanghai 今日；会应用截止日和来源新鲜度门禁）",
+    )
+    expansion_target_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将目标差距报告写入 JSON 文件",
+    )
+    pending_audit_parser = subparsers.add_parser(
+        "pending-evidence-audit",
+        help="审计待证据地学岗位，不改变岗位公开状态",
+    )
+    pending_audit_parser.add_argument(
+        "--all-statuses",
+        action="store_true",
+        help="同时审计过期、撤回和替代记录；默认只审计当前 open 记录",
+    )
+    pending_audit_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将审计账本写入 JSON 文件",
+    )
+    unrestricted_audit_parser = subparsers.add_parser(
+        "unrestricted-role-audit",
+        help="审计专业不限岗位的公共机构边界，不改变岗位公开状态",
+    )
+    unrestricted_audit_parser.add_argument(
+        "--all-statuses",
+        action="store_true",
+        help="同时审计过期、撤回和替代记录；默认只审计当前 open 记录",
+    )
+    unrestricted_audit_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将审计账本写入 JSON 文件",
+    )
     browser_capture_parser = subparsers.add_parser(
         "browser-capture-check",
         help="校验服务器浏览器生成的动态官方岗位捕获清单",
     )
-    browser_capture_parser.add_argument("source_id", help="已注册的 official_browser_rows 来源")
+    browser_capture_parser.add_argument(
+        "source_id",
+        help="已注册的 official_browser_rows、iguopin_general_browser_rows 或 cnooc_browser_rows 来源",
+    )
     browser_capture_parser.add_argument(
         "--path", type=Path, help="可选：覆盖来源配置中的捕获文件路径"
     )
@@ -661,6 +946,14 @@ def main() -> None:
     browser_capture_run_parser.add_argument("source_id", help="已注册的 official_browser_rows 来源")
     browser_capture_run_parser.add_argument(
         "--output", type=Path, help="可选：覆盖来源配置中的输出路径"
+    )
+    browser_runtime_parser = subparsers.add_parser(
+        "browser-runtime-check",
+        help="只启动并关闭本地 Chromium，不访问招聘网站或写入岗位数据",
+    )
+    browser_runtime_parser.add_argument(
+        "--executable-path",
+        help="可选：使用本地 Chromium/Chrome 可执行文件替代 Playwright 默认浏览器",
     )
     browser_capture_run_parser.add_argument(
         "--url", help="可选：覆盖来源配置中的 browser_url"
@@ -677,6 +970,35 @@ def main() -> None:
     )
     source_health_parser.add_argument(
         "--output", type=Path, help="将含传输、robots 和入口检查的诊断 JSON 写入文件"
+    )
+    link_health_parser = subparsers.add_parser(
+        "link-health",
+        help="只读检查学生端官方岗位详情链接，不修改岗位状态",
+    )
+    link_health_parser.add_argument(
+        "--source-id",
+        help="可选：只检查一个已注册来源",
+    )
+    link_health_parser.add_argument(
+        "--job-id",
+        type=int,
+        help="可选：只检查一个岗位 ID",
+    )
+    link_health_parser.add_argument(
+        "--limit",
+        type=int,
+        default=50,
+        help="最多检查岗位数（默认 50，最大 500）",
+    )
+    link_health_parser.add_argument(
+        "--include-non-public",
+        action="store_true",
+        help="同时检查待复核/历史岗位；默认只检查学生端公开岗位",
+    )
+    link_health_parser.add_argument(
+        "--output",
+        type=Path,
+        help="将诊断 JSON 写入文件",
     )
     source_tasks_parser = subparsers.add_parser(
         "source-tasks",
@@ -718,6 +1040,26 @@ def main() -> None:
         action="store_true",
         help="预检通过后执行原子生产切换；未提供时只读检查",
     )
+    iguopin_transition_parser = subparsers.add_parser(
+        "iguopin-production-transition",
+        help="验证两次完整国聘捕获后原子启用一个雇主国聘来源",
+    )
+    iguopin_transition_parser.add_argument(
+        "--source-id",
+        required=True,
+        help="已注册的 iguopin_browser_rows 来源 ID",
+    )
+    iguopin_transition_parser.add_argument(
+        "--previous-capture",
+        type=Path,
+        required=True,
+        help="上一次完整捕获 JSON；相对路径相对于 APP_DATA_DIR",
+    )
+    iguopin_transition_parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="预检通过后执行原子生产启用；未提供时只读检查",
+    )
     publish_parser = subparsers.add_parser("publish", help="立即生成一份日报")
     publish_parser.add_argument(
         "--send-email",
@@ -758,6 +1100,41 @@ def main() -> None:
         "discovery-funnel",
         help="输出私有线索从发现到官方核验的转化漏斗",
     )
+    reconcile_leads_parser = subparsers.add_parser(
+        "reconcile-discovery-leads",
+        help="过滤历史第三方导航/报名入口线索，保留记录但不计入岗位漏斗",
+    )
+    reconcile_leads_parser.add_argument(
+        "--limit",
+        type=int,
+        default=50_000,
+        help="最多检查的线索数，默认 50000",
+    )
+    replay_parser = subparsers.add_parser(
+        "replay-official-lead-urls",
+        help="回放已保存的第三方恢复链接到官方 URL 候选阶段，不核验或发布岗位",
+    )
+    replay_parser.add_argument(
+        "--limit",
+        type=int,
+        default=5000,
+        help="最多处理的私有线索数，默认 5000",
+    )
+    discovery_scan_parser = subparsers.add_parser(
+        "discovery-scan",
+        help="扫描明确允许的第三方公开页面并写入私有线索，不会发布岗位",
+    )
+    discovery_scan_parser.add_argument(
+        "--source-id",
+        action="append",
+        dest="source_ids",
+        help="可选：只扫描一个发现来源，可重复传入",
+    )
+    discovery_scan_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整扫描报告写入指定 JSON 文件",
+    )
     purge_parser = subparsers.add_parser(
         "purge-source",
         help="仅删除一个来源的已采集岗位，保留来源配置",
@@ -794,8 +1171,23 @@ def main() -> None:
     worker_health_parser.add_argument(
         "--max-age",
         type=int,
-        default=180,
-        help="允许的最大心跳年龄（秒，默认 180）",
+        default=900,
+        help="允许的最大心跳年龄（秒，默认 900）",
+    )
+    browser_worker_health_parser = subparsers.add_parser(
+        "browser-worker-health",
+        help="检查一个浏览器 worker 最近心跳，供容器健康检查使用",
+    )
+    browser_worker_health_parser.add_argument(
+        "--service-name",
+        required=True,
+        help="数据库中的浏览器 worker service name",
+    )
+    browser_worker_health_parser.add_argument(
+        "--max-age",
+        type=int,
+        default=14_400,
+        help="允许的最大心跳年龄（秒，默认 14400）",
     )
     backup_parser = subparsers.add_parser(
         "backup-database",
@@ -828,7 +1220,7 @@ def main() -> None:
     readiness_parser.add_argument("--domain-hostname")
     readiness_parser.add_argument("--expected-ip")
     readiness_parser.add_argument(
-        "--worker-max-age", type=int, default=180
+        "--worker-max-age", type=int, default=900
     )
     readiness_parser.add_argument(
         "--backup-max-age", type=int, default=86_400
@@ -837,6 +1229,15 @@ def main() -> None:
         "--require-public",
         action="store_true",
         help="要求正式域名 DNS 与 HTTPS 同时通过，适用于全院公开发布前核验",
+    )
+    release_parser = subparsers.add_parser(
+        "release-check",
+        help="检查发布身份和镜像引用，拒绝未固定的生产版本",
+    )
+    release_parser.add_argument(
+        "--allow-development",
+        action="store_true",
+        help="允许 dev/unknown/latest，仅用于本地开发检查",
     )
     subparsers.add_parser("worker", help="启动持续同步和 20:00 发布任务")
     artifact_process_parser = subparsers.add_parser(
@@ -898,6 +1299,70 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+    if args.command == "revalidate-government-source-evidence":
+        settings = Settings.from_env()
+        settings.ensure_runtime_paths()
+        database = Database(settings.database_path)
+        database.initialize()
+        source_ids = {
+            str(source_id).strip()
+            for source_id in args.source_ids
+            if str(source_id).strip()
+        }
+        if not source_ids:
+            parser.error("至少需要一个非空 --source-id")
+        registered_ids = {
+            str(source.get("id") or "")
+            for source in database.list_sources()
+        }
+        missing_ids = sorted(source_ids - registered_ids)
+        if missing_ids:
+            parser.error("source_id 未登记: " + ", ".join(missing_ids))
+        try:
+            backup = DatabaseBackupManager(settings).create_backup()
+            worker = DailyWorker(settings)
+            result = worker._revalidate_government_position_sources(
+                only_source_ids=source_ids,
+                allow_activation=bool(args.allow_activation),
+            )
+        except BackupError as error:
+            print(
+                json.dumps(
+                    {"ok": False, "error": str(error)},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        except Exception as error:  # noqa: BLE001 - keep the operator result explicit
+            print(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "source_ids": sorted(source_ids),
+                        "error": str(error),
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        print(
+            json.dumps(
+                {
+                    "ok": result.get("error", 0) == 0,
+                    "source_ids": sorted(source_ids),
+                    "allow_activation": bool(args.allow_activation),
+                    "backup": backup.as_dict(),
+                    "result": result,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        if result.get("error", 0):
+            raise SystemExit(1)
+        return
     if args.command == "domain-check":
         try:
             result = probe_public_domain(
@@ -923,6 +1388,43 @@ def main() -> None:
         if args.max_age < 1:
             parser.error("--max-age 必须大于 0")
         result = worker_health(database, args.max_age)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if not result["ok"]:
+            raise SystemExit(1)
+        return
+    if args.command == "browser-worker-health":
+        settings = Settings.from_env()
+        settings.ensure_runtime_paths()
+        database = Database(settings.database_path)
+        database.initialize()
+        if args.max_age < 1:
+            parser.error("--max-age 必须大于 0")
+        result = browser_service_health(
+            database,
+            args.service_name,
+            args.max_age,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if not result["ok"]:
+            raise SystemExit(1)
+        return
+    if args.command == "browser-runtime-check":
+        runtime_config = {}
+        if args.executable_path:
+            runtime_config["executable_path"] = args.executable_path
+        try:
+            result = check_playwright_runtime(runtime_config)
+        except BrowserCaptureError as error:
+            print(json.dumps({"ok": False, "error": str(error)}, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "release-check":
+        settings = Settings.from_env()
+        result = release_configuration(
+            settings,
+            require_pinned_images=not args.allow_development,
+        )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         if not result["ok"]:
             raise SystemExit(1)
@@ -1035,6 +1537,21 @@ def main() -> None:
         # error text; the JSON file remains UTF-8 with native Chinese text.
         print(json.dumps(output, ensure_ascii=True, indent=2))
         return
+    if args.command == "domestic-entry-health":
+        settings = Settings.from_env()
+        result = run_identity_only_entry_health(
+            settings,
+            load_domestic_expansion_queue(),
+            record_ids=args.record_id,
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command == "domestic-expansion-queue":
         queue = load_domestic_expansion_queue()
         result = {
@@ -1125,6 +1642,9 @@ def main() -> None:
     # These commands inspect versioned source metadata or perform transient
     # HTTP checks.  They must not call services(), whose bootstrap writes to
     # the shared SQLite database and makes concurrent provincial probes race.
+    if args.command == "three-oil-dns-audit":
+        print(json.dumps(build_three_oil_dns_audit(), ensure_ascii=False, indent=2))
+        return
     if args.command == "cross-ledger-audit":
         try:
             # Government evidence is dated in the site's business timezone.
@@ -1193,6 +1713,7 @@ def main() -> None:
     if args.command in {
         "cnpc-job-capture-run",
         "cmgb-detail-retry",
+        "iguopin-rejected-detail-repair",
         "cmgb-quarantine-partial",
         "browser-capture-run",
     }:
@@ -1290,6 +1811,7 @@ def main() -> None:
                 allowed_hosts=list(config["allowed_hosts"]),
                 user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
                 max_age_hours=args.max_age_hours,
+                require_capture_manifest=bool(config.get("require_capture_manifest", False)),
             )
         except Exception as error:
             print(
@@ -1311,6 +1833,56 @@ def main() -> None:
                     "ok": payload["status"] == "success",
                     "source_id": args.source_id,
                     "failure_capture": str(failure_capture),
+                    "output": str(output),
+                    "status": payload["status"],
+                    "scan": payload["scan"],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if args.command == "iguopin-rejected-detail-repair":
+        source = database.get_source(args.source_id)
+        if source is None:
+            parser.error(f"source_id is not registered: {args.source_id}")
+        if source.get("source_type") != "iguopin_general_browser_rows":
+            parser.error(
+                "iguopin-rejected-detail-repair requires an iguopin_general_browser_rows source"
+            )
+        config = dict(source["config"])
+        cdp_url = os.getenv("IGUOPIN_BROWSER_CDP_URL", "").strip()
+        if cdp_url:
+            config["cdp_url"] = cdp_url
+        output = args.output or (settings.data_dir / str(config["capture_path"]))
+        try:
+            payload = run_iguopin_rejected_detail_repair(
+                output=output,
+                config=config,
+                allowed_hosts=list(config["allowed_hosts"]),
+                user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
+                max_age_hours=args.max_age_hours,
+            )
+            sync_result = pipeline.sync_source_manual(source)
+            if sync_result.status != "finished":
+                raise RuntimeError(
+                    "国聘定向修复清单已生成但同步未完成: "
+                    f"{sync_result.status}: {sync_result.error or 'unknown error'}"
+                )
+        except Exception as error:
+            print(
+                json.dumps(
+                    {"ok": False, "source_id": args.source_id, "output": str(output), "error": str(error)},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        print(
+            json.dumps(
+                {
+                    "ok": True,
+                    "source_id": args.source_id,
                     "output": str(output),
                     "status": payload["status"],
                     "scan": payload["scan"],
@@ -1492,23 +2064,182 @@ def main() -> None:
         }
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
+    if args.command == "three-oil-catalog":
+        catalog = load_three_oil_catalog()
+        units = list(three_oil_units(catalog))
+        if args.group:
+            units = [item for item in units if item["group_id"] == args.group]
+        result = {
+            "summary": three_oil_catalog_summary(catalog),
+            "filter": {"group": args.group},
+            "items": units,
+            "note": (
+                "目录用于三桶油组织覆盖规划；只有逐单位完成官方入口核验并登记到 "
+                "organization_registry.json 的来源，才能进入自动采集。"
+            ),
+        }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "three-oil-catalog-audit":
+        jobs, _ = database.list_jobs(
+            page_size=None,
+            as_of_date=coverage_snapshot_date(settings),
+        )
+        result = build_three_oil_catalog_audit(job_records=jobs)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "activate-sinopec-snapshot":
+        try:
+            result = activate_sinopec_snapshot(
+                settings,
+                database,
+                source_id=args.source_id,
+                snapshot_path=args.path,
+            )
+        except (OSError, ValueError, BrowserCaptureError) as error:
+            print(
+                json.dumps(
+                    {"error": str(error), "source_id": args.source_id},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "expansion-target-audit":
+        as_of = args.as_of or coverage_snapshot_date(settings)
+        jobs, _ = database.list_jobs(page_size=None, as_of_date=as_of)
+        try:
+            result = build_expansion_target_report(
+                jobs,
+                plan=load_effective_job_target_plan(),
+                registered_source_ids={
+                    str(source["id"])
+                    for source in database.list_sources()
+                    if str(source.get("id") or "").strip()
+                },
+                excluded_source_ids={
+                    str(source["id"])
+                    for source in database.list_sources()
+                    if str(source.get("source_type") or "") == "manual"
+                },
+            )
+            result["as_of_date"] = as_of
+            result["scope_note"] = (
+                str(result.get("scope_note") or "")
+                + "；本次命令使用学生端同一日期/来源新鲜度门禁。"
+            )
+        except (OSError, ValueError) as error:
+            print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "pending-evidence-audit":
+        jobs, _ = database.list_jobs(
+            page_size=None,
+            only_open=False,
+            student_visible=False,
+        )
+        result = build_pending_evidence_audit(
+            jobs,
+            open_only=not args.all_statuses,
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "unrestricted-role-audit":
+        jobs, _ = database.list_jobs(
+            page_size=None,
+            only_open=False,
+            student_visible=False,
+        )
+        result = build_unrestricted_role_audit(
+            jobs,
+            open_only=not args.all_statuses,
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command == "browser-capture-check":
         source = database.get_source(args.source_id)
         if source is None:
             parser.error(f"source_id is not registered: {args.source_id}")
-        if source.get("source_type") != "official_browser_rows":
-            parser.error("browser-capture-check requires an official_browser_rows source")
+        source_type = str(source.get("source_type") or "")
+        if source_type not in {
+            "official_browser_rows",
+            "iguopin_general_browser_rows",
+            "cnooc_browser_rows",
+        }:
+            parser.error(
+                "browser-capture-check requires an official_browser_rows, "
+                "iguopin_general_browser_rows, or cnooc_browser_rows source"
+            )
         config = source["config"]
         capture_path = args.path or (settings.data_dir / str(config["capture_path"]))
         try:
-            payload = load_browser_capture(
-                capture_path,
-                allowed_hosts=list(config["allowed_hosts"]),
-                max_age_hours=args.max_age_hours
-                if args.max_age_hours is not None
-                else float(config.get("max_age_hours", 30)),
-                require_complete_scan=bool(config.get("require_complete_scan", True)),
-            )
+            validation_kwargs = {
+                "allowed_hosts": list(config["allowed_hosts"]),
+                "max_age_hours": (
+                    args.max_age_hours
+                    if args.max_age_hours is not None
+                    else float(config.get("max_age_hours", 30))
+                ),
+                "require_complete_scan": bool(config.get("require_complete_scan", True)),
+                "require_capture_manifest": bool(
+                    config.get("require_capture_manifest", False)
+                ),
+            }
+            if source_type == "iguopin_general_browser_rows":
+                payload = load_iguopin_browser_capture(
+                    capture_path,
+                    **validation_kwargs,
+                )
+                summary = {
+                    **dict(payload["scan"]),
+                    "captured_at": payload["captured_at"],
+                    "capture_age_hours": payload["capture_age_hours"],
+                    "rows": len(payload["rows"]),
+                }
+            elif source_type == "cnooc_browser_rows":
+                payload = load_cnooc_browser_capture(capture_path, **validation_kwargs)
+                summary = {
+                    **dict(payload["scan"]),
+                    "captured_at": payload["captured_at"],
+                    "capture_age_hours": payload["capture_age_hours"],
+                    "rows": len(payload["rows"]),
+                }
+            else:
+                payload = load_browser_capture(capture_path, **validation_kwargs)
+                summary = browser_capture_summary(payload)
         except BrowserCaptureError as error:
             print(
                 json.dumps(
@@ -1522,8 +2253,9 @@ def main() -> None:
             json.dumps(
                 {
                     "source_id": args.source_id,
+                    "source_type": source_type,
                     "capture_path": str(capture_path),
-                    "summary": browser_capture_summary(payload),
+                    "summary": summary,
                     "publication_policy": "normal student publication gate remains mandatory",
                 },
                 ensure_ascii=False,
@@ -1549,6 +2281,23 @@ def main() -> None:
                 user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
             )
         except BrowserCaptureError as error:
+            try:
+                write_browser_capture_failure(
+                    output=output,
+                    platform_url=browser_url,
+                    status=(
+                        "access_limited"
+                        if "HTTP 4" in str(error) or "robots" in str(error).lower()
+                        else "parse_failed"
+                    ),
+                    reason=str(error),
+                    source_id=str(config.get("source_id") or args.source_id),
+                    adapter_version=str(config.get("adapter_version") or "browser-capture-v1"),
+                )
+            except Exception:
+                # The original capture error is the actionable CLI result;
+                # failure-sidecar persistence is best effort and must not hide it.
+                pass
             print(json.dumps({"error": str(error), "source_id": args.source_id}, ensure_ascii=False, indent=2))
             raise SystemExit(1)
         print(
@@ -1610,9 +2359,70 @@ def main() -> None:
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
+    if args.command == "parse-position-table":
+        loaded = load_position_table_with_report(
+            args.path, sheet_name=args.sheet_name, header_row=args.header_row
+        )
+        result = parse_position_table_rows(
+            loaded["rows"],
+            batch_id=args.batch_id,
+            source_id=args.source_id,
+            position_type=args.position_type,
+            province=args.province,
+            official_notice_url=args.notice_url,
+            official_attachment_url=args.attachment_url,
+            deadline_date=args.deadline_date,
+            deadline_policy=args.deadline_policy,
+            location=args.location,
+            location_evidence_policy=args.location_evidence_policy,
+            sheet_name=args.sheet_name or "Sheet1",
+            first_data_row=args.first_data_row,
+        )
+        result["load_report"] = {
+            "sheets": loaded["sheets"],
+            "skipped_sheets": loaded["skipped_sheets"],
+        }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "parse-position-table-manifest":
+        result = parse_position_table_manifest(args.path)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command == "government-position-audit":
         try:
             registry = load_position_registry(args.path)
+            audit_now = None
+            if args.now:
+                try:
+                    audit_now = datetime.fromisoformat(
+                        str(args.now).strip().replace("Z", "+00:00")
+                    )
+                except ValueError as error:
+                    raise ValueError("--now 必须使用带时区的 ISO-8601 时间") from error
+                if audit_now.tzinfo is None or audit_now.utcoffset() is None:
+                    raise ValueError("--now 必须包含时区偏移，例如 +08:00 或 Z")
+            artifact_manifest = None
+            artifact_manifest_available = settings.government_artifact_manifest_path is None
+            manifest_error = None
+            if settings.government_artifact_manifest_path is not None:
+                try:
+                    artifact_manifest = load_government_artifact_manifest(
+                        settings.government_artifact_manifest_path
+                    )
+                    artifact_manifest = project_government_artifact_manifest(
+                        database, artifact_manifest, registry=registry
+                    )
+                    artifact_manifest_available = True
+                except (OSError, ValueError) as error:
+                    manifest_error = str(error)
             # An operator-facing quality report must make the same freshness
             # decision as the daily worker.  Leaving this as ``None`` made a
             # stale static ledger look current in the CLI while production had
@@ -1631,12 +2441,27 @@ def main() -> None:
                     for item in database.list_government_source_verifications()
                 },
                 source_refresh_counts=database.government_source_refresh_counts(),
+                source_refresh_events={
+                    source_id: database.list_government_source_verification_events(
+                        source_id, limit=10
+                    )
+                    for source_id in {
+                        str(item["source_id"])
+                        for item in registry.get("records", [])
+                        if item.get("record_status") == "verified_open"
+                    }
+                },
                 manual_confirmation_source_ids={
                     str(source["id"])
                     for source in database.list_sources()
                     if requires_manual_government_evidence_confirmation(source)
                 },
+                artifact_manifest=artifact_manifest,
+                artifact_manifest_available=artifact_manifest_available,
+                now=audit_now,
             )
+            if manifest_error:
+                result["attachment_manifest_gate"]["error"] = manifest_error
         except (OSError, ValueError) as error:
             print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=2))
             raise SystemExit(1)
@@ -1651,10 +2476,6 @@ def main() -> None:
         source = database.get_source(args.source_id)
         if source is None:
             parser.error(f"source_id is not registered: {args.source_id}")
-        if not requires_manual_government_evidence_confirmation(source):
-            parser.error(
-                "source is not configured for manual-only government evidence confirmation"
-            )
         note = str(args.note or "").strip()
         if not note:
             parser.error("--note must describe the completed manual official-evidence check")
@@ -1674,6 +2495,19 @@ def main() -> None:
             parser.error(
                 "manual confirmation requires at least one verified_open official position record"
             )
+        requires_current_vacancy_confirmation = any(
+            str(item.get("deadline_policy") or "") == "open_until_filled"
+            for item in records
+        )
+        if not requires_manual_government_evidence_confirmation(source) and not requires_current_vacancy_confirmation:
+            parser.error(
+                "source is neither manual-only nor an open-until-filled position source"
+            )
+        if requires_current_vacancy_confirmation and not args.confirm_current_vacancies:
+            parser.error(
+                "open-until-filled positions require --confirm-current-vacancies after "
+                "checking the official current vacancy status; an unchanged notice is insufficient"
+            )
         checked_at = (
             datetime.now(ZoneInfo(settings.timezone))
             .astimezone(timezone.utc)
@@ -1686,6 +2520,12 @@ def main() -> None:
             status="verified",
             checked_at=checked_at,
             detail=f"Administrator manual confirmation: {note}",
+            availability_confirmed_at=(
+                checked_at if requires_current_vacancy_confirmation else None
+            ),
+            availability_confirmation_detail=(
+                note if requires_current_vacancy_confirmation else ""
+            ),
         )
         print(
             json.dumps(
@@ -1694,7 +2534,10 @@ def main() -> None:
                     "status": verification["status"],
                     "checked_at": verification["checked_at"],
                     "verified_open_records": len(records),
-                    "publication_policy": "仍受报名窗口、截止日期和证据新鲜度门禁约束。",
+                    "current_availability_confirmed": requires_current_vacancy_confirmation,
+                    "publication_policy": (
+                        "仍受报名窗口、截止日期、证据新鲜度和招满即止当前名额门禁约束。"
+                    ),
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -1829,6 +2672,146 @@ def main() -> None:
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
+    if args.command == "source-funnel":
+        jobs, _ = database.list_jobs(
+            page_size=None,
+            as_of_date=coverage_snapshot_date(settings),
+        )
+        source_records = database.list_sources()
+        result = build_source_funnel(
+            sources=source_records,
+            jobs=jobs,
+            crawl_runs=database.list_crawl_runs(limit=10_000),
+            health_by_id={
+                item["source_id"]: item for item in database.list_source_health()
+            },
+            source_tasks=database.list_source_tasks(),
+            artifact_status_counts=database.list_source_artifact_status_counts(),
+            target_plan=load_effective_job_target_plan(),
+            capture_freshness_by_id={
+                str(source["id"]): capture
+                for source in source_records
+                if (capture := database.get_source_capture_freshness(str(source["id"])))
+                is not None
+            },
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "growth-metrics":
+        today = coverage_snapshot_date(settings)
+        leads = database.list_candidate_leads(limit=5000)
+        jobs, _ = database.list_jobs(page_size=None, as_of_date=today)
+        open_review_jobs, _ = database.list_jobs(
+            page_size=None,
+            student_visible=False,
+            as_of_date=today,
+        )
+        discovery = discovery_funnel(
+            leads, load_discovery_source_registry(), jobs=jobs
+        )
+        source_records = database.list_sources()
+        source_funnel = build_source_funnel(
+            sources=source_records,
+            jobs=jobs,
+            crawl_runs=database.list_crawl_runs(limit=10_000),
+            health_by_id={item["source_id"]: item for item in database.list_source_health()},
+            source_tasks=database.list_source_tasks(),
+            artifact_status_counts=database.list_source_artifact_status_counts(),
+            target_plan=load_effective_job_target_plan(),
+            capture_freshness_by_id={
+                str(source["id"]): capture
+                for source in source_records
+                if (capture := database.get_source_capture_freshness(str(source["id"])))
+                is not None
+            },
+        )
+        result = {
+            "as_of_date": today,
+            "third_party_leads": discovery["growth_metrics"],
+            "third_party_by_discovery_source": discovery["source_growth_metrics"],
+            "official_source_summary": source_funnel["summary"],
+            "official_sources": [
+                {
+                    "source_id": row["source_id"],
+                    "growth_metrics": row["growth_metrics"],
+                    "stage": row["stage"],
+                    "published_domestic_jobs": row["published_domestic_jobs"],
+                }
+                for row in source_funnel["rows"]
+            ],
+            "current_job_metrics": _current_job_metrics(
+                jobs,
+                open_review_jobs,
+                as_of_date=today,
+            ),
+            "scope_note": (
+                "第三方线索只能推进到官方 URL 候选和私有核验队列；"
+                "official_source_summary 与 official_sources 才是官方采集吞吐。"
+            ),
+        }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "revalidate-publication-gates":
+        result = revalidate_persisted_publication_gates(
+            database,
+            apply=bool(args.apply),
+            limit=args.limit,
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "source-fallback-audit":
+        result = build_fallback_audit(
+            load_fallback_plan(),
+            source_records=database.list_sources(),
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    if args.command == "batch-audit":
+        registry = load_recruitment_batch_registry()
+        # Feed the ledger through the same dated student-public read gate as
+        # coverage and /api/jobs.  Otherwise deadline-expired or stale-source
+        # rows can be counted as "current" in an expansion report.
+        jobs, _ = database.list_jobs(
+            page_size=None,
+            as_of_date=coverage_snapshot_date(settings),
+        )
+        result = build_recruitment_batch_report(
+            batches=registry["batches"],
+            sources=database.list_sources(),
+            jobs=jobs,
+            crawl_runs=database.list_crawl_runs(limit=10_000),
+            health_by_id={
+                item["source_id"]: item for item in database.list_source_health()
+            },
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command == "source-health":
         if args.source_id:
             requested = database.get_source(args.source_id)
@@ -1864,6 +2847,26 @@ def main() -> None:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(
                 json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return
+    if args.command == "link-health":
+        try:
+            payload = build_link_health_report(
+                database,
+                settings,
+                source_id=args.source_id,
+                job_id=args.job_id,
+                limit=args.limit,
+                include_non_public=bool(args.include_non_public),
+            )
+        except ValueError as error:
+            parser.error(str(error))
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(payload, ensure_ascii=False, indent=2),
+                encoding="utf-8",
             )
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return
@@ -1980,12 +2983,13 @@ def main() -> None:
         return
     if args.command == "reconcile-artifact-candidates":
         processor = OfficialAttachmentProcessor(settings, database)
-        artifacts = database.list_source_artifacts(limit=500)
+        artifacts = (
+            [database.get_source_artifact(args.artifact_id)]
+            if args.artifact_id is not None
+            else database.iter_source_artifacts()
+        )
         if args.artifact_id is not None:
-            artifacts = [
-                artifact for artifact in artifacts if int(artifact["id"]) == args.artifact_id
-            ]
-            if not artifacts:
+            if artifacts[0] is None:
                 parser.error(f"artifact_id is not present: {args.artifact_id}")
         results = []
         for artifact in artifacts:
@@ -2018,8 +3022,20 @@ def main() -> None:
         if result.status == "blocked":
             raise SystemExit(1)
         return
+    if args.command == "iguopin-production-transition":
+        result = transition_iguopin_source_to_production(
+            database,
+            pipeline,
+            source_id=args.source_id,
+            previous_capture_path=args.previous_capture,
+            activate=bool(args.confirm),
+        )
+        print(json.dumps(result.as_dict(), ensure_ascii=False, indent=2))
+        if result.status == "blocked":
+            raise SystemExit(1)
+        return
     if args.command == "repair-attachment-evidence":
-        candidates = database.list_artifact_job_candidates(limit=500)
+        candidates = database.iter_artifact_job_candidates()
         candidate_updates = 0
         job_updates = 0
         for candidate in candidates:
@@ -2101,7 +3117,55 @@ def main() -> None:
     if args.command == "discovery-funnel":
         registry = load_discovery_source_registry()
         leads = database.list_candidate_leads(limit=5000)
-        print(json.dumps(discovery_funnel(leads, registry), ensure_ascii=False, indent=2))
+        jobs, _ = database.list_jobs(
+            page_size=None,
+            as_of_date=coverage_snapshot_date(settings),
+        )
+        print(
+            json.dumps(
+                discovery_funnel(leads, registry, jobs=jobs),
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if args.command == "reconcile-discovery-leads":
+        result = reconcile_navigation_discovery_leads(
+            database,
+            limit=max(1, min(int(args.limit), 50_000)),
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if int(result.get("errors") or 0):
+            raise SystemExit(1)
+        return
+    if args.command == "replay-official-lead-urls":
+        result = recover_persisted_official_url_candidates(
+            database,
+            limit=args.limit,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if int(result.get("errors") or 0):
+            raise SystemExit(1)
+        return
+    if args.command == "discovery-scan":
+        settings, database, _pipeline = services()
+        try:
+            result = run_discovery_scan(
+                settings,
+                database,
+                source_ids=args.source_ids,
+            )
+        except (OSError, ValueError, RuntimeError) as error:
+            print(json.dumps({"scope": "private_discovery_only", "error": str(error)}, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if int(result.get("failed_source_count") or 0):
+            raise SystemExit(1)
         return
     if args.command == "simulate-cohort":
         jobs, _ = database.list_jobs(page_size=None)

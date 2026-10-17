@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections import Counter
+from datetime import datetime, timezone
+
 import job_hub.coverage as coverage_module
 from job_hub.coverage import build_coverage_report
 from job_hub.db import Database
@@ -7,6 +10,121 @@ from job_hub.pipeline import JobPipeline
 from job_hub.sources import RawPosting
 
 from conftest import make_settings, source
+
+
+def test_industry_mix_uses_current_five_hundred_target_plan() -> None:
+    report = coverage_module._industry_mix(
+        Counter({"three_oil": 67, "other_domestic": 106}),
+        173,
+        three_oil_group_counts=Counter({"cnooc": 50, "cnpc": 17}),
+    )
+
+    assert report["target_counts"]["total_jobs"] == 500
+    assert report["target_counts"]["planned_three_oil_jobs"] == 360
+    assert report["target_counts"]["three_oil_min"] == 350
+    assert report["target_counts"]["three_oil_max"] == 375
+    assert report["three_oil_group_counts"] == {
+        "cnooc": 50,
+        "cnpc": 17,
+        "sinopec": 0,
+    }
+
+
+def test_three_oil_group_counts_exposes_unresolved_rows() -> None:
+    jobs = [
+        {
+            "employer": "中国海洋石油集团有限公司",
+            "source_id": "unknown-source",
+            "affiliation": "中国海油体系",
+            "country_or_region": "中国大陆",
+        },
+        {
+            "employer": "简称岗位单位",
+            "source_id": "cnpc-career",
+            "country_or_region": "中国大陆",
+        },
+    ]
+    counts = coverage_module._three_oil_group_counts(jobs)
+    assert counts == {"cnpc": 1, "sinopec": 0, "cnooc": 1}
+
+
+def test_three_oil_group_counts_rejects_conflicting_dedicated_source() -> None:
+    jobs = [
+        {
+            "employer": "国家石油天然气管网集团有限公司",
+            "source_id": "cnpc-career",
+            "country_or_region": "中国大陆",
+        },
+        {
+            "employer": "中国石化胜利油田分公司",
+            "source_id": "cnpc-career",
+            "country_or_region": "中国大陆",
+        },
+    ]
+    assert coverage_module._three_oil_group_counts(jobs) == {
+        "cnpc": 0,
+        "sinopec": 1,
+        "cnooc": 0,
+    }
+
+
+def test_current_job_metrics_separates_public_counts_from_pending_rows() -> None:
+    exact = {
+        "source_id": "cnpc-career",
+        "employer": "\u4e2d\u56fd\u77f3\u6cb9\u4e1c\u65b9\u7269\u63a2",
+        "affiliation": "\u4e2d\u56fd\u77f3\u6cb9\u4f53\u7cfb",
+        "category": "\u6cb9\u6c14\u5de5\u7a0b\u6280\u672f\u670d\u52a1",
+        "country_or_region": "\u4e2d\u56fd\u5927\u9646",
+        "publication_status": "student_eligible",
+        "deadline_date": "2026-12-31",
+        "title": "\u5730\u8d28\u5de5\u7a0b\u5e08",
+        "location": "\u5317\u4eac",
+        "field_evidence": {
+            "evidence_scope": "official_html_table_row",
+            "\u5c97\u4f4d": "\u5730\u8d28\u5de5\u7a0b\u5e08",
+            "\u4e13\u4e1a\u8303\u56f4": "\u5730\u8d28\u5de5\u7a0b",
+            "\u5b66\u5386\u8981\u6c42": "\u7855\u58eb\u7814\u7a76\u751f",
+        },
+    }
+    pending = {
+        **exact,
+        "source_id": "candidate-source",
+        "publication_status": "pending_evidence",
+        "category": "\u80fd\u6e90\u3001\u5de5\u7a0b\u4e0e\u5730\u5b66\u62d3\u5c55",
+        "field_evidence": {
+            "evidence_scope": "official_html_table_row",
+            "\u5c97\u4f4d": "\u77ff\u4ea7\u52d8\u67e5\u5c97",
+            "\u4e13\u4e1a\u8303\u56f4": "\u77ff\u4ea7\u52d8\u67e5",
+            "\u5b66\u5386\u8981\u6c42": "\u7855\u58eb\u7814\u7a76\u751f",
+        },
+        "title": "\u77ff\u4ea7\u52d8\u67e5\u5c97",
+    }
+    broad = {
+        **exact,
+        "source_id": "government-source",
+        "employer": "\u67d0\u81ea\u7136\u8d44\u6e90\u5c40",
+        "affiliation": "\u653f\u5e9c\u62db\u5f55\u4f53\u7cfb",
+        "category": "\u516c\u52a1\u5458\u4e0e\u9009\u8c03",
+        "title": "\u81ea\u7136\u8d44\u6e90\u7ba1\u7406\u5c97",
+        "field_evidence": {
+            "evidence_scope": "official_html_table_row",
+            "\u5c97\u4f4d": "\u81ea\u7136\u8d44\u6e90\u7ba1\u7406\u5c97",
+            "\u4e13\u4e1a\u8303\u56f4": "\u5de5\u5b66\u5927\u7c7b",
+            "\u5b66\u5386\u8981\u6c42": "\u7855\u58eb\u7814\u7a76\u751f",
+            "\u5de5\u4f5c\u5730\u70b9": "\u5317\u4eac",
+        },
+    }
+    report = coverage_module._current_job_metrics(
+        [exact, broad], [exact, pending, broad], as_of_date="2026-10-12"
+    )
+    assert report["current_valid_jobs"] == 2
+    assert report["three_oil_jobs"] == 1
+    assert report["exact_match_jobs"] == 1
+    assert report["broad_match_jobs"] == 1
+    assert report["government_jobs"] == 1
+    assert report["domestic_enterprise_jobs"] == 1
+    assert report["pending_evidence_jobs"] == 1
+    assert report["pending_evidence_by_match_level"]["similar"] == 1
 
 
 def snapshot_report(
@@ -113,6 +231,7 @@ def test_coverage_distinguishes_successful_no_match_from_source_failure(tmp_path
     assert "deadline_quality" in report
     assert report["source_target_matrix"]["province_count"] == 31
     assert report["quality_gate"]["status"] in {"pass", "needs_attention"}
+    assert "employer_concentration" in report["job_distribution"]
     assert report["job_distribution"]["source_concentration"]["risk"] == "high"
     assert (
         report["job_distribution"]["category_source_concentration"]
@@ -198,6 +317,57 @@ def test_coverage_separates_retired_source_errors_from_active_health(tmp_path) -
     ]
 
 
+def test_coverage_reports_degraded_browser_worker_and_downgrades_lifecycle(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    browser_source = source()
+    browser_source.update(
+        {
+            "id": "cnooc-career-browser",
+            "name": "测试海油浏览器来源",
+            "source_type": "cnooc_browser_rows",
+        }
+    )
+    database.upsert_source(browser_source)
+    database.record_source_health(
+        "cnooc-career-browser", status="source_active", successful=True
+    )
+    run_id = database.record_crawl_start("cnooc-career-browser")
+    database.record_crawl_finish(
+        run_id,
+        "finished",
+        outcome="complete",
+        open_matching_count=4,
+    )
+    database.record_service_heartbeat(
+        "cnooc-browser", "degraded", "browser capture timeout"
+    )
+
+    report = build_coverage_report(database)
+
+    assert any(
+        item["id"] == "cnooc-career-browser"
+        for item in report["source_health"]["runtime_unhealthy_sources"]
+    )
+    assert any(
+        item["id"] == "cnooc-career-browser"
+        for item in report["source_health"]["unhealthy_sources"]
+    )
+    assert report["source_lifecycle"]["states"]["source_error"] == 1
+
+
+def test_concentration_risk_flags_top_five_source_monopoly() -> None:
+    metric = coverage_module._concentration(
+        coverage_module.Counter({"a": 3, "b": 2, "c": 2, "d": 2, "e": 2, "f": 1}),
+        12,
+    )
+
+    assert metric["top_share"] == 0.25
+    assert metric["top_5_share"] == 0.9167
+    assert metric["risk"] == "high"
+
+
 def test_public_job_reads_apply_deadline_gate_before_worker_expiry(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
@@ -234,6 +404,63 @@ def test_public_job_reads_apply_deadline_gate_before_worker_expiry(tmp_path) -> 
     )[1] == 0
     assert database.find_public_job(job_id, as_of_date="2026-10-06") is None
     assert database.count_open_jobs(as_of_date="2026-10-06") == 0
+
+
+def test_coverage_report_uses_same_deadline_gate_as_student_reads(tmp_path) -> None:
+    """Coverage totals must never include rows hidden from the student API."""
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    pipeline = JobPipeline(settings, database)
+    posting = RawPosting(
+        title="已截止地质岗位",
+        employer="测试地质单位",
+        source_url="https://careers.example.edu.cn/jobs/expired-coverage",
+        application_url=None,
+        text="资源勘查工程本科，报名截止时间为2026年10月5日。",
+        summary="官方岗位公告。",
+        published_date="2026-09-01",
+        deadline_date="2026-10-05",
+        location="北京市",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "已截止地质岗位",
+            "专业范围": "资源勘查工程",
+            "学历要求": "本科",
+        },
+    )
+    database.save_job(
+        pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+    )
+
+    report = build_coverage_report(database, snapshot_date="2026-10-06")
+
+    assert database.count_open_jobs(as_of_date="2026-10-06") == 0
+    assert report["open_jobs"] == 0
+    assert report["domestic_open_jobs"] == 0
+
+
+def test_coverage_report_passes_capture_freshness_to_nested_source_funnel(tmp_path) -> None:
+    """The coverage report and standalone funnel must share freshness state."""
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    configured_source = source()
+    configured_source["config"] = {
+        **configured_source["config"],
+        "max_age_hours": 24,
+    }
+    database.upsert_source(configured_source)
+    database.record_source_capture_freshness(
+        "official-test-source",
+        captured_at=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+    )
+
+    report = build_coverage_report(database)
+
+    nested_funnel = report["source_funnel"]
+    assert nested_funnel["summary"]["freshness_unproven_sources"] == 0
 
 
 def test_public_job_reads_apply_undated_source_window_before_worker_expiry(tmp_path) -> None:
@@ -273,9 +500,9 @@ def test_public_job_reads_apply_undated_source_window_before_worker_expiry(tmp_p
         connection.execute("UPDATE jobs SET status = 'open' WHERE id = ?", (job_id,))
 
     assert database.list_jobs(page_size=None, as_of_date="2026-09-05")[1] == 1
-    assert database.list_jobs(page_size=None, as_of_date="2026-10-02")[1] == 0
-    assert database.find_public_job(job_id, as_of_date="2026-10-02") is None
-    assert database.count_open_jobs(as_of_date="2026-10-02") == 0
+    assert database.list_jobs(page_size=None, as_of_date="2026-10-02")[1] == 1
+    assert database.find_public_job(job_id, as_of_date="2026-10-02") is not None
+    assert database.count_open_jobs(as_of_date="2026-10-02") == 1
 
 
 def test_public_job_reads_treat_empty_deadline_as_undated(tmp_path) -> None:
@@ -317,7 +544,7 @@ def test_public_job_reads_treat_empty_deadline_as_undated(tmp_path) -> None:
         )
 
     assert database.find_public_job(job_id, as_of_date="2026-09-05") is not None
-    assert database.find_public_job(job_id, as_of_date="2026-10-02") is None
+    assert database.find_public_job(job_id, as_of_date="2026-10-02") is not None
 
 
 def test_snapshot_trend_skips_a_replaceable_current_day_snapshot(tmp_path) -> None:

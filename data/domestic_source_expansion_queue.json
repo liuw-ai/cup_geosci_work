@@ -1,16 +1,48 @@
 {
   "version": 1,
-  "as_of": "2026-09-30",
+  "as_of": "2026-10-03",
   "description": "国内官方来源扩展队列。它把单位层级、官方入口、备用入口和当前证据状态分开记录；队列记录本身不会产生学生端岗位。状态须与官方岗位台账和附件生命周期一致。",
   "status_definitions": {
     "official_job_sample_verified": "已取得单位官网、政府官网、高校官网或官方招聘系统的具体岗位样例，并保留岗位级字段证据。",
     "official_identity_only": "官方主体和入口已确认，但尚未取得可发布的岗位级专业/学历证据。",
     "scan_success_no_match": "当前栏目和附件已成功扫描且可访问，但在观察窗口内没有符合地球科学学院专业边界的在招岗位。",
-    "access_limited": "入口或附件受 TLS、robots、网关或业务策略限制；不能解释为无岗位。",
+    "access_limited": "入口或附件受 DNS、TLS、robots、网关或业务策略限制；不能解释为无岗位。",
     "manual_review_required": "需要管理员在服务器或浏览器环境完成当前栏目、公告和附件复核。",
     "current_non_student_eligible": "当前官方招聘已核验，但公告整体或岗位资格明确面向有经验人员、内部调配等，不适合在校本科、硕士或博士学生，不能自动下载或发布。"
   },
   "records": [
+    {
+      "id": "chinalco-iguopin-campus-2027",
+      "system": "中央地勘国企",
+      "organization": "中国铝业集团有限公司",
+      "parent_organization": "中国铝业集团有限公司",
+      "organization_role": "mining_and_resources_group",
+      "official_url": "https://chinalco2027.iguopin.com/job",
+      "backup_urls": ["https://chinalco2027.iguopin.com/notice", "https://www.chinalco.com.cn/"],
+      "source_id": "chinalco-iguopin-browser",
+      "channel_type": "official_recruitment_system",
+      "status": "official_job_sample_verified",
+      "observed_on": "2026-10-03",
+      "sample_announcement_url": "https://chinalco2027.iguopin.com/notice",
+      "sample_job_ids": ["chinalco-iguopin-218518701773684917"],
+      "field_validation": "中国铝业集团 2027 届校园招聘官方公告明确本国聘子站为报名平台，报名期为 2026-09-16 至 2027-03-07。独立服务器环境已完成两次全筛选、全分页、全详情捕获：每次 5 页、51 张卡片、35 个去重岗位详情且详情零失败，职位编号集合哈希一致。经国内地点、专业和学历门禁后，27 条岗位可公开；5 条专业不匹配及 3 条海外或境内外混合岗位不进入学生端。",
+      "next_action": "从干净版本化发布包切换到生产浏览器 worker；连续两次完整成功捕获并抽检岗位详情直达链接后，才计入生产覆盖。"
+    },
+    {
+      "id": "minmetals-campus-entry",
+      "system": "中央地勘国企",
+      "organization": "中国五矿集团有限公司",
+      "parent_organization": "中国五矿集团有限公司",
+      "organization_role": "mining_and_resources_group",
+      "official_url": "https://www.minmetals.com.cn/",
+      "backup_urls": ["https://www.minmetals.com/", "https://minmetals.iguopin.com/"],
+      "source_id": null,
+      "channel_type": "official_homepage",
+      "status": "official_identity_only",
+      "observed_on": "2026-10-03",
+      "field_validation": "服务器隔离 Chromium 直接渲染 https://minmetals.iguopin.com/jobCampus，页面标题为“中国五矿集团有限公司人才招聘”，但正文为“404 您访问的页面不存在”，没有岗位卡片、筛选器或岗位详情链接。该结果只能证明该候选子路径当前不可用，不能推断集团没有招聘。",
+      "next_action": "从中国五矿集团官网重新定位当前年度招聘公告或正式招聘系统；取得岗位级专业、学历、地点、截止日期和官方详情链接后再注册来源。"
+    },
     {
       "id": "cnpc-riped-campus",
       "system": "中国石油",
@@ -21,8 +53,10 @@
       "backup_urls": ["https://zhaopin.cnpc.com.cn/", "https://www.cnpc.com.cn/zh/rczp/"],
       "source_id": null,
       "channel_type": "official_homepage",
-      "status": "official_identity_only",
-      "next_action": "定位 2026/2027 校招或博士后公告，逐岗位保存原文/职位表。"
+      "status": "access_limited",
+      "observed_on": "2026-10-11",
+      "field_validation": "登记的 rip.ed.cnpc.com.cn 在本地及生产服务器均无法解析；集团共享招聘平台可解析，但不证明研究院独立入口或当前岗位。",
+      "next_action": "从集团官方公告定位研究院真实入口及 2026/2027 校招或博士后职位表；不得猜测替代域名。"
     },
     {
       "id": "cnpc-daqing-campus",
@@ -221,8 +255,10 @@
       "backup_urls": ["https://zhaopin.cnpc.com.cn/", "https://www.cnpc.com.cn/zh/rczp/"],
       "source_id": null,
       "channel_type": "official_homepage",
-      "status": "official_identity_only",
-      "next_action": "定位西安、新疆等分支的正式校招入口或职位表。"
+      "status": "access_limited",
+      "observed_on": "2026-10-11",
+      "field_validation": "登记的 cpl.cnpc.com.cn 在本地及生产服务器均无法解析；集团共享招聘平台不等于中油测井独立入口。",
+      "next_action": "从集团官方公告定位中油测井及西安、新疆等分支的正式校招入口或职位表。"
     },
     {
       "id": "sinopec-pepris-campus",
@@ -371,6 +407,25 @@
       "student_scope_reason": "官方附件为人员调配/成熟人才计划，8行13个计划名额普遍要求既有项目经验、工作年限、职称或职业资格；不面向在校本科、硕士、博士学生。",
       "field_validation": "2026-09-30 服务器直连核验官方公告和 XLS（HTTP 200；SHA-256 4d23a2558d490f32f1c31b1ac9c7f365949a48d2fe7a60964109acc80b1aa40f）。公告报名截止2026-10-31 17:00，但附件性质为人员调配计划，不得因包含地质词汇而进入学生端。",
       "next_action": "保留该官方来源和证据，不自动下载或发布；持续寻找该集团面向应届生、博士后或无工作经验要求的后续正式公告。"
+    },
+    {
+      "id": "dingxi-enterprise-self-recruitment-2026",
+      "system": "事业单位及地方国企",
+      "organization": "定西市企业自主引才单位",
+      "parent_organization": "定西市",
+      "organization_role": "state_owned_enterprise_recruitment",
+      "official_url": "http://www.dxdjw.gov.cn/articles/2026/10/10/article_9_104645_1.html",
+      "backup_urls": ["http://www.dxdjw.gov.cn/"],
+      "source_id": "dingxi-party-recruitment",
+      "channel_type": "official_attachment",
+      "status": "current_non_student_eligible",
+      "observed_on": "2026-10-13",
+      "sample_announcement_url": "http://www.dxdjw.gov.cn/articles/2026/10/10/article_9_104645_1.html",
+      "student_eligible": false,
+      "related_artifact_id": "dingxi-2026-second-enterprise-self-recruitment-position-table",
+      "student_scope_reason": "定西党建网公告附件4为企业自主引才计划，要求意向人员直接联系企业，未对全部岗位统一确认应届生或校园招聘资格；在逐企业确认前不得进入在校本科、硕士、博士学生端。",
+      "field_validation": "2026-10-13 已核验定西党建网官方公告 HTTP 200、robots 返回404（不构成拒绝）及附件4官方链接；保留官方证据但不下载、解析或发布岗位行。",
+      "next_action": "逐企业确认应届生资格和岗位级专业、学历、地点、截止日期；确认前维持 current_non_student_eligible。"
     },
     {
       "id": "provincial-geology-bureaus-batch",

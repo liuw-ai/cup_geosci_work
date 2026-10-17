@@ -1,0 +1,960 @@
+{
+  "version": 1,
+  "checked_at": "2026-09-30T14:42:47Z",
+  "transport_mode": "environment",
+  "proxy_environment_present": true,
+  "requested_provinces": null,
+  "requested_roles": null,
+  "target_count": 38,
+  "classification_counts": {
+    "access_limited": 1,
+    "source_unavailable": 37
+  },
+  "results": [
+    {
+      "province": "云南",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "http://dnr.yn.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 404,
+      "detail": "公开入口返回 HTTP 404。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "not_found_assumed_allowed",
+          "status_code": 404,
+          "url": "http://dnr.yn.gov.cn/robots.txt"
+        },
+        "entry": {
+          "status": "http_error",
+          "status_code": 404,
+          "url": "http://dnr.yn.gov.cn/zwgk/rsxx/",
+          "resolved_url": "https://dnr.yn.gov.cn/zwgk/rsxx/"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "云南",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://dkj.yn.gov.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dkj.yn.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "内蒙古",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "http://zrzy.nmg.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://zrzy.nmg.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "内蒙古",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://www.nmgeology.com",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://www.nmgeology.com/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "吉林",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "http://zrzy.jl.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://zrzy.jl.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "吉林",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://dkj.jl.gov.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dkj.jl.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "四川",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://dnr.sc.gov.cn/scdnr/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='dnr.sc.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://dnr.sc.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='dnr.sc.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "四川",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://dkj.sc.gov.cn/scdkj/tggg/15.shtml",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dkj.sc.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "宁夏",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://zrzyt.nx.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.nx.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://zrzyt.nx.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='zrzyt.nx.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "山东",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "http://dnr.shandong.gov.cn/zwgk_324/xxgkml/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dnr.shandong.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "山西",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://zrzyt.shanxi.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.shanxi.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://zrzyt.shanxi.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='zrzyt.shanxi.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "山西",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://dkj.shanxi.gov.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dkj.shanxi.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "广东",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "http://nr.gd.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://nr.gd.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "广东",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://dzj.gd.gov.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dzj.gd.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "广西",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "http://dnr.gxzf.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dnr.gxzf.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "广西",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://dkj.gxzf.gov.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dkj.gxzf.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "新疆",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "http://zrzyt.xinjiang.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://zrzyt.xinjiang.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "新疆",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://xjdkj.tianshanzw.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://xjdkj.tianshanzw.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "江苏",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://dkj.jiangsu.gov.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dkj.jiangsu.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "江西",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://zrzy.jiangxi.gov.cn/col/col38/index.html",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzy.jiangxi.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://zrzy.jiangxi.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='zrzy.jiangxi.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "江西",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://dzj.jiangxi.gov.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dzj.jiangxi.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "河北",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "http://zrzy.hebei.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://zrzy.hebei.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "河南",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://zrzyt.henan.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.henan.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://zrzyt.henan.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='zrzyt.henan.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "浙江",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://www.zjdzy.org.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://www.zjdzy.org.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "海南",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://zizhijian.hainan.gov.cn/xxgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zizhijian.hainan.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://zizhijian.hainan.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='zizhijian.hainan.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "海南",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://dzj.hainan.gov.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dzj.hainan.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "湖北",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://dzj.hubei.gov.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://dzj.hubei.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "湖南",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "http://zrzyt.hunan.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://zrzyt.hunan.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "甘肃",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://zrzy.gansu.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzy.gansu.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://zrzy.gansu.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='zrzy.gansu.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "西藏",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "http://zrzyt.xizang.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://zrzyt.xizang.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "贵州",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://zrzy.guizhou.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzy.guizhou.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://zrzy.guizhou.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='zrzy.guizhou.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "贵州",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "https://dk.guizhou.gov.cn",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='dk.guizhou.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://dk.guizhou.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='dk.guizhou.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "辽宁",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://zrzy.ln.gov.cn/zrzy/zfgkzdgz/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzy.ln.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://zrzy.ln.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='zrzy.ln.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "重庆",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://ghzrzyw.cq.gov.cn/zwgk_186/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='ghzrzyw.cq.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://ghzrzyw.cq.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='ghzrzyw.cq.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "陕西",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://zrzyt.shaanxi.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.shaanxi.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://zrzyt.shaanxi.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='zrzyt.shaanxi.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "陕西",
+      "role": "geology_bureau_or_institute",
+      "role_label": "地质局/地质院",
+      "target_state": "candidate",
+      "official_entry_url": "http://www.sxsddy.com",
+      "classification": "access_limited",
+      "source_health_status": "source_blocked",
+      "status_code": 200,
+      "detail": "robots.txt 不允许本服务访问公开入口。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "disallowed",
+          "status_code": 200,
+          "url": "http://www.sxsddy.com/robots.txt"
+        }
+      },
+      "next_action": "保留访问受限证据；不得标记为无岗位，等待官方公开附件或人工核验入口。"
+    },
+    {
+      "province": "青海",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "http://zrzy.qinghai.gov.cn/zwgk/rsxx/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": 502,
+      "detail": "robots.txt 返回 HTTP 502，未访问来源页面。",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "http_error",
+          "status_code": 502,
+          "url": "http://zrzy.qinghai.gov.cn/robots.txt"
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    },
+    {
+      "province": "黑龙江",
+      "role": "natural_resources",
+      "role_label": "自然资源",
+      "target_state": "candidate",
+      "official_entry_url": "https://zrzyt.hlj.gov.cn/zrzyt/c112211/",
+      "classification": "source_unavailable",
+      "source_health_status": "source_degraded",
+      "status_code": null,
+      "detail": "robots.txt 无法核验：HTTPSConnectionPool(host='zrzyt.hlj.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "checks": {
+        "transport": {
+          "transport_mode": "environment",
+          "proxy_environment_present": true,
+          "http_client": "requests"
+        },
+        "robots": {
+          "status": "transport_error",
+          "url": "https://zrzyt.hlj.gov.cn/robots.txt",
+          "error_class": "SSLError",
+          "error": "HTTPSConnectionPool(host='zrzyt.hlj.gov.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+          "attempts": 3
+        }
+      },
+      "next_action": "记录来源故障并保留备用入口；不启用采集器，不得标记为无岗位。"
+    }
+  ],
+  "publication_policy": "本报告只核验官方入口和 robots/访问状态；可访问不等于存在岗位。不得据此启用来源、下载附件、发布岗位或声称该省无岗位。"
+}

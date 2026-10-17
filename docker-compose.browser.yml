@@ -1,7 +1,27 @@
 name: cupb-geoscience-job-hub
+x-browser-build: &browser-build
+  context: .
+  dockerfile: Dockerfile.browser
+  args:
+    RUNTIME_IMAGE: ${RUNTIME_IMAGE:-cupb-geoscience-job-hub:latest}
+    BROWSER_DEPS_IMAGE: ${BROWSER_DEPS_IMAGE:-cupb-geoscience-job-hub-browser:bd61c09-general}
+
+# A browser worker can remain alive while Chromium or a page is frozen.  The
+# command checks only that service's heartbeat, so a robots denial in another
+# portal cannot restart this container.  The long start period covers the
+# intentional startup staggering and the first bounded capture.
+x-browser-healthcheck: &browser-healthcheck
+  test:
+    - CMD-SHELL
+    - python -m job_hub.cli browser-worker-health --service-name "$${BROWSER_WORKER_SERVICE_NAME}" --max-age 14400
+  interval: 60s
+  timeout: 15s
+  retries: 3
+  start_period: 900s
+
 services:
   headless-shell:
-    image: chromedp/headless-shell:latest
+    image: ${HEADLESS_SHELL_IMAGE:-chromedp/headless-shell:latest}
     command:
       - --no-sandbox
       - --disable-gpu
@@ -11,10 +31,8 @@ services:
       - no-new-privileges:true
 
   cnpc-browser:
-    build:
-      context: .
-      dockerfile: Dockerfile.browser
-    image: cupb-geoscience-job-hub-browser:latest
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
     depends_on:
       - headless-shell
     env_file:
@@ -23,10 +41,14 @@ services:
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      BROWSER_WORKER_SERVICE_NAME: cnpc-browser
+      BROWSER_CAPTURE_MAX_CONCURRENCY: 1
       CNPC_BROWSER_SOURCE_ID: cnpc-career-browser
       CNPC_BROWSER_INTERVAL_MINUTES: 180
+      CNPC_BROWSER_CAPTURE_TIMEOUT_SECONDS: 1800
       CNPC_BROWSER_CDP_URL: http://headless-shell:9222
       CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+      BROWSER_START_DELAY_SECONDS: 0
     command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
     volumes:
       - job_hub_data:/var/lib/job-hub
@@ -36,13 +58,14 @@ services:
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
+    healthcheck: *browser-healthcheck
     logging:
       options:
         max-size: "10m"
         max-file: "3"
 
   cmgb-headless-shell:
-    image: chromedp/headless-shell:latest
+    image: ${HEADLESS_SHELL_IMAGE:-chromedp/headless-shell:latest}
     command:
       - --no-sandbox
       - --disable-gpu
@@ -56,10 +79,8 @@ services:
       - no-new-privileges:true
 
   cmgb-browser:
-    build:
-      context: .
-      dockerfile: Dockerfile.browser
-    image: cupb-geoscience-job-hub-browser:latest
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
     depends_on:
       - cmgb-headless-shell
     env_file:
@@ -68,9 +89,12 @@ services:
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      BROWSER_WORKER_SERVICE_NAME: cmgb-browser
+      BROWSER_CAPTURE_MAX_CONCURRENCY: 1
       BROWSER_WORKER_KIND: cmgb
       CMGB_BROWSER_SOURCE_ID: cmgb-iguopin-browser
       CMGB_BROWSER_INTERVAL_MINUTES: 180
+      BROWSER_START_DELAY_SECONDS: 120
       # Keep the long-running CMGB detail scan isolated from CNPC's browser
       # worker. Sharing one CDP context lets either worker close the other's
       # pages and turns a complete scan into a false access failure.
@@ -85,39 +109,46 @@ services:
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
+    healthcheck: *browser-healthcheck
     logging:
       options:
         max-size: "10m"
         max-file: "3"
 
-  cnooc-headless-shell:
-    image: chromedp/headless-shell:latest
+  cupb-headless-shell:
+    image: ${HEADLESS_SHELL_IMAGE:-chromedp/headless-shell:latest}
     command:
       - --no-sandbox
       - --disable-gpu
+      - --disable-dev-shm-usage
     init: true
+    shm_size: "512m"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
 
-  cnooc-browser:
-    build:
-      context: .
-      dockerfile: Dockerfile.browser
-    image: cupb-geoscience-job-hub-browser:latest
+  cupb-browser:
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
     depends_on:
-      - cnooc-headless-shell
+      - cupb-headless-shell
     env_file:
       - .env
     environment:
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
-      BROWSER_WORKER_KIND: cnooc
-      CNOOC_BROWSER_SOURCE_ID: cnooc-career-browser
-      CNOOC_BROWSER_INTERVAL_MINUTES: 180
-      CNOOC_BROWSER_CDP_URL: http://cnooc-headless-shell:9222
+      BROWSER_WORKER_KIND: cupb
+      BROWSER_WORKER_SERVICE_NAME: cupb-browser
+      BROWSER_CAPTURE_MAX_CONCURRENCY: 1
+      CUPB_BROWSER_SOURCE_ID: cupb-career-browser-20261007
+      CUPB_BROWSER_SERVICE_NAME: cupb-browser
+      CUPB_BROWSER_INTERVAL_MINUTES: 180
+      CUPB_BROWSER_CAPTURE_TIMEOUT_SECONDS: 1800
+      CUPB_BROWSER_EXECUTABLE_PATH: ""
+      CUPB_BROWSER_CDP_URL: http://cupb-headless-shell:9222
       CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+      BROWSER_START_DELAY_SECONDS: 840
     command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
     volumes:
       - job_hub_data:/var/lib/job-hub
@@ -127,13 +158,65 @@ services:
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
+    healthcheck: *browser-healthcheck
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  cnooc-headless-shell:
+    image: ${HEADLESS_SHELL_IMAGE:-chromedp/headless-shell:latest}
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      # CNOOC detail pages keep several renderer/network streams alive during
+      # the 300+ row campaign.  Avoid the Docker 64 MiB /dev/shm limit and
+      # give this isolated, single-concurrency browser a bounded shared area.
+      - --disable-dev-shm-usage
+    init: true
+    shm_size: "512m"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  cnooc-browser:
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
+    depends_on:
+      - cnooc-headless-shell
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      BROWSER_WORKER_SERVICE_NAME: cnooc-browser
+      BROWSER_CAPTURE_MAX_CONCURRENCY: 1
+      BROWSER_WORKER_KIND: cnooc
+      CNOOC_BROWSER_SOURCE_ID: cnooc-career-browser
+      CNOOC_BROWSER_INTERVAL_MINUTES: 180
+      # Bound one full CNOOC listing/detail capture.
+      CNOOC_BROWSER_CAPTURE_TIMEOUT_SECONDS: 900
+      CNOOC_BROWSER_CDP_URL: http://cnooc-headless-shell:9222
+      CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+      BROWSER_START_DELAY_SECONDS: 240
+    command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    healthcheck: *browser-healthcheck
     logging:
       options:
         max-size: "10m"
         max-file: "3"
 
   sinopec-headless-shell:
-    image: chromedp/headless-shell:latest
+    image: ${HEADLESS_SHELL_IMAGE:-chromedp/headless-shell:latest}
     command:
       - --no-sandbox
       - --disable-gpu
@@ -143,10 +226,8 @@ services:
       - no-new-privileges:true
 
   sinopec-browser:
-    build:
-      context: .
-      dockerfile: Dockerfile.browser
-    image: cupb-geoscience-job-hub-browser:latest
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
     depends_on:
       - sinopec-headless-shell
     env_file:
@@ -155,11 +236,14 @@ services:
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      BROWSER_WORKER_SERVICE_NAME: sinopec-browser
+      BROWSER_CAPTURE_MAX_CONCURRENCY: 1
       BROWSER_WORKER_KIND: sinopec
       SINOPEC_BROWSER_SOURCE_ID: sinopec-career
       SINOPEC_BROWSER_INTERVAL_MINUTES: 180
       SINOPEC_BROWSER_CDP_URL: http://sinopec-headless-shell:9222
       CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+      BROWSER_START_DELAY_SECONDS: 360
     command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
     volumes:
       - job_hub_data:/var/lib/job-hub
@@ -169,6 +253,157 @@ services:
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
+    healthcheck: *browser-healthcheck
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  pipechina-headless-shell:
+    profiles:
+      - blocked-source
+    image: ${HEADLESS_SHELL_IMAGE:-chromedp/headless-shell:latest}
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      - --disable-dev-shm-usage
+    init: true
+    shm_size: "512m"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  pipechina-browser:
+    profiles:
+      - blocked-source
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
+    depends_on:
+      - pipechina-headless-shell
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      BROWSER_WORKER_SERVICE_NAME: pipechina-browser
+      BROWSER_CAPTURE_MAX_CONCURRENCY: 1
+      BROWSER_WORKER_KIND: official
+      OFFICIAL_BROWSER_SOURCE_ID: pipechina-browser-capture
+      OFFICIAL_BROWSER_SERVICE_NAME: pipechina-browser
+      OFFICIAL_BROWSER_INTERVAL_MINUTES: 180
+      OFFICIAL_BROWSER_CDP_URL: http://pipechina-headless-shell:9222
+      CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+      BROWSER_START_DELAY_SECONDS: 480
+    command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    healthcheck: *browser-healthcheck
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  chinalco-headless-shell:
+    image: ${HEADLESS_SHELL_IMAGE:-chromedp/headless-shell:latest}
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      - --disable-dev-shm-usage
+    init: true
+    shm_size: "512m"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  chinalco-browser:
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
+    depends_on:
+      - chinalco-headless-shell
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      BROWSER_WORKER_SERVICE_NAME: chinalco-iguopin-browser
+      BROWSER_CAPTURE_MAX_CONCURRENCY: 1
+      BROWSER_WORKER_KIND: iguopin
+      IGUOPIN_BROWSER_SOURCE_ID: chinalco-iguopin-browser
+      IGUOPIN_BROWSER_SERVICE_NAME: chinalco-iguopin-browser
+      IGUOPIN_BROWSER_INTERVAL_MINUTES: 180
+      # Bound a stalled Chromium capture; zero disables only for diagnostics.
+      IGUOPIN_BROWSER_CAPTURE_TIMEOUT_SECONDS: 1800
+      IGUOPIN_BROWSER_CDP_URL: http://chinalco-headless-shell:9222
+      CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+      BROWSER_START_DELAY_SECONDS: 600
+    command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    healthcheck: *browser-healthcheck
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  iguopin-general-headless-shell:
+    image: ${HEADLESS_SHELL_IMAGE:-chromedp/headless-shell:latest}
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      - --disable-dev-shm-usage
+    init: true
+    shm_size: "512m"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  iguopin-general-browser:
+    build: *browser-build
+    image: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
+    depends_on:
+      - iguopin-general-headless-shell
+    env_file:
+      - .env
+    environment:
+      APP_DATA_DIR: /var/lib/job-hub
+      APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      BROWSER_WORKER_SERVICE_NAME: iguopin-general-geoscience-browser
+      BROWSER_CAPTURE_MAX_CONCURRENCY: 1
+      BROWSER_WORKER_KIND: iguopin
+      IGUOPIN_BROWSER_SOURCE_ID: iguopin-general-geoscience-browser
+      IGUOPIN_BROWSER_SERVICE_NAME: iguopin-general-geoscience-browser
+      IGUOPIN_BROWSER_INTERVAL_MINUTES: 180
+      # The general source scans the configured geoscience keyword batches and
+      # every official detail. Keep one bounded capture isolated from
+      # employer-specific scans.
+      IGUOPIN_BROWSER_CAPTURE_TIMEOUT_SECONDS: 3600
+      IGUOPIN_BROWSER_CDP_URL: http://iguopin-general-headless-shell:9222
+      CNPC_BROWSER_PYTHON_TARGET: /var/lib/job-hub/python-packages
+      BROWSER_START_DELAY_SECONDS: 720
+    command: ["python", "-m", "job_hub.cnpc_browser_entrypoint"]
+    volumes:
+      - job_hub_data:/var/lib/job-hub
+      - ./data:/app/data:ro
+    init: true
+    stop_grace_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    healthcheck: *browser-healthcheck
     logging:
       options:
         max-size: "10m"

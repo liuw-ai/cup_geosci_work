@@ -20,7 +20,13 @@ from pathlib import Path
 from typing import Any, Iterable
 from urllib.parse import parse_qs, urljoin, urlparse
 
-from job_hub.browser_capture import BrowserCaptureError, _robots_permit
+from job_hub.browser_capture import (
+    BrowserCaptureError,
+    _robots_permit,
+    launch_playwright_browser,
+)
+from job_hub.capture_evidence import ensure_capture_manifest
+from job_hub.capture_evidence import validate_capture_manifest
 from job_hub.cnpc_browser_runner import _resolve_cdp_websocket
 from job_hub.contracts import is_http_url
 
@@ -126,6 +132,39 @@ def _scan_metrics(payload: dict[str, Any], *, require_complete: bool) -> dict[st
     return {**scan, **normalized}
 
 
+def _complete_duplicate_batch(scan: dict[str, Any], rows: Any) -> bool:
+    """Accept zero new rows only when every visible card was seen in prior batches."""
+    keyword_scans = scan.get("keyword_scans")
+    if not isinstance(rows, list) or rows or not isinstance(keyword_scans, list) or len(keyword_scans) != 1:
+        return False
+    keyword_scan = keyword_scans[0]
+    if not isinstance(keyword_scan, dict) or not str(keyword_scan.get("keyword") or "").strip():
+        return False
+    try:
+        pages = int(scan.get("pages_scanned") or 0)
+        cards = int(scan.get("cards_seen_before_deduplication") or 0)
+        duplicate_cards = int(scan.get("duplicate_cards_skipped") or 0)
+        seeded = int(scan.get("prevalidated_detail_count") or 0)
+        return (
+            pages > 0
+            and cards > 0
+            and seeded > 0
+            and duplicate_cards == cards
+            and int(keyword_scan.get("pages_scanned") or 0) == pages
+            and int(keyword_scan.get("cards_seen") or 0) == cards
+            and keyword_scan.get("pagination_complete") is True
+            and scan.get("pagination_complete") is True
+            and all(int(scan.get(key) or 0) == 0 for key in (
+                "rows_discovered", "rows_exported", "failed_rows", "detail_discovered",
+                "detail_succeeded", "detail_failed", "rejected_rows",
+            ))
+            and not scan.get("failure_records")
+            and not scan.get("rejected_records")
+        )
+    except (TypeError, ValueError):
+        return False
+
+
 def _read_cmgb_capture_payload(path: Path | str) -> dict[str, Any]:
     capture_path = Path(path)
     try:
@@ -166,17 +205,31 @@ def _capture_age_hours(
     return max(0.0, age_hours)
 
 
-def _normalize_cmgb_rows(rows: Any, *, hosts: set[str]) -> list[dict[str, Any]]:
-    if not isinstance(rows, list) or not rows:
+def _normalize_cmgb_rows(
+    rows: Any,
+    *,
+    hosts: set[str],
+    allow_empty_fields: Iterable[str] = (),
+    allow_empty_duplicate_batch: bool = False,
+) -> list[dict[str, Any]]:
+    if not isinstance(rows, list) or (not rows and not allow_empty_duplicate_batch):
         raise CmgbBrowserCaptureError("CMGB capture rows must be a non-empty list")
     normalized_rows: list[dict[str, Any]] = []
+    optional_fields = {str(field).strip() for field in allow_empty_fields if str(field).strip()}
+    optional_evidence_keys = {
+        "deadline": "报名截止",
+        "headcount": "招聘人数",
+    }
     seen: set[str] = set()
     for index, raw in enumerate(rows, start=1):
         if not isinstance(raw, dict):
             raise CmgbBrowserCaptureError(f"row {index} must be an object")
         row = dict(raw)
         for field in CMGB_REQUIRED_ROW_FIELDS:
-            row[field] = _text(row.get(field), f"row {index}.{field}")
+            if field in optional_fields and not str(row.get(field) or "").strip():
+                row[field] = ""
+            else:
+                row[field] = _text(row.get(field), f"row {index}.{field}")
         if row["external_id"] in seen:
             raise CmgbBrowserCaptureError(f"duplicate CMGB external_id: {row['external_id']}")
         seen.add(row["external_id"])
@@ -185,11 +238,34 @@ def _normalize_cmgb_rows(rows: Any, *, hosts: set[str]) -> list[dict[str, Any]]:
         evidence = row.get("field_evidence")
         if not isinstance(evidence, dict):
             raise CmgbBrowserCaptureError(f"row {index}.field_evidence is required")
+        # Older successful captures may have used the official search-card
+        # identity to populate the row while leaving empty identity keys in
+        # the evidence map. The row identity has already passed the detail /
+        # card agreement gate, so fill only these two identity keys from the
+        # normalized row instead of rejecting an otherwise valid capture.
+        evidence = dict(evidence)
+        if not str(evidence.get("岗位") or "").strip():
+            evidence["岗位"] = row["title"]
+        if not str(evidence.get("招聘单位") or "").strip():
+            evidence["招聘单位"] = row["employer"]
         for key in CMGB_REQUIRED_EVIDENCE_KEYS:
             if not str(evidence.get(key) or "").strip():
-                raise CmgbBrowserCaptureError(f"row {index}.field_evidence.{key} is required")
+                optional_field = next(
+                    (
+                        field
+                        for field, evidence_key in optional_evidence_keys.items()
+                        if evidence_key == key
+                    ),
+                    None,
+                )
+                if optional_field not in optional_fields:
+                    raise CmgbBrowserCaptureError(f"row {index}.field_evidence.{key} is required")
         row["field_evidence"] = {
-            str(key): _text(value, f"row {index}.field_evidence.{key}")
+            str(key): (
+                str(value or "").strip()
+                if str(key) in optional_evidence_keys.values() and not str(value or "").strip()
+                else _text(value, f"row {index}.field_evidence.{key}")
+            )
             for key, value in evidence.items()
         }
         # Captures made before a parser improvement still retain the rendered
@@ -214,11 +290,19 @@ def load_cmgb_browser_capture(
     allowed_hosts: Iterable[str] | None = None,
     max_age_hours: float | None = 30,
     require_complete_scan: bool = True,
+    require_capture_manifest: bool = False,
+    allow_empty_fields: Iterable[str] = (),
+    allow_empty_duplicate_batch: bool = False,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     """Load and validate one server-generated CMGB browser manifest."""
 
     payload = _read_cmgb_capture_payload(path)
+    if require_capture_manifest:
+        try:
+            validate_capture_manifest(payload)
+        except ValueError as error:
+            raise CmgbBrowserCaptureError(str(error)) from error
     status = _text(payload.get("status"), "status")
     if status not in CMGB_CAPTURE_STATUSES:
         raise CmgbBrowserCaptureError(f"unsupported CMGB capture status: {status}")
@@ -233,7 +317,13 @@ def load_cmgb_browser_capture(
         max_age_hours=max_age_hours,
     )
     scan = _scan_metrics(payload, require_complete=require_complete_scan)
-    normalized_rows = _normalize_cmgb_rows(payload.get("rows"), hosts=hosts)
+    empty_duplicate_batch = allow_empty_duplicate_batch and _complete_duplicate_batch(scan, payload.get("rows"))
+    normalized_rows = _normalize_cmgb_rows(
+        payload.get("rows"),
+        hosts=hosts,
+        allow_empty_fields=allow_empty_fields,
+        allow_empty_duplicate_batch=empty_duplicate_batch,
+    )
     if scan["rows_exported"] != len(normalized_rows):
         raise CmgbBrowserCaptureError("scan.rows_exported does not match rows length")
     return {
@@ -266,6 +356,7 @@ def load_cmgb_detail_retry_capture(
     *,
     allowed_hosts: Iterable[str] | None = None,
     max_age_hours: float | None = 12,
+    require_capture_manifest: bool = False,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     """Load a recent, fully paginated partial capture for detail-only retry.
@@ -277,6 +368,11 @@ def load_cmgb_detail_retry_capture(
     """
 
     payload = _read_cmgb_capture_payload(path)
+    if require_capture_manifest:
+        try:
+            validate_capture_manifest(payload)
+        except ValueError as error:
+            raise CmgbBrowserCaptureError(str(error)) from error
     status = _text(payload.get("status"), "status")
     if status != "partial":
         raise CmgbBrowserCaptureError("CMGB detail retry requires a partial capture")
@@ -611,10 +707,24 @@ def _major_from_description(text: str) -> str:
     normalized = " ".join(str(text or "").split()).strip()
     if not normalized:
         return ""
+
+    # Some official detail pages state the eligibility directly as
+    # ``不限专业`` or ``专业不限`` without a labelled major field.  This is
+    # explicit job-level evidence and is handled by the normal publication
+    # gate as an unrestricted-major opportunity; it must not be inferred from
+    # a missing field or a generic job title.
+    if re.search(r"(?:不限专业|专业不限)", normalized):
+        return "不限专业"
+
     labels = (
         "专业要求",
         "专业范围",
         "需求专业",
+        "专业（代码）",
+        "专业(代码)",
+        "专业类别要求",
+        "学科专业",
+        "所学专业及代码",
         "专业背景",
         "专业需求",
         "专业类别",
@@ -634,12 +744,50 @@ def _major_from_description(text: str) -> str:
             if value:
                 return value
 
+    # A current public-detail variant renders the label as a standalone
+    # heading without a colon: ``专业要求 地质资源与地质工程... 工作职责``.
+    # The next explicit section heading bounds the capture so a responsibility
+    # paragraph cannot be promoted to a professional requirement.
+    section_boundary = r"岗位职责|工作职责|任职要求|任职条件|职责描述|工作内容"
+    for label in labels:
+        heading = re.search(
+            rf"(?:^|[。；;\n])\s*{re.escape(label)}\s+(?![：:])"
+            rf"(.{{1,240}}?)(?=\s*(?:{section_boundary})(?:\s*[：:]|\s|$)|$)",
+            normalized,
+            flags=re.IGNORECASE,
+        )
+        if heading:
+            value = " ".join(heading.group(1).split()).strip(" ：:;；")
+            if value:
+                return value
+
+    # Another official variant places a non-professional numbered condition
+    # first and the discipline sentence second, e.g. ``（1）博士学历。地球
+    # 物理、资源勘查工程等相关专业``. Stay inside the same condition section
+    # and require one of the reviewed discipline markers plus ``专业``.
+    condition_section = re.search(
+        r"(?:[【\[]\s*)?(?:任职要求|任职条件)(?:\s*[】\]])?"
+        r"(?P<body>.*?)(?=\s*(?:岗位职责|工作职责|职责描述|工作内容)(?:\s*[：:]|\s|$)|$)",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if condition_section:
+        discipline = re.search(
+            r"((?:地质|地球物理|资源勘查|油气勘探|石油地质|地球化学|"
+            r"水文地质|工程地质|物探|测井|遥感地质)[^。；;\n]{0,100}专业)",
+            condition_section.group("body"),
+            flags=re.IGNORECASE,
+        )
+        if discipline:
+            return " ".join(discipline.group(1).split()).strip(" ：:;；")
+
     # A small set of official detail pages use an unlabeled first line under
     # "任职要求", for example "1.地质学；...；煤炭地质勘查相关专业。".
     # It is accepted only when that same requirement sentence explicitly ends
     # in a professional requirement, never from a responsibility paragraph.
     requirement_line = re.search(
-        r"(?:任职要求|任职条件)\s*(?:[：:]\s*)?(?:1[、.．)]\s*)"
+        r"(?:[【\[]\s*)?(?:任职要求|任职条件)(?:\s*[】\]])?\s*"
+        r"(?:[：:]\s*)?(?:[（(]?\s*1\s*[、.．)]?\s*[）)]?\s*)"
         r"([^。；;]{1,180}?专业[^。；;]{0,80})(?:[。；;]|$)",
         normalized,
         flags=re.IGNORECASE,
@@ -657,7 +805,26 @@ def _major_from_description(text: str) -> str:
         normalized,
         flags=re.IGNORECASE,
     )
-    return " ".join(condition.group(1).split()).strip(" ：:;；") if condition else ""
+    if condition:
+        return " ".join(condition.group(1).split()).strip(" ：:;；")
+
+    # Some public detail templates use a plain qualification sentence rather
+    # than a labelled field, e.g. ``地质类相关专业，本科及以上学历``.  Accept
+    # only an explicit target-discipline phrase ending in ``专业`` and only
+    # when the same sentence also contains a qualification marker.  This must
+    # not turn a responsibility or employer introduction into major evidence.
+    explicit = re.search(
+        r"([^。；;\n]{0,80}?(?:地质|地球物理|资源勘查|油气勘探|"
+        r"石油地质|地球化学|水文地质|工程地质|物探|测井|遥感地质)"
+        r"[^。；;\n]{0,80}?(?:相关)?专业[^。；;\n]{0,80})",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if explicit and re.search(
+        r"(?:本科|硕士|博士|学历|学位|任职|招聘|应聘|要求)", explicit.group(1)
+    ):
+        return " ".join(explicit.group(1).split()).strip(" ：:;；")
+    return ""
 
 
 def _label_value(text: str, labels: Iterable[str]) -> str:
@@ -665,20 +832,39 @@ def _label_value(text: str, labels: Iterable[str]) -> str:
         "专业要求",
         "专业范围",
         "需求专业",
+        "专业（代码）",
+        "专业(代码)",
+        "专业类别要求",
+        "学科专业",
+        "所学专业及代码",
         "专业",
+        "最低学历层次",
         "最低学历",
         "学历要求",
+        "学历层次",
         "学历",
+        "工作省市",
+        "工作区域",
+        "工作地址",
         "工作地点",
         "工作城市",
         "工作地区",
         "地点",
+        "计划招聘人数",
+        "招聘数量",
+        "需求数",
         "招聘人数",
         "需求人数",
         "人数",
+        "报名截止时间",
+        "投递截止",
+        "申请截止",
+        "有效期至",
+        "报名时间",
         "报名截止",
         "截止日期",
         "截止时间",
+        "截止",
         "岗位名称",
         "职位名称",
         "招聘单位",
@@ -697,12 +883,29 @@ def _label_value(text: str, labels: Iterable[str]) -> str:
     return ""
 
 
+def _date_after_label(text: str, labels: Iterable[str]) -> str:
+    """Read a calendar date only when it follows an explicit date label."""
+
+    normalized = " ".join(str(text or "").split())
+    for label in labels:
+        match = re.search(
+            rf"{re.escape(label)}\s*[：:]?\s*((?:20\d{{2}}[-/.]\d{{1,2}}[-/.]\d{{1,2}}))",
+            normalized,
+            flags=re.IGNORECASE,
+        )
+        if match:
+            return match.group(1).replace("/", "-").replace(".", "-")
+    return ""
+
+
 def extract_cmgb_detail(
     page: Any,
     *,
     detail_url: str,
     allowed_hosts: set[str],
     require_employer: bool = True,
+    require_title: bool = True,
+    allow_missing_fields: Iterable[str] = (),
 ) -> dict[str, Any]:
     """Extract fields from a rendered official detail tab.
 
@@ -712,6 +915,7 @@ def extract_cmgb_detail(
     """
 
     official_detail_url = _official_url(detail_url, "detail_url", allowed_hosts)
+    optional_fields = {str(field).strip() for field in allow_missing_fields if str(field).strip()}
     body = _body_text(page)
     duty = _first_text(page, (".job-duty", ".job-introduction", ".job-description"))
     title = _first_text(page, (".job-banner .title", ".title", ".job-name", "h1", "h2"))
@@ -719,7 +923,17 @@ def extract_cmgb_detail(
         page,
         (".company-title", ".company-name", ".requirement .company-name", ".company"),
     )
-    major = _overview_value(page, ("专业要求", "专业范围", "需求专业"))
+    major = _overview_value(
+        page,
+        (
+            "专业要求",
+            "专业范围",
+            "需求专业",
+            "专业类别要求",
+            "学科专业",
+            "所学专业及代码",
+        ),
+    )
     detail_major = _major_from_description(duty)
     if _major_needs_detail_evidence(major):
         major = detail_major or _label_value(
@@ -735,17 +949,63 @@ def extract_cmgb_detail(
                 "专业",
             ),
         ) or major
-    degree = _overview_value(page, ("最低学历", "学历要求", "学历")) or _label_value(
-        body, ("最低学历", "学历要求", "学历")
+    degree = _overview_value(
+        page,
+        ("最低学历", "最低学历层次", "学历要求", "学历层次", "学历"),
+    ) or _label_value(
+        body,
+        ("最低学历", "最低学历层次", "学历要求", "学历层次", "学历"),
     )
     location = _first_text(page, (".job-banner .address", ".address")) or _overview_value(
-        page, ("工作地点", "工作城市", "工作地区", "地点")
-    ) or _label_value(body, ("工作地点", "工作城市", "工作地区", "地点"))
-    headcount = _overview_value(page, ("招聘人数", "需求人数", "人数")) or _label_value(
-        body, ("招聘人数", "需求人数", "人数")
+        page,
+        ("工作地点", "工作城市", "工作地区", "工作省市", "工作区域", "工作地址", "地点"),
+    ) or _label_value(
+        body,
+        ("工作地点", "工作城市", "工作地区", "工作省市", "工作区域", "工作地址", "地点"),
     )
-    deadline = _overview_value(page, ("报名截止", "截止日期", "截止时间")) or _label_value(
-        body, ("报名截止", "截止日期", "截止时间")
+    headcount = _overview_value(
+        page,
+        ("招聘人数", "计划招聘人数", "招聘数量", "需求人数", "需求数", "人数"),
+    ) or _label_value(
+        body,
+        ("招聘人数", "计划招聘人数", "招聘数量", "需求人数", "需求数", "人数"),
+    )
+    deadline = _overview_value(
+        page,
+        (
+            "报名截止",
+            "报名截止时间",
+            "投递截止",
+            "申请截止",
+            "有效期至",
+            "报名时间",
+            "截止日期",
+            "截止时间",
+            "截止",
+        ),
+    ) or _label_value(
+        body,
+        (
+            "报名截止",
+            "报名截止时间",
+            "投递截止",
+            "申请截止",
+            "有效期至",
+            "报名时间",
+            "截止日期",
+            "截止时间",
+            "截止",
+        ),
+    )
+    published_date = _overview_value(
+        page,
+        ("更新于", "更新时间", "发布日期", "发布时间"),
+    ) or _date_after_label(
+        body,
+        ("更新于", "更新时间", "发布日期", "发布时间"),
+    )
+    role_type = _overview_value(
+        page, ("职位性质", "招聘性质", "招聘类型", "岗位性质", "岗位类型")
     )
     values = {
         "title": title or _label_value(body, ("岗位名称", "职位名称")),
@@ -756,13 +1016,17 @@ def extract_cmgb_detail(
         "headcount": headcount,
         "deadline": deadline,
     }
-    missing = [
-        field
-        for field, value in values.items()
-        if not value
-        and field != "major"
-        and (field != "employer" or require_employer)
-    ]
+    missing: list[str] = []
+    for field, value in values.items():
+        if value or field == "major":
+            continue
+        if field == "employer" and not require_employer:
+            continue
+        if field == "title" and not require_title:
+            continue
+        if field in optional_fields:
+            continue
+        missing.append(field)
     if not values["major"] or _is_major_placeholder(values["major"]):
         missing.append("major evidence")
     if missing:
@@ -778,12 +1042,15 @@ def extract_cmgb_detail(
         "报名截止": values["deadline"],
         "官方详情链接": official_detail_url,
     }
+    if role_type:
+        evidence["职位性质"] = role_type
     return {
         **values,
         "detail_url": official_detail_url,
         "evidence_url": official_detail_url,
         "field_evidence": evidence,
         "description": duty or body,
+        "published_date": published_date,
     }
 
 
@@ -827,6 +1094,8 @@ def write_cmgb_capture_failure(
     scan: dict[str, Any] | None = None,
     rows: list[dict[str, Any]] | None = None,
     captured_at: str | None = None,
+    source_id: str = "cmgb-iguopin-browser",
+    adapter_version: str = "cmgb-browser-v1",
 ) -> dict[str, Any]:
     """Archive a non-publishable diagnostic without replacing a good capture.
 
@@ -877,13 +1146,23 @@ def write_cmgb_capture_failure(
         "scan": diagnostics,
         "rows": rows or [],
     }
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=source_id,
+        adapter_version=adapter_version,
+    )
     _write_capture(archive_path, payload)
     _write_capture(destination.with_suffix(".failure.json"), payload)
     return payload
 
 
 def persist_cmgb_browser_capture(
-    *, output: Path | str, payload: dict[str, Any]
+    *,
+    output: Path | str,
+    payload: dict[str, Any],
+    source_id: str = "cmgb-iguopin-browser",
+    adapter_version: str = "cmgb-browser-v1",
+    allow_empty_duplicate_batch: bool = False,
 ) -> dict[str, Any]:
     """Persist a CMGB run while protecting the last complete evidence snapshot.
 
@@ -893,6 +1172,11 @@ def persist_cmgb_browser_capture(
     replacement for the previous complete inventory. It is archived instead.
     """
 
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=source_id,
+        adapter_version=adapter_version,
+    )
     status = _text(payload.get("status"), "status")
     if status not in CMGB_CAPTURE_STATUSES:
         raise CmgbBrowserCaptureError(f"unsupported CMGB capture status: {status}")
@@ -900,7 +1184,9 @@ def persist_cmgb_browser_capture(
         # A producer cannot label an incomplete pass as a canonical success.
         scan = _scan_metrics(payload, require_complete=True)
         rows = payload.get("rows")
-        if not isinstance(rows, list) or not rows:
+        if not isinstance(rows, list) or (
+            not rows and not (allow_empty_duplicate_batch and _complete_duplicate_batch(scan, rows))
+        ):
             raise CmgbBrowserCaptureError("successful CMGB capture rows must be a non-empty list")
         if scan["rows_exported"] != len(rows):
             raise CmgbBrowserCaptureError(
@@ -928,6 +1214,8 @@ def persist_cmgb_browser_capture(
         scan=scan,
         rows=rows,
         captured_at=str(payload.get("captured_at") or ""),
+        source_id=source_id,
+        adapter_version=adapter_version,
     )
 
 
@@ -1072,7 +1360,7 @@ def run_cmgb_browser_capture(
                 context = browser.contexts[0]
                 _close_context_pages(context)
             else:
-                browser = playwright.chromium.launch(headless=True)
+                browser = launch_playwright_browser(playwright, config)
                 context = browser.new_context(user_agent=user_agent)
             page = context.new_page()
             page.goto(target_url, wait_until="domcontentloaded", timeout=timeout_ms)
@@ -1271,7 +1559,12 @@ def run_cmgb_browser_capture(
         },
         "rows": rows,
     }
-    return persist_cmgb_browser_capture(output=output, payload=payload)
+    return persist_cmgb_browser_capture(
+        output=output,
+        payload=payload,
+        source_id=str(config.get("source_id") or "cmgb-iguopin-browser"),
+        adapter_version=str(config.get("adapter_version") or "cmgb-browser-v1"),
+    )
 
 
 def run_cmgb_detail_retry(
@@ -1282,6 +1575,7 @@ def run_cmgb_detail_retry(
     allowed_hosts: Iterable[str],
     user_agent: str,
     max_age_hours: float | None = 12,
+    require_capture_manifest: bool = False,
     timeout_ms: int = 45_000,
 ) -> dict[str, Any]:
     """Retry only the failed official CMGB detail tabs from one frozen scan.
@@ -1297,6 +1591,7 @@ def run_cmgb_detail_retry(
         retry_capture_path,
         allowed_hosts=hosts,
         max_age_hours=max_age_hours,
+        require_capture_manifest=require_capture_manifest,
     )
     target_url = str(retry_capture["platform_url"])
     _robots_permit(target_url, user_agent=user_agent)
@@ -1334,7 +1629,7 @@ def run_cmgb_detail_retry(
                     context = browser.contexts[0]
                     _close_context_pages(context)
                 else:
-                    browser = playwright.chromium.launch(headless=True)
+                    browser = launch_playwright_browser(playwright, config)
                     context = browser.new_context(user_agent=user_agent)
 
             def reset_session() -> None:
@@ -1469,4 +1764,9 @@ def run_cmgb_detail_retry(
         retry_failures=retry_failures,
         allowed_hosts=hosts,
     )
-    return persist_cmgb_browser_capture(output=output, payload=payload)
+    return persist_cmgb_browser_capture(
+        output=output,
+        payload=payload,
+        source_id=str(config.get("source_id") or "cmgb-iguopin-browser"),
+        adapter_version=str(config.get("adapter_version") or "cmgb-browser-v1"),
+    )

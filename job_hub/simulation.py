@@ -16,19 +16,16 @@ class SyntheticStudent:
 
 
 # 40 undergraduate, 42 master's, and 18 doctoral students. The distribution is
-# intentionally fixed so every run is comparable and all ten requested tracks
+# intentionally fixed so every run is comparable and all seven requested tracks
 # are exercised. These records are never written to the public site's database.
 COHORT_PLAN = (
-    ("undergraduate-resource-exploration", 30),
-    ("undergraduate-geophysics", 10),
+    ("undergraduate-resource-exploration", 40),
     ("master-geology", 14),
-    ("master-geophysics", 6),
     ("master-geological-engineering", 14),
-    ("master-geological-resources-engineering", 8),
+    ("master-geological-resources-engineering", 14),
     ("doctoral-geology", 6),
-    ("doctoral-geophysics", 2),
     ("doctoral-geological-engineering", 6),
-    ("doctoral-geological-resources-engineering", 4),
+    ("doctoral-geological-resources-engineering", 6),
 )
 
 

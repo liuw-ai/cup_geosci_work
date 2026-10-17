@@ -1,12 +1,27 @@
 name: cupb-geoscience-job-hub
+x-release-environment: &release-environment
+  APP_RELEASE_VERSION: ${APP_RELEASE_VERSION:-dev}
+  APP_RELEASE_GIT_SHA: ${APP_RELEASE_GIT_SHA:-unknown}
+  APP_RELEASE_IMAGE_SHA: ${APP_RELEASE_IMAGE_SHA:-unknown}
+  APP_RELEASE_BUILT_AT: ${APP_RELEASE_BUILT_AT:-unknown}
+  # Pass the same immutable references used for Compose interpolation into the
+  # application container.  ``release-check`` must inspect the image that is
+  # actually running, not a stale value left in the secret-bearing .env file.
+  JOB_HUB_IMAGE: ${JOB_HUB_IMAGE:-cupb-geoscience-job-hub:latest}
+  RUNTIME_IMAGE: ${RUNTIME_IMAGE:-cupb-geoscience-job-hub:latest}
+  JOB_HUB_BROWSER_IMAGE: ${JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest}
+  BROWSER_DEPS_IMAGE: ${BROWSER_DEPS_IMAGE:-cupb-geoscience-job-hub-browser:latest}
+  HEADLESS_SHELL_IMAGE: ${HEADLESS_SHELL_IMAGE:-chromedp/headless-shell:latest}
+
 services:
   web:
     build:
       context: .
-    image: cupb-geoscience-job-hub:latest
+    image: ${JOB_HUB_IMAGE:-cupb-geoscience-job-hub:latest}
     env_file:
       - .env
     environment:
+      <<: *release-environment
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
@@ -55,10 +70,11 @@ services:
   worker:
     build:
       context: .
-    image: cupb-geoscience-job-hub:latest
+    image: ${JOB_HUB_IMAGE:-cupb-geoscience-job-hub:latest}
     env_file:
       - .env
     environment:
+      <<: *release-environment
       APP_DATA_DIR: /var/lib/job-hub
       APP_DATABASE_PATH: /var/lib/job-hub/job_hub.sqlite3
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
@@ -84,11 +100,11 @@ services:
         - job_hub.cli
         - worker-health
         - --max-age
-        - "180"
+        - "900"
       interval: 60s
       timeout: 15s
       retries: 3
-      start_period: 180s
+      start_period: 900s
     restart: unless-stopped
     logging:
       options:

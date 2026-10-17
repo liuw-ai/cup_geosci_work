@@ -67,6 +67,7 @@ def test_pipechina_snapshot_builds_job_detail_links_and_search_fallback(tmp_path
     assert "_HB4_eyJpZCI6NTQ2NDcs" in geology.source_url
     assert "search_key=%E5%9C%B0%E8%B4%A8" in geology.field_evidence["官方地质筛选入口"]
     assert geology.field_evidence["官方详情链接"] == geology.source_url
+    assert geology.official_evidence_url == geology.source_url
 
 
 def test_cnpc_snapshot_builds_renderable_post_name_deep_links(tmp_path) -> None:
@@ -134,7 +135,37 @@ def test_cupb_snapshot_rows_pass_the_same_publication_gate(tmp_path) -> None:
     assert statuses["cupb-460426-geoscience-faculty"] == "student_eligible"
     assert statuses["cupb-460487-postdoc-mineral-green-mining"] == "student_eligible"
     assert statuses["cupb-460487-postdoc-geohazard"] == "student_eligible"
-    assert statuses["cupb-460520-national-energy-unrestricted"] == "unrestricted_eligible"
+    assert statuses["cupb-460520-national-energy-unrestricted"] == "out_of_scope"
+
+
+def test_official_snapshot_location_split_keeps_each_explicit_location(tmp_path) -> None:
+    source = {
+        **SNAPSHOT_SOURCE,
+        "config": {
+            **SNAPSHOT_SOURCE["config"],
+            "snapshot_path": "data/verified/cupb-geoscience-20261007.json",
+            "split_location_rows": True,
+            "max_age_hours": 100_000,
+            "snapshot_captured_at": "2026-10-07T14:35:00+08:00",
+            "allowed_hosts": ["career.cup.edu.cn"],
+        },
+    }
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    pipeline = JobPipeline(settings, database)
+    postings = OfficialSourceCollector(settings).collect(source)
+
+    rows = [
+        posting
+        for posting in postings
+        if posting.external_id.startswith("cupb-460455-row-1--location-")
+    ]
+    assert {posting.location for posting in rows} == {"北京", "成都", "涿州"}
+    assert all(posting.field_evidence["工作地点"] == posting.location for posting in rows)
+    normalized = [pipeline.normalize_posting(posting, source) for posting in rows]
+    assert {item["location"] for item in normalized} == {"北京", "成都", "涿州"}
+    assert all(item["country_or_region"] == "中国大陆" for item in normalized)
 
 
 def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) -> None:
@@ -144,16 +175,24 @@ def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) 
     source = next(
         item for item in registry if item["id"] == "cmgb-iguopin-2027-geoscience-snapshot"
     )
+    # This case validates row parsing and evidence fields. Freshness is covered
+    # by the lifecycle tests; use a long fixture window so an old committed
+    # artifact does not make the parser test depend on the wall clock.
+    source["config"] = {**source["config"], "max_age_hours": 100_000}
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
     database.initialize()
     pipeline = JobPipeline(settings, database)
     postings = OfficialSourceCollector(settings).collect(source)
 
-    # The browser-verified pagination pass covered all 8 pages and retained
-    # only the 33 rows with explicit geoscience evidence. Keep the exact count
-    # here so a future collector change cannot silently shrink the snapshot.
-    assert len(postings) == 33
+    # The browser-verified pagination pass retained 33 official announcement
+    # rows.  Multi-location rows are expanded for the student count, so the
+    # collector now emits 53 location variants while preserving the 33 bases.
+    assert len(postings) == 53
+    assert len({
+        posting.external_id.split("--location-", 1)[0]
+        for posting in postings
+    }) == 33
     assert all(
         posting.official_evidence_url
         == "https://www.cmgb.com.cn/content/2026/09-25/7509048960149884928.html"
@@ -163,11 +202,20 @@ def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) 
     assert all(posting.deadline_date == "2026-11-06" for posting in postings)
 
     normalized = [pipeline.normalize_posting(posting, source) for posting in postings]
-    assert len(normalized) == 33
+    assert len(normalized) == 53
     statuses = [item["publication_status"] for item in normalized]
-    assert statuses.count("student_eligible") == 25
-    assert statuses.count("pending_evidence") == 5
-    assert statuses.count("out_of_scope") == 3
+    # Enterprise rows are eligible only when the official requirement names
+    # one of the four graduation majors; adjacent geoscience wording remains a
+    # separate similar-major or pending-evidence tier.
+    assert statuses.count("student_eligible") == 35
+    assert statuses.count("pending_evidence") == 10
+    assert statuses.count("similar_eligible") == 6
+    assert statuses.count("out_of_scope") == 2
+    mixed_assignment = next(
+        item for item in normalized if item["location"] == "蒙古国、山东"
+    )
+    assert mixed_assignment["country_or_region"] == "境内外混合"
+    assert mixed_assignment["publication_status"] == "out_of_scope"
     assert all(
         posting.field_evidence["招聘人数"]
         and posting.field_evidence["学历要求"]
@@ -177,11 +225,18 @@ def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) 
         and posting.field_evidence["官方详情链接"]
         for posting in postings
     )
+    exact_graduation_majors = (
+        "地质学",
+        "地质工程",
+        "地质资源与地质工程",
+        "资源勘查工程",
+    )
     assert all(
         item["publication_status"] != "student_eligible"
-        or "地质" in item["field_evidence"]["专业范围"]
-        or "资源勘查工程" in item["field_evidence"]["专业范围"]
-        or "地球物理学" in item["field_evidence"]["专业范围"]
+        or any(
+            major in item["field_evidence"]["专业范围"]
+            for major in exact_graduation_majors
+        )
         for item in normalized
     )
 

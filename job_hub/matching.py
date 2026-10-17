@@ -222,6 +222,11 @@ def looks_like_recruitment(text: str) -> bool:
 def extract_degree_levels(text: str) -> list[str]:
     lowered = clean_text(text).lower()
     found: list[str] = []
+    # Preserve a lower education floor as its own level. It covers higher
+    # degree students without relabelling the official requirement as a
+    # bachelor's requirement.
+    if "大专" in lowered or "专科" in lowered or "高职" in lowered:
+        found.append("大专")
     if (
         "本科" in lowered
         or "学士" in lowered
@@ -234,13 +239,17 @@ def extract_degree_levels(text: str) -> list[str]:
     # floor only when the same evidence does not explicitly name a doctorate.
     # This parser feeds the student-facing eligibility gate, so promoting a
     # doctoral-only role to master's students would be a material mismatch.
+    # A postdoctoral appointment is a job type, not an education level.  It
+    # often requires an already awarded PhD, but that condition must appear in
+    # the same official requirement field.  Treating the title ``博士后`` as a
+    # doctorate would otherwise publish a role to a doctoral candidate without
+    # evidence that they meet its degree condition.
+    degree_text = lowered.replace("博士后", "").replace("postdoctoral", "")
     has_doctoral = (
-        "博士" in lowered
-        or "博士后" in lowered
-        or "ph.d" in lowered
-        or "phd" in lowered
-        or "doctoral" in lowered
-        or "postdoctoral" in lowered
+        "博士" in degree_text
+        or "ph.d" in degree_text
+        or "phd" in degree_text
+        or "doctoral" in degree_text
     )
     if "硕士" in lowered or "master" in lowered or ("研究生" in lowered and not has_doctoral):
         found.append("硕士")

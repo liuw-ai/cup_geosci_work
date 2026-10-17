@@ -31,6 +31,7 @@ from job_hub.sources import USER_AGENT, load_source_registries
 from job_hub.transport import (
     configure_session,
     create_session,
+    looks_like_non_robots_document,
     transport_metadata,
     validate_transport_mode,
 )
@@ -259,8 +260,14 @@ class PublicEntryProbeRunner:
             if robots.status_code == 404:
                 allowed = True
             elif 200 <= robots.status_code < 300:
+                robots_text = self._response_text(robots)
+                if looks_like_non_robots_document(robots_text):
+                    base["classification"] = "source_unavailable"
+                    base["error_class"] = "robots_error_document"
+                    base["error_detail"] = "robots.txt returned an HTML error document"
+                    return base
                 parser = RobotFileParser()
-                parser.parse(self._response_text(robots).splitlines())
+                parser.parse(robots_text.splitlines())
                 allowed = parser.can_fetch(USER_AGENT, url)
             elif robots.status_code in ACCESS_POLICY_STATUS:
                 base["classification"] = "access_policy_block"

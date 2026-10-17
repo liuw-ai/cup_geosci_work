@@ -123,6 +123,11 @@ def national_source_matrix_rows(
         for channel in organization.get("channels", []):
             if channel.get("channel_type") not in payload["target_channel_types"]:
                 continue
+            # Phase 2 may register official display names before their legal
+            # identity and unit-scoped evidence are verified.  Such candidate
+            # entries are catalog data, not active national-source channels.
+            if organization.get("identity_status") == "official_display_name_pending_legal_normalization":
+                continue
             source_id = str(channel.get("source_id") or "").strip() or None
             policy = assessments.get(source_id) if source_id else None
             if policy is None:
@@ -144,6 +149,7 @@ def national_source_matrix_rows(
                     "affiliation": organization["affiliation"],
                     "channel_id": channel["id"],
                     "channel_type": channel["channel_type"],
+                    "entry_verification_status": channel["verification_status"],
                     "official_url": channel["official_url"],
                     "backup_urls": list(channel.get("backup_urls", [])),
                     "source_id": source_id,
@@ -205,6 +211,9 @@ def national_source_matrix_summary(
     by_mode = Counter(str(row["acquisition_mode"]) for row in rows)
     by_status = Counter(str(row["runtime_status"]) for row in rows)
     by_conclusion = Counter(str(row["scan_conclusion"]) for row in rows)
+    by_entry_verification = Counter(
+        str(row["entry_verification_status"]) for row in rows
+    )
     by_affiliation = Counter(str(row["affiliation"]) for row in rows)
     assessed = sum(1 for row in rows if row["assessment_source_id"])
     with_backup = sum(1 for row in rows if row["backup_urls"])
@@ -220,6 +229,8 @@ def national_source_matrix_summary(
         "acquisition_mode_counts": dict(sorted(by_mode.items())),
         "runtime_status_counts": dict(sorted(by_status.items())),
         "scan_conclusion_counts": dict(sorted(by_conclusion.items())),
+        "entry_verification_status_counts": dict(sorted(by_entry_verification.items())),
+        "candidate_entry_count": by_entry_verification["candidate"],
         "affiliation_counts": dict(sorted(by_affiliation.items())),
         "source_unavailable_channels": by_conclusion["source_unavailable"],
         "successful_no_match_channels": by_conclusion["scan_success_no_match"],

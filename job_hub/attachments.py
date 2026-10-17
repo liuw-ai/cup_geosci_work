@@ -41,6 +41,7 @@ from job_hub.matching import (
 )
 from job_hub.profiles import (
     PUBLICATION_STUDENT_ELIGIBLE,
+    PUBLICATION_SIMILAR_ELIGIBLE,
     PUBLICATION_UNRESTRICTED_ELIGIBLE,
     evaluate_student_publication,
 )
@@ -48,12 +49,17 @@ from job_hub.transport import (
     RequestPolicy,
     configure_session,
     create_session,
+    looks_like_non_robots_document,
     request_exception_types,
 )
 
 
 USER_AGENT = "cupb-geoscience-job-hub-attachment-fetcher/0.1 (+official-public-source)"
-PARSER_VERSION = "attachments-v3"
+# Bump when extracted metadata or candidate derivation rules change.  The
+# worker uses this marker to reparse already-downloaded official files once.
+# Bump when candidate eligibility rules change so extracted official files are
+# reconciled automatically without downloading them again.
+PARSER_VERSION = "attachments-v5"
 REQUEST_ERRORS = request_exception_types()
 
 SUPPORTED_SUFFIXES = {
@@ -84,6 +90,56 @@ POSITION_TABLE_MARKERS = (
 )
 
 
+_POSITION_CODE_LABEL_RE = re.compile(
+    r"(?:岗位|职位)(?:代码|编号)\s*[:：]?\s*"
+    r"([A-Za-z0-9][A-Za-z0-9_.\-/]{1,39})",
+    re.IGNORECASE,
+)
+
+_NOTICE_APPLICATION_WINDOW_RE = re.compile(
+    r"(?:报名|申请|网申|投递|应聘)[^。；!?！？\n]{0,180}",
+    re.IGNORECASE,
+)
+_NOTICE_PARTIAL_WINDOW_RE = re.compile(
+    r"第[一二三四五六七八九十\d]+批|部分岗位|分批|另行通知|以各单位为准"
+)
+
+
+def notice_deadline_evidence(page_text: str, notice_url: str, *, captured_at: str) -> dict[str, str] | None:
+    """Bind one unqualified application deadline to the official notice body."""
+    windows: list[tuple[str, str]] = []
+    for match in _NOTICE_APPLICATION_WINDOW_RE.finditer(page_text):
+        quote = match.group(0).strip()
+        nearby = page_text[max(0, match.start() - 12):match.end()]
+        if _NOTICE_PARTIAL_WINDOW_RE.search(nearby):
+            continue
+        deadline = extract_deadline(quote)
+        if deadline:
+            windows.append((deadline, quote))
+    if not windows or len({deadline for deadline, _ in windows}) != 1:
+        return None
+    deadline, quote = windows[0]
+    return {
+        "deadline_date": deadline,
+        "notice_url": notice_url,
+        "notice_sha256": hashlib.sha256(page_text.encode("utf-8")).hexdigest(),
+        "captured_at": captured_at,
+        "quote": quote,
+    }
+
+
+def infer_position_code(row_text: str) -> str | None:
+    """Recover a labeled position code when an attachment omits its code column.
+
+    Several government spreadsheets flatten a row into text while retaining a
+    labeled ``岗位代码`` value in the row text. The label is required on
+    purpose: extracting arbitrary numbers (dates, headcounts, phone numbers)
+    would create a false link to the government position ledger.
+    """
+    match = _POSITION_CODE_LABEL_RE.search(str(row_text or ""))
+    return match.group(1).strip() if match else None
+
+
 def build_attachment_field_evidence(
     *,
     title: str,
@@ -111,6 +167,14 @@ def build_attachment_field_evidence(
         "artifact_url": str(artifact.get("artifact_url") or "").strip(),
         "row_text": row_text[:2000],
     }
+    metadata = artifact.get("metadata")
+    if isinstance(metadata, dict):
+        position_type = str(metadata.get("position_type") or "").strip()
+        if position_type:
+            # Preserve the public-recruitment classification at row scope so
+            # broad discipline/category rules can never be inferred from a
+            # generic source name or employer keyword.
+            evidence["政府岗位类型"] = position_type
     if location:
         evidence["工作地点"] = location
     for key, value in (extra_evidence or {}).items():
@@ -122,6 +186,16 @@ def build_attachment_field_evidence(
             and key_text not in {"evidence_scope", "岗位", "专业范围", "学历要求", "table_row", "artifact_url", "row_text"}
         ):
             evidence[key_text] = value_text
+    # Preserve a row-level code even when the spreadsheet parser could not
+    # expose a dedicated code column. This remains bounded by the explicit
+    # label check in ``infer_position_code`` and is therefore safe for dates
+    # and other numeric values appearing elsewhere in the row.
+    if not any(
+        key in evidence for key in ("职位代码", "岗位代码", "职位编号", "岗位编号")
+    ):
+        position_code = infer_position_code(row_text)
+        if position_code:
+            evidence["职位代码"] = position_code
     return {key: value for key, value in evidence.items() if value}
 
 
@@ -260,6 +334,9 @@ class OfficialAttachmentProcessor:
             "official_notice_title": (
                 soup.title.get_text(" ", strip=True) if soup.title else ""
             ),
+            "notice_deadline_evidence": notice_deadline_evidence(
+                page_text, parent_url, captured_at=_utc_now()
+            ),
         }
         discovered: list[dict[str, object]] = []
         seen: set[str] = set()
@@ -397,7 +474,7 @@ class OfficialAttachmentProcessor:
             raise ValueError("Source artifact does not exist")
         if str(artifact.get("extraction_status")) != "extracted":
             raise ValueError("Only extracted source artifacts can be reconciled")
-        rows = self.database.list_source_artifact_rows(artifact_id, limit=500)
+        rows = list(self.database.iter_source_artifact_rows(artifact_id))
         queue_result = self._reconcile_candidate_queue(artifact, rows)
         return AttachmentResult(
             artifact_id=artifact_id,
@@ -969,6 +1046,12 @@ class OfficialAttachmentProcessor:
                 "candidate_queue_retained_rows": retained_rows,
                 "candidate_queue_rejected_rows": rejected_rows,
                 "candidate_queue_checked_at": _utc_now(),
+                # A successful reconciliation supersedes a parser/runtime
+                # error recorded by an earlier container. Keep the diagnostic
+                # fields present but null so operators do not mistake stale
+                # failures for a current processing outage.
+                "last_error": None,
+                "last_error_at": None,
             },
         )
 
@@ -1060,8 +1143,24 @@ class OfficialAttachmentProcessor:
         )
         location = self._field(cells, ("工作地点", "工作区域", "工作城市", "所在地", "地点"))
         degree = self._field(
-            cells, ("学历", "学历要求", "学历层次", "学历及学位", "学位要求", "面向对象")
+            cells,
+            (
+                "学历",
+                "学历要求",
+                "学历层次",
+                "学历及学位",
+                "学历学位",
+                "学历或学位",
+                "学位要求",
+                "面向对象",
+            ),
         )
+        academic_degree = self._field(cells, ("学位", "学位要求"))
+        if academic_degree and academic_degree != degree:
+            # Government position tables commonly split qualifications into
+            # "学历" and "学位" columns. Preserve both instead of silently
+            # downgrading a doctoral role to the generic "研究生" level.
+            degree = "；".join(value for value in (degree, academic_degree) if value)
         major = self._field(
             cells,
             (
@@ -1069,6 +1168,12 @@ class OfficialAttachmentProcessor:
                 "专业要求",
                 "需求专业",
                 "专业范围",
+                "专业及代码",
+                "岗位所需专业",
+                "所需专业",
+                "专业条件要求",
+                "大学本科专业要求",
+                "研究生专业要求",
                 "所学专业",
                 "专业类别",
                 "专业名称",
@@ -1139,7 +1244,16 @@ class OfficialAttachmentProcessor:
         headcount_key = None
         headcount = self._field(
             cells,
-            ("招聘人数", "需求人数", "计划人数", "人数", "计划数"),
+            (
+                "招聘人数",
+                "招聘计划人数",
+                "招聘计划数",
+                "计划招聘人数",
+                "需求人数",
+                "计划人数",
+                "人数",
+                "计划数",
+            ),
         )
         if not headcount:
             # The CCGC table labels the numeric demand column ``备注``.  It
@@ -1160,10 +1274,22 @@ class OfficialAttachmentProcessor:
                 "field_evidence": field_evidence,
             }
         )
-        if publication.status not in {
+        allowed_statuses = {
             PUBLICATION_STUDENT_ELIGIBLE,
             PUBLICATION_UNRESTRICTED_ELIGIBLE,
-        } and publication.label != "待补岗位地点":
+        }
+        # Government tables may publish catalogue-adjacent geoscience names
+        # (for example 地球化学) that are useful to the target students but
+        # are not one of the four enterprise graduation-name matches. Keep
+        # this widening scoped to declared public-sector artifacts; enterprise
+        # attachments remain exact/unrestricted only at queue admission.
+        if str(metadata.get("position_type") or "").strip() in {
+            "public_institution",
+            "civil_service",
+            "postdoctoral",
+        }:
+            allowed_statuses.add(PUBLICATION_SIMILAR_ELIGIBLE)
+        if publication.status not in allowed_statuses and publication.label != "待补岗位地点":
             return None
         return {
             "artifact_row_id": row["id"],
@@ -1296,6 +1422,12 @@ class OfficialAttachmentProcessor:
     @classmethod
     def _workbook_header_info(cls, rows: list[list[str]]) -> tuple[list[str], int]:
         """Find a possibly multi-row header and return its first data index."""
+        # Notice attachments often put a single merged title such as
+        # ``...岗位、计划数及要求一览表`` above the real column header.  The
+        # title contains one keyword and used to be selected as the header;
+        # data rows were then consumed until a row happened to score low.  Pick
+        # the most structurally complete header in the preamble instead.
+        candidates: list[tuple[int, list[str], int, int]] = []
         for index, row in enumerate(rows[:8]):
             header = cls._workbook_header(row)
             if not header:
@@ -1308,38 +1440,47 @@ class OfficialAttachmentProcessor:
                 for cell in header
                 if cell
             )
-            end = index + 1
-            while end < len(rows):
-                candidate = rows[end]
-                score = sum(
-                    any(
-                        keyword in cell
-                        for keyword in ("岗位", "职位", "单位", "专业", "学历", "地点", "报名", "截止", "学位")
-                    )
-                    for cell in candidate
-                    if cell
+            non_empty = sum(1 for cell in header if cell)
+            candidates.append((index, header, header_score, non_empty))
+        if not candidates:
+            return [], 0
+        # Prefer keyword coverage, then the number of populated columns, while
+        # keeping the earliest row for an exact tie (normal multi-row headers).
+        index, header, header_score, _ = max(
+            candidates,
+            key=lambda item: (item[2], item[3], -item[0]),
+        )
+        end = index + 1
+        while end < len(rows):
+            candidate = rows[end]
+            score = sum(
+                any(
+                    keyword in cell
+                    for keyword in ("岗位", "职位", "单位", "专业", "学历", "地点", "报名", "截止", "学位")
                 )
-                # A data row can contain the word “专业”; continuation rows
-                # usually expose at least two field labels and no job code.
-                has_code = any(re.search(r"20\d{2}\d+", cell) for cell in candidate if cell)
-                # Once a first header row already exposes several independent
-                # field labels, the next row is data even if its employer and
-                # major values happen to contain words such as “单位” or
-                # “专业”.  The old rule merged those values into the header
-                # when a portal used a short non-year position code (A-001).
-                if score < 2 or has_code or header_score >= 3:
-                    break
-                for column, value in enumerate(candidate):
-                    if not value:
-                        continue
-                    parent = header[column] if column < len(header) else ""
-                    if not parent or parent.startswith("列"):
-                        header[column] = value
-                    elif value not in parent:
-                        header[column] = value
-                end += 1
-            return header, end
-        return [], 0
+                for cell in candidate
+                if cell
+            )
+            # A data row can contain the word “专业”; continuation rows
+            # usually expose at least two field labels and no job code.
+            has_code = any(re.search(r"20\d{2}\d+", cell) for cell in candidate if cell)
+            # Once a first header row already exposes several independent
+            # field labels, the next row is data even if its employer and
+            # major values happen to contain words such as “单位” or “专业”.
+            # The old rule merged those values into the header when a portal
+            # used a short non-year position code (A-001).
+            if score < 2 or has_code or header_score >= 3:
+                break
+            for column, value in enumerate(candidate):
+                if not value:
+                    continue
+                parent = header[column] if column < len(header) else ""
+                if not parent or parent.startswith("列"):
+                    header[column] = value
+                elif value not in parent:
+                    header[column] = value
+            end += 1
+        return header, end
 
     @staticmethod
     def _expand_merged_values(
@@ -1609,6 +1750,10 @@ class OfficialAttachmentProcessor:
             if response.status_code == 404:
                 parser.parse([])
             elif response.ok:
+                if looks_like_non_robots_document(response.text):
+                    raise AttachmentSkipped(
+                        f"Unable to verify robots.txt for {root}: received an HTML error document"
+                    )
                 parser.parse(response.text.splitlines())
             else:
                 raise AttachmentSkipped(
@@ -1705,15 +1850,18 @@ def process_pending_attachments(
     limit: int = 500,
     retry_failed: bool = False,
     source_ids: set[str] | None = None,
+    include_stale_extracted: bool = False,
+    retry_recovered_skipped: bool = False,
 ) -> dict[str, object]:
     """Process a bounded, oldest-first slice of the private attachment queue.
 
     ``registered`` files need a controlled download and extraction.  A file
     that was downloaded in a previous interrupted run is also eligible so the
     parser can resume without another network request.  Failed files are only
-    retried when an administrator explicitly asks for it; ``skipped`` files
-    commonly represent robots or access-policy decisions and must not be
-    retried implicitly by the daily worker.
+    retried when an administrator explicitly asks for it.  Skipped files are
+    retried by the unattended worker only after the same source has recently
+    reported ``source_active``; this lets a transient robots/TLS outage recover
+    without turning a still-blocked source into a hot retry loop.
 
     The returned items are operational metadata only.  No candidate is
     published here; ``OfficialAttachmentProcessor.process`` stops at the
@@ -1728,6 +1876,38 @@ def process_pending_attachments(
         oldest_first=True,
         extraction_statuses=eligible_statuses,
     )
+    if retry_recovered_skipped and len(artifacts) < bounded_limit:
+        known_ids = {int(item["id"]) for item in artifacts if item.get("id") is not None}
+        skipped_candidates = database.list_source_artifacts(
+            limit=bounded_limit,
+            oldest_first=True,
+            extraction_statuses={"skipped"},
+        )
+        artifacts.extend(
+            item
+            for item in skipped_candidates
+            if item.get("id") is not None
+            and int(item["id"]) not in known_ids
+            and _recovered_skipped_artifact_is_due(database, item)
+        )
+        artifacts = artifacts[:bounded_limit]
+    # New files must remain first in the queue.  Add only enough extracted
+    # files with an older parser marker to fill the remaining batch capacity.
+    # This avoids starving newly discovered official attachments during a
+    # one-time parser migration.
+    if include_stale_extracted and len(artifacts) < bounded_limit:
+        known_ids = {int(item["id"]) for item in artifacts if item.get("id") is not None}
+        stale_candidates = database.list_source_artifacts(
+            limit=bounded_limit,
+            oldest_first=True,
+            extraction_statuses={"extracted"},
+        )
+        artifacts.extend(
+            item
+            for item in stale_candidates
+            if item.get("id") is not None and int(item["id"]) not in known_ids
+        )
+        artifacts = artifacts[:bounded_limit]
     source_scoped_artifacts = [
         artifact
         for artifact in artifacts
@@ -1743,9 +1923,24 @@ def process_pending_attachments(
             artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else None
         )
     ]
-    selected = [
-        artifact for artifact in source_scoped_artifacts if artifact not in policy_skipped
-    ]
+    selected = []
+    for artifact in source_scoped_artifacts:
+        status = str(artifact.get("extraction_status") or "")
+        stale_extracted = (
+            include_stale_extracted
+            and status == "extracted"
+            and str(artifact.get("parser_version") or "") != PARSER_VERSION
+        )
+        pending = status in {"registered", "downloaded"} or (
+            retry_failed and status == "failed"
+        )
+        recovered_skipped = (
+            retry_recovered_skipped
+            and status == "skipped"
+            and _recovered_skipped_artifact_is_due(database, artifact)
+        )
+        if artifact not in policy_skipped and (pending or stale_extracted or recovered_skipped):
+            selected.append(artifact)
     summary: dict[str, object] = {
         "selected": len(selected),
         "processed": 0,
@@ -1755,7 +1950,10 @@ def process_pending_attachments(
         "rows_extracted": 0,
         "candidates_created": 0,
         "candidates_rejected": 0,
+        "reparsed": 0,
+        "include_stale_extracted": bool(include_stale_extracted),
         "retry_failed": bool(retry_failed),
+        "retry_recovered_skipped": bool(retry_recovered_skipped),
         "policy_skipped": len(policy_skipped),
         "policy_skip_items": [
             {
@@ -1774,6 +1972,7 @@ def process_pending_attachments(
     assert isinstance(items, list)
     for artifact in selected:
         artifact_id = int(artifact["id"])
+        was_stale_extracted = str(artifact.get("extraction_status") or "") == "extracted"
         summary["processed"] = int(summary["processed"]) + 1
         try:
             result = processor.process(artifact_id)
@@ -1781,6 +1980,8 @@ def process_pending_attachments(
             status = str(result_payload.get("status") or "")
             if status == "extracted":
                 summary["extracted"] = int(summary["extracted"]) + 1
+                if was_stale_extracted:
+                    summary["reparsed"] = int(summary["reparsed"]) + 1
             elif status == "skipped":
                 summary["skipped"] = int(summary["skipped"]) + 1
             elif status == "failed":
@@ -1812,6 +2013,60 @@ def process_pending_attachments(
                 }
             )
     return summary
+
+
+def _recovered_skipped_artifact_is_due(
+    database: Database,
+    artifact: dict[str, object],
+    *,
+    health_max_age_hours: float = 24.0,
+    retry_cooldown_hours: float = 6.0,
+) -> bool:
+    """Allow an unattended retry only after a fresh healthy source check.
+
+    ``source_active`` describes the current source entry/robots probe; it is
+    not permission to bypass a manifest policy.  A cooldown prevents a source
+    whose attachment host is still failing from being retried every worker
+    cycle.  Missing health timestamps remain fail-closed.
+    """
+
+    source_id = str(artifact.get("source_id") or "").strip()
+    if not source_id:
+        return False
+    getter = getattr(database, "get_source_health", None)
+    if not callable(getter):
+        return False
+    health = getter(source_id)
+    if not isinstance(health, dict) or str(health.get("status") or "") != "source_active":
+        return False
+    now = datetime.now(timezone.utc)
+    checked_at = _parse_utc_timestamp(health.get("checked_at"))
+    if checked_at is None:
+        return False
+    age_hours = (now - checked_at).total_seconds() / 3600
+    if age_hours < 0 or age_hours > health_max_age_hours:
+        return False
+    metadata = artifact.get("metadata")
+    if not isinstance(metadata, dict):
+        return True
+    failed_at = _parse_utc_timestamp(metadata.get("last_error_at"))
+    if failed_at is None:
+        return True
+    retry_age_hours = (now - failed_at).total_seconds() / 3600
+    return retry_age_hours >= retry_cooldown_hours
+
+
+def _parse_utc_timestamp(value: object) -> datetime | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 def _utc_now() -> str:

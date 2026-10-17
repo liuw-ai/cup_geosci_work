@@ -1,9 +1,9 @@
 <article class="job-card">
   <div class="job-card-topline">
     <span class="category-label">{{ job.category_label or job.category|category_label }}</span>
-    <span class="relevance publication-{{ job.publication_status }}">{{ job.publication_status_label }}</span>
+    <span class="relevance publication-{{ job.publication_layer or job.publication_status }}">{{ job.publication_layer_label or job.publication_status_label }}</span>
   </div>
-  <h3><a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
+  <h3><a href="{{ url_for('job_detail', job_id=job.id, scope='official_pending') if official_pending else url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
   <p class="employer">{{ job.canonical_employer_name or job.employer }}</p>
   {% if job.canonical_employer_name and job.canonical_employer_name != job.employer %}
     <p class="muted">公告单位：{{ job.employer }}</p>
@@ -23,11 +23,16 @@
       <dd>{{ job.opportunity_scope }}</dd>
     </div>
   </dl>
-  {% if job.profile_match %}
+  {% if official_pending %}
+    <p class="notice-warning">待补字段：{{ '、'.join(job.pending_missing_fields) if job.pending_missing_fields else '岗位级证据字段' }}</p>
+  {% elif job.profile_match %}
     <div class="profile-match profile-match-{{ job.profile_match.level }}">
       <strong>{{ job.profile_match.label }}</strong>
       <span>{{ job.profile_match.reason }}</span>
     </div>
+  {% endif %}
+  {% if job.source_availability_status in ['source_unavailable', 'degraded', 'stale_pending_review'] %}
+    <p class="notice-warning">来源状态：{{ job.source_availability_status_label or '来源暂时不可用' }}；已保留历史官方证据，请以原始链接为准。</p>
   {% endif %}
   <dl class="job-meta">
     <div>
@@ -41,7 +46,7 @@
     <div>
       <dt>截止</dt>
       <dd class="{% if job.deadline_date %}deadline{% endif %}">
-        {{ job.deadline_date|cn_date if job.deadline_date else "未注明" }}
+        {{ job.deadline_date|cn_date if job.deadline_date else "官方未公布截止日期" }}
       </dd>
     </div>
   </dl>
@@ -57,10 +62,13 @@
   {% endif %}
   <div class="job-card-footer">
     <span>来源：{{ job.source_name }}</span>
+    {% if job.official_table_url %}
+      <a class="text-link" href="{{ job.official_table_url }}" target="_blank" rel="noopener noreferrer">岗位表链接</a>
+    {% endif %}
     {% if active_profile_id %}
       <a class="text-link" href="{{ url_for('job_detail', job_id=job.id, profile=active_profile_id) }}">查看详情</a>
     {% else %}
-      <a class="text-link" href="{{ url_for('job_detail', job_id=job.id) }}">查看详情</a>
+      <a class="text-link" href="{{ url_for('job_detail', job_id=job.id, scope='official_pending') if official_pending else url_for('job_detail', job_id=job.id) }}">查看详情</a>
     {% endif %}
   </div>
 </article>

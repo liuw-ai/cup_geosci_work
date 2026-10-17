@@ -14,7 +14,7 @@ from job_hub.attachments import (
     OfficialAttachmentProcessor,
     build_attachment_field_evidence,
 )
-from job_hub.config import PROJECT_ROOT, Settings
+from job_hub.config import PROJECT_ROOT, Settings, load_project_env
 from job_hub.contracts import (
     NATIONAL_RUNTIME_STATUSES,
     ORGANIZATION_ROLES,
@@ -22,6 +22,9 @@ from job_hub.contracts import (
     is_http_url,
 )
 from job_hub.coverage import build_coverage_report
+from job_hub.expansion_targets import load_effective_job_target_plan
+from job_hub.source_funnel import build_source_funnel
+from job_hub.source_fallbacks import build_fallback_audit, load_fallback_plan
 from job_hub.cnpc_matrix import CnpcMatrixError, build_cnpc_matrix_report
 from job_hub.cnpc_browser_capture import (
     CnpcBrowserCaptureError,
@@ -46,6 +49,7 @@ from job_hub.organizations import (
     organization_matrix_rows,
     organization_matrix_summary,
 )
+from job_hub.three_oil_catalog import build_three_oil_catalog_audit
 from job_hub.national_sources import (
     load_national_source_matrix,
     national_source_matrix_rows,
@@ -61,6 +65,7 @@ from job_hub.entry_probes import (
     national_entry_probe_summary,
 )
 from job_hub.pipeline import JobPipeline
+from job_hub.phase3_policy import PUBLICATION_LAYERS
 from job_hub.profiles import (
     StudentProfile,
     annotate_profile_match,
@@ -74,20 +79,29 @@ from job_hub.source_validation import (
     source_validation_summary,
 )
 from job_hub.backups import DatabaseBackupManager
-from job_hub.operations import backup_health_payload
+from job_hub.government_artifacts import (
+    load_government_artifact_manifest,
+    project_government_artifact_manifest,
+)
+from job_hub.operations import backup_health_payload, build_production_readiness
 from job_hub.government_positions import (
     load_position_registry,
     source_activation_tasks,
     upcoming_position_records,
 )
-from job_hub.government_revalidation import requires_manual_government_evidence_confirmation
+from job_hub.government_revalidation import (
+    requires_manual_government_evidence_confirmation,
+    requires_preopening_evidence_confirmation,
+)
 from job_hub.reports import build_daily_report, local_today, publish_daily_report
 from job_hub.sources import RawPosting
 from job_hub.sinopec import load_sinopec_capture, sinopec_capture_summary
 
 
 def create_app(settings: Settings | None = None) -> Flask:
-    settings = settings or Settings.from_env()
+    if settings is None:
+        load_project_env()
+        settings = Settings.from_env()
     settings.ensure_runtime_paths()
     database = Database(settings.database_path)
     database.initialize()
@@ -232,9 +246,29 @@ def create_app(settings: Settings | None = None) -> Flask:
             return []
         try:
             registry = load_position_registry(path)
+            artifact_manifest = None
+            artifact_manifest_available = settings.government_artifact_manifest_path is None
+            if settings.government_artifact_manifest_path is not None:
+                artifact_manifest = load_government_artifact_manifest(
+                    settings.government_artifact_manifest_path
+                )
+                artifact_manifest = project_government_artifact_manifest(
+                    database, artifact_manifest, registry=registry
+                )
+                artifact_manifest_available = True
             verifications = {
                 str(item["source_id"]): item
                 for item in database.list_government_source_verifications()
+            }
+            # A future batch configured for automatic verification must not be
+            # published from its static reviewed ledger before the opening
+            # instant.  The worker deliberately performs zero requests before
+            # that instant; only an explicit prior verification event may make
+            # the planning row visible here.
+            preopening_confirmation_source_ids = {
+                str(source["id"])
+                for source in database.list_sources()
+                if requires_preopening_evidence_confirmation(source)
             }
             return upcoming_position_records(
                 registry,
@@ -245,7 +279,9 @@ def create_app(settings: Settings | None = None) -> Flask:
                     str(source["id"])
                     for source in database.list_sources()
                     if requires_manual_government_evidence_confirmation(source)
-                },
+                } | preopening_confirmation_source_ids,
+                artifact_manifest=artifact_manifest,
+                artifact_manifest_available=artifact_manifest_available,
                 now=datetime.now(timezone.utc),
             )
         except (OSError, ValueError, KeyError):
@@ -262,8 +298,22 @@ def create_app(settings: Settings | None = None) -> Flask:
         query: str | None,
         profile: StudentProfile | None,
         match_filter: str,
+        publication_layer: str | None = None,
+        scope: str = "current",
     ) -> tuple[list[dict[str, Any]], int]:
         business_date = local_today(settings).isoformat()
+        if scope == "official_pending":
+            records, total = database.list_official_pending_jobs(
+                category=category,
+                degree=degree,
+                province=province,
+                relevance_band=relevance_band,
+                publication_layer=publication_layer,
+                q=query,
+                page=page,
+                as_of_date=business_date,
+            )
+            return [annotate_official_pending_job(job) for job in records], total
         if profile is None:
             return database.list_jobs(
                 category=category,
@@ -281,6 +331,7 @@ def create_app(settings: Settings | None = None) -> Flask:
             category=category,
             province=province,
             relevance_band=relevance_band,
+            publication_layer=publication_layer,
             q=query,
             page_size=None,
             as_of_date=business_date,
@@ -309,6 +360,48 @@ def create_app(settings: Settings | None = None) -> Flask:
         start = (page - 1) * page_size
         return visible[start : start + page_size], len(visible)
 
+    def annotate_official_pending_job(job: dict[str, Any]) -> dict[str, Any]:
+        """Add an explicit missing-field checklist to the private browse view.
+
+        Pending rows are official-source observations, not student-eligible
+        vacancies.  The checklist is intentionally derived from row-bound
+        evidence only; it must never turn a title keyword into a qualification.
+        """
+        annotated = dict(job)
+        evidence = job.get("field_evidence")
+        if not isinstance(evidence, dict):
+            evidence = {}
+        nested = evidence.get("fields")
+        if not isinstance(nested, dict):
+            nested = {}
+        def has_value(*keys: str) -> bool:
+            return any(
+                str(evidence.get(key) or nested.get(key) or "").strip()
+                for key in keys
+            )
+
+        missing: list[str] = []
+        if not has_value("专业范围", "专业要求", "major"):
+            missing.append("专业要求")
+        if not has_value("学历要求", "学历", "degree", "面向对象"):
+            missing.append("学历要求")
+        if not str(job.get("location") or "").strip() and not has_value(
+            "工作地点", "官方工作地点", "location"
+        ):
+            missing.append("工作地点")
+        if not str(job.get("deadline_date") or "").strip() and not has_value(
+            "截止日期", "报名截止", "报名截止时间", "截止时间", "deadline"
+        ):
+            missing.append("截止日期")
+        annotated["pending_missing_fields"] = missing
+        basis = job.get("publication_basis")
+        annotated["pending_gate_reason"] = (
+            str(basis.get("reason") or "").strip()
+            if isinstance(basis, dict)
+            else ""
+        )
+        return annotated
+
     @app.get("/")
     def home() -> str:
         report, is_preview = active_report()
@@ -324,6 +417,9 @@ def create_app(settings: Settings | None = None) -> Flask:
             "home.html",
             report=report,
             is_preview=is_preview,
+            live_open_total=database.count_open_jobs(
+                as_of_date=local_today(settings).isoformat()
+            ),
             featured=featured,
             categories=database.list_categories(
                 as_of_date=local_today(settings).isoformat()
@@ -374,14 +470,24 @@ def create_app(settings: Settings | None = None) -> Flask:
 
     @app.get("/jobs")
     def jobs() -> str:
-        page = max(request.args.get("page", 1, type=int), 1)
+        # Flask returns ``None`` when a typed query parameter cannot be
+        # converted. Treat malformed pagination as the first page instead of
+        # turning a harmless public request into a 500 response.
+        page = max(request.args.get("page", 1, type=int) or 1, 1)
         category = request.args.get("category", "").strip() or None
         degree = request.args.get("degree", "").strip() or None
         province = request.args.get("province", "").strip() or None
         if province and province not in PROVINCES:
             abort(404)
         relevance_band = request.args.get("relevance", "").strip() or None
+        publication_layer = request.args.get("layer", "").strip() or None
+        if publication_layer not in {"", *PUBLICATION_LAYERS - {"not_public"}}:
+            publication_layer = None
         query = request.args.get("q", "").strip() or None
+        scope = request.args.get("scope", "").strip()
+        if scope not in {"", "official_pending"}:
+            scope = ""
+        official_pending = scope == "official_pending"
         profile = requested_profile()
         match_filter = request.args.get("match", "").strip()
         if match_filter not in {"", "explicit", "review"}:
@@ -395,6 +501,8 @@ def create_app(settings: Settings | None = None) -> Flask:
             query=query,
             profile=profile,
             match_filter=match_filter,
+            publication_layer=publication_layer,
+            scope=scope or "current",
         )
         page_size = 20
         page_count = max((total + page_size - 1) // page_size, 1)
@@ -414,25 +522,38 @@ def create_app(settings: Settings | None = None) -> Flask:
                 "q": query or "",
                 "profile": profile.id if profile else "",
                 "match": match_filter,
+                "layer": publication_layer or "",
+                "scope": scope,
             },
             categories=database.list_categories(
                 as_of_date=local_today(settings).isoformat()
             ),
             profile=profile,
+            official_pending=official_pending,
         )
 
     @app.get("/jobs/<int:job_id>")
     def job_detail(job_id: int) -> str:
-        job = database.find_public_job(
-            job_id, as_of_date=local_today(settings).isoformat()
-        )
+        scope = request.args.get("scope", "").strip()
+        official_pending = scope == "official_pending"
+        if official_pending:
+            job = database.find_official_pending_job(
+                job_id, as_of_date=local_today(settings).isoformat()
+            )
+        else:
+            job = database.find_public_job(
+                job_id, as_of_date=local_today(settings).isoformat()
+            )
         if job is None:
             abort(404)
         profile = requested_profile()
+        if official_pending:
+            job = annotate_official_pending_job(job)
         return render_template(
             "job_detail.html",
-            job=annotate_profile_match(job, profile),
-            profile=profile,
+            job=annotate_profile_match(job, profile) if not official_pending else job,
+            profile=profile if not official_pending else None,
+            official_pending=official_pending,
         )
 
     @app.get("/about")
@@ -476,6 +597,7 @@ def create_app(settings: Settings | None = None) -> Flask:
         return jsonify(
             {
                 "status": "ok",
+                "release": settings.release_info(),
                 "open_jobs": database.count_open_jobs(
                     as_of_date=local_today(settings).isoformat()
                 ),
@@ -487,16 +609,54 @@ def create_app(settings: Settings | None = None) -> Flask:
             }
         )
 
+    @app.get("/readinessz")
+    def readinessz() -> Any:
+        """Expose the internal publication gate without changing liveness.
+
+        ``/healthz`` is intentionally a process check used by Docker.  This
+        endpoint is the deployment/readiness check: a running web process can
+        return 503 while workers, source freshness, backups, or validation
+        evidence are not safe for student-facing publication.
+        """
+        report = build_production_readiness(settings, database)
+        ready = bool(report.get("internal_ready"))
+        response = jsonify(
+            {
+                "status": "ready" if ready else "not_ready",
+                "internal_ready": ready,
+            }
+        )
+        response.status_code = 200 if ready else 503
+        response.headers["Cache-Control"] = "no-store"
+        return response
+
+    @app.get("/version")
+    def version() -> Any:
+        """Expose release identity for deployment and rollback verification."""
+        return jsonify(
+            {
+                "service": "cupb-geoscience-job-hub",
+                **settings.release_info(),
+            }
+        )
+
     @app.get("/api/jobs")
     def jobs_api() -> Any:
-        page = max(request.args.get("page", 1, type=int), 1)
+        page = max(request.args.get("page", 1, type=int) or 1, 1)
         profile = requested_profile()
+        scope = request.args.get("scope", "").strip()
+        if scope not in {"", "official_pending"}:
+            scope = ""
+        official_pending = scope == "official_pending"
         province = request.args.get("province", "").strip() or None
         if province and province not in PROVINCES:
             return jsonify({"error": "province is not a supported mainland province"}), 400
         match_filter = request.args.get("match", "").strip()
         if match_filter not in {"", "explicit", "review"}:
             match_filter = ""
+        publication_layer = request.args.get("layer", "").strip() or None
+        if publication_layer not in {"", *PUBLICATION_LAYERS - {"not_public"}}:
+            publication_layer = None
         records, total = list_display_jobs(
             page=page,
             category=request.args.get("category", "").strip() or None,
@@ -510,12 +670,16 @@ def create_app(settings: Settings | None = None) -> Flask:
             query=request.args.get("q", "").strip() or None,
             profile=profile,
             match_filter=match_filter,
+            publication_layer=publication_layer,
+            scope=scope or "current",
         )
         return jsonify(
             {
                 "items": records,
                 "total": total,
                 "page": page,
+                "scope": scope or "current",
+                "counts_as_current": not official_pending,
                 "profile": (
                     {"id": profile.id, "label": profile.label}
                     if profile
@@ -543,6 +707,93 @@ def create_app(settings: Settings | None = None) -> Flask:
             return view(*args, **kwargs)
 
         return wrapped
+
+    @app.get("/api/admin/source-funnel")
+    @require_admin
+    def source_funnel_api() -> Any:
+        """Expose the private source-throughput ledger for expansion work."""
+        sources = database.list_sources()
+        jobs, _ = database.list_jobs(
+            page_size=None,
+            as_of_date=local_today(settings).isoformat(),
+        )
+        return jsonify(
+            build_source_funnel(
+                sources=sources,
+                jobs=jobs,
+                crawl_runs=database.list_crawl_runs(limit=10_000),
+                health_by_id={
+                    item["source_id"]: item for item in database.list_source_health()
+                },
+                source_tasks=database.list_source_tasks(),
+                artifact_status_counts=database.list_source_artifact_status_counts(),
+                target_plan=load_effective_job_target_plan(),
+                capture_freshness_by_id={
+                    str(source["id"]): capture
+                    for source in sources
+                    if (
+                        capture := database.get_source_capture_freshness(
+                            str(source["id"])
+                        )
+                    ) is not None
+                },
+            )
+        )
+
+    @app.get("/api/admin/growth-metrics")
+    @require_admin
+    def growth_metrics_api() -> Any:
+        """Expose separated lead and first-party throughput metrics."""
+        today = local_today(settings).isoformat()
+        leads = database.list_candidate_leads(limit=5000)
+        jobs, _ = database.list_jobs(page_size=None, as_of_date=today)
+        discovery = discovery_funnel(
+            leads, load_discovery_source_registry(), jobs=jobs
+        )
+        sources = database.list_sources()
+        source_report = build_source_funnel(
+            sources=sources,
+            jobs=jobs,
+            crawl_runs=database.list_crawl_runs(limit=10_000),
+            health_by_id={item["source_id"]: item for item in database.list_source_health()},
+            source_tasks=database.list_source_tasks(),
+            artifact_status_counts=database.list_source_artifact_status_counts(),
+            target_plan=load_effective_job_target_plan(),
+            capture_freshness_by_id={
+                str(source["id"]): capture
+                for source in sources
+                if (capture := database.get_source_capture_freshness(str(source["id"])))
+                is not None
+            },
+        )
+        return jsonify(
+            {
+                "as_of_date": today,
+                "third_party_leads": discovery["growth_metrics"],
+                "third_party_by_discovery_source": discovery["source_growth_metrics"],
+                "official_source_summary": source_report["summary"],
+                "official_sources": [
+                    {
+                        "source_id": row["source_id"],
+                        "growth_metrics": row["growth_metrics"],
+                        "stage": row["stage"],
+                        "published_domestic_jobs": row["published_domestic_jobs"],
+                    }
+                    for row in source_report["rows"]
+                ],
+            }
+        )
+
+    @app.get("/api/admin/source-fallback-audit")
+    @require_admin
+    def source_fallback_audit_api() -> Any:
+        """Expose CNPC/Sinopec fallback entries without treating candidates as sources."""
+        return jsonify(
+            build_fallback_audit(
+                load_fallback_plan(),
+                source_records=database.list_sources(),
+            )
+        )
 
     @app.get("/api/admin/organization-matrix")
     @require_admin
@@ -592,6 +843,22 @@ def create_app(settings: Settings | None = None) -> Flask:
                 },
                 "items": rows,
             }
+        )
+
+    @app.get("/api/admin/three-oil-catalog-audit")
+    @require_admin
+    def three_oil_catalog_audit_api() -> Any:
+        """Expose current three-oil unit and job-row binding evidence privately."""
+        jobs, _ = database.list_jobs(
+            page_size=None,
+            as_of_date=local_today(settings).isoformat(),
+        )
+        return jsonify(
+            build_three_oil_catalog_audit(
+                organization_registry=load_organization_registry(),
+                source_records=database.list_sources(),
+                job_records=jobs,
+            )
         )
 
     @app.get("/api/admin/national-source-matrix")
@@ -925,7 +1192,7 @@ def create_app(settings: Settings | None = None) -> Flask:
         payload = request.get_json(silent=True)
         if not isinstance(payload, dict):
             return jsonify({"error": "Request body must be a JSON object."}), 400
-        for field in ("lead_url", "official_url"):
+        for field in ("lead_url", "official_url", "official_application_url"):
             value = str(payload.get(field, "")).strip()
             if value and not is_http_url(value):
                 return jsonify({"error": f"{field} must be an HTTP(S) URL."}), 400
@@ -960,7 +1227,11 @@ def create_app(settings: Settings | None = None) -> Flask:
         """Show private lead conversion counts without exposing third-party content."""
         registry = load_discovery_source_registry()
         leads = database.list_candidate_leads(limit=5000)
-        return jsonify(discovery_funnel(leads, registry))
+        jobs, _ = database.list_jobs(
+            page_size=None,
+            as_of_date=local_today(settings).isoformat(),
+        )
+        return jsonify(discovery_funnel(leads, registry, jobs=jobs))
 
     @app.patch("/api/admin/leads/<int:lead_id>")
     @require_admin
@@ -971,6 +1242,13 @@ def create_app(settings: Settings | None = None) -> Flask:
         official_url = str(payload.get("official_url", "")).strip()
         if official_url and not is_http_url(official_url):
             return jsonify({"error": "official_url must be an HTTP(S) URL."}), 400
+        official_application_url = str(
+            payload.get("official_application_url", "")
+        ).strip()
+        if official_application_url and not is_http_url(official_application_url):
+            return jsonify(
+                {"error": "official_application_url must be an HTTP(S) URL."}
+            ), 400
         try:
             lead = database.update_candidate_lead(lead_id, payload)
         except ValueError as error:
@@ -1035,7 +1313,12 @@ def create_app(settings: Settings | None = None) -> Flask:
             title=str(metadata.get("title") or lead["title"]).strip(),
             employer=employer,
             source_url=str(lead["official_url"]).strip(),
-            application_url=str(metadata.get("application_url") or "").strip() or None,
+            application_url=str(
+                lead.get("official_application_url")
+                or metadata.get("application_url")
+                or ""
+            ).strip()
+            or None,
             text=str(metadata.get("description") or lead["title"]).strip(),
             summary=str(metadata.get("summary") or "").strip(),
             published_date=str(

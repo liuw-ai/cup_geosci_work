@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "as_of": "2026-10-11",
+  "description": "CNPC 与 Sinopec 的官方备用入口台账。候选入口只用于排程与复核，未完成证据核验前不得注册为可采集来源或发布岗位。",
+  "groups": [
+    {
+      "group_id": "cnpc",
+      "group_name": "中国石油天然气集团有限公司",
+      "primary_source_id": "cnpc-career",
+      "entries": [
+        {
+          "entry_id": "cnpc-official-announcement",
+          "channel_type": "official_announcement",
+          "entry_url": "https://www.cnpc.com.cn/zh/rczp/",
+          "status": "access_limited",
+          "source_id": "cnpc-official-announcement-fallback",
+          "evidence_url": "https://www.cnpc.com.cn/",
+          "notes": "2026-10-11 只读复核：robots 允许但招聘栏目返回 HTTP 412，记录为访问受限；需在可访问环境重新复核栏目结构、公告正文和岗位级字段。",
+          "last_probe": {
+            "observed_on": "2026-10-11",
+            "environment": "phase463-local",
+            "classification": "access_policy_block",
+            "http_status": 412,
+            "robots_allowed": true,
+            "evidence_file": ".tmp-phase463-cnpc-probe.json"
+          }
+        },
+        {
+          "entry_id": "cnpc-official-attachment",
+          "channel_type": "official_attachment",
+          "entry_url": "https://www.cnpc.com.cn/zh/rczp/",
+          "status": "access_limited",
+          "source_id": "cnpc-official-attachment-fallback",
+          "evidence_url": "https://www.cnpc.com.cn/",
+          "notes": "2026-10-11 只读复核：同一招聘栏目返回 HTTP 412，记录为访问受限；只有公告正文明确链接到 XLS/XLSX/PDF 并完成哈希和行级解析后才能升级。",
+          "last_probe": {
+            "observed_on": "2026-10-11",
+            "environment": "phase463-local",
+            "classification": "access_policy_block",
+            "http_status": 412,
+            "robots_allowed": true,
+            "evidence_file": ".tmp-phase463-cnpc-probe.json"
+          }
+        },
+        {
+          "entry_id": "cnpc-authorized-iguopin",
+          "channel_type": "authorized_platform",
+          "entry_url": "https://www.iguopin.com/",
+          "status": "candidate",
+          "notes": "仅登记国聘平台候选；必须找到中国石油官方公告中的明确授权原文，不能因平台存在而视为授权。"
+        }
+      ]
+    },
+    {
+      "group_id": "sinopec",
+      "group_name": "中国石油化工集团有限公司",
+      "primary_source_id": "sinopec-career",
+      "entries": [
+        {
+          "entry_id": "sinopec-official-announcement",
+          "channel_type": "official_announcement",
+          "entry_url": "https://www.sinopecgroup.com/",
+          "status": "candidate",
+          "source_id": "sinopec-official-announcement-fallback",
+          "evidence_url": "https://www.sinopecgroup.com/",
+          "notes": "2026-10-11 只读复核：集团官网 robots 请求超时，尚未取得可解析页面；保持候选，不能解释为无岗位。需在可访问环境复核招聘栏目、公告年份和岗位级字段。",
+          "last_probe": {
+            "observed_on": "2026-10-11",
+            "environment": "phase463-local",
+            "classification": "source_unavailable",
+            "http_status": null,
+            "robots_allowed": null,
+            "evidence_file": ".tmp-phase463-sinopec-probe.json"
+          }
+        },
+        {
+          "entry_id": "sinopec-official-attachment",
+          "channel_type": "official_attachment",
+          "entry_url": "https://www.sinopecgroup.com/",
+          "status": "candidate",
+          "source_id": "sinopec-official-attachment-fallback",
+          "evidence_url": "https://www.sinopecgroup.com/",
+          "notes": "候选附件入口；必须从同一官方公告解析出附件 URL、SHA-256、岗位行和截止日期。"
+        },
+        {
+          "entry_id": "sinopec-authorized-iguopin",
+          "channel_type": "authorized_platform",
+          "entry_url": "https://www.iguopin.com/",
+          "status": "candidate",
+          "notes": "仅登记国聘平台候选；必须保留中国石化官方授权原文、授权时间范围和岗位入口。"
+        }
+      ]
+    }
+  ],
+  "policy": "本台账不绕过 robots、访问限制或授权要求；候选入口不等于来源可用，失败必须记录 access_limited/source_unavailable，而不是解释为没有岗位。"
+}

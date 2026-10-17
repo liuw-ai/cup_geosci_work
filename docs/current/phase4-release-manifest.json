@@ -1,0 +1,72 @@
+{
+  "generated_at": "2026-10-17T09:44:34Z",
+  "phase": "phase4",
+  "status": "local_audit_in_progress",
+  "logical_baseline": "phase532-logical-phase1",
+  "git_sha": "7b0e5fa03c15833f2af211f153517a5a5178d815",
+  "working_tree_dirty": true,
+  "compose_path": "deploy/compose.yaml",
+  "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
+  "release_env_sha256": "49f2c7be91ff3cfadb0cc0f88a255e3e7d3ac2a1194f1e719d0207a85b79175d",
+  "config_sha256": {
+    "discovery_sources": "e7edda1b2befd4741d9e01c8d7cd6a55753f21bf7bf7f12208dc3e895e7cb2a4",
+    "third_party_adapters": "95addd9a27b52713bdebfb8c6592ab390131588c4ade6ca6ddfff8e855a39400",
+    "organization_registry": "6ee3339bce3088abd8b3ba3da120875220ec96db582b6777725375da80a897a3",
+    "three_oil_catalog": "a6d1979d99b5b027590acb07d4883910bca074c301ed8dc0e134bfdf57991394",
+    "phase4_organization_reconciliation": "5e088ebef888c79539d975e639b530ee746724a4540726d5f786211d37f496c2"
+  },
+  "database": {
+    "path": "runtime/job_hub.sqlite3",
+    "sha256": "0d21692caa133394d8b0adf2f7e6fb08e22dc53e76d8629b3fa5018eedd68e34",
+    "integrity_check": "ok",
+    "job_status_counts": {
+      "expired": 106,
+      "open": 3745,
+      "superseded": 45,
+      "withdrawn": 51
+    },
+    "publication_layer_counts": {
+      "broad_geoscience_match": 1,
+      "exact_match": 210,
+      "incomplete_but_basic_match": 615,
+      "not_public": 2955,
+      "source_unavailable": 166
+    },
+    "candidate_lead_count": 0
+  },
+  "third_party": {
+    "registered_sources": 12,
+    "batch_candidate_sources": 5,
+    "table_adapters": 5,
+    "real_candidate_leads_in_database": 0
+  },
+  "three_oil_organization_reconciliation": {
+    "catalog_group_count": 3,
+    "catalog_unit_count": 64,
+    "registry_related_organization_count": 295,
+    "scope_status_counts": {
+      "formal_catalog": 64,
+      "display_candidate_unverified": 231
+    },
+    "catalog_units_by_group": {
+      "cnpc": 27,
+      "sinopec": 17,
+      "cnooc": 20
+    },
+    "registry_channel_verification_counts": {
+      "official_confirmed": 75,
+      "candidate": 238,
+      "automation_ready": 1
+    }
+  },
+  "automation_model": "gpt-5.6-terra",
+  "automation_status": "paused",
+  "production_deployment": "not_performed",
+  "release_blockers": [
+    "working_tree_contains_uncommitted_or_untracked_changes",
+    "official_site_browser_permission_blocked",
+    "no_audited_third_party_table_batch_imported",
+    "three_oil_unit_entry_evidence_incomplete",
+    "local_phase4_validation_not_approved_for_server"
+  ]
+}

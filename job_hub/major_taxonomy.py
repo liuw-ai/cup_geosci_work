@@ -26,6 +26,8 @@ class MajorDefinition:
     student_levels: tuple[str, ...]
     classification: dict[str, Any]
     exact_terms: tuple[str, ...]
+    official_codes: tuple[str, ...]
+    bounded_exact_terms: tuple[str, ...]
     category_terms: tuple[str, ...]
     english_exact_terms: tuple[str, ...]
     related_terms: tuple[str, ...]
@@ -37,6 +39,8 @@ class MajorDefinition:
             "student_levels": list(self.student_levels),
             "classification": dict(self.classification),
             "exact_terms": list(self.exact_terms),
+            "official_codes": list(self.official_codes),
+            "bounded_exact_terms": list(self.bounded_exact_terms),
             "category_terms": list(self.category_terms),
             "english_exact_terms": list(self.english_exact_terms),
             "related_terms": list(self.related_terms),
@@ -71,6 +75,12 @@ def validate_major_taxonomy(payload: Any) -> dict[str, Any]:
     normalized: list[dict[str, Any]] = []
     ids: set[str] = set()
     exact_terms: set[str] = set()
+    # The service has four fixed graduation majors.  Keeping this invariant
+    # at taxonomy-load time prevents a future alias or adjacent discipline
+    # from silently becoming an enterprise publication match.
+    canonical_graduation_names = frozenset(
+        {"资源勘查工程", "地质学", "地质工程", "地质资源与地质工程"}
+    )
     for index, value in enumerate(majors):
         if not isinstance(value, dict):
             raise ContractValidationError(f"major taxonomy item {index} must be an object")
@@ -96,7 +106,32 @@ def validate_major_taxonomy(payload: Any) -> dict[str, Any]:
             if not isinstance(terms, list) or any(not str(term).strip() for term in terms):
                 raise ContractValidationError(f"major taxonomy {item_id} {field} is invalid")
             item[field] = list(dict.fromkeys(str(term).strip() for term in terms))
+        official_codes = item.get("official_codes", [])
+        if not isinstance(official_codes, list) or any(
+            not str(code).strip() for code in official_codes
+        ):
+            raise ContractValidationError(
+                f"major taxonomy {item_id} official_codes is invalid"
+            )
+        item["official_codes"] = list(
+            dict.fromkeys(str(code).strip() for code in official_codes)
+        )
+        bounded_terms = item.get("bounded_exact_terms", [])
+        if not isinstance(bounded_terms, list) or any(
+            not str(term).strip() for term in bounded_terms
+        ):
+            raise ContractValidationError(
+                f"major taxonomy {item_id} bounded_exact_terms is invalid"
+            )
+        item["bounded_exact_terms"] = list(
+            dict.fromkeys(str(term).strip() for term in bounded_terms)
+        )
         for term in item["exact_terms"]:
+            folded = term.casefold()
+            if folded in exact_terms:
+                raise ContractValidationError(f"duplicate exact major term: {term}")
+            exact_terms.add(folded)
+        for term in item["bounded_exact_terms"]:
             folded = term.casefold()
             if folded in exact_terms:
                 raise ContractValidationError(f"duplicate exact major term: {term}")
@@ -104,6 +139,19 @@ def validate_major_taxonomy(payload: Any) -> dict[str, Any]:
         item["id"] = item_id
         item["student_levels"] = list(dict.fromkeys(levels))
         normalized.append(item)
+    for item in normalized:
+        if item["name"] not in canonical_graduation_names:
+            raise ContractValidationError(
+                f"unsupported graduation major name: {item['name']}"
+            )
+        if set(item["exact_terms"]) != {item["name"]}:
+            raise ContractValidationError(
+                f"{item['id']} exact_terms must contain only its canonical graduation major"
+            )
+    if {item["name"] for item in normalized} != canonical_graduation_names:
+        raise ContractValidationError(
+            "major taxonomy must contain exactly the four CUPB Geoscience graduation majors"
+        )
     result = dict(payload)
     result["version"] = version
     result["description"] = str(payload.get("scope") or "").strip()
@@ -120,6 +168,8 @@ def list_major_definitions(path: Path | None = None) -> tuple[MajorDefinition, .
             student_levels=tuple(item["student_levels"]),
             classification=dict(item["classification"]),
             exact_terms=tuple(item["exact_terms"]),
+            official_codes=tuple(item.get("official_codes", [])),
+            bounded_exact_terms=tuple(item["bounded_exact_terms"]),
             category_terms=tuple(item["category_terms"]),
             english_exact_terms=tuple(item["english_exact_terms"]),
             related_terms=tuple(item["related_terms"]),
@@ -138,11 +188,8 @@ def get_major_definition(major_id: str, path: Path | None = None) -> MajorDefini
 def profile_major_definition(profile_id: str, path: Path | None = None) -> MajorDefinition:
     profile_major_ids = {
         "undergraduate-resource-exploration": "resource-exploration-engineering",
-        "undergraduate-geophysics": "geophysics",
         "master-geology": "geology",
-        "master-geophysics": "geophysics",
         "doctoral-geology": "geology",
-        "doctoral-geophysics": "geophysics",
         "master-geological-engineering": "geological-engineering",
         "doctoral-geological-engineering": "geological-engineering",
         "master-geological-resources-engineering": "geological-resources-and-engineering",
@@ -156,9 +203,47 @@ def exact_terms_for_profile(profile_id: str, path: Path | None = None) -> tuple[
     return profile_major_definition(profile_id, path).exact_terms
 
 
+def official_codes_for_profile(
+    profile_id: str, path: Path | None = None
+) -> tuple[str, ...]:
+    """Return official catalogue codes, kept separate from named majors.
+
+    Codes are only useful when a public position table provides a code-backed
+    major condition. They are deliberately not part of ``exact_terms`` so an
+    enterprise notice cannot silently turn a classification code into a
+    broader equivalent major.
+    """
+    return profile_major_definition(profile_id, path).official_codes
+
+
 def category_terms_for_profile(profile_id: str, path: Path | None = None) -> tuple[str, ...]:
     """Return explicit discipline-category terms for a supported profile."""
     return profile_major_definition(profile_id, path).category_terms
+
+
+def discipline_category_for_profile(
+    profile_id: str, path: Path | None = None
+) -> str:
+    """Return the official broad discipline category for a supported profile.
+
+    This is separate from ``category_terms``: ``工学大类`` is a broad
+    eligibility condition, not an exact named-major match.
+    """
+    value = profile_major_definition(profile_id, path).classification.get(
+        "discipline_category"
+    )
+    return str(value or "").strip()
+
+
+def bounded_exact_terms_for_profile(
+    profile_id: str, path: Path | None = None
+) -> tuple[str, ...]:
+    """Return reviewed short-form major names requiring CJK boundaries.
+
+    An official table may abbreviate a formal discipline by dropping a suffix,
+    but a substring of a different discipline must never become a match.
+    """
+    return profile_major_definition(profile_id, path).bounded_exact_terms
 
 
 def english_exact_terms_for_profile(profile_id: str, path: Path | None = None) -> tuple[str, ...]:

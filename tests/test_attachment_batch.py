@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 
 from job_hub.attachments import AttachmentProcessingError, AttachmentResult, process_pending_attachments
 
@@ -8,6 +9,7 @@ from job_hub.attachments import AttachmentProcessingError, AttachmentResult, pro
 @dataclass
 class FakeDatabase:
     artifacts: list[dict[str, object]]
+    health: dict[str, dict[str, object]] | None = None
 
     def list_source_artifacts(
         self,
@@ -19,6 +21,9 @@ class FakeDatabase:
         assert oldest_first is True
         assert extraction_statuses
         return self.artifacts[:limit]
+
+    def get_source_health(self, source_id: str) -> dict[str, object] | None:
+        return (self.health or {}).get(source_id)
 
 
 class FakeProcessor:
@@ -123,3 +128,95 @@ def test_batch_excludes_manifest_artifacts_with_non_automatic_policy() -> None:
     assert summary["selected"] == 1
     assert summary["policy_skipped"] == 2
     assert {item["artifact_id"] for item in summary["policy_skip_items"]} == {1, 2}
+
+
+def test_batch_reparses_only_extracted_artifacts_with_stale_parser() -> None:
+    database = FakeDatabase(
+        [
+            {
+                "id": 4,
+                "source_id": "source-d",
+                "extraction_status": "extracted",
+                "parser_version": "attachments-v3",
+            },
+            {
+                "id": 5,
+                "source_id": "source-e",
+                "extraction_status": "extracted",
+                "parser_version": "attachments-v5",
+            },
+        ]
+    )
+    processor = FakeProcessor({4: AttachmentResult(4, "extracted", rows_extracted=3)})
+
+    summary = process_pending_attachments(
+        database,
+        processor,
+        include_stale_extracted=True,
+    )
+
+    assert processor.calls == [4]
+    assert summary["reparsed"] == 1
+    assert summary["processed"] == 1
+
+
+def test_batch_retries_skipped_artifact_after_fresh_source_recovery() -> None:
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    database = FakeDatabase(
+        [
+            {
+                "id": 7,
+                "source_id": "source-recovered",
+                "extraction_status": "skipped",
+                "metadata": {
+                    "last_error_at": (now - timedelta(hours=7)).isoformat(),
+                },
+            }
+        ],
+        health={
+            "source-recovered": {
+                "status": "source_active",
+                "checked_at": now.isoformat(),
+            }
+        },
+    )
+    processor = FakeProcessor({7: AttachmentResult(7, "extracted", rows_extracted=2)})
+
+    summary = process_pending_attachments(
+        database,
+        processor,
+        retry_recovered_skipped=True,
+    )
+
+    assert processor.calls == [7]
+    assert summary["selected"] == 1
+    assert summary["extracted"] == 1
+    assert summary["retry_recovered_skipped"] is True
+
+
+def test_batch_does_not_retry_skipped_artifact_when_source_is_still_degraded() -> None:
+    database = FakeDatabase(
+        [
+            {
+                "id": 8,
+                "source_id": "source-degraded",
+                "extraction_status": "skipped",
+            }
+        ],
+        health={
+            "source-degraded": {
+                "status": "source_degraded",
+                "checked_at": datetime.now(timezone.utc).isoformat(),
+            }
+        },
+    )
+    processor = FakeProcessor({})
+
+    summary = process_pending_attachments(
+        database,
+        processor,
+        retry_recovered_skipped=True,
+    )
+
+    assert processor.calls == []
+    assert summary["selected"] == 0

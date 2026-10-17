@@ -27,6 +27,27 @@ PROVINCIAL_SOURCE_REGISTRY_PATH = (
     Path(__file__).resolve().parent.parent / "data" / "provincial_sources.json"
 )
 
+ORGANIZATION_ROLE_NORMALIZATION = {
+    "group": "group",
+    "upstream_operator": "operating_company",
+    "research_institute": "research_institute",
+    "internal_technical_service": "internal_service_unit",
+    "external_service_provider": "external_service_provider",
+}
+ORGANIZATION_ROLE_LABELS = {
+    "group": "集团",
+    "operating_company": "运营公司",
+    "regional_branch": "地区分公司",
+    "research_institute": "研究院",
+    "internal_service_unit": "内部服务单位",
+    "external_service_provider": "外部服务商",
+    "refining_company": "炼化单位",
+    "sales_company": "销售单位",
+    "financial_support_unit": "金融与支撑单位",
+    "international_business_unit": "国际业务单位",
+    "other_affiliate": "其他所属单位",
+}
+
 
 def _registered_source_ids() -> set[str]:
     source_ids: set[str] = set()
@@ -138,6 +159,18 @@ def organization_matrix_rows(
         for record in records
         if record.get("id")
     }
+    all_channels = [
+        channel
+        for item in organization_items(payload)
+        for channel in item["channels"]
+    ]
+    channel_key_counts = Counter(
+        (
+            str(channel.get("source_id") or "").strip(),
+            str(channel.get("official_url") or "").strip(),
+        )
+        for channel in all_channels
+    )
     parents = {
         organization["id"]: organization["canonical_name"]
         for organization in organization_items(payload)
@@ -155,6 +188,17 @@ def organization_matrix_rows(
             channels.append(
                 {
                     **channel,
+                    "binding_scope": (
+                        "unit_scoped"
+                        if channel_key_counts[
+                            (
+                                str(channel.get("source_id") or "").strip(),
+                                str(channel.get("official_url") or "").strip(),
+                            )
+                        ]
+                        == 1
+                        else "shared_group_entry"
+                    ),
                     "source_registered_in_runtime": source is not None,
                     "source_enabled": (
                         bool(source.get("enabled")) if source is not None else None
@@ -169,6 +213,15 @@ def organization_matrix_rows(
                 "parent_id": organization["parent_id"],
                 "parent_name": parents.get(organization["parent_id"]),
                 "organization_role": organization["organization_role"],
+                "organization_role_normalized": ORGANIZATION_ROLE_NORMALIZATION.get(
+                    organization["organization_role"], organization["organization_role"]
+                ),
+                "organization_role_label": ORGANIZATION_ROLE_LABELS.get(
+                    ORGANIZATION_ROLE_NORMALIZATION.get(
+                        organization["organization_role"], organization["organization_role"]
+                    ),
+                    organization["organization_role"],
+                ),
                 "industry_path": organization["industry_path"],
                 "affiliation": organization["affiliation"],
                 "aliases": list(organization["aliases"]),
@@ -207,6 +260,13 @@ def organization_matrix_summary(
         for organization in organizations
         for channel in organization["channels"]
     ]
+    channel_key_counts = Counter(
+        (
+            str(channel.get("source_id") or "").strip(),
+            str(channel.get("official_url") or "").strip(),
+        )
+        for _, channel in channels
+    )
     status_counts = Counter(str(channel["verification_status"]) for _, channel in channels)
     role_counts = Counter(str(organization["organization_role"]) for organization in organizations)
     affiliation_counts = Counter(str(organization["affiliation"]) for organization in organizations)
@@ -241,6 +301,61 @@ def organization_matrix_summary(
         for organization, channel in automation_ready_registered
         if enabled_by_id.get(str(channel["source_id"]), False)
     ]
+    primary_channels = [
+        (organization, channel)
+        for organization, channel in channels
+        if channel.get("is_primary")
+    ]
+    unit_scoped_primary = [
+        (organization, channel)
+        for organization, channel in primary_channels
+        if channel_key_counts[
+            (
+                str(channel.get("source_id") or "").strip(),
+                str(channel.get("official_url") or "").strip(),
+            )
+        ]
+        == 1
+    ]
+    shared_primary = [
+        (organization, channel)
+        for organization, channel in primary_channels
+        if channel_key_counts[
+            (
+                str(channel.get("source_id") or "").strip(),
+                str(channel.get("official_url") or "").strip(),
+            )
+        ]
+        > 1
+    ]
+    shared_examples: list[dict[str, Any]] = []
+    seen_shared_keys: set[tuple[str, str]] = set()
+    for _organization, channel in shared_primary:
+        key = (
+            str(channel.get("source_id") or "").strip(),
+            str(channel.get("official_url") or "").strip(),
+        )
+        if key in seen_shared_keys:
+            continue
+        seen_shared_keys.add(key)
+        shared_examples.append(
+            {
+                "source_id": key[0],
+                "official_url": key[1],
+                "organization_count": channel_key_counts[key],
+                "organization_ids": [
+                    organization["id"]
+                    for organization, other in channels
+                    if (
+                        str(other.get("source_id") or "").strip(),
+                        str(other.get("official_url") or "").strip(),
+                    )
+                    == key
+                ],
+            }
+        )
+        if len(shared_examples) >= 5:
+            break
     missing_backup = [
         {
             "organization_id": organization["id"],
@@ -250,6 +365,46 @@ def organization_matrix_summary(
         for organization, channel in channels
         if not channel["backup_urls"]
     ]
+    # A shared group portal proves that the group hosts recruitment, but it
+    # does not prove that a subordinate unit has its own entrance or that a
+    # detail row belongs to that unit. Emit every such primary channel as an
+    # explicit work item instead of silently counting it as unit coverage.
+    unit_binding_queue = []
+    for organization, channel in primary_channels:
+        key = (
+            str(channel.get("source_id") or "").strip(),
+            str(channel.get("official_url") or "").strip(),
+        )
+        if channel_key_counts[key] <= 1:
+            continue
+        unit_binding_queue.append(
+            {
+                "organization_id": organization["id"],
+                "organization_name": organization["canonical_name"],
+                "parent_id": organization.get("parent_id"),
+                "organization_role": organization["organization_role"],
+                "affiliation": organization["affiliation"],
+                "channel_id": channel["id"],
+                "shared_source_id": key[0] or None,
+                "shared_official_url": key[1],
+                "verification_status": channel["verification_status"],
+                "required_evidence": [
+                    "unit_owned_official_recruitment_entry_or_announcement",
+                    "job_detail_employer_field_binding",
+                    "current_major_degree_location_deadline_fields",
+                ],
+                "next_action": (
+                    "locate_unit_scoped_official_entry; until verified, use the "
+                    "shared platform only for employer-field attribution"
+                ),
+            }
+        )
+    unit_binding_queue.sort(
+        key=lambda item: (
+            str(item["shared_source_id"] or ""),
+            str(item["organization_name"]),
+        )
+    )
     unbound_sources = sorted(
         {
             str(channel["source_id"])
@@ -270,6 +425,24 @@ def organization_matrix_summary(
         "automation_ready_channels": len(automation_ready),
         "automation_ready_registered": len(automation_ready_registered),
         "automation_ready_enabled_channels": len(automation_ready_enabled),
+        "unit_binding_quality": {
+            "primary_channel_count": len(primary_channels),
+            "unit_scoped_primary_channels": len(unit_scoped_primary),
+            "shared_group_primary_channels": len(shared_primary),
+            "unit_scoped_rate": (
+                len(unit_scoped_primary) / len(primary_channels)
+                if primary_channels
+                else 0.0
+            ),
+            "shared_group_examples": shared_examples,
+            "unit_binding_queue_count": len(unit_binding_queue),
+            "unit_binding_queue": unit_binding_queue,
+            "scope_note": (
+                "集团统一招聘平台可通过岗位详情中的用人单位字段归属下属单位，"
+                "但同一 URL 不等于下属单位专属入口；shared_group_primary_channels "
+                "必须继续补充单位级官方公告或入口证据。"
+            ),
+        },
         "missing_backup_channels": missing_backup,
         "unbound_source_ids": unbound_sources,
         "source_bindings": organization_source_bindings(payload),

@@ -34,6 +34,19 @@ SMTP_USE_SSL=true
 HTTP_TRANSPORT_MODE=direct
 ```
 
+生产发布不能修改基础 `.env` 中的开发默认值，也不能用可覆盖的镜像标签。镜像推送完成并取得各自的 `@sha256:...` 内容摘要后，生成不含密码或 SMTP 信息的独立发布清单：
+
+```bash
+python scripts/prepare_release_env.py \
+  --version 2026.10.10-1 \
+  --application-image registry.example/cupb-job-hub@sha256:<application-digest> \
+  --browser-image registry.example/cupb-job-hub-browser@sha256:<browser-digest> \
+  --browser-deps-image registry.example/cupb-job-hub-browser-deps@sha256:<deps-digest> \
+  --headless-shell-image chromedp/headless-shell@sha256:<headless-shell-digest>
+```
+
+该命令默认写入 `.release.env`，其中应用镜像摘要会同时作为 `APP_RELEASE_IMAGE_SHA` 和浏览器运行时基础镜像。`release-check` 要求发布版本、Git SHA、构建时间和全部五个镜像引用均有效，且只接受 `@sha256:` 内容摘要；普通固定标签和 `latest` 都不能通过生产门禁。
+
 `HTTP_TRANSPORT_MODE` 默认是 `environment`，会遵循服务器进程环境中的代理变量。只有服务器具备组织允许的稳定直连公网出口时才设置为 `direct`；它的作用是避免把本机/容器代理握手失败误判为“无岗位”，不是绕过目标站点的 403、412、验证码或 robots 规则。两种模式都保留 TLS 证书校验。
 
 `APP_BASE_URL` 必须是学生在微信中实际打开的 HTTPS 地址；不能填写 `127.0.0.1`、`localhost` 或服务器内网地址，否则日报邮件中的链接会指向错误位置。
@@ -41,16 +54,43 @@ HTTP_TRANSPORT_MODE=direct
 先做静态校验，再启动服务：
 
 ```bash
-docker compose config
-docker compose up -d --build
-docker compose ps
-docker compose logs --tail=100 worker
+docker compose --env-file .release.env -f docker-compose.yml -f docker-compose.browser.yml config
+docker compose --env-file .release.env -f docker-compose.yml -f docker-compose.browser.yml run --rm web python -m job_hub.cli release-check
+docker compose --env-file .release.env -f docker-compose.yml -f docker-compose.browser.yml up -d
+docker compose --env-file .release.env -f docker-compose.yml -f docker-compose.browser.yml ps
+docker compose --env-file .release.env -f docker-compose.yml -f docker-compose.browser.yml logs --tail=100 worker
 ```
+
+`production-readiness` 还会检查所有启用非手工来源的捕获新鲜度。输出中的
+`freshness_unproven_sources`、`stale_capture_sources` 或
+`invalid_capture_sources` 只要有一项非空，就不能把系统标记为可正式服务；必须让对应
+worker 完成真实成功捕获，不能通过修改 `max_age_hours` 或重启服务绕过。
+
+浏览器 Worker 不仅抓取证据，还会直接同步岗位，因此不能只替换 Web/主 Worker 的应用镜像。
+每次调整专业匹配、岗位发布或证据规则，必须用同一应用运行时重建并逐个替换所有启用的浏览器 Worker；
+`production-readiness.browser_workers.workers` 的 `policy_consistent` 全部为 `true`
+才算规则同版。旧 Worker 即使 Docker healthcheck 显示 healthy，也不能通过发布门禁。
+
+worker 遇到备份、同步或政府证据复核异常时，会保持 `degraded` 心跳，并按
+`WORKER_FAILURE_RETRY_SECONDS`（默认 60 秒）重试；不会把一次失败伪装成正常运行，
+也不会等到完整的三小时来源周期才重试。只有成功恢复后才恢复 `running` 心跳。
+
+worker 还会每 `DOMESTIC_ENTRY_HEALTH_INTERVAL_MINUTES` 分钟（默认 360）复核扩源
+台账中 `official_identity_only` 的官方入口，输出到
+`/var/lib/job-hub/domestic-entry-health/latest.json`。该检查只验证 robots 和入口
+可达性：入口可达只意味着可继续定位岗位样例，入口失败也不等于没有岗位；它不会注册
+来源、采集岗位或修改学生端数据。
+
+浏览器采集服务还配置了独立的 Docker healthcheck。它只读取该容器对应的
+`BROWSER_WORKER_SERVICE_NAME` 心跳：进程卡死或心跳超过 4 小时会触发
+`restart: unless-stopped` 的自动恢复；robots/403/412 等已记录的来源访问限制会保持
+`degraded`，不会被误当作进程故障反复重启。恢复后仍必须完成真实捕获，来源新鲜度门禁
+不会因容器重启而放行旧快照。
 
 上线前建议在服务器执行一次国家能源入口的只读直连诊断，并把结果保存到运行目录：
 
 ```bash
-docker compose run --rm \
+docker compose -f docker-compose.yml -f docker-compose.browser.yml run --rm \
   -e HTTP_TRANSPORT_MODE=direct web \
   python -m job_hub.cli national-entry-probe \
   --transport direct --environment production-server \
@@ -62,9 +102,9 @@ docker compose run --rm \
 Compose 启动时 worker 会自动注册来源并执行同步。需要手动初始化或排查时，可在共享卷中执行：
 
 ```bash
-docker compose run --rm web python -m job_hub.cli init
-docker compose run --rm web python -m job_hub.cli audit
-docker compose exec worker python -m job_hub.cli worker-health --max-age 180
+docker compose -f docker-compose.yml -f docker-compose.browser.yml run --rm web python -m job_hub.cli init
+docker compose -f docker-compose.yml -f docker-compose.browser.yml run --rm web python -m job_hub.cli audit
+docker compose -f docker-compose.yml -f docker-compose.browser.yml exec worker python -m job_hub.cli worker-health --max-age 180
 ```
 
 ## 3. HTTPS 反向代理
@@ -74,7 +114,7 @@ docker compose exec worker python -m job_hub.cli worker-health --max-age 180
 本项目固定使用 `jobs.cupdky.cn`。先确认 `cupdky.cn` 已注册且已在域名服务商或 DNS 托管商处启用权威 DNS；若 `nslookup cupdky.cn` 本身返回 `NXDOMAIN`，仅添加 `jobs` 记录不会生效。根域可解析后，创建 `A` 记录：`jobs` -> `81.70.62.174`（TTL 设为 `600` 或服务商的 `Auto`）。确认 `nslookup jobs.cupdky.cn` 返回该地址后，在服务器执行：
 
 ```bash
-docker compose up -d --build web worker
+docker compose -f docker-compose.yml -f docker-compose.browser.yml up -d --build web worker
 docker compose -f docker-compose.public.yml up -d
 docker compose -f docker-compose.public.yml logs --tail=100 caddy
 ```
@@ -82,7 +122,7 @@ docker compose -f docker-compose.public.yml logs --tail=100 caddy
 部署后先运行只读域名预检：
 
 ```bash
-docker compose exec web python -m job_hub.cli domain-check \
+docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web python -m job_hub.cli domain-check \
   --hostname jobs.cupdky.cn --expected-ip 81.70.62.174
 ```
 
@@ -111,19 +151,20 @@ curl -fsS http://127.0.0.1:8080/healthz
 curl -I https://jobs.example.edu.cn/healthz
 nslookup jobs.cupdky.cn
 docker compose -f docker-compose.public.yml ps
-docker compose ps
-docker compose logs --tail=100 web worker
+docker compose -f docker-compose.yml -f docker-compose.browser.yml ps
+docker compose -f docker-compose.yml -f docker-compose.browser.yml logs --tail=100 web worker
 ```
 
 第一条失败说明容器或 Gunicorn 没有正常工作；本机 Web 成功而域名失败，说明是 DNS、Caddy 或防火墙链路问题；DNS 返回 NXDOMAIN 时必须先到域名服务商添加记录，代码和服务器无法替代 DNS 所有权操作。
 
 ## 5. 每日 20:00 链路
 
-worker 会按 `SOURCE_SYNC_INTERVAL_MINUTES` 周期刷新来源，并在每次周期中自动幂等登记 `GOVERNMENT_ARTIFACT_MANIFEST_PATH` 指向的事业编/公务员官方附件清单，再进入受控附件处理队列。到达 `DAILY_PUBLISH_TIME=20:00` 后，它会再次同步、执行发布前审计、冻结当天日报，并通过 SMTP 发送日报链接。服务器在 20:00 短暂离线时，worker 重启后会检测当天是否缺少日报并补发。
+worker 会按 `SOURCE_SYNC_INTERVAL_MINUTES` 周期刷新来源，并在每次周期中自动幂等登记 `GOVERNMENT_ARTIFACT_MANIFEST_PATH` 指向的事业编/公务员官方附件清单，再进入受控附件处理队列。生产默认 `DEFAULT_SOURCE_MAX_AGE_HOURS=72`：启动时会为没有来源级配置的实时官方来源物化新鲜度合同，成功同步会写入捕获时间；超过窗口未成功更新的岗位由读侧和生命周期清理同时 fail-closed。静态附件、浏览器快照仍必须具备独立捕获证据，不会用 worker 心跳或同步时间冒充成功捕获。到达 `DAILY_PUBLISH_TIME=20:00` 后，它会再次同步、执行发布前审计、冻结当天日报，并通过 SMTP 发送日报链接。服务器在 20:00 短暂离线时，worker 重启后会检测当天是否缺少日报并补发。
 
 健康检查要求：
 
-- `/healthz` 返回成功，说明 web 进程可用。
+- `/healthz` 返回成功，说明 web 进程可用。它是 Docker 的存活检查，不代表岗位数据已经可以正式发布。
+- `/readinessz` 返回 HTTP 200 才表示内部生产门禁通过；worker、来源捕获新鲜度、政府附件证据、日报、备份或连续验证任一失败时返回 HTTP 503。该接口只返回最小状态，详细原因使用 `production-readiness` 命令查看。
 - `worker-health --max-age 180` 返回 `ok: true`，说明 worker 最近有心跳。
 - 邮件发送失败不会修改已经冻结的日报内容；worker 会记录失败并在下一轮尝试重发。
 
@@ -132,9 +173,9 @@ worker 会按 `SOURCE_SYNC_INTERVAL_MINUTES` 周期刷新来源，并在每次�
 首次上线、调整来源配置或更新解析器后，应先在服务器上建立一份可追溯的质量基线：
 
 ```bash
-docker compose exec web python -m job_hub.cli audit
-docker compose exec web python -m job_hub.cli coverage --record --output /var/lib/job-hub/coverage.json
-docker compose exec web python -m job_hub.cli simulate-cohort --output /var/lib/job-hub/cohort-coverage.json
+docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web python -m job_hub.cli audit
+docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web python -m job_hub.cli coverage --record --output /var/lib/job-hub/coverage.json
+docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web python -m job_hub.cli simulate-cohort --output /var/lib/job-hub/cohort-coverage.json
 ```
 
 `audit` 必须通过，才允许冻结日报。`coverage --record` 将本日省级来源状态、字段完整率、来源集中度和 100 人匿名画像匹配结果写入 SQLite；同日可被后续成功同步替换，页面趋势只与前一个不同日期比较。来源异常、尚未扫描或五类省级官方入口未全部核验时，零岗位只表示当前无法判断，不能对外写成“当地没有招聘”。
@@ -144,13 +185,13 @@ docker compose exec web python -m job_hub.cli simulate-cohort --output /var/lib/
 更新代码前先备份数据库卷。最简单的做法是在服务器上停止写入后导出 SQLite：
 
 ```bash
-docker compose exec web python -c "from job_hub.config import Settings; print(Settings.from_env().database_path)"
-docker compose stop worker
-docker compose cp web:/var/lib/job-hub/job_hub.sqlite3 ./backup/job_hub-$(date +%F).sqlite3
-docker compose up -d worker
+docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web python -c "from job_hub.config import Settings; print(Settings.from_env().database_path)"
+docker compose -f docker-compose.yml -f docker-compose.browser.yml stop worker
+docker compose -f docker-compose.yml -f docker-compose.browser.yml cp web:/var/lib/job-hub/job_hub.sqlite3 ./backup/job_hub-$(date +%F).sqlite3
+docker compose -f docker-compose.yml -f docker-compose.browser.yml up -d worker
 ```
 
-更新后依次运行 `docker compose config`、`docker compose up -d --build`、`audit` 和 `worker-health`。不要把 `.env`、数据库、SMTP 授权码或运行时日志提交到 Git。
+更新后依次运行 `docker compose -f docker-compose.yml -f docker-compose.browser.yml config`、同一组文件的 `up -d --build`、`audit` 和 `worker-health`。不要把 `.env`、数据库、SMTP 授权码或运行时日志提交到 Git。
 
 ## 8. 数据质量边界
 

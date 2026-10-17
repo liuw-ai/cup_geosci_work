@@ -20,7 +20,12 @@ from urllib.parse import parse_qs, urljoin, urlparse, urlunparse
 import requests
 from bs4 import BeautifulSoup
 
-from job_hub.browser_capture import BrowserCaptureError, _robots_permit
+from job_hub.browser_capture import (
+    BrowserCaptureError,
+    _robots_permit,
+    launch_playwright_browser,
+)
+from job_hub.capture_evidence import ensure_capture_manifest
 from job_hub.cnpc_browser_capture import CnpcJobCaptureError
 from job_hub.contracts import is_http_url
 
@@ -306,7 +311,7 @@ def run_cnpc_browser_capture(
                 )
                 page = context.new_page()
             else:
-                browser = playwright.chromium.launch(headless=True)
+                browser = launch_playwright_browser(playwright, config)
                 page = browser.new_page(user_agent=user_agent)
             response = page.goto(target_url, wait_until="networkidle", timeout=timeout_ms)
             if response is not None and response.status >= 400:
@@ -387,6 +392,11 @@ def run_cnpc_browser_capture(
         "announcements": announcements,
         "jobs": jobs,
     }
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=str(config.get("source_id") or "cnpc-career-browser"),
+        adapter_version=str(config.get("adapter_version") or "cnpc-browser-v1"),
+    )
     destination = Path(output)
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + ".tmp")
@@ -396,7 +406,13 @@ def run_cnpc_browser_capture(
 
 
 def write_cnpc_capture_failure(
-    *, output: Path | str, platform_url: str, status: str, reason: str
+    *,
+    output: Path | str,
+    platform_url: str,
+    status: str,
+    reason: str,
+    source_id: str = "cnpc-career-browser",
+    adapter_version: str = "cnpc-browser-v1",
 ) -> dict[str, Any]:
     """Persist an access-limited/parse-failed diagnostic atomically.
 
@@ -427,6 +443,11 @@ def write_cnpc_capture_failure(
         "announcements": [],
         "jobs": [],
     }
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=source_id,
+        adapter_version=adapter_version,
+    )
     destination = Path(output)
     failure_path = destination.with_suffix(".failure.json")
     failure_path.parent.mkdir(parents=True, exist_ok=True)

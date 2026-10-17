@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from job_hub.government_artifacts import government_artifact_publication_block_reason
 from job_hub.sources import RawPosting
 
 
@@ -29,6 +30,7 @@ RECORD_STATUSES = frozenset(
 )
 MATCH_STATUSES = frozenset({"explicit_match", "unrestricted_match", "needs_review", "out_of_scope"})
 DEADLINE_POLICIES = frozenset({"fixed_date", "open_until_filled"})
+LOCATION_EVIDENCE_POLICIES = frozenset({"row_exact", "registry_province"})
 ASSESSMENT_STATUSES = frozenset(
     {
         "verified_open_sample",
@@ -64,6 +66,48 @@ class GovernmentPositionContractError(ValueError):
     """Raised when a government-position ledger is incomplete or unsafe."""
 
 
+def consecutive_qualified_source_refreshes(
+    events: list[dict[str, Any]],
+    *,
+    opening_at: str | None = None,
+    require_opening_at: bool = False,
+) -> int:
+    """Count newest independent successes, excluding pre-opening evidence."""
+    opening: datetime | None = None
+    if opening_at:
+        try:
+            opening = datetime.fromisoformat(str(opening_at).replace("Z", "+00:00"))
+        except ValueError:
+            return 0
+        if opening.tzinfo is None or opening.utcoffset() is None:
+            return 0
+        opening = opening.astimezone(timezone.utc)
+    elif require_opening_at:
+        return 0
+
+    consecutive = 0
+    previous: datetime | None = None
+    for event in events:
+        if str(event.get("status") or "") != "verified":
+            break
+        try:
+            checked = datetime.fromisoformat(
+                str(event.get("checked_at") or "").replace("Z", "+00:00")
+            )
+        except ValueError:
+            break
+        if checked.tzinfo is None or checked.utcoffset() is None:
+            break
+        checked = checked.astimezone(timezone.utc)
+        if (opening is not None and checked < opening) or (
+            previous is not None and checked >= previous
+        ):
+            break
+        consecutive += 1
+        previous = checked
+    return consecutive
+
+
 def _text(value: Any, field: str, *, allow_empty: bool = False) -> str:
     result = str(value or "").strip()
     if not result and not allow_empty:
@@ -97,6 +141,24 @@ def _date(value: Any, field: str, *, allow_empty: bool = False) -> str:
     return result
 
 
+def _opening_datetime(value: Any, field: str, *, allow_empty: bool = False) -> str:
+    """Validate an official opening instant and require an explicit timezone."""
+    result = str(value or "").strip()
+    if not result and allow_empty:
+        return ""
+    try:
+        parsed = datetime.fromisoformat(result.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise GovernmentPositionContractError(
+            f"{field} must use an ISO-8601 datetime"
+        ) from error
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise GovernmentPositionContractError(
+            f"{field} must include an explicit timezone offset"
+        )
+    return parsed.isoformat()
+
+
 def validate_position_record(value: Any, *, context: str = "position") -> dict[str, Any]:
     if not isinstance(value, dict):
         raise GovernmentPositionContractError(f"{context} must be an object")
@@ -119,6 +181,21 @@ def validate_position_record(value: Any, *, context: str = "position") -> dict[s
     ):
         normalized[field] = _text(normalized[field], f"{context}.{field}")
     normalized["location"] = str(normalized.get("location") or "").strip()
+    normalized["location_evidence_policy"] = str(
+        normalized.get("location_evidence_policy") or "row_exact"
+    ).strip()
+    if normalized["location_evidence_policy"] not in LOCATION_EVIDENCE_POLICIES:
+        raise GovernmentPositionContractError(
+            f"{context}.location_evidence_policy must be one of "
+            f"{sorted(LOCATION_EVIDENCE_POLICIES)}"
+        )
+    if (
+        normalized["location_evidence_policy"] == "registry_province"
+        and normalized["province"] not in normalized["location"]
+    ):
+        raise GovernmentPositionContractError(
+            f"{context}.registry_province location evidence must contain province"
+        )
     normalized["position_type"] = _text(normalized["position_type"], f"{context}.position_type")
     if normalized["position_type"] not in POSITION_TYPES:
         raise GovernmentPositionContractError(
@@ -151,6 +228,18 @@ def validate_position_record(value: Any, *, context: str = "position") -> dict[s
         f"{context}.opening_date",
         allow_empty=True,
     )
+    normalized["opening_at"] = _opening_datetime(
+        normalized.get("opening_at"),
+        f"{context}.opening_at",
+        allow_empty=True,
+    )
+    if normalized["opening_at"] and normalized["opening_date"]:
+        if date.fromisoformat(normalized["opening_date"]) != datetime.fromisoformat(
+            normalized["opening_at"]
+        ).date():
+            raise GovernmentPositionContractError(
+                f"{context}.opening_at date must match opening_date"
+            )
     normalized["deadline_policy"] = _text(normalized["deadline_policy"], f"{context}.deadline_policy")
     if normalized["deadline_policy"] not in DEADLINE_POLICIES:
         raise GovernmentPositionContractError(
@@ -204,8 +293,10 @@ def _expand_position_batches(payload: dict[str, Any]) -> list[dict[str, Any]]:
             "position_type": batch.get("position_type"),
             "province": batch.get("province"),
             "location": batch.get("location"),
+            "location_evidence_policy": batch.get("location_evidence_policy", "row_exact"),
             "deadline_date": batch.get("deadline_date", ""),
             "opening_date": batch.get("opening_date", ""),
+            "opening_at": batch.get("opening_at", ""),
             "deadline_policy": batch.get("deadline_policy"),
             "official_notice_url": batch.get("official_notice_url"),
             "official_attachment_url": batch.get("official_attachment_url"),
@@ -232,6 +323,7 @@ def _expand_position_batches(payload: dict[str, Any]) -> list[dict[str, Any]]:
                     **shared_fields,
                     "province": row_province,
                     "location": row_location,
+                    "location_evidence_policy": shared_fields["location_evidence_policy"],
                     "id": f"{batch_id}-{str(code).strip().lower()}",
                     "employer": employer,
                     "position_code": code,
@@ -272,6 +364,27 @@ def _source_opening_dates(payload: dict[str, Any], source_ids: set[str]) -> dict
     return result
 
 
+def _source_opening_datetimes(
+    payload: dict[str, Any], source_ids: set[str]
+) -> dict[str, str]:
+    """Validate source-wide opening instants for time-of-day windows."""
+    raw = payload.get("source_opening_at") or {}
+    if not isinstance(raw, dict):
+        raise GovernmentPositionContractError("registry.source_opening_at must be an object")
+    result: dict[str, str] = {}
+    for source_id, opening_at in raw.items():
+        normalized_id = _text(source_id, "registry.source_opening_at source id")
+        if normalized_id not in source_ids:
+            raise GovernmentPositionContractError(
+                f"registry.source_opening_at references unknown source: {normalized_id}"
+            )
+        result[normalized_id] = _opening_datetime(
+            opening_at,
+            f"registry.source_opening_at[{normalized_id}]",
+        )
+    return result
+
+
 def load_position_registry(path: Path | str | None = None) -> dict[str, Any]:
     registry_path = Path(path or DEFAULT_REGISTRY_PATH)
     try:
@@ -297,6 +410,10 @@ def load_position_registry(path: Path | str | None = None) -> dict[str, Any]:
         seen.add(record["id"])
         normalized.append(record)
     opening_dates = _source_opening_dates(
+        payload,
+        {str(record["source_id"]) for record in normalized},
+    )
+    opening_datetimes = _source_opening_datetimes(
         payload,
         {str(record["source_id"]) for record in normalized},
     )
@@ -329,6 +446,7 @@ def load_position_registry(path: Path | str | None = None) -> dict[str, Any]:
         "as_of": as_of,
         "description": str(payload.get("description") or "").strip(),
         "source_opening_dates": opening_dates,
+        "source_opening_at": opening_datetimes,
         "source_assessments": normalized_assessments,
         "records": normalized,
     }
@@ -341,7 +459,10 @@ def government_position_quality_report(
     max_age_hours: float | None = None,
     source_verifications: dict[str, dict[str, Any]] | None = None,
     source_refresh_counts: dict[str, dict[str, int]] | None = None,
+    source_refresh_events: dict[str, list[dict[str, Any]]] | None = None,
     manual_confirmation_source_ids: set[str] | None = None,
+    artifact_manifest: dict[str, Any] | None = None,
+    artifact_manifest_available: bool = True,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     payload = registry or load_position_registry()
@@ -359,25 +480,30 @@ def government_position_quality_report(
     province_counts = Counter(str(item["province"]) for item in records)
     source_counts = Counter(str(item["source_id"]) for item in records)
     refresh_counts = source_refresh_counts or {}
-    refresh_gate = {
-        source_id: {
+    refresh_events = source_refresh_events or {}
+    refresh_gate: dict[str, dict[str, Any]] = {}
+    for source_id in sorted(source_counts):
+        if not any(
+            item.get("record_status") == "verified_open"
+            and str(item.get("source_id") or "") == source_id
+            for item in records
+        ):
+            continue
+        qualified = consecutive_qualified_source_refreshes(
+            refresh_events.get(source_id) or [],
+            opening_at=(payload.get("source_opening_at") or {}).get(source_id),
+            require_opening_at=source_id in (payload.get("source_opening_dates") or {}),
+        )
+        refresh_gate[source_id] = {
             "successful_refreshes": int(
                 (refresh_counts.get(source_id) or {}).get("successful_refreshes", 0)
             ),
             "total_refreshes": int(
                 (refresh_counts.get(source_id) or {}).get("total_refreshes", 0)
             ),
-            "passed_two_successes": int(
-                (refresh_counts.get(source_id) or {}).get("successful_refreshes", 0)
-            ) >= 2,
+            "qualified_consecutive_successes": qualified,
+            "passed_two_successes": qualified >= 2,
         }
-        for source_id in sorted(source_counts)
-        if any(
-            str(item.get("record_status") or "") == "verified_open"
-            for item in records
-            if str(item.get("source_id") or "") == source_id
-        )
-    }
     manual_only_sources = set(manual_confirmation_source_ids or ())
     open_records = current_publishable_position_records(
         payload,
@@ -385,6 +511,8 @@ def government_position_quality_report(
         max_age_hours=max_age_hours,
         source_verifications=source_verifications,
         manual_confirmation_source_ids=manual_only_sources,
+        artifact_manifest=artifact_manifest,
+        artifact_manifest_available=artifact_manifest_available,
         now=now,
     )
     explicit_matches = [
@@ -403,6 +531,7 @@ def government_position_quality_report(
     if reference.tzinfo is None:
         reference = reference.replace(tzinfo=timezone.utc)
     reference = reference.astimezone(timezone.utc)
+    evaluation_reference = reference if now is not None else None
     fallback_fresh = _registry_fresh(str(payload.get("as_of") or ""), reference, max_age_hours)
     # A stale reviewed ledger correctly removes rows from the student-facing
     # list, but that must not be reported as a successful empty scan.  Track
@@ -416,7 +545,11 @@ def government_position_quality_report(
             if item.get("record_status") == "verified_open"
             and item.get("match_status") in {"explicit_match", "unrestricted_match"}
             and _record_is_in_current_window(
-                item, today_date, payload.get("source_opening_dates") or {}
+                item,
+                today_date,
+                payload.get("source_opening_dates") or {},
+                payload.get("source_opening_at") or {},
+                reference=evaluation_reference,
             )
             and not _source_evidence_is_current(
                 str(item.get("source_id") or ""),
@@ -427,6 +560,27 @@ def government_position_quality_report(
                 requires_manual_confirmation=(
                     str(item.get("source_id") or "") in manual_only_sources
                 ),
+            )
+        }
+    )
+    availability_confirmation_required_sources = sorted(
+        {
+            str(item.get("source_id") or "")
+            for item in records
+            if item.get("record_status") == "verified_open"
+            and item.get("match_status") in {"explicit_match", "unrestricted_match"}
+            and _record_is_in_current_window(
+                item,
+                today_date,
+                payload.get("source_opening_dates") or {},
+                payload.get("source_opening_at") or {},
+                reference=evaluation_reference,
+            )
+            and _requires_current_availability_confirmation(item)
+            and not _source_current_availability_is_fresh(
+                (source_verifications or {}).get(str(item.get("source_id") or "")),
+                reference,
+                max_age_hours,
             )
         }
     )
@@ -466,8 +620,23 @@ def government_position_quality_report(
         max_age_hours=max_age_hours,
         source_verifications=source_verifications,
         manual_confirmation_source_ids=manual_only_sources,
-        now=reference,
+        artifact_manifest=artifact_manifest,
+        artifact_manifest_available=artifact_manifest_available,
+        now=now,
     )
+    manifest_blocks = {
+        str(item.get("id") or ""): _artifact_publication_block_reason(
+            item,
+            artifact_manifest=artifact_manifest,
+            artifact_manifest_available=artifact_manifest_available,
+        )
+        for item in records
+    }
+    manifest_blocks = {
+        record_id: reason
+        for record_id, reason in manifest_blocks.items()
+        if record_id and reason
+    }
     scan_no_current_match = sum(
         1
         for item in payload.get("source_assessments", [])
@@ -488,6 +657,19 @@ def government_position_quality_report(
         "by_source": dict(sorted(source_counts.items())),
         "verified_open_records": len(open_records),
         "verified_upcoming_records": len(upcoming),
+        "attachment_manifest_gate": {
+            "available": artifact_manifest_available,
+            "blocked_records": len(manifest_blocks),
+            "blocked_sources": sorted(
+                {
+                    str(item.get("source_id") or "")
+                    for item in records
+                    if str(item.get("id") or "") in manifest_blocks
+                }
+                - {""}
+            ),
+            "rule": "已登记附件必须完成受控下载、哈希和逐行复核后才可发布。",
+        },
         "open_until_filled_records": sum(
             1 for item in open_records if item.get("deadline_policy") == "open_until_filled"
         ),
@@ -501,9 +683,38 @@ def government_position_quality_report(
             | verification_failure_sources
             | manual_source_ids
             | pending_source_ids
+            | set(availability_confirmation_required_sources)
         ),
         "manual_confirmation_required_sources": manual_confirmation_required_sources,
         "pending_evidence_sources": pending_evidence_sources,
+        "availability_confirmation_required_sources": availability_confirmation_required_sources,
+        "open_until_filled_policy": {
+            "current_records": sum(
+                1
+                for item in open_records
+                if _requires_current_availability_confirmation(item)
+            ),
+            "blocked_records": sum(
+                1
+                for item in records
+                if item.get("record_status") == "verified_open"
+                and item.get("match_status") in {"explicit_match", "unrestricted_match"}
+                and _record_is_in_current_window(
+                    item,
+                    today_date,
+                    payload.get("source_opening_dates") or {},
+                    payload.get("source_opening_at") or {},
+                    reference=evaluation_reference,
+                )
+                and _requires_current_availability_confirmation(item)
+                and not _source_current_availability_is_fresh(
+                    (source_verifications or {}).get(str(item.get("source_id") or "")),
+                    reference,
+                    max_age_hours,
+                )
+            ),
+            "rule": "招满即止岗位必须有未过期的当前名额确认；公告或附件仍可访问不足以发布。",
+        },
         "verified_scan_no_current_match": scan_no_current_match,
         "source_activation_tasks": source_activation_tasks(
             payload,
@@ -511,7 +722,7 @@ def government_position_quality_report(
             max_age_hours=max_age_hours,
             source_verifications=source_verifications,
             manual_confirmation_source_ids=manual_only_sources,
-            now=reference,
+            now=now,
         ),
         "source_evidence_verifications": {
             "total": sum(verification_counts.values()),
@@ -524,7 +735,7 @@ def government_position_quality_report(
             "passed_sources": sum(
                 1 for item in refresh_gate.values() if item["passed_two_successes"]
             ),
-            "note": "仅统计不可变复核事件；静态台账日期或单次成功不能满足连续刷新门槛。",
+            "note": "历史累计仅供审计；通过门槛必须有最近两次独立、连续且不早于精确开窗时刻的成功事件。",
         },
         "field_completeness": {
             field: {
@@ -547,16 +758,39 @@ def government_position_quality_report(
                 "evidence_locator",
             )
         },
+        "row_evidence_quality": _row_evidence_quality(records),
         "scan_interpretation": (
             "存在来源故障或待核验记录，不能把缺少岗位解释为无岗位。"
             if failures
             or verification_failures
             or manual_confirmation_required_sources
             or pending_evidence_sources
+            or availability_confirmation_required_sources
             else "部分官方来源已扫描成功但当前无可发布匹配；这不是来源故障。"
             if scan_no_current_match
             else "台账中的正式来源均已完成当前记录核验。"
         ),
+    }
+
+
+def _row_evidence_quality(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Report whether each row retains a usable attachment/table locator.
+
+    Contract validation already requires a non-empty locator. This additional
+    metric catches weak locators that merely repeat a filename or notice title
+    and therefore cannot guide a reviewer back to a page, sheet, row, or code.
+    """
+    locator_ok = 0
+    for record in records:
+        locator = str(record.get("evidence_locator") or "").strip().lower()
+        if any(token in locator for token in ("!", "page", "页", "row", "行", "code", "代码")):
+            locator_ok += 1
+    total = len(records)
+    return {
+        "usable_locator": locator_ok,
+        "total": total,
+        "rate": round(locator_ok / total, 4) if total else 0.0,
+        "rule": "定位信息应包含页码、工作表/行号或岗位代码；仅有文件名不计为充分证据。",
     }
 
 
@@ -588,9 +822,11 @@ def source_activation_tasks(
     if reference.tzinfo is None:
         reference = reference.replace(tzinfo=timezone.utc)
     reference = reference.astimezone(timezone.utc)
+    evaluation_reference = reference if now is not None else None
     raw_as_of = str(registry.get("as_of") or "").strip()
     fallback_fresh = _registry_fresh(raw_as_of, reference, max_age_hours)
     opening_dates = registry.get("source_opening_dates") or {}
+    opening_datetimes = registry.get("source_opening_at") or {}
     manual_only_sources = set(manual_confirmation_source_ids or ())
     grouped: dict[str, list[dict[str, Any]]] = {}
     for item in registry.get("records", []):
@@ -599,7 +835,7 @@ def source_activation_tasks(
         if item.get("match_status") not in {"explicit_match", "unrestricted_match"}:
             continue
         source_id = str(item.get("source_id") or "").strip()
-        if source_id in opening_dates or item.get("opening_date"):
+        if source_id in opening_dates or source_id in opening_datetimes or item.get("opening_date") or item.get("opening_at"):
             grouped.setdefault(source_id, []).append(item)
 
     tasks: list[dict[str, Any]] = []
@@ -607,7 +843,7 @@ def source_activation_tasks(
         opening_values = [
             value
             for value in (
-                _opening_date_for_record(row, opening_dates) for row in rows
+                _opening_date_for_record(row, opening_dates, opening_datetimes) for row in rows
             )
             if value is not None
         ]
@@ -622,7 +858,17 @@ def source_activation_tasks(
         deadline = max(deadlines) if deadlines else None
         if deadline is not None and deadline < target:
             status = "expired"
-        elif opening > target:
+        elif any(
+            _opening_date_for_record(row, opening_dates, opening_datetimes) == opening
+            and not _record_is_in_current_window(
+                row,
+                target,
+                opening_dates,
+                opening_datetimes,
+                reference=evaluation_reference,
+            )
+            for row in rows
+        ):
             status = "scheduled"
         else:
             fresh = _source_evidence_is_current(
@@ -640,6 +886,18 @@ def source_activation_tasks(
                 "source_id": source_id,
                 "status": status,
                 "opening_date": opening.isoformat(),
+                "opening_at": (
+                    min(
+                        (
+                            _opening_datetime_for_record(row, opening_datetimes)
+                            for row in rows
+                            if _opening_datetime_for_record(row, opening_datetimes)
+                        ),
+                        default=None,
+                    ).isoformat()
+                    if any(_opening_datetime_for_record(row, opening_datetimes) for row in rows)
+                    else ""
+                ),
                 "deadline_date": deadline.isoformat() if deadline else "",
                 "matching_row_count": len(rows),
                 "headcount": sum(int(row.get("headcount") or 0) for row in rows),
@@ -665,6 +923,8 @@ def current_publishable_position_records(
     max_age_hours: float | None = None,
     source_verifications: dict[str, dict[str, Any]] | None = None,
     manual_confirmation_source_ids: set[str] | None = None,
+    artifact_manifest: dict[str, Any] | None = None,
+    artifact_manifest_available: bool = True,
     now: datetime | None = None,
 ) -> list[dict[str, Any]]:
     """Return current rows with per-source official-evidence freshness.
@@ -681,9 +941,11 @@ def current_publishable_position_records(
     if reference.tzinfo is None:
         reference = reference.replace(tzinfo=timezone.utc)
     reference = reference.astimezone(timezone.utc)
+    evaluation_reference = reference if now is not None else None
     raw_as_of = str(registry.get("as_of") or "").strip()
     fallback_fresh = _registry_fresh(raw_as_of, reference, max_age_hours)
     source_opening_dates = registry.get("source_opening_dates") or {}
+    source_opening_at = registry.get("source_opening_at") or {}
     manual_only_sources = set(manual_confirmation_source_ids or ())
     rows: list[dict[str, Any]] = []
     for item in registry.get("records", []):
@@ -691,7 +953,19 @@ def current_publishable_position_records(
             continue
         if item["match_status"] not in {"explicit_match", "unrestricted_match"}:
             continue
-        if not _record_is_in_current_window(item, target, source_opening_dates):
+        if not _record_is_in_current_window(
+            item,
+            target,
+            source_opening_dates,
+            source_opening_at,
+            reference=evaluation_reference,
+        ):
+            continue
+        if _artifact_publication_block_reason(
+            item,
+            artifact_manifest=artifact_manifest,
+            artifact_manifest_available=artifact_manifest_available,
+        ):
             continue
         if not _source_evidence_is_current(
             str(item.get("source_id") or ""),
@@ -702,6 +976,18 @@ def current_publishable_position_records(
             requires_manual_confirmation=(
                 str(item.get("source_id") or "") in manual_only_sources
             ),
+        ):
+            continue
+        # A surviving notice and attachment prove that the official recruitment
+        # material still exists.  For "招满即止" rows, however, they do not prove
+        # that this particular position still has a vacancy.  Require a separate,
+        # expiring confirmation of current availability before showing the row to
+        # students.  This deliberately fails closed instead of treating a missing
+        # status update as an open position.
+        if _requires_current_availability_confirmation(item) and not _source_current_availability_is_fresh(
+            verification_map.get(str(item.get("source_id") or "")),
+            reference,
+            max_age_hours,
         ):
             continue
         rows.append(dict(item))
@@ -715,6 +1001,8 @@ def upcoming_position_records(
     max_age_hours: float | None = None,
     source_verifications: dict[str, dict[str, Any]] | None = None,
     manual_confirmation_source_ids: set[str] | None = None,
+    artifact_manifest: dict[str, Any] | None = None,
+    artifact_manifest_available: bool = True,
     now: datetime | None = None,
 ) -> list[dict[str, Any]]:
     """Return verified student-matching rows whose official window is upcoming.
@@ -729,9 +1017,11 @@ def upcoming_position_records(
     if reference.tzinfo is None:
         reference = reference.replace(tzinfo=timezone.utc)
     reference = reference.astimezone(timezone.utc)
+    evaluation_reference = reference if now is not None else None
     raw_as_of = str(registry.get("as_of") or "").strip()
     fallback_fresh = _registry_fresh(raw_as_of, reference, max_age_hours)
     source_opening_dates = registry.get("source_opening_dates") or {}
+    source_opening_at = registry.get("source_opening_at") or {}
     manual_only_sources = set(manual_confirmation_source_ids or ())
     rows: list[dict[str, Any]] = []
     for item in registry.get("records", []):
@@ -739,11 +1029,23 @@ def upcoming_position_records(
             continue
         if item.get("match_status") not in {"explicit_match", "unrestricted_match"}:
             continue
-        opening_date = _opening_date_for_record(item, source_opening_dates)
-        if opening_date is None or opening_date <= target:
+        opening_date = _opening_date_for_record(item, source_opening_dates, source_opening_at)
+        if opening_date is None or _record_is_in_current_window(
+            item,
+            target,
+            source_opening_dates,
+            source_opening_at,
+            reference=evaluation_reference,
+        ):
             continue
         deadline = str(item.get("deadline_date") or "").strip()
         if deadline and date.fromisoformat(deadline) < target:
+            continue
+        if _artifact_publication_block_reason(
+            item,
+            artifact_manifest=artifact_manifest,
+            artifact_manifest_available=artifact_manifest_available,
+        ):
             continue
         if not _source_evidence_is_current(
             str(item.get("source_id") or ""),
@@ -758,6 +1060,9 @@ def upcoming_position_records(
             continue
         row = dict(item)
         row["opening_date"] = opening_date.isoformat()
+        opening_at = _opening_datetime_for_record(item, source_opening_at)
+        if opening_at is not None:
+            row["opening_at"] = opening_at.isoformat()
         rows.append(row)
     rows.sort(
         key=lambda row: (
@@ -772,8 +1077,12 @@ def upcoming_position_records(
 def _opening_date_for_record(
     record: dict[str, Any],
     source_opening_dates: dict[str, Any],
+    source_opening_at: dict[str, Any] | None = None,
 ) -> date | None:
     """Resolve a row-specific opening date before the source-wide fallback."""
+    opening_at = _opening_datetime_for_record(record, source_opening_at or {})
+    if opening_at is not None:
+        return opening_at.date()
     raw = str(
         record.get("opening_date")
         or source_opening_dates.get(str(record.get("source_id") or ""))
@@ -782,14 +1091,49 @@ def _opening_date_for_record(
     return date.fromisoformat(raw) if raw else None
 
 
+def _opening_datetime_for_record(
+    record: dict[str, Any],
+    source_opening_at: dict[str, Any],
+) -> datetime | None:
+    raw = str(
+        record.get("opening_at")
+        or source_opening_at.get(str(record.get("source_id") or ""))
+        or ""
+    ).strip()
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        return None
+    return parsed
+
+
 def _record_is_in_current_window(
     record: dict[str, Any],
     target: date,
     source_opening_dates: dict[str, Any],
+    source_opening_at: dict[str, Any] | None = None,
+    *,
+    reference: datetime | None = None,
 ) -> bool:
     """Return whether a reviewed row is inside its official date window."""
-    opening_date = _opening_date_for_record(record, source_opening_dates)
-    if opening_date and opening_date > target:
+    opening_datetimes = source_opening_at or {}
+    opening_at = _opening_datetime_for_record(record, opening_datetimes)
+    opening_date = _opening_date_for_record(record, source_opening_dates, opening_datetimes)
+    if opening_at is not None:
+        if reference is None:
+            # A date-only caller cannot prove that the clock has reached the
+            # opening instant on the same day; fail closed until a real `now`
+            # is supplied by the worker or audit command.
+            opened = target > opening_at.date()
+        else:
+            opened = reference.astimezone(timezone.utc) >= opening_at.astimezone(timezone.utc)
+        if not opened:
+            return False
+    elif opening_date and opening_date > target:
         return False
     deadline = str(record.get("deadline_date") or "").strip()
     return not deadline or date.fromisoformat(deadline) >= target
@@ -804,6 +1148,29 @@ def _registry_fresh(
         return True
     as_of = datetime.combine(date.fromisoformat(raw_as_of), time.min, tzinfo=timezone.utc)
     return max(0.0, (reference - as_of).total_seconds() / 3600) <= float(max_age_hours)
+
+
+def _artifact_publication_block_reason(
+    record: dict[str, Any],
+    *,
+    artifact_manifest: dict[str, Any] | None,
+    artifact_manifest_available: bool,
+) -> str | None:
+    """Keep table-backed rows behind the attachment evidence lifecycle.
+
+    Direct official-detail records intentionally use the same URL for notice
+    and evidence and do not require a table manifest.  A configured manifest
+    that cannot be loaded is different from no manifest being configured: in
+    that case table-backed rows fail closed rather than using a stale static
+    ledger as an implicit substitute.
+    """
+    attachment_url = str(record.get("official_attachment_url") or "").strip()
+    notice_url = str(record.get("official_notice_url") or "").strip()
+    if not artifact_manifest_available:
+        if attachment_url and attachment_url != notice_url:
+            return "官方附件清单不可用，表格岗位暂不对学生端发布。"
+        return None
+    return government_artifact_publication_block_reason(attachment_url, artifact_manifest)
 
 
 def _source_evidence_is_current(
@@ -843,6 +1210,52 @@ def _source_evidence_is_current(
     return age_hours <= float(max_age_hours)
 
 
+def _requires_current_availability_confirmation(record: dict[str, Any]) -> bool:
+    """Return whether source evidence alone cannot establish a live vacancy.
+
+    A fixed official deadline supplies a public time boundary.  "Open until
+    filled" does not: an unchanged notice may remain online after every seat is
+    taken.  These records therefore need an explicit, fresh confirmation that
+    the source still accepts applications for the recorded vacancies.
+    """
+    return str(record.get("deadline_policy") or "") == "open_until_filled"
+
+
+def _source_current_availability_is_fresh(
+    verification: dict[str, Any] | None,
+    reference: datetime,
+    max_age_hours: float | None,
+) -> bool:
+    """Check the separately recorded current-vacancy confirmation.
+
+    There is intentionally no static-ledger fallback.  A dated spreadsheet or
+    reachable notice is not availability evidence for a rolling, fill-until-
+    full recruitment run.  Production provides a finite freshness window; the
+    ``None`` branch exists for explicit diagnostic callers that intentionally
+    disable age expiry, matching the established source-evidence API.
+    """
+    if not verification:
+        return False
+    if str(verification.get("status") or "") in {"withdrawn", "not_configured"}:
+        return False
+    raw_confirmation = str(verification.get("availability_confirmed_at") or "").strip()
+    if not raw_confirmation:
+        return False
+    try:
+        confirmed = datetime.fromisoformat(raw_confirmation.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    if confirmed.tzinfo is None:
+        confirmed = confirmed.replace(tzinfo=timezone.utc)
+    if max_age_hours is None:
+        return True
+    age_hours = max(
+        0.0,
+        (reference - confirmed.astimezone(timezone.utc)).total_seconds() / 3600,
+    )
+    return age_hours <= float(max_age_hours)
+
+
 def position_record_to_posting(record: dict[str, Any]) -> RawPosting:
     """Convert one verified government table row into the normal job contract."""
     major = str(record["major_requirement"]).strip()
@@ -854,6 +1267,7 @@ def position_record_to_posting(record: dict[str, Any]) -> RawPosting:
         "evidence_scope": "official_attachment_row",
         "岗位": str(record["title"]).strip(),
         "政府岗位类型": str(record["position_type"]),
+        "官方职位表省份": str(record.get("province") or "").strip(),
         "职位代码": code,
         "专业要求": major,
         "学历要求": degree,

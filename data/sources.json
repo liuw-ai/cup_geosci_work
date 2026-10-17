@@ -25,14 +25,22 @@
           "url": "https://career.cup.edu.cn/campus/view/id/460487",
           "title_hint": "赣南实验室2026年招聘公告"
         },
-        {
-          "url": "https://career.cup.edu.cn/campus/view/id/460426",
-          "title_hint": "桂林理工大学2026年招聘公告"
-        },
-        {
-          "url": "https://career.cup.edu.cn/news/view/aid/95612/tag/xwzp",
-          "title_hint": "福建省能源石化创新研究院有限责任公司"
-        }
+      {
+        "url": "https://career.cup.edu.cn/campus/view/id/460426",
+        "title_hint": "桂林理工大学2026年招聘公告"
+      },
+      {
+        "url": "https://career.cup.edu.cn/campus/view/id/460455",
+        "title_hint": "东方地球物理勘探有限责任公司2027届高校毕业生招聘"
+      },
+      {
+        "url": "https://career.cup.edu.cn/news/view/aid/95612/tag/xwzp",
+        "title_hint": "福建省能源石化创新研究院有限责任公司"
+      },
+      {
+        "url": "https://career.cup.edu.cn/campus/view/id/460476",
+        "title_hint": "中国石油勘探开发研究院西北分院2027届研究生校园招聘"
+      }
       ],
       "detail_path_patterns": [
         "/campus/view/id/",
@@ -85,6 +93,7 @@
       "deduplicate_by_title": true,
       "allow_shared_source_url": true,
       "undated_open_window_days": 45,
+      "skip_expired_before_persist": true,
       "require_detail_content": true,
       "minimum_detail_characters": 80,
       "request_interval_seconds": 1.0,
@@ -157,6 +166,7 @@
       "minimum_relevance": 45,
       "max_items": 45,
       "fetch_detail_pages": true,
+      "allow_international_public": false,
       "deadline_policy": "official_page_does_not_publish_a_fixed_deadline",
       "detail_title_selector": ".jobDisplay h1, .job-title, h1",
       "detail_content_selector": ".jobDisplayShell, .jobDisplay, #content",
@@ -198,6 +208,7 @@
         "www.sydwgkzp.cn"
       ],
       "government_evidence_recheck": true,
+      "source_role": "natural_resources",
       "attachment_discovery_enabled": true,
       "title_selector": "h1, .title, .article-title, title",
       "content_selector": "article, main, .TRS_Editor, .content, body",
@@ -223,6 +234,27 @@
         "体检",
         "考察",
         "录用公示"
+      ],
+      "detail_table_profiles": [
+        {
+          "title_pattern": "发展研究中心.*博士后",
+          "table_selector": "table",
+          "table_index": 1,
+          "required_headers": ["专业", "研究方向", "招收人数"],
+          "column_aliases": {
+            "title": ["研究方向"],
+            "major": ["专业"],
+            "quantity": ["招收人数"]
+          },
+          "title_prefix": "博士后研究人员（",
+          "title_suffix": "）",
+          "degree_requirement": "博士研究生（相关专业博士学位）",
+          "employer": "中国地质调查局发展研究中心",
+          "location": "北京市西城区",
+          "require_degree_evidence": true,
+          "require_location_evidence": true,
+          "note": "仅匹配已核验的中国地质调查局发展研究中心博士后岗位表。表头、岗位方向、专业、人数均须同时命中；其他中国地质调查局公告仍进入普通公告或附件复核流程。"
+        }
       ],
       "minimum_relevance": 40,
       "max_items": 24,
@@ -313,21 +345,23 @@
       "listing_url": "https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
       "max_age_hours": 30,
       "snapshot_captured_at": "2026-09-24T08:00:00+08:00",
+      "split_location_rows": true,
       "browser_index_capture_path": "data/verified/cnpc-browser-index-20260925.json",
       "browser_index_capture_status": "partial_detail_api_degraded",
       "detail_access_status": "official_detail_api_degraded",
+      "allow_international_public": false,
       "note": "当前启用的是 2026-09-24 浏览器核验的官方岗位快照。2026-09-24 复测发现官方详情页前端调用 showN 接口返回缺少 recruitInfoObj，页面会显示空白；因此学生端保留官方快照字段，主入口指向中国石油官方招聘列表，详情编号和接口异常状态均明确展示。待服务器取得合规公开接口或专用适配器后再替换为自动同步。"
     }
   },
   {
     "id": "cnpc-career-browser",
-    "name": "中国石油招聘平台浏览器岗位详情采集",
+    "name": "中国石油招聘平台浏览器岗位详情采集（访问恢复前停用）",
     "publisher": "中国石油天然气集团有限公司",
     "homepage_url": "https://zhaopin.cnpc.com.cn/web/recruitInfolist.html",
     "source_type": "cnpc_browser_rows",
     "category": "油气勘探开发运营与研究机构",
     "source_tier": "A",
-    "enabled": true,
+    "enabled": false,
     "config": {
       "allowed_hosts": ["zhaopin.cnpc.com.cn"],
       "capture_path": "captures/cnpc-jobs.json",
@@ -339,9 +373,16 @@
       "max_pages": 30,
       "max_age_hours": 30,
       "require_complete_scan": true,
+      "require_capture_manifest": true,
+      "source_id": "cnpc-career-browser",
+      "adapter_version": "cnpc-browser-v1",
+      "allow_international_public": false,
+      "background_capture_enabled": true,
+      "auto_activate_on_complete_capture": true,
+      "runtime_enabled_control": "cnpc-browser-production",
       "max_items": 2000,
       "maintenance_window": "00:00-06:00 Asia/Shanghai",
-      "note": "独立浏览器任务负责公告分页和岗位详情表；浏览器不可用、详情字段不完整、维护窗口或扫描未完成时保持停用，不把访问故障写成无岗位。启用前必须完成服务器 Chromium 运行回归。"
+      "note": "2026-10-06 直连浏览器捕获收到官方入口 HTTP 412（access-limited），未形成可用捕获文件；学生端来源暂时停用，但受控浏览器后台继续按计划重试。只有完整分页、全详情、完整清单验证和原子同步全部成功后才自动启用；访问故障不得解释为无岗位。"
     }
   },
   {
@@ -370,16 +411,50 @@
       "candidate_enterprise_total": 35,
       "max_items": 1000,
       "max_age_hours": 30,
+      "split_location_rows": true,
       "require_complete_manifest": true,
+      "require_capture_manifest": true,
+      "source_id": "sinopec-career",
+      "adapter_version": "sinopec-browser-v1",
+      "allow_international_public": false,
       "reconcile_missing_external_ids": true,
       "runtime_mode": "browser_worker_only",
-      "disabled_reason": "普通同步不再读取浏览器捕获路径；由 sinopec-browser 独立 worker 负责动态 SPA 捕获。服务器 403/robots 失败保留 access_limited 心跳和失败快照，不能解释为无岗位。",
-      "note": "2026-09-29 服务器隔离 Chromium 通过官方只读 SPA 接口捕获确认 132 个单位，35 个候选单位、363 条岗位行；132 个单位清单和 35 个候选单位详情均完成分页扫描，失败行为 0。学生端只展示岗位级专业/学历明确匹配，捕获文件必须在 max_age_hours 内重新核验。"
+      "background_capture_enabled": true,
+      "auto_activate_on_complete_capture": true,
+      "runtime_enabled_control": "sinopec-browser-production",
+      "disabled_reason": "学生端发布保持关闭，但 sinopec-browser 按计划继续尝试官方只读 SPA 捕获。只有 robots 可核验、全量单位与详情扫描完成且同步事务成功时，才自动启用来源；403/robots 失败保留 access_limited 心跳和失败快照，不能解释为无岗位。",
+      "note": "2026-09-29 服务器隔离 Chromium 通过官方只读 SPA 接口捕获确认 132 个单位，35 个候选单位、363 条岗位行；132 个单位清单和 35 个候选单位详情均完成分页扫描，失败行为 0。后台采集和学生端发布状态独立：捕获失败不会恢复旧快照或改变发布状态，完整成功捕获通过原子同步后才启用。学生端只展示岗位级专业/学历明确匹配，捕获文件必须在 max_age_hours 内重新核验。"
+    }
+  },
+  {
+    "id": "sinopec-2027-geoscience-snapshot",
+    "name": "中国石化2027届地学岗位官方快照（人工核验过渡源）",
+    "publisher": "中国石油化工集团有限公司",
+    "homepage_url": "https://job.sinopec.com/#/school/recruitmentPositions",
+    "source_type": "manual",
+    "category": "油气上游业主与研究机构",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allowed_hosts": ["job.sinopec.com"],
+      "snapshot_path": "data/verified/sinopec-geoscience-20260929.json",
+      "max_age_hours": 192,
+      "official_evidence_url": "https://job.sinopec.com/#/school/recruitmentPositions",
+      "application_url": "https://job.sinopec.com/",
+      "snapshot_captured_at": "2026-09-29T07:08:24.607107Z",
+      "split_location_rows": true,
+      "enterprise_total": 132,
+      "candidate_enterprise_total": 35,
+      "captured_job_rows": 363,
+      "publication_mode": "verified_snapshot_manual_activation",
+      "allow_international_public": false,
+      "dynamic_replacement_source_id": "sinopec-career",
+      "note": "官方 SPA 完整捕获的人工核验过渡源。仅通过岗位级专业、学历、地点、截止日期和官方详情门禁的行进入学生端；人工快照在 192 小时内有效，动态源成功刷新后必须原子替换并清理本过渡源。该源不宣称每日实时更新。"
     }
   },
   {
     "id": "sinopec-pepris-recruitment",
-    "name": "中国石化石油勘探开发研究院2026年校园招聘公告",
+    "name": "中国石化石油勘探开发研究院人才招聘官方列表",
     "publisher": "中国石化石油勘探开发研究院有限公司",
     "homepage_url": "http://pepris.sinopec.com/pepris/careers/rwzl/2026/6/I1519026538069098496.shtml",
     "source_type": "official_table_rows",
@@ -390,7 +465,10 @@
       "direct_notice_urls": [
         "http://pepris.sinopec.com/pepris/careers/rwzl/2026/6/I1519026538069098496.shtml"
       ],
-      "direct_only": true,
+      "direct_only": false,
+      "listing_urls": [
+        "http://pepris.sinopec.com/pepris/careers/rwzl/A033006003Gone1.shtml"
+      ],
       "allowed_hosts": ["pepris.sinopec.com"],
       "title_selector": "h1, title",
       "content_selector": "article, .article-content, .content, main, body",
@@ -412,8 +490,6 @@
       ],
       "row_exclude_patterns": ["人工智能|项目管理|软件开发|计算机"],
       "employer_hint": "中国石化石油勘探开发研究院有限公司",
-      "published_date": "2025-10-11",
-      "deadline_date": "2025-11-15",
       "require_page_recruitment_word": true,
       "require_recruitment_word": false,
       "require_major_match": true,
@@ -422,7 +498,8 @@
       "request_interval_seconds": 1.0,
       "undated_open_window_days": null,
       "allow_shared_source_url": true,
-      "note": "石勘院官方公告页含北京总院和无锡石油地质研究所两张岗位表。岗位行按官方原文逐行解析，专业白名单和排除词均为人工核验配置。公告报名截止时间为2025-11-15，当前只作为历史解析证据，不计入在招数量；后续年度公告应新增并复核 direct_notice_urls。"
+      "max_notice_pages": 20,
+      "note": "石勘院官方人才招聘列表页与历史公告直链均属于第一方来源。适配器先从官方列表页发现年度公告，再逐页解析北京总院和无锡研究所岗位表；历史直链保留用于回归。发布日期和截止日期必须从每篇官方公告正文解析，不能由配置固定覆盖；专业、学历、地点和当前性门禁不放宽。"
     }
   },
   {
@@ -487,17 +564,35 @@
       "company_id": "105147",
       "api_host": "https://fe.zhaopin.com",
       "api_path": "/grace/api/dsc/search-job-list",
+      "api_allowed_hosts": ["fe.zhaopin.com"],
       "include_patterns": ["地质|勘查|物探|化探|测井|地球物理|油气|石油|资源|储层|海洋"],
+    "allow_unrestricted_candidates": true,
+    "allow_unclassified_domestic_address": true,
       "exclude_patterns": ["财务|法务|行政|人力资源|审计|采购|市场|风控|合规|法律"],
       "page_size": 100,
       "max_pages": 20,
       "max_items": 500,
       "allow_large_item_limit": true,
       "max_age_hours": 30,
+      "detail_retry_attempts": 2,
+      "detail_retry_delay_ms": 500,
+      "detail_timeout_ms": 15000,
+      "detail_data_wait_ms": 3000,
+      "max_consecutive_detail_failures": 5,
+      "retry_max_targets": 10,
       "require_complete_scan": true,
+      "require_capture_manifest": true,
+      "allow_missing_deadline": true,
+      "deadline_policy": "official_portal_may_use_rolling_recruitment",
+      "undated_open_window_days": 45,
+      "reconcile_missing_external_ids": true,
+      "split_location_rows": true,
+      "source_id": "cnooc-career-browser",
+      "adapter_version": "cnooc-browser-v1",
+      "allow_international_public": false,
       "automation_status": "browser_detail_pipeline_ready_20261001",
       "scan_policy": "daily_browser_detail_monitor",
-      "note": "列表 API 只负责发现候选；学生端只消费完整 Chromium 详情捕获。详情挑战、分页失败或字段缺失进入复核，不显示为无岗位。"
+      "note": "列表 API 只负责发现候选；学生端只消费完整 Chromium 详情捕获。详情挑战、分页失败或字段缺失进入复核；分页完整且少量详情失败时自动执行同批次定向重试，只有全部失败详情修复后才原子替换快照，不显示为无岗位。"
     }
   },
   {
@@ -518,12 +613,16 @@
       "detail_base_url": "https://zhaopin.pipechina.com.cn/recruit",
       "detail_board_category": "_HB4_NDA%253D",
       "detail_job_meta_state": "new_portal_campus",
+      "prefer_detail_evidence_url": true,
+      "allow_international_public": false,
       "max_age_hours": 30,
       "snapshot_captured_at": "2026-09-24T08:00:00+08:00",
+      "automation_status": "blocked_robots",
+      "background_capture_enabled": false,
       "official_search_url": "https://zhaopin.pipechina.com.cn/recruit#/portal_job_list?job_class=_HB4_Y2FtcHVz&search_key=%E5%9C%B0%E8%B4%A8&filter_dict=_HB4_eyJfam9iX2NsYXNzIjoiY2FtcHVzIiwic2VsZWN0X2RlcGFydCI6bnVsbH0%253D",
       "official_evidence_url": "https://www.pipechina.com.cn/front/tzgg/3004720.html",
       "application_url": "https://zhaopin.pipechina.com.cn/recruit",
-      "note": "官方招聘系统为动态 Angular 页面；2026-09-24 浏览器核验到校园招聘地质关键词 24 条。已逐条核对岗位编号和下属单位编号，生成官方岗位详情链接；学生端仍逐岗位执行专业、学历和证据门禁。官方地质筛选入口作为备用入口。本机 requests/curl_cffi 直连为 TLS EOF，未绕过 robots、验证码或访问控制；服务器直连动态适配器待后续接入。"
+      "note": "官方招聘系统为动态 Angular 页面；2026-09-24 浏览器核验到校园招聘地质关键词 24 条。已逐条核对岗位编号和下属单位编号，生成官方岗位详情链接；学生端仍逐岗位执行专业、学历和证据门禁。当前快照已超过 freshness window，且官方入口 robots/访问策略无法通过受控复核，因此来源显式停用，不把历史快照继续展示为当前岗位；恢复访问后必须重新完成完整捕获。"
     }
   },
   {
@@ -536,8 +635,12 @@
     "source_tier": "A",
     "enabled": false,
     "config": {
+      "background_capture_enabled": false,
+      "auto_activate_on_complete_capture": true,
+      "runtime_enabled_control": "pipechina-browser-production",
       "allowed_hosts": ["zhaopin.pipechina.com.cn", "www.pipechina.com.cn"],
       "capture_path": "captures/pipechina-career.json",
+      "cdp_url": "http://pipechina-headless-shell:9222",
       "browser_url": "https://zhaopin.pipechina.com.cn/recruit#/portal_job_list?job_class=_HB4_Y2FtcHVz&search_key=%E5%9C%B0%E8%B4%A8",
       "row_selector": "div.table-row[hcm-key]",
       "id_attribute": "hcm-key",
@@ -555,6 +658,11 @@
       "application_url": "https://zhaopin.pipechina.com.cn/recruit",
       "max_age_hours": 30,
       "require_complete_scan": true,
+      "require_capture_manifest": true,
+      "source_id": "pipechina-browser-capture",
+      "adapter_version": "browser-capture-v1",
+      "runtime_mode": "browser_worker_only",
+      "automation_status": "blocked_robots",
       "note": "服务器安装并授权使用公开 Chromium 后启用。捕获任务必须完成地质关键词结果的分页扫描，并逐岗位保留官方详情 URL、专业、学历、地点和截止日期；浏览器不可用、robots 无法核验或扫描不完整时保持停用并继续使用 2026-09-24 官方快照。"
     }
   },
@@ -576,6 +684,8 @@
       ],
       "minimum_relevance": 20,
       "snapshot_path": "data/verified/cupb-geoscience-20260924.json",
+      "max_age_hours": 30,
+      "snapshot_captured_at": "2026-09-24T08:00:00+08:00",
       "official_evidence_url": "https://career.cup.edu.cn/campus/view/id/460426",
       "application_url": "https://career.cup.edu.cn/campus",
       "note": "2026-09-24 浏览器只读核验的中国石油大学（北京）就业网公开岗位快照。每条记录保留具体公告、岗位级专业/学历字段和报名入口；动态列表因本机 robots/TLS 不稳定不直接绕过，快照仅作为管理员复核桥接。无岗位级证据的公告总述不进入快照。"
@@ -738,6 +848,7 @@
       "request_timeout_seconds": 8,
       "fetch_detail_pages": true,
       "require_detail_content": true,
+      "allow_international_public": false,
       "minimum_detail_characters": 250,
       "require_location_evidence": true,
       "undated_open_window_days": 60,
@@ -860,7 +971,7 @@
     "source_type": "mokahr_search",
     "category": "矿产资源与矿业",
     "source_tier": "A",
-    "enabled": true,
+    "enabled": false,
     "config": {
       "listing_url": "https://app.mokahr.com/social-recruitment/zijinmining/140688?locale=zh-CN#/jobs",
       "org_id": "zijinmining",
@@ -879,7 +990,7 @@
       "deadline_policy": "official_portal_may_use_rolling_recruitment",
       "request_interval_seconds": 1.2,
       "allowed_hosts": ["app.mokahr.com"],
-      "note": "紫金矿业官网链接的官方 MokaHR 社会招聘门户；仅采集公开岗位，不提交申请。"
+      "note": "紫金矿业官网链接的官方 MokaHR 社会招聘门户；当前项目范围只收录应届/校园招聘，保留该源用于历史审计但停用自动采集。"
     }
   },
   {
@@ -976,9 +1087,10 @@
       "employer_hint": "中国冶金地质总局第二地质勘查院",
       "published_date": "2026-09-17",
       "require_recruitment_word": false,
-      "require_major_match": true,
-      "minimum_relevance": 40,
-      "max_items": 4,
+    "require_major_match": true,
+    "minimum_relevance": 40,
+      "allow_international_public": false,
+    "max_items": 4,
       "request_interval_seconds": 1.0,
       "undated_open_window_days": 45,
       "allow_shared_source_url": true,
@@ -1031,9 +1143,12 @@
       "allowed_hosts": ["www.cmgb.com.cn", "cmgb.iguopin.com", "www.iguopin.com"],
       "minimum_relevance": 40,
       "snapshot_path": "data/verified/cmgb-iguopin-geoscience-20260927.json",
+      "max_age_hours": 30,
+      "snapshot_captured_at": "2026-09-27T14:07:41Z",
       "official_evidence_url": "https://www.cmgb.com.cn/content/2026/09-25/7509048960149884928.html",
       "application_url": "https://cmgb.iguopin.com/jobCampus",
       "official_search_url": "https://cmgb.iguopin.com/jobCampus",
+      "split_location_rows": true,
       "note": "中国冶金地质总局官网于2026-09-25发布2027届校园招聘公告，公告指向官方国聘校园招聘系统。该来源作为首次核验快照保留原始岗位证据；动态浏览器来源完成生产切换后，快照岗位仅作可审计历史，不与动态岗位重复展示。"
     }
   },
@@ -1045,7 +1160,7 @@
     "source_type": "cmgb_browser_rows",
     "category": "自然资源、地调与地勘",
     "source_tier": "A",
-    "enabled": true,
+    "enabled": false,
     "config": {
       "runtime_enabled_control": "cmgb-iguopin-browser-production",
       "reconcile_missing_external_ids": true,
@@ -1054,6 +1169,10 @@
       "capture_path": "captures/cmgb-iguopin-browser.json",
       "allowed_hosts": ["cmgb.iguopin.com", "www.iguopin.com", "iguopin.com", "www.cmgb.com.cn"],
       "max_age_hours": 30,
+      "require_capture_manifest": true,
+      "split_location_rows": true,
+      "source_id": "cmgb-iguopin-browser",
+      "adapter_version": "cmgb-browser-v1",
         "retry_partial_first": true,
         "detail_retry_max_age_hours": 12,
         "detail_retry_attempts": 3,
@@ -1067,6 +1186,103 @@
       "next_selector": ".ant-pagination-next",
       "detail_button_selector": "button",
       "note": "2026-09-27 已在服务器逐页捕获 8 页、146/146 条详情，字段完整率 100%。启用前必须通过 cmgb-production-transition：完整捕获、明确匹配不低于现有快照、原子同步后才停用快照；捕获失败或分页不完整时旧快照保持可见。partial 归档在 12 小时内优先只重试其失败的官方详情，全部补齐前绝不覆盖正式快照；归档过期或不适用才恢复完整列表扫描。启用后每次完整动态清单会撤回已消失的岗位，保留原始事件审计。"
+    }
+  },
+  {
+    "id": "chinalco-iguopin-browser",
+      "name": "中国铝业集团2027届校园招聘国聘动态岗位（生产浏览器采集）",
+    "publisher": "中国铝业集团有限公司",
+    "homepage_url": "https://chinalco2027.iguopin.com/job",
+    "source_type": "iguopin_browser_rows",
+    "category": "矿产资源与矿业",
+    "source_tier": "A",
+      "enabled": true,
+    "config": {
+      "runtime_enabled_control": "chinalco-iguopin-browser-production",
+      "browser_url": "https://chinalco2027.iguopin.com/job",
+      "application_url": "https://chinalco2027.iguopin.com/job",
+      "capture_path": "captures/chinalco-iguopin-browser.json",
+      "previous_capture_path": "captures/chinalco-iguopin-browser.first.json",
+      "allowed_hosts": ["chinalco2027.iguopin.com", "www.iguopin.com", "iguopin.com"],
+      "major_filters": [
+        {"parent": "理学", "child": "地质学类"},
+        {"parent": "理学", "child": "地球物理学类"},
+        {"parent": "工学", "child": "地质类"},
+        {"parent": "工学", "child": "地质资源与地质工程类"}
+      ],
+      "external_id_prefix": "chinalco-iguopin",
+      "max_pages_per_filter": 20,
+        "max_items": 2000,
+        "max_age_hours": 30,
+      "require_complete_scan": true,
+      "require_capture_manifest": true,
+      "reconcile_missing_external_ids": true,
+      "split_location_rows": true,
+      "minimum_relevance": 0,
+      "source_id": "chinalco-iguopin-browser",
+      "adapter_version": "iguopin-browser-v1",
+      "official_announcement_url": "https://chinalco2027.iguopin.com/notice",
+        "note": "中国铝业集团2027年度高校毕业生招聘官方公告明确报名平台为本国聘子站，报名期为 2026-09-16 至 2027-03-07。2026-10-07 已通过两次独立直连浏览器全筛选、全分页、全详情捕获：每次 5 页、51 张卡片、35 个去重详情、35/35 详情成功，外部编号集合一致；其中 27 条经中国大陆地点和专业学历门禁后可公开，5 条专业不匹配、3 条海外或境内外混合岗位保持私有。来源已通过生产切换并启用；后续必须以新鲜完整捕获替代当前快照，任何部分或失败捕获均不得覆盖最后一次成功清单。"
+    }
+  },
+  {
+    "id": "iguopin-general-geoscience-browser",
+    "name": "国聘主站地学岗位动态浏览器采集（两轮完整复核后生产启用）",
+    "publisher": "国聘网",
+    "homepage_url": "https://www.iguopin.com/job",
+    "source_type": "iguopin_general_browser_rows",
+    "category": "综合央国企与公共就业",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "runtime_enabled_control": "iguopin-general-geoscience-browser-production",
+      "browser_url": "https://www.iguopin.com/job",
+      "application_url": "https://www.iguopin.com/job",
+      "capture_path": "captures/iguopin-general-geoscience-browser.json",
+      "allowed_hosts": ["www.iguopin.com", "iguopin.com"],
+      "search_keywords": [
+        "地质",
+        "地球物理",
+        "资源勘查",
+        "油气勘探",
+        "测井",
+        "水文地质",
+        "遥感地质",
+        "矿产勘查",
+        "地球化学",
+        "矿床学",
+        "矿产普查与勘探",
+        "地质工程",
+        "物探",
+        "矿产",
+        "石油地质",
+        "油气地质",
+        "能源资源",
+        "地震勘探",
+        "地质调查"
+      ],
+      "card_identity_mode": "rendered_react_job_id",
+      "external_id_prefix": "iguopin-general",
+      "max_pages_per_keyword": 20,
+      "search_keyword_batch_size": 1,
+      "search_keyword_batch_timeout_seconds": 1800,
+      "keyword_render_wait_ms": 10000,
+    "keyword_search_attempts": 3,
+    "detail_repair_max_targets": 120,
+    "detail_repair_max_seconds": 240,
+    "initial_render_wait_ms": 3000,
+      "detail_render_wait_ms": 600,
+      "max_items": 2000,
+      "minimum_capture_id_jaccard": 0.97,
+      "max_age_hours": 30,
+      "require_complete_scan": true,
+      "require_capture_manifest": true,
+      "reconcile_missing_external_ids": true,
+      "split_location_rows": true,
+      "minimum_relevance": 0,
+      "source_id": "iguopin-general-geoscience-browser",
+      "adapter_version": "iguopin-general-browser-v1-phase288-expanded-keywords",
+      "note": "仅通过国聘主站已渲染的关键词搜索卡片发现岗位；搜索卡片的 React job_id 仅用于构造官方公开详情页，且岗位名称、单位、专业、学历、地点和官方详情证据逐条核对。固定截止日缺失时，仅当详情页提供官方‘更新于’日期、来源声明按滚动招聘管理、捕获新鲜度仍在30小时内时，才按45天无截止窗口处理；专业、学历、地点或详情身份缺失仍拒绝发布。Phase 288 在原关键词基础上补充地质工程、物探、矿产、石油地质、油气地质、能源资源、地震勘探和地质调查，用于减少官方主站搜索漏检；新增关键词只扩大候选发现，不放宽学生端专业、学历、地点或生命周期门禁。所有关键词必须完成分页和详情核验，并按官方详情编号合并去重；部分扫描、字段缺失、详情不一致或访问受限仍只归档失败证据，绝不覆盖最后一次完整清单。"
     }
   },
   {
@@ -1137,8 +1353,9 @@
         "拟录用",
         "录用公示"
       ],
-      "employer_hint": "中海油田服务股份有限公司",
-      "undated_open_window_days": 90,
+    "employer_hint": "中海油田服务股份有限公司",
+      "allow_international_public": false,
+    "undated_open_window_days": 90,
       "minimum_relevance": 20,
       "fallback_entry_urls": ["https://www.cosl.com.cn/"],
       "automation_status": "validated_public_read_api_20260926",
@@ -1170,13 +1387,18 @@
     "enabled": false,
     "config": {
       "allow_shared_source_url": true,
-      "allowed_hosts": ["www.cea.gov.cn"],
-      "attachment_allowed_hosts": ["www.cea.gov.cn"],
+      "allowed_hosts": ["www.cea.gov.cn", "www.cea-igp.ac.cn", "cea-igp.ac.cn"],
+      "attachment_allowed_hosts": ["www.cea.gov.cn", "www.cea-igp.ac.cn", "cea-igp.ac.cn"],
       "government_evidence_recheck": true,
-      "government_evidence_recheck_mode": "manual_only",
+      "government_evidence_recheck_mode": "automatic_after_opening",
+      "runtime_enabled_control": true,
+      "activation_required_successes": 2,
+      "max_age_hours": 48,
+      "expected_attachment_sha256": "646e153605e06596c21601695b1072ba1a74a8f24ec18321fd54b3d184589729",
       "publication_category": "事业单位与人才引进",
+      "official_notice_url": "https://www.cea.gov.cn/cea/zwgk/rsxx/ryzp/5855536/index.html",
       "official_attachment_url": "https://www.cea.gov.cn/cea/zwgk/rsxx/ryzp/5855536/2026092316044245325.xlsx",
-      "note": "中国地震局官网公告及官方岗位信息表逐行核验；仅发布岗位表明确包含本院目标专业且学历覆盖的岗位。附件自动下载受 robots 限制，来源保持人工核验台账模式，不触发通用网页抓取。"
+      "note": "中国地震局官网公告及官方岗位信息表逐行核验；仅发布岗位表明确包含本院目标专业且学历覆盖的岗位。自动再验证只在官方报名窗口开启后执行：先检查 robots，再完整下载并核对附件 SHA-256，连续两次成功后才启用来源；robots 禁止或哈希变化时保持停用。"
     }
   },
   {
@@ -1207,6 +1429,234 @@
       "allow_shared_source_url": true,
       "fallback_entry_urls": ["https://www.zjzzgz.gov.cn/"],
       "note": "服务器直连核验官方公务员专题。页面当前展示2026年度招录、专项招录和面向基层遴选信息；遴选面向在编公务员，未发现面向本院社会毕业生的当前开放地学职位表。"
+    }
+  },
+  {
+    "id": "cnpc-logging-campus",
+    "name": "中国石油集团测井有限公司待核验主页线索",
+    "publisher": "中国石油集团测井有限公司",
+    "homepage_url": "https://cpl.cnpc.com.cn/",
+    "source_type": "landing_page",
+    "category": "油气工程技术服务",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "employer_hint": "中国石油集团测井有限公司",
+      "allowed_hosts": ["cpl.cnpc.com.cn"],
+      "fallback_entry_urls": [
+        "https://zhaopin.cnpc.com.cn/",
+        "https://www.cnpc.com.cn/zh/rczp/"
+      ],
+      "automation_status": "access_limited",
+      "note": "2026-10-11 本地及生产服务器均无法解析登记的 cpl.cnpc.com.cn；此 URL 仅保留为待核验线索。集团共享招聘入口不能证明中油测井独立入口或当前岗位；来源保持停用。"
+    }
+  },
+  {
+    "id": "cupb-career-browser-20261007",
+    "name": "中国石油大学（北京）就业网官方浏览器过渡快照（2026-10-07）",
+    "publisher": "中国石油大学（北京）就业指导中心",
+    "homepage_url": "https://career.cup.edu.cn/campus",
+    "source_type": "official_snapshot_rows",
+    "category": "能源、工程与地学拓展",
+    "source_tier": "B",
+    "enabled": true,
+    "config": {
+      "allowed_hosts": ["career.cup.edu.cn"],
+      "minimum_relevance": 20,
+      "snapshot_path": "data/verified/cupb-geoscience-20261007.json",
+      "capture_path": "captures/cupb-geoscience-browser.json",
+      "snapshot_captured_at": "2026-10-07T14:35:00+08:00",
+      "runtime_mode": "browser_worker_only",
+      "background_capture_enabled": true,
+      "capture_worker": "cupb_browser_worker",
+    "browser_executable_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "browser_discover_listings": true,
+    "listing_urls": [
+      "https://career.cup.edu.cn/campus",
+      "https://career.cup.edu.cn/news/index/tag/xwzp",
+      "https://career.cup.edu.cn/job/search/d_category/0",
+      "https://career.cup.edu.cn/"
+    ],
+    "detail_path_patterns": [
+      "/campus/view/id/",
+      "/job/view/id/",
+      "/news/view/.+tag/xwzp"
+    ],
+    "listing_exclude_patterns": [
+      "招聘会",
+      "宣讲会",
+      "双选会",
+      "双选",
+      "邀请函",
+      "活动",
+      "讲座",
+      "就业补贴",
+      "生涯",
+      "就业指导",
+      "签约",
+      "调查",
+      "征集",
+      "采购",
+      "招标",
+      "中标"
+    ],
+    "listing_page_limit": 6,
+    "candidate_limit": 400,
+      "max_age_hours": 30,
+      "split_location_rows": true,
+      "reconcile_missing_external_ids": true,
+      "official_evidence_url": "https://career.cup.edu.cn/campus",
+      "application_url": "https://career.cup.edu.cn/campus",
+      "allow_shared_source_url": true,
+      "note": "由 Chromium 只读渲染中国石油大学（北京）官方公告后，使用现有 CUPB 岗位表/编号岗位解析器生成。每条记录保留官方公告链接、岗位级专业、学历、地点和截止日期；快照超过 30 小时自动失去当前性，不得继续公开。后续应由 CUPB 浏览器适配器替换该过渡快照。"
+    }
+  },
+  {
+    "id": "cnpc-official-announcement-fallback",
+    "name": "中国石油集团官网招聘公告备用入口（待核验）",
+    "publisher": "中国石油天然气集团有限公司",
+    "homepage_url": "https://www.cnpc.com.cn/zh/rczp/",
+    "source_type": "manual",
+    "category": "油气勘探开发运营与研究机构",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allowed_hosts": ["www.cnpc.com.cn", "cnpc.com.cn"],
+      "fallback_role": "official_announcement",
+      "primary_source_id": "cnpc-career",
+      "automation_status": "candidate_only",
+      "note": "只用于将第三方线索解析到 CNPC 官方公告候选 URL；未完成栏目、robots、岗位字段和当前性复核，不参与采集或发布。"
+    }
+  },
+  {
+    "id": "cnpc-official-attachment-fallback",
+    "name": "中国石油集团官网招聘附件备用入口（待核验）",
+    "publisher": "中国石油天然气集团有限公司",
+    "homepage_url": "https://www.cnpc.com.cn/zh/rczp/",
+    "source_type": "manual",
+    "category": "油气勘探开发运营与研究机构",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allowed_hosts": ["www.cnpc.com.cn", "cnpc.com.cn"],
+      "fallback_role": "official_attachment",
+      "primary_source_id": "cnpc-career",
+      "automation_status": "candidate_only",
+      "note": "只用于登记官方公告链接的 XLS/XLSX/PDF 候选；必须取得公告正文、附件哈希和岗位行证据后才可升级。"
+    }
+  },
+  {
+    "id": "sinopec-official-announcement-fallback",
+    "name": "中国石化集团官网招聘公告备用入口（待核验）",
+    "publisher": "中国石油化工集团有限公司",
+    "homepage_url": "https://www.sinopecgroup.com/",
+    "source_type": "manual",
+    "category": "油气上游业主与研究机构",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allowed_hosts": ["www.sinopecgroup.com", "sinopecgroup.com"],
+      "fallback_role": "official_announcement",
+      "primary_source_id": "sinopec-career",
+      "automation_status": "candidate_only",
+      "note": "只用于将第三方线索解析到中国石化官方公告候选 URL；未完成栏目、robots、岗位字段和当前性复核，不参与采集或发布。"
+    }
+  },
+  {
+    "id": "sinopec-official-attachment-fallback",
+    "name": "中国石化集团官网招聘附件备用入口（待核验）",
+    "publisher": "中国石油化工集团有限公司",
+    "homepage_url": "https://www.sinopecgroup.com/",
+    "source_type": "manual",
+    "category": "油气上游业主与研究机构",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allowed_hosts": ["www.sinopecgroup.com", "sinopecgroup.com"],
+      "fallback_role": "official_attachment",
+      "primary_source_id": "sinopec-career",
+      "automation_status": "candidate_only",
+      "note": "只用于登记官方公告链接的 XLS/XLSX/PDF 候选；必须取得公告正文、附件哈希和岗位行证据后才可升级。"
+    }
+  },
+  {
+    "id": "gxib-official-recovery",
+    "name": "中国科学院广西植物研究所官方恢复入口（待核验）",
+    "publisher": "中国科学院广西植物研究所",
+    "homepage_url": "https://www.gxib.cn/",
+    "source_type": "manual",
+    "category": "事业单位与科研院所",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allowed_hosts": ["www.gxib.cn", "gxib.cn"],
+      "fallback_role": "official_recovery",
+      "automation_status": "candidate_only",
+      "note": "仅作为第三方线索正文中出现的广西植物研究所官方域名候选；未完成 robots、公告和附件复核，不参与采集或发布。"
+    }
+  },
+  {
+    "id": "gxust-official-recovery",
+    "name": "广西科技大学官方恢复入口（待核验）",
+    "publisher": "广西科技大学",
+    "homepage_url": "https://www.gxust.edu.cn/",
+    "source_type": "manual",
+    "category": "高校与事业单位",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allowed_hosts": ["www.gxust.edu.cn", "gxust.edu.cn"],
+      "fallback_role": "official_recovery",
+      "automation_status": "candidate_only",
+      "note": "仅作为第三方线索正文中出现的广西科技大学官方域名候选；未完成 robots、公告和岗位表复核，不参与采集或发布。"
+    }
+  },
+  {
+    "id": "hunan-hrss-official-recovery",
+    "name": "湖南省人力资源和社会保障厅官方恢复入口（待核验）",
+    "publisher": "湖南省人力资源和社会保障厅",
+    "homepage_url": "https://rst.hunan.gov.cn/",
+    "source_type": "manual",
+    "category": "事业单位与政府招聘",
+    "source_tier": "A",
+    "enabled": false,
+    "config": {
+      "allowed_hosts": ["rst.hunan.gov.cn"],
+      "fallback_role": "official_recovery",
+      "automation_status": "candidate_only",
+      "note": "仅作为第三方线索正文中出现的湖南省人社厅官方域名候选；未完成公告、岗位表和当前性复核，不参与采集或发布。"
+    }
+  },
+  {
+    "id": "dingxi-party-recruitment",
+    "name": "定西党建网人才引进公告与官方附件",
+    "publisher": "中共定西市委组织部",
+    "homepage_url": "http://www.dxdjw.gov.cn/articles/2026/10/10/article_9_104645_1.html",
+    "source_type": "attachment_discovery_feed",
+    "category": "事业单位、国有企业与人才引进",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "province": "甘肃",
+      "source_role": "human_resources_or_exam",
+      "publication_category": "事业单位与人才引进",
+      "automation_status": "validated_official_attachment_queue",
+      "healthcheck_url": "http://www.dxdjw.gov.cn/articles/2026/10/10/article_9_104645_1.html",
+      "listing_urls": [
+        "http://www.dxdjw.gov.cn/articles/2026/10/10/article_9_104645_1.html"
+      ],
+      "direct_notice_urls": [
+        "http://www.dxdjw.gov.cn/articles/2026/10/10/article_9_104645_1.html"
+      ],
+      "direct_title_hint": "定西市2026年度第二批人才引进公告",
+      "healthcheck_enabled": true,
+      "target_active_sources": 3,
+      "allowed_hosts": ["www.dxdjw.gov.cn", "dxdjw.gov.cn"],
+      "attachment_allowed_hosts": ["www.dxdjw.gov.cn", "dxdjw.gov.cn"],
+      "attachment_discovery_enabled": true,
+      "attachment_discovery_max_notices": 1,
+      "request_interval_seconds": 1.2,
+      "note": "第一方公告明确事业单位（含带编入企）面向往届和2027年应届毕业生，报名窗口为2026-10-13 08:30至2026-10-27 18:00。附件1至3进入受控解析队列；附件4企业自主引才先保留为学生范围外，不能整批发布。岗位必须逐行核对单位、专业、学历、地点和学生资格。"
     }
   }
 ]

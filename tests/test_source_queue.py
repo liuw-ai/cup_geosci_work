@@ -51,6 +51,37 @@ def test_source_queue_force_claim_runs_not_due_task_but_respects_active_lease(tm
     assert database.claim_source_task("source-force", force=True, lease_seconds=60) is None
 
 
+def test_disabled_source_stays_in_audit_list_but_not_due_queue_or_claim(tmp_path) -> None:
+    database = Database(tmp_path / "queue-disabled.sqlite3")
+    database.initialize()
+    source = _source("source-disabled")
+    database.upsert_source(source)
+    database.ensure_source_tasks([source])
+    database.set_source_enabled("source-disabled", False)
+
+    # Historical task state remains inspectable for operations/audit.
+    all_tasks = database.list_source_tasks()
+    assert [row["source_id"] for row in all_tasks] == ["source-disabled"]
+    assert database.list_source_tasks(due_only=True) == []
+    assert database.claim_source_task("source-disabled") is None
+    assert database.claim_source_task("source-disabled", force=True) is None
+
+
+def test_reenabled_source_returns_to_due_queue_and_can_be_claimed(tmp_path) -> None:
+    database = Database(tmp_path / "queue-reenabled.sqlite3")
+    database.initialize()
+    source = _source("source-reenabled")
+    database.upsert_source(source)
+    database.ensure_source_tasks([source])
+    database.set_source_enabled("source-reenabled", False)
+    assert database.list_source_tasks(due_only=True) == []
+
+    database.set_source_enabled("source-reenabled", True)
+    due = database.list_source_tasks(due_only=True)
+    assert [row["source_id"] for row in due] == ["source-reenabled"]
+    assert database.claim_source_task("source-reenabled") is not None
+
+
 def test_source_queue_keeps_policy_blocked_sources_distinct_from_success(tmp_path) -> None:
     database = Database(tmp_path / "queue.sqlite3")
     database.initialize()

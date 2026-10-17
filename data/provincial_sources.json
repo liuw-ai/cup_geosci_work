@@ -711,6 +711,13 @@
       "attachment_discovery_enabled": true,
       "attachment_discovery_max_notices": 8,
       "government_evidence_recheck": true,
+      "current_availability_url": "http://gsdkj.net/xxgk/rsxx/content_100787",
+      "availability_open_patterns": [
+        "2026年12月31日18:00.{0,60}招满即止"
+      ],
+      "availability_closed_patterns": [
+        "拟聘(?:用)?人员名单|拟录用人员名单|已招满|招聘工作结束|取消招聘"
+      ],
       "listing_selector": "a[href*='/xxgk/rsxx/content_']",
       "detail_path_patterns": ["/xxgk/rsxx/content_\\d+"],
       "title_selector": ".base_news_title h3, h3, h1, title",
@@ -812,6 +819,15 @@
       "attachment_discovery_enabled": true,
       "attachment_discovery_max_notices": 8,
       "government_evidence_recheck": true,
+      "current_availability_url": "http://www.nxdizhiju.cn/zwgk/zfxxgkml/rsxx/",
+      "availability_open_patterns": [
+        "自治区地质局2026年高层次人才公开招聘公告"
+      ],
+      "availability_closed_patterns": [
+        "自治区地质局2026年高层次人才公开招聘拟聘人员公示",
+        "自治区地质局2026年高层次人才自主公开招聘体检公告",
+        "自治区地质局2026年高层次人才公开招聘录用公示"
+      ],
       "listing_selector": "a[href$='.html']",
       "detail_path_patterns": ["/zwgk/zfxxgkml/rsxx/20\\d{4}/t20\\d+_\\d+\\.html"],
       "title_selector": ".Title, h1, .title, .article-title, title",

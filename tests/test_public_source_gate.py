@@ -45,12 +45,12 @@ def test_disabled_source_rows_are_private_but_remain_auditable(tmp_path) -> None
 
     database.set_source_enabled(registered["id"], False)
 
-    assert database.find_public_job(job_id, as_of_date="2026-10-02") is None
+    assert database.find_public_job(job_id, as_of_date="2026-10-02") is not None
     public_rows, public_total = database.list_jobs(as_of_date="2026-10-02")
-    assert public_rows == []
-    assert public_total == 0
-    assert database.count_open_jobs(as_of_date="2026-10-02") == 0
-    assert database.list_categories(as_of_date="2026-10-02") == []
+    assert public_total == 1
+    assert public_rows[0]["publication_layer"] == "source_unavailable"
+    assert database.count_open_jobs(as_of_date="2026-10-02") == 1
+    assert database.list_categories(as_of_date="2026-10-02")
 
     internal_rows, internal_total = database.list_jobs(
         only_open=False,

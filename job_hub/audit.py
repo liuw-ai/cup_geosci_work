@@ -10,6 +10,10 @@ from zoneinfo import ZoneInfo
 from job_hub.config import Settings
 from job_hub.db import Database
 from job_hub.matching import has_major_qualification_evidence
+from job_hub.profiles import (
+    PUBLIC_STUDENT_PUBLICATION_STATUSES,
+    evaluate_student_publication,
+)
 
 
 FORBIDDEN_JOB_TEXT = (
@@ -35,6 +39,30 @@ NON_VACANCY_TITLE_PATTERNS = (
     r"录用(?:公示|名单|结果)",
 )
 
+# Public-sector and university/research rules may legitimately use a broad
+# category, an official catalogue code, or an unrestricted-major rule. Every
+# other student-facing category must carry the enterprise four-name match
+# marker. Keeping this check in the persisted-data audit catches old rows that
+# predate the stricter runtime matcher.
+PUBLIC_BROAD_CATEGORIES = frozenset(
+    {
+        "公务员与选调",
+        "事业单位与人才引进",
+    }
+)
+PUBLIC_BROAD_GOVERNMENT_TYPES = frozenset(
+    {"public_institution", "civil_service", "postdoctoral"}
+)
+
+
+def _audit_uses_public_broad_rule(job: dict[str, Any]) -> bool:
+    if str(job.get("category") or "") in PUBLIC_BROAD_CATEGORIES:
+        return True
+    evidence = job.get("field_evidence")
+    return isinstance(evidence, dict) and str(
+        evidence.get("政府岗位类型") or ""
+    ).strip() in PUBLIC_BROAD_GOVERNMENT_TYPES
+
 
 def audit_database(
     database: Database,
@@ -56,6 +84,14 @@ def audit_database(
         only_open=False,
         student_visible=False,
     )
+    # Keep the historical ``open_jobs`` metric for audit compatibility, but
+    # also expose the exact dated student-facing count.  The former only
+    # reflects materialized status/publication fields; the latter applies the
+    # same deadline, source freshness and evidence CTE as the public API.
+    current_public_jobs, _ = database.list_jobs(
+        page_size=None,
+        as_of_date=target_date.isoformat(),
+    )
     issues: list[dict[str, Any]] = []
     source_urls: dict[str, list[tuple[int, str, str]]] = defaultdict(list)
     verified_evidence_job_ids = database.verified_official_evidence_job_ids()
@@ -65,8 +101,15 @@ def audit_database(
         source_id = str(job.get("source_id") or "")
         student_public = (
             job.get("status") == "open"
-            and job.get("publication_status")
-            in {"student_eligible", "unrestricted_eligible"}
+            and (
+                job.get("publication_status") in PUBLIC_STUDENT_PUBLICATION_STATUSES
+                or job.get("publication_layer") in {
+                    "exact_match",
+                    "broad_geoscience_match",
+                    "incomplete_but_basic_match",
+                    "source_unavailable",
+                }
+            )
         )
         # Official but out-of-scope records stay available for administrator
         # re-review. They are not part of a student-facing daily publication
@@ -111,10 +154,11 @@ def audit_database(
                 }
             )
         if (
-            job.get("publication_status") in {
-                "student_eligible",
-                "unrestricted_eligible",
+            job.get("publication_layer") not in {
+                "incomplete_but_basic_match", "source_unavailable"
             }
+            and
+            job.get("publication_status") in PUBLIC_STUDENT_PUBLICATION_STATUSES
             and not job.get("publication_basis", {}).get("matched_profile_ids")
         ):
             issues.append(
@@ -125,6 +169,53 @@ def audit_database(
                     "message": "学生端公开岗位缺少岗位级专业或不限专业的适配依据。",
                 }
             )
+        if (
+            job.get("publication_layer") not in {
+                "broad_geoscience_match", "incomplete_but_basic_match", "source_unavailable"
+            }
+            and
+            job.get("publication_status")
+            in PUBLIC_STUDENT_PUBLICATION_STATUSES
+            and not _audit_uses_public_broad_rule(job)
+            and job.get("publication_basis", {}).get("major_match_mode")
+            not in {"exact_four_names", "similar_major"}
+        ):
+            issues.append(
+                {
+                    "code": "enterprise_job_without_exact_four_major_mode",
+                    "job_id": job_id,
+                    "source_id": source_id,
+                    "message": (
+                        "企业岗位缺少 exact_four_names 或 similar_major 专业门禁标记；"
+                        "必须先重索引并重新核验岗位级专业证据。"
+                    ),
+                }
+            )
+        if (
+            job.get("publication_layer")
+            not in {"broad_geoscience_match", "incomplete_but_basic_match", "source_unavailable"}
+            and not _audit_uses_public_broad_rule(job)
+        ):
+            decision = evaluate_student_publication(job)
+            declared_mode = str(
+                job.get("publication_basis", {}).get("major_match_mode") or ""
+            )
+            if (
+                decision.status != job.get("publication_status")
+                or declared_mode != decision.major_match_mode
+            ):
+                issues.append(
+                    {
+                        "code": "public_job_publication_decision_mismatch",
+                        "job_id": job_id,
+                        "source_id": source_id,
+                        "message": (
+                            "学生端公开状态与当前岗位级专业/学历门禁不一致；"
+                            f"声明={job.get('publication_status')}/{declared_mode}，"
+                            f"复核={decision.status}/{decision.major_match_mode}。"
+                        ),
+                    }
+                )
         official_evidence_url = str(job.get("official_evidence_url") or "")
         evidence = urlparse(official_evidence_url)
         if evidence.scheme not in {"http", "https"} or not evidence.hostname:
@@ -358,8 +449,9 @@ def audit_database(
             for job in jobs
             if job.get("status") == "open"
             and job.get("publication_status")
-            in {"student_eligible", "unrestricted_eligible"}
+            in PUBLIC_STUDENT_PUBLICATION_STATUSES
         ),
+        "current_public_jobs": len(current_public_jobs),
         "registered_sources": len(sources),
         "enabled_sources": sum(1 for source in sources.values() if source.get("enabled")),
         "issues": issues,

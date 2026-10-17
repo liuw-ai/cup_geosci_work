@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from job_hub.profiles import (
+    classify_major_match,
     evaluate_profile_match,
     evaluate_student_publication,
     get_student_profile,
@@ -34,21 +35,53 @@ def job(**overrides: object) -> dict[str, object]:
 def test_supported_profiles_exactly_cover_requested_tracks() -> None:
     profiles = list_student_profiles()
 
-    assert len(profiles) == 10
+    assert len(profiles) == 7
     assert get_student_profile("undergraduate-resource-exploration").label == (
         "本科 · 资源勘查工程"
     )
-    assert get_student_profile("undergraduate-geophysics").label == (
-        "本科 · 地球物理学"
+    assert get_student_profile("master-geophysics") is None
+    assert sum(item.degree == "硕士" for item in profiles) == 3
+    assert sum(item.degree == "博士" for item in profiles) == 3
+
+
+def test_major_match_projection_separates_exact_similar_and_public_broad() -> None:
+    exact = classify_major_match(job())
+    assert exact["level"] == "exact"
+    assert exact["publication_status"] == "student_eligible"
+
+    similar = classify_major_match(
+        job(
+            title="\u77ff\u4ea7\u52d8\u67e5\u6280\u672f\u5c97",
+            description="\u4e13\u4e1a\u8981\u6c42\uff1a\u77ff\u4ea7\u52d8\u67e5\uff1b\u5b66\u5386\u8981\u6c42\uff1a\u7855\u58eb\u7814\u7a76\u751f\u3002",
+            major_tags=["\u77ff\u4ea7\u52d8\u67e5"],
+            field_evidence={
+                "evidence_scope": "official_html_table_row",
+                "\u5c97\u4f4d": "\u77ff\u4ea7\u52d8\u67e5\u6280\u672f\u5c97",
+                "\u4e13\u4e1a\u8303\u56f4": "\u77ff\u4ea7\u52d8\u67e5",
+                "\u5b66\u5386\u8981\u6c42": "\u7855\u58eb\u7814\u7a76\u751f",
+            },
+        )
     )
-    assert sum(item.degree == "硕士" for item in profiles) == 4
-    assert sum(item.degree == "博士" for item in profiles) == 4
+    assert similar["level"] == "similar"
+    assert similar["publication_status"] != "student_eligible"
+
+    broad = classify_major_match(
+        job(
+            category="\u516c\u52a1\u5458\u4e0e\u9009\u8c03",
+            title="\u81ea\u7136\u8d44\u6e90\u7ba1\u7406\u5c97",
+            location="\u5317\u4eac",
+            field_evidence={
+                "evidence_scope": "official_html_table_row",
+                "\u5c97\u4f4d": "\u81ea\u7136\u8d44\u6e90\u7ba1\u7406\u5c97",
+                "\u4e13\u4e1a\u8303\u56f4": "\u5de5\u5b66\u5927\u7c7b",
+                "\u5b66\u5386\u8981\u6c42": "\u7855\u58eb\u7814\u7a76\u751f",
+            },
+        )
+    )
+    assert broad["level"] == "broad"
 
 
-def test_geophysics_profile_requires_explicit_job_level_evidence() -> None:
-    profile = get_student_profile("master-geophysics")
-    assert profile is not None
-
+def test_geophysics_is_retained_only_as_an_internal_similar_tier() -> None:
     result = evaluate_student_publication(
         job(
             title="岩石物理工程师",
@@ -65,8 +98,11 @@ def test_geophysics_profile_requires_explicit_job_level_evidence() -> None:
         )
     )
 
-    assert result.is_public
-    assert "master-geophysics" in result.matched_profile_ids
+    assert result.status == "similar_eligible"
+    assert result.major_match_mode == "similar_major"
+    # Adjacent geoscience wording is retained for internal review, but the
+    # student-facing corpus requires one of the four exact graduation majors.
+    assert result.is_public is False
 
 
 def test_browser_detail_scopes_pass_the_same_job_level_gate() -> None:
@@ -85,6 +121,229 @@ def test_browser_detail_scopes_pass_the_same_job_level_gate() -> None:
         assert result.status == "student_eligible"
 
 
+def test_pipeline_normalized_foreign_location_is_never_public() -> None:
+    result = evaluate_student_publication(
+        job(country_or_region="境内外混合", location="北京，非洲")
+    )
+
+    assert result.status == "out_of_scope"
+    assert result.label == "非中国大陆岗位"
+
+
+def test_internship_and_trainee_roles_are_not_student_employment_rows() -> None:
+    for title, description in (
+        ("地质实习生", "专业要求：地质工程。学历要求：硕士。"),
+        ("地质工程师", "本岗位为见习岗位，专业要求：地质工程。学历要求：硕士。"),
+    ):
+        result = evaluate_student_publication(
+            job(
+                title=title,
+                description=description,
+                field_evidence={
+                    "evidence_scope": "official_detail_block",
+                    "岗位": title,
+                    "专业范围": "地质工程",
+                    "学历要求": "硕士",
+                },
+            )
+        )
+        assert result.status == "out_of_scope"
+        assert result.label == "实习/见习岗位"
+
+
+def test_internship_experience_preference_does_not_reject_regular_role() -> None:
+    result = evaluate_student_publication(
+        job(
+            description=(
+                "校园招聘岗位；有相关实习经历者优先。"
+                "专业要求：地质工程。学历要求：硕士。"
+            )
+        )
+    )
+
+    assert result.status == "student_eligible"
+
+
+def test_procurement_workflow_titles_are_not_geoscience_student_roles() -> None:
+    result = evaluate_student_publication(
+        job(
+            title="招标业务员",
+            description=(
+                "专业范围：资源勘查类；学历要求：硕士。"
+            ),
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": "招标业务员",
+                "专业范围": "资源勘查类",
+                "学历要求": "硕士",
+            },
+        )
+    )
+
+    assert result.status == "out_of_scope"
+    assert result.label == "非地学业务岗位"
+
+
+def test_social_recruitment_is_kept_private_for_this_phase() -> None:
+    result = evaluate_student_publication(
+        job(
+            description=(
+                "社会招聘岗位。专业要求：地质工程；学历要求：硕士。"
+            )
+        )
+    )
+
+    assert result.status == "out_of_scope"
+    assert result.label == "社会招聘岗位"
+
+
+def test_structured_social_type_and_long_experience_clause_are_both_blocking() -> None:
+    """Legacy detail rows must not reopen during a taxonomy reindex."""
+    result = evaluate_student_publication(
+        job(
+            title="煤质数据库开发及应用负责人",
+            description=(
+                "专业要求：煤炭类、地质类、矿产类相关专业，本科及以上学历，"
+                "五年以上数据库建设应用或煤炭矿山、地质类、煤质类相关工作经历。"
+            ),
+            field_evidence={
+                "evidence_scope": "official_iguopin_browser_detail",
+                "岗位": "煤质数据库开发及应用负责人",
+                "专业范围": (
+                    "煤炭类、地质类、矿产类相关专业，本科及以上学历，"
+                    "五年以上数据库建设应用或煤炭矿山、地质类、煤质类相关工作经历"
+                ),
+                "学历要求": "本科",
+                "职位性质": "社招",
+            },
+        )
+    )
+
+    assert result.status == "out_of_scope"
+    assert result.label == "社会招聘岗位"
+
+    experience_only = evaluate_student_publication(
+        job(
+            title="煤质数据库开发及应用负责人",
+            description=(
+                "专业要求：煤炭类、地质类、矿产类相关专业，本科及以上学历，"
+                "五年以上数据库建设应用或煤炭矿山、地质类、煤质类相关工作经历。"
+            ),
+            field_evidence={
+                "evidence_scope": "official_iguopin_browser_detail",
+                "岗位": "煤质数据库开发及应用负责人",
+                "专业范围": (
+                    "煤炭类、地质类、矿产类相关专业，本科及以上学历，"
+                    "五年以上数据库建设应用或煤炭矿山、地质类、煤质类相关工作经历"
+                ),
+                "学历要求": "本科",
+                "职位性质": "校招",
+            },
+        )
+    )
+
+    assert experience_only.status == "out_of_scope"
+    assert experience_only.label == "需工作经验"
+
+
+def test_nested_structured_social_type_is_also_blocking() -> None:
+    result = evaluate_student_publication(
+        job(
+            field_evidence={
+                "evidence_scope": "official_iguopin_browser_detail",
+                "fields": {
+                    "岗位": "地质工程师",
+                    "专业范围": "地质工程",
+                    "学历要求": "硕士",
+                    "职位性质": "社招",
+                },
+            }
+        )
+    )
+
+    assert result.status == "out_of_scope"
+    assert result.label == "社会招聘岗位"
+
+
+def test_explicit_postdoctoral_vacancy_is_allowed_despite_platform_social_label() -> None:
+    result = evaluate_student_publication(
+        job(
+            title="2027-油气勘探开发与转化【博士后】",
+            description="职位性质：社招。博士后岗位，开展油气勘探开发研究。",
+            degree_levels=["博士"],
+            field_evidence={
+                "evidence_scope": "official_iguopin_browser_detail",
+                "岗位": "2027-油气勘探开发与转化【博士后】",
+                "专业范围": "地质资源与地质工程、地质学",
+                "学历要求": "博士",
+                "职位性质": "社招",
+            },
+        )
+    )
+
+    assert result.status == "student_eligible"
+    assert "doctoral-geological-resources-engineering" in result.matched_profile_ids
+
+
+def test_postdoctoral_workstation_researcher_is_not_implicitly_postdoctoral() -> None:
+    result = evaluate_student_publication(
+        job(
+            title="博士后工作站研究员",
+            description="职位性质：社招。专业要求：地质学；学历要求：博士。",
+            degree_levels=["博士"],
+            field_evidence={
+                "evidence_scope": "official_iguopin_browser_detail",
+                "岗位": "博士后工作站研究员",
+                "专业范围": "地质学",
+                "学历要求": "博士",
+                "职位性质": "社招",
+            },
+        )
+    )
+
+    assert result.status == "out_of_scope"
+    assert result.label == "社会招聘岗位"
+
+
+def test_international_source_is_kept_private_even_with_legacy_opt_in() -> None:
+    result = evaluate_student_publication(
+        job(
+            country_or_region="哈萨克斯坦",
+            location="哈萨克斯坦·阿克套",
+            field_evidence={
+                "evidence_scope": "official_browser_capture_row",
+                "岗位": "地质工程师",
+                "专业范围": "地质工程",
+                "学历要求": "硕士",
+                "官方岗位详情": "https://careers.example.test/jobs/1",
+            },
+        ),
+        allow_non_domestic=True,
+    )
+
+    assert result.status == "out_of_scope"
+    assert result.label == "非中国大陆岗位"
+
+
+def test_international_source_still_rejects_generic_location_scope() -> None:
+    result = evaluate_student_publication(
+        job(
+            country_or_region="海外",
+            location="海外项目",
+            field_evidence={
+                "evidence_scope": "official_browser_capture_row",
+                "岗位": "地质工程师",
+                "专业范围": "地质工程",
+                "学历要求": "硕士",
+            },
+        ),
+        allow_non_domestic=True,
+    )
+
+    assert result.status == "out_of_scope"
+    assert result.public_scope == "domestic"
+
+
 def test_profile_match_requires_both_explicit_major_and_degree_evidence() -> None:
     profile = get_student_profile("master-geological-engineering")
     assert profile is not None
@@ -95,6 +354,95 @@ def test_profile_match_requires_both_explicit_major_and_degree_evidence() -> Non
     assert result.label == "明确匹配"
     assert "地质工程" in result.reason
     assert "硕士" in result.reason
+
+
+def test_lower_education_floor_covers_higher_geoscience_students() -> None:
+    result = evaluate_student_publication(
+        job(
+            title="石油勘探岗",
+            description="专业要求：资源勘查工程、地球物理勘查技术。学历要求：大专（高职）。",
+            degree_levels=["大专"],
+            major_tags=["资源勘查工程", "地球物理"],
+            field_evidence={
+                "evidence_scope": "official_sinopec_detail_snapshot",
+                "岗位": "石油勘探岗",
+                "专业范围": "资源勘查工程、地球物理勘查技术",
+                "学历要求": "大专（高职）",
+            },
+        )
+    )
+
+    assert result.status == "student_eligible"
+
+
+def test_degree_floor_hierarchy_preserves_explicit_degree_boundaries() -> None:
+    """Official degree floors must not hide doctoral matches or widen exact rows."""
+    expected_profiles = {
+        "本科": set(),
+        "本科及以上": {"master-geology", "doctoral-geology"},
+        "硕士": {"master-geology"},
+        "硕士研究生及以上": {"master-geology", "doctoral-geology"},
+        "研究生及以上": {"master-geology", "doctoral-geology"},
+        "博士": {"doctoral-geology"},
+        "本科、硕士": {"master-geology"},
+    }
+    for degree, expected in expected_profiles.items():
+        decision = evaluate_student_publication(
+            job(
+                title="地质学研究岗",
+                field_evidence={
+                    "evidence_scope": "official_detail_block",
+                    "岗位": "地质学研究岗",
+                    "专业范围": "地质学",
+                    "学历要求": degree,
+                },
+            )
+        )
+        if expected:
+            assert decision.status == "student_eligible", degree
+        else:
+            assert decision.status == "out_of_scope", degree
+        assert set(decision.matched_profile_ids) == expected, degree
+
+
+def test_degree_floor_accepts_common_above_wording_without_widening_exact_rows() -> None:
+    """Common official wording must preserve the same minimum-degree closure."""
+    expected_profiles = {
+        "本科以上学历": {"master-geology", "doctoral-geology"},
+        "硕士以上学历": {"master-geology", "doctoral-geology"},
+        "Bachelor's or higher": {"master-geology", "doctoral-geology"},
+        "Master's or higher": {"master-geology", "doctoral-geology"},
+    }
+    for degree, expected in expected_profiles.items():
+        decision = evaluate_student_publication(
+            job(
+                title="地质学研究岗",
+                field_evidence={
+                    "evidence_scope": "official_detail_block",
+                    "岗位": "地质学研究岗",
+                    "专业范围": "地质学",
+                    "学历要求": degree,
+                },
+            )
+        )
+        assert decision.status == "student_eligible", degree
+        assert set(decision.matched_profile_ids) == expected, degree
+
+
+def test_postdoctoral_title_is_not_treated_as_a_doctoral_degree() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="地质学博士后",
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": "地质学博士后",
+                "专业范围": "地质学",
+                "学历要求": "博士后研究人员",
+            },
+        )
+    )
+
+    assert decision.status == "pending_evidence"
 
 
 def test_profile_match_does_not_trust_unstructured_major_tags() -> None:
@@ -239,7 +587,103 @@ def test_publication_gate_accepts_explicit_target_major() -> None:
     assert "master-geological-engineering" in decision.matched_profile_ids
 
 
-def test_publication_gate_accepts_named_geology_second_level_discipline() -> None:
+def test_related_suffix_does_not_hide_explicit_target_for_matching_degree() -> None:
+    """An explicit target major remains eligible when the notice says related."""
+    decision = evaluate_student_publication(
+        job(
+            title="地质专业技术岗",
+            degree_levels=["硕士"],
+            field_evidence={
+                "evidence_scope": "official_cmgb_browser_detail",
+                "岗位": "地质专业技术岗",
+                "专业范围": "地质工程相关专业",
+                "学历要求": "硕士",
+                "工作地点": "北京",
+            },
+        )
+    )
+
+    assert decision.status == "student_eligible"
+    assert decision.matched_profile_ids == ("master-geological-engineering",)
+
+
+def test_explicit_petroleum_engineering_related_requirement_is_out_of_scope() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="钻完井工程师",
+            field_evidence={
+                "evidence_scope": "official_cnooc_browser_detail",
+                "岗位": "钻完井工程师",
+                "专业范围": "石油工程、油气井工程、油气田开发工程等相关专业",
+                "学历要求": "硕士研究生及以上",
+                "工作地点": "天津",
+            },
+        )
+    )
+
+    assert decision.status == "out_of_scope"
+    assert decision.label == "石油工程方向不匹配"
+
+
+def test_petroleum_engineering_filter_preserves_ambiguous_geophysical_direction() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="物探工程师",
+            field_evidence={
+                "evidence_scope": "official_cnooc_browser_detail",
+                "岗位": "物探工程师",
+                "专业范围": "石油工程、地球物理学等相关专业",
+                "学历要求": "硕士研究生及以上",
+                "工作地点": "天津",
+            },
+        )
+    )
+
+    assert decision.status == "similar_eligible"
+    assert decision.label == "相近专业机会"
+
+
+def test_petroleum_engineering_filter_preserves_target_major_with_wrong_degree() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="油气开发岗",
+            degree_levels=["本科"],
+            field_evidence={
+                "evidence_scope": "official_cnooc_browser_detail",
+                "岗位": "油气开发岗",
+                "专业范围": "石油工程、地质工程等相关专业",
+                "学历要求": "本科",
+                "工作地点": "天津",
+            },
+        )
+    )
+
+    assert decision.status == "pending_evidence"
+    assert decision.label == "待补岗位级证据"
+
+
+def test_explicit_graduate_major_does_not_match_unrelated_undergraduate_profile() -> None:
+    """A bachelor row naming a graduate-only major stays private."""
+    decision = evaluate_student_publication(
+        job(
+            title="地质专业技术岗",
+            degree_levels=["本科"],
+            field_evidence={
+                "evidence_scope": "official_cmgb_browser_detail",
+                "岗位": "地质专业技术岗",
+                "专业范围": "地质工程相关专业",
+                "学历要求": "本科",
+                "工作地点": "山东",
+            },
+        )
+    )
+
+    assert decision.status == "pending_evidence"
+    assert decision.matched_profile_ids == ()
+    assert "未直接列出本院目标专业" in decision.reason
+
+
+def test_publication_gate_classifies_named_geology_second_level_discipline_as_similar() -> None:
     decision = evaluate_student_publication(
         job(
             title="环境地球化学研究岗",
@@ -253,11 +697,11 @@ def test_publication_gate_accepts_named_geology_second_level_discipline() -> Non
         )
     )
 
-    assert decision.status == "student_eligible"
-    assert decision.matched_profile_ids == ("doctoral-geology",)
+    assert decision.status == "similar_eligible"
+    assert decision.major_match_mode == "similar_major"
 
 
-def test_publication_gate_accepts_named_geological_resources_direction() -> None:
+def test_publication_gate_classifies_geological_resources_direction_as_similar() -> None:
     decision = evaluate_student_publication(
         job(
             title="工程检测技术岗",
@@ -271,14 +715,16 @@ def test_publication_gate_accepts_named_geological_resources_direction() -> None
         )
     )
 
-    assert decision.status == "student_eligible"
-    assert "master-geological-resources-engineering" in decision.matched_profile_ids
+    assert decision.status == "pending_evidence"
+    assert decision.label == "待核岗位方向"
+    assert decision.is_public is False
 
 
 def test_publication_gate_accepts_explicit_undergraduate_geology_category() -> None:
     decision = evaluate_student_publication(
         job(
             title="勘探地质现场操作岗",
+            category="事业单位与人才引进",
             field_evidence={
                 "evidence_scope": "official_detail_block",
                 "岗位": "勘探地质现场操作岗",
@@ -293,14 +739,15 @@ def test_publication_gate_accepts_explicit_undergraduate_geology_category() -> N
     assert "undergraduate-resource-exploration" in decision.matched_profile_ids
 
 
-def test_geophysical_category_is_promoted_only_after_explicit_taxonomy_mapping() -> None:
+def test_broad_engineering_category_matches_engineering_profiles() -> None:
     decision = evaluate_student_publication(
         job(
-            title="物探工程师",
+            title="地质工程师",
+            category="事业单位与人才引进",
             field_evidence={
                 "evidence_scope": "official_detail_block",
-                "岗位": "物探工程师",
-                "专业范围": "地球物理学类等相关专业",
+                "岗位": "地质工程师",
+                "专业范围": "工学大类",
                 "学历要求": "硕士研究生及以上",
                 "工作地点": "上海",
             },
@@ -308,10 +755,69 @@ def test_geophysical_category_is_promoted_only_after_explicit_taxonomy_mapping()
     )
 
     assert decision.status == "student_eligible"
-    assert "master-geophysics" in decision.matched_profile_ids
+    assert set(decision.matched_profile_ids) == {
+        "master-geological-engineering",
+        "doctoral-geological-engineering",
+        "master-geological-resources-engineering",
+        "doctoral-geological-resources-engineering",
+    }
 
 
-def test_geophysical_direction_without_formal_major_stays_private() -> None:
+def test_broad_science_category_matches_geology_profiles() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="地学研究岗",
+            category="公务员与选调",
+            field_evidence={
+                "evidence_scope": "official_cmgb_browser_detail",
+                "岗位": "地学研究岗",
+                "专业范围": "理学大类",
+                "学历要求": "硕士研究生及以上",
+                "工作地点": "山东",
+            },
+        )
+    )
+
+    assert decision.status == "student_eligible"
+    assert set(decision.matched_profile_ids) == {"master-geology", "doctoral-geology"}
+
+
+def test_nested_management_category_does_not_match_science_discipline() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="人力资源管理",
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": "人力资源管理",
+                "专业范围": "管理学类、心理学类、法学类",
+                "学历要求": "硕士研究生",
+                "工作地点": "天津",
+            },
+        )
+    )
+
+    assert decision.status == "out_of_scope"
+
+
+def test_degree_floor_in_major_field_covers_higher_student_profiles() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="地质测绘岗",
+            field_evidence={
+                "evidence_scope": "official_detail_block",
+                "岗位": "地质测绘岗",
+                "专业范围": "本科及以上学历，地质工程、测绘工程等相关专业",
+                "学历要求": "本科",
+                "工作地点": "长沙",
+            },
+        )
+    )
+
+    assert decision.status == "student_eligible"
+    assert "master-geological-engineering" in decision.matched_profile_ids
+
+
+def test_adjacent_geophysical_direction_is_separate_from_exact_match() -> None:
     decision = evaluate_student_publication(
         job(
             title="地球物理勘查工程师",
@@ -325,7 +831,8 @@ def test_geophysical_direction_without_formal_major_stays_private() -> None:
         )
     )
 
-    assert decision.status == "out_of_scope"
+    assert decision.status == "similar_eligible"
+    assert decision.major_match_mode == "similar_major"
 
 
 def test_government_position_without_row_location_stays_private() -> None:
@@ -526,18 +1033,104 @@ def test_publication_gate_does_not_promote_english_responsibility_to_major_requi
 def test_publication_gate_keeps_official_unrestricted_major_opportunity() -> None:
     decision = evaluate_student_publication(
         job(
+            title="油气勘探地质工程师",
+            category="事业单位与人才引进",
             degree_levels=["本科", "硕士"],
             field_evidence={
                 "evidence_scope": "official_html_table_row",
                 "岗位": "油气勘探地质工程师",
                 "专业范围": "不限专业",
                 "学历要求": "本科、硕士研究生",
+                "工作地点": "北京",
             },
         )
     )
 
     assert decision.status == "unrestricted_eligible"
     assert decision.is_public is True
+
+
+def test_publication_gate_rejects_unrestricted_enterprise_role() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="综合管理岗",
+            category="三桶油与油服",
+            degree_levels=["本科", "硕士"],
+            field_evidence={
+                "evidence_scope": "official_html_table_row",
+                "岗位": "综合管理岗",
+                "专业范围": "不限专业",
+                "学历要求": "本科、硕士研究生",
+                "工作地点": "北京",
+            },
+        )
+    )
+
+    assert decision.status == "out_of_scope"
+    assert decision.label == "非公共岗位不限专业"
+
+
+def test_publication_gate_rejects_private_education_company_unrestricted_role() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="主讲教师",
+            employer="北京学而思教育科技有限公司",
+            category="科研院所、高校与博士后",
+            degree_levels=["本科"],
+            field_evidence={
+                "evidence_scope": "official_iguopin_browser_detail",
+                "岗位": "主讲教师",
+                "专业范围": "专业不限",
+                "学历要求": "本科",
+                "工作地点": "南通",
+            },
+        )
+    )
+
+    assert decision.status == "out_of_scope"
+    assert decision.label == "非公共岗位不限专业"
+
+
+def test_publication_gate_rejects_unrestricted_university_identity() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="实验技术员",
+            employer="中国石油大学（北京）",
+            category="科研院所、高校与博士后",
+            degree_levels=["本科"],
+            field_evidence={
+                "evidence_scope": "official_html_table_row",
+                "岗位": "实验技术员",
+                "专业范围": "不限专业",
+                "学历要求": "本科",
+                "工作地点": "北京",
+            },
+        )
+    )
+
+    assert decision.status == "out_of_scope"
+    assert decision.label == "非公共岗位不限专业"
+
+
+def test_publication_gate_rejects_company_research_institute_unrestricted_role() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="2027届校园招聘",
+            employer="中国能源建设集团广东省电力设计研究院有限公司",
+            category="科研院所、高校与博士后",
+            degree_levels=["硕士"],
+            field_evidence={
+                "evidence_scope": "official_html_table_row",
+                "岗位": "2027届校园招聘",
+                "专业范围": "不限专业",
+                "学历要求": "硕士",
+                "工作地点": "广东省广州市",
+            },
+        )
+    )
+
+    assert decision.status == "out_of_scope"
+    assert decision.label == "非公共岗位不限专业"
 
 
 def test_publication_gate_rejects_unbound_announcement_level_qualification() -> None:

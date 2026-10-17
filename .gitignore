@@ -1,4 +1,5 @@
 .env
+.release.env
 .venv/
 __pycache__/
 *.py[cod]
@@ -12,3 +13,7 @@ instance/
 *.log
 coverage.xml
 htmlcov/
+# Recoverable local archives are not release inputs; keep only their manifests.
+archive/workspace-artifacts/*/*
+!archive/workspace-artifacts/*/moved-files.txt
+history/

@@ -15,11 +15,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
+from urllib.robotparser import RobotFileParser
 
 import requests
 from bs4 import BeautifulSoup
 
 from job_hub.contracts import is_http_url
+from job_hub.capture_evidence import ensure_capture_manifest, validate_capture_manifest
 
 
 CAPTURE_STATUSES = frozenset({"success", "access_limited", "parse_failed", "partial"})
@@ -64,6 +66,7 @@ def load_browser_capture(
     allowed_hosts: list[str] | set[str],
     max_age_hours: float | None = None,
     require_complete_scan: bool = True,
+    require_capture_manifest: bool = False,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     """Load a browser capture and enforce its freshness and scan contract."""
@@ -77,6 +80,11 @@ def load_browser_capture(
         raise BrowserCaptureError(f"browser capture file cannot be read: {capture_path}") from error
     if not isinstance(payload, dict):
         raise BrowserCaptureError("browser capture must be a JSON object")
+    if require_capture_manifest:
+        try:
+            validate_capture_manifest(payload)
+        except ValueError as error:
+            raise BrowserCaptureError(str(error)) from error
 
     hosts = {str(host).strip().lower() for host in allowed_hosts if str(host).strip()}
     if not hosts:
@@ -169,12 +177,30 @@ def browser_capture_summary(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _robots_permit(url: str, *, user_agent: str) -> None:
-    """Require a readable, permissive robots policy before launching a browser."""
+def _robots_permit(
+    url: str,
+    *,
+    user_agent: str,
+    robots_cache: dict[str, RobotFileParser | None | str] | None = None,
+) -> None:
+    """Require a readable, permissive robots policy before launching a browser.
+
+    A single capture can visit hundreds of paths on one host. Cache the
+    host-level robots document for that capture, while still applying its
+    path-specific ``can_fetch`` rule for every URL. The cache is caller-owned
+    so it cannot outlive one source run.
+    """
 
     parsed = urlparse(url)
     root = f"{parsed.scheme}://{parsed.netloc}"
     robots_url = urljoin(root, "/robots.txt")
+    if robots_cache is not None and root in robots_cache:
+        cached = robots_cache[root]
+        if isinstance(cached, str):
+            raise BrowserCaptureError(cached)
+        if cached is not None and not cached.can_fetch(user_agent, url):
+            raise BrowserCaptureError("robots.txt does not permit browser capture")
+        return
     # The browser worker is deployed on the same host as the direct HTTP
     # worker.  A module-level ``requests.get`` would silently honor proxy
     # environment variables even when ``HTTP_TRANSPORT_MODE=direct`` is set,
@@ -192,20 +218,92 @@ def _robots_permit(url: str, *, user_agent: str) -> None:
     try:
         response = session.get(robots_url, headers={"User-Agent": user_agent}, timeout=15)
     except requests.RequestException as error:
-        raise BrowserCaptureError(f"robots.txt cannot be verified: {error}") from error
+        message = f"robots.txt cannot be verified: {error}"
+        if robots_cache is not None:
+            robots_cache[root] = message
+        raise BrowserCaptureError(message) from error
     try:
         if response.status_code == 404:
+            if robots_cache is not None:
+                robots_cache[root] = None
             return
         if not response.ok:
-            raise BrowserCaptureError(f"robots.txt returned HTTP {response.status_code}")
-        from urllib.robotparser import RobotFileParser
+            message = f"robots.txt returned HTTP {response.status_code}"
+            if robots_cache is not None:
+                robots_cache[root] = message
+            raise BrowserCaptureError(message)
 
         parser = RobotFileParser()
         parser.parse(response.text.splitlines())
+        if robots_cache is not None:
+            robots_cache[root] = parser
         if not parser.can_fetch(user_agent, url):
             raise BrowserCaptureError("robots.txt does not permit browser capture")
     finally:
         response.close()
+
+
+def launch_playwright_browser(playwright: Any, config: dict[str, Any]) -> Any:
+    """Launch the pinned browser, with an optional local executable override.
+
+    Production workers leave the override unset and therefore use the browser
+    installed in their image. Local verification can point at an installed
+    system Chrome through the config or ``PLAYWRIGHT_EXECUTABLE_PATH`` without
+    changing the source-specific capture contract.
+    """
+
+    launch_kwargs: dict[str, Any] = {"headless": True}
+    executable_path = str(
+        config.get("executable_path")
+        or os.getenv("PLAYWRIGHT_EXECUTABLE_PATH", "")
+    ).strip()
+    if executable_path:
+        launch_kwargs["executable_path"] = executable_path
+    try:
+        return playwright.chromium.launch(**launch_kwargs)
+    except Exception as error:
+        detail = str(error)
+        if "spawn UNKNOWN" in detail:
+            raise BrowserCaptureError(
+                "browser runtime could not start before target access; verify the local "
+                "Chromium side-by-side/runtime dependencies or use the isolated CDP "
+                "browser worker"
+            ) from error
+        raise BrowserCaptureError(f"browser runtime could not start: {detail}") from error
+
+
+def check_playwright_runtime(config: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Start and close Chromium without contacting a recruitment website.
+
+    This separates a missing local browser/runtime prerequisite from official
+    website, robots, or adapter failures. It does not write a capture or
+    mutate the runtime database.
+    """
+
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError as error:
+        raise BrowserCaptureError(
+            "Playwright is not installed; install the browser worker extra before "
+            "enabling a dynamic source"
+        ) from error
+
+    runtime_config = dict(config or {})
+    executable_path = str(
+        runtime_config.get("executable_path")
+        or os.getenv("PLAYWRIGHT_EXECUTABLE_PATH", "")
+    ).strip()
+    with sync_playwright() as playwright:
+        browser = launch_playwright_browser(playwright, runtime_config)
+        try:
+            return {
+                "ok": True,
+                "engine": "chromium",
+                "browser_version": str(browser.version),
+                "executable_override": bool(executable_path),
+            }
+        finally:
+            browser.close()
 
 
 def _field_text(row: Any, selector: str, field: str) -> str:
@@ -292,10 +390,38 @@ def run_browser_capture(
     hosts = {str(host).strip().lower() for host in allowed_hosts if str(host).strip()}
     rows: list[dict[str, Any]] = []
     pages_scanned = 0
+    browser = None
+    context = None
+    owns_browser = False
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=True)
-            page = browser.new_page(user_agent=user_agent)
+            cdp_url = str(config.get("cdp_url") or "").strip()
+            if cdp_url:
+                # The browser worker image keeps Chromium in a separate
+                # container. Resolve its internal CDP endpoint instead of
+                # launching a second browser inside the worker container.
+                # Import lazily because cnpc_browser_runner imports this
+                # module for the shared capture contracts.
+                from job_hub.cnpc_browser_runner import _resolve_cdp_websocket
+
+                browser = playwright.chromium.connect_over_cdp(
+                    _resolve_cdp_websocket(cdp_url)
+                )
+                if not browser.contexts:
+                    raise BrowserCaptureError("CDP browser has no default context")
+                context = browser.contexts[0]
+                for opened_page in list(context.pages):
+                    try:
+                        if not opened_page.is_closed():
+                            opened_page.close()
+                    except Exception:
+                        pass
+                page = context.new_page()
+            else:
+                browser = launch_playwright_browser(playwright, config)
+                owns_browser = True
+                context = browser.new_context(user_agent=user_agent)
+                page = context.new_page()
             page.goto(target_url, wait_until="networkidle", timeout=timeout_ms)
             max_pages = max(1, int(config.get("max_pages", 20)))
             next_selector = str(config.get("next_selector") or "").strip()
@@ -320,7 +446,8 @@ def run_browser_capture(
                     break
                 next_button.click()
                 page.wait_for_load_state("networkidle", timeout=timeout_ms)
-            browser.close()
+            if owns_browser and browser is not None:
+                browser.close()
     except PlaywrightTimeoutError as error:
         raise BrowserCaptureError(f"browser page timed out: {error}") from error
     except BrowserCaptureError:
@@ -331,6 +458,7 @@ def run_browser_capture(
     if not rows:
         raise BrowserCaptureError("browser capture rendered no rows")
     payload = {
+        "version": 1,
         "status": "success",
         "platform_url": target_url,
         "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -343,7 +471,59 @@ def run_browser_capture(
         },
         "rows": rows,
     }
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=str(config.get("source_id") or "official-browser-source"),
+        adapter_version=str(config.get("adapter_version") or "browser-capture-v1"),
+    )
     destination = Path(output)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_suffix(destination.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary.replace(destination)
+    return payload
+
+
+def write_browser_capture_failure(
+    *,
+    output: Path | str,
+    platform_url: str,
+    status: str,
+    reason: str,
+    source_id: str = "official-browser-source",
+    adapter_version: str = "browser-capture-v1",
+) -> dict[str, Any]:
+    """Persist a manifest for a failed generic browser attempt.
+
+    The diagnostic is written beside the last successful capture.  It is
+    never used as a publication pointer, but its manifest makes an access or
+    parser failure auditable in the same way as a successful capture.
+    """
+
+    if status not in {"access_limited", "parse_failed", "partial"}:
+        raise ValueError("failure capture status must be access_limited, parse_failed or partial")
+    payload: dict[str, Any] = {
+        "version": 1,
+        "status": status,
+        "platform_url": platform_url,
+        "diagnostic_for": Path(output).name,
+        "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "scan": {
+            "pages_scanned": 0,
+            "pagination_complete": False,
+            "rows_discovered": 0,
+            "rows_exported": 0,
+            "failed_rows": 0,
+            "failure_reason": str(reason)[:1000],
+        },
+        "rows": [],
+    }
+    payload = ensure_capture_manifest(
+        payload,
+        source_id=source_id,
+        adapter_version=adapter_version,
+    )
+    destination = Path(str(output) + ".failure.json")
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + ".tmp")
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

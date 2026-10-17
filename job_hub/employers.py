@@ -40,6 +40,31 @@ CATEGORY_DISPLAY_NAMES = {
     "油气上游业主与研究机构": "油气勘探开发运营与研究机构",
 }
 
+# Industry-group reporting is deliberately separate from the public category
+# taxonomy.  A job can be an oilfield-service role, a research role, or a
+# government role while still belonging to one of the three oil groups.  The
+# group is derived only from an explicit employer identity/affiliation (or a
+# narrowly allow-listed source id); it must never be inferred from words such
+# as "石油" in a long job description.
+THREE_OIL_GROUP_BY_AFFILIATION = {
+    "中国石油体系": "cnpc",
+    "中国石化体系": "sinopec",
+    "中国海油体系": "cnooc",
+}
+THREE_OIL_SOURCE_GROUPS = {
+    "cnpc-bgp-recruitment": "cnpc",
+    "cnpc-career": "cnpc",
+    "cnpc-career-browser": "cnpc",
+    "cnpc-logging-campus": "cnpc",
+    "sinopec-career": "sinopec",
+    "sinopec-2027-geoscience-snapshot": "sinopec",
+    "sinopec-pepris-recruitment": "sinopec",
+    "cnooc-career-browser": "cnooc",
+    "cosl-career": "cnooc",
+}
+THREE_OIL_AFFILIATIONS = frozenset(THREE_OIL_GROUP_BY_AFFILIATION)
+THREE_OIL_SOURCE_IDS = frozenset(THREE_OIL_SOURCE_GROUPS)
+
 _JOB_LEVEL_EVIDENCE_SCOPES = frozenset(
     {
         "official_role_section",
@@ -48,6 +73,7 @@ _JOB_LEVEL_EVIDENCE_SCOPES = frozenset(
         "official_cnpc_browser_job_row",
         "official_sinopec_detail_snapshot",
         "official_cmgb_browser_detail",
+        "official_iguopin_browser_detail",
         "official_cnooc_browser_detail",
         "official_zhaopin_detail_initial_data",
         "admin_verified_official_record",
@@ -102,8 +128,26 @@ def official_job_link(job: dict[str, Any]) -> tuple[str, str]:
 PUBLICATION_STATUS_LABELS = {
     "student_eligible": "目标专业明确匹配",
     "unrestricted_eligible": "不限专业可报",
+    "similar_eligible": "相近专业机会（请以原公告为准）",
     "pending_evidence": "待补岗位级证据",
     "out_of_scope": "专业不匹配",
+    "source_unavailable": "来源暂时不可用（保留历史官方证据）",
+}
+
+PUBLICATION_LAYER_LABELS = {
+    "exact_match": "目标专业明确匹配",
+    "broad_geoscience_match": "专业范围宽泛",
+    "incomplete_but_basic_match": "官方信息不完整",
+    "source_unavailable": "来源暂时不可用（保留历史官方证据）",
+}
+
+SOURCE_AVAILABILITY_LABELS = {
+    "available": "来源可访问",
+    "fresh": "来源证据新鲜",
+    "stale": "来源证据较旧（不影响岗位有效性）",
+    "source_unavailable": "来源暂时不可用",
+    "degraded": "来源解析降级",
+    "stale_pending_review": "来源待复核",
 }
 
 CATEGORY_DESCRIPTIONS = {
@@ -124,6 +168,9 @@ _LEGACY_CATEGORY_MAP = {
     "三桶油与油服": "能源、工程与地学拓展",
     "自然资源与地勘": "自然资源、地调与地勘",
     "科研院所与高校": "科研院所、高校与博士后",
+    "在华外企": "能源、工程与地学拓展",
+    # Backward-compatible alias for historical source records. New source
+    # configuration uses the mainland-only label above.
     "在华外企与国际机会": "能源、工程与地学拓展",
     "金融与央国企": "金融与央国企综合机会",
 }
@@ -165,6 +212,176 @@ def _load_employer_registry(path: str) -> tuple[dict[str, Any], ...]:
         raise ValueError(f"employer_registry.json is invalid: {error}") from error
 
 
+_THREE_OIL_ROLE_CATEGORY = {
+    "group": ("油气上游业主与研究机构", "油气勘探开发运营单位"),
+    "upstream_operator": ("油气上游业主与研究机构", "油气勘探开发运营单位"),
+    "research_institute": ("油气上游业主与研究机构", "油气勘探开发研究机构"),
+    "internal_technical_service": (
+        "油气工程技术服务",
+        "集团体系内油气工程技术服务单位",
+    ),
+}
+_THREE_OIL_AFFILIATIONS = {
+    "cnpc": "中国石油体系",
+    "sinopec": "中国石化体系",
+    "cnooc": "中国海油体系",
+}
+
+
+def _identity_text(value: Any) -> str:
+    """Normalize only identity punctuation, retaining all Chinese characters."""
+
+    return re.sub(r"[\W_]+", "", str(value or "").casefold())
+
+
+def _identity_aliases(values: list[str]) -> tuple[str, ...]:
+    """Add conservative legal-name variants used by official portals."""
+
+    aliases: list[str] = []
+    prefixes = (
+        "中国石油天然气股份有限公司",
+        "中国石油天然气集团有限公司",
+        "中国石油化工集团有限公司",
+        "中国石化",
+        "中国石油",
+    )
+    legal_suffixes = ("有限责任公司", "股份有限公司", "有限公司")
+    for value in values:
+        text = str(value or "").strip()
+        if not text:
+            continue
+        aliases.append(text)
+        for suffix in legal_suffixes:
+            if text.endswith(suffix) and len(text) > len(suffix) + 2:
+                aliases.append(text[: -len(suffix)])
+        for prefix in prefixes:
+            if text.startswith(prefix):
+                remainder = text[len(prefix) :].strip()
+                # A bare “天津分公司” is not a unit identity; a named oilfield
+                # or research institute suffix is sufficiently distinctive.
+                if len(remainder) >= 5 and not re.fullmatch(r".+分公司", remainder):
+                    aliases.append(remainder)
+                elif any(
+                    marker in remainder
+                    for marker in (
+                        "油田",
+                        "油气田",
+                        "煤层气",
+                        "研究院",
+                        "研究总院",
+                        "钻探",
+                        "测井",
+                        "物探",
+                    )
+                ):
+                    aliases.append(remainder)
+    return tuple(dict.fromkeys(aliases))
+
+
+@lru_cache(maxsize=1)
+def _three_oil_identity_records() -> tuple[dict[str, Any], ...]:
+    """Build a fallback identity index from the authoritative three-oil scope.
+
+    ``employer_registry.json`` is intentionally a curated display registry and
+    does not need to duplicate every subsidiary.  The scope catalog and
+    organization registry, however, must still resolve a job whose official
+    employer contains a group prefix (for example ``中国海油-中海石油...``).
+    This index is only used after the curated registry and never infers an
+    employer from the job title or description.
+    """
+
+    try:
+        from job_hub.three_oil_catalog import load_three_oil_catalog, three_oil_units
+        from job_hub.organizations import load_organization_registry
+
+        catalog = load_three_oil_catalog()
+        organizations = load_organization_registry().get("organizations", [])
+    except (OSError, ValueError, ImportError):
+        return ()
+
+    organization_by_id = {
+        str(item.get("id")): item
+        for item in organizations
+        if isinstance(item, dict) and item.get("id")
+    }
+    group_name_by_id = {
+        str(group.get("id")): str(group.get("name") or "").strip()
+        for group in catalog.get("groups", [])
+        if isinstance(group, dict) and group.get("id")
+    }
+    records: list[dict[str, Any]] = []
+    for unit in three_oil_units(catalog):
+        role = str(unit.get("role") or "")
+        category, employer_type = _THREE_OIL_ROLE_CATEGORY.get(
+            role, ("油气上游业主与研究机构", "油气勘探开发运营单位")
+        )
+        organization = organization_by_id.get(str(unit.get("id"))) or {}
+        aliases = [str(unit.get("name") or "")]
+        aliases.extend(
+            str(value)
+            for value in organization.get("aliases", [])
+            if str(value).strip()
+        )
+        records.append(
+            {
+                "id": str(unit["id"]),
+                "canonical_name": str(
+                    organization.get("canonical_name") or unit.get("name") or ""
+                ).strip(),
+                "aliases": _identity_aliases(aliases),
+                "category": category,
+                "employer_type": employer_type,
+                "affiliation": _THREE_OIL_AFFILIATIONS[str(unit["group_id"])],
+                "specificity": 0 if role == "group" else 1,
+                "parent_name": (
+                    None
+                    if str(unit["id"]) == str(unit["group_id"])
+                    else group_name_by_id.get(str(unit["group_id"]))
+                ),
+            }
+        )
+    return tuple(records)
+
+
+def _fallback_three_oil_identity(identity: str) -> dict[str, Any] | None:
+    """Resolve a concrete three-oil unit from the employer field alone."""
+
+    normalized_identity = _identity_text(identity)
+    if not normalized_identity:
+        return None
+    matches: list[tuple[int, int, int, dict[str, Any]]] = []
+    for record in _three_oil_identity_records():
+        for alias in record["aliases"]:
+            normalized_alias = _identity_text(alias)
+            if len(normalized_alias) < 4 or normalized_alias not in normalized_identity:
+                continue
+            # Prefer the longest concrete unit alias.  This prevents a broad
+            # group name such as 中国海油 from hiding 天津分公司 or 研究总院.
+            start = normalized_identity.find(normalized_alias)
+            matches.append(
+                (
+                    start + len(normalized_alias),
+                    len(normalized_alias),
+                    record["specificity"],
+                    record,
+                )
+            )
+    if not matches:
+        return None
+    match_end, match_length, _, best = max(
+        matches, key=lambda item: (item[0], item[1], item[2])
+    )
+    return {
+        "canonical_employer_id": best["id"],
+        "canonical_employer_name": best["canonical_name"],
+        "parent_employer_name": best["parent_name"],
+        "category": best["category"],
+        "employer_type": best["employer_type"],
+        "affiliation": best["affiliation"],
+        "_match_score": (match_end, match_length),
+    }
+
+
 def resolve_employer(
     employer: str | None,
     *,
@@ -178,15 +395,22 @@ def resolve_employer(
     identity = clean_employment_text(employer).lower()
     if not identity:
         return None
-    matches: list[tuple[int, dict[str, Any]]] = []
+    matches: list[tuple[int, int, int, dict[str, Any]]] = []
     for item in load_employer_registry(registry_path):
         for alias in item["aliases"]:
             normalized_alias = clean_employment_text(str(alias)).lower()
             if normalized_alias and normalized_alias in identity:
-                matches.append((len(normalized_alias), item))
-    if not matches:
+                start = _identity_text(identity).find(_identity_text(alias))
+                specificity = 1 if item.get("parent_id") else 0
+                matches.append((start + len(normalized_alias), len(normalized_alias), specificity, item))
+    best_score = max(((item[0], item[1]) for item in matches), default=(0, 0))
+    _, _, _, best = max(matches, key=lambda item: (item[0], item[1], item[2])) if matches else (0, 0, 0, None)
+    fallback = _fallback_three_oil_identity(employer)
+    if fallback and fallback["_match_score"] > best_score:
+        fallback.pop("_match_score", None)
+        return fallback
+    if best is None:
         return None
-    _, best = max(matches, key=lambda item: item[0])
     return {
         "canonical_employer_id": best["id"],
         "canonical_employer_name": best["canonical_name"],
@@ -362,6 +586,14 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
     enriched["publication_status_label"] = PUBLICATION_STATUS_LABELS.get(
         str(job.get("publication_status") or ""), "资格待核验"
     )
+    layer = str(job.get("publication_layer") or "").strip()
+    if layer in PUBLICATION_LAYER_LABELS:
+        enriched["publication_status_label"] = PUBLICATION_LAYER_LABELS[layer]
+        enriched["publication_layer_label"] = PUBLICATION_LAYER_LABELS[layer]
+    availability = str(job.get("source_availability_status") or "").strip()
+    enriched["source_availability_status_label"] = SOURCE_AVAILABILITY_LABELS.get(
+        availability, "来源状态待核验"
+    )
     identity_values = (job.get("title"), job.get("employer"))
     identity = resolve_employer(str(job.get("employer") or ""))
     field_evidence = enriched.get("field_evidence") or {}
@@ -401,11 +633,20 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
         identity_text=" ".join(str(value) for value in identity_values if value),
     )
     profile_values = profile.as_dict()
-    # A verified government position carries an explicit publication category;
-    # employer identity (for example, a university) must not relabel it as a
-    # generic academic opportunity in the student-facing filter.
-    if str(job.get("category") or "") in {"事业单位与人才引进", "公务员与选调"}:
-        profile_values["category"] = str(job["category"])
+    # A verified public-sector position carries an explicit publication
+    # category; employer identity (for example, a university or research
+    # institute) must not relabel it as a generic academic/industry
+    # opportunity in the student-facing filter.  Postdoctoral rows use the
+    # same public broad-major rules as civil-service and public-institution
+    # rows, so their persisted category is part of the eligibility contract.
+    persisted_category = str(job.get("category") or "")
+    protected_public_categories = {
+        "事业单位与人才引进",
+        "公务员与选调",
+        "博士后与科研助理",
+    }
+    if persisted_category in protected_public_categories:
+        profile_values["category"] = persisted_category
     enriched.update(profile_values)
     if identity:
         # Persistent rows already carry these values after v0.3 migration.
@@ -416,13 +657,47 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
             enriched["canonical_employer_name"] = identity["canonical_employer_name"]
         if not enriched.get("parent_employer_name"):
             enriched["parent_employer_name"] = identity["parent_employer_name"]
-        enriched["category"] = identity["category"]
-        enriched["category_label"] = CATEGORY_DISPLAY_NAMES.get(
-            identity["category"], identity["category"]
-        )
+        if persisted_category not in protected_public_categories:
+            enriched["category"] = identity["category"]
+            enriched["category_label"] = CATEGORY_DISPLAY_NAMES.get(
+                identity["category"], identity["category"]
+            )
         enriched["employer_type"] = identity["employer_type"]
         enriched["affiliation"] = identity["affiliation"]
     return enriched
+
+
+def three_oil_group(job: dict[str, Any]) -> str | None:
+    """Attribute a job to its employer group, falling back to a dedicated source."""
+    identity = resolve_employer(str(job.get("employer") or "")) or {}
+    affiliation = str(identity.get("affiliation") or job.get("affiliation") or "").strip()
+    if affiliation:
+        return THREE_OIL_GROUP_BY_AFFILIATION.get(affiliation)
+    return THREE_OIL_SOURCE_GROUPS.get(str(job.get("source_id") or "").strip())
+
+
+def employment_segment(job: dict[str, Any]) -> str:
+    """Return the auditable industry group used by coverage reporting.
+
+    The value is intentionally coarse and stable.  It is not a new eligibility
+    rule and does not promote a row.  ``three_oil`` means China National
+    Petroleum, Sinopec, or CNOOC and their explicitly identified subsidiaries;
+    PipeChina remains ``other_energy`` even though it is an energy SOE.
+    """
+
+    if three_oil_group(job):
+        return "three_oil"
+
+    category = str(job.get("category") or "").strip()
+    if category in {"公务员与选调"}:
+        return "civil_service"
+    if category in {"事业单位与人才引进"}:
+        return "public_institution"
+
+    country = str(job.get("country_or_region") or "").strip()
+    if country and country not in {"中国", "中国大陆", "中国内地", "大陆"}:
+        return "overseas"
+    return "other_domestic"
 
 
 def load_employment_landscape(path: Path | None = None) -> dict[str, Any]:

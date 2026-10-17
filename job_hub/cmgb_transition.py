@@ -14,6 +14,7 @@ from typing import Any
 
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline, SourceSyncResult
+from job_hub.profiles import PUBLIC_STUDENT_PUBLICATION_STATUSES
 
 
 SNAPSHOT_SOURCE_ID = "cmgb-iguopin-2027-geoscience-snapshot"
@@ -55,7 +56,7 @@ def _preview_student_external_ids(
         if (
             normalized["status"] == "open"
             and normalized["publication_status"]
-            in {"student_eligible", "unrestricted_eligible"}
+            in PUBLIC_STUDENT_PUBLICATION_STATUSES
             and posting.external_id
         ):
             identifiers.add(str(posting.external_id))

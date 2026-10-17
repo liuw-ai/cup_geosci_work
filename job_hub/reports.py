@@ -9,6 +9,7 @@ from job_hub.db import Database
 from job_hub.government_artifacts import (
     government_artifact_refresh_summary,
     load_government_artifact_manifest,
+    project_government_artifact_manifest,
 )
 from job_hub.government_positions import (
     government_position_quality_report,
@@ -16,6 +17,7 @@ from job_hub.government_positions import (
 )
 from job_hub.government_revalidation import requires_manual_government_evidence_confirmation
 from job_hub.run_ledger import build_run_ledger
+from job_hub.profiles import classify_major_match
 
 
 def local_today(settings: Settings) -> date:
@@ -45,6 +47,7 @@ def job_card(job: dict[str, Any]) -> dict[str, Any]:
         "degree_levels": job.get("degree_levels", []),
         "major_tags": job.get("major_tags", []),
         "field_evidence": job.get("field_evidence", {}),
+        "major_match": classify_major_match(job),
         "relevance_score": job["relevance_score"],
         "relevance_band": job["relevance_band"],
         "publication_status": job.get("publication_status"),
@@ -78,10 +81,23 @@ def build_daily_report(
     )
     manifest = None
     manifest_error = None
+    registry_payload = None
+    position_registry_error = None
+    registry_path = settings.government_position_registry_path
+    if registry_path is not None:
+        try:
+            registry_payload = load_position_registry(registry_path)
+        except (OSError, ValueError) as error:
+            # Keep the error visible below; a missing registry must not make
+            # the daily report itself unavailable.
+            position_registry_error = str(error)
     manifest_path = settings.government_artifact_manifest_path
     if manifest_path is not None:
         try:
             manifest = load_government_artifact_manifest(manifest_path)
+            manifest = project_government_artifact_manifest(
+                database, manifest, registry=registry_payload
+            )
         except (OSError, ValueError) as error:
             # A malformed manifest must be visible in operations, but must not
             # prevent an already verified daily report from being generated.
@@ -93,13 +109,11 @@ def build_daily_report(
         today=target,
         manifest_error=manifest_error,
     )
-    position_registry_error = None
     position_quality = None
-    registry_path = settings.government_position_registry_path
-    if registry_path is not None:
+    if registry_payload is not None:
         try:
             position_quality = government_position_quality_report(
-                load_position_registry(registry_path),
+                registry_payload,
                 today=target,
                 max_age_hours=settings.government_position_max_age_hours,
                 source_verifications={
@@ -107,11 +121,23 @@ def build_daily_report(
                     for item in database.list_government_source_verifications()
                 },
                 source_refresh_counts=database.government_source_refresh_counts(),
+                source_refresh_events={
+                    source_id: database.list_government_source_verification_events(
+                        source_id, limit=10
+                    )
+                    for source_id in {
+                        str(item["source_id"])
+                        for item in registry_payload.get("records", [])
+                        if item.get("record_status") == "verified_open"
+                    }
+                },
                 manual_confirmation_source_ids={
                     str(source["id"])
                     for source in database.list_sources()
                     if requires_manual_government_evidence_confirmation(source)
                 },
+                artifact_manifest=manifest,
+                artifact_manifest_available=manifest_error is None,
                 now=datetime.now(ZoneInfo(settings.timezone)),
             )
         except (OSError, ValueError) as error:

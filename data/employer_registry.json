@@ -33,6 +33,36 @@
     "official_domains": ["rip.ed.cnpc.com.cn"]
   },
   {
+    "id": "cnpc-engineering-construction",
+    "canonical_name": "中国石油工程建设有限公司",
+    "parent_id": "cnpc",
+    "parent_name": "中国石油天然气集团有限公司",
+    "category": "油气工程技术服务",
+    "employer_type": "集团体系内油气工程技术服务单位",
+    "affiliation": "中国石油体系",
+    "aliases": [
+      "中国石油工程建设有限公司",
+      "中国石油工程建设有限公司新疆设计分公司",
+      "中国石油工程建设有限公司天津分公司",
+      "中国石油工程建设公司"
+    ],
+    "official_domains": ["cnpc.com.cn"]
+  },
+  {
+    "id": "cnpc-economic-research",
+    "canonical_name": "中国石油集团经济技术研究院",
+    "parent_id": "cnpc",
+    "parent_name": "中国石油天然气集团有限公司",
+    "category": "油气上游业主与研究机构",
+    "employer_type": "集团体系内能源经济与技术研究机构",
+    "affiliation": "中国石油体系",
+    "aliases": [
+      "中国石油集团经济技术研究院",
+      "中国石油经济技术研究院"
+    ],
+    "official_domains": ["cnpc.com.cn"]
+  },
+  {
     "id": "cnpc-changqing",
     "canonical_name": "中国石油长庆油田分公司",
     "parent_id": "cnpc",

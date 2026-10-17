@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "description": "B级第三方职位表发现适配器。适配器只发现职位表和官方回溯线索，不把第三方页面变成申请链接。",
+  "adapters": [
+    {
+      "source_id": "offcn-discovery",
+      "allowed_hosts": ["www.offcn.com", "offcn.com"],
+      "scan_urls": ["https://www.offcn.com/"],
+      "table_link_patterns": ["职位表", "岗位表", "下载", "xls", "xlsx", "pdf"],
+      "official_url_required": true,
+      "manual_review_required": true
+    },
+    {
+      "source_id": "fenbi-discovery",
+      "allowed_hosts": ["www.fenbi.com", "fenbi.com"],
+      "scan_urls": ["https://www.fenbi.com/"],
+      "table_link_patterns": ["职位表", "岗位表", "下载", "xls", "xlsx", "pdf"],
+      "official_url_required": true,
+      "manual_review_required": true
+    },
+    {
+      "source_id": "huatu-discovery",
+      "allowed_hosts": ["www.huatu.com", "sydw.huatu.com"],
+      "scan_urls": [
+        "https://www.huatu.com/gwy/",
+        "https://sydw.huatu.com/zt/sydwggk/"
+      ],
+      "table_link_patterns": ["职位表", "岗位表", "下载", "xls", "xlsx", "pdf"],
+      "official_url_required": true,
+      "manual_review_required": true
+    },
+    {
+      "source_id": "gongkaoleida-discovery",
+      "allowed_hosts": ["www.gongkaoleida.com", "gongkaoleida.com"],
+      "scan_urls": ["https://www.gongkaoleida.com/"],
+      "table_link_patterns": ["职位表", "岗位表", "下载", "xls", "xlsx", "pdf"],
+      "official_url_required": true,
+      "manual_review_required": true
+    },
+    {
+      "source_id": "gongkaozixun-discovery",
+      "allowed_hosts": ["www.gkzixun.com", "gkzixun.com"],
+      "scan_urls": ["https://www.gkzixun.com/"],
+      "table_link_patterns": ["职位表", "岗位表", "下载", "xls", "xlsx", "pdf"],
+      "official_url_required": true,
+      "manual_review_required": true
+    }
+  ]
+}

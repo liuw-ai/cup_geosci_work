@@ -1,18 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}全部在招岗位 | {{ site_name }}{% endblock %}
+{% block title %}{% if official_pending %}官方待核岗位{% else %}全部在招岗位{% endif %} | {{ site_name }}{% endblock %}
 
 {% block content %}
   <section class="page-heading">
     <div class="shell">
-      <p class="eyebrow">公开岗位库</p>
-      <h1>全部在招岗位</h1>
-      <p class="lede">按地球科学学院培养方向、就业类别和截止时间查找公开官方岗位。</p>
+      <p class="eyebrow">{% if official_pending %}官方来源核验队列{% else %}公开岗位库{% endif %}</p>
+      <h1>{% if official_pending %}官方待核岗位{% else %}全部在招岗位{% endif %}</h1>
+      <p class="lede">{% if official_pending %}这些记录来自已登记的官方来源，但岗位级专业、学历、地点或截止日期证据尚未完整。它们只用于定位缺口，不计入当前可投递岗位。{% else %}按地球科学学院培养方向、就业类别和截止时间查找公开官方岗位。{% endif %}</p>
     </div>
   </section>
 
   <section class="shell content-section jobs-layout">
     <form class="filters" method="get" action="{{ url_for('jobs') }}">
+      {% if official_pending %}<input type="hidden" name="scope" value="official_pending">{% endif %}
       <div class="field">
         <label for="profile">我的学历与专业</label>
         <select id="profile" name="profile">
@@ -23,7 +24,7 @@
         </select>
       </div>
       <div class="field search-field">
-        <label for="q">搜索岗位、单位或地点</label>
+        <label for="q">搜索岗位、专业、单位或地点</label>
         <input id="q" name="q" type="search" value="{{ selected.q }}" placeholder="例如：测井、地质工程、新疆">
       </div>
       <div class="field">
@@ -44,7 +45,19 @@
           {% endfor %}
         </select>
       </div>
-      {% if profile %}
+      {% if not official_pending %}
+        <div class="field">
+          <label for="layer">学生端层级</label>
+          <select id="layer" name="layer">
+            <option value="">全部层级</option>
+            <option value="exact_match" {% if selected.layer == "exact_match" %}selected{% endif %}>精确匹配</option>
+            <option value="broad_geoscience_match" {% if selected.layer == "broad_geoscience_match" %}selected{% endif %}>专业范围宽泛</option>
+            <option value="incomplete_but_basic_match" {% if selected.layer == "incomplete_but_basic_match" %}selected{% endif %}>官方信息不完整</option>
+            <option value="source_unavailable" {% if selected.layer == "source_unavailable" %}selected{% endif %}>来源暂时不可用</option>
+          </select>
+        </div>
+      {% endif %}
+      {% if profile and not official_pending %}
         <div class="field">
           <label for="match">匹配状态</label>
           <select id="match" name="match">
@@ -71,13 +84,16 @@
     </form>
 
     <div class="result-heading">
-      {% if profile %}
+      {% if official_pending %}
+        <p>当前找到 <strong>{{ total }}</strong> 条官方待核记录</p>
+        <p class="muted">这些记录不计入当前可投递数量，也不会替代学生端的专业精确匹配结果；请打开原始公告补齐缺失字段。</p>
+      {% elif profile %}
         <p><strong>{{ profile.label }}</strong>：当前找到 <strong>{{ total }}</strong> 条可优先查看的岗位</p>
         <p class="muted">“明确匹配”同时具备专业和学历证据；其余岗位请以原始公告为准。</p>
       {% else %}
         <p>当前找到 <strong>{{ total }}</strong> 条可报的官方岗位</p>
       {% endif %}
-      {% if selected.category or selected.degree or selected.province or selected.q %}
+      {% if selected.category or selected.degree or selected.province or selected.q or selected.layer %}
         <p class="muted">仅展示岗位级专业与学历条件支持本院学生申请的官方岗位。</p>
       {% endif %}
     </div>
@@ -91,11 +107,11 @@
       {% if page_count > 1 %}
         <nav class="pagination" aria-label="岗位分页">
           {% if page > 1 %}
-            <a href="{{ url_for('jobs', page=page-1, category=selected.category, degree=selected.degree, province=selected.province, relevance=selected.relevance, q=selected.q, profile=selected.profile, match=selected.match) }}">上一页</a>
+          <a href="{{ url_for('jobs', page=page-1, category=selected.category, degree=selected.degree, province=selected.province, relevance=selected.relevance, q=selected.q, profile=selected.profile, match=selected.match, layer=selected.layer, scope=selected.scope) }}">上一页</a>
           {% endif %}
           <span>第 {{ page }} / {{ page_count }} 页</span>
           {% if page < page_count %}
-            <a href="{{ url_for('jobs', page=page+1, category=selected.category, degree=selected.degree, province=selected.province, relevance=selected.relevance, q=selected.q, profile=selected.profile, match=selected.match) }}">下一页</a>
+            <a href="{{ url_for('jobs', page=page+1, category=selected.category, degree=selected.degree, province=selected.province, relevance=selected.relevance, q=selected.q, profile=selected.profile, match=selected.match, layer=selected.layer, scope=selected.scope) }}">下一页</a>
           {% endif %}
         </nav>
       {% endif %}
@@ -103,7 +119,7 @@
       <div class="empty-state">
         <h2>暂未找到匹配岗位</h2>
         <p>可以放宽筛选条件，或稍后再查看官方来源同步后的更新。</p>
-        <a class="action-link" href="{{ url_for('jobs') }}">清除筛选</a>
+        <a class="action-link" href="{{ url_for('jobs', scope=selected.scope) if official_pending else url_for('jobs') }}">清除筛选</a>
       </div>
     {% endif %}
   </section>

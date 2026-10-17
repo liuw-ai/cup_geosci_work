@@ -553,6 +553,11 @@ small {
   background: var(--amber-soft);
 }
 
+.publication-similar_eligible {
+  color: #255a72;
+  background: #e3f0f5;
+}
+
 .job-card h3 {
   margin: 15px 0 6px;
   overflow-wrap: anywhere;

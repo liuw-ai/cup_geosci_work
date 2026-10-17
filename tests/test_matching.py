@@ -30,6 +30,10 @@ def test_doctoral_postgraduate_does_not_become_masters_requirement() -> None:
     assert extract_degree_levels("硕士研究生、博士研究生") == ["硕士", "博士"]
 
 
+def test_lower_education_floor_is_preserved() -> None:
+    assert extract_degree_levels("大专（高职）") == ["大专"]
+
+
 def test_unverified_body_keywords_cannot_be_strong_match() -> None:
     score, band, tags = score_relevance(
         "中国石油炼化设备技术招聘，正文提到油气地质大赛和地球物理大赛。",
@@ -181,6 +185,22 @@ def test_upstream_category_uses_precise_student_facing_label() -> None:
 
     assert job["category"] == "油气上游业主与研究机构"
     assert job["category_label"] == "油气勘探开发运营与研究机构"
+
+
+def test_postdoctoral_public_category_is_not_relabelled_by_employer_identity() -> None:
+    from job_hub.employers import enrich_job
+
+    job = enrich_job(
+        {
+            "title": "地质学博士后",
+            "employer": "中国地质科学院地质研究所",
+            "category": "博士后与科研助理",
+            "field_evidence": {"政府岗位类型": "postdoctoral"},
+        }
+    )
+
+    assert job["category"] == "博士后与科研助理"
+    assert job["category_label"] == "博士后与科研助理"
 
 
 def test_enrich_job_repairs_legacy_cnpc_detail_navigation() -> None:

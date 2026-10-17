@@ -1,0 +1,2 @@
+# Development-only verification tools. Keep these out of the production image.
+pytest==7.4.0

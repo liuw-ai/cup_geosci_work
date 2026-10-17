@@ -14,7 +14,9 @@ def test_candidate_leads_stay_private_until_official_content_is_verified(tmp_pat
         {
             "id": "official-manual-import",
             "source_type": "manual",
-            "enabled": False,
+            # An administrator-approved manual source must be explicitly
+            # enabled before its verified rows can enter student-facing reads.
+            "enabled": True,
             "config": {"allow_shared_source_url": True},
         }
     )
@@ -56,6 +58,7 @@ def test_candidate_leads_stay_private_until_official_content_is_verified(tmp_pat
         headers=headers,
         json={
             "official_url": "https://official.example.gov.cn/jobs/1",
+            "official_application_url": "https://official.example.gov.cn/apply/1",
             "verification_status": "official_url_found",
         },
     )
@@ -91,3 +94,24 @@ def test_candidate_leads_stay_private_until_official_content_is_verified(tmp_pat
     assert jobs["items"][0]["official_evidence_url"] == (
         "https://official.example.gov.cn/jobs/1"
     )
+    assert jobs["items"][0]["application_url"] == (
+        "https://official.example.gov.cn/apply/1"
+    )
+
+
+def test_candidate_lead_rejects_non_http_official_application_url(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    lead = database.create_candidate_lead(
+        {
+            "lead_provider": "中公教育",
+            "lead_url": "https://example.com/lead/2",
+            "title": "地质岗位",
+        }
+    )
+    with __import__("pytest").raises(ValueError, match="official_application_url"):
+        database.update_candidate_lead(
+            int(lead["id"]),
+            {"official_application_url": "javascript:alert(1)"},
+        )

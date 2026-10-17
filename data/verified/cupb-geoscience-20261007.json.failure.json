@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "status": "parse_failed",
+  "captured_at": "2026-10-08T09:03:39.145255Z",
+  "diagnostic_for": "cupb-geoscience-20261007.json",
+  "failure_reason": "CUPB snapshot sync failed: Official source ladder exhausted: official snapshot row 9 is missing a required field"
+}

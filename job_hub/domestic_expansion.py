@@ -182,9 +182,45 @@ def domestic_expansion_summary(queue: dict[str, Any]) -> dict[str, Any]:
         ),
         "by_status": dict(sorted(by_status.items())),
         "by_system": dict(sorted(by_system.items())),
+        "action_plan": domestic_expansion_action_plan(queue),
         "scope_note": (
             "队列是扩源任务台账，不是岗位数据；只有来源通过官方原文、"
             "岗位级专业/学历证据和发布审计后，才会进入学生端。当前但不适合"
             "在校生的招聘必须显式标记，不能作为学生岗位或无岗位结论。"
         ),
+    }
+
+
+def domestic_expansion_action_plan(queue: dict[str, Any]) -> dict[str, Any]:
+    """Turn the queue into ordered, source-specific work without publishing rows."""
+    priorities = {
+        "official_job_sample_verified": (1, "repeat_server_refresh", "已有岗位样例；完成两次独立服务器刷新后才可计入覆盖"),
+        "manual_review_required": (2, "server_or_browser_recheck", "需要记录失败单位/页面/附件并完成一次人工复核"),
+        "official_identity_only": (3, "find_job_sample", "官方主体已确认；定位岗位级专业、学历和截止日期证据"),
+        "access_limited": (4, "network_recheck", "保留访问限制证据；更换网络环境后重新核验，不能解释为无岗位"),
+        "scan_success_no_match": (5, "repeat_scan", "成功扫描但未见匹配；按来源新鲜度重新扫描"),
+        "current_non_student_eligible": (6, "keep_private", "已核验但不适合学生，不进入学生端"),
+    }
+    tasks = []
+    for record in queue["records"]:
+        status = str(record.get("status") or "")
+        priority, gate, action = priorities.get(status, (99, "manual_review", "补充状态说明"))
+        tasks.append(
+            {
+                "id": record["id"],
+                "system": record.get("system"),
+                "organization": record.get("organization"),
+                "status": status,
+                "priority": priority,
+                "gate": gate,
+                "action": action,
+                "source_id": record.get("source_id"),
+            }
+        )
+    tasks.sort(key=lambda item: (item["priority"], str(item["system"] or ""), item["id"]))
+    return {
+        "task_count": len(tasks),
+        "by_gate": dict(sorted(Counter(str(item["gate"]) for item in tasks).items())),
+        "tasks": tasks,
+        "scope_note": "任务排序不等于岗位数量；只有完成对应门禁的官方来源才可进入采集和发布。",
     }

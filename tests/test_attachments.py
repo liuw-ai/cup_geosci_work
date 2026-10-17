@@ -1,16 +1,44 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from io import BytesIO
 from pathlib import Path
 
 import pytest
 
 from job_hub.app import create_app
-from job_hub.attachments import OfficialAttachmentProcessor
+from job_hub.attachments import (
+    OfficialAttachmentProcessor,
+    build_attachment_field_evidence,
+    infer_position_code,
+)
 from job_hub.db import Database
 from job_hub.government_artifacts import register_government_artifacts
 
 from conftest import make_settings, make_settings_with_artifact_path, source
+
+
+def test_infer_position_code_requires_an_explicit_label() -> None:
+    assert infer_position_code("岗位代码：2026113；专业：地质学") == "2026113"
+    assert infer_position_code("职位编号 A-07，学历：硕士") == "A-07"
+    assert infer_position_code("报名截止：2026-10-31；招聘人数：1") is None
+
+
+def test_attachment_evidence_recovers_code_from_flattened_row() -> None:
+    from job_hub.attachments import build_attachment_field_evidence
+
+    evidence = build_attachment_field_evidence(
+        title="专业技术岗位",
+        major="地质学",
+        degree="博士研究生",
+        location="合肥市",
+        artifact={"artifact_url": "https://dkj.ah.gov.cn/positions.xls"},
+        row={"sheet_name": "岗位表", "row_number": 17},
+        row_text="岗位代码：2026113；专业：地质学；学历：博士研究生",
+    )
+
+    assert evidence["职位代码"] == "2026113"
 
 
 def test_relative_artifact_storage_is_resolved_below_app_data(tmp_path: Path) -> None:
@@ -134,7 +162,12 @@ def _docx_position_bytes() -> bytes:
     return output.getvalue()
 
 
-def _registered_artifact(tmp_path: Path, *, session: FakeSession):
+def _registered_artifact(
+    tmp_path: Path,
+    *,
+    session: FakeSession,
+    category: str = "能源、工程与地学拓展",
+):
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
     database.initialize()
@@ -146,7 +179,7 @@ def _registered_artifact(tmp_path: Path, *, session: FakeSession):
             "artifact_url": "https://careers.example.edu.cn/files/positions.xlsx",
             "artifact_kind": "position_table",
             "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "metadata": {"employer": "测试能源集团", "category": "能源、工程与地学拓展"},
+            "metadata": {"employer": "测试能源集团", "category": category},
         }
     )
     processor = OfficialAttachmentProcessor(settings, database, session=session)
@@ -188,6 +221,171 @@ def test_excel_attachment_is_hashed_extracted_and_idempotent(tmp_path) -> None:
     assert len(database.list_artifact_job_candidates(artifact_id=artifact["id"])) == 1
 
 
+def test_reparse_reuses_legacy_null_suffix_row_identity(tmp_path: Path) -> None:
+    """Parser key normalization must not fork an existing attachment row."""
+    settings, database, artifact, _ = _registered_artifact(
+        tmp_path, session=FakeSession(_xlsx_bytes())
+    )
+    legacy_identity = {
+        "artifact_id": int(artifact["id"]),
+        "sheet_name": "岗位表",
+        "row_number": 2,
+        "row_kind": "tabular",
+        "row_key_suffix": None,
+    }
+    legacy_key = hashlib.sha256(
+        json.dumps(legacy_identity, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+    with database.transaction() as connection:
+        connection.execute(
+            """
+            INSERT INTO source_artifact_rows (
+                artifact_id, row_key, sheet_name, row_number, row_kind,
+                cells_json, row_text, extraction_confidence, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                artifact["id"],
+                legacy_key,
+                "岗位表",
+                2,
+                "tabular",
+                json.dumps({"岗位名称": "旧岗位"}, ensure_ascii=False),
+                "旧岗位",
+                "high",
+                "2026-01-01T00:00:00Z",
+                "2026-01-01T00:00:00Z",
+            ),
+        )
+        legacy_row_id = int(connection.execute("SELECT last_insert_rowid()").fetchone()[0])
+    database.upsert_artifact_job_candidate(
+        {
+            "artifact_row_id": legacy_row_id,
+            "source_id": "official-test-source",
+            "official_page_url": artifact["parent_url"],
+            "title": "旧岗位",
+            "employer": "测试能源集团",
+            "location": "北京",
+            "degree_levels": ["硕士"],
+            "major_tags": ["地质工程"],
+            "summary": "legacy",
+            "description": "legacy",
+            "extraction_confidence": "high",
+            "field_evidence": {
+                "artifact_url": artifact["artifact_url"],
+                "专业范围": "地质工程",
+                "学历要求": "硕士",
+                "table_row": "岗位表!2",
+            },
+            "review_status": "official_content_verified",
+        }
+    )
+
+    rows = database.upsert_source_artifact_rows(
+        int(artifact["id"]),
+        [
+            {
+                "sheet_name": "岗位表",
+                "row_number": 2,
+                "cells": {
+                    "岗位名称": "新岗位",
+                    "岗位代码": "G-002",
+                    "招聘单位": "测试能源集团",
+                    "工作地点": "北京",
+                    "学历要求": "硕士",
+                    "专业要求": "地质工程",
+                },
+                "row_text": "新岗位；G-002；地质工程；硕士；北京",
+            }
+        ],
+    )
+
+    assert len(rows) == 1
+    assert rows[0]["id"] == legacy_row_id
+    candidates = database.list_artifact_job_candidates(artifact_id=int(artifact["id"]))
+    assert len(candidates) == 1
+    assert candidates[0]["artifact_row_id"] == legacy_row_id
+    assert candidates[0]["review_status"] == "official_content_verified"
+    assert candidates[0]["row_cells"]["岗位代码"] == "G-002"
+
+
+def test_reconcile_reads_eligible_position_after_first_500_rows(tmp_path: Path) -> None:
+    session = FakeSession(_xlsx_bytes())
+    _, database, artifact, processor = _registered_artifact(tmp_path, session=session)
+    database.update_source_artifact_processing(
+        int(artifact["id"]),
+        extraction_status="extracted",
+        content_sha256="a" * 64,
+        storage_path="sha256/aa/" + "a" * 64 + ".xlsx",
+        parser_version="attachments-test",
+    )
+    rows = [
+        {
+            "sheet_name": "岗位表",
+            "row_number": index,
+            "cells": {"说明": f"非岗位行 {index}"},
+            "row_text": f"非岗位行 {index}",
+        }
+        for index in range(1, 501)
+    ]
+    rows.append(
+        {
+            "sheet_name": "岗位表",
+            "row_number": 501,
+            "cells": {
+                "岗位名称": "地质工程师",
+                "岗位代码": "G-501",
+                "招聘单位": "测试能源集团",
+                "工作地点": "北京市",
+                "学历要求": "硕士研究生",
+                "专业要求": "地质工程",
+                "报名截止日期": "2099-12-31",
+            },
+            "row_text": "地质工程师；地质工程；硕士研究生；北京市",
+        }
+    )
+    database.upsert_source_artifact_rows(int(artifact["id"]), rows)
+
+    result = processor.reconcile_candidates(int(artifact["id"]))
+
+    assert result.rows_extracted == 501
+    assert result.candidates_created == 1
+    candidates = list(database.iter_artifact_job_candidates(artifact_id=int(artifact["id"])))
+    assert len(candidates) == 1
+    assert candidates[0]["row_number"] == 501
+
+
+def test_public_position_type_is_carried_into_row_evidence(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    artifact = database.upsert_source_artifact(
+        {
+            "source_id": "official-test-source",
+            "parent_url": "https://careers.example.edu.cn/notice/2",
+            "artifact_url": "https://careers.example.edu.cn/files/public.xlsx",
+            "artifact_kind": "position_table",
+            "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "metadata": {
+                "employer": "测试事业单位",
+                "category": "事业单位与人才引进",
+                "position_type": "public_institution",
+            },
+        }
+    )
+    evidence = build_attachment_field_evidence(
+        title="地质技术岗",
+        major="工学大类",
+        degree="硕士研究生",
+        location="北京",
+        artifact=artifact,
+        row={"sheet_name": "岗位表", "row_number": 2},
+        row_text="地质技术岗 工学大类 硕士研究生",
+    )
+    assert evidence["政府岗位类型"] == "public_institution"
+
+
 def test_parallel_position_tables_do_not_overwrite_repeated_headers(tmp_path) -> None:
     """One official spreadsheet row may contain two independent job blocks."""
     body = _position_xlsx_bytes(
@@ -217,6 +415,31 @@ def test_parallel_position_tables_do_not_overwrite_repeated_headers(tmp_path) ->
         "地球科学工程师",
     }
     assert {candidate["location"] for candidate in candidates} == {"长沙", "衡阳"}
+
+
+def test_workbook_title_row_does_not_consume_real_position_header(tmp_path) -> None:
+    """A merged notice title above the header must not hide early rows."""
+    openpyxl = pytest.importorskip("openpyxl")
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "岗位表"
+    sheet.append(["湖南省地质院直属事业单位公开招聘岗位、计划数及要求一览表"])
+    sheet.append(["序号", "招聘单位", "岗位名称", "招聘人数", "学历学位", "专业要求", "工作地点"])
+    sheet.append(["1", "湖南省地质院", "地学科研岗", "2", "博士研究生", "地质学、地质资源与地质工程", "长沙"])
+    body = BytesIO()
+    workbook.save(body)
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path, session=FakeSession(body.getvalue())
+    )
+
+    result = processor.process(artifact["id"])
+
+    assert result.candidates_created == 1
+    rows = database.list_source_artifact_rows(artifact["id"])
+    assert rows[0]["row_number"] == 3
+    candidate = database.list_artifact_job_candidates(artifact_id=artifact["id"])[0]
+    assert candidate["title"] == "地学科研岗"
+    assert candidate["field_evidence"]["专业范围"] == "地质学、地质资源与地质工程"
 
 
 def test_mislabelled_xls_with_ooxml_content_uses_excel_parser(tmp_path) -> None:
@@ -423,6 +646,26 @@ def test_attachment_candidate_requires_review_then_publishes_with_evidence(tmp_p
         "official_page",
         "attachment",
     }
+
+
+def test_status_update_preserves_official_major_and_degree_text(tmp_path) -> None:
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path, session=FakeSession(_xlsx_bytes())
+    )
+    processor.process(artifact["id"])
+    candidate = database.list_artifact_job_candidates(artifact_id=artifact["id"])[0]
+    original = candidate["field_evidence"]
+
+    updated = database.update_artifact_job_candidate(
+        candidate["id"],
+        {
+            "review_status": "official_content_verified",
+            "review_note": "已核对官方附件岗位行。",
+        },
+    )
+
+    assert updated["field_evidence"]["专业范围"] == original["专业范围"]
+    assert updated["field_evidence"]["学历要求"] == original["学历要求"]
 
 
 def test_attachment_row_requiring_experience_never_enters_student_review_queue(
@@ -683,7 +926,46 @@ def test_non_geoscience_position_rows_do_not_enter_private_review_queue(tmp_path
     assert database.list_artifact_job_candidates(artifact_id=artifact["id"]) == []
 
 
-def test_unrestricted_major_position_row_enters_private_review_queue(tmp_path) -> None:
+def test_public_government_similar_geoscience_row_enters_review_queue(tmp_path) -> None:
+    """Public tables retain adjacent geoscience rows for explicit tiering."""
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    artifact = database.upsert_source_artifact(
+        {
+            "source_id": "official-test-source",
+            "parent_url": "https://careers.example.edu.cn/notice/public-similar",
+            "artifact_url": "https://careers.example.edu.cn/files/public-similar.xlsx",
+            "artifact_kind": "position_table",
+            "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "metadata": {
+                "employer": "测试事业单位",
+                "category": "事业单位与人才引进",
+                "position_type": "public_institution",
+            },
+        }
+    )
+    processor = OfficialAttachmentProcessor(
+        settings,
+        database,
+        session=FakeSession(
+            _position_xlsx_bytes(
+                ["岗位名称", "岗位代码", "招聘单位", "工作地点", "学历要求", "专业要求"],
+                ["地球化学研究岗", "P-001", "测试事业单位", "北京", "博士研究生", "地球化学"],
+            )
+        ),
+    )
+
+    result = processor.process(artifact["id"])
+
+    assert result.candidates_created == 1
+    candidate = database.list_artifact_job_candidates(artifact_id=artifact["id"])[0]
+    assert candidate["review_status"] == "needs_review"
+    assert "地球化学" in candidate["field_evidence"]["专业范围"]
+
+
+def test_unrestricted_enterprise_position_row_stays_private(tmp_path) -> None:
     body = _position_xlsx_bytes(
         ["岗位名称", "岗位代码", "招聘单位", "工作地点", "学历要求", "专业要求"],
         ["综合管理岗", "A-001", "测试事业单位", "北京市", "本科及以上", "不限专业"],
@@ -695,9 +977,8 @@ def test_unrestricted_major_position_row_enters_private_review_queue(tmp_path) -
     result = processor.process(artifact["id"])
     candidates = database.list_artifact_job_candidates(artifact_id=artifact["id"])
 
-    assert result.candidates_created == 1
-    assert len(candidates) == 1
-    assert candidates[0]["field_evidence"]["专业范围"] == "不限专业"
+    assert result.candidates_created == 0
+    assert candidates == []
 
 
 def test_combined_enterprise_condition_columns_are_mapped_without_relaxing_gates(tmp_path) -> None:
@@ -729,6 +1010,100 @@ def test_combined_enterprise_condition_columns_are_mapped_without_relaxing_gates
     assert candidate["field_evidence"]["招聘人数原字段"] == "备注"
 
 
+@pytest.mark.parametrize(
+    ("headers", "values", "expected_major", "category"),
+    [
+        (
+            ["序号", "单位名称", "岗位名称", "招聘人数", "学历学位", "专业及代码"],
+            ["1", "中国地质科学院", "深地大数据科研岗A", "1", "硕士研究生", "地质资源与地质工程（0818）"],
+            "地质资源与地质工程",
+            "事业单位与人才引进",
+        ),
+        (
+            ["岗位代码", "招聘单位名称", "岗位名称", "招聘计划人数", "学历", "岗位所需专业"],
+            ["420001", "湖北省自然资源厅", "矿产资源管理岗", "2", "本科及以上", "地质学类、地质资源与地质工程类"],
+            "地质资源与地质工程",
+            "事业单位与人才引进",
+        ),
+        (
+            ["岗位代码", "招聘单位名称", "岗位名称", "招聘\n计划数", "学历", "岗位所需专业"],
+            ["420002", "湖南省地质院", "地质技术岗", "1", "硕士研究生", "0709 地质学"],
+            "地质学",
+            "事业单位与人才引进",
+        ),
+        (
+            ["招聘单位", "岗位名称", "岗位编码", "招聘人数", "学历或学位", "专业条件要求"],
+            ["四川省第一地质大队", "地质技术岗", "200004001002", "1", "研究生学历及以上相应学位", "地质工程专业、岩土工程专业"],
+            "地质工程",
+            "事业单位与人才引进",
+        ),
+    ],
+)
+def test_official_position_table_aliases_cover_government_field_labels(
+    tmp_path, headers, values, expected_major, category
+) -> None:
+    """Common government-table labels must reach the private review queue."""
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path,
+        session=FakeSession(_position_xlsx_bytes(headers, values)),
+        category=category,
+    )
+
+    result = processor.process(artifact["id"])
+    candidates = database.list_artifact_job_candidates(artifact_id=artifact["id"])
+
+    assert result.candidates_created == 1
+    assert len(candidates) == 1
+    assert candidates[0]["review_status"] == "needs_review"
+    assert expected_major in candidates[0]["field_evidence"]["专业范围"]
+    assert candidates[0]["field_evidence"]["招聘人数"] == values[3]
+
+
+def test_ningxia_style_position_table_maps_required_major_without_city(tmp_path) -> None:
+    """A real government XLS may use \"所需专业\" and omit the city field."""
+    body = _position_xlsx_bytes(
+        [
+            "招聘主管部门\n（联系电话）",
+            "招聘单位",
+            "岗位\n名称",
+            "岗位\n代码",
+            "招聘  人数",
+            "学历",
+            "学位",
+            "所需专业",
+            "与岗位相关\n的其他要求",
+        ],
+        [
+            "自治区地质局（0951-2036329）",
+            "自治区煤炭地质局",
+            "地质矿产岗",
+            "001",
+            "1",
+            "研究生",
+            "博士",
+            "矿产普查与勘探、地质工程、地质学",
+            "本科或硕士研究生任一学习阶段所学专业须为地质相关专业",
+        ],
+    )
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path, session=FakeSession(body)
+    )
+
+    result = processor.process(artifact["id"])
+    candidates = database.list_artifact_job_candidates(artifact_id=artifact["id"])
+
+    assert result.candidates_created == 1
+    assert len(candidates) == 1
+    candidate = candidates[0]
+    assert candidate["title"] == "地质矿产岗"
+    assert candidate["employer"] == "自治区煤炭地质局"
+    assert candidate["location"] is None
+    assert candidate["degree_levels"] == ["博士"]
+    assert "地质工程" in candidate["major_tags"]
+    assert candidate["field_evidence"]["职位代码"] == "001"
+    assert candidate["field_evidence"]["招聘人数"] == "1"
+
+
 def test_reconcile_rejects_old_candidates_from_an_application_form(tmp_path) -> None:
     settings, database, artifact, processor = _registered_artifact(
         tmp_path, session=FakeSession(_xlsx_bytes())
@@ -738,7 +1113,11 @@ def test_reconcile_rejects_old_candidates_from_an_application_form(tmp_path) -> 
     database.update_source_artifact_processing(
         artifact["id"],
         extraction_status="extracted",
-        metadata_updates={"display_name": "公开招聘报名表"},
+        metadata_updates={
+            "display_name": "公开招聘报名表",
+            "last_error": "旧容器缺少候选拒绝方法",
+            "last_error_at": "2026-09-28T10:01:11Z",
+        },
     )
 
     result = processor.reconcile_candidates(artifact["id"])
@@ -750,3 +1129,5 @@ def test_reconcile_rejects_old_candidates_from_an_application_form(tmp_path) -> 
     assert refreshed["review_status"] == "rejected"
     assert "Phase 62 附件用途识别" in refreshed["review_note"]
     assert stored["metadata"]["candidate_queue_status"] == "rejected_non_position_attachment"
+    assert stored["metadata"]["last_error"] is None
+    assert stored["metadata"]["last_error_at"] is None

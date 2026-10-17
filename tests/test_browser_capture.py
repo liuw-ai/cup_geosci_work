@@ -11,6 +11,7 @@ from job_hub.browser_capture import (
     BrowserCaptureError,
     _robots_permit,
     extract_rendered_rows,
+    launch_playwright_browser,
     load_browser_capture,
 )
 from job_hub.sources import OfficialSourceCollector
@@ -76,6 +77,62 @@ def test_robots_probe_honors_direct_transport(monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setenv("REQUESTS_CA_BUNDLE", "/etc/ssl/certs/ca-certificates.crt")
     monkeypatch.setattr("job_hub.browser_capture.requests.Session", FakeSession)
     _robots_permit("https://official.example.edu.cn/jobs", user_agent="test-agent")
+
+
+def test_robots_probe_caches_document_but_checks_each_path(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class FakeResponse:
+        status_code = 200
+        ok = True
+        text = "User-agent: *\nDisallow: /private\n"
+
+        def close(self) -> None:
+            pass
+
+    calls = 0
+
+    class FakeSession:
+        trust_env = True
+        verify = True
+
+        def get(self, *_args: object, **_kwargs: object) -> FakeResponse:
+            nonlocal calls
+            calls += 1
+            return FakeResponse()
+
+    monkeypatch.setattr("job_hub.browser_capture.requests.Session", FakeSession)
+    cache: dict[str, object] = {}
+    _robots_permit(
+        "https://official.example.edu.cn/jobs/1",
+        user_agent="test-agent",
+        robots_cache=cache,
+    )
+    _robots_permit(
+        "https://official.example.edu.cn/jobs/2",
+        user_agent="test-agent",
+        robots_cache=cache,
+    )
+    assert calls == 1
+    with pytest.raises(BrowserCaptureError, match="does not permit"):
+        _robots_permit(
+            "https://official.example.edu.cn/private/1",
+            user_agent="test-agent",
+            robots_cache=cache,
+        )
+    assert calls == 1
+
+
+def test_browser_launcher_classifies_local_runtime_start_failure() -> None:
+    class FakeChromium:
+        def launch(self, **_kwargs: object) -> object:
+            raise RuntimeError("BrowserType.launch: spawn UNKNOWN")
+
+    class FakePlaywright:
+        chromium = FakeChromium()
+
+    with pytest.raises(BrowserCaptureError, match="could not start before target access"):
+        launch_playwright_browser(FakePlaywright(), {})
 
 
 def test_browser_capture_requires_complete_pagination_and_fresh_rows(tmp_path: Path) -> None:

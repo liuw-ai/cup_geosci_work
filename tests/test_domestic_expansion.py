@@ -27,6 +27,17 @@ def _source_by_id(source_id: str) -> dict[str, object]:
     return next(source for source in sources if source["id"] == source_id)
 
 
+def test_unresolvable_cnpc_homepages_remain_private_leads() -> None:
+    queue = load_domestic_expansion_queue()
+    rows = {row["id"]: row for row in queue["records"]}
+    for record_id in ("cnpc-riped-campus", "cnpc-logging-campus"):
+        assert rows[record_id]["status"] == "access_limited"
+        assert "无法解析" in rows[record_id]["field_validation"]
+    source = _source_by_id("cnpc-logging-campus")
+    assert source["enabled"] is False
+    assert source["config"]["automation_status"] == "access_limited"
+
+
 def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
     queue = load_domestic_expansion_queue()
     summary = domestic_expansion_summary(queue)
@@ -64,7 +75,18 @@ def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
     assert ccgc_row["student_eligible"] is False
     assert ccgc_row["related_artifact_id"] == "ccgc-mature-talent-2026-position-table"
     assert "成熟人才" in ccgc_row["student_scope_reason"]
-    assert summary["current_non_student_eligible"] == 1
+    assert summary["current_non_student_eligible"] == 2
+
+    dingxi_row = next(
+        item
+        for item in queue["records"]
+        if item["id"] == "dingxi-enterprise-self-recruitment-2026"
+    )
+    assert dingxi_row["status"] == "current_non_student_eligible"
+    assert dingxi_row["student_eligible"] is False
+    assert dingxi_row["related_artifact_id"] == (
+        "dingxi-2026-second-enterprise-self-recruitment-position-table"
+    )
 
     cnpc_rows = [
         item
@@ -79,6 +101,25 @@ def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
     assert all(item.get("source_id") == "cnpc-career" for item in cnpc_rows)
     assert all(item.get("sample_job_ids") for item in cnpc_rows)
     assert all(item.get("field_validation") for item in cnpc_rows)
+
+    chinalco_row = next(
+        item
+        for item in queue["records"]
+        if item["id"] == "chinalco-iguopin-campus-2027"
+    )
+    assert chinalco_row["source_id"] == "chinalco-iguopin-browser"
+    assert chinalco_row["status"] == "official_job_sample_verified"
+    assert chinalco_row["sample_announcement_url"] == "https://chinalco2027.iguopin.com/notice"
+    assert chinalco_row["sample_job_ids"]
+    assert "两次" in chinalco_row["field_validation"]
+
+    minmetals_row = next(
+        item for item in queue["records"] if item["id"] == "minmetals-campus-entry"
+    )
+    assert minmetals_row["status"] == "official_identity_only"
+    assert minmetals_row["source_id"] is None
+    assert "404" in minmetals_row["field_validation"]
+    assert "不能推断" in minmetals_row["field_validation"]
 
     limited = domestic_expansion_rows(queue, status="access_limited")
     assert limited
@@ -120,7 +161,7 @@ def test_domestic_verified_snapshot_has_job_level_gate(tmp_path) -> None:
     result = import_verified_jobs(database, pipeline, path)
     assert result == {"created": 2, "updated": 0, "unchanged": 0}
 
-    jobs, _ = database.list_jobs(page_size=None, only_open=True, student_visible=True)
+    jobs, _ = database.list_jobs(page_size=None, only_open=True, student_visible=True, as_of_date="2026-10-10")
     titles = {str(job["title"]) for job in jobs}
     assert "油气田勘探开发技术研究" in titles
     assert "岩土勘察工程师" in titles
@@ -152,7 +193,17 @@ def test_cnpc_snapshot_covers_ten_oilfields_and_all_rows_are_publishable(tmp_pat
     )
     settings.source_registry_path.write_text(
         json.dumps(
-            [item for item in source_registry if item["id"] == "cnpc-career"],
+            [
+                {
+                    **item,
+                    # The test validates row-level import shape. Use an
+                    # explicitly long fixture window; production keeps the
+                    # configured 30-hour freshness contract.
+                    "config": {**item.get("config", {}), "max_age_hours": 100_000},
+                }
+                for item in source_registry
+                if item["id"] == "cnpc-career"
+            ],
             ensure_ascii=False,
         ),
         encoding="utf-8",
@@ -164,7 +215,7 @@ def test_cnpc_snapshot_covers_ten_oilfields_and_all_rows_are_publishable(tmp_pat
 
     result = import_verified_jobs(database, pipeline, snapshot_path)
     assert result == {"created": 20, "updated": 0, "unchanged": 0}
-    jobs, _ = database.list_jobs(page_size=None, only_open=True, student_visible=True)
+    jobs, _ = database.list_jobs(page_size=None, only_open=True, student_visible=True, as_of_date="2026-10-10")
     assert len(jobs) == 20
     assert all(job["publication_status"] == "student_eligible" for job in jobs)
 

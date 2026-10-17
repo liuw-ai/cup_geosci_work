@@ -1,10 +1,10 @@
 """Daily discovery of official government recruitment attachments.
 
 This module bridges registered official announcement feeds and the existing
-controlled attachment processor.  It intentionally ends at the private review
-queue: a discovered PDF or spreadsheet is neither an active job nor evidence
-that a student is eligible.  Publication remains an explicit row-level review
-operation in the administrator interface.
+controlled attachment processor.  A discovered PDF or spreadsheet first
+enters the private evidence queue.  A later verifier may promote a fully
+self-contained, current, student-eligible row through the normal publication
+gate; discovery itself is never evidence that a student is eligible.
 """
 
 from __future__ import annotations
@@ -60,8 +60,9 @@ def discover_configured_government_artifacts(
         "no_notice_sources": 0,
         "source_results": [],
         "publication_policy": (
-            "新发现附件只进入私有待复核队列；必须逐岗位核验官方原文、"
-            "专业、学历、地点、人数和截止日期后，才允许展示给学生。"
+            "新发现附件先进入私有证据队列；只有通过官方域名、哈希、"
+            "岗位行专业、学历、地点、人数、截止日期和学生端门禁的记录，"
+            "才允许由自动发布流程展示给学生。"
         ),
     }
     source_results = summary["source_results"]

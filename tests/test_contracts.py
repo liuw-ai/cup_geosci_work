@@ -60,6 +60,31 @@ def test_source_contract_rejects_invalid_required_values(
         validate_source_registry([record])
 
 
+@pytest.mark.parametrize("max_age_hours", [float("nan"), float("inf"), -float("inf")])
+def test_source_contract_rejects_non_finite_freshness_window(max_age_hours: float) -> None:
+    record = {
+        "id": "structured-freshness-test",
+        "name": "结构化新鲜度测试来源",
+        "publisher": "测试单位",
+        "homepage_url": "https://official.example.edu.cn/jobs",
+        "source_type": "structured_opening_page",
+        "category": "事业单位与人才引进",
+        "source_tier": "A",
+        "config": {
+            "allowed_hosts": ["official.example.edu.cn"],
+            "opening_title_selector": "h3",
+            "opening_content_selector": "article",
+            "opening_title_field_label": "岗位名称",
+            "opening_location_field_label": "工作地点",
+            "opening_date_field_label": "截止日期",
+            "max_age_hours": max_age_hours,
+        },
+    }
+
+    with pytest.raises(ContractValidationError, match="max_age_hours"):
+        validate_source_registry([record])
+
+
 def test_source_loader_preserves_its_existing_error_boundary(tmp_path) -> None:
     path = tmp_path / "sources.json"
     path.write_text(

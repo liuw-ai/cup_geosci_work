@@ -43,7 +43,17 @@ Phase 62 为该队列补上附件用途和岗位行语义门禁：报名表、�
 
 最新的中国石油官方浏览器索引捕获与安徽事业编附件队列见 [docs/phase-33/README.md](docs/phase-33/README.md)。浏览器捕获只记录 13 页、122 条官方公告索引和重点详情状态；详情字段缺失时不把公告索引当作学生端岗位。
 
-当前最新本地交付基线为 Phase 108；后续实时扩源仍以单位矩阵审计通过、官方岗位证据完整和学生端专业门禁通过为前提。Phase 108 增加受管理员令牌保护的 `/api/admin/government-position-tasks`，直接展示官方职位表的开放排期、待复核、已核验和清退状态。Phase 107 为带未来报名开始日的官方职位表增加了显式激活任务：开放前不发布，开放日未完成官方复核时进入待复核任务，复核成功后才允许按原有门禁发布，截止后进入清退确认。Phase 106 修复了中国石油旧快照详情页缺少 `postName` 导致官方页面空壳的问题：采集新记录和读取旧记录时都会生成可渲染的官方深链接，岗位字段和证据内容不被改写。Phase 105 的专业类别门禁修复和生产验收记录见 [docs/phase-105/README.md](docs/phase-105/README.md)、[docs/phase-106/README.md](docs/phase-106/README.md)、[docs/phase-107/README.md](docs/phase-107/README.md) 与 [docs/phase-108/README.md](docs/phase-108/README.md)。
+当前最新本地审计基线为 Phase 435：国聘 7/7 批次完整捕获通过，正式快照包含 302 页、2032 个详情决策、0 个详情失败；政府附件全量发现覆盖 `13` 个来源、`33` 条公告，登记 `46` 个附件（岗位表 `9`），其中 `9` 个附件成功解析 `103` 行但没有生成可发布候选；随后按 worker 同一逻辑复核政府台账，结果 `verified=1`、`source_unavailable=5`、`withdrawn=0`、`activated=0`，失败未被误判为无岗位或清退。全量回归为 `860 passed/3 skipped`，待证据 `752` 条（地学信号 `141`），三桶油目录 `64/64` 映射且仅 `cnpc-bgp` automation-ready。湖北省自然资源厅因 robots 错误页明确阻断，不能解释为无岗位。学生端为 `287` 条中国大陆有效岗位（67 条三桶油、220 条其他国内官方来源），距离招聘季 500 条目标还差 `213` 条。候选、证据完整、人工复核、开放匹配、附件解析行和计划名额不能直接计入学生端。中国海油继续保持 50 条岗位通过学生端门禁；中国石油主入口 HTTP 412、中国石化 robots HTTP 403，不能用旧快照补数。CEA 已在 2026-10-10 08:00（Asia/Shanghai）开窗后执行两次环境传输复核和一次直连复核：前两次因官方 robots TLS `SSLError` 失败，直连明确 robots 拒绝；来源保持 disabled、连续成功 `0/2`，91 条计划岗位和 112 个计划名额不计入学生端。worker 失败重试已修复为默认 60 秒并保持 degraded 心跳，成功后恢复 running。自动同步、截止日期过期和来源新鲜度撤回逻辑已完成代码审计并通过回归测试。浏览器 worker 已统一纳入 Compose（含 CUPB），但本机没有连续运行 worker、日报和备份闭环，因此 production-readiness 仍保持 false。所有当前报表统一使用招聘季 500 条、三桶油 360 条。详见 [docs/phase-435/README.md](docs/phase-435/README.md)、[docs/phase-434/README.md](docs/phase-434/README.md) 及此前各阶段文档。
+
+Phase 436 已把历史数据库记录、旧阶段快照与学生端当前可见数统一：当前唯一有效口径仍为 `287`，不是历史的 `309` 或 `173`。Phase 437 修复了学生端专业关键词只检索标题/正文而漏掉岗位级结构化专业证据的问题；现在“地质工程”等查询同时检索核验专业标签与官方专业字段。详见 [docs/phase-436/README.md](docs/phase-436/README.md) 和 [docs/phase-437/README.md](docs/phase-437/README.md)。
+
+Phase 438 复核了政府与三桶油官方来源健康：当前访问受限、海外/社招和证据过期记录不会被误发；学生端保持 `287/500`。Phase 439 将生产发布改为不可变镜像 digest 与独立 `.release.env` 清单，Phase 440 为全部浏览器 worker 补上空闲等待期间的心跳，抓取卡死仍由 watchdog 处理。详见 [docs/phase-438/README.md](docs/phase-438/README.md)、[docs/phase-439/README.md](docs/phase-439/README.md) 和 [docs/phase-440/README.md](docs/phase-440/README.md)。
+
+Phase 441 将“仅确认官方主体”的五个扩源候选接入 worker 的私有入口健康检查：它只检测官方入口和 robots，绝不创建岗位或把入口可达当成招聘存在。当前数据库权威学生端读集仍为 `287`，历史 `309` 不是当前有效口径；第三方发现池当前为 `0` 条线索，因此中公、华图等发现渠道尚未形成无人值守采集。详见 [docs/phase-441/README.md](docs/phase-441/README.md)。
+
+Phase 318 完成了开放后自动再验证来源的无人值守门禁：开放前零请求，开放后先校验 robots、完整下载并核对官方附件哈希，连续两次成功后才自动启用；公共“即将开放”页面不再把 automatic-after-opening 来源的静态台账当作实时岗位。详见 [docs/phase-318/README.md](docs/phase-318/README.md)。
+
+Phase 320 复核了 SLB、Halliburton、Baker Hughes 和 Weatherford 的中国大陆官方岗位入口；SLB/Halliburton 本轮没有形成符合地点与岗位级证据门禁的岗位，Baker Hughes 返回验证页，Weatherford robots 超时，均未用海外或历史岗位补数。详见 [docs/phase-320/README.md](docs/phase-320/README.md)。
 
 Phase 40 已增加中国石油“公告列表分页 -> 公告详情 -> 多岗位表格”的专用浏览器采集链路。见 [docs/phase-40/README.md](docs/phase-40/README.md)。浏览器采集运行在独立 Chromium Worker 中，完整捕获才允许进入现有发布门禁；维护窗口、详情异常或扫描不完整均记录为来源受限，不写成无岗位。
 
@@ -63,10 +73,10 @@ Phase 21 的国家管网岗位级详情链接和字段展示见 [docs/phase-21/R
 - 合规采集：只访问登记来源，检查 robots.txt，不处理登录、验证码或绕过反爬限制。
 - 可靠性分级：A 级为单位/政府官方来源，B 级为高校或经认证就业信息；第三方转载不直接公开。
 - 当前已自动接入的校外来源：**中国科学院人才招聘网、Halliburton 官方招聘页、SLB 官方职位页、中国地质调查局招聘公告页、自然资源部官网及所属企事业单位公开招聘平台、中国煤炭地质总局、中国冶金地质总局、紫金矿业社会/校园招聘门户**；中国石油大学（北京）就业网仅是其中一个 B 级来源，不是系统唯一来源。
-- 岗位标准化：保留单位、岗位、原始地点、标准化省份/城市/国家地区、学历、专业标签、发布时间、截止日期、原始链接和报名链接；国际岗位使用官方地点中的国家代码，不从单位名称猜测省份。
+- 岗位标准化：保留单位、岗位、原始地点、标准化省份/城市/国家地区、学历、专业标签、发布时间、截止日期、原始链接和报名链接；海外地点只记录官方国家/地区用于私有审计，不进入学生端。对已完成岗位级详情核验、但官方地点只给出中文地址而未写城市的来源，可在来源配置中显式开启 `allow_unclassified_domestic_address`：仅确认“中国大陆”而不猜测省市，海外/混合地点仍优先拦截。
 - 单位体系：用可审计的单位别名表区分油气上游运营单位、集团内技术服务、独立油服和国际油服；保留公告原始单位名，不对模糊名称强行归类。
-- 地学匹配：围绕资源勘查工程、地质工程、地质学、地质资源与地质工程，并识别石油地质、测井、储层、地球物理、地学数据、遥感、GIS 等相邻方向。
-- 学生画像筛选：提供 7 个不保存个人数据的“学历 × 专业”画像，分别覆盖资源勘查工程本科，以及地质学、地质工程、地质资源与地质工程的硕士和博士；页面明确区分“明确匹配”和“需核验原公告”。
+- 地学匹配：目标专业为资源勘查工程、地质工程、地质学、地质资源与地质工程。石油地质、测井、储层、地球物理、地学数据、遥感、GIS 等相邻方向仅用于发现或待证据审计，不能单独替代目标专业的岗位级资格证据。
+- 学生画像筛选：提供 7 个不保存个人数据的“学历 × 专业”画像：资源勘查工程本科，以及地质学、地质工程、地质资源与地质工程各自的硕士和博士。地球物理学和石油工程不是学生画像；岗位必须明确匹配目标专业、允许的大类或公共部门不限专业条件后才可公开。
 - 队列验证：内置固定的匿名 100 人地球科学学院模拟队列，利用当前真实岗位库输出各培养方向的明确匹配、待核验、覆盖类别和未覆盖情况。
 - 岗位分类：油气上游业主与研究机构、油气工程技术服务、管网/炼化/综合能源、自然资源/地调/地勘、矿产资源与矿业、地质工程/环境/基础设施、科研院所/高校/博士后、事业单位与人才引进、公务员与选调、金融与央国企综合机会、能源与地学拓展。
 - 去重与更新记录：同一官方公告只保留一条岗位记录，内容变化会进入“信息更新”日报。
@@ -79,7 +89,9 @@ Phase 21 的国家管网岗位级详情链接和字段展示见 [docs/phase-21/R
 - 扩源矩阵：`data/source_targets.json` 按 31 个省和五类官方角色记录已核验、候选和待定位入口。候选入口只进入扩源排期，不会被 worker 抓取或在学生端显示。
 - 组织与入口矩阵：`data/organization_registry.json` 将集团、油田/区域运营单位、研究院、集团内技术服务、独立/国际油服、中央地勘、矿业、重点高校和政府招聘系统分层登记。每个频道独立记录正式入口、备用官方入口、来源绑定和验证状态；`official_confirmed` 不等于可抓取，只有 `automation_ready` 且来源健康的频道才可能进入自动同步。
 - 省级来源核验：`data/source_validation_registry.json` 记录已查看的官方入口、真实公告样例、字段证据、备用入口、离线解析夹具和回归测试节点。`adapter_fixture_verified` 只表示解析器能理解样例，不会自动启用来源；山东人事考试候选源在运行时健康检查通过前保持停用。
-- 质量报告与日报快照：`/api/coverage` 输出来源健康、每省有效/备用来源、来源角色矩阵、原文/专业/学历/地点/截止日完整率、来源与类别集中度，以及 100 人模拟中的明确匹配率；每次同步会记录当天可更新的质量快照，用于与前一个不同日期比较，而不是只看岗位总数。
+- 质量报告与日报快照：`/api/coverage` 输出来源健康、每省有效/备用来源、来源角色矩阵、原文/专业/学历/地点/截止日完整率、来源/单位/类别集中度、100 人模拟中的明确匹配率，以及 `expansion_targets` 的招聘季 500 条分段目标、当前有效数、缺口和未注册计划来源；每次同步会记录当天可更新的质量快照，用于与前一个不同日期比较，而不是只看岗位总数。
+- 扩容批次与来源分散门禁：`/api/coverage.source_diversity` 把招聘季 500 条目标拆成来源级批次，三桶油 360 条为第一优先级；其他官方来源按并列扩源方向推进。超过集中度阈值的来源进入 `hold_dominant_source`，未登记或停用来源分别进入注册/适配器门禁。该计划只排程，不会把候选线索或待复核岗位计入有效数。
+- 双轴完成度与来源漏斗：`/api/coverage.dual_axis` 将国内有效岗位覆盖和证据/运行可靠性分开报告，不能用高工程分数掩盖岗位覆盖不足；`python -m job_hub.cli source-funnel` 与管理员接口输出来源从发现、证据、复核到发布的最新运行漏斗，访问受限不等于无岗位。
 - 公开接口：/api/jobs 提供只读 JSON 数据，支持 `province` 省份筛选；/api/coverage 输出上述可观测指标。
 - 私有线索池：中公、华图、国聘、行业公众号等只可进入受保护的候选线索池，完成官方原文核验后才可发布为公开岗位。
 - 私有发现注册与漏斗：`data/discovery_sources.json` 记录第三方发现入口的用途和访问状态；规范化 URL 指纹合并重复线索，`candidate_lead_mentions` 保留多渠道归因，管理员可查看官方原文定位、内容核验和发布转化漏斗，学生端不接触这些记录。
@@ -144,6 +156,7 @@ PDF 职位表优先使用布局提取并按职位代码聚合跨行文本；低�
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 Copy-Item .env.example .env
 ~~~
 
@@ -214,6 +227,7 @@ python -m job_hub.cli simulate-cohort --output .\runtime\cohort-coverage.json
 python -m job_hub.cli coverage
 python -m job_hub.cli coverage --output .\runtime\coverage.json
 python -m job_hub.cli coverage --record --output .\runtime\coverage.json
+python -m job_hub.cli source-funnel --output .\runtime\source-funnel.json
 ~~~
 
 `sync` 和常驻 worker 会在同步后自动记录当天的质量快照；`coverage --record` 用于人工复核后的补记。同一天的快照可以被后一次同步替换，趋势比较只取前一个不同日期，避免同日重复执行制造虚假的“增长”。
@@ -249,6 +263,19 @@ python -m job_hub.cli source-health --source-id mnr-public-recruitment
 python -m job_hub.cli source-health --include-disabled
 ~~~
 
+学生端官方详情链接还可以做只读健康检查。它会先核验来源白名单和
+`robots.txt`，再区分可访问详情、动态壳、404、维护/反自动化限制和网络故障；
+受限结果不会自动清退岗位，也不能解释成来源没有岗位：
+
+~~~powershell
+python -m job_hub.cli link-health --limit 50 --output .\runtime\link-health.json
+python -m job_hub.cli link-health --source-id cnooc-career-browser --limit 20
+python -m job_hub.cli link-health --job-id 1234
+~~~
+
+该命令只生成诊断报告，不写入岗位状态。`reachable_dynamic` 表示官方路由可达但
+返回的是前端壳页面，仍需对应浏览器适配器提供字段证据；不能用它替代岗位采集。
+
 ## 每日自动运行
 
 生产环境运行独立 worker：
@@ -257,13 +284,20 @@ python -m job_hub.cli source-health --include-disabled
 python -m job_hub.worker
 ~~~
 
-worker 启动时会同步来源，随后按 SOURCE_SYNC_INTERVAL_MINUTES 定期刷新。到达 DAILY_PUBLISH_TIME=20:00 后，它会执行一次最终同步、运行数据审计、冻结当天日报并发送邮件。进程重启或服务器短暂故障后，如果当天 20:00 已过且日报不存在，worker 会自动补发当天日报。若审计发现原始链接域名不在白名单、相关度低于阈值、混入招聘会/采购噪声或岗位状态异常，worker 不会发布日报，并向管理员发送异常邮件。
+worker 启动时会同步来源，随后按 SOURCE_SYNC_INTERVAL_MINUTES 定期刷新。生产默认 `DEFAULT_SOURCE_MAX_AGE_HOURS=72`，启动时会为实时官方来源补齐有限新鲜度合同，成功同步写入捕获时间；超时未更新的岗位在读侧和生命周期清理中同时隐藏。静态附件和浏览器快照仍必须使用独立捕获证据。到达 DAILY_PUBLISH_TIME=20:00 后，它会执行一次最终同步、运行数据审计、冻结当天日报并发送邮件。进程重启或服务器短暂故障后，如果当天 20:00 已过且日报不存在，worker 会自动补发当天日报。若审计发现原始链接域名不在白名单、相关度低于阈值、混入招聘会/采购噪声或岗位状态异常，worker 不会发布日报，并向管理员发送异常邮件。
 
 worker 每 30 秒更新一次心跳。若进程在单个来源采集期间异常退出，下一次同步只会将超过 `CRAWL_RUN_STALE_SECONDS`（默认 1800 秒）的旧 `running` 记录标为 `interrupted`，不会删除记录或把它误记为成功；发布前审计会阻止仍超时的启用来源。可在服务器上检查 worker 状态：
 
 ~~~bash
-docker compose exec worker python -m job_hub.cli worker-health --max-age 180
+docker compose -f docker-compose.yml -f docker-compose.browser.yml exec worker \
+  python -m job_hub.cli worker-health --max-age 180
 ~~~
+
+生产服务器可设置 `LINK_HEALTH_ENABLED=true`，worker 会在每天第一次成功同步后，
+按来源轮询最多 `LINK_HEALTH_SAMPLE_SIZE`（默认 20）个学生端官方详情链接，并将
+只读报告写入 `APP_DATA_DIR/link-health/YYYY-MM-DD.json`。报告中的 404、动态壳、
+robots 拒绝、HTTP 412 或暂时性 5xx 不会自动清退岗位，也不会被解释为“没有岗位”；
+它们只用于安排对应来源的人工复核或浏览器重新捕获。
 
 ## 数据库备份与上线门禁
 
@@ -274,11 +308,14 @@ SQLite 在运行时使用 WAL，不能用普通文件复制代替一致性备份
 
 ~~~bash
 # 立即创建并校验一份快照
-docker compose exec -T web python -m job_hub.cli backup-database --force
+docker compose -f docker-compose.yml -f docker-compose.browser.yml exec -T web \
+  python -m job_hub.cli backup-database --force
 
 # 查看生产数据、worker 与备份是否达标；正式公开时再加域名 HTTPS 门禁
-docker compose exec -T web python -m job_hub.cli production-readiness
-docker compose exec -T web python -m job_hub.cli production-readiness \
+docker compose -f docker-compose.yml -f docker-compose.browser.yml exec -T web \
+  python -m job_hub.cli production-readiness
+docker compose -f docker-compose.yml -f docker-compose.browser.yml exec -T web \
+  python -m job_hub.cli production-readiness \
   --domain-hostname jobs.cupdky.cn --expected-ip 81.70.62.174 --require-public
 ~~~
 
@@ -310,12 +347,12 @@ SMTP_USE_SSL=true
 ~~~bash
 cp .env.example .env
 # 编辑 .env，至少设置 APP_SECRET_KEY、ADMIN_TOKEN、APP_BASE_URL 和邮件配置
-docker compose config
-docker compose up -d --build
-docker compose logs -f worker
+docker compose -f docker-compose.yml -f docker-compose.browser.yml config
+docker compose -f docker-compose.yml -f docker-compose.browser.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.browser.yml logs -f worker
 ~~~
 
-Compose 默认只把 8080 绑定到服务器本机的 `127.0.0.1`，不直接暴露给公网。正式部署优先在 Nginx、Caddy 或学校现有网关上配置 HTTPS 反向代理到 `127.0.0.1:8080`。如果暂时没有域名，可在服务器 `.env` 中明确设置 `WEB_BIND_ADDRESS=0.0.0.0` 和已在云安全组放行的 `WEB_PORT=80`，通过 `http://服务器公网IP/` 临时访问；这只提供 HTTP，不等同于生产 HTTPS。`APP_BASE_URL` 必须填写学生实际访问的完整地址，否则邮件中的日报链接会不正确。`docker compose ps` 应显示 web 与 worker 均为 healthy；worker 健康检查读取共享 SQLite 中最近 180 秒的心跳。
+生产启动必须同时加载 `docker-compose.yml` 和 `docker-compose.browser.yml`；后者包含中国石油、中国石化、中国海油、CUPB 就业网、国聘及其他动态官方入口的隔离浏览器 worker。只执行 `docker compose up` 会漏启这些服务，不能作为无人值守部署。Compose 默认只把 8080 绑定到服务器本机的 `127.0.0.1`，不直接暴露给公网。正式部署优先在 Nginx、Caddy 或学校现有网关上配置 HTTPS 反向代理到 `127.0.0.1:8080`。如果暂时没有域名，可在服务器 `.env` 中明确设置 `WEB_BIND_ADDRESS=0.0.0.0` 和已在云安全组放行的 `WEB_PORT=80`，通过 `http://服务器公网IP/` 临时访问；这只提供 HTTP，不等同于生产 HTTPS。`APP_BASE_URL` 必须填写学生实际访问的完整地址，否则邮件中的日报链接会不正确。`docker compose -f docker-compose.yml -f docker-compose.browser.yml ps` 应显示 web、worker 和所有启用的浏览器 worker；主 worker 和每个浏览器 worker 的健康检查都读取共享 SQLite 心跳。
 
 若服务器位于中国大陆且网站向公众开放，通常需要准备已备案域名；若使用境外服务器，不需要 ICP 备案，但应评估中国大陆和微信内访问速度。网页可被微信直接打开，不要求学生安装飞书、腾讯文档或其他办公软件。
 
@@ -330,7 +367,7 @@ Compose 默认只把 8080 绑定到服务器本机的 `127.0.0.1`，不直接暴
 | 中国石油大学（北京）就业信息网 | 专用岗位页适配器 | 仅保留具体岗位和招聘公告；招聘会、宣讲会、补贴和就业通知不会发布。 |
 | 中国石油东方物探公开招聘页 | 结构化公开岗位页适配器 | 只读取 BGP 官方页面中的职位、地点、学历/专业要求和发布日期；标题/内容块错配即停止采集，不把集团内技术服务单位误标为上游运营主体。 |
 | 中国科学院人才招聘网 | 官方岗位列表 + 详情页适配器 | 用岗位名称、学科领域和专业要求筛选，不能因“研究所名称”含地学词就误收财务、行政等岗位。 |
-| Halliburton Careers | 官方公开检索页适配器 | 只收录实际岗位标题/结果行中明确涉及地学、油气、测井、储层、钻完井等方向的机会；可包含符合条件的海外岗位。 |
+| Halliburton Careers | 官方公开检索页适配器 | 只收录中国大陆实际岗位标题/结果行中明确涉及地学、油气、测井、储层、钻完井等方向的机会；海外岗位仅可作为私有审计记录，不进入学生端。 |
 | 自然资源部所属企事业单位公开招聘平台 | 平台公开招聘 API 适配器 | 读取网站公开前端所使用的只读公告和职位字段；按岗位本身的专业、学历、地点和截止日期过滤，不因单位名称带“地质”误收财务或行政岗。 |
 | 中国地质调查局、自然资源部 | 官方公告页适配器 | 只读取明确招聘、人才引进、博士后、科研助理或实习公告；采购、招标、中标、征求意见等被排除。 |
 | SLB | 官网公开 Coveo 检索适配器 | 运行时读取网页公开检索配置，逐条读取官方详情；不保存令牌、不登录、不调用申请接口，搜索地点与详情地点不一致时拒绝发布。 |
@@ -340,7 +377,7 @@ Compose 默认只把 8080 绑定到服务器本机的 `127.0.0.1`，不直接暴
 
 ### 已登记但暂不自动抓取的重点官方渠道
 
-中国石油统一招聘平台、中国石化、国家管网、Baker Hughes、Weatherford、中国石油大学（华东）智慧就业网、国家大学生就业服务平台、国考专题、部省人社系统和中国地质科学院等入口仍保留在白名单中，因 robots 规则、浏览器验证、动态检索、详情登录限制、年度专题变化或当前网络连接不稳定而暂不自动抓取。中国海油入口已核验为 `https://cnooc.zhaopin.com/`；页面可达但公开岗位接口当前返回业务错误，来源保持停用，不能解释为没有岗位。系统不会绕过登录、验证码、反爬或访问限制；待找到允许公开读取的稳定接口或专用页面结构后，再单独开发适配器并在本地人工审核结果后启用。
+中国石油统一招聘平台、中国石化、国家管网、Baker Hughes、Weatherford、中国石油大学（华东）智慧就业网、国家大学生就业服务平台、国考专题、部省人社系统和中国地质科学院等入口仍保留在白名单中，因 robots 规则、浏览器验证、动态检索、详情登录限制、年度专题变化或当前网络连接不稳定而暂不自动抓取。中国海油入口已核验为 `https://cnooc.zhaopin.com/`，当前由专用浏览器适配器完成官方 API 分页和 332 条详情捕获，其中 50 条通过学生端门禁；其余岗位保留为待证据或不适配记录。系统不会绕过登录、验证码、反爬或访问限制；来源适配器变化时仍需更新代码并重新通过真实捕获门禁。
 
 31 个省级自然资源入口登记在 `data/provincial_sources.json`。除上述已启用来源外，甘肃省地矿局的人事栏目已经定位到正式公开页面，但其 `robots.txt` 会从 HTTP 跳转到 HTTPS 后发生 TLS 握手失败；因此保留为 `robots_tls_unverified` 候选来源并停用，不会由 worker 自动访问。其他入口仍可能处于路径变更、访问受限或当前网络异常的待核验状态。`data/source_targets.json` 进一步把每省的人社/考试、自然资源、地质局/地质院、事业单位统一招聘、公务员五类目标拆开，只有绑定真实 `source_id` 的 `verified` 项才计入已核验来源。登记不等于可抓取，也不等于当地没有招聘。
 
@@ -353,6 +390,20 @@ Compose 默认只把 8080 绑定到服务器本机的 `127.0.0.1`，不直接暴
 3. 页面无需登录、验证码、账号或付费权限。
 4. 页面结构可以稳定提取标题、原始链接和发布日期；动态站点应添加专门的官方 API 或页面适配器，不应通过绕过限制处理。
 5. 先在本地执行一次同步，人工查看候选结果、重复率和误判情况，再将来源启用到生产环境。
+
+### 公网出口与传输模式
+
+来源采集和 robots 门禁默认遵循 `HTTP_TRANSPORT_MODE`。服务器或本机配置了代理时，
+不能因为代理 TLS EOF、连接被重置或代理返回的错误页，就把官方来源记录为“没有岗位”。
+应先对单个官方来源做只读健康检查：
+
+~~~powershell
+python -m job_hub.cli source-health --source-id cnpc-bgp-recruitment
+~~~
+
+若已确认服务器具有稳定直连公网出口，且 `direct` 模式下 robots 与官方入口均通过，
+才在该环境的 `.env` 设置 `HTTP_TRANSPORT_MODE=direct` 并重新执行单来源同步。
+不能通过关闭 TLS 校验、绕过 robots 或混用两个出口的结果来“修复”访问问题。
 
 对中国石油、中国石化、中国海油三家上游业主，要与其体系内技术服务乙方分开标注：例如东方物探、长城钻探、川庆钻探、渤海钻探、石化石油工程技术服务、中海油服、中海油能源发展属于集团体系内的技术服务/工程单位；杰瑞、安东、中曼、海隆、贝肯、通源属于独立或民营油服；SLB、Halliburton、Baker Hughes、Weatherford 属于国际油服。国家管网、自然资源与地勘系统、事业单位、考公、科研院所、银行和在华外企则按各自官方入口单独接入。通用页面采集器仅适合结构明确的公开公告页，不会假装能够可靠处理每一个 JavaScript 招聘系统。
 
@@ -381,6 +432,7 @@ Content-Type: application/json
 ## 验证
 
 ~~~powershell
+$env:PYTHONPATH = (Get-Location).Path
 python -m pytest -q
 ~~~
 

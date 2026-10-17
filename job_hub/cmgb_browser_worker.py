@@ -5,17 +5,20 @@ from __future__ import annotations
 import logging
 import os
 import signal
+import argparse
 from contextlib import contextmanager
 from threading import Event
 from zoneinfo import ZoneInfo
 
+from job_hub.browser_liveness import wait_with_heartbeat
 from job_hub.cmgb_browser_capture import (
     CmgbBrowserCaptureError,
     run_cmgb_browser_capture,
     run_cmgb_detail_retry,
     write_cmgb_capture_failure,
 )
-from job_hub.config import Settings
+from job_hub.config import Settings, load_project_env
+from job_hub.browser_timeout import run_capture_with_timeout
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
 
@@ -54,7 +57,8 @@ class CmgbBrowserWorker:
         self.settings = settings
         self.database = Database(settings.database_path)
         self.database.initialize()
-        JobPipeline(settings, self.database).bootstrap_sources()
+        self.pipeline = JobPipeline(settings, self.database)
+        self.pipeline.bootstrap_sources()
         self.stop_event = Event()
         self.timezone = ZoneInfo(settings.timezone)
         self.source_id = os.getenv("CMGB_BROWSER_SOURCE_ID", "cmgb-iguopin-browser")
@@ -70,15 +74,23 @@ class CmgbBrowserWorker:
             0, int(os.getenv("CMGB_BROWSER_CAPTURE_TIMEOUT_SECONDS", "1800"))
         )
 
-    def run_forever(self) -> None:
+    def run_forever(self) -> int:
         self._heartbeat("starting", "CMGB browser worker boot completed")
         while not self.stop_event.is_set():
             self._run_once()
             if self.run_once:
+                if getattr(self, "_last_heartbeat_status", "") == "degraded":
+                    return 1
                 self._heartbeat("stopped", "CMGB browser worker completed one-shot capture")
-                return
-            self.stop_event.wait(self.interval_seconds)
+                return 0
+            wait_with_heartbeat(
+                self.stop_event,
+                self.interval_seconds,
+                self._heartbeat,
+                detail="waiting for next CMGB browser capture",
+            )
         self._heartbeat("stopped", "CMGB browser worker received a stop signal")
+        return 0
 
     def stop(self, *_: object) -> None:
         self.stop_event.set()
@@ -98,14 +110,21 @@ class CmgbBrowserWorker:
             return
         self._heartbeat("capturing", f"capturing {self.source_id}")
         try:
-            with _capture_deadline(self.capture_timeout_seconds):
-                payload = run_cmgb_browser_capture(
-                    url=str(config.get("browser_url") or source["homepage_url"]),
-                    output=output,
-                    config=config,
-                    allowed_hosts=list(config["allowed_hosts"]),
-                    user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
-                )
+            payload = run_capture_with_timeout(
+                run_cmgb_browser_capture,
+                kwargs={
+                    "url": str(config.get("browser_url") or source["homepage_url"]),
+                    "output": output,
+                    "config": config,
+                    "allowed_hosts": list(config["allowed_hosts"]),
+                    "user_agent": "CUPB-Geoscience-Employment-Information-Service/1.0",
+                },
+                timeout_seconds=self.capture_timeout_seconds,
+                on_wait=self._heartbeat,
+                stop_event=getattr(self, "stop_event", None),
+            )
+            if payload.get("status") == "success":
+                self._sync_successful_capture(source)
             status = "running" if payload.get("status") == "success" else "degraded"
             self._heartbeat(status, f"CMGB capture: {payload.get('scan')}")
             LOGGER.info("CMGB capture completed: %s", payload.get("scan"))
@@ -116,6 +135,8 @@ class CmgbBrowserWorker:
                     platform_url=str(config.get("browser_url") or source["homepage_url"]),
                     status="access_limited" if "HTTP 4" in str(error) or "robots" in str(error).lower() else "parse_failed",
                     reason=str(error),
+                    source_id=str(config.get("source_id") or self.source_id),
+                    adapter_version=str(config.get("adapter_version") or "cmgb-browser-v1"),
                 )
             except Exception:
                 LOGGER.exception("Could not persist CMGB failure capture")
@@ -144,15 +165,22 @@ class CmgbBrowserWorker:
         if not failure_capture.is_file():
             return False
         try:
-            payload = run_cmgb_detail_retry(
-                retry_capture_path=failure_capture,
-                output=output,
-                config=config,
-                allowed_hosts=list(config["allowed_hosts"]),
-                user_agent="CUPB-Geoscience-Employment-Information-Service/1.0",
-                max_age_hours=float(config.get("detail_retry_max_age_hours", 12)),
+            payload = run_capture_with_timeout(
+                run_cmgb_detail_retry,
+                kwargs={
+                    "retry_capture_path": failure_capture,
+                    "output": output,
+                    "config": config,
+                    "allowed_hosts": list(config["allowed_hosts"]),
+                    "user_agent": "CUPB-Geoscience-Employment-Information-Service/1.0",
+                    "max_age_hours": float(config.get("detail_retry_max_age_hours", 12)),
+                    "require_capture_manifest": bool(config.get("require_capture_manifest", False)),
+                },
+                timeout_seconds=getattr(self, "capture_timeout_seconds", 0),
+                on_wait=self._heartbeat,
+                stop_event=getattr(self, "stop_event", None),
             )
-        except CmgbBrowserCaptureError as error:
+        except (CmgbBrowserCaptureError, RuntimeError) as error:
             message = str(error)
             retry_preconditions = (
                 "requires a partial capture",
@@ -160,6 +188,7 @@ class CmgbBrowserWorker:
                 "requires a completed pagination pass",
                 "has no failed detail rows",
                 "failure_records do not match",
+                "capture_evidence manifest is required",
                 "detail_url must be non-empty",
                 "must be a concrete CMGB job detail URL",
             )
@@ -176,6 +205,8 @@ class CmgbBrowserWorker:
                     platform_url=str(config.get("browser_url") or source["homepage_url"]),
                     status="parse_failed",
                     reason=f"CMGB targeted detail retry failed: {error}",
+                    source_id=str(config.get("source_id") or self.source_id),
+                    adapter_version=str(config.get("adapter_version") or "cmgb-browser-v1"),
                 )
             except Exception:
                 LOGGER.exception("Could not archive CMGB targeted retry failure")
@@ -184,11 +215,32 @@ class CmgbBrowserWorker:
             return True
 
         status = "running" if payload.get("status") == "success" else "degraded"
+        if payload.get("status") == "success":
+            try:
+                self._sync_successful_capture(source)
+            except Exception as error:
+                self._heartbeat("degraded", f"CMGB targeted retry synchronization failed: {error}"[:500])
+                LOGGER.exception("CMGB targeted retry synchronization failed")
+                return True
         self._heartbeat(status, f"CMGB targeted detail retry: {payload.get('scan')}")
         LOGGER.info("CMGB targeted detail retry completed: %s", payload.get("scan"))
         return True
 
+    def _sync_successful_capture(self, source: dict[str, object]) -> None:
+        """Publish a complete CMGB capture immediately and fail closed on sync errors."""
+
+        pipeline = getattr(self, "pipeline", None)
+        if pipeline is None:
+            return
+        sync_result = pipeline.sync_source_manual(source)
+        if sync_result.status != "finished":
+            raise RuntimeError(
+                "CMGB capture succeeded but source synchronization did not finish: "
+                f"{sync_result.status}: {sync_result.error or 'unknown error'}"
+            )
+
     def _heartbeat(self, status: str, detail: str = "") -> None:
+        self._last_heartbeat_status = status
         try:
             self.database.record_service_heartbeat("cmgb-browser", status, detail)
         except Exception:
@@ -196,6 +248,11 @@ class CmgbBrowserWorker:
 
 
 def main() -> None:
+    argparse.ArgumentParser(
+        prog="python -m job_hub.cmgb_browser_worker",
+        description="运行中国冶金地质总局/国聘浏览器采集 worker。",
+    ).parse_args()
+    load_project_env()
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
@@ -203,7 +260,7 @@ def main() -> None:
     worker = CmgbBrowserWorker(Settings.from_env())
     signal.signal(signal.SIGINT, worker.stop)
     signal.signal(signal.SIGTERM, worker.stop)
-    worker.run_forever()
+    raise SystemExit(worker.run_forever())
 
 
 if __name__ == "__main__":

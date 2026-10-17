@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "as_of": "2026-09-30",
-  "description": "安徽、甘肃、宁夏、湖南、山东、河南、天津、中国地震局和中国煤炭地质总局已核验官方岗位表附件。只有标记为服务器待下载的附件才能进入受控下载队列；人工核验、历史已截止、来源不可用及不适合在校生的附件不得自动下载或发布。",
+  "as_of": "2026-10-13",
+  "description": "安徽、甘肃、宁夏、湖南、山东、河南、天津、中国地震局、中国煤炭地质总局和定西市已登记官方岗位表附件。只有标记为服务器待下载的附件才能进入受控下载队列；人工核验、历史已截止、来源不可用及不适合在校生的附件不得自动下载或发布。",
   "artifacts": [
     {
       "id": "anhui-geology-bureau-2026-high-level-position-table",
@@ -15,7 +15,7 @@
       "deadline_policy": "fixed_date",
       "observed_on": "2026-09-25",
       "status": "server_download_pending",
-      "note": "安徽省地矿局官网公告确认安徽工业经济职业技术学院2026年高层次人才招聘29人，岗位表含地质学、地质资源与地质工程等博士岗位。公告和附件已核验；服务器下载、逐行地点证据和人工复核完成前不得发布。"
+      "note": "安徽省地矿局官网公告确认安徽工业经济职业技术学院2026年高层次人才招聘29人，岗位表含地质学、地质资源与地质工程等博士岗位。2026-10-03 服务器受控读取的完整附件 SHA-256 为 7b68418eb03b47a2e232f05cc95174fb227c3c7e66e2ccc6bec84d60f60957a8，岗位代码2026113和2026120分别位于表格第17、24行。2026-10-08 复核学院官方人事处页面 https://www.ahiec.edu.cn/rsc/info/1028/1405.htm，仅确认学院地址为安徽省合肥市包河区祁门路66号；该页面不是本次招聘公告，岗位表也未列工作地点，不能作为岗位级地点证据。维持待复核状态，不得发布。"
     },
     {
       "id": "shandong-geology-bureau-2026-position-table",
@@ -95,8 +95,8 @@
       "notice_url": "http://gsdkj.net/xxgk/rsxx/content_103876",
       "attachment_url": "http://gsdkj.net/upload/main/contentmanage/article/file/2026/09/08/202609080914513449.pdf",
       "artifact_kind": "position_table",
-      "deadline_date": "2026-12-31",
-      "deadline_policy": "fixed_date",
+      "deadline_date": "",
+      "deadline_policy": "open_until_filled",
       "observed_on": "2026-09-27",
       "status": "server_download_pending",
       "note": "甘肃省地矿局官方补充公告说明高层次人才第一期岗位表已于2026-09-08调整，原公告报名自发布之日起至2026-12-31 18:00，按计划名额招满即止。最新 PDF 只作为岗位表证据，岗位级专业/学历/地点仍须复核。"
@@ -109,11 +109,11 @@
       "notice_url": "http://www.nxdizhiju.cn/zwgk/zfxxgkml/rsxx/202604/t20260422_5223747.html",
       "attachment_url": "http://www.nxdizhiju.cn/zwgk/zfxxgkml/rsxx/202604/W020260422644720955266.xls",
       "artifact_kind": "position_table",
-      "deadline_date": "2026-12-31",
-      "deadline_policy": "fixed_date",
+      "deadline_date": "",
+      "deadline_policy": "open_until_filled",
       "observed_on": "2026-09-27",
       "status": "server_download_pending",
-      "note": "宁夏回族自治区地质局官方公告明确拟招聘地质类专业博士研究生4名，公告有效期至2026-12-31，公告有效期内均可报名直至招满。岗位表为官方 XLS；专业条件变更另登记为补充附件并在复核时覆盖岗位002。"
+      "note": "宁夏回族自治区地质局官方公告明确拟招聘地质类专业博士研究生4名，公告有效期至2026-12-31，公告有效期内均可报名直至招满。该岗位按招满即止管理，不把公告有效期误作岗位截止日期；岗位表为官方 XLS，专业条件变更另登记为补充附件并在复核时覆盖岗位002。"
     },
     {
       "id": "ningxia-geology-bureau-2026-high-level-major-amendment",
@@ -123,8 +123,8 @@
       "notice_url": "http://www.nxdizhiju.cn/zwgk/zfxxgkml/rsxx/202608/t20260827_5324773.html",
       "attachment_url": "http://www.nxdizhiju.cn/zwgk/zfxxgkml/rsxx/202608/P020260827676113796535.xls",
       "artifact_kind": "announcement_attachment",
-      "deadline_date": "2026-12-31",
-      "deadline_policy": "fixed_date",
+      "deadline_date": "",
+      "deadline_policy": "open_until_filled",
       "observed_on": "2026-09-27",
       "status": "server_download_pending",
       "note": "宁夏地质局2026-08-27官方公告仅变更自治区地球物理地球化学调查院地质矿产岗（岗位代码002）所需专业；该附件不能单独代表完整岗位表，须与原始岗位表联合复核。"
@@ -184,6 +184,66 @@
       "observed_on": "2026-09-30",
       "status": "current_non_student_eligible",
       "note": "中国煤炭地质总局所属中国煤炭地质集团有限公司官网2026年度成熟人才公开招聘公告。服务器已直接核验官方公告和附件（HTTP 200；SHA-256 4d23a2558d490f32f1c31b1ac9c7f365949a48d2fe7a60964109acc80b1aa40f），岗位表共8行、13个计划名额；其性质为人员调配/成熟人才计划，多数行要求既有项目经验、工作年限、职称或执业资格。因此这是当前真实官方招聘，但不属于在校本科、硕士、博士学生端可推荐的岗位，不能自动解析或发布。"
+    },
+    {
+      "id": "dingxi-2026-second-high-level-position-table",
+      "source_id": "dingxi-party-recruitment",
+      "province": "甘肃",
+      "position_type": "public_institution",
+      "notice_url": "http://www.dxdjw.gov.cn/articles/2026/10/10/article_9_104645_1.html",
+      "attachment_url": "http://www.dxdjw.gov.cn/upfiles/2026/10/10/2026-10-10-15-55-32-1122610244.pdf",
+      "artifact_kind": "position_table",
+      "deadline_date": "2026-10-27",
+      "deadline_policy": "fixed_date",
+      "observed_on": "2026-10-13",
+      "status": "server_download_pending",
+      "evidence_mode": "row_self_contained",
+      "note": "定西党建网第一方公告附件1：事业单位引进高层次人才需求计划。公告明确事业单位（含带编入企）面向往届和2027年应届毕业生，报名截止2026-10-27 18:00；附件需逐行核对岗位代码、单位、专业、学历、地点及岗位类别，不能按公告306个岗位总数直接发布。"
+    },
+    {
+      "id": "dingxi-2026-second-bianzhi-enterprise-position-table",
+      "source_id": "dingxi-party-recruitment",
+      "province": "甘肃",
+      "position_type": "public_institution",
+      "notice_url": "http://www.dxdjw.gov.cn/articles/2026/10/10/article_9_104645_1.html",
+      "attachment_url": "http://www.dxdjw.gov.cn/upfiles/2026/10/10/2026-10-10-15-55-501047572618.pdf",
+      "artifact_kind": "position_table",
+      "deadline_date": "2026-10-27",
+      "deadline_policy": "fixed_date",
+      "observed_on": "2026-10-13",
+      "status": "server_download_pending",
+      "evidence_mode": "row_self_contained",
+      "note": "定西党建网第一方公告附件2：带编入企引进高层次人才需求计划。公告将其纳入事业单位引才（含带编入企）并适用2027年应届毕业生条件；岗位级单位性质和具体专业必须以附件行证据为准。"
+    },
+    {
+      "id": "dingxi-2026-second-urgent-shortage-position-table",
+      "source_id": "dingxi-party-recruitment",
+      "province": "甘肃",
+      "position_type": "public_institution",
+      "notice_url": "http://www.dxdjw.gov.cn/articles/2026/10/10/article_9_104645_1.html",
+      "attachment_url": "http://www.dxdjw.gov.cn/upfiles/2026/10/10/2026-10-10-15-56-12-784397598.pdf",
+      "artifact_kind": "position_table",
+      "deadline_date": "2026-10-27",
+      "deadline_policy": "fixed_date",
+      "observed_on": "2026-10-13",
+      "status": "server_download_pending",
+      "evidence_mode": "row_self_contained",
+      "note": "定西党建网第一方公告附件3：引进急需紧缺人才需求计划。仅将附件中的明确岗位行进入私有解析和学生资格复核，不把急需紧缺类别自动等同于四个毕业专业。"
+    },
+    {
+      "id": "dingxi-2026-second-enterprise-self-recruitment-position-table",
+      "source_id": "dingxi-party-recruitment",
+      "province": "甘肃",
+      "position_type": "state_owned_enterprise",
+      "notice_url": "http://www.dxdjw.gov.cn/articles/2026/10/10/article_9_104645_1.html",
+      "attachment_url": "http://www.dxdjw.gov.cn/upfiles/2026/10/10/2026-10-10-15-56-251252256727.pdf",
+      "artifact_kind": "position_table",
+      "deadline_date": "2026-10-27",
+      "deadline_policy": "fixed_date",
+      "observed_on": "2026-10-13",
+      "status": "current_non_student_eligible",
+      "evidence_mode": "row_self_contained",
+      "note": "定西党建网第一方公告附件4：企业自主引进人才需求计划。公告要求意向人员直接联系企业联系人，未对全部企业岗位统一承诺应届生或校园招聘资格；先保留官方证据但按学生范围外处理，不自动下载、解析或发布，待逐企业确认后再升级。"
     }
   ]
 }

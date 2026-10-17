@@ -113,6 +113,117 @@ def test_worker_falls_back_to_full_scan_only_when_partial_retry_is_stale(
     assert heartbeats[-1][0] == "running"
 
 
+def test_cmgb_worker_syncs_a_successful_full_capture_immediately(monkeypatch, tmp_path) -> None:
+    worker, source, heartbeats = _worker_with_source(tmp_path)
+
+    class FakePipeline:
+        def __init__(self) -> None:
+            self.calls = []
+
+        def sync_source_manual(self, received_source):
+            self.calls.append(received_source)
+            return SimpleNamespace(status="finished", error=None)
+
+    worker.pipeline = FakePipeline()
+    monkeypatch.setattr(
+        worker_module,
+        "run_cmgb_browser_capture",
+        lambda **_kwargs: {"status": "success", "scan": {"rows_exported": 1}},
+    )
+    worker._run_once()
+
+    assert worker.pipeline.calls == [source]
+    assert heartbeats[-1][0] == "running"
+
+
+def test_cmgb_worker_does_not_report_running_when_full_sync_fails(monkeypatch, tmp_path) -> None:
+    worker, _source, heartbeats = _worker_with_source(tmp_path)
+
+    class FakePipeline:
+        def sync_source_manual(self, _received_source):
+            return SimpleNamespace(status="failed", error="collector failed")
+
+    worker.pipeline = FakePipeline()
+    monkeypatch.setattr(
+        worker_module,
+        "run_cmgb_browser_capture",
+        lambda **_kwargs: {"status": "success", "scan": {}},
+    )
+    monkeypatch.setattr(worker_module, "write_cmgb_capture_failure", lambda **_kwargs: None)
+
+    worker._run_once()
+
+    assert heartbeats[-1][0] == "degraded"
+    assert "synchronization did not finish" in heartbeats[-1][1]
+
+
+def test_cmgb_one_shot_degraded_worker_returns_nonzero() -> None:
+    worker = CmgbBrowserWorker.__new__(CmgbBrowserWorker)
+    worker.stop_event = SimpleNamespace(is_set=lambda: False)
+    worker.run_once = True
+    worker._heartbeat = lambda status, detail="": setattr(worker, "_last_heartbeat_status", status)
+    worker._run_once = lambda: worker._heartbeat("degraded", "capture timeout")
+
+    assert worker.run_forever() == 1
+
+
+def test_worker_falls_back_to_full_scan_for_legacy_partial_without_manifest(
+    monkeypatch, tmp_path
+) -> None:
+    worker, _source, heartbeats = _worker_with_source(tmp_path)
+    failure = tmp_path / "captures" / "cmgb.failure.json"
+    failure.parent.mkdir(parents=True)
+    failure.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(
+        worker_module,
+        "run_cmgb_detail_retry",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            CmgbBrowserCaptureError("capture_evidence manifest is required")
+        ),
+    )
+    calls = []
+
+    def fake_full_capture(**kwargs):
+        calls.append(kwargs)
+        return {"status": "success", "scan": {"detail_failed": 0}}
+
+    monkeypatch.setattr(worker_module, "run_cmgb_browser_capture", fake_full_capture)
+
+    worker._run_once()
+
+    assert len(calls) == 1
+    assert heartbeats[-1][0] == "running"
+
+
+def test_worker_falls_back_when_windows_timeout_wraps_partial_precondition(
+    monkeypatch, tmp_path
+) -> None:
+    worker, _source, heartbeats = _worker_with_source(tmp_path)
+    failure = tmp_path / "captures" / "cmgb.failure.json"
+    failure.parent.mkdir(parents=True)
+    failure.write_text("{}", encoding="utf-8")
+    def fake_timeout(capture, **kwargs):
+        if capture is worker_module.run_cmgb_detail_retry:
+            raise RuntimeError(
+                "CmgbBrowserCaptureError: CMGB detail retry requires a partial capture"
+            )
+        return capture(**kwargs)
+
+    monkeypatch.setattr(worker_module, "run_capture_with_timeout", fake_timeout)
+    calls = []
+
+    def fake_full_capture(**kwargs):
+        calls.append(kwargs)
+        return {"status": "success", "scan": {"detail_failed": 0}}
+
+    monkeypatch.setattr(worker_module, "run_cmgb_browser_capture", fake_full_capture)
+
+    worker._run_once()
+
+    assert len(calls) == 1
+    assert heartbeats[-1][0] == "running"
+
+
 def test_cmgb_retry_configuration_is_scoped_to_the_cmgb_source() -> None:
     registry = json.loads(
         (Path(__file__).parent.parent / "data" / "sources.json").read_text(encoding="utf-8")

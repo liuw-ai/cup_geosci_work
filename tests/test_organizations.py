@@ -142,6 +142,31 @@ def test_organization_summary_separates_registered_entries_from_enabled_runtime_
     assert rows[1]["channels"][0]["source_enabled"] is None
 
 
+def test_shared_group_entries_generate_explicit_unit_binding_queue() -> None:
+    first = _organization("first", source_id="official-source")
+    second = _organization("second", source_id="official-source")
+    second["channels"][0]["official_url"] = first["channels"][0]["official_url"]
+    registry = validate_organization_registry(
+        _registry(first, second),
+        source_ids={"official-source"},
+    )
+
+    summary = organization_matrix_summary(
+        registry,
+        source_ids={"official-source"},
+        source_records=[{"id": "official-source", "enabled": True}],
+    )
+    quality = summary["unit_binding_quality"]
+    assert quality["unit_binding_queue_count"] == 2
+    assert {
+        item["organization_id"] for item in quality["unit_binding_queue"]
+    } == {"first", "second"}
+    assert all(
+        "job_detail_employer_field_binding" in item["required_evidence"]
+        for item in quality["unit_binding_queue"]
+    )
+
+
 def test_organization_contract_adds_one_primary_when_unspecified_and_rejects_multiple() -> None:
     row = _organization("root", source_id=None, status="official_confirmed", is_primary=False)
     normalized = validate_organization_registry(_registry(row), source_ids=set())

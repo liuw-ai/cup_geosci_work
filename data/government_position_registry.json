@@ -4,6 +4,9 @@
   "source_opening_dates": {
     "cea-2027-recruitment": "2026-10-10"
   },
+  "source_opening_at": {
+    "cea-2027-recruitment": "2026-10-10T08:00:00+08:00"
+  },
   "description": "事业单位与公务员职位表的官方证据台账。records 只保存逐岗位证据；source_assessments 保存尚未形成岗位行的年度入口状态。",
   "source_assessments": [
     {
@@ -15,7 +18,7 @@
       "official_attachment_url": "https://dkj.ah.gov.cn/group3/M00/14/5E/wKg86mnx3JSAe_TTAAA0PEnJC-Q385.xls",
       "deadline_date": "2026-10-31",
       "deadline_policy": "fixed_date",
-      "note": "公告与岗位表均为安徽省地质矿产勘查局官网内容；公告正文地址为安徽省合肥市屯溪路296号，岗位行已进入地点核验与发布流程。"
+      "note": "公告与岗位表均为安徽省地质矿产勘查局官网内容；2026-10-08 复核学院官方人事处页面 https://www.ahiec.edu.cn/rsc/info/1028/1405.htm，仅确认学院机构地址为安徽省合肥市包河区祁门路66号，未提供本次岗位逐项工作地点。岗位行继续进入地点核验与发布流程，不得将机构地址推断为岗位地点。"
     },
     {
       "source_id": "beijing-hrss",
@@ -153,7 +156,8 @@
       "source_id": "hunan-geology-institute",
       "position_type": "public_institution",
       "province": "湖南",
-      "location": "湖南省长沙市（具体报名地点按公告所列用人单位地址）",
+      "location": "湖南省",
+      "location_evidence_policy": "registry_province",
       "deadline_date": "",
       "deadline_policy": "open_until_filled",
       "official_notice_url": "http://rst.hunan.gov.cn/rst/xxgk/zpzl/sydwzp/202603/t20260330_33943916.html",
@@ -169,7 +173,7 @@
         "招聘人数",
         "附件定位"
       ],
-      "note": "湖南省人力资源和社会保障厅官方公告附件1逐岗位核验；公告报名自发布之日至2026-12-31，随到随招、招满即止。学生端必须每日复核公告状态，招满或公告撤回即清退。",
+      "note": "湖南省人力资源和社会保障厅官方公告附件1逐岗位核验；公告报名自发布之日至2026-12-31，随到随招、招满即止。公告列明各用人单位报名地址均在湖南省长沙市，岗位表未单列工作地点，因此学生端仅显示省级地点“湖南省”，不把报名地址冒充具体工作地址。学生端必须每日复核公告状态，招满或公告撤回即清退。",
       "rows": [
         [
           "A02",
@@ -2195,9 +2199,9 @@
       "official_notice_url": "https://dkj.ah.gov.cn/xwzx/tzgg/40788529.html",
       "official_attachment_url": "https://dkj.ah.gov.cn/group3/M00/14/5E/wKg86mnx3JSAe_TTAAA0PEnJC-Q385.xls",
       "evidence_locator": "2026年高层次人才招聘岗位汇总表!17",
-      "record_status": "verified_open",
+      "record_status": "manual_review_required",
       "match_status": "explicit_match",
-      "note": "专业和学历在官方岗位行中明确；地点依据官方公告正文地址：安徽省合肥市屯溪路296号。附件岗位表第17行，报名截止2026-10-31。"
+      "note": "专业、学历、人数和岗位代码已由官方附件第17行复核。安徽省地矿局网站页脚及学院人事处页面地址只能证明机构地址，不能作为本岗位工作地点证据；待取得招聘学院本次招聘公告或岗位级附件中的地点字段后才可发布。报名截止2026-10-31。"
     },
     {
       "id": "anhui-2026-2026120",
@@ -2216,9 +2220,9 @@
       "official_notice_url": "https://dkj.ah.gov.cn/xwzx/tzgg/40788529.html",
       "official_attachment_url": "https://dkj.ah.gov.cn/group3/M00/14/5E/wKg86mnx3JSAe_TTAAA0PEnJC-Q385.xls",
       "evidence_locator": "2026年高层次人才招聘岗位汇总表!24",
-      "record_status": "verified_open",
+      "record_status": "manual_review_required",
       "match_status": "explicit_match",
-      "note": "专业和学历在官方岗位行中明确；地点依据官方公告正文地址：安徽省合肥市屯溪路296号。附件岗位表第24行，报名截止2026-10-31。"
+      "note": "专业、学历、人数和岗位代码已由官方附件第24行复核。安徽省地矿局网站页脚及学院人事处页面地址只能证明机构地址，不能作为本岗位工作地点证据；待取得招聘学院本次招聘公告或岗位级附件中的地点字段后才可发布。报名截止2026-10-31。"
     },
     {
       "id": "hubei-2026-mineral-resource-management",
@@ -2252,6 +2256,7 @@
       "major_requirement": "地质学（070900，含矿物学、岩石学、矿床学、地球化学、构造地质学）、地质资源与地质工程（081800，含矿产普查与勘查、地球探测与信息技术、地质工程）等",
       "degree_requirement": "博士研究生",
       "location": "甘肃省兰州市七里河区兰工坪路121号",
+      "location_evidence_policy": "registry_province",
       "headcount": 3,
       "deadline_date": "",
       "deadline_policy": "open_until_filled",
@@ -2273,7 +2278,8 @@
       "major_requirement": "地质学、地质资源与地质工程、资源与环境（085700）等",
       "degree_requirement": "博士研究生",
       "location": "甘肃省兰州市城关区红星巷123号",
-      "headcount": 2,
+      "location_evidence_policy": "registry_province",
+      "headcount": 3,
       "deadline_date": "",
       "deadline_policy": "open_until_filled",
       "official_notice_url": "http://gsdkj.net/xxgk/rsxx/content_103876",
@@ -2294,6 +2300,7 @@
       "major_requirement": "矿产普查与勘探、地质工程、油气井工程、矿物学、岩石学、矿床学、构造地质学、地质学；本科或硕士研究生任一学习阶段专业须为地质（学）类、地质资源与地质工程等地质矿产类专业",
       "degree_requirement": "研究生，博士学位",
       "location": "宁夏回族自治区（公告未列具体市县）",
+      "location_evidence_policy": "registry_province",
       "headcount": 1,
       "deadline_date": "",
       "deadline_policy": "open_until_filled",
@@ -2315,6 +2322,7 @@
       "major_requirement": "勘探地球物理、综合地球物理、矿产资源地球物理、重磁电勘探、深地探测技术、地球物理大数据、地球化学、地质学；变更后增加地球探测与信息技术、资源与环境、矿物学、岩石学、矿床学、矿产普查与勘探及其他地质学类专业",
       "degree_requirement": "研究生，博士学位",
       "location": "宁夏回族自治区（公告未列具体市县）",
+      "location_evidence_policy": "registry_province",
       "headcount": 1,
       "deadline_date": "",
       "deadline_policy": "open_until_filled",
@@ -2336,6 +2344,7 @@
       "major_requirement": "矿物学、岩石学、矿床学、构造地质学、矿产普查与勘探、地质工程、第四纪地质学、地球探测与信息技术、核科学与技术及地质学（类）专业",
       "degree_requirement": "研究生，博士学位",
       "location": "宁夏回族自治区（公告未列具体市县）",
+      "location_evidence_policy": "registry_province",
       "headcount": 1,
       "deadline_date": "",
       "deadline_policy": "open_until_filled",
@@ -2357,6 +2366,7 @@
       "major_requirement": "矿物学、岩石学、矿床学、地球探测与信息技术、地图学与地理信息系统、古生物学与地层学、地球化学、地质学",
       "degree_requirement": "研究生，博士学位",
       "location": "宁夏回族自治区（公告未列具体市县）",
+      "location_evidence_policy": "registry_province",
       "headcount": 1,
       "deadline_date": "",
       "deadline_policy": "open_until_filled",

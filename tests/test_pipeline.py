@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta, timezone
 from dataclasses import replace
 
+import pytest
+
 from job_hub.audit import audit_database
 from job_hub.db import Database
 from job_hub.pipeline import JobPipeline
@@ -11,6 +13,51 @@ from job_hub.sources import RawPosting
 from job_hub.worker import DailyWorker
 
 from conftest import make_settings, source
+
+
+def test_growth_counter_recomputes_major_match_from_row_evidence(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    pipeline = JobPipeline(settings, Database(settings.database_path))
+    official_source = source()
+    base_job = {
+        "official_evidence_url": "https://careers.example.edu.cn/jobs/1",
+        "title": "地质工程技术岗",
+        "employer": "测试单位",
+        "location": "北京",
+        "deadline_date": "2027-10-01",
+        "field_evidence": {
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程技术岗",
+            "专业范围": "地质工程",
+            "学历要求": "硕士研究生",
+            "工作地点": "北京",
+        },
+        "publication_status": "student_eligible",
+    }
+
+    unknown_mode = {"official_url_count": 0, "field_complete_count": 0,
+                    "precise_major_pass_count": 0, "public_broad_pass_count": 0,
+                    "unrestricted_major_pass_count": 0}
+    pipeline._count_growth_row(unknown_mode, base_job, official_source)
+    assert unknown_mode["field_complete_count"] == 1
+    assert unknown_mode["precise_major_pass_count"] == 1
+    assert unknown_mode["public_broad_pass_count"] == 0
+
+    public_mode = dict(base_job)
+    public_mode["publication_basis"] = {"major_match_mode": "public_named_or_code"}
+    counts = {key: 0 for key in unknown_mode}
+    pipeline._count_growth_row(counts, public_mode, official_source)
+    assert counts["precise_major_pass_count"] == 1
+    assert counts["public_broad_pass_count"] == 0
+
+    broad = dict(base_job)
+    broad["field_evidence"] = dict(base_job["field_evidence"])
+    broad["field_evidence"]["专业范围"] = "地质类"
+    broad["publication_basis"] = {"major_match_mode": "exact_four_names"}
+    broad_counts = {key: 0 for key in unknown_mode}
+    pipeline._count_growth_row(broad_counts, broad, official_source)
+    assert broad_counts["field_complete_count"] == 1
+    assert broad_counts["precise_major_pass_count"] == 0
 
 
 class FakeCollector:
@@ -24,6 +71,14 @@ class FakeCollector:
 class FailingCollector:
     def collect(self, _source: object) -> list[RawPosting]:
         raise RuntimeError("unexpected source parser failure")
+
+
+class MultiPostingCollector:
+    def __init__(self, postings: list[RawPosting]) -> None:
+        self.postings = postings
+
+    def collect(self, _source: object) -> list[RawPosting]:
+        return list(self.postings)
 
 
 def test_source_retry_delay_is_bounded_and_policy_failures_are_slower(tmp_path) -> None:
@@ -51,6 +106,87 @@ def test_source_retry_delay_is_bounded_and_policy_failures_are_slower(tmp_path) 
     assert pipeline._source_retry_after_seconds(
         {"consecutive_failures": 2}, blocked=True
     ) == 180
+
+
+def test_source_scoped_domestic_address_gate_keeps_official_detail_job_public(
+    tmp_path,
+) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    official_source["config"] = {
+        **official_source["config"],
+        "allow_unclassified_domestic_address": True,
+    }
+    database.upsert_source(official_source)
+    posting = RawPosting(
+        title="勘探地质技术岗",
+        employer="中国海油测试单位",
+        source_url="https://careers.example.edu.cn/jobs/address-only",
+        application_url="https://careers.example.edu.cn/apply/address-only",
+        text="地质工程硕士可报，官方岗位详情地点为南调路1388号，报名截止时间为2027年10月1日。",
+        summary="官方岗位级详情。",
+        published_date="2026-10-02",
+        deadline_date="2027-10-01",
+        location="南调路1388号",
+        external_id="address-only",
+        field_evidence={
+            "evidence_scope": "official_cnooc_browser_detail",
+            "岗位": "勘探地质技术岗",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+            "工作地点": "南调路1388号",
+        },
+        qualification_text="学历要求：硕士；专业要求：地质工程",
+    )
+    pipeline = JobPipeline(settings, database)
+
+    normalized = pipeline.normalize_posting(posting, official_source)
+
+    assert normalized["publication_status"] == "student_eligible"
+    assert normalized["country_or_region"] == "中国大陆"
+    assert normalized["province"] is None
+
+
+def test_structured_detail_location_repairs_unknown_historical_address(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    database.upsert_source(official_source)
+    posting = RawPosting(
+        title="井下作业主办",
+        employer="中国海油测试单位",
+        source_url="https://careers.example.edu.cn/jobs/detail-location",
+        application_url="https://careers.example.edu.cn/apply/detail-location",
+        text=(
+            "任职要求：学历要求：硕士；专业要求：资源勘查工程、地质工程等相关专业；"
+            "工作地点：山西吕梁；报名截止时间为2027年10月1日。"
+        ),
+        summary="官方岗位级详情。",
+        published_date="2026-10-01",
+        deadline_date="2027-10-01",
+        location="左子坪乡",
+        external_id="detail-location",
+        field_evidence={
+            "evidence_scope": "official_zhaopin_detail_initial_data",
+            "岗位": "井下作业主办",
+            "专业范围": "资源勘查工程、地质工程等相关专业；工作地点：山西吕梁",
+            "学历要求": "硕士",
+            "工作地点": "左子坪乡",
+        },
+        qualification_text="学历要求：硕士；专业要求：资源勘查工程、地质工程",
+    )
+
+    normalized = JobPipeline(settings, database).normalize_posting(
+        posting, official_source
+    )
+
+    assert normalized["location"] == "山西吕梁"
+    assert normalized["province"] == "山西"
+    assert normalized["country_or_region"] == "中国大陆"
+    assert normalized["publication_status"] == "student_eligible"
 
 
 def test_pipeline_deduplicates_and_creates_daily_change(tmp_path) -> None:
@@ -99,6 +235,57 @@ def test_pipeline_deduplicates_and_creates_daily_change(tmp_path) -> None:
     assert database.count_jobs_for_source("official-test-source") == 0
     with database.connect() as connection:
         assert connection.execute("SELECT COUNT(*) FROM job_events").fetchone()[0] == 0
+
+
+def test_sync_source_rolls_back_staged_rows_when_later_normalization_fails(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    database.upsert_source(official_source)
+    postings = [
+        RawPosting(
+            title="第一条岗位",
+            employer="测试能源集团",
+            source_url="https://careers.example.edu.cn/jobs/first",
+            application_url=None,
+            text="地质工程硕士，工作地点北京，报名截止时间为2027年1月1日。",
+            summary="岗位一",
+            published_date="2026-10-01",
+            deadline_date="2027-01-01",
+            location="北京",
+            external_id="first",
+        ),
+        RawPosting(
+            title="第二条岗位",
+            employer="测试能源集团",
+            source_url="https://careers.example.edu.cn/jobs/second",
+            application_url=None,
+            text="地质工程硕士，工作地点山东，报名截止时间为2027年1月1日。",
+            summary="岗位二",
+            published_date="2026-10-01",
+            deadline_date="2027-01-01",
+            location="山东",
+            external_id="second",
+        ),
+    ]
+    pipeline = JobPipeline(settings, database, MultiPostingCollector(postings))
+    original_normalize = pipeline.normalize_posting
+    calls = 0
+
+    def fail_on_second(posting: RawPosting, source_record: dict[str, object]) -> dict[str, object]:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise RuntimeError("second row parser failure")
+        return original_normalize(posting, source_record)
+
+    pipeline.normalize_posting = fail_on_second  # type: ignore[method-assign]
+    result = pipeline.sync_source(database.get_source("official-test-source"))
+
+    assert result.status == "failed"
+    assert database.count_jobs_for_source("official-test-source") == 0
+    assert database.list_source_health()[0]["status"] == "source_error"
 
 
 def test_opt_in_expired_dynamic_rows_do_not_enter_private_review_queue(tmp_path) -> None:
@@ -200,6 +387,69 @@ def test_sync_all_reports_progress_without_changing_results(tmp_path) -> None:
     assert result.source_results[0].status == "finished"
     assert events[0] == (0, 1, "official-test-source")
     assert events[-1] == (1, 1, "official-test-source")
+
+
+def test_sync_all_skips_browser_worker_only_source(tmp_path) -> None:
+    """The general worker must not reread a browser worker's capture file."""
+
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    browser_source = source()
+    browser_source["config"] = {"runtime_mode": "browser_worker_only"}
+    database.upsert_source(browser_source)
+
+    result = JobPipeline(settings, database, FailingCollector()).sync_all()
+
+    assert result.source_results == []
+    with database.connect() as connection:
+        assert connection.execute("SELECT COUNT(*) FROM crawl_runs").fetchone()[0] == 0
+
+
+def test_complete_browser_capture_can_atomically_enable_and_publish_source(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    browser_source = source()
+    browser_source["enabled"] = False
+    browser_source["config"] = {
+        "minimum_relevance": 0,
+        "runtime_mode": "browser_worker_only",
+        "background_capture_enabled": True,
+    }
+    database.upsert_source(browser_source)
+    posting = RawPosting(
+        title="油气地质研究岗",
+        employer="测试能源集团",
+        source_url="https://careers.example.edu.cn/jobs/atomic-enable",
+        application_url="https://careers.example.edu.cn/apply/atomic-enable",
+        text="专业要求：地质工程。学历要求：硕士。工作地点：北京。",
+        summary="官方岗位级详情。",
+        published_date="2026-10-01",
+        deadline_date="2027-01-01",
+        location="北京",
+        external_id="atomic-enable",
+        field_evidence={
+            "evidence_scope": "official_browser_capture_row",
+            "岗位": "油气地质研究岗",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+            "工作地点": "北京",
+        },
+        qualification_text="专业要求：地质工程；学历要求：硕士",
+    )
+
+    result = JobPipeline(settings, database, FakeCollector(posting)).sync_source_atomically(
+        database.get_source("official-test-source"),
+        before_commit=lambda: database.set_source_enabled("official-test-source", True),
+    )
+
+    assert result.status == "finished"
+    assert database.get_source("official-test-source")["enabled"] is True
+    jobs, total = database.list_jobs(page_size=None)
+    assert total == 1
+    assert jobs[0]["external_id"] == "atomic-enable"
+    assert jobs[0]["publication_status"] == "student_eligible"
 
 
 def test_sync_all_recovers_expired_source_task_before_claiming_it(tmp_path) -> None:
@@ -414,6 +664,302 @@ def test_reindex_preserves_retired_job_lifecycle_status(tmp_path) -> None:
     retired = database.find_job(job_id, student_visible=False)
     assert retired is not None
     assert retired["status"] == "superseded"
+
+
+def test_reindex_keeps_disabled_source_rows_private(tmp_path) -> None:
+    """Taxonomy maintenance must not republish a disabled source snapshot."""
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    disabled_source = source()
+    disabled_source["id"] = "disabled-reindex-source"
+    disabled_source["enabled"] = False
+    database.upsert_source(disabled_source)
+    pipeline = JobPipeline(settings, database)
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(
+            RawPosting(
+                title="停用来源地质工程岗",
+                employer="测试能源集团",
+                source_url="https://careers.example.edu.cn/jobs/disabled-reindex",
+                application_url=None,
+                text="地质工程专业硕士，工作地点北京。",
+                summary="停用官方来源的历史岗位。",
+                published_date="2026-10-01",
+                deadline_date="2026-12-31",
+                location="北京",
+                field_evidence={
+                    "evidence_scope": "official_html_table_row",
+                    "岗位": "停用来源地质工程岗",
+                    "专业范围": "地质工程",
+                    "学历要求": "硕士",
+                    "工作地点": "北京",
+                },
+            ),
+            disabled_source,
+        )
+    )
+
+    result = pipeline.reindex_jobs()
+    retained = database.find_job(job_id, student_visible=False)
+
+    assert result["reclassified"] >= 1
+    assert retained is not None
+    assert retained["publication_status"] == "pending_evidence"
+    assert database.list_jobs(page_size=None, student_visible=True)[1] == 1
+    assert database.list_jobs(page_size=None, student_visible=True)[0][0]["publication_layer"] == "source_unavailable"
+
+
+def test_reindex_repairs_legacy_cnooc_detail_evidence_before_publication(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    cnooc_source = source()
+    cnooc_source.update(
+        {
+            "id": "cnooc-career-browser",
+            "source_type": "cnooc_browser_rows",
+            "homepage_url": "https://cnooc.zhaopin.com/",
+        }
+    )
+    database.upsert_source(cnooc_source)
+    pipeline = JobPipeline(settings, database)
+    legacy_detail = (
+        "岗位职责：开展地质资料解释。"
+        "任职要求：1.学历要求：硕士研究生及以上 "
+        "2.专业要求：地质学、地球物理学 "
+        "3.外语要求：大学英语六级"
+    )
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(
+            RawPosting(
+                title="地质科研岗",
+                employer="中国海油测试单位",
+                source_url="https://xiaoyuan.zhaopin.com/job/CC258591510J40972459615",
+                application_url=None,
+                text=legacy_detail,
+                summary="中国海油官方岗位详情。",
+                published_date="2026-10-01",
+                deadline_date="2027-10-01",
+                location="湛江",
+                external_id="CC258591510J40972459615",
+                field_evidence={
+                    "evidence_scope": "official_zhaopin_detail_initial_data",
+                    "岗位": "地质科研岗",
+                    "专业要求": legacy_detail,
+                    "专业范围": legacy_detail,
+                    "学历要求": "硕士",
+                    "工作地点": "湛江",
+                },
+            ),
+            cnooc_source,
+        )
+    )
+
+    result = pipeline.reindex_jobs()
+    repaired = database.find_job(job_id, student_visible=False)
+
+    assert result["evidence_repaired"] == 1
+    assert result["evidence_repair_failed"] == 0
+    assert repaired is not None
+    assert repaired["field_evidence"]["专业范围"] == "地质学、地球物理学"
+    assert repaired["field_evidence"]["学历要求"] == "硕士研究生及以上"
+    assert repaired["publication_status"] == "student_eligible"
+
+
+def test_reindex_keeps_unrepairable_legacy_cnooc_detail_private(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    cnooc_source = source()
+    cnooc_source.update(
+        {
+            "id": "cnooc-career-browser",
+            "source_type": "cnooc_browser_rows",
+            "homepage_url": "https://cnooc.zhaopin.com/",
+        }
+    )
+    database.upsert_source(cnooc_source)
+    pipeline = JobPipeline(settings, database)
+    legacy_detail = "岗位职责：开展地质资料解释。学历要求：硕士研究生及以上。"
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(
+            RawPosting(
+                title="地质技术岗",
+                employer="中国海油测试单位",
+                source_url="https://xiaoyuan.zhaopin.com/job/CC258591510J40972459999",
+                application_url=None,
+                text=legacy_detail,
+                summary="中国海油官方岗位详情。",
+                published_date="2026-10-01",
+                deadline_date="2027-10-01",
+                location="北京",
+                external_id="CC258591510J40972459999",
+                field_evidence={
+                    "evidence_scope": "official_zhaopin_detail_initial_data",
+                    "岗位": "地质技术岗",
+                    "专业要求": legacy_detail,
+                    "专业范围": legacy_detail,
+                    "学历要求": "硕士",
+                    "工作地点": "北京",
+                },
+            ),
+            cnooc_source,
+        )
+    )
+
+    result = pipeline.reindex_jobs()
+    repaired = database.find_job(job_id, student_visible=False)
+
+    assert result["evidence_repaired"] == 0
+    assert result["evidence_repair_failed"] == 1
+    assert repaired is not None
+    assert repaired["publication_status"] == "pending_evidence"
+    assert database.list_jobs(page_size=None, student_visible=True)[1] == 0
+
+
+def test_reindex_restamps_enterprise_major_match_mode_and_rejects_broad_legacy_row(
+    tmp_path,
+) -> None:
+    """Historical rows must be re-evaluated after the four-major policy changes."""
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    enterprise_source = source()
+    enterprise_source.update(
+        {
+            "id": "enterprise-reindex-source",
+            "category": "油气上游业主与研究机构",
+            "config": {"allowed_hosts": ["careers.example.edu.cn"]},
+        }
+    )
+    database.upsert_source(enterprise_source)
+    pipeline = JobPipeline(settings, database)
+
+    exact_id, _ = database.save_job(
+        pipeline.normalize_posting(
+            RawPosting(
+                title="地质工程技术岗",
+                employer="测试能源集团",
+                source_url="https://careers.example.edu.cn/jobs/exact",
+                application_url=None,
+                text="专业要求：地质工程。学历要求：硕士研究生。",
+                summary="官方岗位。",
+                published_date="2026-10-01",
+                deadline_date="2099-12-31",
+                location="北京",
+                external_id="exact",
+                field_evidence={
+                    "evidence_scope": "official_html_table_row",
+                    "岗位": "地质工程技术岗",
+                    "专业范围": "地质工程",
+                    "学历要求": "硕士研究生",
+                    "工作地点": "北京",
+                },
+            ),
+            enterprise_source,
+        )
+    )
+    broad_id, _ = database.save_job(
+        pipeline.normalize_posting(
+            RawPosting(
+                title="地学技术岗",
+                employer="测试能源集团",
+                source_url="https://careers.example.edu.cn/jobs/broad",
+                application_url=None,
+                text="专业要求：地质类。学历要求：硕士研究生。",
+                summary="官方岗位。",
+                published_date="2026-10-01",
+                deadline_date="2099-12-31",
+                location="北京",
+                external_id="broad",
+                field_evidence={
+                    "evidence_scope": "official_html_table_row",
+                    "岗位": "地学技术岗",
+                    "专业范围": "地质类",
+                    "学历要求": "硕士研究生",
+                    "工作地点": "北京",
+                },
+            ),
+            enterprise_source,
+        )
+    )
+
+    # Simulate a legacy row written before publication_basis was persisted.
+    with database.connect() as connection:
+        connection.execute(
+            "UPDATE jobs SET publication_status = 'student_eligible', publication_basis_json = '{}' WHERE id = ?",
+            (broad_id,),
+        )
+        connection.commit()
+
+    result = pipeline.reindex_jobs()
+    exact = database.find_job(exact_id, student_visible=False)
+    broad = database.find_job(broad_id, student_visible=False)
+    assert result["reclassified"] >= 1
+    assert exact is not None
+    assert exact["publication_status"] == "student_eligible"
+    assert exact["publication_basis"]["major_match_mode"] == "exact_four_names"
+    assert broad is not None
+    assert broad["publication_status"] == "out_of_scope"
+    assert broad["publication_basis"]["major_match_mode"] == ""
+
+
+def test_reindex_rolls_back_all_rows_when_one_normalization_fails(tmp_path, monkeypatch) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    official_source = source()
+    database.upsert_source(official_source)
+    pipeline = JobPipeline(settings, database)
+    for suffix in ("one", "two"):
+        database.save_job(
+            pipeline.normalize_posting(
+                RawPosting(
+                    title=f"地质工程技术岗-{suffix}",
+                    employer="测试能源集团",
+                    source_url=f"https://careers.example.edu.cn/jobs/{suffix}",
+                    application_url=None,
+                    text="专业要求：地质工程。学历要求：硕士。",
+                    summary="官方岗位。",
+                    published_date="2026-10-01",
+                    deadline_date="2027-10-01",
+                    location="北京",
+                    field_evidence={
+                        "evidence_scope": "official_html_table_row",
+                        "岗位": f"地质工程技术岗-{suffix}",
+                        "专业范围": "地质工程",
+                        "学历要求": "硕士",
+                        "工作地点": "北京",
+                    },
+                ),
+                official_source,
+            )
+        )
+    with database.connect() as connection:
+        before_events = connection.execute(
+            "SELECT COUNT(*) FROM job_events WHERE event_type = 'reclassified'"
+        ).fetchone()[0]
+    original = database.update_derived_job_fields
+    calls = 0
+
+    def fail_on_second(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise RuntimeError("simulated reindex failure")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(database, "update_derived_job_fields", fail_on_second)
+
+    with pytest.raises(RuntimeError, match="simulated reindex failure"):
+        pipeline.reindex_jobs()
+
+    with database.connect() as connection:
+        after_events = connection.execute(
+            "SELECT COUNT(*) FROM job_events WHERE event_type = 'reclassified'"
+        ).fetchone()[0]
+    assert after_events == before_events
 
 
 def test_delete_job_removes_only_the_exact_invalid_record(tmp_path) -> None:
@@ -669,11 +1215,18 @@ def test_audit_accepts_official_host_and_rejects_no_integrity_issues(tmp_path) -
     database.save_job(
         pipeline.normalize_posting(posting, official_source)
     )
+    database.record_source_capture_freshness(
+        official_source["id"],
+        captured_at="2026-09-18T00:00:00Z",
+    )
 
     result = audit_database(database, settings, date(2026, 9, 18))
 
     assert result["ok"] is True
     assert result["checked_jobs"] == 1
+    # This fixture intentionally lacks row-level major evidence, so it is
+    # audited without being counted as a current student-facing vacancy.
+    assert result["current_public_jobs"] == 0
     assert result["issues"] == []
 
 

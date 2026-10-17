@@ -38,6 +38,7 @@ def sinopec_source() -> dict[str, object]:
             "candidate_enterprise_total": 35,
             "max_items": 500,
             "require_complete_manifest": False,
+            "split_location_rows": True,
         },
     }
 
@@ -67,7 +68,7 @@ def test_sinopec_spa_rows_preserve_official_field_evidence(tmp_path: Path) -> No
     )
     postings = collector.collect(sinopec_source())
 
-    assert len(postings) == 348
+    assert len(postings) == 756
     geology = next(posting for posting in postings if posting.title == "油气地质研究岗")
     assert geology.employer == "胜利油田"
     assert geology.location.startswith("山东东营")
@@ -78,11 +79,34 @@ def test_sinopec_spa_rows_preserve_official_field_evidence(tmp_path: Path) -> No
     assert geology.field_evidence["招聘人数"] == "125人"
 
 
+def test_sinopec_spa_rows_split_explicit_locations(tmp_path: Path) -> None:
+    collector = OfficialSourceCollector(
+        replace(make_settings(tmp_path), max_source_items=500)
+    )
+    postings = collector.collect(sinopec_source())
+
+    rows = [
+        posting
+        for posting in postings
+        if posting.external_id.startswith(
+            "sinopec-BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75-02--location-"
+        )
+    ]
+    assert len(rows) > 1
+    assert len({posting.location for posting in rows}) == len(rows)
+    assert all(posting.field_evidence["工作地点"] == posting.location for posting in rows)
+    assert all(
+        posting.field_evidence["地点拆分基准岗位"].endswith("-02")
+        for posting in rows
+    )
+
+
 def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> None:
     """The full capture must be audited before the source can be promoted.
 
-    This locks the distinction between explicit matches, ambiguous related
-    wording and rejected majors for the reviewed 2026-09-24 capture.  It also
+    This locks the distinction between explicit matches, separately labelled
+    similar-major wording, ambiguous evidence and rejected majors for the
+    reviewed 2026-09-24 capture. It also
     prevents a future parser change from silently publishing all 348 rows.
     """
     settings = replace(make_settings(tmp_path), max_source_items=500)
@@ -102,22 +126,29 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
             "official_sinopec_detail_snapshot"
         )
 
-    assert len(rows) == 348
+    assert len(rows) == 756
     assert statuses == {
-        "student_eligible": 70,
-        "pending_evidence": 98,
-        "out_of_scope": 180,
+        "student_eligible": 158,
+        "similar_eligible": 1,
+        "pending_evidence": 41,
+        "out_of_scope": 556,
     }
+    mixed_assignment = next(
+        row
+        for row in rows
+        if row["external_id"] == "sinopec-52A3CE39-F9D8-4309-B48E-F55580E8E11C-01"
+    )
+    assert mixed_assignment["country_or_region"] == "境内外混合"
+    assert mixed_assignment["publication_status"] == "out_of_scope"
     huadong_research = next(
         row
         for row in rows
         if row["external_id"]
         == "sinopec-F76DDBE3-0690-412B-9A85-1B2DEB6F3FE3-01"
     )
-    assert huadong_research["publication_status"] == "student_eligible"
-    assert huadong_research["publication_basis"]["matched_profile_ids"] == [
-        "doctoral-geological-resources-engineering"
-    ]
+    assert huadong_research["publication_status"] == "similar_eligible"
+    assert huadong_research["publication_basis"]["matched_profile_ids"]
+    assert huadong_research["publication_basis"]["major_match_mode"] == "similar_major"
     assert "矿产普查与勘探" in huadong_research["field_evidence"]["专业要求原文"]
     assert all(
         row["publication_basis"]["matched_profile_ids"]
@@ -127,12 +158,18 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
     assert all(
         not row["publication_basis"]["matched_profile_ids"]
         for row in rows
-        if row["publication_status"] != "student_eligible"
+        if row["publication_status"] == "out_of_scope"
+    )
+    assert all(
+        row["publication_basis"]["matched_profile_ids"]
+        and row["publication_basis"]["major_match_mode"] == "similar_major"
+        for row in rows
+        if row["publication_status"] == "similar_eligible"
     )
 
 
 def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
-    """A promoted source stores the full audit set but exposes only 70 rows."""
+    """A promoted source stores the full audit set but exposes only 159 rows."""
     settings = replace(make_settings(tmp_path), max_source_items=500)
     database = Database(settings.database_path)
     database.initialize()
@@ -147,8 +184,8 @@ def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
 
     result = pipeline.sync_source(source)
     assert result.status == "finished"
-    assert result.discovered == 348
-    assert result.open_matches == 70
+    assert result.discovered == 756
+    assert result.open_matches == 158
 
     public_rows, public_count = database.list_jobs(page_size=None)
     audit_rows, audit_count = database.list_jobs(
@@ -160,16 +197,18 @@ def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
         row for row in audit_rows if row["source_id"] == "sinopec-career"
     ]
 
-    assert public_count == 70
-    assert len(public_rows) == 70
-    assert audit_count == 348
-    assert len(source_audit_rows) == 348
+    assert public_count == 160
+    assert len(public_rows) == 160
+    assert audit_count == 756
+    assert len(source_audit_rows) == 756
     assert all(
-        row["publication_status"] in {"student_eligible", "unrestricted_eligible"}
+        row["publication_status"]
+        in {"student_eligible", "unrestricted_eligible", "similar_eligible", "pending_evidence"}
         for row in public_rows
     )
     assert {row["publication_status"] for row in source_audit_rows} == {
         "student_eligible",
+        "similar_eligible",
         "pending_evidence",
         "out_of_scope",
     }
