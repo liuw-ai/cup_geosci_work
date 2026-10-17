@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-17T11:25:43Z",
+  "generated_at": "2026-10-17T11:28:26Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "c6c8963777eb0391a6edaadb627a6bad63842901",
+  "git_sha": "d7c2e8d9114d12a18591b1a48e425b79be549c36",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -84,6 +84,12 @@
       {
         "source_id": "gongkaoleida-discovery",
         "host": "www.gongkaoleida.com",
+        "status": "blocked",
+        "reason": "user_denied_browser_permission"
+      },
+      {
+        "source_id": "yingjiesheng-discovery",
+        "host": "www.yingjiesheng.com",
         "status": "blocked",
         "reason": "user_denied_browser_permission"
       }
