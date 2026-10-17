@@ -15,6 +15,13 @@
     "path": "deploy/compose.yaml",
     "config_check": "passed"
   },
+  "third_party_access_revalidation": {
+    "source_id": "offcn-discovery",
+    "checked_at": "2026-10-17T11:08:36Z",
+    "status": "blocked",
+    "access_policy": "saved_browser_permission_blocked",
+    "action_taken": "read_only_navigation_attempted; no download, login, captcha, CDP, curl, or robots bypass"
+  },
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
@@ -32,6 +39,7 @@
   },
   "release_status": "not_publishable",
   "release_blockers": [
+    "official_site_browser_permission_blocked",
     "no_audited_third_party_table_batch_imported",
     "three_oil_external_identity_evidence_pending",
     "three_oil_unit_entry_evidence_incomplete",
