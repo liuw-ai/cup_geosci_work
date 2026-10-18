@@ -20,6 +20,15 @@ python scripts/verify_phase4_manifest.py
 python -m pytest -q
 ```
 
+如果重新生成了任一 Phase 4 审计报告，必须按依赖顺序刷新全部元数据，避免报告哈希与 Manifest 脱节：
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+python scripts/refresh_phase4_metadata.py
+```
+
+该脚本只生成当前审计文件并执行只读校验，不修改岗位数据库、服务器或自动化状态。
+
 `verify_phase4_manifest.py` 会重新计算生产 Compose、Dockerfile、配置和运行数据库的 SHA-256，检查 SQLite 完整性、Manifest 统计、源提交存在性，以及“未部署/自动化暂停/发布阻塞项”边界。校验失败时不得生成部署批准。
 
 ## 1. 目标目录
