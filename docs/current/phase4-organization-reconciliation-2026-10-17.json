@@ -1,15 +1,15 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T10:12:47Z",
+  "generated_at": "2026-10-18T13:23:15Z",
   "purpose": "Phase 4 read-only reconciliation; non-catalog records are not production inputs.",
   "external_evidence_policy": "Do not promote a display or registry name without an official group page, legal-registration record, or official recruitment evidence.",
   "summary": {
     "catalog_group_count": 3,
     "catalog_unit_count": 64,
-    "registry_related_organization_count": 295,
+    "registry_related_organization_count": 303,
     "scope_status_counts": {
       "formal_catalog": 64,
-      "display_candidate_unverified": 231
+      "display_candidate_unverified": 239
     },
     "catalog_units_by_group": {
       "cnpc": 27,
@@ -18,7 +18,7 @@
     },
     "registry_channel_verification_counts": {
       "official_confirmed": 75,
-      "candidate": 238,
+      "candidate": 246,
       "automation_ready": 1
     }
   },
@@ -2927,6 +2927,166 @@
       },
       "channel_ids": [
         "sinopec-display-131-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-extra-exploration-research",
+      "canonical_name": "石油勘探开发研究院",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-extra-exploration-research-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-extra-international-exploration",
+      "canonical_name": "国际石油勘探公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-extra-international-exploration-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-extra-jianghan-oilfield",
+      "canonical_name": "江汉油田",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-extra-jianghan-oilfield-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-extra-lubricants",
+      "canonical_name": "润滑油公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-extra-lubricants-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-extra-petroleum-engineering-construction",
+      "canonical_name": "石油工程建设有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-extra-petroleum-engineering-construction-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-extra-petroleum-engineering-research",
+      "canonical_name": "石油工程技术研究院",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "research_institute",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-extra-petroleum-engineering-research-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-extra-petroleum-machinery",
+      "canonical_name": "石油机械股份有限公司",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "internal_technical_service",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-extra-petroleum-machinery-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-extra-shengli-oilfield",
+      "canonical_name": "胜利油田",
+      "parent_id": "sinopec",
+      "parent_name": null,
+      "affiliation": "中国石化体系",
+      "organization_role_legacy": "upstream_operator",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-extra-shengli-oilfield-channel-1"
       ],
       "official_urls": [
         "https://job.sinopec.com/"
