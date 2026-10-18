@@ -4,6 +4,13 @@
 project. It is evaluated from this directory, so the build context and
 versioned data mounts intentionally use `..` paths.
 
+The application build is explicitly pinned to
+`deploy/docker/Dockerfile.app`, and the browser-worker build input is kept at
+`deploy/docker/Dockerfile.browser`. Their SHA-256 values are recorded in the
+Phase 4 Manifest. The root Dockerfiles remain local-compatibility artifacts
+until the old development compose contract is retired; they are not
+production build inputs.
+
 The root `docker-compose.yml` remains a local-development compatibility file;
 it is not a production rollout command. Phase overlays, location-fix files,
 and old Dockerfiles are historical artifacts and must not be combined with
