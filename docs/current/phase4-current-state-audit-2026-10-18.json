@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T10:39:32Z",
+  "generated_at": "2026-10-18T10:54:09Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "c86247d4f3c892a6f6674964247d32c9d62a3ca1",
+  "git_sha": "be6c3428446a8e58d92ec2229d41a477cd0d52f8",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -89,9 +89,13 @@
       "path": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
       "sha256": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878"
     },
+    "phase4_third_party_blocked_batches": {
+      "path": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
+      "sha256": "cafde30bdbe3deb152589c5da2e16181613c43223e614ea165bd6feaa6284e6b"
+    },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "c1cdd1fabc1c0e7d81007a0b141a4c4169856b0aa4eabc9c580a195c3368f73d"
+      "sha256": "0f42b8b19f32a548f80b83a8d0c8b690c65de4c6d9c4e7e486c0e380da4379ed"
     }
   },
   "code_inventory": [
@@ -557,8 +561,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 237,
-      "sha256": "b5acd81929ebb06765a48489d0620837e914b3beae056e5120f0ef3c68b9be13"
+      "line_count": 242,
+      "sha256": "feafb3cfc356eef372ee131c0ed6cb19e74904930df244fa2f155558f2ea639f"
     },
     {
       "path": "scripts/build_phase3_manifest.py",
@@ -567,8 +571,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 229,
-      "sha256": "c53c3f6ccdb84891067cfb37f27bc9667f60ea58d40d90f23965d26afd994a79"
+      "line_count": 232,
+      "sha256": "2ca512f770f7efa9d44b22ff3b479dd842b165b32ebb115a750f677a69d9d5e1"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
