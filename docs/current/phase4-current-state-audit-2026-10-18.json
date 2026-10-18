@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T17:49:17Z",
+  "generated_at": "2026-10-18T17:57:42Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "af32d27b2265515c9fe40b8a8d0190208c7c6224",
+  "git_sha": "516b7ccb8fdb9b724ee39922d72c5733ff8fc9ed",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -91,9 +91,9 @@
         "sha256": "070d0961e86815283df9b831cbb0e020c890b5c128bd53bc32f58ae72f8d3486"
       },
       {
-        "path": "docs/current/phase4-local-validation-2026-10-18.json",
+        "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "ac6eb474ec720dcd1617a7d6b4b3cc531e4dbcb849a61eb4027814bbc78a3990"
+        "sha256": "27ef9a4a69d0a5c02315a6b70420b3e7cc4f9784fd1bf304b0c861efdb7b8222"
       }
     ],
     "metadata_documents": [
@@ -144,8 +144,8 @@
       "sha256": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1"
     },
     "phase4_local_validation": {
-      "path": "docs/current/phase4-local-validation-2026-10-18.json",
-      "sha256": "ac6eb474ec720dcd1617a7d6b4b3cc531e4dbcb849a61eb4027814bbc78a3990"
+      "path": "docs/current/phase4-local-validation-2026-10-19.json",
+      "sha256": "27ef9a4a69d0a5c02315a6b70420b3e7cc4f9784fd1bf304b0c861efdb7b8222"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -648,7 +648,7 @@
     {
       "path": "scripts/audit_phase4_current_state.py",
       "line_count": 340,
-      "sha256": "f5eee391f45913a44865c5feac1fa80a90b0be06ae07baf85fa26c011be8a4fb"
+      "sha256": "070207436e09e6f600e9f0fa44135c6700b6f59df48d51e892c72fb9e0392d1b"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -663,7 +663,7 @@
     {
       "path": "scripts/build_phase4_manifest.py",
       "line_count": 310,
-      "sha256": "bc0cc221ce13e2deaff2be1184c9a7523cf6d5dd1f6804cbb42bfe0914d39766"
+      "sha256": "10cc2aa66d94f7470b0ed8af1317a340d30cb096983f93204efab1f5e78521bb"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
