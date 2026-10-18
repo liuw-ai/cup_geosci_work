@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T15:59:11Z",
+  "generated_at": "2026-10-18T16:00:04Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "a40bdac114900893925820bc849e9edaec6cb6cc",
-  "git_status_porcelain": "M docs/current/PHASE4-2026-10-17.md",
+  "git_sha": "9da3415d9a1d816f1c929b7445713c2855b3624b",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
@@ -25,7 +25,7 @@
     "phase3_withdrawal_audit_count": 3947,
     "candidate_lead_count": 6,
     "formal_third_party_job_count": 5,
-    "student_read_as_of_date": "2026-10-18",
+    "student_read_as_of_date": "2026-10-19",
     "student_visible_layer_counts": {
       "broad_geoscience_match": 5,
       "exact_match": 146,
