@@ -186,15 +186,13 @@ def build_report() -> dict[str, Any]:
         },
     ]
 
-    blockers = sorted(
-        {
-            blocker
+    blockers = sorted({str(item) for item in manifest.get("release_blockers", []) if str(item).strip()})
+    if not blockers:
+        blockers = sorted(
+            item["id"]
             for item in requirements
             if item["status"] in {"blocked", "partial"}
-            for blocker in ([item["id"]] if item["status"] == "blocked" else [])
-        }
-        | set(str(item) for item in manifest.get("release_blockers", []))
-    )
+        )
     return {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "phase": "phase4",
