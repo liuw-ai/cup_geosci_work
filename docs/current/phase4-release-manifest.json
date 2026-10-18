@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T23:25:30Z",
+  "generated_at": "2026-10-18T23:29:29Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "9a7cfa979532c1ec26b24d869232d3f67a2a5bbc",
+  "git_sha": "4e464a5a6f0c8a70a5a1b8429f51ecfa37d3457f",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "b43d074deed22667a869befd2e55ac26d7ea4330f8c973227e869818d0d4a2cf",
-    "phase4_document_consistency": "b43d074deed22667a869befd2e55ac26d7ea4330f8c973227e869818d0d4a2cf",
+    "phase4_current_state_audit": "217e425b903610b87ae516f0e18e1f081351945d43e16b4b947eddfb37fa9188",
+    "phase4_document_consistency": "217e425b903610b87ae516f0e18e1f081351945d43e16b4b947eddfb37fa9188",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -50,11 +50,11 @@
     "phase4_third_party_huatu_shanxi_geology_group": "81808418c668aeb800754e01982ef01905f56762edb5a45512858ce2e146c7b0",
     "phase4_third_party_huatu_hbdk_geophysics": "f2ef342fc4c3a8f1cde1c0f0b439f333dfd5b10a52975560c1baa964d0f1adf3",
     "phase4_main_record": "ee4f22fafbbfc0a44c9f53d13c23c126c3e811d9813f36a67d6113bda6966560",
-    "phase4_local_validation": "bcf9b8af0077d588cd1b795f825edcb27ba484acca9c41630f4092fd1d06bac1",
+    "phase4_local_validation": "c86a1c0acd90e1c4904541d6b1f7062218afc8062cbc8fcd7cace464bb06c167",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "922a8937f2efad212b3d2cad2d91c42a6623e18124583e0cfed8d42e7c09e347",
-    "phase4_completion_audit": "7aeda9660b47cdb669ed86ffca351f237d702a962f7d42fdd812822df56dc203",
-    "phase4_workspace_layout": "97e8e78ad298b62885bd9e6dc2749329905532ae3567ff1110d5239e9d75e3a0"
+    "phase4_completion_audit": "aa186af9b98ee91936eafb1a829138358575b31bb0d4bc6eeefc7f8b22ccda86",
+    "phase4_workspace_layout": "7310f69b10dc8871a04d45b6eab2494ee1cd3da68f4b5a80ee8c9ecd9c084d53"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -123,14 +123,14 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-19T06:59:53+08:00",
+    "validated_at": "2026-10-19T07:29:10+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "81f6ab7",
-    "git_sha_at_validation": "81f6ab7",
+    "git_sha_before_metadata_commit": "4e464a5",
+    "git_sha_at_validation": "4e464a5",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1083,
+      "passed": 1084,
       "skipped": 4,
       "failed": 0,
       "warnings": 0,
@@ -209,7 +209,7 @@
         "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
       },
       "robots_gate_targeted_tests": "22 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py, tests/test_phase4_completion_audit.py)",
-      "source_disabled_visibility_regression": "included in full 1083-test run; disabled source remains student-visible without withdrawal",
+      "source_disabled_visibility_regression": "included in full 1084-test run; disabled source remains student-visible without withdrawal",
       "robots_or_permission_blocked_followups": 1,
       "huatu_discovery_scan": {
         "discovered_announcements": 65,

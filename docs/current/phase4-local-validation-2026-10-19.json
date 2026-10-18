@@ -1,13 +1,13 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T06:59:53+08:00",
+  "validated_at": "2026-10-19T07:29:10+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "81f6ab7",
-  "git_sha_at_validation": "81f6ab7",
+  "git_sha_before_metadata_commit": "4e464a5",
+  "git_sha_at_validation": "4e464a5",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1083,
+    "passed": 1084,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
@@ -70,7 +70,7 @@
       "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
     },
     "robots_gate_targeted_tests": "22 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py, tests/test_phase4_completion_audit.py)",
-    "source_disabled_visibility_regression": "included in full 1083-test run; disabled source remains student-visible without withdrawal",
+    "source_disabled_visibility_regression": "included in full 1084-test run; disabled source remains student-visible without withdrawal",
     "robots_or_permission_blocked_followups": 1,
     "huatu_discovery_scan": {
       "discovered_announcements": 65,
