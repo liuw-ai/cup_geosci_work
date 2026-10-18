@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T09:38:46Z",
+  "generated_at": "2026-10-18T09:41:17Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "c0b7d49f65aad16ba4c481c1d003cfe78d39183a",
+  "git_sha": "14bf859387c36dbb2dd16ac83270d5ef52f826bc",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -19,9 +19,9 @@
     "phase4_three_oil_entry_evidence": "c2d44f1c2445b0693a7dbe2b26be5dda1bab2d4b6898c90a5046ec652afa4931",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "0f2c712784f191135832fd5ca38d3513ab239d70794de43f9d7b315dc2f99895",
+    "phase4_current_state_audit": "71b3d1c3b8a969dd12d995df96f945361a7a95181f9003d014e4d8570c170eea",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
-    "phase4_local_validation": "3b959904bebdc95a393ecacb637885193d40e661b3f771ecd56fadb8749c9a4e"
+    "phase4_local_validation": "3547d57750ed3a93f714ddf7f094c2c8d4a9caba331d5d4ee3863074becedc9b"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -57,10 +57,10 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-18T10:15:00+08:00",
+    "validated_at": "2026-10-18T18:20:00+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "203ab434aa04ae49a2444491441475e19f6ba937",
+    "git_sha_before_metadata_commit": "c0b7d49f65aad16ba4c481c1d003cfe78d39183a",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1062,
@@ -76,11 +76,11 @@
     },
     "database": {
       "path": "runtime/job_hub.sqlite3",
-      "sha256_before_tests": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
-      "sha256_after_tests": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
+      "sha256_before_tests": "d151038a0fba7f0d8da022abd8f221177531db77d0b563365eca8ff65a10486a",
+      "sha256_after_tests": "d151038a0fba7f0d8da022abd8f221177531db77d0b563365eca8ff65a10486a",
       "integrity_check": "ok",
       "jobs": 3947,
-      "candidate_leads": 0,
+      "candidate_leads": 1,
       "phase3_withdrawal_audits": 3947,
       "student_read_as_of_date": "2026-10-18",
       "student_visible_total": 624,
@@ -93,6 +93,7 @@
     },
     "third_party": {
       "isolated_huatu_trial_candidate_leads": 11,
+      "formal_database_private_candidate_leads": 1,
       "formal_jobs_created": 0,
       "formal_database_unchanged": true,
       "robots_or_permission_blocked_followups": 1
