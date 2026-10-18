@@ -7,7 +7,7 @@
   "git_sha_at_validation": "78a3940f2f152b8abd4305af7d10331cce36049e",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1077,
+    "passed": 1078,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
@@ -68,8 +68,8 @@
       "backup_path": "backups/job_hub-pre-phase4-conversion-audit-20261018.sqlite3",
       "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
     },
-    "robots_gate_targeted_tests": "19 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py)",
-    "source_disabled_visibility_regression": "included in full 1077-test run; disabled source remains student-visible without withdrawal",
+    "robots_gate_targeted_tests": "20 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py)",
+    "source_disabled_visibility_regression": "included in full 1078-test run; disabled source remains student-visible without withdrawal",
     "robots_or_permission_blocked_followups": 1,
     "huatu_discovery_scan": {
       "discovered_announcements": 65,
