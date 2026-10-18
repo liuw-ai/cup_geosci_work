@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T09:29:00Z",
+  "generated_at": "2026-10-18T09:32:11Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "5d247afcab26965478e00b2519168a8eacafc59e",
+  "git_sha": "fb4e47c8a1d5c9201e36296a2479aaf75f01f812",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -70,6 +70,10 @@
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
       "sha256": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1"
+    },
+    "phase4_local_validation": {
+      "path": "docs/current/phase4-local-validation-2026-10-18.json",
+      "sha256": "3b959904bebdc95a393ecacb637885193d40e661b3f771ecd56fadb8749c9a4e"
     }
   },
   "code_inventory": [
@@ -535,8 +539,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 191,
-      "sha256": "e26a1b135c6292f1eebd875bee7a74d996fc25d47fff9bc23b6a3f7efbef2ca6"
+      "line_count": 196,
+      "sha256": "1e836a57f758c23fc449fcb77d465979a7aabfe4c2e2adee05de8664966be71d"
     },
     {
       "path": "scripts/build_phase3_manifest.py",
@@ -546,7 +550,7 @@
     {
       "path": "scripts/build_phase4_manifest.py",
       "line_count": 192,
-      "sha256": "88ff3e044a96e5a1d1bcf7ed9b14df8566679a8b1bff75971bd507799e857cb0"
+      "sha256": "8cffd0edb08f3420fb51db7ee874a2bb3bee7557b269887339dfd603996bc5a2"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
