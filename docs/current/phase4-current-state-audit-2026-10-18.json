@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T15:30:43Z",
+  "generated_at": "2026-10-18T15:34:46Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "8a7b38d6f6ba9ef3e4c18d67e59400287a2d86ef",
+  "git_sha": "51f3e300de834bb5e92a5cf2fb3d614fbc818669",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -88,12 +88,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "9728a80c4dd7894b0c991803ad8b0a5439805577b5d677f34f153fd46a12a5d1"
+        "sha256": "064d2ccea9172cdd3cbf492f853552bd71cd4a3ae168249467f808f87209162a"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
         "exists": true,
-        "sha256": "1e6cc52f75c25d77e4c73aff71e9237f2f07a4438c57aa21fc680b54dfb3d09f"
+        "sha256": "059ca82fd9ed95de4194be267b586394f0dcc709ad8dcee0a56a83ebda93f094"
       }
     ],
     "metadata_documents": [
@@ -133,7 +133,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-18.json",
-      "sha256": "1e6cc52f75c25d77e4c73aff71e9237f2f07a4438c57aa21fc680b54dfb3d09f"
+      "sha256": "059ca82fd9ed95de4194be267b586394f0dcc709ad8dcee0a56a83ebda93f094"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -161,7 +161,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "9728a80c4dd7894b0c991803ad8b0a5439805577b5d677f34f153fd46a12a5d1"
+      "sha256": "064d2ccea9172cdd3cbf492f853552bd71cd4a3ae168249467f808f87209162a"
     }
   },
   "code_inventory": [
@@ -642,8 +642,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 258,
-      "sha256": "2f51625c61fb7ff1bc77ad68c8fa92fa8657fbf070d8cb77810e78122e248bf1"
+      "line_count": 277,
+      "sha256": "8f1fcf867dfc0a134b0026b765283c03d8ff980df598d9c114b85a758e6c3ece"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -1097,8 +1097,8 @@
     },
     {
       "path": "tests/test_phase4_manifest.py",
-      "line_count": 46,
-      "sha256": "198a0e8b97018c8e216e4748fc07765b7a5a4ff9bbd3199553aa1177cbcd5c50"
+      "line_count": 53,
+      "sha256": "53e5e9ef03020ca5080f545bcda2f2f84050ce4cbc50b99560ad773924fb45f7"
     },
     {
       "path": "tests/test_phase4_third_party_funnel.py",
