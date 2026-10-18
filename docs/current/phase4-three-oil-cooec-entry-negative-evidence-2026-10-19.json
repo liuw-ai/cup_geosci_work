@@ -1,0 +1,31 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-19T02:40:00+08:00",
+  "group_id": "cnooc",
+  "catalog_id": "cnooc-engineering",
+  "canonical_name": "海洋石油工程股份有限公司",
+  "official_identity": {
+    "homepage_url": "https://www.cnoocengineering.com/",
+    "homepage_http_status": 200,
+    "homepage_final_url": "https://www.cnoocengineering.com/",
+    "homepage_bytes": 35282,
+    "homepage_sha256": "9addaf65effda2d5e81c4d1074ddff0e82db13ebf9eac84cf152bb9a1e9b24b8",
+    "identity_observation": "主页标题和正文明确显示海洋石油工程股份有限公司，页面内容为公司业务、公告、新闻和投资者信息。"
+  },
+  "recruitment_entry_check": {
+    "method": "read_only_homepage_navigation",
+    "recruitment_navigation_labels_found": [],
+    "recruitment_url_found": null,
+    "robots_url": "https://www.cnoocengineering.com/robots.txt",
+    "robots_http_status": 404,
+    "conclusion": "官方主页已核验，但本次页面没有招聘、人才、校园或职业入口；不能据此生成单位级招聘入口。"
+  },
+  "evidence_boundary": {
+    "official_identity_verified": true,
+    "unit_specific_recruitment_entry_verified": false,
+    "group_portal_is_not_copied": true,
+    "student_application_url": null,
+    "next_evidence_required": "该单位官方招聘公告、官方岗位表、官方招聘系统或官方公告明确的授权招聘入口。"
+  },
+  "policy_decision": "official_homepage_checked_no_unit_recruitment_entry_found"
+}

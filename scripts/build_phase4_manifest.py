@@ -168,6 +168,7 @@ def main() -> None:
     entry_evidence = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"
     cnooc_unit_evidence = ROOT / "docs" / "current" / "phase4-cnooc-unit-display-evidence-2026-10-19.json"
     cnooc_full_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-unit-job-evidence-2026-10-19.json"
+    cooec_negative_entry = ROOT / "docs" / "current" / "phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json"
     entry_matrix = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
     display_audit = ROOT / "docs" / "current" / "phase4-sinopec-display-units-2026-10-18.json"
     sinopec_page_roster = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
@@ -231,6 +232,7 @@ def main() -> None:
             "phase4_three_oil_entry_evidence": sha256(entry_evidence),
             "phase4_cnooc_unit_display_evidence": sha256(cnooc_unit_evidence),
             "phase4_cnooc_unit_job_evidence": sha256(cnooc_full_job_evidence),
+            "phase4_three_oil_cooec_negative_entry": sha256(cooec_negative_entry),
             "phase4_three_oil_unit_entry_matrix": sha256(entry_matrix),
             "phase4_sinopec_display_audit": sha256(display_audit),
             "phase4_sinopec_page_roster": sha256(sinopec_page_roster),
@@ -292,6 +294,7 @@ def main() -> None:
         "three_oil_entry_evidence": {
             "cnooc_unit_display_evidence": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
             "cnooc_unit_job_evidence": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+            "cooec_negative_entry_evidence": "docs/current/phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json",
             "cnooc_units_with_active_job_evidence": int(
                 json.loads(cnooc_unit_evidence.read_text(encoding="utf-8"))
                 .get("summary", {})

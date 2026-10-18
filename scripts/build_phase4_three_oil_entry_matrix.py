@@ -18,6 +18,7 @@ CATALOG = ROOT / "data" / "three_oil_organization_catalog.json"
 REGISTRY = ROOT / "data" / "organization_registry.json"
 ENTRY_EVIDENCE = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"
 CNOOC_UNIT_EVIDENCE = ROOT / "docs" / "current" / "phase4-cnooc-unit-display-evidence-2026-10-19.json"
+NEGATIVE_ENTRY_EVIDENCE = ROOT / "docs" / "current" / "phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json"
 OUTPUT = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
 
 
@@ -76,6 +77,10 @@ def main() -> None:
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
     evidence = json.loads(ENTRY_EVIDENCE.read_text(encoding="utf-8"))
     cnooc_unit_evidence = json.loads(CNOOC_UNIT_EVIDENCE.read_text(encoding="utf-8"))
+    negative_entry_evidence = json.loads(NEGATIVE_ENTRY_EVIDENCE.read_text(encoding="utf-8"))
+    negative_entry_by_catalog_id = {
+        str(negative_entry_evidence.get("catalog_id") or "").strip(): negative_entry_evidence
+    }
     cnooc_observations = {
         str(item.get("canonical_name") or "").strip(): item
         for item in cnooc_unit_evidence.get("units", [])
@@ -106,6 +111,8 @@ def main() -> None:
                 unit_status = "group_portal_verified" if group_status == "official_portal_verified" else "group_portal_not_revalidated"
             elif unit_entry:
                 unit_status = "unit_specific_entry_verified"
+            elif unit_id in negative_entry_by_catalog_id:
+                unit_status = "official_site_checked_no_unit_entry_found"
             elif displayed:
                 unit_status = "group_portal_unit_display_observed"
             else:
@@ -146,18 +153,26 @@ def main() -> None:
                     "evidence_scope": (
                         "official_registry_recruitment_channel"
                         if unit_entry
+                        else "official_homepage_no_recruitment_entry_found"
+                        if unit_id in negative_entry_by_catalog_id
                         else "official_group_portal"
                         if is_group
                         else "official_group_portal_display_roster"
                         if displayed
                         else "no_unit_specific_entry_evidence"
                     ),
-                    "verified_at": "2026-10-19" if observed else "2026-10-18",
+                    "verified_at": (
+                        "2026-10-19"
+                        if observed or unit_id in negative_entry_by_catalog_id
+                        else "2026-10-18"
+                    ),
                     "next_evidence_required": (
                         None
                         if is_group
                         else None
                         if unit_entry
+                        else negative_entry_by_catalog_id[unit_id].get("evidence_boundary", {}).get("next_evidence_required")
+                        if unit_id in negative_entry_by_catalog_id
                         else "unit-specific official recruitment page, notice, or authorized recruitment record"
                     ),
                 }
