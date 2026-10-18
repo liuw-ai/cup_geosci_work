@@ -15,9 +15,9 @@
     "three_oil_catalog": "a6d1979d99b5b027590acb07d4883910bca074c301ed8dc0e134bfdf57991394",
     "phase4_organization_reconciliation": "b81e3276160a5e89d203263796bae667ffdb44160afc949705e21393c19ba13d",
     "phase4_three_oil_catalog_audit": "146bbc0bceaa60ccb27430464f417153781de43d0bc7a2587e0e47cba0eeda19",
-    "phase4_third_party_trial": "cce5e6df73eefd143be566a459dcc89d3e15fc53ba3e1557616b2afe65e32218",
+    "phase4_third_party_trial": "9e1d9a183117349b025b765d1c53f7e60b6bbc6fbf76d7dd529aab3b47f91656",
     "phase4_three_oil_entry_evidence": "c2d44f1c2445b0693a7dbe2b26be5dda1bab2d4b6898c90a5046ec652afa4931",
-    "phase4_local_validation": "5a0fa8488059b15c9b745620a8056b0fd12fc54e97a3db1c2746eba15c71279a"
+    "phase4_local_validation": "705ab3c46a31bbb9037857c76a5031fa887354825b948c06c91f471bb7923b8a"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -139,6 +139,15 @@
       "student_visible_changes": 0,
       "report": "docs/current/phase4-third-party-trial-2026-10-18.json"
     },
+    "third_party_recovery_followup": {
+      "source_id": "huatu-discovery",
+      "title": "2027年江苏南京水利科学研究院公开招聘事业编制工作人员50人公告",
+      "official_notice_url": "https://www.nhri.cn/tzgg/zpxx/art/2026/art_01a4e42a69594ee88fac503a5cce8df5.html",
+      "official_table_url_verified": true,
+      "capture_status": "blocked_by_robots_and_browser_download_permission",
+      "formal_rows_created": 0,
+      "report": "docs/current/phase4-third-party-trial-2026-10-18.json"
+    },
     "student_layers": {
       "exact_match": 210,
       "broad_geoscience_match": 1,
@@ -160,6 +169,8 @@
     "table_adapters": 5,
     "real_candidate_leads_in_database": 0,
     "isolated_trial_candidate_leads": 11,
+    "official_recovered_candidate_batches": 1,
+    "official_recovered_position_rows": 0,
     "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json"
   },
   "three_oil_organization_reconciliation": {

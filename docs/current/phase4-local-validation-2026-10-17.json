@@ -69,6 +69,15 @@
     "student_visible_changes": 0,
     "report": "docs/current/phase4-third-party-trial-2026-10-18.json"
   },
+  "third_party_recovery_followup": {
+    "source_id": "huatu-discovery",
+    "title": "2027年江苏南京水利科学研究院公开招聘事业编制工作人员50人公告",
+    "official_notice_url": "https://www.nhri.cn/tzgg/zpxx/art/2026/art_01a4e42a69594ee88fac503a5cce8df5.html",
+    "official_table_url_verified": true,
+    "capture_status": "blocked_by_robots_and_browser_download_permission",
+    "formal_rows_created": 0,
+    "report": "docs/current/phase4-third-party-trial-2026-10-18.json"
+  },
   "three_oil_entry_evidence": {
     "report": "docs/current/phase4-three-oil-entry-evidence-2026-10-18.json",
     "cnpc": "blocked_by_saved_browser_permission",
