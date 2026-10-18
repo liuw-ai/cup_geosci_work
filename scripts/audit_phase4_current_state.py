@@ -169,10 +169,16 @@ def document_consistency_facts() -> dict[str, object]:
         "docs/current/phase3-audit-preview-2026-10-17.json",
         "docs/current/phase3-backfill-result-2026-10-17.json",
     ]
+    # The audit is consumed by the manifest, so hashing the audit itself or
+    # the manifest here would create a self-referential, never-stable chain.
+    # Keep source/current documents separate from metadata documents whose
+    # hashes are bound one way by the manifest.
     current_paths = [
         "docs/current/PHASE4-2026-10-17.md",
-        "docs/current/phase4-current-state-audit-2026-10-18.json",
         "docs/current/phase4-local-validation-2026-10-18.json",
+    ]
+    metadata_paths = [
+        "docs/current/phase4-current-state-audit-2026-10-18.json",
         "docs/current/phase4-release-manifest.json",
     ]
     historical_checks: list[dict[str, object]] = []
@@ -197,10 +203,15 @@ def document_consistency_facts() -> dict[str, object]:
         {"path": relative, "exists": (ROOT / relative).is_file(), "sha256": sha256(ROOT / relative)}
         for relative in current_paths
     ]
+    metadata_checks = [
+        {"path": relative, "exists": (ROOT / relative).is_file(), "hash_bound_by": "phase4-release-manifest.json"}
+        for relative in metadata_paths
+    ]
     return {
         "policy": "historical_snapshots_are_evidence_only; current_audit_and_manifest_are_source_of_truth",
         "historical_documents": historical_checks,
         "current_documents": current_checks,
+        "metadata_documents": metadata_checks,
         "historical_documents_are_publish_inputs": False,
     }
 

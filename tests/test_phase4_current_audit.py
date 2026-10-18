@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from scripts.audit_phase4_current_state import current_database_facts, document_consistency_facts
 
 
@@ -24,3 +26,14 @@ def test_document_consistency_marks_old_codebase_as_historical() -> None:
     assert old["declared_historical"] is True
     assert facts["historical_documents_are_publish_inputs"] is False
     assert all(item["exists"] for item in facts["current_documents"])
+    assert all(item["exists"] for item in facts["metadata_documents"])
+    assert all("sha256" not in item for item in facts["metadata_documents"])
+
+
+def test_current_readme_does_not_duplicate_stale_database_totals() -> None:
+    content = Path("docs/current/README.md").read_text(encoding="utf-8")
+
+    # Current counts belong in the hash-bound audit and manifest.  A stale
+    # literal here would become a second, conflicting source of truth.
+    assert "正式数据库只读审计为 3948 条岗位" not in content
+    assert "formal_third_party_job_count" not in content
