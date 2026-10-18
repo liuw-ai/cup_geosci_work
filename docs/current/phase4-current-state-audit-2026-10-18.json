@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T17:36:05Z",
+  "generated_at": "2026-10-18T17:49:17Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "21037de8ce05a9a1419377fb263e3387f455427a",
+  "git_sha": "af32d27b2265515c9fe40b8a8d0190208c7c6224",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -88,7 +88,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "cdae173f7414f31c7bace82f068ea298699bddc7d19a311fd94ed5b274d0cd2f"
+        "sha256": "070d0961e86815283df9b831cbb0e020c890b5c128bd53bc32f58ae72f8d3486"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
@@ -130,6 +130,10 @@
     "phase4_cnooc_unit_job_evidence": {
       "path": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
       "sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288"
+    },
+    "phase4_sinopec_page_roster": {
+      "path": "docs/current/phase4-sinopec-page-roster-2026-10-19.json",
+      "sha256": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd"
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
@@ -177,7 +181,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "cdae173f7414f31c7bace82f068ea298699bddc7d19a311fd94ed5b274d0cd2f"
+      "sha256": "070d0961e86815283df9b831cbb0e020c890b5c128bd53bc32f58ae72f8d3486"
     }
   },
   "code_inventory": [
@@ -643,8 +647,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 335,
-      "sha256": "75b50dff8b3b8441eff1b13988ce4eed059e4538f5abc4fa5913bd60987adb8d"
+      "line_count": 340,
+      "sha256": "f5eee391f45913a44865c5feac1fa80a90b0be06ae07baf85fa26c011be8a4fb"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -658,8 +662,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 308,
-      "sha256": "28cac653e3489c5ddc9811b292ce89e3f4ed9a174b8b96fa6fcee204a36724a7"
+      "line_count": 310,
+      "sha256": "bc0cc221ce13e2deaff2be1184c9a7523cf6d5dd1f6804cbb42bfe0914d39766"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -1123,8 +1127,8 @@
     },
     {
       "path": "tests/test_phase4_three_oil_entry_matrix.py",
-      "line_count": 29,
-      "sha256": "5e9f2708c3388d1d472431267f6aac6966711d8b69d1c6fac5ef4f407a0f5904"
+      "line_count": 50,
+      "sha256": "d14f88fe3d2bc341ae4b79d23fe3cfb7d5b9b9ceb782682964e044eaf2dd3bea"
     },
     {
       "path": "tests/test_pipeline.py",
