@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T15:50:32Z",
+  "generated_at": "2026-10-18T15:57:32Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "70cd1d6e10cdeaaa27d646467eff52f366ad5aa3",
+  "git_sha": "d246ce6899c36bea1648e93b3a656138ab84d22b",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
