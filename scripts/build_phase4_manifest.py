@@ -69,6 +69,7 @@ def db_facts(path: Path) -> dict[str, object]:
     digest = sha256(path)
     with sqlite3.connect(f"file:{path.resolve().as_posix()}?mode=ro", uri=True) as connection:
         integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
+        job_count = int(connection.execute("SELECT COUNT(*) FROM jobs").fetchone()[0])
         statuses = dict(connection.execute("SELECT status, COUNT(*) FROM jobs GROUP BY status").fetchall())
         layers = dict(connection.execute("SELECT publication_layer, COUNT(*) FROM jobs GROUP BY publication_layer").fetchall())
         leads = int(connection.execute("SELECT COUNT(*) FROM candidate_leads").fetchone()[0])
@@ -104,7 +105,8 @@ def db_facts(path: Path) -> dict[str, object]:
         "path": "runtime/job_hub.sqlite3",
         "sha256": digest,
         "integrity_check": integrity,
-        "job_status_counts": statuses,
+        "job_count": job_count,
+        "status_counts": statuses,
         "publication_layer_counts": layers,
         "student_read_as_of_date": as_of_date,
         "student_visible_layer_counts": student_visible_counts,

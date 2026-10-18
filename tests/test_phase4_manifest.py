@@ -39,6 +39,7 @@ def test_phase4_manifest_database_facts_separate_full_layer_counts_from_student_
     facts = db_facts(source)
 
     assert facts["integrity_check"] == "ok"
+    assert facts["job_count"] == sum(facts["status_counts"].values())
     assert facts["student_visible_total"] == sum(
         facts["student_visible_layer_counts"].values()
     )
