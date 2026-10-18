@@ -204,6 +204,7 @@ def main() -> None:
             "phase4_sinopec_display_audit": sha256(display_audit),
             "phase4_third_party_geoscience_followup": sha256(geoscience_followup),
             "phase4_current_state_audit": sha256(current_audit),
+            "phase4_document_consistency": sha256(current_audit),
             "phase4_third_party_candidate": sha256(manual_candidate),
             "phase4_third_party_hrinm": sha256(hrinm_trial),
             "phase4_third_party_blocked_batches": sha256(blocked_batches),
@@ -224,6 +225,15 @@ def main() -> None:
             "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
+        "document_policy": {
+            "historical_snapshots_are_evidence_only": True,
+            "current_facts_document": "docs/current/phase4-current-state-audit-2026-10-18.json",
+            "release_manifest_binds_source_commit": True,
+            "manifest_commit_note": (
+                "git_sha is the clean source/config commit used to generate this metadata; "
+                "the metadata-only commit is intentionally subsequent."
+            ),
+        },
         "automation_model": "gpt-5.6-terra",
         "automation_status": "paused",
         "production_deployment": "not_performed",

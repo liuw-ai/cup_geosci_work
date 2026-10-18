@@ -161,6 +161,50 @@ def code_facts() -> list[dict[str, object]]:
     return rows
 
 
+def document_consistency_facts() -> dict[str, object]:
+    """Make the current-vs-historical document boundary machine-readable."""
+    historical_paths = [
+        "docs/current/CODEBASE-2026-10-17.md",
+        "docs/current/PHASE3-2026-10-17.md",
+        "docs/current/phase3-audit-preview-2026-10-17.json",
+        "docs/current/phase3-backfill-result-2026-10-17.json",
+    ]
+    current_paths = [
+        "docs/current/PHASE4-2026-10-17.md",
+        "docs/current/phase4-current-state-audit-2026-10-18.json",
+        "docs/current/phase4-local-validation-2026-10-18.json",
+        "docs/current/phase4-release-manifest.json",
+    ]
+    historical_checks: list[dict[str, object]] = []
+    for relative in historical_paths:
+        path = ROOT / relative
+        content = path.read_text(encoding="utf-8") if path.is_file() else ""
+        declared = True
+        if relative.endswith("CODEBASE-2026-10-17.md"):
+            declared = all(
+                marker in content
+                for marker in ("历史代码清点快照", "不应被用作发布输入")
+            )
+        historical_checks.append(
+            {
+                "path": relative,
+                "exists": path.is_file(),
+                "declared_historical": declared,
+                "sha256": sha256(path),
+            }
+        )
+    current_checks = [
+        {"path": relative, "exists": (ROOT / relative).is_file(), "sha256": sha256(ROOT / relative)}
+        for relative in current_paths
+    ]
+    return {
+        "policy": "historical_snapshots_are_evidence_only; current_audit_and_manifest_are_source_of_truth",
+        "historical_documents": historical_checks,
+        "current_documents": current_checks,
+        "historical_documents_are_publish_inputs": False,
+    }
+
+
 def main() -> None:
     catalog_audit = ROOT / "docs" / "current" / "phase4-three-oil-catalog-audit-2026-10-17.json"
     trial_report = ROOT / "docs" / "current" / "phase4-third-party-trial-2026-10-18.json"
@@ -180,6 +224,7 @@ def main() -> None:
         "git_status_porcelain": input_tree_status(),
         "database": current_database_facts(),
         "sources_and_organizations": source_facts(),
+        "document_consistency": document_consistency_facts(),
         "evidence_documents": {
             "phase4_three_oil_catalog_audit": {
                 "path": "docs/current/phase4-three-oil-catalog-audit-2026-10-17.json",

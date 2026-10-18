@@ -80,10 +80,49 @@
       "candidate_rows_created": 0,
       "formal_jobs_created": 0,
       "reason": "官方公告已找到，但第三方 PDF 不允许抓取且浏览器下载未完成；未伪造表格行。"
+    },
+    {
+      "discovery_page_url": "https://sx.huatu.com/shehui/kaoshi/gg/2026/1017/1281187.html",
+      "title": "山西省地质调查院有限公司2026年度秋季校园招聘公告",
+      "declared_official_source": "山西省地质调查院有限公司",
+      "third_party_table_url": null,
+      "official_source_urls_in_notice": [
+        "https://www.sxddy.com/xinwendongtai/tongzhigonggao/2026-10-16/3507.html",
+        "https://www.sxddy.com/d/file/p/2026/10-16/096282082eab830d3a77e47f07d0f407.doc",
+        "https://www.sxddy.com/d/file/p/2026/10-16/48b749cc11c09ef07c205af6a035a637.doc"
+      ],
+      "capture_status": "official_notice_read_but_role_table_not_present",
+      "response_probe_status": null,
+      "downloaded": false,
+      "retained": false,
+      "parsed": false,
+      "sha256": null,
+      "candidate_rows_created": 0,
+      "formal_jobs_created": 0,
+      "reason": "官方公告正文确认五类岗位、硕士/博士条件、报名邮箱和截止日期，但招聘岗位及要求表格为空；官方页面可见附件为应聘登记表和诚信承诺书，不是岗位表。华图附件域名 robots 禁止抓取，且未保留可审计的第三方附件地址，不能用其补造岗位行。"
+    },
+    {
+      "discovery_page_url": "https://sydw.huatu.com/2026/0717/2868457.html",
+      "title": "2026年山东省地质矿产勘查开发局所属事业单位公开招聘工作人员72人公告",
+      "declared_official_source": "山东省地质矿产勘查开发局",
+      "third_party_table_url": "https://u3.huatu.com/uploads/soft/260717/e66fcec80b405872b39eb223b7b5b24275155.xlsx",
+      "official_source_urls_in_notice": [
+        "http://dkj.shandong.gov.cn/art/2026/7/17/art_356047_10333801.html",
+        "http://dkj.shandong.gov.cn/module/download/downfile.jsp?classid=0&filename=732c4f35c08742398d1c946003273bca.xlsx"
+      ],
+      "capture_status": "official_table_link_found_download_permission_denied",
+      "response_probe_status": null,
+      "downloaded": false,
+      "retained": false,
+      "parsed": false,
+      "sha256": null,
+      "candidate_rows_created": 0,
+      "formal_jobs_created": 0,
+      "reason": "官方公告逐字确认岗位表链接、报名系统和截止时间，但本机浏览器拒绝下载官方 XLSX；第三方附件又受 robots 限制。没有逐行专业、学历、单位和岗位编号证据，不能创建候选或正式岗位。"
     }
   ],
   "summary": {
-    "batches_reviewed": 4,
+    "batches_reviewed": 6,
     "third_party_files_downloaded": 0,
     "third_party_file_responses_probed": 2,
     "candidate_rows_created": 0,
