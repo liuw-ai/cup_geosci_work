@@ -1,12 +1,12 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-18T18:20:00+08:00",
+  "validated_at": "2026-10-18T18:35:00+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "c0b7d49f65aad16ba4c481c1d003cfe78d39183a",
+  "git_sha_before_metadata_commit": "ddae96f",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1062,
+    "passed": 1063,
     "skipped": 4,
     "failed": 0,
     "warnings": 1,
@@ -19,16 +19,16 @@
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256_before_tests": "d151038a0fba7f0d8da022abd8f221177531db77d0b563365eca8ff65a10486a",
-    "sha256_after_tests": "d151038a0fba7f0d8da022abd8f221177531db77d0b563365eca8ff65a10486a",
+    "sha256_before_tests": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba",
+    "sha256_after_tests": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba",
     "integrity_check": "ok",
-    "jobs": 3947,
-    "candidate_leads": 1,
+    "jobs": 3948,
+    "candidate_leads": 2,
     "phase3_withdrawal_audits": 3947,
     "student_read_as_of_date": "2026-10-18",
-    "student_visible_total": 624,
+    "student_visible_total": 625,
     "student_visible_layer_counts": {
-      "exact_match": 145,
+      "exact_match": 146,
       "broad_geoscience_match": 1,
       "incomplete_but_basic_match": 367,
       "source_unavailable": 111
@@ -36,9 +36,10 @@
   },
   "third_party": {
     "isolated_huatu_trial_candidate_leads": 11,
-    "formal_database_private_candidate_leads": 1,
-    "formal_jobs_created": 0,
-    "formal_database_unchanged": true,
+    "formal_database_private_candidate_leads": 2,
+    "formal_jobs_created": 1,
+    "formal_third_party_job_ids": [5432],
+    "formal_database_unchanged": false,
     "robots_or_permission_blocked_followups": 1
   },
   "release_boundary": {
@@ -47,7 +48,7 @@
     "model_policy": "gpt-5.6-terra",
     "production_deployment": "not_performed",
     "release_blockers": [
-      "no_audited_third_party_table_batch_imported",
+      "third_party_batch_import_target_not_yet_met",
       "three_oil_external_identity_evidence_pending",
       "three_oil_unit_entry_evidence_incomplete",
       "local_phase4_validation_not_approved_for_server"
