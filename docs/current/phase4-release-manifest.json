@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T19:50:29Z",
+  "generated_at": "2026-10-18T19:54:24Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "29a5c9b603212964478b2dc1d23da1b6279858ba",
+  "git_sha": "10aeda15dc5c3c4da86c9fb70c50033ab6782761",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -25,8 +25,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "362a5533a3d37a6bf439792bc68a436764d04554a3e2e19ff592df1853afec90",
-    "phase4_document_consistency": "362a5533a3d37a6bf439792bc68a436764d04554a3e2e19ff592df1853afec90",
+    "phase4_current_state_audit": "55e70d7e408137eaf588a65b32a4abe6865ddf326bcce61b0364166c07ae54c6",
+    "phase4_document_consistency": "55e70d7e408137eaf588a65b32a4abe6865ddf326bcce61b0364166c07ae54c6",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -41,7 +41,7 @@
     "phase4_huatu_table_discovery": "e13bea423404b688d1de2aa46ea316926e9692caa5cc3bb3c3bbfcc3a178fa22",
     "phase4_huatu_discovery_scan": "6084764bc34681e688a1bcfaa07851a8fb0c4fcb073680a308ffd219ea2fb277",
     "phase4_main_record": "f2ee6d7bf8e8127bb89ae47471a500574a56984170af07b31976e8cc8cf0647d",
-    "phase4_local_validation": "721986f8d8884b844df8906fd71d7399eac690e40a8596e9b1b3cea6b25133f9",
+    "phase4_local_validation": "17131b99923a725252a6db9b0b74151b42bea67b8efa8669607d6ac80e910303",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935"
   },
   "database": {
@@ -111,11 +111,11 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-19T03:48:06+08:00",
+    "validated_at": "2026-10-19T03:54:05+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "6139647",
-    "git_sha_at_validation": "6139647",
+    "git_sha_before_metadata_commit": "10aeda1",
+    "git_sha_at_validation": "10aeda1",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1075,
