@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T10:36:39Z",
+  "generated_at": "2026-10-18T10:39:35Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "2e6e77b4dac5c5d8e4735284728ecaa6ad8d6f79",
+  "git_sha": "44ef4167695f26afa45e33977c31c8a89a7a02bb",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -21,11 +21,11 @@
     "phase4_three_oil_unit_entry_matrix": "f3c74cf8149291be9a286e6981cabc6e0cad9feac1c8a435b2b5d1e502129777",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "eff49d163e4459de3fda6dfa28696ac791643157bd9905dc1640df38bbf2f552",
+    "phase4_current_state_audit": "48afc3b501d3bdd4c07788e3f2a4daecfb305ad18ff860d1cca097350bd04c70",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
-    "phase4_main_record": "5460aba8905083111e45ad3229b546126b99ea4276bc6b1d6cd906330dbddad3",
-    "phase4_local_validation": "2f662edc26020af853d70d439d460bb1f5e0c86bcfadbf3990106963afdafc97"
+    "phase4_main_record": "c1cdd1fabc1c0e7d81007a0b141a4c4169856b0aa4eabc9c580a195c3368f73d",
+    "phase4_local_validation": "c4b87379877ef06258a28efa92ed18ed7d7059b468b23cc4e2d3d94cf486a0bc"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -72,7 +72,7 @@
     "git_sha_before_metadata_commit": "ddae96f",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1063,
+      "passed": 1064,
       "skipped": 4,
       "failed": 0,
       "warnings": 1,
