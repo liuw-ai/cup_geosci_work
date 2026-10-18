@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T13:04:33Z",
+  "generated_at": "2026-10-18T13:08:29Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "910c1e1bb31911bec85ca9fbbced3afed8cdda0c",
+  "git_sha": "f9170331648c357036317ad09d1001bd09fadc80",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -93,7 +93,7 @@
       {
         "path": "docs/current/phase4-current-state-audit-2026-10-18.json",
         "exists": true,
-        "sha256": "cc57ef4dfc297db2249169a8a0eface359416519d62ae21bcc39e680ffcfaf5d"
+        "sha256": "86116ae586f419e41d6e2199109fa8428c875be04e51268da298caaf9c2cb6e7"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
@@ -103,7 +103,7 @@
       {
         "path": "docs/current/phase4-release-manifest.json",
         "exists": true,
-        "sha256": "03b8830fdf2464e375370d843977fd7bd7409ac6b4aca8220ebe187c47e13607"
+        "sha256": "4dd1f1d40b13459aabf335503d16d5a2bc4f149fc5f8f08809bed1f776b889f8"
       }
     ],
     "historical_documents_are_publish_inputs": false
@@ -148,6 +148,10 @@
     "phase4_third_party_blocked_batches": {
       "path": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
       "sha256": "74da7ade28ae3e7310f78796f80dc2cc2ee27a7d4b13fcb65601667f667ed31c"
+    },
+    "phase4_local_web_recheck": {
+      "path": "docs/current/phase4-local-web-recheck-2026-10-18.json",
+      "sha256": "84f73ee1f95e71b4b7ff03ab699c4f977db8588fa58a35e6d3a66929fe0ed842"
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
@@ -617,8 +621,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 292,
-      "sha256": "01e0a3230b3a11a91b69847fd41cd85e5fcfac9894bf6f2c69f57a59012e82ef"
+      "line_count": 297,
+      "sha256": "21e05f6123f7b419e81d806ede81baf0f6bc5736fdc95ac93e7bc9cdf12f65f7"
     },
     {
       "path": "scripts/build_phase3_manifest.py",
@@ -627,8 +631,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 253,
-      "sha256": "d9a82abff55b60e88ecaa99d304d02a9a51fc3fe2e3c831b7a280d7aba07ce58"
+      "line_count": 255,
+      "sha256": "f396e151c6259021338ce4271e1969a80c1ee03884d922efa7b7066989da3773"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
