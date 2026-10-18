@@ -1,13 +1,13 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-18T21:28:23+08:00",
+  "validated_at": "2026-10-18T22:15:12+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "281048eb7867a1e9809d70b96e8bebb153daa6e4",
-  "git_sha_at_validation": "281048eb7867a1e9809d70b96e8bebb153daa6e4",
+  "git_sha_before_metadata_commit": "2b905ad",
+  "git_sha_at_validation": "2b905ad",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1069,
+    "passed": 1070,
     "skipped": 4,
     "failed": 0,
     "warnings": 1,
@@ -20,17 +20,17 @@
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256_before_tests": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
-    "sha256_after_tests": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
+    "sha256_before_tests": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
+    "sha256_after_tests": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
     "integrity_check": "ok",
-    "jobs": 3948,
+    "jobs": 3952,
     "candidate_leads": 6,
     "phase3_withdrawal_audits": 3947,
     "student_read_as_of_date": "2026-10-18",
-    "student_visible_total": 625,
+    "student_visible_total": 629,
     "student_visible_layer_counts": {
       "exact_match": 146,
-      "broad_geoscience_match": 1,
+      "broad_geoscience_match": 5,
       "incomplete_but_basic_match": 367,
       "source_unavailable": 111
     }
@@ -38,16 +38,17 @@
   "third_party": {
     "isolated_huatu_trial_candidate_leads": 11,
     "formal_database_private_candidate_leads": 6,
-    "formal_jobs_created": 1,
-    "formal_third_party_job_ids": [5432],
+    "formal_jobs_created": 5,
+    "formal_third_party_job_ids": [5432, 5433, 5434, 5435, 5436],
     "formal_database_unchanged": false,
-    "formal_database_change_note": "The approved local HRINM recovery created job 5432. The CGS attachment trial then added four official-content-verified private candidate leads (ids 3-6) without creating jobs. A later local audit backfilled candidate lead 2 conversion_checked_at; subsequent tests were read-only and preserved the SHA-256 recorded above.",
+    "formal_database_change_note": "The approved local HRINM recovery created job 5432; the B-level Huatu-to-CGS recovery then created jobs 5433-5436 from four official attachment rows. All subsequent tests used isolated databases or read-only inspection.",
     "cgs_attachment_trial": {
       "candidate_lead_ids": [3, 4, 5, 6],
       "official_rows": 4,
-      "formal_jobs_created": 0,
-      "backup_path": "backups/job_hub-pre-phase4-cgs-trial-20261018.sqlite3",
-      "backup_sha256": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62"
+      "formal_jobs_created": 4,
+      "formal_job_ids": [5433, 5434, 5435, 5436],
+      "backup_path": "backups/job_hub-pre-phase4-cgs-promotion-20261018.sqlite3",
+      "backup_sha256": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702"
     },
     "conversion_audit_backfill": {
       "candidate_lead_id": 2,
@@ -60,7 +61,7 @@
     "robots_or_permission_blocked_followups": 1
   },
   "local_web_read_only": {
-    "base_url": "http://127.0.0.1:8095",
+    "base_url": "http://127.0.0.1:8097",
     "database_mode": "temporary_copy_of_runtime_database",
     "healthz_status": 200,
     "home_status": 200,
@@ -71,16 +72,19 @@
       "source_unavailable": 200
     },
     "formal_third_party_job_query": {
-      "query": "地质研发",
+      "query": "金属矿床",
       "status": 200,
       "total": 2,
-      "job_id": 5432,
-      "publication_layer": "exact_match",
-      "official_notice_url": "https://www.hrinm.cn/xwxq/35.html",
+      "job_id": 5433,
+      "publication_layer": "broad_geoscience_match",
+      "official_notice_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
       "official_application_url": null,
       "third_party_table_url": null,
       "third_party_discovery_url_is_student_visible": false
     },
+    "broad_layer_total": 5,
+    "homepage_job_table_link_label_present": true,
+    "homepage_third_party_discovery_domain_exposed": false,
     "server_deployment": false
   },
   "release_boundary": {

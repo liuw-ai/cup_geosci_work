@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-18T13:29:00Z",
+  "generated_at": "2026-10-18T14:23:39Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "b30f9944b0b15d83a389a5396ba58ed9dd8b1917",
-  "working_tree_dirty": false,
+  "git_sha": "2b905adcd5fb55beb401f10b5045b6066b949125",
+  "working_tree_dirty": true,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
   "release_env_sha256": "49f2c7be91ff3cfadb0cc0f88a255e3e7d3ac2a1194f1e719d0207a85b79175d",
@@ -16,34 +16,34 @@
     "three_oil_catalog": "a6d1979d99b5b027590acb07d4883910bca074c301ed8dc0e134bfdf57991394",
     "phase4_organization_reconciliation": "e4da77e84543f6d6a81c19e0e93d6370ff7a80655e5c54f2fd259ddeb4757d64",
     "phase4_three_oil_catalog_audit": "146bbc0bceaa60ccb27430464f417153781de43d0bc7a2587e0e47cba0eeda19",
-    "phase4_third_party_trial": "9e1d9a183117349b025b765d1c53f7e60b6bbc6fbf76d7dd529aab3b47f91656",
+    "phase4_third_party_trial": "57d91e1e205f3dc229c7ec4ec0c3a71fb702bf54e415d9057bf0ad34553f8232",
     "phase4_three_oil_entry_evidence": "c2d44f1c2445b0693a7dbe2b26be5dda1bab2d4b6898c90a5046ec652afa4931",
     "phase4_three_oil_unit_entry_matrix": "afd073160c9de41f9a879f5d406ca100213dfdc8a2a104e0f7699cf67ff58e98",
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "dc2a6350a7b6070df4ba92cb4133181569a9d3f10af8bdfa731afc0a38d4c162",
-    "phase4_document_consistency": "dc2a6350a7b6070df4ba92cb4133181569a9d3f10af8bdfa731afc0a38d4c162",
+    "phase4_current_state_audit": "8d132eca856938a3105971ba1dee1a582b98e58a0b590708f972fecdd69a8e90",
+    "phase4_document_consistency": "8d132eca856938a3105971ba1dee1a582b98e58a0b590708f972fecdd69a8e90",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
-    "phase4_third_party_cgs": "c9ac28c1b0026ef107897aa2516f67e13307ecced258882c4242a090ebd582da",
+    "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
     "phase4_third_party_blocked_batches": "74da7ade28ae3e7310f78796f80dc2cc2ee27a7d4b13fcb65601667f667ed31c",
-    "phase4_local_web_recheck": "84f73ee1f95e71b4b7ff03ab699c4f977db8588fa58a35e6d3a66929fe0ed842",
-    "phase4_main_record": "7947e3b3c9a34ecda685714551bacc5a884e6c4ef31f1258581dd9c71ab19195",
-    "phase4_local_validation": "d44d31425b25a50933cd3d540358f5db088b028e5164f089433c7385c68cc522"
+    "phase4_local_web_recheck": "8f019cc8442713d3440847fc3ae37ce2efcde5e2178d2699b3808af26351bd23",
+    "phase4_main_record": "2a2f35b93b193002f40df45fccc0b078b50fd55bb28d9debe5f5811756f44aa1",
+    "phase4_local_validation": "c2b2ceaaa40cf9f2dcc9daa273f9edb0996bc496b501869ab8b2b5459b0c477b"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
+    "sha256": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
     "integrity_check": "ok",
-    "job_count": 3948,
+    "job_count": 3952,
     "status_counts": {
       "expired": 106,
-      "open": 3746,
+      "open": 3750,
       "superseded": 45,
       "withdrawn": 51
     },
     "publication_layer_counts": {
-      "broad_geoscience_match": 1,
+      "broad_geoscience_match": 5,
       "exact_match": 211,
       "incomplete_but_basic_match": 615,
       "not_public": 2955,
@@ -51,15 +51,15 @@
     },
     "student_read_as_of_date": "2026-10-18",
     "student_visible_layer_counts": {
-      "broad_geoscience_match": 1,
+      "broad_geoscience_match": 5,
       "exact_match": 146,
       "incomplete_but_basic_match": 367,
       "not_public": 0,
       "source_unavailable": 111
     },
-    "student_visible_total": 625,
+    "student_visible_total": 629,
     "candidate_lead_count": 6,
-    "formal_third_party_job_count": 1,
+    "formal_third_party_job_count": 5,
     "pre_third_party_candidate_backup": {
       "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
       "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a"
@@ -75,14 +75,14 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-18T21:28:23+08:00",
+    "validated_at": "2026-10-18T22:15:12+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "281048eb7867a1e9809d70b96e8bebb153daa6e4",
-    "git_sha_at_validation": "281048eb7867a1e9809d70b96e8bebb153daa6e4",
+    "git_sha_before_metadata_commit": "2b905ad",
+    "git_sha_at_validation": "2b905ad",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1069,
+      "passed": 1070,
       "skipped": 4,
       "failed": 0,
       "warnings": 1,
@@ -95,17 +95,17 @@
     },
     "database": {
       "path": "runtime/job_hub.sqlite3",
-      "sha256_before_tests": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
-      "sha256_after_tests": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
+      "sha256_before_tests": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
+      "sha256_after_tests": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
       "integrity_check": "ok",
-      "jobs": 3948,
+      "jobs": 3952,
       "candidate_leads": 6,
       "phase3_withdrawal_audits": 3947,
       "student_read_as_of_date": "2026-10-18",
-      "student_visible_total": 625,
+      "student_visible_total": 629,
       "student_visible_layer_counts": {
         "exact_match": 146,
-        "broad_geoscience_match": 1,
+        "broad_geoscience_match": 5,
         "incomplete_but_basic_match": 367,
         "source_unavailable": 111
       }
@@ -113,12 +113,16 @@
     "third_party": {
       "isolated_huatu_trial_candidate_leads": 11,
       "formal_database_private_candidate_leads": 6,
-      "formal_jobs_created": 1,
+      "formal_jobs_created": 5,
       "formal_third_party_job_ids": [
-        5432
+        5432,
+        5433,
+        5434,
+        5435,
+        5436
       ],
       "formal_database_unchanged": false,
-      "formal_database_change_note": "The approved local HRINM recovery created job 5432. The CGS attachment trial then added four official-content-verified private candidate leads (ids 3-6) without creating jobs. A later local audit backfilled candidate lead 2 conversion_checked_at; subsequent tests were read-only and preserved the SHA-256 recorded above.",
+      "formal_database_change_note": "The approved local HRINM recovery created job 5432; the B-level Huatu-to-CGS recovery then created jobs 5433-5436 from four official attachment rows. All subsequent tests used isolated databases or read-only inspection.",
       "cgs_attachment_trial": {
         "candidate_lead_ids": [
           3,
@@ -127,9 +131,15 @@
           6
         ],
         "official_rows": 4,
-        "formal_jobs_created": 0,
-        "backup_path": "backups/job_hub-pre-phase4-cgs-trial-20261018.sqlite3",
-        "backup_sha256": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62"
+        "formal_jobs_created": 4,
+        "formal_job_ids": [
+          5433,
+          5434,
+          5435,
+          5436
+        ],
+        "backup_path": "backups/job_hub-pre-phase4-cgs-promotion-20261018.sqlite3",
+        "backup_sha256": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702"
       },
       "conversion_audit_backfill": {
         "candidate_lead_id": 2,
@@ -142,7 +152,7 @@
       "robots_or_permission_blocked_followups": 1
     },
     "local_web_read_only": {
-      "base_url": "http://127.0.0.1:8095",
+      "base_url": "http://127.0.0.1:8097",
       "database_mode": "temporary_copy_of_runtime_database",
       "healthz_status": 200,
       "home_status": 200,
@@ -153,16 +163,19 @@
         "source_unavailable": 200
       },
       "formal_third_party_job_query": {
-        "query": "地质研发",
+        "query": "金属矿床",
         "status": 200,
         "total": 2,
-        "job_id": 5432,
-        "publication_layer": "exact_match",
-        "official_notice_url": "https://www.hrinm.cn/xwxq/35.html",
+        "job_id": 5433,
+        "publication_layer": "broad_geoscience_match",
+        "official_notice_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
         "official_application_url": null,
         "third_party_table_url": null,
         "third_party_discovery_url_is_student_visible": false
       },
+      "broad_layer_total": 5,
+      "homepage_job_table_link_label_present": true,
+      "homepage_third_party_discovery_domain_exposed": false,
       "server_deployment": false
     },
     "release_boundary": {
@@ -185,7 +198,7 @@
     "real_candidate_leads_in_database": 6,
     "private_candidate_evidence": "docs/current/phase4-third-party-candidate-2026-10-18.json",
     "official_attachment_trial": "docs/current/phase4-third-party-cgs-2026-10-18.json",
-    "formal_jobs_published": 1,
+    "formal_jobs_published": 5,
     "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
     "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
     "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json"
@@ -219,6 +232,7 @@
   "automation_status": "paused",
   "production_deployment": "not_performed",
   "release_blockers": [
+    "working_tree_contains_uncommitted_or_untracked_changes",
     "b_level_table_batch_target_not_yet_met",
     "three_oil_external_identity_evidence_pending",
     "three_oil_unit_entry_evidence_incomplete",

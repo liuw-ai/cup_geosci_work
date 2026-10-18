@@ -1,22 +1,22 @@
 {
-  "generated_at": "2026-10-18T13:28:57Z",
+  "generated_at": "2026-10-18T14:23:36Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "b30f9944b0b15d83a389a5396ba58ed9dd8b1917",
-  "git_status_porcelain": "",
+  "git_sha": "2b905adcd5fb55beb401f10b5045b6066b949125",
+  "git_status_porcelain": "M docs/current/phase4-local-validation-2026-10-18.json\n M docs/current/phase4-local-web-recheck-2026-10-18.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
+    "sha256": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
     "integrity_check": "ok",
-    "job_count": 3948,
+    "job_count": 3952,
     "status_counts": {
       "expired": 106,
-      "open": 3746,
+      "open": 3750,
       "superseded": 45,
       "withdrawn": 51
     },
     "publication_layer_counts": {
-      "broad_geoscience_match": 1,
+      "broad_geoscience_match": 5,
       "exact_match": 211,
       "incomplete_but_basic_match": 615,
       "not_public": 2955,
@@ -24,16 +24,16 @@
     },
     "phase3_withdrawal_audit_count": 3947,
     "candidate_lead_count": 6,
-    "formal_third_party_job_count": 1,
+    "formal_third_party_job_count": 5,
     "student_read_as_of_date": "2026-10-18",
     "student_visible_layer_counts": {
-      "broad_geoscience_match": 1,
+      "broad_geoscience_match": 5,
       "exact_match": 146,
       "incomplete_but_basic_match": 367,
       "not_public": 0,
       "source_unavailable": 111
     },
-    "student_visible_total": 625
+    "student_visible_total": 629
   },
   "sources_and_organizations": {
     "registered_source_count": 12,
@@ -88,22 +88,22 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "7947e3b3c9a34ecda685714551bacc5a884e6c4ef31f1258581dd9c71ab19195"
+        "sha256": "2a2f35b93b193002f40df45fccc0b078b50fd55bb28d9debe5f5811756f44aa1"
       },
       {
         "path": "docs/current/phase4-current-state-audit-2026-10-18.json",
         "exists": true,
-        "sha256": "4e15a9fd47f277976d1a87fdba02bc0b7385cb4d46d3ef9a9f6e275334d9c4db"
+        "sha256": "74e5092b1301d2fabeec0df9e63b24a81c95e2519785a4e0c31a1b5d70a9d56a"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
         "exists": true,
-        "sha256": "d44d31425b25a50933cd3d540358f5db088b028e5164f089433c7385c68cc522"
+        "sha256": "c2b2ceaaa40cf9f2dcc9daa273f9edb0996bc496b501869ab8b2b5459b0c477b"
       },
       {
         "path": "docs/current/phase4-release-manifest.json",
         "exists": true,
-        "sha256": "68315c97863db0c886635921bc958d97def69a42d559725fb75506170b0bbe5d"
+        "sha256": "5a8228f5abc27f4120c1d1309e310a4807e70d214c6a17ef63accaaed7be3f80"
       }
     ],
     "historical_documents_are_publish_inputs": false
@@ -115,7 +115,7 @@
     },
     "phase4_third_party_trial": {
       "path": "docs/current/phase4-third-party-trial-2026-10-18.json",
-      "sha256": "9e1d9a183117349b025b765d1c53f7e60b6bbc6fbf76d7dd529aab3b47f91656"
+      "sha256": "57d91e1e205f3dc229c7ec4ec0c3a71fb702bf54e415d9057bf0ad34553f8232"
     },
     "phase4_three_oil_entry_evidence": {
       "path": "docs/current/phase4-three-oil-entry-evidence-2026-10-18.json",
@@ -131,7 +131,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-18.json",
-      "sha256": "d44d31425b25a50933cd3d540358f5db088b028e5164f089433c7385c68cc522"
+      "sha256": "c2b2ceaaa40cf9f2dcc9daa273f9edb0996bc496b501869ab8b2b5459b0c477b"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -143,7 +143,7 @@
     },
     "phase4_third_party_cgs": {
       "path": "docs/current/phase4-third-party-cgs-2026-10-18.json",
-      "sha256": "c9ac28c1b0026ef107897aa2516f67e13307ecced258882c4242a090ebd582da"
+      "sha256": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913"
     },
     "phase4_third_party_blocked_batches": {
       "path": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
@@ -151,11 +151,11 @@
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-18.json",
-      "sha256": "84f73ee1f95e71b4b7ff03ab699c4f977db8588fa58a35e6d3a66929fe0ed842"
+      "sha256": "8f019cc8442713d3440847fc3ae37ce2efcde5e2178d2699b3808af26351bd23"
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "7947e3b3c9a34ecda685714551bacc5a884e6c4ef31f1258581dd9c71ab19195"
+      "sha256": "2a2f35b93b193002f40df45fccc0b078b50fd55bb28d9debe5f5811756f44aa1"
     }
   },
   "code_inventory": [
@@ -182,7 +182,7 @@
     {
       "path": "job_hub/audit.py",
       "line_count": 461,
-      "sha256": "d3c67f2806ada8cd60d4cbed4584d1e80600fcf51acdbbd61a32a6e7eddbad81"
+      "sha256": "3009cd31b57734355de77c2b13ed5080e316c118b138406c179383a489f9f4d5"
     },
     {
       "path": "job_hub/backups.py",
@@ -296,8 +296,8 @@
     },
     {
       "path": "job_hub/db.py",
-      "line_count": 5525,
-      "sha256": "760adeca76c68282ab549afd2441e34c1310f9019a4cf81f07ab82d182ea94a6"
+      "line_count": 5530,
+      "sha256": "90fbaa768e41d7e05a0f57c69ded0448ba704b9f1fafb77aea3b808071bb64fc"
     },
     {
       "path": "job_hub/discovery.py",
@@ -456,8 +456,8 @@
     },
     {
       "path": "job_hub/phase3_policy.py",
-      "line_count": 238,
-      "sha256": "3118a413d3d3a713e654337fac71dd8929b5cfaae4c49a8f9bbb125ebf50ba2c"
+      "line_count": 245,
+      "sha256": "1fb08cc824ec064a75c12ed837a59d1a4f6f9a08f93afa7823da27b62bcfdc8e"
     },
     {
       "path": "job_hub/pipeline.py",
@@ -471,8 +471,8 @@
     },
     {
       "path": "job_hub/profiles.py",
-      "line_count": 1793,
-      "sha256": "0c3129efb1c35793ca935742ce804c8427019e455aed31459f3a0615e32d0a1d"
+      "line_count": 1847,
+      "sha256": "4a1c0f2f881e241a6093f0ce77edae9a9490d1413d8c2dfdc2ef228fd6897d7a"
     },
     {
       "path": "job_hub/provincial_matrix_audit.py",
@@ -622,7 +622,7 @@
     {
       "path": "scripts/audit_phase4_current_state.py",
       "line_count": 297,
-      "sha256": "21e05f6123f7b419e81d806ede81baf0f6bc5736fdc95ac93e7bc9cdf12f65f7"
+      "sha256": "541414194365e750daa55721a4adf74f07e2b71ac8c2b77eae0c2fd3ae234e7c"
     },
     {
       "path": "scripts/build_phase3_manifest.py",
@@ -675,9 +675,14 @@
       "sha256": "f7565e2d8a5fb1cfe990f711ba008375cf0cc0e8c02ac51493b3995fc46a6ae9"
     },
     {
+      "path": "scripts/publish_phase4_cgs_trial.py",
+      "line_count": 169,
+      "sha256": "ea96fa43a77a9195cf3f4e29c0fc2c26536526f06926762ef7486d832ae5d455"
+    },
+    {
       "path": "scripts/register_phase4_cgs_trial.py",
-      "line_count": 183,
-      "sha256": "460e573957274fb307dc641d672804192dcf27c9f6be2d8835022b50da9d67fc"
+      "line_count": 214,
+      "sha256": "9faa85e0704f5411c180d6d1ef93916558874c9dd7fb2d7398865a0db8ecddba"
     },
     {
       "path": "tests/conftest.py",
@@ -832,7 +837,7 @@
     {
       "path": "tests/test_coverage.py",
       "line_count": 660,
-      "sha256": "da677f1f9df5ce28025c6eb5bff8c53213551949f7cb4f592f5d3e7d81d0fbbe"
+      "sha256": "e840197eef7b6787e4809f33d5573647e1e447c4f764713a5508a5f2d3d0dab6"
     },
     {
       "path": "tests/test_cupb_browser_capture.py",
@@ -907,7 +912,7 @@
     {
       "path": "tests/test_exact_major_policy.py",
       "line_count": 256,
-      "sha256": "0b53761673697946b67cc061b6b80520228e45949f4e4671ebfbe6ce5ed194d8"
+      "sha256": "6100cf2a7ee2bbf9552a685ef66301656bbc9db49380d4cdf191cf2fbf5f7d64"
     },
     {
       "path": "tests/test_expansion_targets.py",
@@ -957,7 +962,7 @@
     {
       "path": "tests/test_government_positions.py",
       "line_count": 850,
-      "sha256": "875087a2c1987be471f1dc40224c0855e3b0acc059253048e1ca27e0903aa84d"
+      "sha256": "946d56b2b07b697b48d85c834fe17f69f857ef0d5e31a91af0b7536401f5f195"
     },
     {
       "path": "tests/test_government_revalidation.py",
@@ -1037,7 +1042,7 @@
     {
       "path": "tests/test_official_snapshot_rows.py",
       "line_count": 308,
-      "sha256": "6925d5ec2f4e48bc739a742c507fce0146a85f46cb447dcab37cae9513f66820"
+      "sha256": "8cbbb010d26dab7ecded8b774db77518f38e998dc6920c2cda9997171502e88e"
     },
     {
       "path": "tests/test_official_table_rows.py",
@@ -1067,12 +1072,12 @@
     {
       "path": "tests/test_phase3_policy.py",
       "line_count": 52,
-      "sha256": "64194bb1c8a35c29aab46415ea98e4b77da6944c41447128f74c34ac22c4674e"
+      "sha256": "2faf160845e4a8d574503d356bb9a42a2d1990fd503630890da4e5b58974f39d"
     },
     {
       "path": "tests/test_phase4_cgs_trial.py",
-      "line_count": 31,
-      "sha256": "cfa0c7c400a1534ff4304f67fd7b4a65ccb17bdf6ff6646826a3bc833056270a"
+      "line_count": 56,
+      "sha256": "0f25550360dfd2b06c8573abf24b763c937b9ba92906aff9199461c99c189eaa"
     },
     {
       "path": "tests/test_phase4_current_audit.py",
@@ -1092,7 +1097,7 @@
     {
       "path": "tests/test_pipeline.py",
       "line_count": 1361,
-      "sha256": "c7934c71787fa2dd3bb33cb0c9376baf0c5fc6133b1970bf958194c53aac883d"
+      "sha256": "19315ebd0defc2847e3d277620a82c226ea40e31aea9023543467fe2980b5b4b"
     },
     {
       "path": "tests/test_policy_contract.py",
@@ -1101,8 +1106,8 @@
     },
     {
       "path": "tests/test_profiles.py",
-      "line_count": 1222,
-      "sha256": "9169dbc7e6e50cfe112d66edacc0cd4ba3db6b7a795720df2b761b2dfcfb4fbb"
+      "line_count": 1221,
+      "sha256": "1b2461ae1e93f8d8ee9e48005137e5e51e67bf0c96c7cb7ae1a58bc88078273f"
     },
     {
       "path": "tests/test_provincial_matrix_audit.py",
@@ -1127,7 +1132,7 @@
     {
       "path": "tests/test_publication_write_gate.py",
       "line_count": 157,
-      "sha256": "e50d866c8b2cba41b75c6c345def76eeebaed22f2cbe1571dedb60236107db14"
+      "sha256": "70dc4a9bc74a99175299ada6c55f6d3defc502b3f7db9422ecae66192570b987"
     },
     {
       "path": "tests/test_readiness_axes.py",
@@ -1181,13 +1186,13 @@
     },
     {
       "path": "tests/test_sinopec_spa.py",
-      "line_count": 238,
-      "sha256": "4537d053290562844043e55a55be2cc921dac0d6dbe8f6ece59baa86f03dd546"
+      "line_count": 237,
+      "sha256": "3e7429ec1f1a89e27b027895aa3a64148aafeee9dbaa3f0b3cdc1fcfd1a2ba16"
     },
     {
       "path": "tests/test_snapshot_activation.py",
-      "line_count": 81,
-      "sha256": "39bb2516554ef2fa2a868464fb7e22d89eda0bec2536da29df70286d7229c086"
+      "line_count": 80,
+      "sha256": "284b1d5e1db1b763aa65a003cf778cd8184ea03787473d30bf3dc08f011e9183"
     },
     {
       "path": "tests/test_source_diversity.py",
@@ -1295,7 +1300,7 @@
     "automation_status": "paused",
     "formal_third_party_jobs_published": true,
     "notes": [
-      "One locally approved third-party discovery lead was recovered to an official employer notice and published as job 5432; no server deployment was performed.",
+      "One C-level discovery lead was recovered to an official employer notice and published as job 5432; four B-level Huatu discovery rows were recovered to the official CGS attachment and published as jobs 5433-5436; no server deployment was performed.",
       "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
       "Historical snapshots remain archived and are not overwritten by current facts."
     ]

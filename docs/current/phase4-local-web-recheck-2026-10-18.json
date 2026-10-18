@@ -1,25 +1,30 @@
 {
   "phase": "phase4",
-  "checked_at": "2026-10-18T21:06:42+08:00",
+  "checked_at": "2026-10-18T22:15:12+08:00",
   "git_sha": "c5bd515",
   "environment": "local_temporary_database_copy",
   "server_deployment": false,
-  "database_sha256": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
-  "base_url": "http://127.0.0.1:8096",
+  "database_sha256": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
+  "base_url": "http://127.0.0.1:8097",
   "temporary_database_removed_after_check": true,
   "endpoints": {
     "/": {"status": 200},
-    "/healthz": {"status": 200, "open_jobs": 625},
+    "/healthz": {"status": 200, "open_jobs": 629},
     "/api/jobs?layer=exact_match": {"status": 200, "total": 146},
-    "/api/jobs?layer=broad_geoscience_match": {"status": 200, "total": 1},
+    "/api/jobs?layer=broad_geoscience_match": {"status": 200, "total": 5, "cgs_job_ids": [5433, 5434, 5435, 5436]},
     "/api/jobs?layer=incomplete_but_basic_match": {"status": 200, "total": 367},
     "/api/jobs?layer=source_unavailable": {"status": 200, "total": 111},
-    "/api/jobs?q=地质研发": {
+    "/api/jobs?q=金属矿床": {
       "status": 200,
       "total": 2,
-      "formal_third_party_job_id": 5432,
+      "formal_third_party_job_id": 5433,
       "third_party_discovery_url_student_visible": false
     }
+  },
+  "homepage": {
+    "status": 200,
+    "job_table_link_label_present": true,
+    "third_party_discovery_domain_exposed": false
   },
   "release_boundary": "not_publishable"
 }
