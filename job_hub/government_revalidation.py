@@ -83,9 +83,8 @@ def revalidate_government_sources(
         if str(record.get("record_status") or "") == "verified_open":
             records_by_source[str(record.get("source_id") or "")].append(record)
 
-    # A failed recheck withdraws the reviewed rows. Do not let that make an
-    # automatic-after-opening source permanently invisible: its configured
-    # first-party notice/attachment URLs remain the recovery evidence. This
+    # A failed recheck records source_unavailable evidence only. It must not
+    # make reviewed rows invisible or change their lifecycle state. This
     # path is limited to sources that declare an official attachment, so
     # ordinary sources without reviewed rows are not probed.
     source_ids = set(records_by_source)

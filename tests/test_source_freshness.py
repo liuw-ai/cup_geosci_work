@@ -333,7 +333,7 @@ def test_bootstrap_invalidates_legacy_live_sync_for_official_xlsx(tmp_path) -> N
     assert database.get_source_capture_freshness(xlsx_source["id"]) is None
 
 
-def test_stale_snapshot_rows_are_withdrawn_and_auditable(tmp_path) -> None:
+def test_stale_snapshot_rows_remain_open_and_auditable(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
     database.initialize()
@@ -404,8 +404,8 @@ def test_stale_snapshot_rows_are_withdrawn_and_auditable(tmp_path) -> None:
     assert event is not None
 
 
-def test_read_side_hides_stale_capture_when_worker_has_not_withdrawn_row(tmp_path) -> None:
-    """A worker outage must not leave an old snapshot visible to students."""
+def test_read_side_keeps_stale_capture_visible_when_worker_is_down(tmp_path) -> None:
+    """A worker outage must not hide a still-valid job from students."""
 
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)

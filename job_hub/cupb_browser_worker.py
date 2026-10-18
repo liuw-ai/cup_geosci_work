@@ -110,8 +110,9 @@ class CupbBrowserWorker:
             # the other browser adapters.  The generic pipeline therefore
             # cannot derive its capture timestamp from ``capture_path``.  Make
             # the successful browser result durable explicitly; without this
-            # projection a healthy capture would keep the old declared
-            # snapshot timestamp and be withdrawn as stale after 30 hours.
+            # projection the source-health report would retain the old
+            # declared snapshot timestamp. Freshness is an evidence-health
+            # signal only and never withdraws or hides a job.
             self.database.record_source_capture_freshness(
                 self.source_id,
                 captured_at=captured_at,

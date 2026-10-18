@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T22:23:54Z",
+  "generated_at": "2026-10-18T22:35:30Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "d67d9cfc886bf5d82683586280a084fa646772f5",
-  "git_status_porcelain": "",
+  "git_sha": "67c40642c074af6ab9f12b12b7d651ce45e9dd7b",
+  "git_status_porcelain": "M job_hub/cupb_browser_worker.py\n M job_hub/government_revalidation.py\n M tests/test_source_freshness.py",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
@@ -403,8 +403,8 @@
     },
     {
       "path": "job_hub/cupb_browser_worker.py",
-      "line_count": 173,
-      "sha256": "6185b38039d68036434f01dd70690c1073662a314cff25f51711aae6101d918c"
+      "line_count": 174,
+      "sha256": "b5110b17360f2adc6978e03371f91038cc895ca6a8a969727a84988391a69b5f"
     },
     {
       "path": "job_hub/db.py",
@@ -483,8 +483,8 @@
     },
     {
       "path": "job_hub/government_revalidation.py",
-      "line_count": 557,
-      "sha256": "9d7509e003cff167bcc7a9af124a54efb371f2202659ba4a272f49db960a27bb"
+      "line_count": 556,
+      "sha256": "21fe6101ae4c5d63bd097190b347fc01f2ceeec6e5ba09b7f94131473d2017e3"
     },
     {
       "path": "job_hub/government_table_parser.py",
@@ -1374,7 +1374,7 @@
     {
       "path": "tests/test_source_freshness.py",
       "line_count": 616,
-      "sha256": "21ce5a78273d4a480e2a75158eb9850966f534b82838ebe8d8ff3091b732340b"
+      "sha256": "7f1fff336644f22d3f0e4eee2fbf9bd1fa12476127f2d758c6da089789cbf6cc"
     },
     {
       "path": "tests/test_source_funnel.py",
