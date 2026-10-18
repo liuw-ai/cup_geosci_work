@@ -11,6 +11,7 @@ def test_phase4_completion_audit_is_requirement_scoped_and_not_complete() -> Non
     assert statuses["phase3_lifecycle_and_withdrawal_policy"] == "pass"
     assert statuses["third_party_table_to_official_recovery_trial"] == "pass"
     assert statuses["third_party_batch_expansion"] == "blocked"
+    assert statuses["third_party_hbdk_geoscience_recovery"] == "partial"
     assert statuses["three_oil_catalog_and_entry_evidence"] == "partial"
     assert statuses["isolated_local_regression"] == "pass"
     assert statuses["student_site_acceptance"] == "pass"

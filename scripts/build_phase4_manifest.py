@@ -335,6 +335,7 @@ def main() -> None:
             "funnel_audit": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
             "table_discovery_report": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
             "discovery_scan_report": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
+            "hbdk_geophysics_visual_evidence": "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
         "three_oil_entry_evidence": {
