@@ -224,6 +224,7 @@ def main() -> None:
     entry_evidence = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"
     cnooc_unit_evidence = ROOT / "docs" / "current" / "phase4-cnooc-unit-display-evidence-2026-10-19.json"
     cnooc_full_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-unit-job-evidence-2026-10-19.json"
+    sinopec_page_roster = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
     entry_matrix = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
     validation = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-18.json"
@@ -265,6 +266,10 @@ def main() -> None:
             "phase4_cnooc_unit_job_evidence": {
                 "path": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
                 "sha256": sha256(cnooc_full_job_evidence),
+            },
+            "phase4_sinopec_page_roster": {
+                "path": "docs/current/phase4-sinopec-page-roster-2026-10-19.json",
+                "sha256": sha256(sinopec_page_roster),
             },
             "phase4_three_oil_unit_entry_matrix": {
                 "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
