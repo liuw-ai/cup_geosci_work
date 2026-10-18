@@ -44,6 +44,26 @@ def git(command: list[str]) -> str:
         return ""
 
 
+def input_tree_status() -> str:
+    """Report input changes while excluding generated audit metadata."""
+    try:
+        return subprocess.check_output(
+            [
+                "git",
+                "status",
+                "--porcelain",
+                "--",
+                ".",
+                ":!docs/current/phase4-current-state-audit-2026-10-18.json",
+                ":!docs/current/phase4-release-manifest.json",
+            ],
+            cwd=ROOT,
+            text=True,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "audit_status_unavailable"
+
+
 def current_database_facts() -> dict[str, object]:
     as_of_date = datetime.now(ZoneInfo("Asia/Shanghai")).date().isoformat()
     with sqlite3.connect(f"file:{DATABASE.resolve().as_posix()}?mode=ro", uri=True) as connection:
@@ -130,7 +150,7 @@ def main() -> None:
         "phase": "phase4",
         "scope": "local_read_only_current_state",
         "git_sha": git(["git", "rev-parse", "HEAD"]),
-        "git_status_porcelain": git(["git", "status", "--porcelain"]),
+        "git_status_porcelain": input_tree_status(),
         "database": current_database_facts(),
         "sources_and_organizations": source_facts(),
         "evidence_documents": {
