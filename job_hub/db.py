@@ -276,11 +276,12 @@ CREATE TABLE IF NOT EXISTS source_health (
 CREATE INDEX IF NOT EXISTS idx_source_health_status
 ON source_health(status, checked_at DESC);
 
--- Student-facing reads must be able to enforce the same capture-freshness
--- contract as the worker. ``source_health.last_success_at`` is deliberately
--- not used here: it records when a sync finished and can therefore be newer
--- than an old snapshot that was merely re-read. This table stores the
--- evidence capture time from a complete successful source run.
+-- Capture freshness is source-health telemetry only. It must never hide a
+-- previously verified student-facing job or change its lifecycle state.
+-- ``source_health.last_success_at`` is deliberately not used here: it records
+-- when a sync finished and can therefore be newer than an old snapshot that
+-- was merely re-read. This table stores the evidence capture time from a
+-- complete successful source run for audit and alerting.
 CREATE TABLE IF NOT EXISTS source_capture_freshness (
     source_id TEXT PRIMARY KEY REFERENCES sources(id) ON DELETE CASCADE,
     captured_at TEXT NOT NULL,
@@ -3625,8 +3626,9 @@ class Database:
         evidence, source reconciliation and fallback.  This read-side rank
         removes only URL-proven duplicates from student-facing results.  A
         source with lower ``official_detail_precedence`` wins; if it becomes
-        disabled, stale or withdrawn it leaves the candidate set and another
-        live observation takes over automatically.
+        source-disabled or stale rows remain eligible when they have historical
+        official evidence; only explicit lifecycle states such as superseded,
+        deadline expiry, or official closure remove them from the current set.
         """
 
         clauses = [
@@ -4124,8 +4126,9 @@ class Database:
         if only_open:
             # ``status`` is a materialized current-state field. A historical
             # read must still inspect rows the worker has since marked
-            # expired; the dated deadline/freshness predicates decide whether
-            # that row was visible on the requested date.
+            # expired; the dated deadline predicates decide whether that row
+            # was visible on the requested date. Capture freshness is not a
+            # student-facing predicate.
             clauses.append(
                 "jobs.status IN ('open', 'expired')"
                 if as_of_date is not None
