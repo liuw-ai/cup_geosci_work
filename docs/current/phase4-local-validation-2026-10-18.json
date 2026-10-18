@@ -1,17 +1,17 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-18T23:03:09+08:00",
+  "validated_at": "2026-10-18T23:16:33+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "de5b8a8",
-  "git_sha_at_validation": "de5b8a8",
+  "git_sha_before_metadata_commit": "9371ed5339e42fd0a141f7373d7b21d878439595",
+  "git_sha_at_validation": "9371ed5339e42fd0a141f7373d7b21d878439595",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1072,
     "skipped": 4,
     "failed": 0,
-    "warnings": 1,
-    "warning_scope": "BeautifulSoup MarkupResemblesLocatorWarning in discovery_scan.py; no test failure"
+    "warnings": 0,
+    "warning_scope": null
   },
   "compose": {
     "path": "deploy/compose.yaml",
