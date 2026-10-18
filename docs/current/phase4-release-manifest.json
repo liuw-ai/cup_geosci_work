@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T20:21:49Z",
+  "generated_at": "2026-10-18T20:27:18Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "50adc310557bb0ce987ae1cbcda6d10dba1476f8",
+  "git_sha": "6b6e322f302280e5c6f2270e816cd73328337477",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "cf54fefbd277ea0ad2d9a0f635443c014d021a19a847be6e40bc2dde909d66b8",
-    "phase4_document_consistency": "cf54fefbd277ea0ad2d9a0f635443c014d021a19a847be6e40bc2dde909d66b8",
+    "phase4_current_state_audit": "c14b47029e48de0f5856d96ccf05dd820ad0fe1aa3d54ab232acbd8d3593196a",
+    "phase4_document_consistency": "c14b47029e48de0f5856d96ccf05dd820ad0fe1aa3d54ab232acbd8d3593196a",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -45,9 +45,10 @@
     "phase4_local_web_live_validation": "ce5ca5f99d6b8b1042411127069d64e51f44ff795bcf53a100022de5a56585ef",
     "phase4_huatu_table_discovery": "e13bea423404b688d1de2aa46ea316926e9692caa5cc3bb3c3bbfcc3a178fa22",
     "phase4_huatu_discovery_scan": "6084764bc34681e688a1bcfaa07851a8fb0c4fcb073680a308ffd219ea2fb277",
-    "phase4_main_record": "f2ee6d7bf8e8127bb89ae47471a500574a56984170af07b31976e8cc8cf0647d",
+    "phase4_main_record": "e68630d5e7ee271f4f71b8678bf4706480f8cc13e1f6706d4af31bd1b4f9300d",
     "phase4_local_validation": "3e40c2b2703c7561ee982bbb8bfa0fecee0ba915f9ecdc0a3d9bc1cce1da45e4",
-    "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935"
+    "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
+    "phase4_three_oil_homepage_probe": "94847570b30c8ee0caa57e1dcf49874cf5968d6a5e26ca164e0b710a03d6522a"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -321,6 +322,7 @@
     "cnooc_unit_display_evidence": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
     "cnooc_unit_job_evidence": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
     "cooec_negative_entry_evidence": "docs/current/phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json",
+    "homepage_probe": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
     "cnooc_units_with_active_job_evidence": 16,
     "cnooc_observed_job_cards": 350,
     "independent_unit_recruitment_portals_proven": 0,

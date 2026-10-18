@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T20:21:46Z",
+  "generated_at": "2026-10-18T20:27:15Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "50adc310557bb0ce987ae1cbcda6d10dba1476f8",
+  "git_sha": "6b6e322f302280e5c6f2270e816cd73328337477",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -134,7 +134,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "f2ee6d7bf8e8127bb89ae47471a500574a56984170af07b31976e8cc8cf0647d"
+        "sha256": "e68630d5e7ee271f4f71b8678bf4706480f8cc13e1f6706d4af31bd1b4f9300d"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -257,9 +257,13 @@
       "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",
       "sha256": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935"
     },
+    "phase4_three_oil_homepage_probe": {
+      "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
+      "sha256": "94847570b30c8ee0caa57e1dcf49874cf5968d6a5e26ca164e0b710a03d6522a"
+    },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "f2ee6d7bf8e8127bb89ae47471a500574a56984170af07b31976e8cc8cf0647d"
+      "sha256": "e68630d5e7ee271f4f71b8678bf4706480f8cc13e1f6706d4af31bd1b4f9300d"
     }
   },
   "code_inventory": [
@@ -725,8 +729,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 420,
-      "sha256": "b8d77dfa5eb2cbf03f46c2aca74e11e8f00e090335700ae1cb17f5659a77db2c"
+      "line_count": 425,
+      "sha256": "3cbe1b733388e795173ece2cf628bb7fa18225ea1611f8e506918d382c2c2591"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -745,8 +749,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 352,
-      "sha256": "d8575f1bf5aafd909d669a8eb3ef45114ed232447559db897cf67940b868f8c0"
+      "line_count": 355,
+      "sha256": "4e9a2a3ef76602f65637109c1aba5823b1fdbb614e248ad842ff1404d5badb84"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -787,6 +791,11 @@
       "path": "scripts/prepare_release_env.py",
       "line_count": 119,
       "sha256": "f7565e2d8a5fb1cfe990f711ba008375cf0cc0e8c02ac51493b3995fc46a6ae9"
+    },
+    {
+      "path": "scripts/probe_phase4_three_oil_homepages.py",
+      "line_count": 152,
+      "sha256": "c5d90738cf260f433a070b2a31347c99403c28e8d2787d5a8036664ad7e1915f"
     },
     {
       "path": "scripts/publish_phase4_cgs_trial.py",
