@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T21:59:01Z",
+  "generated_at": "2026-10-18T22:07:22Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "fabd09075858eb73306a3710bef234ff52998b86",
-  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json",
+  "git_sha": "f092176d791583ea2ae5ce1def692b5d6eb37a7e",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
@@ -263,7 +263,7 @@
     },
     "phase4_three_oil_homepage_probe": {
       "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
-      "sha256": "5b44889b9ee2f3782efc0f24f0f9b3595c226d0463b3460d5e89c5068f3397b5"
+      "sha256": "922a8937f2efad212b3d2cad2d91c42a6623e18124583e0cfed8d42e7c09e347"
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
