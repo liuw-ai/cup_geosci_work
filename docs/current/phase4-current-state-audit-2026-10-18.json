@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T15:38:33Z",
+  "generated_at": "2026-10-18T15:50:32Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "47bb7949088a5251604cb388a8dba1a02109eac6",
+  "git_sha": "70cd1d6e10cdeaaa27d646467eff52f366ad5aa3",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -88,7 +88,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "46f81c46aca191e6803a5db964a255a6e79802c9e6dab790288cec02bcf20531"
+        "sha256": "3efd5d5479c9baf351f93113a0f09629f30a6a3d64c9c6be01b76782bd1caee1"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
@@ -125,7 +125,7 @@
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-      "sha256": "d4c5ef42c588fed5d394c51e8d441a998a49d8e820073333fcc15640bb427c2f"
+      "sha256": "91121b185a001e3cea7d3a52388022c70d38a0a0369984747ed476a40b25eb71"
     },
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
@@ -161,7 +161,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "46f81c46aca191e6803a5db964a255a6e79802c9e6dab790288cec02bcf20531"
+      "sha256": "3efd5d5479c9baf351f93113a0f09629f30a6a3d64c9c6be01b76782bd1caee1"
     }
   },
   "code_inventory": [
@@ -657,8 +657,8 @@
     },
     {
       "path": "scripts/build_phase4_three_oil_entry_matrix.py",
-      "line_count": 103,
-      "sha256": "012b1432ef29ae20157624e6fc8d7dc22db643f2d0b5e1e987392d7dd0584532"
+      "line_count": 169,
+      "sha256": "0d3cd96e147d8c8472ae42137dded5ce0bb1ddfc4b70ce8489d3c6d60789027f"
     },
     {
       "path": "scripts/import_third_party_table.py",
@@ -1107,8 +1107,8 @@
     },
     {
       "path": "tests/test_phase4_three_oil_entry_matrix.py",
-      "line_count": 19,
-      "sha256": "b91adc94d6c31278b4f4bf82c286997a852655acad8379bf15bfe821a3821e72"
+      "line_count": 20,
+      "sha256": "4d0bb6e42dd02e6d38106e7b3fe03d24f4ef60ebd7e119d21bb5131390524b2b"
     },
     {
       "path": "tests/test_pipeline.py",
