@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T23:34:46Z",
+  "generated_at": "2026-10-18T23:45:46Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "b93e53cd6d4bdf9c56f014add8c3bb9a39ad0b7a",
-  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
+  "git_sha": "3abcfbb7e03185cc449a9b8342909763ec9c4f17",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
@@ -420,8 +420,8 @@
     },
     {
       "path": "job_hub/db.py",
-      "line_count": 5529,
-      "sha256": "5dacb3b3adafe4b70ecb1823d0b6968d74fd4dbfc3906fc3fcd222dd4045f640"
+      "line_count": 5532,
+      "sha256": "65964b03d5fe9ba15c51b12ad2b07596e496a4c6abae1535554a9f2333f6612b"
     },
     {
       "path": "job_hub/discovery.py",
