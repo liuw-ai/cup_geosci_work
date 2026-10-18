@@ -170,7 +170,7 @@ def main() -> None:
     access_recheck = ROOT / "docs" / "current" / "phase4-third-party-access-recheck-2026-10-19.json"
     local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
     third_party_funnel = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
-    local_web_recheck = ROOT / "docs" / "current" / "phase4-local-web-recheck-2026-10-18.json"
+    local_web_recheck = ROOT / "docs" / "current" / "phase4-local-web-recheck-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     working_tree_dirty = dirty()
     release_blockers = []

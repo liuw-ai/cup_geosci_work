@@ -1,10 +1,10 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T00:52:12+08:00",
+  "validated_at": "2026-10-19T01:26:01+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "b35480da772a7365b4adc5e29dafefb023b07422",
-  "git_sha_at_validation": "b35480da772a7365b4adc5e29dafefb023b07422",
+  "git_sha_before_metadata_commit": "17f5b312aa56dc127894116533b8d993c341b293",
+  "git_sha_at_validation": "17f5b312aa56dc127894116533b8d993c341b293",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1074,
@@ -87,7 +87,8 @@
     "detail_job_id": 5433,
     "detail_job_table_link_label_present": true,
     "homepage_third_party_discovery_domain_exposed": false,
-    "server_deployment": false
+    "server_deployment": false,
+    "latest_recheck_report": "docs/current/phase4-local-web-recheck-2026-10-19.json"
   },
   "release_boundary": {
     "status": "not_publishable",
