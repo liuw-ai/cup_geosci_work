@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T20:05:11Z",
+  "generated_at": "2026-10-18T20:19:49Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "4124735755fa04dd30183b3561df16398337d5e3",
+  "git_sha": "78a3940f2f152b8abd4305af7d10331cce36049e",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -75,6 +75,33 @@
     "cnooc_group_portal_units_with_active_job_evidence": 16,
     "cnooc_observed_job_cards": 350
   },
+  "deployment": {
+    "production_compose": {
+      "path": "deploy/compose.yaml",
+      "sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0"
+    },
+    "canonical_dockerfiles": {
+      "app": {
+        "path": "deploy/docker/Dockerfile.app",
+        "sha256": "bd862732498ff1a59d555ffddf1dfe0de22f733b0ef6a0027aba548384606e1c"
+      },
+      "browser": {
+        "path": "deploy/docker/Dockerfile.browser",
+        "sha256": "671b7902b4f9e60b61154123dd04350ee311b5db0b92512684fa7dc6eeb3e7a1"
+      }
+    },
+    "root_compatibility_files_retained": [
+      "docker-compose.yml",
+      "docker-compose.browser.yml",
+      "docker-compose.location-fix.yml",
+      "docker-compose.public.yml",
+      "Dockerfile",
+      "Dockerfile.browser",
+      "Dockerfile.business-date",
+      "Dockerfile.experience-gate"
+    ],
+    "production_entrypoint": "deploy/compose.yaml"
+  },
   "document_consistency": {
     "policy": "historical_snapshots_are_evidence_only; current_audit_and_manifest_are_source_of_truth",
     "historical_documents": [
@@ -112,7 +139,7 @@
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "405516ad72d21cf53a709eeff65cf70b6639732ecb2654467926eaac2e3d0b90"
+        "sha256": "0c65d91399fc1b1375ab7b6ba55e3aeb0b11189c2868f8edc8bb11fa802e9332"
       }
     ],
     "metadata_documents": [
@@ -168,7 +195,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "405516ad72d21cf53a709eeff65cf70b6639732ecb2654467926eaac2e3d0b90"
+      "sha256": "0c65d91399fc1b1375ab7b6ba55e3aeb0b11189c2868f8edc8bb11fa802e9332"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -698,8 +725,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 393,
-      "sha256": "ad553397a8ada53676f4fffa45517441c8ed7273728e7d01010e64a2cd40910f"
+      "line_count": 420,
+      "sha256": "b8d77dfa5eb2cbf03f46c2aca74e11e8f00e090335700ae1cb17f5659a77db2c"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -718,8 +745,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 348,
-      "sha256": "23558246548d14962e04e5538814efb8d2ef467f1898fb45774f51dabd0c617c"
+      "line_count": 352,
+      "sha256": "d8575f1bf5aafd909d669a8eb3ef45114ed232447559db897cf67940b868f8c0"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -1238,8 +1265,8 @@
     },
     {
       "path": "tests/test_release_manifest.py",
-      "line_count": 128,
-      "sha256": "9a9ad9bc273c998f0d5b53231528b166d9310c90378611e4cf8c74118605207c"
+      "line_count": 149,
+      "sha256": "329494e375c53ec274e72ac85b8a6b94674e8a9754240287c85af36cd59e1332"
     },
     {
       "path": "tests/test_reports.py",
