@@ -1,0 +1,1197 @@
+{
+  "generated_at": "2026-10-18T09:27:25Z",
+  "phase": "phase4",
+  "scope": "local_read_only_current_state",
+  "git_sha": "bfc302253eaf43ba736c87dbeed78687863b3670",
+  "git_status_porcelain": "M docs/current/phase4-release-manifest.json\n?? docs/current/phase4-current-state-audit-2026-10-18.json",
+  "database": {
+    "path": "runtime/job_hub.sqlite3",
+    "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
+    "integrity_check": "ok",
+    "job_count": 3947,
+    "status_counts": {
+      "expired": 106,
+      "open": 3745,
+      "superseded": 45,
+      "withdrawn": 51
+    },
+    "publication_layer_counts": {
+      "broad_geoscience_match": 1,
+      "exact_match": 210,
+      "incomplete_but_basic_match": 615,
+      "not_public": 2955,
+      "source_unavailable": 166
+    },
+    "phase3_withdrawal_audit_count": 3947,
+    "candidate_lead_count": 0,
+    "student_read_as_of_date": "2026-10-18",
+    "student_visible_layer_counts": {
+      "broad_geoscience_match": 1,
+      "exact_match": 145,
+      "incomplete_but_basic_match": 367,
+      "not_public": 0,
+      "source_unavailable": 111
+    },
+    "student_visible_total": 624
+  },
+  "sources_and_organizations": {
+    "registered_source_count": 12,
+    "trust_grade_counts": {
+      "A": 1,
+      "A-": 0,
+      "B": 5,
+      "C": 5,
+      "D": 1
+    },
+    "batch_candidate_source_count": 5,
+    "table_adapter_count": 5,
+    "three_oil_catalog_group_counts": {
+      "cnpc": 27,
+      "sinopec": 17,
+      "cnooc": 20
+    },
+    "three_oil_catalog_unit_count": 64,
+    "organization_registry_count": 323,
+    "official_confirmed_channel_count": 91
+  },
+  "evidence_documents": {
+    "phase4_three_oil_catalog_audit": {
+      "path": "docs/current/phase4-three-oil-catalog-audit-2026-10-17.json",
+      "sha256": "146bbc0bceaa60ccb27430464f417153781de43d0bc7a2587e0e47cba0eeda19"
+    },
+    "phase4_third_party_trial": {
+      "path": "docs/current/phase4-third-party-trial-2026-10-18.json",
+      "sha256": "9e1d9a183117349b025b765d1c53f7e60b6bbc6fbf76d7dd529aab3b47f91656"
+    },
+    "phase4_three_oil_entry_evidence": {
+      "path": "docs/current/phase4-three-oil-entry-evidence-2026-10-18.json",
+      "sha256": "c2d44f1c2445b0693a7dbe2b26be5dda1bab2d4b6898c90a5046ec652afa4931"
+    },
+    "phase4_third_party_geoscience_followup": {
+      "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
+      "sha256": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1"
+    }
+  },
+  "code_inventory": [
+    {
+      "path": "job_hub/__init__.py",
+      "line_count": 1,
+      "sha256": "31cb4f9a7860f1da3e24b91f11656a747eabd96ecfce5058480f3b80902f986c"
+    },
+    {
+      "path": "job_hub/app.py",
+      "line_count": 1582,
+      "sha256": "cb71c752d2ba09f5eefcebc0170ab85056df864bb17a9d9308b06d25accf45d6"
+    },
+    {
+      "path": "job_hub/artifact_publication.py",
+      "line_count": 227,
+      "sha256": "e01cdd471e586c3487e5c7fa9163d18a25d340ab6585e9316f96fa4f7ba668e1"
+    },
+    {
+      "path": "job_hub/attachments.py",
+      "line_count": 2087,
+      "sha256": "51141597916721302b02f223c89a024c7833dd24217aa5b179680a5bc350e06f"
+    },
+    {
+      "path": "job_hub/audit.py",
+      "line_count": 461,
+      "sha256": "d3c67f2806ada8cd60d4cbed4584d1e80600fcf51acdbbd61a32a6e7eddbad81"
+    },
+    {
+      "path": "job_hub/backups.py",
+      "line_count": 369,
+      "sha256": "2acc242c5965bf89deb411d8492d73ff924834d6cc3f762c2e19dfb526f1c856"
+    },
+    {
+      "path": "job_hub/browser_capture.py",
+      "line_count": 537,
+      "sha256": "58c8db6246dcc15780f1c157d67eab278ad491dc1a81e04fa56523787b3aa63c"
+    },
+    {
+      "path": "job_hub/browser_liveness.py",
+      "line_count": 35,
+      "sha256": "0668a851bb6cb588c3a3299cd3a31af0c1118b140db86eb8e5b03d74bb193373"
+    },
+    {
+      "path": "job_hub/browser_timeout.py",
+      "line_count": 144,
+      "sha256": "91c846aaf77cb4caf652c3c6165714a2486fb834b650e5f9376b5fd726f91411"
+    },
+    {
+      "path": "job_hub/browser_watchdog.py",
+      "line_count": 109,
+      "sha256": "ef965c5316fcec973aa8b0c79a33e6b4e1e7ab3b60f461454953b24816543c3d"
+    },
+    {
+      "path": "job_hub/capture_evidence.py",
+      "line_count": 134,
+      "sha256": "e66f46712392ac95210b2c82d2e5e62cbdf02b102b4f6b976c5365d9fb86e590"
+    },
+    {
+      "path": "job_hub/cli.py",
+      "line_count": 3241,
+      "sha256": "7874e758f3c7bdafb7193a13187dd410a0055086a81fd9c530cb3e804e978d0d"
+    },
+    {
+      "path": "job_hub/cmgb_browser_capture.py",
+      "line_count": 1772,
+      "sha256": "958f10c09bf23d4cfb5433258cb5b474b1fc09604d79a97ac6d0ae15945d56ca"
+    },
+    {
+      "path": "job_hub/cmgb_browser_worker.py",
+      "line_count": 267,
+      "sha256": "36fcd625182be2eaba93133d04724931dd06e0875bc6181ab13d235e8ba30bff"
+    },
+    {
+      "path": "job_hub/cmgb_transition.py",
+      "line_count": 147,
+      "sha256": "b79e711025ab00d8ca85f8db68300c2fc606019abc78b88076d81e8226ca5ab8"
+    },
+    {
+      "path": "job_hub/cnooc_browser_capture.py",
+      "line_count": 976,
+      "sha256": "f01b06fc3f7142a90a6dd76a7630eaebd6d8f7129179857fe68e3d5bc30b01e3"
+    },
+    {
+      "path": "job_hub/cnooc_browser_worker.py",
+      "line_count": 215,
+      "sha256": "e32d344f023da0bf27ec9d7f4dfe2198b0f702e319ad1bc3593f8b0025a0557d"
+    },
+    {
+      "path": "job_hub/cnpc_browser_capture.py",
+      "line_count": 413,
+      "sha256": "5b98b7e52301d90e7365adf81fe84630f7ea6b2d333385707fec7edd64039238"
+    },
+    {
+      "path": "job_hub/cnpc_browser_entrypoint.py",
+      "line_count": 137,
+      "sha256": "857322bbd3161c7a162cf6eeccb9577ad52d8feb579343346327201b592ef131"
+    },
+    {
+      "path": "job_hub/cnpc_browser_runner.py",
+      "line_count": 457,
+      "sha256": "b7efc669071fb66a176244f7a7b8d22cfed7473f97998640880613cb1d76f2c7"
+    },
+    {
+      "path": "job_hub/cnpc_browser_worker.py",
+      "line_count": 193,
+      "sha256": "616e06facd062a22d10d7aeda7b07b06750f2ff95379e96e029da296e1283494"
+    },
+    {
+      "path": "job_hub/cnpc_matrix.py",
+      "line_count": 237,
+      "sha256": "309417a2c1797013336b73fd6d7832fcc9653ba0d4a60c53127a0f7d1c571c00"
+    },
+    {
+      "path": "job_hub/config.py",
+      "line_count": 350,
+      "sha256": "9da6b285d08050a6559b2e1cd4c2068a4f2f6c3dff463bfae3e156162e958a3d"
+    },
+    {
+      "path": "job_hub/contracts.py",
+      "line_count": 2611,
+      "sha256": "0152bd99dd0ec64e7f519d3e679a4e8005dd03d054ef66d79412881bd39bfa9d"
+    },
+    {
+      "path": "job_hub/coverage.py",
+      "line_count": 1280,
+      "sha256": "815d6819d500bbae9da5b2256f411151a19b99d1b42a737fd85104cf0fc18897"
+    },
+    {
+      "path": "job_hub/cupb_browser_capture.py",
+      "line_count": 380,
+      "sha256": "8ff88721fdf202ca9aa48708c2d9e04c5d092d1769eb80f7e7090177ca0e3393"
+    },
+    {
+      "path": "job_hub/cupb_browser_worker.py",
+      "line_count": 173,
+      "sha256": "6185b38039d68036434f01dd70690c1073662a314cff25f51711aae6101d918c"
+    },
+    {
+      "path": "job_hub/db.py",
+      "line_count": 5489,
+      "sha256": "25b5675f2afd9348745455f341b20956911d2049168dd3576c53ab9260a3b468"
+    },
+    {
+      "path": "job_hub/discovery.py",
+      "line_count": 1257,
+      "sha256": "aee9dc052ad0ed909368a19c85aa2e26716b903d18235815800d0663bfc7d3bd"
+    },
+    {
+      "path": "job_hub/discovery_scan.py",
+      "line_count": 838,
+      "sha256": "85249e576fd79822503f69f2fddeb1c7e2629ed470ce321d723813b54a7b9dcd"
+    },
+    {
+      "path": "job_hub/domain_probe.py",
+      "line_count": 175,
+      "sha256": "5fa5137d2d7bef2e773b23d9e8b7c9469598677f281ba84ed6ce908dee4bf642"
+    },
+    {
+      "path": "job_hub/domestic_entry_health.py",
+      "line_count": 132,
+      "sha256": "b75ba2c889cba74e6fe3293648e4fe1f4ebaea6216c78a2dbb45e8e34fde7ca2"
+    },
+    {
+      "path": "job_hub/domestic_expansion.py",
+      "line_count": 226,
+      "sha256": "d9c09e4e23d59d2908421c393d73bdb8f38c25aa4c8a242d59fbfc0184c06d02"
+    },
+    {
+      "path": "job_hub/emailer.py",
+      "line_count": 140,
+      "sha256": "9be6cdf6dd1067d32cd116dd4d7d5a8ffa0cc23d4c8f52399bf85eedb813cd5d"
+    },
+    {
+      "path": "job_hub/employers.py",
+      "line_count": 1238,
+      "sha256": "8da87529c6e1bff7b2b3c70f8ddcd5758d13e965c3068ef06f5f08cc23a90e27"
+    },
+    {
+      "path": "job_hub/entry_probes.py",
+      "line_count": 519,
+      "sha256": "b8e9d657f64ea5b0fdb9c8522e14b33bedacf0d7389967b31f05dad9da8c5a4c"
+    },
+    {
+      "path": "job_hub/expansion_targets.py",
+      "line_count": 264,
+      "sha256": "e4df8d752a150c1026d6a9e89f0683032595bb0ceba60333c6dd4c9db4bb2c5c"
+    },
+    {
+      "path": "job_hub/government_artifact_verification.py",
+      "line_count": 1696,
+      "sha256": "80c1525d39a9827516dafc90e852ecbcdd30657637e95eaab50be41a26cef0da"
+    },
+    {
+      "path": "job_hub/government_artifacts.py",
+      "line_count": 587,
+      "sha256": "e20e881d818e0289fe82e9f4e7ee1344838b8897de716c92e87521bd0c9932f6"
+    },
+    {
+      "path": "job_hub/government_discovery.py",
+      "line_count": 174,
+      "sha256": "bff44a5b417ae07cdfdfc97695779032a1a636e7c5b05a5522d6fd0b65113719"
+    },
+    {
+      "path": "job_hub/government_ledger_audit.py",
+      "line_count": 303,
+      "sha256": "abb72b463cf2b981397ee1449b5a92a8b9b78a8d5d4912bdf85139166eed6e1a"
+    },
+    {
+      "path": "job_hub/government_positions.py",
+      "line_count": 1301,
+      "sha256": "f50a438d7f0ee4f38d53b123994d66a65f89e191f9302000f2f54e6fe9c40523"
+    },
+    {
+      "path": "job_hub/government_revalidation.py",
+      "line_count": 557,
+      "sha256": "9d7509e003cff167bcc7a9af124a54efb371f2202659ba4a272f49db960a27bb"
+    },
+    {
+      "path": "job_hub/government_table_parser.py",
+      "line_count": 640,
+      "sha256": "72b38f0d8881b72896826296c7314291a5641b925c9fb004da9a309427c50bbf"
+    },
+    {
+      "path": "job_hub/iguopin_browser_capture.py",
+      "line_count": 1581,
+      "sha256": "5386cb2e832e2eed31242788200955985f7999e0663fe071aacd326aede4a0e9"
+    },
+    {
+      "path": "job_hub/iguopin_browser_worker.py",
+      "line_count": 352,
+      "sha256": "941f2b762c997fda1bae070de880bb23f88f34308814d0557d11c3cbff58f4e0"
+    },
+    {
+      "path": "job_hub/iguopin_transition.py",
+      "line_count": 370,
+      "sha256": "3b537c7caddadd220a7d04241c8948976e43a6294740354943e78e3cf44c0e2e"
+    },
+    {
+      "path": "job_hub/link_health.py",
+      "line_count": 304,
+      "sha256": "bc553254649c2ef7ccfae5ee923bc94ce670441b5d1c7c8e7ac97fd9c927d956"
+    },
+    {
+      "path": "job_hub/locations.py",
+      "line_count": 932,
+      "sha256": "24f939d946b0a7a12e28dde33ef1e6f22d164d84cc43b13a5a87e4f7e51fadbb"
+    },
+    {
+      "path": "job_hub/major_taxonomy.py",
+      "line_count": 254,
+      "sha256": "52f82b9ad2f216c0cdcad9285dd3acaf37179c571803967442743ad35c2cab39"
+    },
+    {
+      "path": "job_hub/matching.py",
+      "line_count": 538,
+      "sha256": "3182ed6f26d3315dfc1ffc5d9b8c6c7aa35faaa429cb6749ef218025b7c041d6"
+    },
+    {
+      "path": "job_hub/national_probes.py",
+      "line_count": 67,
+      "sha256": "d4a878f1ac94a3bc423771b7aec23f8bf11210791d4c0f401df3d9aae183dfdb"
+    },
+    {
+      "path": "job_hub/national_sources.py",
+      "line_count": 242,
+      "sha256": "d9449f41d6ef62a7a1c621314aa5c7bf31d4a3153b1550785febff3bcbda6dee"
+    },
+    {
+      "path": "job_hub/official_browser_worker.py",
+      "line_count": 255,
+      "sha256": "2c886d87eff07741c7ba6df9d74cc70a20b2d7a7ca33641e92c1129d92509c11"
+    },
+    {
+      "path": "job_hub/official_identity.py",
+      "line_count": 92,
+      "sha256": "8992790ac436a1bedd843db7660770d29ed334424e03d8dc1dcebe21344cb0d9"
+    },
+    {
+      "path": "job_hub/operations.py",
+      "line_count": 819,
+      "sha256": "1f5990bd8e29df800100d9e50dcea5604385ce41b890d97c7e211ddf2e3727f8"
+    },
+    {
+      "path": "job_hub/organizations.py",
+      "line_count": 450,
+      "sha256": "ee92cf23c8d6546649c0ab12ea9e8845826bf7f6a06dabf58dced373f57d3e8b"
+    },
+    {
+      "path": "job_hub/pending_evidence_audit.py",
+      "line_count": 286,
+      "sha256": "13c6d76d1acbb95bba29f63ec72564457c0ec52197ffdacacb02b7b22514a9e8"
+    },
+    {
+      "path": "job_hub/phase3_audit.py",
+      "line_count": 353,
+      "sha256": "90f27480ab9dae108be27d3d0f786a82687a2808e2d7a9b32480e83df3cb0058"
+    },
+    {
+      "path": "job_hub/phase3_policy.py",
+      "line_count": 238,
+      "sha256": "3118a413d3d3a713e654337fac71dd8929b5cfaae4c49a8f9bbb125ebf50ba2c"
+    },
+    {
+      "path": "job_hub/pipeline.py",
+      "line_count": 1782,
+      "sha256": "b97ea029539ef1748eb02ccb92775bbe255dbf4ab8e295961edc43ec9cc97802"
+    },
+    {
+      "path": "job_hub/policy_contract.py",
+      "line_count": 28,
+      "sha256": "1afd5543eb8a0535dcab7b10792cfe6ddbffd111356298a5d6c0bee7541cf97d"
+    },
+    {
+      "path": "job_hub/profiles.py",
+      "line_count": 1793,
+      "sha256": "0c3129efb1c35793ca935742ce804c8427019e455aed31459f3a0615e32d0a1d"
+    },
+    {
+      "path": "job_hub/provincial_matrix_audit.py",
+      "line_count": 238,
+      "sha256": "19eb3f0e8a452cc3b1e1c531fa07be3cc6397aac45962666c930628cac24dc03"
+    },
+    {
+      "path": "job_hub/provincial_probe.py",
+      "line_count": 169,
+      "sha256": "e0948d89ce5bf797c485a416e35765e1683cfadad8ecb6308f9d44545b0cd85b"
+    },
+    {
+      "path": "job_hub/publication_revalidation.py",
+      "line_count": 92,
+      "sha256": "425c59b5a676e43c5f89abd4f8a0f1f34a6c8329d27c8814366fdd3337e3badf"
+    },
+    {
+      "path": "job_hub/readiness_axes.py",
+      "line_count": 247,
+      "sha256": "acd06c9a1af10530e4fd7f83f5b0e52d0a9a9fc61b17373e065c12ae6e901181"
+    },
+    {
+      "path": "job_hub/recruitment_batches.py",
+      "line_count": 322,
+      "sha256": "fd308d3fc50c446b87402a5b79806a3d1abef1f713d2b42824548e56cfddaa88"
+    },
+    {
+      "path": "job_hub/reports.py",
+      "line_count": 197,
+      "sha256": "9180fb45615b80dfcc2f66c6be5993974a851b09a177b1d565fc97c76ae39fd0"
+    },
+    {
+      "path": "job_hub/run_ledger.py",
+      "line_count": 240,
+      "sha256": "c6b4c84aa8b4eb8debd47011adb7502553c77928389cdc7244781829298c8db3"
+    },
+    {
+      "path": "job_hub/scorecard.py",
+      "line_count": 230,
+      "sha256": "68459c10ef616374d581a4c5b91368f9448293aa81e7aee48673a6969a170537"
+    },
+    {
+      "path": "job_hub/simulation.py",
+      "line_count": 137,
+      "sha256": "a2c7e316f1c363fec6934734c52a2e2b8e2e24b557c655d2863ccc8d9bcc71e6"
+    },
+    {
+      "path": "job_hub/sinopec.py",
+      "line_count": 389,
+      "sha256": "92c209d13120e4d02eb2e89fb01a8d7e68b44468494c865355d698cf3582f1e1"
+    },
+    {
+      "path": "job_hub/sinopec_browser_capture.py",
+      "line_count": 460,
+      "sha256": "4ad2e9552b352635952fcc219d89a5f23dd7cf31566b4ffd6b486bc562df2cc0"
+    },
+    {
+      "path": "job_hub/sinopec_browser_worker.py",
+      "line_count": 180,
+      "sha256": "52463c1f26581e2e32fce86c1a7aa46a83c5c193f31705cf269dd25483d79595"
+    },
+    {
+      "path": "job_hub/sinopec_scan.py",
+      "line_count": 162,
+      "sha256": "299ef9b5a5ae4a873a5d6283f150a0205d69a2e9eb6aa30be50616ce5f0bd6dd"
+    },
+    {
+      "path": "job_hub/snapshot_activation.py",
+      "line_count": 117,
+      "sha256": "4d081fecebafd8e0d1b06e4aee9ab94ac55f773f3b9771be2c4bebec1e1c6158"
+    },
+    {
+      "path": "job_hub/source_diversity.py",
+      "line_count": 198,
+      "sha256": "bdc06102b85f86b893cff6119ddaa1df61c12f9af93da972ec74e7cc7fe96e66"
+    },
+    {
+      "path": "job_hub/source_fallbacks.py",
+      "line_count": 265,
+      "sha256": "0dd75966c8bdee2448a05afc878ed41fd32e10791c8bcd9297f79c6a3e00b3e9"
+    },
+    {
+      "path": "job_hub/source_funnel.py",
+      "line_count": 631,
+      "sha256": "f992b49389993fa42d1996fb6f2ade6ee6dbf7ebfd624a14a2f581dc110fe59b"
+    },
+    {
+      "path": "job_hub/source_lifecycle.py",
+      "line_count": 138,
+      "sha256": "12c5e87ad57db8d3a8e8c250043382daf2901c7314df297adeb3b2159b0f6082"
+    },
+    {
+      "path": "job_hub/source_targets.py",
+      "line_count": 135,
+      "sha256": "8e56a69322d92dc826ab57deb53162bb5b7f66f7457f4f2c26426a95b1703ef7"
+    },
+    {
+      "path": "job_hub/source_validation.py",
+      "line_count": 340,
+      "sha256": "f4679f47bebf46e080f06e8cdaa776a1cb497e1b8346aac0a8c501e49add58f2"
+    },
+    {
+      "path": "job_hub/sources.py",
+      "line_count": 6801,
+      "sha256": "439f40d89c301950107c9a7faa951c9b60d03a9f91630c6e923d95f0f0983f68"
+    },
+    {
+      "path": "job_hub/third_party_tables.py",
+      "line_count": 464,
+      "sha256": "e70ba7dc874f2b6916554937c2edb63d2c7d81660b6b218c1410b214e2e69add"
+    },
+    {
+      "path": "job_hub/three_oil_catalog.py",
+      "line_count": 857,
+      "sha256": "a8855cab5ee870d2367748ef100da721b13fb532ac9ca4d4385aaa960237c6dc"
+    },
+    {
+      "path": "job_hub/transport.py",
+      "line_count": 496,
+      "sha256": "d518306056c2871066ac825676fac1138883aa6a1e9fa4e5495a907b86fb342a"
+    },
+    {
+      "path": "job_hub/unrestricted_audit.py",
+      "line_count": 120,
+      "sha256": "116993f86f9279944c36d9d196cb25df2e638a3a7da7067cb1c1b6863297bdd2"
+    },
+    {
+      "path": "job_hub/worker.py",
+      "line_count": 1048,
+      "sha256": "e31bde1b45870ee959e243a99b32945aac79366adcff645dc6e450d078a888ed"
+    },
+    {
+      "path": "job_hub/wsgi.py",
+      "line_count": 4,
+      "sha256": "6eb78c5d873547799fdc91785bf3560195a9d43c70273ff9e3eff71c5fab5961"
+    },
+    {
+      "path": "job_hub/zhaopin_detail.py",
+      "line_count": 294,
+      "sha256": "ae3bedb10924385d115de577f91144e55bf9bfd4e3f683f3c3cd0b609f8db9af"
+    },
+    {
+      "path": "scripts/audit_phase3_withdrawals.py",
+      "line_count": 107,
+      "sha256": "556cc55e3dc5c56c6f9749ed33389deb28af9657a9e0ff2cda7f691efe3565c6"
+    },
+    {
+      "path": "scripts/audit_phase4_current_state.py",
+      "line_count": 171,
+      "sha256": "79d9df51cac14c4894b2023636024f169115dd384bcc4c18c674ce2bcf5be23d"
+    },
+    {
+      "path": "scripts/build_phase3_manifest.py",
+      "line_count": 165,
+      "sha256": "2d7df601be88425eb1350bc37d4468b1fa934836a60128d8259d2e9c2ac707d2"
+    },
+    {
+      "path": "scripts/build_phase4_manifest.py",
+      "line_count": 190,
+      "sha256": "dcde5f130b8b34fd750c34f26689e860ca802ddcc3cc0a3b7e28c7df0d244628"
+    },
+    {
+      "path": "scripts/build_phase4_organization_reconciliation.py",
+      "line_count": 100,
+      "sha256": "b8fb731af5c32f6bc55c8dd8b7c2c1258f0c5efc2b9ed6a85c3dd2356830d393"
+    },
+    {
+      "path": "scripts/build_phase4_sinopec_display_audit.py",
+      "line_count": 78,
+      "sha256": "4a1f82f3e4eecf3bd68db7cd0a959c095ea526297546ea104e270cd47075d107"
+    },
+    {
+      "path": "scripts/import_third_party_table.py",
+      "line_count": 89,
+      "sha256": "9c9e576dfcf64df26bd4948b4b0ebf725f9b0cafaf8e2bf487f7aaed7e48a854"
+    },
+    {
+      "path": "scripts/inspect_official_notice.py",
+      "line_count": 49,
+      "sha256": "86ae3a2236f9ce82c29edd1b9b61baf4686f85922c971871488e0601ec496fe3"
+    },
+    {
+      "path": "scripts/phase3_backfill.py",
+      "line_count": 31,
+      "sha256": "6626c8f80ae0d9cd9810a711957c8ff45658628292b90b344502f2c575ac168f"
+    },
+    {
+      "path": "scripts/phase529_add_recovery_sources.py",
+      "line_count": 130,
+      "sha256": "a0481f51765d8a168e5c0761cdb7b44684c56cfe0b0eb7d4bd442667a6315b6c"
+    },
+    {
+      "path": "scripts/prepare_release_env.py",
+      "line_count": 119,
+      "sha256": "f7565e2d8a5fb1cfe990f711ba008375cf0cc0e8c02ac51493b3995fc46a6ae9"
+    },
+    {
+      "path": "tests/conftest.py",
+      "line_count": 86,
+      "sha256": "33f5d16257000b47d04a492977f7a324edc90df8440e81e495a76476f1bd3e46"
+    },
+    {
+      "path": "tests/test_app.py",
+      "line_count": 810,
+      "sha256": "9cc586a3cf513fe3b3896d7f8425a39407eb239e5ce4bd7ccb3ce0222c0c2b74"
+    },
+    {
+      "path": "tests/test_attachment_batch.py",
+      "line_count": 222,
+      "sha256": "8df1c35f9544e65eb6737f6a4e226c9f706f132c8eebdf4a08ab2c94bf80cb68"
+    },
+    {
+      "path": "tests/test_attachment_pdf.py",
+      "line_count": 57,
+      "sha256": "596680b055530be41ed4f5b8e66390c976f3670694503ae7a9e62f98af0e94a2"
+    },
+    {
+      "path": "tests/test_attachments.py",
+      "line_count": 1133,
+      "sha256": "a2024e8c422a1b6db0e3aa381a18f56dc39f1d1022c755ac45d3c17d0fd1b855"
+    },
+    {
+      "path": "tests/test_audit.py",
+      "line_count": 114,
+      "sha256": "d5aba8079f61ae338c96c1f7129d1708287f71437cce75a33dde8ebacb5d3cdc"
+    },
+    {
+      "path": "tests/test_backups.py",
+      "line_count": 976,
+      "sha256": "aafec33b816bc13eed6f37ed2e7bae08f2568c9ea006f9875957a46c5e6c2317"
+    },
+    {
+      "path": "tests/test_browser_capture.py",
+      "line_count": 224,
+      "sha256": "23e03cb6db4aa5d04d6573b09618ce802a1f3b7ef69a56e8c1c9899dc8ec0858"
+    },
+    {
+      "path": "tests/test_browser_image_contract.py",
+      "line_count": 88,
+      "sha256": "0083cb49378a5176198c57162ca7a929271e7d98bf42f729cd9ee8d145c819c4"
+    },
+    {
+      "path": "tests/test_browser_liveness.py",
+      "line_count": 61,
+      "sha256": "7cdafdb6031a72f061c9d0da96d2dd1cadff8aa34cbe17ed883380442c9d107b"
+    },
+    {
+      "path": "tests/test_browser_timeout.py",
+      "line_count": 102,
+      "sha256": "81362756dcc55a0a1425d94caab3b2fe97788dc18071c6a452a1896eb7afb544"
+    },
+    {
+      "path": "tests/test_browser_watchdog.py",
+      "line_count": 39,
+      "sha256": "e6ee99b82cd226c456d822639abd9fbf48b802d25df25f2e810210c2b4e4ecfc"
+    },
+    {
+      "path": "tests/test_browser_worker_cli.py",
+      "line_count": 40,
+      "sha256": "dbd038d9981ca6019b26d5b2ca47e037cfb1b991dc935546c2ea26031dcfbf44"
+    },
+    {
+      "path": "tests/test_business_date.py",
+      "line_count": 50,
+      "sha256": "1d02fc1ab394a0dee699aab7e41c73ea21161999e06768885ceeaf116ec8f83c"
+    },
+    {
+      "path": "tests/test_capture_evidence.py",
+      "line_count": 24,
+      "sha256": "70975c584156084ce74db33af5da816449ea86ab5759b5b51d084c88296b58b9"
+    },
+    {
+      "path": "tests/test_cli_capture.py",
+      "line_count": 455,
+      "sha256": "b571022c989ff37f0ddf0499c90b33abb6c4c3372ce46d2c9efc27b9cd470161"
+    },
+    {
+      "path": "tests/test_cmgb_browser_capture.py",
+      "line_count": 1020,
+      "sha256": "57b9aca10960f35afb09eb74db5009cd05895cd53a7bfda3c2e8b09bbdab28fc"
+    },
+    {
+      "path": "tests/test_cmgb_browser_worker.py",
+      "line_count": 264,
+      "sha256": "5c33f2c3291f91363ec12254f233a6cdf3da85f03c6dd554f9c8f5c0a48834a2"
+    },
+    {
+      "path": "tests/test_cmgb_sources.py",
+      "line_count": 111,
+      "sha256": "5ad69a8c406c5819a3a707394e32de0a444ec167b867791767ca7c4a65d5fb3a"
+    },
+    {
+      "path": "tests/test_cmgb_transition.py",
+      "line_count": 137,
+      "sha256": "56768e2c7cf7d8e5705640c594d50e51ab772b93f560e5e7a04ad1bd025a0881"
+    },
+    {
+      "path": "tests/test_cnooc_browser_capture.py",
+      "line_count": 301,
+      "sha256": "a192bbb059693d31cbc30bb317e61531c3570cd1afacf34d6aa1021d2dafead8"
+    },
+    {
+      "path": "tests/test_cnooc_browser_worker.py",
+      "line_count": 115,
+      "sha256": "a9c0378273c7c940e93f5500043e2cff1aaa5cd0d3d1cb82cf1627e633b74fad"
+    },
+    {
+      "path": "tests/test_cnpc_browser_capture.py",
+      "line_count": 55,
+      "sha256": "758fc1b89529c75097c9a52d7135b55715411c492e0d8a05e5af113c54fb1051"
+    },
+    {
+      "path": "tests/test_cnpc_browser_worker.py",
+      "line_count": 207,
+      "sha256": "c67a1aad547e86c8cfe192224aeba72b689e697306b4a9ff686dbc51eafb8c49"
+    },
+    {
+      "path": "tests/test_cnpc_job_capture.py",
+      "line_count": 305,
+      "sha256": "3ee7504ef5f1fb7097a69904a109db5b9c505c5beb3f69f33f675e835317f68d"
+    },
+    {
+      "path": "tests/test_cnpc_matrix.py",
+      "line_count": 58,
+      "sha256": "52f25deb58ec5d7ae9211f1d342d2e3b175ced815b479fddec3ffd9f5aa67977"
+    },
+    {
+      "path": "tests/test_config.py",
+      "line_count": 23,
+      "sha256": "bef45de84b3686c7845959b43f10fb1800ca2b66c547b68d635a87b540a3e0d7"
+    },
+    {
+      "path": "tests/test_continuous_validation.py",
+      "line_count": 39,
+      "sha256": "9b9fadc327598710ef6110555d086cc155f05f71ff2c1c3220d49a00926b68b1"
+    },
+    {
+      "path": "tests/test_contracts.py",
+      "line_count": 248,
+      "sha256": "ab2d73242cbce3799cfdfa3076c233aa13d585e1b539d20055f4e27ab2569ac7"
+    },
+    {
+      "path": "tests/test_cosl.py",
+      "line_count": 130,
+      "sha256": "45c134441f17de90bf0a7d47c7bd7b69802c8ad374ffe9263c2902d7ab4bef33"
+    },
+    {
+      "path": "tests/test_coverage.py",
+      "line_count": 660,
+      "sha256": "da677f1f9df5ce28025c6eb5bff8c53213551949f7cb4f592f5d3e7d81d0fbbe"
+    },
+    {
+      "path": "tests/test_cupb_browser_capture.py",
+      "line_count": 62,
+      "sha256": "bced72b6a0635c5d4e364cf6670901d68412c22710f49268d1bee76c02e416da"
+    },
+    {
+      "path": "tests/test_cupb_browser_worker.py",
+      "line_count": 127,
+      "sha256": "f001f639bd23eb0864bf17c9ef0a974c1a049e5f344ad4c68147c96287e2ba90"
+    },
+    {
+      "path": "tests/test_cupb_current.py",
+      "line_count": 68,
+      "sha256": "0a0cf2ea0bb71cfe78e8929b96551316a4d5cb48786fb47e16aa3ee2003fe93d"
+    },
+    {
+      "path": "tests/test_db_connection.py",
+      "line_count": 17,
+      "sha256": "eb5f00a65eea8d6b906f2c5b53ef0e1cd9d0f5cdfc59a1fe31ec663d5ec80345"
+    },
+    {
+      "path": "tests/test_db_migration.py",
+      "line_count": 258,
+      "sha256": "070bbd6525ef8e99205bf3f451e1cd8c18bd6fe6b6115671c68249bc51e2ef53"
+    },
+    {
+      "path": "tests/test_discovery.py",
+      "line_count": 920,
+      "sha256": "da1139cb5ca20b21c587828b1487f08233a3df9c4adaace31611f66435b45243"
+    },
+    {
+      "path": "tests/test_discovery_plain_urls.py",
+      "line_count": 71,
+      "sha256": "48110fefb428f49273b312b2e3d830d935ecce94225a34130ec1637932429572"
+    },
+    {
+      "path": "tests/test_domain_probe.py",
+      "line_count": 80,
+      "sha256": "ccc91f08f9dc6d1cccbb47de0e5e271b9dd328c28add1f7420a9c3d17aee9b54"
+    },
+    {
+      "path": "tests/test_domestic_entry_health.py",
+      "line_count": 113,
+      "sha256": "7915b0abb3ad98927270d03f1c8fd1a759ab881d35e076848534a5a897155774"
+    },
+    {
+      "path": "tests/test_domestic_expansion.py",
+      "line_count": 326,
+      "sha256": "aa802547d43068d55f18a56f808a29b6649f9d1b19b7c2a64642a2e1b1c54241"
+    },
+    {
+      "path": "tests/test_domestic_expansion_plan.py",
+      "line_count": 15,
+      "sha256": "753e9f80e752d83fde6cfd1da881890316055d090cca1b64fe7e34d57a5209f5"
+    },
+    {
+      "path": "tests/test_dynamic_capture_manifest.py",
+      "line_count": 99,
+      "sha256": "6431cb533f4ca28fcd0fc348d335ea1de7f433b7df20c287bb77d6c30aa5da79"
+    },
+    {
+      "path": "tests/test_entry_probes.py",
+      "line_count": 341,
+      "sha256": "a69913107ccfd2aa3bfd15beda3f0d7698664e185cb7d40ad25c4ae9e1c5ab02"
+    },
+    {
+      "path": "tests/test_evidence.py",
+      "line_count": 401,
+      "sha256": "473d1621829a071aa53255255c6189ebcfc91f1d82f69729849745759920a940"
+    },
+    {
+      "path": "tests/test_exact_major_policy.py",
+      "line_count": 256,
+      "sha256": "0b53761673697946b67cc061b6b80520228e45949f4e4671ebfbe6ce5ed194d8"
+    },
+    {
+      "path": "tests/test_expansion_targets.py",
+      "line_count": 384,
+      "sha256": "74ce18c59ecb641b54a86bc9acb7f4bfccc0507dfad9222e6095b83b929b1ad1"
+    },
+    {
+      "path": "tests/test_government_artifact_auto_publication.py",
+      "line_count": 335,
+      "sha256": "dd5b2d4744ec5382d4b324224b25cf6edca34e2e19e6c354eb0da9f97bf178dd"
+    },
+    {
+      "path": "tests/test_government_artifact_verification.py",
+      "line_count": 793,
+      "sha256": "a897033fc4298751ef0e849c5e39e76d97e3a39dca19c3c09eed62eca6b11390"
+    },
+    {
+      "path": "tests/test_government_artifacts.py",
+      "line_count": 633,
+      "sha256": "731d56c344bd067744e26533923e81c2eade491dde1c606ddd91858cd06bb302"
+    },
+    {
+      "path": "tests/test_government_discovery.py",
+      "line_count": 124,
+      "sha256": "a9101bd61f1bcfe46680e0b39e8cba7cea5ff97667cc80864b7aa76290305d7b"
+    },
+    {
+      "path": "tests/test_government_ledger_audit.py",
+      "line_count": 101,
+      "sha256": "bc27985f0e269e32626e6e7c051035670f5d67981be4a1b67c9117fc287adada"
+    },
+    {
+      "path": "tests/test_government_notice_deadline.py",
+      "line_count": 248,
+      "sha256": "b340b3145698e8103c989be344ca34eff055a1b02a9e2b6f1b34695e53ed932f"
+    },
+    {
+      "path": "tests/test_government_position_cli.py",
+      "line_count": 278,
+      "sha256": "3fb1a9f210379caed0d5c187a08e34dc81ee52a655dbf96a8f438137194a0b64"
+    },
+    {
+      "path": "tests/test_government_position_publish.py",
+      "line_count": 567,
+      "sha256": "eeb59a337efe1afe150bd5d22aa2b2a3bde86e34467d86dd320b0c0b0ed44725"
+    },
+    {
+      "path": "tests/test_government_positions.py",
+      "line_count": 850,
+      "sha256": "875087a2c1987be471f1dc40224c0855e3b0acc059253048e1ca27e0903aa84d"
+    },
+    {
+      "path": "tests/test_government_revalidation.py",
+      "line_count": 1155,
+      "sha256": "d8f0f558744c606557bec18430aaef1a3b386b8efd8c22a1164d926cb87f57d1"
+    },
+    {
+      "path": "tests/test_government_table_parser.py",
+      "line_count": 398,
+      "sha256": "bb34baf2dbf1b312f475c7d0f3a25d25c3c57c9186b60a7cd8de0c2074775216"
+    },
+    {
+      "path": "tests/test_growth_metrics.py",
+      "line_count": 178,
+      "sha256": "58ceedd90f9804f69925fed9ab89c9e59aedf9b027976498fdbceb6a2e4bf361"
+    },
+    {
+      "path": "tests/test_iguopin_browser_capture.py",
+      "line_count": 1271,
+      "sha256": "9ca1d4748b4670dbbbd2881c8007fc4c01ba9e0f15616cfc4e8b2ca28da8ec49"
+    },
+    {
+      "path": "tests/test_iguopin_transition.py",
+      "line_count": 214,
+      "sha256": "b470ea08e5c393370353947313f6bfdbd80f7fca6539bc158f0137960ea82ded"
+    },
+    {
+      "path": "tests/test_leads.py",
+      "line_count": 154,
+      "sha256": "189898e884cac4ee042d7623aa99e89fb1da809ac724acaab9222bbd41816a23"
+    },
+    {
+      "path": "tests/test_link_health.py",
+      "line_count": 202,
+      "sha256": "04e2f95619d8dc28ad6d0a8c7ba0a225fb0f13d0c0a6d9980d5354c5c2c99bf5"
+    },
+    {
+      "path": "tests/test_locations.py",
+      "line_count": 341,
+      "sha256": "d9daf57a49e1e462575268a83300190bd8983892600894537c2e793d93ae2e72"
+    },
+    {
+      "path": "tests/test_major_taxonomy.py",
+      "line_count": 85,
+      "sha256": "0fde2e65b52ca7259297eaa30574ddbd3bbfa1ff42d35a4e0cf7b3caab4a3943"
+    },
+    {
+      "path": "tests/test_matching.py",
+      "line_count": 265,
+      "sha256": "0d87b580d8389d31b0ff89cc8d6a487adc33b1d01ee6f8c3e2091fd9a6e729d7"
+    },
+    {
+      "path": "tests/test_mokahr.py",
+      "line_count": 177,
+      "sha256": "f3e90847b38e53116481db0ec11d3ddc2d8aa3ed87cf4bfc91840056354d046b"
+    },
+    {
+      "path": "tests/test_national_probes.py",
+      "line_count": 60,
+      "sha256": "69e29067ae2b6beee15a855f39c9b1e1993b47ac73de3593a7c5c4de05eb1ad9"
+    },
+    {
+      "path": "tests/test_national_sources.py",
+      "line_count": 108,
+      "sha256": "7cc94a12211baf04069ed58ed0514bf1a731b91e41fd4003a210ccd5d5c7e6c9"
+    },
+    {
+      "path": "tests/test_official_browser_worker.py",
+      "line_count": 304,
+      "sha256": "bee81b688bad5a08a7b4d40df3d95668821f6a7887009da29f30b25f12424531"
+    },
+    {
+      "path": "tests/test_official_identity.py",
+      "line_count": 242,
+      "sha256": "7296850f0d65a210e3a2a62d72a37779193523909ca3c89ba483f890a3bac0a4"
+    },
+    {
+      "path": "tests/test_official_snapshot_rows.py",
+      "line_count": 308,
+      "sha256": "6925d5ec2f4e48bc739a742c507fce0146a85f46cb447dcab37cae9513f66820"
+    },
+    {
+      "path": "tests/test_official_table_rows.py",
+      "line_count": 132,
+      "sha256": "b7f09101c853859c53d55c4ff5f7d831daf090e9812f78980e3d146930fca6d9"
+    },
+    {
+      "path": "tests/test_organizations.py",
+      "line_count": 217,
+      "sha256": "e512d164772a3cbfb9faf801b8f16a004cd6c164d1bd91f3edc7e9c4c031f4e5"
+    },
+    {
+      "path": "tests/test_pending_evidence_audit.py",
+      "line_count": 117,
+      "sha256": "4fd56c00ff28579de556a0327682d196ebc9271e7a555b5700e5314f92ecb965"
+    },
+    {
+      "path": "tests/test_phase3_audit.py",
+      "line_count": 62,
+      "sha256": "3e180ae4ae0c2e51002c2d8216fe1f70907f86b89b6263925d19d70f60e46fb3"
+    },
+    {
+      "path": "tests/test_phase3_database_contract.py",
+      "line_count": 59,
+      "sha256": "715d6716f5ecfc91e3f13010bf1f703bdf7ec8527d84dd9510e4668281bbb612"
+    },
+    {
+      "path": "tests/test_phase3_policy.py",
+      "line_count": 52,
+      "sha256": "64194bb1c8a35c29aab46415ea98e4b77da6944c41447128f74c34ac22c4674e"
+    },
+    {
+      "path": "tests/test_phase4_current_audit.py",
+      "line_count": 12,
+      "sha256": "8d4f7941be8551a5c54efd5827d4d5c58b2d42ae777253d7c19b80c1685f2ad6"
+    },
+    {
+      "path": "tests/test_phase4_manifest.py",
+      "line_count": 45,
+      "sha256": "ec53c2b30aaa8ff2db1a33febd7f9202c5f3db5511be4ca99257d35a50f9ebce"
+    },
+    {
+      "path": "tests/test_pipeline.py",
+      "line_count": 1361,
+      "sha256": "c7934c71787fa2dd3bb33cb0c9376baf0c5fc6133b1970bf958194c53aac883d"
+    },
+    {
+      "path": "tests/test_policy_contract.py",
+      "line_count": 16,
+      "sha256": "62b9a99e0a57d3f625b6e791f7c86e40269550c48621c368f1f82b4a314532db"
+    },
+    {
+      "path": "tests/test_profiles.py",
+      "line_count": 1222,
+      "sha256": "9169dbc7e6e50cfe112d66edacc0cd4ba3db6b7a795720df2b761b2dfcfb4fbb"
+    },
+    {
+      "path": "tests/test_provincial_matrix_audit.py",
+      "line_count": 109,
+      "sha256": "886eb563265abf9f10a7e889a9b06718265b42f780bd863309fc411536e1ca35"
+    },
+    {
+      "path": "tests/test_provincial_probe.py",
+      "line_count": 127,
+      "sha256": "ebb1a1dacd83298020e28d489b59dd82d2b8a147c298d15ade366945145ac4c1"
+    },
+    {
+      "path": "tests/test_provincial_sources.py",
+      "line_count": 139,
+      "sha256": "9a0685aeae88a046582b53d8ec63c0a2ab3b107c84c0058e418fbefda0ef7740"
+    },
+    {
+      "path": "tests/test_public_source_gate.py",
+      "line_count": 61,
+      "sha256": "b76670f27c991f9743111b7a93354d87ea9ac1e4ecdd95154c4ebfdcb93da998"
+    },
+    {
+      "path": "tests/test_publication_write_gate.py",
+      "line_count": 157,
+      "sha256": "e50d866c8b2cba41b75c6c345def76eeebaed22f2cbe1571dedb60236107db14"
+    },
+    {
+      "path": "tests/test_readiness_axes.py",
+      "line_count": 169,
+      "sha256": "5a19f445dd4cffcdb0354f37c69fc8b64088dbbc5595630a48e59f6cc062824b"
+    },
+    {
+      "path": "tests/test_recruitment_batches.py",
+      "line_count": 186,
+      "sha256": "280a8340918779dcd498ef2f5ddfe4d947577c3a732c528d3aa90ac775b9d6c7"
+    },
+    {
+      "path": "tests/test_release_manifest.py",
+      "line_count": 128,
+      "sha256": "9a9ad9bc273c998f0d5b53231528b166d9310c90378611e4cf8c74118605207c"
+    },
+    {
+      "path": "tests/test_reports.py",
+      "line_count": 184,
+      "sha256": "6e0d3942a5b95178c7fc0448ee7ef6604e4cd0d4ed2a2a2af1ab293b53ca52a9"
+    },
+    {
+      "path": "tests/test_run_ledger.py",
+      "line_count": 155,
+      "sha256": "e8ee97ba8d0a7197037b18b09e1b2e946c88ad22aa00fb2063d44fdf58ec3102"
+    },
+    {
+      "path": "tests/test_scorecard.py",
+      "line_count": 87,
+      "sha256": "82a3c45aeb4a644cde9f69ac772751a0ff7cadb95e5dd4e37ea1e25e70bb206d"
+    },
+    {
+      "path": "tests/test_sinopec_browser_capture.py",
+      "line_count": 83,
+      "sha256": "be6b5e00e220a93461f359561e819b637c3d541334ada35c2e954583f4388535"
+    },
+    {
+      "path": "tests/test_sinopec_browser_worker.py",
+      "line_count": 179,
+      "sha256": "2c5b453cebc193783813b10b81da45667d57e1ddc6b84ca554d495da9f3a9ef1"
+    },
+    {
+      "path": "tests/test_sinopec_live_capture.py",
+      "line_count": 74,
+      "sha256": "14568cec2dd57d37011088855ff42c795e57cb28811c68d618bf9dad7e2d203a"
+    },
+    {
+      "path": "tests/test_sinopec_scan.py",
+      "line_count": 114,
+      "sha256": "66735b1ce79f6c510eeeae5ce13c9b043dfc5fdc97f5d6efaaa3987e280104b7"
+    },
+    {
+      "path": "tests/test_sinopec_spa.py",
+      "line_count": 238,
+      "sha256": "4537d053290562844043e55a55be2cc921dac0d6dbe8f6ece59baa86f03dd546"
+    },
+    {
+      "path": "tests/test_snapshot_activation.py",
+      "line_count": 81,
+      "sha256": "39bb2516554ef2fa2a868464fb7e22d89eda0bec2536da29df70286d7229c086"
+    },
+    {
+      "path": "tests/test_source_diversity.py",
+      "line_count": 56,
+      "sha256": "be8981a8935851f37588c8df96dba1c65b1e5303e9a8b5734c4a305d1a258553"
+    },
+    {
+      "path": "tests/test_source_fallbacks.py",
+      "line_count": 90,
+      "sha256": "41996fc73d7c247dd8df5e644fb66ed7be8eda470b40e72d75ad2505d968a6ca"
+    },
+    {
+      "path": "tests/test_source_freshness.py",
+      "line_count": 615,
+      "sha256": "201b55eebf58f097440a9865cda69a507e529a6c09e7abfdff005ff878018514"
+    },
+    {
+      "path": "tests/test_source_funnel.py",
+      "line_count": 385,
+      "sha256": "81ab34d83ab7e12dc7f652b67373137311c98b352c188d1ba53a626f26631aed"
+    },
+    {
+      "path": "tests/test_source_health.py",
+      "line_count": 168,
+      "sha256": "4ff49eaea24e92d85a90fd50bbd2786f08a6c717aa863f45a43906868614d63c"
+    },
+    {
+      "path": "tests/test_source_lifecycle.py",
+      "line_count": 77,
+      "sha256": "7c4c50d3dc9b4445f9d9e9ed2d860f74d7aabf8b6e25e0b0b45205a68b5c8c4e"
+    },
+    {
+      "path": "tests/test_source_queue.py",
+      "line_count": 181,
+      "sha256": "7771db92c19ee60f2703bb3cfb54e669377e8c757c2a1f6a3e4f2f2db5de32f4"
+    },
+    {
+      "path": "tests/test_source_targets.py",
+      "line_count": 41,
+      "sha256": "c0df7b5cd232fa49c257a7e153ac8daadad3b38a34112ff760610c2040976b88"
+    },
+    {
+      "path": "tests/test_source_validation.py",
+      "line_count": 107,
+      "sha256": "fec2807cad27f8914da7c3793279f57c364957add2e483338de30521b963e4a7"
+    },
+    {
+      "path": "tests/test_sources.py",
+      "line_count": 2063,
+      "sha256": "9298a9b360e38ba1ff43613d57925258c9ef6506a88891dd01807b0f2b3402cb"
+    },
+    {
+      "path": "tests/test_structured_openings.py",
+      "line_count": 216,
+      "sha256": "49a7760790ea648eabfeaf7e76570d91435bd402b1c40a6aa317571b7d83da62"
+    },
+    {
+      "path": "tests/test_third_party_adapter_registry.py",
+      "line_count": 26,
+      "sha256": "701be7f627d76b2bc037888aba8fb1135463885d38e53bb71272f1fd725a17bf"
+    },
+    {
+      "path": "tests/test_third_party_tables.py",
+      "line_count": 222,
+      "sha256": "d0c9de13417a5211648a18cb68c2b9de207ec7113310cb7e0403f36fa0234ffc"
+    },
+    {
+      "path": "tests/test_three_oil_catalog.py",
+      "line_count": 431,
+      "sha256": "8f50f7d908d716c7b094a1c736e5c8404a4ede0665443effab83eb0f07abd3e6"
+    },
+    {
+      "path": "tests/test_transport.py",
+      "line_count": 173,
+      "sha256": "4181c4fd04acc631d0284945693c638583e09120924a0cb19ae55184783a9fe2"
+    },
+    {
+      "path": "tests/test_unrestricted_audit.py",
+      "line_count": 65,
+      "sha256": "1779f7e14787ef7c1c4f9bc69f51b654ac3c59f23bb2768d28f0aac6ccbc1632"
+    },
+    {
+      "path": "tests/test_worker_domestic_entry_health.py",
+      "line_count": 55,
+      "sha256": "a4839d00dda645899f5726c6404d3293ba2201ef0267423757eb8f36394951f2"
+    },
+    {
+      "path": "tests/test_worker_link_health.py",
+      "line_count": 50,
+      "sha256": "a9ec0a8eea6da41a05f96488e72ae7575f2672c488add186d5ef4861efb85058"
+    },
+    {
+      "path": "tests/test_zhaopin.py",
+      "line_count": 326,
+      "sha256": "bb8ce2203cd30ae255ffce55c801b356a79a174494094be3e958056186e38022"
+    },
+    {
+      "path": "tests/test_zhaopin_detail.py",
+      "line_count": 263,
+      "sha256": "669cc84ab68bf7b6b4a56df69c715139f0d5bcd70983b673d90d9f89c808ab13"
+    }
+  ],
+  "release_boundary": {
+    "server_deployment": false,
+    "automation_status": "paused",
+    "formal_third_party_jobs_published": false,
+    "notes": [
+      "The formal database remains unchanged by this audit.",
+      "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
+      "Historical snapshots remain archived and are not overwritten by current facts."
+    ]
+  }
+}
