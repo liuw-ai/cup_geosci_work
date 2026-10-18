@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T20:39:36Z",
+  "generated_at": "2026-10-18T20:44:13Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "f2e940cc0241d44706396538aff37e9f43faa2b0",
+  "git_sha": "144b079027aa4bdf6e837cc056504e58c2bfe759",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -134,7 +134,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "5c1938f9ded414430ad7f0a38abd8d7bf4b5ec7034d7978dd38786c61397d45b"
+        "sha256": "8ffac00c9081cf5825ca8b27a75ad4a0342926304920f4dbefb90f3e4e0718bd"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -253,6 +253,10 @@
       "path": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
       "sha256": "6084764bc34681e688a1bcfaa07851a8fb0c4fcb073680a308ffd219ea2fb277"
     },
+    "phase4_third_party_bingtuan_official_recovery": {
+      "path": "docs/current/phase4-third-party-bingtuan-official-recovery-2026-10-19.json",
+      "sha256": "d71105dbb62be53489cdedbaaa20c11e1c00d93a739bf4b9a1b7c9b6672f8634"
+    },
     "phase4_local_db_write_incident": {
       "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",
       "sha256": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935"
@@ -263,7 +267,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "5c1938f9ded414430ad7f0a38abd8d7bf4b5ec7034d7978dd38786c61397d45b"
+      "sha256": "8ffac00c9081cf5825ca8b27a75ad4a0342926304920f4dbefb90f3e4e0718bd"
     }
   },
   "code_inventory": [
@@ -729,8 +733,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 425,
-      "sha256": "3cbe1b733388e795173ece2cf628bb7fa18225ea1611f8e506918d382c2c2591"
+      "line_count": 430,
+      "sha256": "72075b9f153a4d2129d0872c105123e0cb84f35e52383ad617ea3c476672a08e"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -749,8 +753,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 355,
-      "sha256": "4e9a2a3ef76602f65637109c1aba5823b1fdbb614e248ad842ff1404d5badb84"
+      "line_count": 357,
+      "sha256": "538baf62a0318282cda9574ee1d40eb31e5c6f1232b2ee42de6fcdaadb3986ac"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
