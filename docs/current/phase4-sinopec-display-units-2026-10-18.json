@@ -1,17 +1,20 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-18T09:24:26Z",
+  "generated_at": "2026-10-18T13:20:11Z",
   "source": {
     "portal_url": "https://job.sinopec.com/",
     "observed_display_unit_total": 132,
-    "retained_registry_record_count": 123,
-    "missing_from_registry_count": 9,
-    "observation_note": "132 is the portal's observed display count. Only retained records are listed below; no missing names are invented."
+    "retained_registry_record_count": 131,
+    "excluded_non_unit_display_names": [
+      "“优培计划”"
+    ],
+    "missing_from_registry_count": 0,
+    "observation_note": "132 is the portal's observed display count. The non-unit “优培计划” program is recorded separately; all other observed unit labels are retained as display candidates or explicitly reported as missing."
   },
   "catalog_scope": {
     "formal_sinopec_catalog_count": 17,
     "matched_display_records": 0,
-    "unmatched_display_records": 123,
+    "unmatched_display_records": 131,
     "promotion_rule": "A display name is not a formal unit or independent recruitment entry without legal/official identity evidence."
   },
   "records": [
@@ -1116,6 +1119,78 @@
     {
       "registry_id": "sinopec-display-131-unit",
       "display_name": "中国航油集团海南有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-extra-exploration-research",
+      "display_name": "石油勘探开发研究院",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-extra-international-exploration",
+      "display_name": "国际石油勘探公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-extra-jianghan-oilfield",
+      "display_name": "江汉油田",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-extra-lubricants",
+      "display_name": "润滑油公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-extra-petroleum-engineering-construction",
+      "display_name": "石油工程建设有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-extra-petroleum-engineering-research",
+      "display_name": "石油工程技术研究院",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-extra-petroleum-machinery",
+      "display_name": "石油机械股份有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-extra-shengli-oilfield",
+      "display_name": "胜利油田",
       "identity_status": "official_display_name_pending_legal_normalization",
       "formal_catalog_match": null,
       "portal_url": "https://job.sinopec.com/",

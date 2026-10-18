@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT))
 OUTPUT = ROOT / "docs" / "current" / "phase4-sinopec-display-units-2026-10-18.json"
 REGISTRY = ROOT / "data" / "organization_registry.json"
 CATALOG = ROOT / "data" / "three_oil_organization_catalog.json"
+OBSERVED_NON_UNIT_DISPLAY_NAMES = ["“优培计划”"]
 
 
 def normalize(value: str) -> str:
@@ -59,8 +60,15 @@ def main() -> None:
             "portal_url": "https://job.sinopec.com/",
             "observed_display_unit_total": 132,
             "retained_registry_record_count": len(rows),
-            "missing_from_registry_count": max(132 - len(rows), 0),
-            "observation_note": "132 is the portal's observed display count. Only retained records are listed below; no missing names are invented.",
+            "excluded_non_unit_display_names": OBSERVED_NON_UNIT_DISPLAY_NAMES,
+            "missing_from_registry_count": max(
+                132 - len(rows) - len(OBSERVED_NON_UNIT_DISPLAY_NAMES), 0
+            ),
+            "observation_note": (
+                "132 is the portal's observed display count. The non-unit “优培计划” "
+                "program is recorded separately; all other observed unit labels are "
+                "retained as display candidates or explicitly reported as missing."
+            ),
         },
         "catalog_scope": {
             "formal_sinopec_catalog_count": len(catalog_units),

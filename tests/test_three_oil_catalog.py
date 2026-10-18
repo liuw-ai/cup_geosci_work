@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -41,6 +42,28 @@ def test_three_oil_units_keep_group_and_operating_unit_separate() -> None:
     assert rows["cnpc-economic-research"]["role"] == "research_institute"
     assert rows["sinopec-shengli"]["parent_id"] == "sinopec"
     assert rows["cnooc-research"]["parent_id"] == "cnooc"
+
+
+def test_sinopec_display_roster_retains_all_observed_units_without_promotion() -> None:
+    report = json.loads(
+        (
+            Path("docs/current/phase4-sinopec-display-units-2026-10-18.json")
+        ).read_text(encoding="utf-8")
+    )
+
+    source = report["source"]
+    assert source["observed_display_unit_total"] == 132
+    assert source["retained_registry_record_count"] + len(
+        source["excluded_non_unit_display_names"]
+    ) == 132
+    assert source["missing_from_registry_count"] == 0
+    assert all(item["promotion_status"] == "display_candidate_only" for item in report["records"])
+    assert {item["display_name"] for item in report["records"]} >= {
+        "胜利油田",
+        "江汉油田",
+        "石油工程建设有限公司",
+        "石油勘探开发研究院",
+    }
 
 
 def test_real_three_oil_catalog_units_are_all_mapped_to_the_registry() -> None:
