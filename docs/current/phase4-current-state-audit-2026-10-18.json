@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T11:14:11Z",
+  "generated_at": "2026-10-18T11:17:43Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "c800416e0c035693debaacda22cfe26700bf61a0",
+  "git_sha": "9ca8a9bfbda9a8e6a1e5c62458a8b545f31fc322",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -95,7 +95,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "8ec5b332697e73dc4e3d48fc8ac4df52c8297525de09a6e0679eb14934248348"
+      "sha256": "1de75b365d7c1c5ed4c3d49d859a5cc5def9f489c7a43b14c50d9e656651196b"
     }
   },
   "code_inventory": [
