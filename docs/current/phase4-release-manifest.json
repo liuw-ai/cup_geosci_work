@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T09:32:23Z",
+  "generated_at": "2026-10-18T09:38:46Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "3c2c31b00b62eb99f3d9e2719181cea3edbd5651",
+  "git_sha": "c0b7d49f65aad16ba4c481c1d003cfe78d39183a",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -19,12 +19,13 @@
     "phase4_three_oil_entry_evidence": "c2d44f1c2445b0693a7dbe2b26be5dda1bab2d4b6898c90a5046ec652afa4931",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "38021040a16b44dfcc89f14ea555c0ba67ad6c3ec65bdd47b4ede61452efdcbe",
+    "phase4_current_state_audit": "0f2c712784f191135832fd5ca38d3513ab239d70794de43f9d7b315dc2f99895",
+    "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_local_validation": "3b959904bebdc95a393ecacb637885193d40e661b3f771ecd56fadb8749c9a4e"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
+    "sha256": "d151038a0fba7f0d8da022abd8f221177531db77d0b563365eca8ff65a10486a",
     "integrity_check": "ok",
     "job_status_counts": {
       "expired": 106,
@@ -48,7 +49,11 @@
       "source_unavailable": 111
     },
     "student_visible_total": 624,
-    "candidate_lead_count": 0
+    "candidate_lead_count": 1,
+    "pre_third_party_candidate_backup": {
+      "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
+      "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a"
+    }
   },
   "local_validation": {
     "phase": "phase4",
@@ -109,7 +114,9 @@
     "registered_sources": 12,
     "batch_candidate_sources": 5,
     "table_adapters": 5,
-    "real_candidate_leads_in_database": 0,
+    "real_candidate_leads_in_database": 1,
+    "private_candidate_evidence": "docs/current/phase4-third-party-candidate-2026-10-18.json",
+    "formal_jobs_published": 0,
     "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json"
   },
   "three_oil_organization_reconciliation": {
