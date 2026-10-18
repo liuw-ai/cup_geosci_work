@@ -1,0 +1,37 @@
+{
+  "phase": "phase4",
+  "incident_type": "local_runtime_database_write_detected",
+  "detected_at": "2026-10-19T03:42:17+08:00",
+  "scope": "local_only",
+  "server_deployment": false,
+  "automation_status": "paused",
+  "process": {
+    "kind": "Flask development server",
+    "bind": "127.0.0.1:8097",
+    "database_path_from_env": "runtime/job_hub.sqlite3",
+    "action": "stopped before further validation"
+  },
+  "database": {
+    "known_prior_hash": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
+    "current_hash": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
+    "integrity_check": "ok",
+    "job_count": 3952,
+    "status": "current local runtime database retained; no row deletion or publication change observed"
+  },
+  "backup": {
+    "path": "backups/job_hub-phase4-current-after-local-server-stop-20261019.sqlite3",
+    "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688"
+  },
+  "containment": [
+    "stopped the local Flask process",
+    "did not contact or modify the production server",
+    "did not resume automation",
+    "future browser and HTTP checks must use a temporary database copy",
+    "formal database hash and validation manifest were refreshed after containment"
+  ],
+  "follow_up": [
+    "add an explicit local-validation launcher that requires a temporary database path",
+    "keep runtime/job_hub.sqlite3 out of the local web process environment",
+    "do not describe the previous hash as current"
+  ]
+}

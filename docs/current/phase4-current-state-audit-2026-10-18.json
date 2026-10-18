@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-10-18T19:32:17Z",
+  "generated_at": "2026-10-18T19:44:58Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "5350eb0ad8a1ac4c7039399fa3b37df0d3d12fe7",
+  "git_sha": "6139647539f336c4f2e46209b4beef19a4ec3ae2",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
+    "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
     "integrity_check": "ok",
     "job_count": 3952,
     "status_counts": {
@@ -160,7 +160,7 @@
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-      "sha256": "c0c4ca442e458c7131de0fd67ad2eac5ac973f2ad703a8152b36611d9a10f508"
+      "sha256": "a4c65e21870d656c680aba23fbfc561eb9c7eb1b1a26d0bdd60b6619e74cac2c"
     },
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
@@ -208,7 +208,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "38d57511133557b9e26f9ab894fae5f538e83ab43c9224505415c80589153911"
+      "sha256": "8421924b84cbbb79eb7171f7b449c9398f6f3fa160025dc1d78dc891b8f08a20"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",

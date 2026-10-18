@@ -146,6 +146,7 @@ def main() -> None:
     pre_hrinm_backup = ROOT / "backups" / "job_hub-pre-phase4-hrinm-20261018.sqlite3"
     pre_conversion_audit_backup = ROOT / "backups" / "job_hub-pre-phase4-conversion-audit-20261018.sqlite3"
     pre_local_repair_backup = ROOT / "backups" / "job_hub-pre-phase4-deadline-location-repair-20261019.sqlite3"
+    current_after_local_server_stop_backup = ROOT / "backups" / "job_hub-phase4-current-after-local-server-stop-20261019.sqlite3"
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
     database["pre_third_party_candidate_backup"] = {
         "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
@@ -162,6 +163,10 @@ def main() -> None:
     database["pre_deadline_location_repair_backup"] = {
         "path": "backups/job_hub-pre-phase4-deadline-location-repair-20261019.sqlite3",
         "sha256": sha256(pre_local_repair_backup),
+    }
+    database["current_after_local_server_stop_backup"] = {
+        "path": "backups/job_hub-phase4-current-after-local-server-stop-20261019.sqlite3",
+        "sha256": sha256(current_after_local_server_stop_backup),
     }
     validation = local_validation_facts()
     trial_report = ROOT / "docs" / "current" / "phase4-third-party-trial-2026-10-18.json"
@@ -188,6 +193,7 @@ def main() -> None:
     local_web_recheck = ROOT / "docs" / "current" / "phase4-local-web-recheck-2026-10-19.json"
     huatu_table_discovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-table-discovery-2026-10-19.json"
     huatu_discovery_scan = ROOT / "docs" / "current" / "phase4-third-party-huatu-discovery-2026-10-19.json"
+    local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     working_tree_dirty = dirty()
     release_blockers = []
@@ -257,6 +263,7 @@ def main() -> None:
             "phase4_huatu_discovery_scan": sha256(huatu_discovery_scan),
             "phase4_main_record": sha256(phase4_record),
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
+            "phase4_local_db_write_incident": sha256(local_db_write_incident),
         },
         "database": database,
         "target_metrics": {

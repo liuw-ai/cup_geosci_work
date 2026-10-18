@@ -1,10 +1,10 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T03:18:00+08:00",
+  "validated_at": "2026-10-19T03:48:06+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "5350eb0",
-  "git_sha_at_validation": "5350eb0",
+  "git_sha_before_metadata_commit": "6139647",
+  "git_sha_at_validation": "6139647",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1075,
@@ -20,8 +20,8 @@
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256_before_tests": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
-    "sha256_after_tests": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
+    "sha256_before_tests": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
+    "sha256_after_tests": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
     "integrity_check": "ok",
     "jobs": 3952,
     "candidate_leads": 6,
@@ -33,7 +33,9 @@
       "broad_geoscience_match": 5,
       "incomplete_but_basic_match": 373,
       "source_unavailable": 111
-    }
+    },
+    "formal_database_stable_during_tests": true,
+    "current_hash_incident": "docs/current/phase4-local-db-write-incident-2026-10-19.json"
   },
   "third_party": {
     "isolated_huatu_trial_candidate_leads": 11,
@@ -41,7 +43,7 @@
     "formal_jobs_created": 5,
     "formal_third_party_job_ids": [5432, 5433, 5434, 5435, 5436],
     "formal_database_unchanged": false,
-    "formal_database_change_note": "The approved local HRINM recovery created job 5432; the B-level Huatu-to-CGS recovery then created jobs 5433-5436 from four official attachment rows. All subsequent tests used isolated databases or read-only inspection.",
+    "formal_database_change_note": "The approved local HRINM recovery created job 5432; the B-level Huatu-to-CGS recovery then created jobs 5433-5436 from four official attachment rows. A later local Flask process was found using the formal path; it was stopped and recorded separately. The current full test run kept the formal database hash stable.",
     "cgs_attachment_trial": {
       "candidate_lead_ids": [3, 4, 5, 6],
       "official_rows": 4,
@@ -103,7 +105,7 @@
     "coverage_status": 200,
     "coverage_seconds": 24.629,
     "latest_recheck_report": "docs/current/phase4-local-web-recheck-2026-10-19.json",
-    "database_mode_note": "all requests used a temporary copy; runtime/job_hub.sqlite3 was not opened for writing"
+    "database_mode_note": "all requests used a temporary copy; the earlier local Flask process was stopped and is recorded in phase4-local-db-write-incident-2026-10-19.json"
   },
   "release_boundary": {
     "status": "not_publishable",
