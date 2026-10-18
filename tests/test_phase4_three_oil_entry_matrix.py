@@ -15,5 +15,6 @@ def test_phase4_three_oil_entry_matrix_covers_every_formal_catalog_unit() -> Non
     assert len({item["catalog_id"] for item in units}) == 64
     assert payload["summary"]["units_by_group"] == {"cnpc": 27, "sinopec": 17, "cnooc": 20}
     assert payload["summary"]["unit_specific_entry_evidence_complete"] is False
-    assert all(item["unit_specific_entry_url"] is None for item in units)
+    assert sum(item["unit_specific_entry_status"] == "unit_specific_entry_verified" for item in units) >= 3
+    assert any(item["unit_specific_entry_url"] for item in units)
     assert any(item["unit_specific_entry_status"] == "unit_specific_entry_pending" for item in units)
