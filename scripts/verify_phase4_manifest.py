@@ -200,8 +200,12 @@ def verify_manifest(path: Path = MANIFEST) -> dict[str, Any]:
         if required not in blockers:
             errors.append(f"release blocker missing: {required}")
 
+    try:
+        display_path = str(path.relative_to(ROOT)).replace("\\", "/")
+    except ValueError:
+        display_path = str(path)
     return {
-        "manifest": str(path.relative_to(ROOT)).replace("\\", "/"),
+        "manifest": display_path,
         "ok": not errors,
         "errors": errors,
         "database": database,
