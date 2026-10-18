@@ -299,8 +299,8 @@ class JobPipeline:
         This is intentionally a one-way bootstrap of the read-side projection:
         a missing or partial file contributes nothing, and an existing newer
         runtime record is never replaced by an older registry declaration.
-        The subsequent age predicate still decides whether the source is
-        currently publishable.
+        The resulting timestamp is source-health evidence only; publication
+        remains governed by official deadline/90-day rules and job evidence.
         """
 
         for source in sources:
@@ -1454,14 +1454,15 @@ class JobPipeline:
 
         Snapshot/browser sources can successfully read an already-old file.
         Their declared capture timestamp is therefore the only safe freshness
-        boundary. A missing or non-success capture is intentionally stale.
+        boundary for source-health reporting. A missing or non-success capture
+        is unavailable evidence, not job closure.
         """
 
         config = source.get("config") if isinstance(source.get("config"), dict) else {}
         declared = str(config.get("snapshot_captured_at") or "").strip()
         # Browser-owned snapshots refresh their artifact independently from the
-        # static source registry.  After a process restart, use the durable
-        # successful-capture projection for lifecycle expiry; ordinary manual
+        # static source registry. After a process restart, use the durable
+        # successful-capture projection for health reporting; ordinary manual
         # snapshots intentionally continue to honor their declared timestamp.
         if str(config.get("runtime_mode") or "").strip() == "browser_worker_only":
             freshness = self.database.get_source_capture_freshness(str(source.get("id") or ""))
@@ -1480,8 +1481,8 @@ class JobPipeline:
                             declared = recorded
         elif not declared and not str(config.get("capture_path") or "").strip():
             # Live adapters use the successful crawl itself as the capture
-            # event. Reuse that durable timestamp after restart so the worker
-            # can withdraw rows when subsequent scans stop succeeding.
+            # event. Reuse that durable timestamp after restart for health
+            # reporting; failed scans never withdraw existing jobs.
             freshness = self.database.get_source_capture_freshness(
                 str(source.get("id") or "")
             )
@@ -1489,9 +1490,9 @@ class JobPipeline:
         # Browser workers persist their successful capture timestamp in the
         # database because their writable runtime capture is intentionally a
         # plain row list (rather than the manifest-shaped payload used by the
-        # generic snapshot adapters).  Keep using that durable projection for
-        # lifecycle checks, including after a failed attempt: a failed refresh
-        # must not immediately withdraw a still-fresh prior capture.
+        # generic snapshot adapters). Keep using that durable projection for
+        # health checks, including after a failed attempt: a failed refresh
+        # must not change the lifecycle of a prior official job.
         if str(config.get("runtime_mode") or "").strip() == "browser_worker_only":
             return declared
         capture_path = str(config.get("capture_path") or "").strip()
