@@ -1,10 +1,10 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-18T23:37:57+08:00",
+  "validated_at": "2026-10-19T00:16:54+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "51f3e300de834bb5e92a5cf2fb3d614fbc818669",
-  "git_sha_at_validation": "51f3e300de834bb5e92a5cf2fb3d614fbc818669",
+  "git_sha_before_metadata_commit": "af8eef7bbfb25f7d2b4e29bb7bf7f884215a8e94",
+  "git_sha_at_validation": "af8eef7bbfb25f7d2b4e29bb7bf7f884215a8e94",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1073,
@@ -26,7 +26,7 @@
     "jobs": 3952,
     "candidate_leads": 6,
     "phase3_withdrawal_audits": 3947,
-    "student_read_as_of_date": "2026-10-18",
+    "student_read_as_of_date": "2026-10-19",
     "student_visible_total": 629,
     "student_visible_layer_counts": {
       "exact_match": 146,
