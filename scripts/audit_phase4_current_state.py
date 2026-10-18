@@ -73,6 +73,20 @@ def current_database_facts() -> dict[str, object]:
             connection.execute("SELECT publication_layer, COUNT(*) FROM jobs GROUP BY publication_layer").fetchall()
         )
         lead_count = int(connection.execute("SELECT COUNT(*) FROM candidate_leads").fetchone()[0])
+        formal_third_party_jobs = int(
+            connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM jobs
+                WHERE id IN (
+                    SELECT published_job_id
+                    FROM candidate_leads
+                    WHERE verification_status = 'published'
+                      AND published_job_id IS NOT NULL
+                )
+                """
+            ).fetchone()[0]
+        )
         audit_count = int(connection.execute("SELECT COUNT(*) FROM phase3_withdrawal_audits").fetchone()[0])
         job_count = int(connection.execute("SELECT COUNT(*) FROM jobs").fetchone()[0])
     database = Database(DATABASE, read_only=True)
@@ -90,6 +104,7 @@ def current_database_facts() -> dict[str, object]:
         "publication_layer_counts": layer_counts,
         "phase3_withdrawal_audit_count": audit_count,
         "candidate_lead_count": lead_count,
+        "formal_third_party_job_count": formal_third_party_jobs,
         "student_read_as_of_date": as_of_date,
         "student_visible_layer_counts": visible_by_layer,
         "student_visible_total": visible_total,
@@ -99,12 +114,18 @@ def current_database_facts() -> dict[str, object]:
 def source_facts() -> dict[str, object]:
     sources = json.loads((ROOT / "data" / "discovery_sources.json").read_text(encoding="utf-8"))["sources"]
     adapters = json.loads((ROOT / "data" / "third_party_table_adapters.json").read_text(encoding="utf-8"))["adapters"]
+    official_sources = json.loads((ROOT / "data" / "sources.json").read_text(encoding="utf-8"))
     catalog = json.loads((ROOT / "data" / "three_oil_organization_catalog.json").read_text(encoding="utf-8"))
     registry = json.loads((ROOT / "data" / "organization_registry.json").read_text(encoding="utf-8"))
     organizations = registry.get("organizations", [])
     group_counts = {group["id"]: len(group.get("units", [])) for group in catalog.get("groups", [])}
     return {
         "registered_source_count": len(sources),
+        "official_recovery_source_count": sum(
+            1
+            for source in official_sources
+            if str(source.get("id") or "") == "hunan-nonferrous-institute-recruitment"
+        ),
         "trust_grade_counts": {
             grade: sum(1 for source in sources if str(source.get("trust_grade")) == grade)
             for grade in ("A", "A-", "B", "C", "D")
@@ -147,6 +168,7 @@ def main() -> None:
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
     validation = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-18.json"
     manual_candidate = ROOT / "docs" / "current" / "phase4-third-party-candidate-2026-10-18.json"
+    hrinm_trial = ROOT / "docs" / "current" / "phase4-third-party-hrinm-2026-10-18.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     report = {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -181,6 +203,10 @@ def main() -> None:
                 "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
                 "sha256": sha256(manual_candidate),
             },
+            "phase4_third_party_hrinm": {
+                "path": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
+                "sha256": sha256(hrinm_trial),
+            },
             "phase4_main_record": {
                 "path": "docs/current/PHASE4-2026-10-17.md",
                 "sha256": sha256(phase4_record),
@@ -190,9 +216,9 @@ def main() -> None:
         "release_boundary": {
             "server_deployment": False,
             "automation_status": "paused",
-            "formal_third_party_jobs_published": False,
+            "formal_third_party_jobs_published": True,
             "notes": [
-                "The formal database remains unchanged by this audit.",
+                "One locally approved third-party discovery lead was recovered to an official employer notice and published as job 5432; no server deployment was performed.",
                 "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
                 "Historical snapshots remain archived and are not overwritten by current facts.",
             ],

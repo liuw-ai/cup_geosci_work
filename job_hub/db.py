@@ -4981,8 +4981,29 @@ class Database:
                 raise ValueError(
                     "Lead has no registered-source match or explicit manual-domain approval"
                 )
-            if connection.execute("SELECT 1 FROM jobs WHERE id = ?", (job_id,)).fetchone() is None:
+            job_row = connection.execute(
+                "SELECT publication_status, publication_layer, status FROM jobs WHERE id = ?",
+                (job_id,),
+            ).fetchone()
+            if job_row is None:
                 raise ValueError("Published lead references an unknown job_id")
+            if (
+                str(job_row["status"] or "") in {"withdrawn", "expired"}
+                or (
+                    str(job_row["publication_status"] or "")
+                    not in PUBLIC_STUDENT_PUBLICATION_STATUSES
+                    and str(job_row["publication_layer"] or "")
+                    not in {
+                        "exact_match",
+                        "broad_geoscience_match",
+                        "incomplete_but_basic_match",
+                        "source_unavailable",
+                    }
+                )
+            ):
+                raise ValueError(
+                    "Published lead references a job that has not passed the student publication gate"
+                )
             validate_candidate_lead_transition(
                 row["verification_status"],
                 "published",

@@ -1,0 +1,63 @@
+{
+  "phase": "phase4",
+  "trial_status": "completed_local_formal_job",
+  "discovery": {
+    "source_id": "geotalent-discovery",
+    "source_grade": "C",
+    "lead_url": "https://geo.36hjob.com/Article-QoNvp.html",
+    "capture_mode": "manual_browser_read_only",
+    "role": "discovery_only",
+    "student_facing": false
+  },
+  "official_recovery": {
+    "source_id": "hunan-nonferrous-institute-recruitment",
+    "employer": "湖南有色金属研究院有限责任公司",
+    "homepage_url": "https://www.hrinm.cn/",
+    "official_notice_url": "https://www.hrinm.cn/xwxq/35.html",
+    "official_notice_published_at": "2026-10-11T17:38:00+08:00",
+    "official_capture_path": "runtime/official-captures/hrinm/2026-10-18/official-notice.html",
+    "official_capture_sha256": "562b2071ac836b3cb815c53d7b24b83757530d50076a2193271e46125dfc98f8",
+    "official_position_row": 5,
+    "title": "地质研发岗",
+    "degree_requirement": "硕士及以上",
+    "major_requirement": "矿山地质、地质学、地质工程等",
+    "location": "湖南省长沙市芙蓉区",
+    "deadline_text": "报名截止时间：2027年7月（官方未公布具体日）",
+    "application_method": "公告要求扫描二维码下载报名表，并将报名表与材料发送至 yshbzhaopin@163.com；没有独立 HTTP 报名地址。",
+    "official_application_url": null,
+    "official_table_url": null,
+    "table_note": "岗位表以官方公告正文中的 HTML 表格形式出现，未发现独立官方表格 URL；不伪造附件地址。"
+  },
+  "funnel": {
+    "discovery_leads_created": 1,
+    "official_url_found": 1,
+    "official_content_verified": 1,
+    "formal_jobs_created": 1,
+    "student_visible_jobs_created": 1,
+    "rejected_before_official_recovery": 0
+  },
+  "database": {
+    "candidate_lead_id": 2,
+    "job_id": 5432,
+    "candidate_verification_status": "published",
+    "job_publication_status": "student_eligible",
+    "job_publication_layer": "exact_match",
+    "job_status": "open",
+    "no_deadline_expires_at": "2027-01-09",
+    "official_application_url": null,
+    "student_display_rule": "显示官方公告/报名说明；不显示第三方发现链接，不显示虚构申请 URL；截止日期显示官方未公布截止日期。"
+  },
+  "policy_checks": {
+    "third_party_link_as_application": false,
+    "official_url_required_before_publication": true,
+    "official_source_host_registered": true,
+    "captcha_or_login_bypass": false,
+    "robots_bypass": false,
+    "formal_server_deployment": false
+  },
+  "notes": [
+    "该岗位是通过第三方渠道发现、再由企业官网官方公告逐行核验的第一条本地正式岗位。",
+    "公告只给出截止月份，具体日期未公布；系统按无具体截止日期规则记录并保留原文，不把月份伪装成具体日。",
+    "公告正文的报名方式是邮件和二维码，学生端只能打开官方公告查看完整报名说明。"
+  ]
+}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from job_hub.app import create_app
+from job_hub.sources import RawPosting
 
 from conftest import make_settings, source
 
@@ -152,3 +153,81 @@ def test_verified_candidate_rejects_third_party_application_url(tmp_path) -> Non
                 "verification_note": "已核验官方公告和岗位字段。",
             },
         )
+
+
+def test_published_lead_requires_student_publication_gate(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    manual_source = source()
+    manual_source.update(
+        {
+            "id": "official-manual-import",
+            "source_type": "manual",
+            "enabled": True,
+            "config": {"allow_shared_source_url": True},
+        }
+    )
+    database.upsert_source(manual_source)
+    lead = database.create_candidate_lead(
+        {
+            "lead_provider": "华图教育",
+            "lead_url": "https://www.huatu.com/lead/publication-gate",
+            "title": "地质研发岗",
+            "employer_hint": "某研究院",
+            "official_url": "https://official.example.edu.cn/jobs/1",
+            "official_source_id": "official-manual-import",
+            "metadata": {
+                "source_id": "official-manual-import",
+                "title": "地质研发岗",
+                "employer": "某研究院",
+                "description": "官方记录暂未提供岗位级专业与学历字段。",
+                "field_evidence": {
+                    "岗位": "地质研发岗",
+                    "evidence_scope": "admin_verified_official_record",
+                },
+            },
+        }
+    )
+    lead_id = int(lead["id"])
+    database.update_candidate_lead(
+        lead_id,
+        {
+            "verification_status": "official_url_found",
+            "official_source_id": "official-manual-import",
+        },
+    )
+    database.update_candidate_lead(
+        lead_id,
+        {
+            "verification_status": "official_content_verified",
+            "official_source_id": "official-manual-import",
+            "official_domain_status": "manual_review_approved",
+            "verification_note": "已核对官方页面，但岗位级专业和学历证据仍不完整。",
+        },
+    )
+    pipeline = app.extensions["pipeline"]
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(
+            RawPosting(
+                title="待补岗位级证据",
+                employer="某研究院",
+                source_url="https://official.example.edu.cn/jobs/1",
+                application_url=None,
+                text="官方记录暂未提供岗位级专业与学历字段。",
+                summary="",
+                published_date="2026-10-18",
+                deadline_date="2026-12-31",
+                location="北京市",
+                external_id="publication-gate-pending-1",
+                official_evidence_url="https://official.example.edu.cn/jobs/1",
+                field_evidence={
+                    "岗位": "待补岗位级证据",
+                    "evidence_scope": "admin_verified_official_record",
+                },
+            ),
+            database.get_source("official-manual-import"),
+        )
+    )
+    with __import__("pytest").raises(ValueError, match="student publication gate"):
+        database.mark_candidate_lead_published(lead_id, job_id)

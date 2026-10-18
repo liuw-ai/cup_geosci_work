@@ -1628,6 +1628,25 @@
     }
   },
   {
+    "id": "hunan-nonferrous-institute-recruitment",
+    "name": "湖南有色金属研究院有限责任公司官方招聘公告",
+    "publisher": "湖南有色金属研究院有限责任公司",
+    "homepage_url": "https://www.hrinm.cn/",
+    "source_type": "manual",
+    "category": "能源、工程与地学拓展",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "allowed_hosts": ["www.hrinm.cn", "hrinm.cn"],
+      "allow_shared_source_url": true,
+      "publication_category": "能源、工程与地学拓展",
+      "automation_status": "manual_official_recovery_verified",
+      "official_notice_url": "https://www.hrinm.cn/xwxq/35.html",
+      "official_notice_published_at": "2026-10-11T17:38:00+08:00",
+      "note": "企业官网官方招聘公告。当前岗位由第三方发现后回溯至该公告，正式岗位使用官方公告作为详情和报名说明；公告要求邮件报名，没有独立 HTTP 报名地址。"
+    }
+  },
+  {
     "id": "dingxi-party-recruitment",
     "name": "定西党建网人才引进公告与官方附件",
     "publisher": "中共定西市委组织部",

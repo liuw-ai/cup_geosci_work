@@ -71,6 +71,20 @@ def db_facts(path: Path) -> dict[str, object]:
         statuses = dict(connection.execute("SELECT status, COUNT(*) FROM jobs GROUP BY status").fetchall())
         layers = dict(connection.execute("SELECT publication_layer, COUNT(*) FROM jobs GROUP BY publication_layer").fetchall())
         leads = int(connection.execute("SELECT COUNT(*) FROM candidate_leads").fetchone()[0])
+        formal_third_party_jobs = int(
+            connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM jobs
+                WHERE id IN (
+                    SELECT published_job_id
+                    FROM candidate_leads
+                    WHERE verification_status = 'published'
+                      AND published_job_id IS NOT NULL
+                )
+                """
+            ).fetchone()[0]
+        )
     as_of_date = datetime.now(ZoneInfo("Asia/Shanghai")).date().isoformat()
     read_database = Database(path, read_only=True)
     student_visible_counts = {
@@ -95,6 +109,7 @@ def db_facts(path: Path) -> dict[str, object]:
         "student_visible_layer_counts": student_visible_counts,
         "student_visible_total": student_visible_total,
         "candidate_lead_count": leads,
+        "formal_third_party_job_count": formal_third_party_jobs,
     }
 
 
@@ -115,10 +130,15 @@ def main() -> None:
         (ROOT / "docs" / "current" / "phase4-organization-reconciliation-2026-10-17.json").read_text(encoding="utf-8")
     )
     pre_candidate_backup = ROOT / "backups" / "job_hub-pre-phase4-third-party-candidate-20261018.sqlite3"
+    pre_hrinm_backup = ROOT / "backups" / "job_hub-pre-phase4-hrinm-20261018.sqlite3"
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
     database["pre_third_party_candidate_backup"] = {
         "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
         "sha256": sha256(pre_candidate_backup),
+    }
+    database["pre_hrinm_backup"] = {
+        "path": "backups/job_hub-pre-phase4-hrinm-20261018.sqlite3",
+        "sha256": sha256(pre_hrinm_backup),
     }
     validation = local_validation_facts()
     trial_report = ROOT / "docs" / "current" / "phase4-third-party-trial-2026-10-18.json"
@@ -127,6 +147,7 @@ def main() -> None:
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
     current_audit = ROOT / "docs" / "current" / "phase4-current-state-audit-2026-10-18.json"
     manual_candidate = ROOT / "docs" / "current" / "phase4-third-party-candidate-2026-10-18.json"
+    hrinm_trial = ROOT / "docs" / "current" / "phase4-third-party-hrinm-2026-10-18.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     working_tree_dirty = dirty()
     release_blockers = []
@@ -141,7 +162,7 @@ def main() -> None:
     else:
         release_blockers.append("local_validation_report_missing")
     for blocker in (
-        "no_audited_third_party_table_batch_imported",
+        "b_level_table_batch_target_not_yet_met",
         "three_oil_external_identity_evidence_pending",
         "three_oil_unit_entry_evidence_incomplete",
         "local_phase4_validation_not_approved_for_server",
@@ -160,6 +181,7 @@ def main() -> None:
         "release_env_sha256": sha256(ROOT / ".release.env"),
         "config_sha256": {
             "discovery_sources": sha256(ROOT / "data" / "discovery_sources.json"),
+            "sources": sha256(ROOT / "data" / "sources.json"),
             "third_party_adapters": sha256(ROOT / "data" / "third_party_table_adapters.json"),
             "organization_registry": sha256(ROOT / "data" / "organization_registry.json"),
             "three_oil_catalog": sha256(ROOT / "data" / "three_oil_organization_catalog.json"),
@@ -175,6 +197,7 @@ def main() -> None:
             "phase4_third_party_geoscience_followup": sha256(geoscience_followup),
             "phase4_current_state_audit": sha256(current_audit),
             "phase4_third_party_candidate": sha256(manual_candidate),
+            "phase4_third_party_hrinm": sha256(hrinm_trial),
             "phase4_main_record": sha256(phase4_record),
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
         },
@@ -186,8 +209,9 @@ def main() -> None:
             "table_adapters": len(adapters),
             "real_candidate_leads_in_database": database["candidate_lead_count"],
             "private_candidate_evidence": "docs/current/phase4-third-party-candidate-2026-10-18.json",
-            "formal_jobs_published": 0,
+            "formal_jobs_published": database.get("formal_third_party_job_count", 0),
             "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
+            "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
         "automation_model": "gpt-5.6-terra",
