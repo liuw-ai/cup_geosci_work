@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T18:35:39Z",
+  "generated_at": "2026-10-18T18:44:54Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "124ee5f5b4c59c5da9d0ef672ad88457065978b0",
+  "git_sha": "7a1feb57b784d9b3952b4e1bc7b7c5a0b03debbe",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -88,7 +88,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "c1811c6c94b32b7714c639ccdbac9a0c70c68416b116c31ecfbbe301e0d9e103"
+        "sha256": "465bcb92ba3852f5e9cf2cc9498fffb59aecc02e36850d44860483499c3f09b1"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -131,13 +131,17 @@
       "path": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
       "sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288"
     },
+    "phase4_three_oil_cooec_negative_entry": {
+      "path": "docs/current/phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json",
+      "sha256": "ab794937926b4236b4542fb9af191c51078ed245573f0a4814d6ecaf0d63e87b"
+    },
     "phase4_sinopec_page_roster": {
       "path": "docs/current/phase4-sinopec-page-roster-2026-10-19.json",
       "sha256": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd"
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-      "sha256": "77af1568a8704071f5dbfb56974c423349d84c29cff4f28fe42448b7ca70b82c"
+      "sha256": "d10a6f54df1eef67cb752a9ad5cfbbbb4eea7efa8b57a9e48cf3f1d1c7ebc4e6"
     },
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
@@ -185,7 +189,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "39deb53c493dc559e3f7122705c86345d5e6d5638e86008fb9e9f59d8fd4e918"
+      "sha256": "1f21c13f5c996e9ec7d14d1fe437c67ef3e75c1f6c4c91fde0d37e19ff108964"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -193,7 +197,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "c1811c6c94b32b7714c639ccdbac9a0c70c68416b116c31ecfbbe301e0d9e103"
+      "sha256": "465bcb92ba3852f5e9cf2cc9498fffb59aecc02e36850d44860483499c3f09b1"
     }
   },
   "code_inventory": [
@@ -659,8 +663,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 365,
-      "sha256": "6b91b2a6b3034e4e7273e9335d1911894799cf112bf0da126991909742aaf1a3"
+      "line_count": 370,
+      "sha256": "ccf1dc437d90c371acc7d067ccefd0a5ed4fe34a7a37a281cf4b4ecfc3a0d66c"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -674,8 +678,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 327,
-      "sha256": "d69f8fb5afdcfa819cf8e48de8ba8fb8e407c3d916832a1e828d961f017992f8"
+      "line_count": 330,
+      "sha256": "7278f349c23da7b750ee90f1fa4b46fa8bb417cda1ae7be13a12cea581591ed2"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -689,8 +693,8 @@
     },
     {
       "path": "scripts/build_phase4_three_oil_entry_matrix.py",
-      "line_count": 203,
-      "sha256": "2507e45efd1316749c71ac7cc78d64029625590653012b6e8ac65a0eedc80696"
+      "line_count": 218,
+      "sha256": "5c9a7b64347a92a9daf9650fb747776eec2634fdee5a59dc2259aa0adf02ab51"
     },
     {
       "path": "scripts/import_third_party_table.py",

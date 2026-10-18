@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "phase4",
-  "generated_at": "2026-10-18T18:23:08Z",
+  "generated_at": "2026-10-18T18:44:54Z",
   "policy": "A shared group portal proves only the shared portal. It is not copied into a unit-specific URL.",
   "summary": {
     "formal_catalog_units": 64,
@@ -12,8 +12,9 @@
     },
     "unit_specific_entry_status_counts": {
       "group_portal_verified": 2,
-      "group_portal_unit_display_observed": 15,
+      "group_portal_unit_display_observed": 14,
       "unit_specific_entry_pending": 43,
+      "official_site_checked_no_unit_entry_found": 1,
       "unit_specific_entry_verified": 3,
       "group_portal_not_revalidated": 1
     },
@@ -171,7 +172,7 @@
       "unit_specific_entry_channel_id": null,
       "unit_specific_entry_channel_type": null,
       "unit_specific_entry_verification_status": null,
-      "unit_specific_entry_status": "group_portal_unit_display_observed",
+      "unit_specific_entry_status": "official_site_checked_no_unit_entry_found",
       "official_display_name_observed": true,
       "observed_official_job_count": 12,
       "observed_official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972470515?srccode=448002",
@@ -179,9 +180,9 @@
       "observed_job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
       "observed_job_summary_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
       "observed_job_evidence_scope": "official_group_portal_active_unit_job_cards",
-      "evidence_scope": "official_group_portal_display_roster",
+      "evidence_scope": "official_homepage_no_recruitment_entry_found",
       "verified_at": "2026-10-19",
-      "next_evidence_required": "unit-specific official recruitment page, notice, or authorized recruitment record"
+      "next_evidence_required": "该单位官方招聘公告、官方岗位表、官方招聘系统或官方公告明确的授权招聘入口。"
     },
     {
       "catalog_id": "cnooc-fujian",
