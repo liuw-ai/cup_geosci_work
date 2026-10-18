@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T22:07:22Z",
+  "generated_at": "2026-10-18T22:08:11Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "f092176d791583ea2ae5ce1def692b5d6eb37a7e",
+  "git_sha": "35bbb3fcf3a467744f4758258ddebe302e8920fb",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -247,7 +247,7 @@
     },
     "phase4_huatu_table_discovery": {
       "path": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
-      "sha256": "167bbc3c08bcde5ff566db81420ab1fd463007bb5c124b0251b3487c967e3897"
+      "sha256": "63b2de6df44335e619f55fa6c2cc2738915c8b371c5225f8527c048abcb202b9"
     },
     "phase4_huatu_discovery_scan": {
       "path": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
