@@ -115,12 +115,18 @@ def main() -> None:
         (ROOT / "docs" / "current" / "phase4-organization-reconciliation-2026-10-17.json").read_text(encoding="utf-8")
     )
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
+    database["pre_third_party_candidate_backup"] = {
+        "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
+        "sha256": sha256(pre_candidate_backup),
+    }
     validation = local_validation_facts()
     trial_report = ROOT / "docs" / "current" / "phase4-third-party-trial-2026-10-18.json"
     entry_evidence = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"
     display_audit = ROOT / "docs" / "current" / "phase4-sinopec-display-units-2026-10-18.json"
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
     current_audit = ROOT / "docs" / "current" / "phase4-current-state-audit-2026-10-18.json"
+    manual_candidate = ROOT / "docs" / "current" / "phase4-third-party-candidate-2026-10-18.json"
+    pre_candidate_backup = ROOT / "backups" / "job_hub-pre-phase4-third-party-candidate-20261018.sqlite3"
     working_tree_dirty = dirty()
     release_blockers = []
     if working_tree_dirty:
@@ -167,6 +173,7 @@ def main() -> None:
             "phase4_sinopec_display_audit": sha256(display_audit),
             "phase4_third_party_geoscience_followup": sha256(geoscience_followup),
             "phase4_current_state_audit": sha256(current_audit),
+            "phase4_third_party_candidate": sha256(manual_candidate),
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
         },
         "database": database,
@@ -176,6 +183,8 @@ def main() -> None:
             "batch_candidate_sources": sum(1 for item in sources if item.get("batch_candidate_allowed")),
             "table_adapters": len(adapters),
             "real_candidate_leads_in_database": database["candidate_lead_count"],
+            "private_candidate_evidence": "docs/current/phase4-third-party-candidate-2026-10-18.json",
+            "formal_jobs_published": 0,
             "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],

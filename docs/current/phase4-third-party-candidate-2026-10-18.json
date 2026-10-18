@@ -1,0 +1,39 @@
+{
+  "phase": "phase4",
+  "captured_at": "2026-10-18T18:00:00+08:00",
+  "source_id": "geotalent-discovery",
+  "source_grade": "C",
+  "source_host": "geo.36hjob.com",
+  "source_identity_status": "brand_alias_not_yet_formally_bound_to_registered_geotalent.cn",
+  "capture_mode": "manual_browser_read_only",
+  "lead_url": "https://geo.36hjob.com/job-Ucrql.html",
+  "title": "生产技术部",
+  "employer": "常德市鼎城祥荣矿业有限公司",
+  "position_fields": {
+    "categories": [
+      "采矿工程师",
+      "矿业矿产开发",
+      "测绘/测量/勘测勘察"
+    ],
+    "major_requirement": "相关地质专业应届毕业生也可",
+    "degree_requirement": "大专以上",
+    "location": "湖南·常德",
+    "deadline_date": "2026-11-29",
+    "headcount": 2,
+    "salary": "8000-12000元/月",
+    "job_description": "三级矿量编录，采矿设计，生产指导实施。"
+  },
+  "official_recovery": {
+    "official_url": null,
+    "official_application_url": null,
+    "status": "not_found",
+    "next_action": "人工核验企业官方站点、官方招聘公告或官方报名入口；在此之前不得升级或发布。"
+  },
+  "publication_decision": {
+    "candidate_lead_allowed": true,
+    "formal_job_allowed": false,
+    "student_visible": false,
+    "reason": "C级垂直渠道提供了岗位级字段，但只有第三方页面证据，未找到官方 URL。"
+  },
+  "evidence_note": "该记录是私有候选证据，不是官方岗位记录；第三方页面不得作为学生端申请链接。"
+}
