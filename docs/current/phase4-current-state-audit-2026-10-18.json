@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T22:13:41Z",
+  "generated_at": "2026-10-18T22:19:42Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "fd487f3c1c3574416a5abed044bd22435da46e07",
+  "git_sha": "c18002de75913554cd4ddf635478658e605a01f4",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -134,7 +134,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "0b5983ba9c233128a86d543cb46cabd9350d067b6effcd2df3ea29b77b84fb16"
+        "sha256": "713ba3570ff77be27906b36fc4406400b843eb317c9d997f8efd9ea402e0efe9"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -267,7 +267,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "0b5983ba9c233128a86d543cb46cabd9350d067b6effcd2df3ea29b77b84fb16"
+      "sha256": "713ba3570ff77be27906b36fc4406400b843eb317c9d997f8efd9ea402e0efe9"
     }
   },
   "code_inventory": [
@@ -817,6 +817,11 @@
       "sha256": "ea96fa43a77a9195cf3f4e29c0fc2c26536526f06926762ef7486d832ae5d455"
     },
     {
+      "path": "scripts/refresh_phase4_metadata.py",
+      "line_count": 37,
+      "sha256": "59b43a0f05dbc2bf7822c12b10eb67226a2dd9944149c7fb1462b7195c7272e5"
+    },
+    {
       "path": "scripts/register_phase4_cgs_trial.py",
       "line_count": 214,
       "sha256": "9faa85e0704f5411c180d6d1ef93916558874c9dd7fb2d7398865a0db8ecddba"
@@ -1235,6 +1240,11 @@
       "path": "tests/test_phase4_manifest.py",
       "line_count": 76,
       "sha256": "c12c8c4d7b1359b6c58e0ed1471557d3a44545a81df0e3d58f79838037e28bc8"
+    },
+    {
+      "path": "tests/test_phase4_metadata_refresh.py",
+      "line_count": 14,
+      "sha256": "3c4126975c4b4207569e80feecd0d50e3010ad04fffa9f390d67492b8ee46de1"
     },
     {
       "path": "tests/test_phase4_third_party_funnel.py",

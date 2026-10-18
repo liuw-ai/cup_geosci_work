@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T22:17:18Z",
+  "generated_at": "2026-10-18T22:19:46Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "fd487f3c1c3574416a5abed044bd22435da46e07",
+  "git_sha": "c18002de75913554cd4ddf635478658e605a01f4",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "b155f0a7e9cc23c41572d01c39cd4024d2fdda26495c0ad893658665a4eb52fb",
-    "phase4_document_consistency": "b155f0a7e9cc23c41572d01c39cd4024d2fdda26495c0ad893658665a4eb52fb",
+    "phase4_current_state_audit": "70b9113fbb5eb8b6371bdfa66c9a1ef2e584c9c12567c45d4f124f898d159742",
+    "phase4_document_consistency": "70b9113fbb5eb8b6371bdfa66c9a1ef2e584c9c12567c45d4f124f898d159742",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -46,12 +46,12 @@
     "phase4_huatu_table_discovery": "63b2de6df44335e619f55fa6c2cc2738915c8b371c5225f8527c048abcb202b9",
     "phase4_huatu_discovery_scan": "6084764bc34681e688a1bcfaa07851a8fb0c4fcb073680a308ffd219ea2fb277",
     "phase4_third_party_bingtuan_official_recovery": "d71105dbb62be53489cdedbaaa20c11e1c00d93a739bf4b9a1b7c9b6672f8634",
-    "phase4_main_record": "0b5983ba9c233128a86d543cb46cabd9350d067b6effcd2df3ea29b77b84fb16",
+    "phase4_main_record": "713ba3570ff77be27906b36fc4406400b843eb317c9d997f8efd9ea402e0efe9",
     "phase4_local_validation": "47e88957b0c4e08f2a42222c209f5bf9c4201977c2d10e04a89c270bce554e75",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "922a8937f2efad212b3d2cad2d91c42a6623e18124583e0cfed8d42e7c09e347",
-    "phase4_completion_audit": "c39d5b14b959045dac21bcc86c9cb1da1580a41b2787d4c303514cf02e311294",
-    "phase4_workspace_layout": "c48071cdade4af2c5184155220c418c248daee0c73df42577bdccdb8a3eae402"
+    "phase4_completion_audit": "2b3c5270841cf6cae47bc7ac647d10d005084b91d22601ec2cdfa5bb64a75075",
+    "phase4_workspace_layout": "83dcd4e46ae4dab7d9cde1e98c9766f9f944d079d7fe0dc0ce273e80416d1f66"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
