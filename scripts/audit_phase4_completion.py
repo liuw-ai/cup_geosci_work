@@ -55,6 +55,7 @@ def build_report() -> dict[str, Any]:
     validation = _read("docs/current/phase4-local-validation-2026-10-19.json")
     funnel = _read("docs/current/phase4-third-party-funnel-audit-2026-10-18.json")
     huatu_shanxi = _read("docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json")
+    huatu_hbdk = _read("docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
     workspace_layout = _read("docs/current/phase4-workspace-layout-audit-2026-10-19.json")
     database = _database_facts()
@@ -134,6 +135,20 @@ def build_report() -> dict[str, Any]:
                 "download_permission": huatu_shanxi.get("verification", {}).get("official_table_download_permission"),
                 "row_level_evidence_obtained": huatu_shanxi.get("verification", {}).get("row_level_evidence_obtained"),
                 "publication_status": huatu_shanxi.get("publication_decision", {}).get("status"),
+            },
+        },
+        {
+            "id": "third_party_hbdk_geoscience_recovery",
+            "status": "partial",
+            "evidence": [
+                "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json",
+            ],
+            "facts": {
+                "official_notice_url": huatu_hbdk.get("official_recovery", {}).get("official_notice_url"),
+                "official_table_url": huatu_hbdk.get("official_recovery", {}).get("official_table_url"),
+                "rows_observed": len(huatu_hbdk.get("rows", [])),
+                "original_attachment_sha256": huatu_hbdk.get("table_capture", {}).get("original_attachment_sha256"),
+                "publication_status": huatu_hbdk.get("publication_decision", {}).get("status"),
             },
         },
         {

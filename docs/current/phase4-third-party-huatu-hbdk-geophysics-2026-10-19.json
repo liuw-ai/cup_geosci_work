@@ -1,0 +1,93 @@
+{
+  "phase": "phase4",
+  "captured_at": "2026-10-19T07:23:31+08:00",
+  "source": {
+    "source_id": "huatu-discovery",
+    "trust_grade": "B",
+    "discovery_page_url": "https://he.huatu.com/2026/1015/1714501.html",
+    "discovery_title": "2026年河北省地球物理勘查有限公司第三批公开招聘2人公告",
+    "discovery_role": "第三方发现源；不作为学生端申请链接"
+  },
+  "official_recovery": {
+    "official_publisher": "河北地矿集团有限公司",
+    "employer": "河北省地球物理勘查有限公司",
+    "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/383.html",
+    "official_notice_title": "河北省地球物理勘查有限公司2026年第三批公开招聘公告",
+    "official_notice_date": "2026-10-15",
+    "official_table_url": "https://docs.qq.com/doc/DTFFuZmpRQ1FxR3JU",
+    "official_table_label": "河北省地球物理勘查有限公司2026年度第三次公开招聘岗位信息表",
+    "official_application_url": null,
+    "official_application_method": "官方公告要求下载报名材料并将岗位、个人信息及证件材料发送至 hbdqwl2020@163.com；未公布独立 HTTP 报名地址。",
+    "application_window_text": "自发布之日起7个工作日内",
+    "deadline_date": null,
+    "deadline_policy": "relative_working_days_unresolved",
+    "location": "河北省廊坊市经济技术开发区银杏路26号",
+    "official_fields_observed": [
+      "用人单位",
+      "招聘人数",
+      "报名方式",
+      "报名时间文本",
+      "官方岗位表链接",
+      "工作地点"
+    ]
+  },
+  "table_capture": {
+    "capture_mode": "read_only_browser_screenshot",
+    "captured_at": "2026-10-19T07:23:31+08:00",
+    "original_attachment_downloaded": false,
+    "original_attachment_sha256": null,
+    "screenshot_paths": [
+      "runtime/third-party-evidence/hbdk-hebei-2026-10-19/official-notice.png",
+      "runtime/third-party-evidence/hbdk-hebei-2026-10-19/official-position-table.png"
+    ],
+    "screenshot_sha256": {
+      "official-notice.png": "B4ABD8C5BE01F81D4BC0F5F0E482BB764F47AAB069A9480855B7F86EAB48F067",
+      "official-position-table.png": "E71FCCFAE697543B62845489AFD97507DF3D004BF0C419874425B1AF7978ED68"
+    },
+    "download_constraint": "原始官方岗位表在浏览器中可见，但浏览器下载权限未完成；未通过其他网络面或绕过方式取得附件。"
+  },
+  "rows": [
+    {
+      "row_number": 1,
+      "department": "物化探（水土修复）部",
+      "title": "技术员",
+      "position_category": "技术岗",
+      "headcount": 1,
+      "major_requirement": "矿产地质/地质工程勘查相关专业",
+      "degree_requirement": "本科及以上",
+      "location": "河北省廊坊市经济技术开发区银杏路26号",
+      "student_layer_assessment": "broad_geoscience_match",
+      "professional_basis": "官方岗位表直接列出矿产地质、地质工程勘查相关专业；不等同四个核心专业，进入专业范围宽泛待核验层。"
+    },
+    {
+      "row_number": 2,
+      "department": "物化探（水土修复）部",
+      "title": "部长副职",
+      "position_category": "管理岗",
+      "headcount": 1,
+      "major_requirement": "矿产地质/地质工程勘查相关专业",
+      "degree_requirement": "本科及以上",
+      "location": "河北省廊坊市经济技术开发区银杏路26号",
+      "student_layer_assessment": "broad_geoscience_match",
+      "professional_basis": "官方岗位表直接列出矿产地质、地质工程勘查相关专业；不等同四个核心专业，进入专业范围宽泛待核验层。"
+    }
+  ],
+  "publication_decision": {
+    "status": "candidate_only",
+    "candidate_leads_created": 0,
+    "formal_jobs_created": 0,
+    "student_visible": false,
+    "student_counted": false,
+    "reasons": [
+      "官方原始岗位表附件未取得 SHA-256，仅保存了浏览器可见截图证据",
+      "官方报名期限为相对工作日文本，尚未按经过确认的工作日历解析为确定日期",
+      "官方提供邮箱报名而非 HTTP 申请链接，需沿用现有无 HTTP 报名方式的发布门禁判断"
+    ]
+  },
+  "required_next_review": [
+    "在允许的浏览器权限或由运营方提供原始官方文件后，保存原始附件并计算 SHA-256",
+    "确认7个工作日截止日期的计算口径并保留原文",
+    "逐行复核岗位职责、专业兼容性和学生端标签",
+    "确认学生端显示官方公告、岗位表链接和邮箱报名说明，不显示华图链接为申请入口"
+  ]
+}
