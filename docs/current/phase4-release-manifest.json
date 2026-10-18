@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T10:55:20Z",
+  "generated_at": "2026-10-18T11:14:34Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "e37c80ca7e80cadcbf55b3bf53a61d33c4b9df36",
+  "git_sha": "378d870a3f639a599f799655bf0ab5fd33a2b016",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -21,12 +21,12 @@
     "phase4_three_oil_unit_entry_matrix": "f3c74cf8149291be9a286e6981cabc6e0cad9feac1c8a435b2b5d1e502129777",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "daac64b81525f2d954cf33f4c4042812b35c9b6d0fe46b48fc60b823d659d06d",
+    "phase4_current_state_audit": "c0a68dac718435facfb5e0ae178f5d9af5100c1f36365911e5d86424d0afa8af",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_blocked_batches": "133f06dbc69109b53812d6366d9acd18bc29c1dde3de7697261f64262304f2d8",
-    "phase4_main_record": "0f42b8b19f32a548f80b83a8d0c8b690c65de4c6d9c4e7e486c0e380da4379ed",
-    "phase4_local_validation": "c4b87379877ef06258a28efa92ed18ed7d7059b468b23cc4e2d3d94cf486a0bc"
+    "phase4_main_record": "8ec5b332697e73dc4e3d48fc8ac4df52c8297525de09a6e0679eb14934248348",
+    "phase4_local_validation": "400463ff433c0afdb36bece1bc323938272d0ecbae9b583bb6f9e2b77f76c68a"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -67,13 +67,13 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-18T18:35:00+08:00",
+    "validated_at": "2026-10-18T19:12:18+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "ddae96f",
+    "git_sha_before_metadata_commit": "d99d62e",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1064,
+      "passed": 1065,
       "skipped": 4,
       "failed": 0,
       "warnings": 1,
@@ -109,6 +109,8 @@
         5432
       ],
       "formal_database_unchanged": false,
+      "formal_database_change_note": "The approved local HRINM recovery created job 5432; subsequent tests were read-only and preserved the SHA-256 recorded above.",
+      "robots_gate_targeted_tests": "13 passed (tests/test_third_party_tables.py, tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py)",
       "robots_or_permission_blocked_followups": 1
     },
     "local_web_read_only": {
