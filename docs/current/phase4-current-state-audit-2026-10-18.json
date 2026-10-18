@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T18:23:08Z",
+  "generated_at": "2026-10-18T18:35:39Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "ad3d78196d8a8d62bc5ac0e852665526ae44b3af",
+  "git_sha": "124ee5f5b4c59c5da9d0ef672ad88457065978b0",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -88,7 +88,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "a8731edec3fc915cdeebcf6416c8717d7f38eda542801faec0fbca2fff669c08"
+        "sha256": "c1811c6c94b32b7714c639ccdbac9a0c70c68416b116c31ecfbbe301e0d9e103"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -167,6 +167,10 @@
       "path": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
       "sha256": "1ad776f23b17f23d3774921107a34e9af3cd754cedd6bcf1cace3044dd1ca6f6"
     },
+    "phase4_third_party_lead_recheck": {
+      "path": "docs/current/phase4-third-party-lead-recheck-2026-10-19.json",
+      "sha256": "ac9070e0f5d84ca2190b16df50fb232ab3c121a7b00d7106c0fb3e7f38cfa432"
+    },
     "phase4_cnpc_entry_recheck": {
       "path": "docs/current/phase4-cnpc-entry-recheck-2026-10-19.json",
       "sha256": "217753c1c99e2663308f27ce7a2cc9cc1606a63b73d6017cddf813f261bc0be1"
@@ -181,7 +185,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "f818cbc7fef5a14478d9140c4362f9e7d73cef2fe4bb8b73bf9bfbf97601e98b"
+      "sha256": "39deb53c493dc559e3f7122705c86345d5e6d5638e86008fb9e9f59d8fd4e918"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -189,7 +193,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "a8731edec3fc915cdeebcf6416c8717d7f38eda542801faec0fbca2fff669c08"
+      "sha256": "c1811c6c94b32b7714c639ccdbac9a0c70c68416b116c31ecfbbe301e0d9e103"
     }
   },
   "code_inventory": [
@@ -655,8 +659,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 359,
-      "sha256": "5545cb29fc4b4212b956ba702b622c4071150c5f76c4d0b01dc6134f71934bba"
+      "line_count": 365,
+      "sha256": "6b91b2a6b3034e4e7273e9335d1911894799cf112bf0da126991909742aaf1a3"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -670,8 +674,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 324,
-      "sha256": "0288c7aef2718152735828ff2fe880fa083a989aa16567ac6f5521e346abb88b"
+      "line_count": 327,
+      "sha256": "d69f8fb5afdcfa819cf8e48de8ba8fb8e407c3d916832a1e828d961f017992f8"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -1345,6 +1349,7 @@
     "formal_third_party_jobs_published": true,
     "notes": [
       "One C-level discovery lead was recovered to an official employer notice and published as job 5432; four B-level Huatu discovery rows were recovered to the official CGS attachment and published as jobs 5433-5436; no server deployment was performed.",
+      "The remaining C-level lead (candidate 1) was rechecked on 2026-10-19; no job-specific official evidence or application URL was found, so it remains private and unresolved.",
       "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
       "Historical snapshots remain archived and are not overwritten by current facts."
     ]
