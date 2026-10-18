@@ -1,34 +1,34 @@
 {
   "phase": "phase4",
-  "checked_at": "2026-10-19T00:00:00+08:00",
+  "checked_at": "2026-10-19T06:12:00+08:00",
   "environment": "local_read_only",
   "policy": "Access failure is a source health fact, not evidence that the source has no jobs. No robots, TLS, browser permission, login, or captcha restriction was bypassed.",
   "sources": [
     {
       "source_id": "offcn-discovery",
       "status": "access_limited",
-      "observations": ["command-line TLS handshake failed", "browser navigation blocked by saved site permission"],
+      "observations": ["robots probe failed with TLS handshake error", "page was not fetched after robots failure"],
       "downloaded": false,
       "candidate_rows_created": 0
     },
     {
       "source_id": "fenbi-discovery",
       "status": "access_limited",
-      "observations": ["command-line TLS handshake failed"],
+      "observations": ["robots probe failed with TLS handshake error", "page was not fetched after robots failure"],
       "downloaded": false,
       "candidate_rows_created": 0
     },
     {
       "source_id": "gongkaoleida-discovery",
       "status": "access_limited",
-      "observations": ["command-line TLS handshake failed"],
+      "observations": ["robots probe failed with TLS handshake error", "page was not fetched after robots failure"],
       "downloaded": false,
       "candidate_rows_created": 0
     },
     {
       "source_id": "gongkaozixun-discovery",
       "status": "access_limited",
-      "observations": ["command-line TLS handshake failed", "browser navigation previously returned DNS resolution failure"],
+      "observations": ["robots probe failed with TLS handshake error", "page was not fetched after robots failure"],
       "downloaded": false,
       "candidate_rows_created": 0
     }
