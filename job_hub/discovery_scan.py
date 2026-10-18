@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import html
 import re
+import warnings
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Iterable
@@ -19,7 +20,7 @@ from xml.etree import ElementTree
 from zoneinfo import ZoneInfo
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 
 from job_hub.config import Settings
 from job_hub.discovery import (
@@ -590,7 +591,12 @@ def extract_discovery_evidence(
     official_hosts: set[str] | None = None,
 ) -> dict[str, Any]:
     """Extract bounded, non-authoritative recovery evidence from an article."""
-    soup = BeautifulSoup(str(body)[:2_000_000], "html.parser")
+    # Discovery pages may be a plain-text URL list rather than HTML.  Parse
+    # that input as markup intentionally and keep BeautifulSoup's locator
+    # heuristic from turning a valid scan into a noisy test warning.
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
+        soup = BeautifulSoup(str(body)[:2_000_000], "html.parser")
     title = re.sub(r"\s+", " ", soup.title.get_text(" ", strip=True)) if soup.title else ""
     attribution = ""
     for text_node in soup.find_all(string=re.compile("文章来源")):
