@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T21:26:56Z",
+  "generated_at": "2026-10-18T21:31:21Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "7ff755a971e2168a01b6b7cb77c43a9b026ae072",
+  "git_sha": "ec5ed26e80f5ffeb70ab0e8b7c08d36172b59fe7",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -49,7 +49,8 @@
     "phase4_main_record": "f5e203c114113576eb74ec1adb1884b93c8a4be2ab1d5265991077d794d3d41b",
     "phase4_local_validation": "88fb57a0cb5d548be52cf335e87c20c21bb69050ed299c30bd2e2dfd7746ba55",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
-    "phase4_three_oil_homepage_probe": "94847570b30c8ee0caa57e1dcf49874cf5968d6a5e26ca164e0b710a03d6522a"
+    "phase4_three_oil_homepage_probe": "94847570b30c8ee0caa57e1dcf49874cf5968d6a5e26ca164e0b710a03d6522a",
+    "phase4_completion_audit": "c30c24a117399b814f6f4e1b70a8cdfd398e5e5bf3f3d06edb4dbef3d2a447d5"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -262,6 +263,10 @@
         "local_phase4_validation_not_approved_for_server"
       ]
     }
+  },
+  "completion_audit": {
+    "path": "docs/current/phase4-completion-audit-2026-10-19.json",
+    "status": "not_complete"
   },
   "third_party": {
     "registered_sources": 12,

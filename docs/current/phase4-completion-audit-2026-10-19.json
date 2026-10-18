@@ -1,0 +1,157 @@
+{
+  "generated_at": "2026-10-18T21:31:19Z",
+  "phase": "phase4",
+  "status": "not_complete",
+  "database": {
+    "integrity_check": "ok",
+    "job_count": 3952,
+    "withdrawal_reasons": {
+      "deadline_passed": 51
+    },
+    "phase3_withdrawal_audits": 3947,
+    "candidate_leads": 6,
+    "published_candidate_leads": 5
+  },
+  "student_target": {
+    "target": 500,
+    "actual": 629,
+    "status": "met",
+    "basis": "data/effective_job_target_plan.json",
+    "note": "This is the overall student-visible target; it is separate from third-party expansion readiness."
+  },
+  "requirements": [
+    {
+      "id": "phase3_lifecycle_and_withdrawal_policy",
+      "status": "pass",
+      "evidence": [
+        "docs/current/PHASE4-2026-10-17.md",
+        "job_hub/db.py",
+        "job_hub/pipeline.py"
+      ],
+      "facts": {
+        "withdrawal_reasons": {
+          "deadline_passed": 51
+        },
+        "allowed_reasons": [
+          "major_mismatch",
+          "deadline_passed",
+          "official_cancelled",
+          "official_closed",
+          "official_replaced"
+        ]
+      }
+    },
+    {
+      "id": "phase3_historical_withdrawal_audit",
+      "status": "pass",
+      "evidence": [
+        "docs/current/phase4-current-state-audit-2026-10-18.json"
+      ],
+      "facts": {
+        "audited_rows": 3947
+      }
+    },
+    {
+      "id": "third_party_table_to_official_recovery_trial",
+      "status": "pass",
+      "evidence": [
+        "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
+        "docs/current/phase4-third-party-cgs-2026-10-18.json"
+      ],
+      "facts": {
+        "candidate_leads": 6,
+        "published_leads": 5,
+        "failed_leads": 0
+      }
+    },
+    {
+      "id": "third_party_batch_expansion",
+      "status": "blocked",
+      "evidence": [
+        "docs/current/phase4-third-party-access-recheck-2026-10-19.json",
+        "docs/current/phase4-third-party-blocked-batches-2026-10-18.json"
+      ],
+      "facts": {
+        "formal_jobs": 5,
+        "blocker": "remaining sources or table assets are inaccessible under current TLS/robots/browser policy"
+      }
+    },
+    {
+      "id": "three_oil_catalog_and_entry_evidence",
+      "status": "partial",
+      "evidence": [
+        "data/three_oil_organization_catalog.json",
+        "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json"
+      ],
+      "facts": {
+        "formal_catalog_units": 64,
+        "unit_specific_entry_evidence_complete": false,
+        "unit_specific_entry_status_counts": {
+          "group_portal_verified": 2,
+          "group_portal_unit_display_observed": 23,
+          "group_portal_registered": 34,
+          "official_site_checked_no_unit_entry_found": 1,
+          "unit_specific_entry_verified": 3,
+          "group_portal_not_revalidated": 1
+        }
+      }
+    },
+    {
+      "id": "isolated_local_regression",
+      "status": "pass",
+      "evidence": [
+        "docs/current/phase4-local-validation-2026-10-19.json"
+      ],
+      "facts": {
+        "passed": 1079,
+        "skipped": 4,
+        "failed": 0,
+        "formal_database_stable": true
+      }
+    },
+    {
+      "id": "student_site_acceptance",
+      "status": "pass",
+      "evidence": [
+        "docs/current/phase4-local-web-live-validation-2026-10-19.json"
+      ],
+      "facts": {
+        "healthz": 200,
+        "home": 200,
+        "layer_api_statuses": {
+          "exact_match": 200,
+          "broad_geoscience_match": 200,
+          "incomplete_but_basic_match": 200,
+          "source_unavailable": 200
+        },
+        "database_mode": "temporary_copy_of_runtime_database"
+      }
+    },
+    {
+      "id": "manifest_and_deployment_boundary",
+      "status": "pass",
+      "evidence": [
+        "docs/current/phase4-release-manifest.json"
+      ],
+      "facts": {
+        "manifest_boundary_fields_valid": true,
+        "production_deployment": "not_performed",
+        "automation_status": "paused",
+        "release_blockers": [
+          "third_party_batch_expansion_incomplete",
+          "three_oil_external_identity_evidence_pending",
+          "three_oil_unit_entry_evidence_incomplete",
+          "local_phase4_validation_not_approved_for_server"
+        ]
+      }
+    }
+  ],
+  "release_blockers": [
+    "local_phase4_validation_not_approved_for_server",
+    "third_party_batch_expansion",
+    "third_party_batch_expansion_incomplete",
+    "three_oil_external_identity_evidence_pending",
+    "three_oil_unit_entry_evidence_incomplete"
+  ],
+  "policy": "A pass means the scoped evidence exists; blocked or partial items remain release blockers and cannot be inferred complete from tests alone."
+}
