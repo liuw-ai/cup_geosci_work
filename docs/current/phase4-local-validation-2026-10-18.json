@@ -3,8 +3,8 @@
   "validated_at": "2026-10-19T00:52:12+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "pending-source-commit",
-  "git_sha_at_validation": "pending-source-commit",
+  "git_sha_before_metadata_commit": "b35480da772a7365b4adc5e29dafefb023b07422",
+  "git_sha_at_validation": "b35480da772a7365b4adc5e29dafefb023b07422",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1074,

@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T16:29:17Z",
+  "generated_at": "2026-10-18T16:56:17Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "f0c69b8600a47820b56ff6bddee6a8da0ef44888",
+  "git_sha": "b35480da772a7365b4adc5e29dafefb023b07422",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -21,41 +21,42 @@
     "phase4_three_oil_unit_entry_matrix": "91121b185a001e3cea7d3a52388022c70d38a0a0369984747ed476a40b25eb71",
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "c13775894af5bfb9d3b8db512e581d7c2282c56c24f02ee80542ac6623c87f62",
-    "phase4_document_consistency": "c13775894af5bfb9d3b8db512e581d7c2282c56c24f02ee80542ac6623c87f62",
+    "phase4_current_state_audit": "1d49a1f5c8982bb58d6da9393ab75aacf01d36b48f01910b3c93b2e2f81243e3",
+    "phase4_document_consistency": "1d49a1f5c8982bb58d6da9393ab75aacf01d36b48f01910b3c93b2e2f81243e3",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
     "phase4_third_party_blocked_batches": "74da7ade28ae3e7310f78796f80dc2cc2ee27a7d4b13fcb65601667f667ed31c",
     "phase4_third_party_access_recheck": "2084cc2ff11ac68267ebe74b32e1a2a38c8d0c409343ec51c7a5cb55d54da7be",
+    "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
     "phase4_third_party_funnel": "7481c6cdd6939996069831b70e989ae4d779751c98b61fd60bb2e863a0cb0c9e",
-    "phase4_local_web_recheck": "8f019cc8442713d3440847fc3ae37ce2efcde5e2178d2699b3808af26351bd23",
-    "phase4_main_record": "1dd245fa6724e864caec893fde317d64f98094609ec321f80598905a866c5fe3",
-    "phase4_local_validation": "56aba80940fe6efcb5cebdff38a8c22603d84aadf297d7dae2cfac4e7a85c75c"
+    "phase4_local_web_recheck": "8a2f67624ca29f264ef33a9cf3b46cd0ba1cc9b791221109f1c4d8f1c084df25",
+    "phase4_main_record": "d5d09e2fac893c25345e4820e02bc36268506d2db2c3b71f2899b9a0e009c86c",
+    "phase4_local_validation": "fb603a1a4094b39c68975a2063580cf8356c0493f9b7834431157fe7b7c62848"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
+    "sha256": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
     "integrity_check": "ok",
     "job_count": 3952,
     "status_counts": {
-      "expired": 106,
-      "open": 3750,
+      "expired": 264,
+      "open": 3592,
       "superseded": 45,
       "withdrawn": 51
     },
     "publication_layer_counts": {
       "broad_geoscience_match": 5,
-      "exact_match": 211,
-      "incomplete_but_basic_match": 615,
+      "exact_match": 202,
+      "incomplete_but_basic_match": 624,
       "not_public": 2955,
       "source_unavailable": 166
     },
     "student_read_as_of_date": "2026-10-19",
     "student_visible_layer_counts": {
       "broad_geoscience_match": 5,
-      "exact_match": 146,
-      "incomplete_but_basic_match": 367,
+      "exact_match": 140,
+      "incomplete_but_basic_match": 373,
       "not_public": 0,
       "source_unavailable": 111
     },
@@ -73,6 +74,10 @@
     "pre_conversion_audit_backup": {
       "path": "backups/job_hub-pre-phase4-conversion-audit-20261018.sqlite3",
       "sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
+    },
+    "pre_deadline_location_repair_backup": {
+      "path": "backups/job_hub-pre-phase4-deadline-location-repair-20261019.sqlite3",
+      "sha256": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a"
     }
   },
   "target_metrics": {
@@ -92,14 +97,14 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-19T00:16:54+08:00",
+    "validated_at": "2026-10-19T00:52:12+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "af8eef7bbfb25f7d2b4e29bb7bf7f884215a8e94",
-    "git_sha_at_validation": "af8eef7bbfb25f7d2b4e29bb7bf7f884215a8e94",
+    "git_sha_before_metadata_commit": "b35480da772a7365b4adc5e29dafefb023b07422",
+    "git_sha_at_validation": "b35480da772a7365b4adc5e29dafefb023b07422",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1073,
+      "passed": 1074,
       "skipped": 4,
       "failed": 0,
       "warnings": 0,
@@ -112,8 +117,8 @@
     },
     "database": {
       "path": "runtime/job_hub.sqlite3",
-      "sha256_before_tests": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
-      "sha256_after_tests": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
+      "sha256_before_tests": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
+      "sha256_after_tests": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
       "integrity_check": "ok",
       "jobs": 3952,
       "candidate_leads": 6,
@@ -121,9 +126,9 @@
       "student_read_as_of_date": "2026-10-19",
       "student_visible_total": 629,
       "student_visible_layer_counts": {
-        "exact_match": 146,
+        "exact_match": 140,
         "broad_geoscience_match": 5,
-        "incomplete_but_basic_match": 367,
+        "incomplete_but_basic_match": 373,
         "source_unavailable": 111
       }
     },
@@ -191,7 +196,9 @@
         "third_party_discovery_url_is_student_visible": false
       },
       "broad_layer_total": 5,
-      "homepage_job_table_link_label_present": true,
+      "homepage_job_table_link_label_present": false,
+      "detail_job_id": 5433,
+      "detail_job_table_link_label_present": true,
       "homepage_third_party_discovery_domain_exposed": false,
       "server_deployment": false
     },
