@@ -26,6 +26,18 @@ from job_hub.phase3_policy import PUBLICATION_LAYERS
 OUTPUT = ROOT / "docs" / "current" / "phase4-current-state-audit-2026-10-18.json"
 DATABASE = ROOT / "runtime" / "job_hub.sqlite3"
 
+# These are generated audit artifacts. They are deliberately excluded from
+# the input-tree status so the two-step source/config commit plus metadata
+# commit records the state of actual release inputs, not its own output.
+GENERATED_METADATA_PATHS = (
+    ":!docs/current/phase4-current-state-audit-2026-10-18.json",
+    ":!docs/current/phase4-release-manifest.json",
+    ":!docs/current/phase4-local-validation-2026-10-19.json",
+    ":!docs/current/phase4-local-web-recheck-2026-10-19.json",
+    ":!docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
+    ":!docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
+)
+
 
 def sha256(path: Path) -> str | None:
     if not path.is_file():
@@ -54,10 +66,7 @@ def input_tree_status() -> str:
                 "--porcelain",
                 "--",
                 ".",
-                ":!docs/current/phase4-current-state-audit-2026-10-18.json",
-                ":!docs/current/phase4-release-manifest.json",
-                ":!docs/current/phase4-local-validation-2026-10-19.json",
-                ":!docs/current/phase4-local-web-recheck-2026-10-18.json",
+                *GENERATED_METADATA_PATHS,
             ],
             cwd=ROOT,
             text=True,
@@ -232,6 +241,7 @@ def main() -> None:
     hrinm_trial = ROOT / "docs" / "current" / "phase4-third-party-hrinm-2026-10-18.json"
     cgs_trial = ROOT / "docs" / "current" / "phase4-third-party-cgs-2026-10-18.json"
     blocked_batches = ROOT / "docs" / "current" / "phase4-third-party-blocked-batches-2026-10-18.json"
+    nhri_official_page = ROOT / "docs" / "current" / "phase4-third-party-nhri-official-page-2026-10-19.json"
     access_recheck = ROOT / "docs" / "current" / "phase4-third-party-access-recheck-2026-10-19.json"
     local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
     third_party_funnel = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
@@ -298,6 +308,10 @@ def main() -> None:
             "phase4_third_party_blocked_batches": {
                 "path": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
                 "sha256": sha256(blocked_batches),
+            },
+            "phase4_third_party_nhri_official_page": {
+                "path": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
+                "sha256": sha256(nhri_official_page),
             },
             "phase4_third_party_access_recheck": {
                 "path": "docs/current/phase4-third-party-access-recheck-2026-10-19.json",

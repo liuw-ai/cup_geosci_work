@@ -1,0 +1,40 @@
+{
+  "phase": "phase4",
+  "captured_at": "2026-10-19T02:10:24+08:00",
+  "discovery_source_id": "huatu-discovery",
+  "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875231.html",
+  "official_source": {
+    "employer": "南京水利科学研究院",
+    "homepage_url": "https://www.nhri.cn/",
+    "notice_url": "https://www.nhri.cn/tzgg/zpxx/art/2026/art_01a4e42a69594ee88fac503a5cce8df5.html",
+    "notice_title": "南京水利科学研究院2027年公开招聘事业编制工作人员公告",
+    "published_date": "2026-10-16",
+    "position_count_in_notice": 50,
+    "deadline_date": "2026-11-20",
+    "location": "南京市广州路223号南京水利科学研究院人事处",
+    "application_method": "将报名表和材料按公告要求发送至 rsc@nhri.cn；公告未提供独立 HTTP 报名 URL。",
+    "official_table_url": "https://www.nhri.cn/api-gateway/jpaas-web-server/front/document/download?fileUrl=YW5UzzlvCwcM%2FNHHX%2FtT6Du%2BYe4yVKZJwpy7%2FX41ZtH3jzrjBAGNZ7eb4VNI%2B6APA58hw%2FF1WFUBMght3OIgkp7GAzci%2F3n2KEszI2FJL6bAf3NVTU8toxcwhvxoQio5k9%2BdtCRdf5Grdlw25haK7zN0%2BkqF4%2F7DxmTiQZ6sH7k%3D&fileName=%E9%99%84%E4%BB%B61%EF%BC%9A%E5%8D%97%E4%BA%AC%E6%B0%B4%E5%88%A9%E7%A7%91%E5%AD%A6%E7%A0%94%E7%A9%B6%E9%99%A2%E5%8F%AC%E5%BC%80%E6%8B%9B%E8%81%98%E4%BA%8B%E4%B8%9A%E7%BC%96%E5%88%B6%E5%B7%A5%E4%BD%9C%E4%BA%BA%E5%91%98%E5%B2%97%E4%BD%8D%E8%A1%A8.pdf"
+  },
+  "verification_mode": "read_only_browser_dom",
+  "attachment_status": {
+    "third_party_attachment_url": "https://u3.huatu.com/uploads/soft/261016/83c02233b7dae819b7449c9c167b9e5471637.pdf",
+    "robots_url": "https://u3.huatu.com/robots.txt",
+    "robots_policy": "User-agent: *; Disallow: /",
+    "download_attempted": false,
+    "browser_download_permission": "denied",
+    "status": "blocked_by_robots_and_browser_download_permission",
+    "reason": "逐岗位专业、学历和岗位编号位于附件；第三方附件域名禁止抓取，且浏览器下载权限被拒绝。不能使用 TLS 绕过、验证码、登录或替代传输。"
+  },
+  "publication_decision": {
+    "candidate_leads_created": 0,
+    "formal_jobs_created": 0,
+    "student_visible": false,
+    "reason": "公告级事实已核验，但未取得岗位表行级证据；50 是公告汇总人数，不是可直接入库的 50 条岗位。"
+  },
+  "student_link_policy": {
+    "official_notice_url_retained": true,
+    "official_table_url_is_evidence_only_until_rows_verified": true,
+    "third_party_links_student_visible": false,
+    "official_application_url": null
+  }
+}

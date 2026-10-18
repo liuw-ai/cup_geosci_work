@@ -21,6 +21,17 @@ from job_hub.phase3_policy import PUBLICATION_LAYERS
 OUTPUT = ROOT / "docs" / "current" / "phase4-release-manifest.json"
 LOCAL_VALIDATION = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-19.json"
 
+# Keep the dirty flag about source/config/database inputs. These reports are
+# generated after the source commit and are committed as metadata afterward.
+GENERATED_METADATA_PATHS = (
+    ":!docs/current/phase4-current-state-audit-2026-10-18.json",
+    ":!docs/current/phase4-release-manifest.json",
+    ":!docs/current/phase4-local-validation-2026-10-19.json",
+    ":!docs/current/phase4-local-web-recheck-2026-10-19.json",
+    ":!docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
+    ":!docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
+)
+
 
 def sha256(path: Path) -> str | None:
     if not path.is_file():
@@ -52,10 +63,7 @@ def dirty() -> bool:
                 "--porcelain",
                 "--",
                 ".",
-                ":!docs/current/phase4-current-state-audit-2026-10-18.json",
-                ":!docs/current/phase4-release-manifest.json",
-                ":!docs/current/phase4-local-validation-2026-10-19.json",
-                ":!docs/current/phase4-local-web-recheck-2026-10-18.json",
+                *GENERATED_METADATA_PATHS,
             ],
             cwd=ROOT,
             text=True,
@@ -169,6 +177,7 @@ def main() -> None:
     hrinm_trial = ROOT / "docs" / "current" / "phase4-third-party-hrinm-2026-10-18.json"
     cgs_trial = ROOT / "docs" / "current" / "phase4-third-party-cgs-2026-10-18.json"
     blocked_batches = ROOT / "docs" / "current" / "phase4-third-party-blocked-batches-2026-10-18.json"
+    nhri_official_page = ROOT / "docs" / "current" / "phase4-third-party-nhri-official-page-2026-10-19.json"
     access_recheck = ROOT / "docs" / "current" / "phase4-third-party-access-recheck-2026-10-19.json"
     local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
     third_party_funnel = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
@@ -230,6 +239,7 @@ def main() -> None:
             "phase4_third_party_hrinm": sha256(hrinm_trial),
             "phase4_third_party_cgs": sha256(cgs_trial),
             "phase4_third_party_blocked_batches": sha256(blocked_batches),
+            "phase4_third_party_nhri_official_page": sha256(nhri_official_page),
             "phase4_third_party_access_recheck": sha256(access_recheck),
             "phase4_local_repair": sha256(local_repair),
             "phase4_third_party_funnel": sha256(third_party_funnel),
@@ -269,6 +279,7 @@ def main() -> None:
             "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
             "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
             "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
+            "nhri_official_page_evidence": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
             "funnel_audit": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],

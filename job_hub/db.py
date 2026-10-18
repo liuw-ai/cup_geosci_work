@@ -3677,7 +3677,6 @@ class Database:
                 FROM jobs
                 JOIN sources AS source_meta
                   ON source_meta.id = jobs.source_id
-                 AND (source_meta.enabled = 1 OR jobs.publication_layer = 'source_unavailable')
                 WHERE """
             + where
             + "\n            )\n",

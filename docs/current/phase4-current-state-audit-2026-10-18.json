@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T18:00:13Z",
+  "generated_at": "2026-10-18T18:11:27Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "2985b9bc1338e012b385b6d1647c235fd32d0922",
-  "git_status_porcelain": "",
+  "git_sha": "accf099d9bc9d241f3b1f32d96994ff4a81b26fa",
+  "git_status_porcelain": "M docs/current/PHASE4-2026-10-17.md\n M job_hub/db.py\n M scripts/audit_phase4_current_state.py\n M scripts/build_phase4_manifest.py\n M tests/test_source_freshness.py\n?? docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
@@ -88,7 +88,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "485c99c6d3bdae7913348cb68b977637e59e81f016b0790d3bd6aa6ca5b18218"
+        "sha256": "c89550de8360f4e5011d98785a40b802db302681f969c8d9db45358151f23f4d"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -137,7 +137,7 @@
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-      "sha256": "e071ff9b8e8ef5a88febb80153cfae8de53b187046f629cc8c094860e0047cc4"
+      "sha256": "cafcd4845e0fe82470ba8d0dda9cb9b7905ef7f544ed5473555043f580228437"
     },
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
@@ -163,6 +163,10 @@
       "path": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
       "sha256": "74da7ade28ae3e7310f78796f80dc2cc2ee27a7d4b13fcb65601667f667ed31c"
     },
+    "phase4_third_party_nhri_official_page": {
+      "path": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
+      "sha256": "1ad776f23b17f23d3774921107a34e9af3cd754cedd6bcf1cace3044dd1ca6f6"
+    },
     "phase4_third_party_access_recheck": {
       "path": "docs/current/phase4-third-party-access-recheck-2026-10-19.json",
       "sha256": "2084cc2ff11ac68267ebe74b32e1a2a38c8d0c409343ec51c7a5cb55d54da7be"
@@ -173,7 +177,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "7481c6cdd6939996069831b70e989ae4d779751c98b61fd60bb2e863a0cb0c9e"
+      "sha256": "a606deb8e47fb1fc7dde15edf1aa03de7d2e678ffb624f840c2c8cea57d12577"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -181,7 +185,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "485c99c6d3bdae7913348cb68b977637e59e81f016b0790d3bd6aa6ca5b18218"
+      "sha256": "c89550de8360f4e5011d98785a40b802db302681f969c8d9db45358151f23f4d"
     }
   },
   "code_inventory": [
@@ -322,8 +326,8 @@
     },
     {
       "path": "job_hub/db.py",
-      "line_count": 5530,
-      "sha256": "90fbaa768e41d7e05a0f57c69ded0448ba704b9f1fafb77aea3b808071bb64fc"
+      "line_count": 5529,
+      "sha256": "5dacb3b3adafe4b70ecb1823d0b6968d74fd4dbfc3906fc3fcd222dd4045f640"
     },
     {
       "path": "job_hub/discovery.py",
@@ -647,8 +651,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 340,
-      "sha256": "070207436e09e6f600e9f0fa44135c6700b6f59df48d51e892c72fb9e0392d1b"
+      "line_count": 354,
+      "sha256": "ee6b75d4db4d7b8e433755b81615fb504ee6de5ab78a6596657747784a7c72ed"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -662,8 +666,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 310,
-      "sha256": "10cc2aa66d94f7470b0ed8af1317a340d30cb096983f93204efab1f5e78521bb"
+      "line_count": 321,
+      "sha256": "9864e286263e283fb3cfb57131342e79c3bf40ec24ad0dad4a9046c4fff12f8d"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -1242,8 +1246,8 @@
     },
     {
       "path": "tests/test_source_freshness.py",
-      "line_count": 615,
-      "sha256": "201b55eebf58f097440a9865cda69a507e529a6c09e7abfdff005ff878018514"
+      "line_count": 616,
+      "sha256": "21ce5a78273d4a480e2a75158eb9850966f534b82838ebe8d8ff3091b732340b"
     },
     {
       "path": "tests/test_source_funnel.py",

@@ -564,7 +564,7 @@ def test_sources_without_freshness_contract_are_not_withdrawn(tmp_path) -> None:
     assert JobPipeline(settings, database).expire_stale_source_jobs() == {}
 
 
-def test_disabled_non_manual_source_rows_are_withdrawn(tmp_path) -> None:
+def test_disabled_non_manual_source_rows_remain_visible_without_withdrawal(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
     database.initialize()
@@ -613,3 +613,4 @@ def test_disabled_non_manual_source_rows_are_withdrawn(tmp_path) -> None:
     public_jobs, public_total = database.list_jobs(page_size=None)
     assert public_total == 1
     assert public_jobs[0]["publication_layer"] == "source_unavailable"
+    assert public_jobs[0]["status"] == "open"
