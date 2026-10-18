@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T11:57:44Z",
+  "generated_at": "2026-10-18T12:05:52Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "385a5a7e4df45f6352ea9287a62259a4ff485249",
+  "git_sha": "df3b21dc8a38afc2050c252d20f3c2e63a2ac399",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -21,13 +21,13 @@
     "phase4_three_oil_unit_entry_matrix": "f3c74cf8149291be9a286e6981cabc6e0cad9feac1c8a435b2b5d1e502129777",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "befa0b76d7f3199cc2f29a80f1a1ec5906e4242e754409d8eb7983cf8ea6ea21",
-    "phase4_document_consistency": "befa0b76d7f3199cc2f29a80f1a1ec5906e4242e754409d8eb7983cf8ea6ea21",
+    "phase4_current_state_audit": "4a9e73a308f4a07ede7269ace69c847659e86444fdcaea8afdb3801e7746e2ee",
+    "phase4_document_consistency": "4a9e73a308f4a07ede7269ace69c847659e86444fdcaea8afdb3801e7746e2ee",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_blocked_batches": "74da7ade28ae3e7310f78796f80dc2cc2ee27a7d4b13fcb65601667f667ed31c",
     "phase4_main_record": "a7fade79caa33731c576d18304fbe4b3b59580873fba3a33f3eca2ba24e1ef06",
-    "phase4_local_validation": "681381b887efd662f264d7d1a76d35c1c791c56adedba5b3d73f42a93e1f2cf5"
+    "phase4_local_validation": "d752b9c5aa8d9cd5260a86e1ce2beaaadbdb227199496f69a02aca8b00702026"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -72,10 +72,11 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-18T19:38:04+08:00",
+    "validated_at": "2026-10-18T20:04:37+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "154b983e29ad344b264707603a4bf64f228bd882",
+    "git_sha_before_metadata_commit": "d7050146b2d9df5b3fb8d128dca6fc4efc0ef174",
+    "git_sha_at_validation": "d7050146b2d9df5b3fb8d128dca6fc4efc0ef174",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1066,
@@ -126,7 +127,7 @@
       "robots_or_permission_blocked_followups": 1
     },
     "local_web_read_only": {
-      "base_url": "http://127.0.0.1:8094",
+      "base_url": "http://127.0.0.1:8095",
       "database_mode": "temporary_copy_of_runtime_database",
       "healthz_status": 200,
       "home_status": 200,
