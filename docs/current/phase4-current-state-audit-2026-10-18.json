@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-10-18T12:05:49Z",
+  "generated_at": "2026-10-18T12:51:58Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "df3b21dc8a38afc2050c252d20f3c2e63a2ac399",
-  "git_status_porcelain": "",
+  "git_sha": "d0f1831f80572eb510a96a3aa51abfcc7fe6fb5a",
+  "git_status_porcelain": "M data/sources.json\n M data/third_party_table_adapters.json\n M docs/current/PHASE4-2026-10-17.md\n M docs/current/README.md\n M docs/current/phase4-local-validation-2026-10-18.json\n M scripts/audit_phase4_current_state.py\n M scripts/build_phase4_manifest.py\n?? docs/current/phase4-third-party-cgs-2026-10-18.json\n?? scripts/register_phase4_cgs_trial.py\n?? tests/test_phase4_cgs_trial.py",
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62",
+    "sha256": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
     "integrity_check": "ok",
     "job_count": 3948,
     "status_counts": {
@@ -23,7 +23,7 @@
       "source_unavailable": 166
     },
     "phase3_withdrawal_audit_count": 3947,
-    "candidate_lead_count": 2,
+    "candidate_lead_count": 6,
     "formal_third_party_job_count": 1,
     "student_read_as_of_date": "2026-10-18",
     "student_visible_layer_counts": {
@@ -88,22 +88,22 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "a7fade79caa33731c576d18304fbe4b3b59580873fba3a33f3eca2ba24e1ef06"
+        "sha256": "c2248e598da764f30cbf8a319b9363b026fd67b67ef23581b48f30846a18fd55"
       },
       {
         "path": "docs/current/phase4-current-state-audit-2026-10-18.json",
         "exists": true,
-        "sha256": "befa0b76d7f3199cc2f29a80f1a1ec5906e4242e754409d8eb7983cf8ea6ea21"
+        "sha256": "ff0afc28b9b6249a6498c355df6d9888152632b45959d4430076554bd97b5831"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
         "exists": true,
-        "sha256": "d752b9c5aa8d9cd5260a86e1ce2beaaadbdb227199496f69a02aca8b00702026"
+        "sha256": "e4e8ad6df1623292c74fad4fbaa13c34f4105d1e75b09149cbc971fe8c81e20d"
       },
       {
         "path": "docs/current/phase4-release-manifest.json",
         "exists": true,
-        "sha256": "62c7393c9ff8c3a9a2056bab96c1936ed22aa75ec187d3b155452fa3c995d365"
+        "sha256": "ece7c4dc86b95db78e4306ee886815dfe9b17f36aa07ab89303b9bba582f042e"
       }
     ],
     "historical_documents_are_publish_inputs": false
@@ -131,7 +131,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-18.json",
-      "sha256": "d752b9c5aa8d9cd5260a86e1ce2beaaadbdb227199496f69a02aca8b00702026"
+      "sha256": "e4e8ad6df1623292c74fad4fbaa13c34f4105d1e75b09149cbc971fe8c81e20d"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -141,13 +141,17 @@
       "path": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
       "sha256": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878"
     },
+    "phase4_third_party_cgs": {
+      "path": "docs/current/phase4-third-party-cgs-2026-10-18.json",
+      "sha256": "c9ac28c1b0026ef107897aa2516f67e13307ecced258882c4242a090ebd582da"
+    },
     "phase4_third_party_blocked_batches": {
       "path": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
       "sha256": "74da7ade28ae3e7310f78796f80dc2cc2ee27a7d4b13fcb65601667f667ed31c"
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "a7fade79caa33731c576d18304fbe4b3b59580873fba3a33f3eca2ba24e1ef06"
+      "sha256": "c2248e598da764f30cbf8a319b9363b026fd67b67ef23581b48f30846a18fd55"
     }
   },
   "code_inventory": [
@@ -613,8 +617,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 287,
-      "sha256": "bc6864a3adbe1a7bbe6ce452ae556ffc7e75757ee3ca90aabb9504391d9cbfd3"
+      "line_count": 292,
+      "sha256": "01e0a3230b3a11a91b69847fd41cd85e5fcfac9894bf6f2c69f57a59012e82ef"
     },
     {
       "path": "scripts/build_phase3_manifest.py",
@@ -623,8 +627,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 248,
-      "sha256": "e657a18b9c3691075cf98b913b51e468c5d127902d8ab079fb5a39208c920791"
+      "line_count": 251,
+      "sha256": "886a010eb3d067a8bde254934b1de86290cd4d0facb477207a0f167b10703b4a"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -665,6 +669,11 @@
       "path": "scripts/prepare_release_env.py",
       "line_count": 119,
       "sha256": "f7565e2d8a5fb1cfe990f711ba008375cf0cc0e8c02ac51493b3995fc46a6ae9"
+    },
+    {
+      "path": "scripts/register_phase4_cgs_trial.py",
+      "line_count": 183,
+      "sha256": "460e573957274fb307dc641d672804192dcf27c9f6be2d8835022b50da9d67fc"
     },
     {
       "path": "tests/conftest.py",
@@ -1055,6 +1064,11 @@
       "path": "tests/test_phase3_policy.py",
       "line_count": 52,
       "sha256": "64194bb1c8a35c29aab46415ea98e4b77da6944c41447128f74c34ac22c4674e"
+    },
+    {
+      "path": "tests/test_phase4_cgs_trial.py",
+      "line_count": 31,
+      "sha256": "cfa0c7c400a1534ff4304f67fd7b4a65ccb17bdf6ff6646826a3bc833056270a"
     },
     {
       "path": "tests/test_phase4_current_audit.py",

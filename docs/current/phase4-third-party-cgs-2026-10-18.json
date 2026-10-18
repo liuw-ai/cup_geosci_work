@@ -1,0 +1,90 @@
+{
+  "phase": "phase4",
+  "trial_status": "official_table_recovered_private_review",
+  "discovery": {
+    "source_id": "huatu-discovery",
+    "source_grade": "B",
+    "discovery_page_url": "http://bj.huatu.com/2026/0930/1253526.html",
+    "discovery_page_sha256": "48F2EBEB47B14331889790909EFF5E27CB01AF7EDB62DE62DD3C3DC2A3023B68",
+    "discovery_page_published_at": "2026-09-30T14:35:03+08:00",
+    "discovery_title": "中国地质调查局自然资源综合调查指挥中心2026年度第二批博士后研究人员招收公告",
+    "discovery_role": "发现线索；不作为学生端申请链接"
+  },
+  "official_recovery": {
+    "source_id": "cgs-notices",
+    "employer": "中国地质调查局自然资源综合调查指挥中心",
+    "official_table_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+    "official_table_sha256": "C58A31EB8187AAC6BC0DE6173324E442D00E31697108AC3C6F194E58D487818E",
+    "official_table_bytes": 18568,
+    "official_table_captured_at": "2026-10-18T15:00:00+08:00",
+    "official_table_capture_path": "runtime/third-party-evidence/cgs-postdoc/2026-10-18/cgs-official-plan.docx",
+    "official_notice_url": null,
+    "official_application_url": null,
+    "official_application_method": "官方公告正文要求通过邮件发送博士后申请材料至 boguanban2021@163.com；未发现独立 HTTP 报名页面。",
+    "published_date": "2026-09-30",
+    "deadline_policy": "no_deadline_90_days_asia_shanghai",
+    "no_deadline_expires_at": "2026-12-29",
+    "location": "北京市西城区红莲南路55号",
+    "location_evidence": "华图转载的公告正文明确给出中国地质调查局自然资源综合调查指挥中心地址；官方岗位附件未重复地点。"
+  },
+  "rows": [
+    {
+      "row_number": 2,
+      "title": "金属矿床成矿作用与战略性矿产勘查评价综合研究",
+      "major_requirement": "矿物学、岩石学、矿床学；矿产普查与勘探",
+      "degree_requirement": "博士后研究人员（申请人需具备博士学位）",
+      "headcount": 1,
+      "supervisor": "喻光明、夏锐",
+      "student_layer_decision": "broad_geoscience_match",
+      "publication_decision": "当前代码将未出现四个核心专业原名的博士后岗位保留为相近专业审核，不直接发布。"
+    },
+    {
+      "row_number": 3,
+      "title": "战略性矿产区块优选调查评价与多源数据融合应用研究",
+      "major_requirement": "矿物学、岩石学、矿床学",
+      "degree_requirement": "博士后研究人员（申请人需具备博士学位）",
+      "headcount": 1,
+      "supervisor": "田玉昆、陈英富",
+      "student_layer_decision": "broad_geoscience_match",
+      "publication_decision": "当前代码将未出现四个核心专业原名的博士后岗位保留为相近专业审核，不直接发布。"
+    },
+    {
+      "row_number": 4,
+      "title": "地质大数据关键技术研究",
+      "major_requirement": "地质与矿产专业、人工智能、计算机技术、数据科学、大数据科学与大数据技术",
+      "degree_requirement": "博士后研究人员（申请人需具备博士学位）",
+      "headcount": 1,
+      "supervisor": "刘荣梅",
+      "student_layer_decision": "broad_geoscience_match",
+      "publication_decision": "含地质与矿产上下文但同时列出计算机与数据方向；须人工确认学生专业范围后再决定发布。"
+    },
+    {
+      "row_number": 5,
+      "title": "自然资源多元数据挖掘与综合分析",
+      "major_requirement": "能源环境工程（大数据挖掘方向）、地理信息系统、生态地质学、自然地理学等相关专业",
+      "degree_requirement": "博士后研究人员（申请人需具备博士学位）",
+      "headcount": 1,
+      "supervisor": "雒新萍",
+      "student_layer_decision": "broad_geoscience_match",
+      "publication_decision": "包含生态地质学与自然地理学，但为相关专业表述；须人工确认上下文，不自动等同四个核心专业。"
+    }
+  ],
+  "funnel": {
+    "discovery_pages": 1,
+    "official_table_recovered": 1,
+    "official_rows_parsed": 4,
+    "private_candidate_leads_created": 4,
+    "official_content_verified": 4,
+    "formal_jobs_created": 0,
+    "student_visible_jobs_created": 0,
+    "reason_not_published": "官方附件逐行证据真实且完整，但四行均未直接出现四个核心毕业专业原名；当前既有代码将其标记为相近专业/待人工审核。不能为了达到数量目标绕过现有发布门禁。"
+  },
+  "policy_checks": {
+    "third_party_link_as_application": false,
+    "official_table_link_is_student_application_link": false,
+    "official_notice_required_before_formal_publication": true,
+    "robots_or_captcha_bypass": false,
+    "source_failure_means_no_vacancy": false,
+    "server_deployment": false
+  }
+}

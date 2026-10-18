@@ -20,7 +20,7 @@
     },
     {
       "source_id": "huatu-discovery",
-      "allowed_hosts": ["www.huatu.com", "sydw.huatu.com", "u3.huatu.com"],
+      "allowed_hosts": ["www.huatu.com", "bj.huatu.com", "sydw.huatu.com", "u3.huatu.com"],
       "scan_urls": [
         "https://www.huatu.com/gwy/",
         "https://sydw.huatu.com/zt/sydwggk/"

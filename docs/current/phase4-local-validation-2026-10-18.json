@@ -1,13 +1,13 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-18T20:04:37+08:00",
+  "validated_at": "2026-10-18T20:51:39+08:00",
   "environment": "local",
   "server_deployment": false,
   "git_sha_before_metadata_commit": "d7050146b2d9df5b3fb8d128dca6fc4efc0ef174",
   "git_sha_at_validation": "d7050146b2d9df5b3fb8d128dca6fc4efc0ef174",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1066,
+    "passed": 1068,
     "skipped": 4,
     "failed": 0,
     "warnings": 1,
@@ -20,11 +20,11 @@
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256_before_tests": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62",
-    "sha256_after_tests": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62",
+    "sha256_before_tests": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
+    "sha256_after_tests": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
     "integrity_check": "ok",
     "jobs": 3948,
-    "candidate_leads": 2,
+    "candidate_leads": 6,
     "phase3_withdrawal_audits": 3947,
     "student_read_as_of_date": "2026-10-18",
     "student_visible_total": 625,
@@ -37,11 +37,18 @@
   },
   "third_party": {
     "isolated_huatu_trial_candidate_leads": 11,
-    "formal_database_private_candidate_leads": 2,
+    "formal_database_private_candidate_leads": 6,
     "formal_jobs_created": 1,
     "formal_third_party_job_ids": [5432],
     "formal_database_unchanged": false,
-    "formal_database_change_note": "The approved local HRINM recovery created job 5432. A later local audit backfilled candidate lead 2 conversion_checked_at from its existing official_checked_at; subsequent tests were read-only and preserved the SHA-256 recorded above.",
+    "formal_database_change_note": "The approved local HRINM recovery created job 5432. The CGS attachment trial then added four official-content-verified private candidate leads (ids 3-6) without creating jobs. A later local audit backfilled candidate lead 2 conversion_checked_at; subsequent tests were read-only and preserved the SHA-256 recorded above.",
+    "cgs_attachment_trial": {
+      "candidate_lead_ids": [3, 4, 5, 6],
+      "official_rows": 4,
+      "formal_jobs_created": 0,
+      "backup_path": "backups/job_hub-pre-phase4-cgs-trial-20261018.sqlite3",
+      "backup_sha256": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62"
+    },
     "conversion_audit_backfill": {
       "candidate_lead_id": 2,
       "conversion_status": "official_content_verified",
@@ -66,7 +73,7 @@
     "formal_third_party_job_query": {
       "query": "地质研发",
       "status": 200,
-      "total": 1,
+      "total": 2,
       "job_id": 5432,
       "publication_layer": "exact_match",
       "official_notice_url": "https://www.hrinm.cn/xwxq/35.html",
