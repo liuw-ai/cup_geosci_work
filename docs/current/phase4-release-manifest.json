@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T09:41:17Z",
+  "generated_at": "2026-10-18T09:43:26Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "14bf859387c36dbb2dd16ac83270d5ef52f826bc",
+  "git_sha": "35e6012a2d631b4564e1e88a13e8cf9d6b4f6d23",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -19,8 +19,9 @@
     "phase4_three_oil_entry_evidence": "c2d44f1c2445b0693a7dbe2b26be5dda1bab2d4b6898c90a5046ec652afa4931",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "71b3d1c3b8a969dd12d995df96f945361a7a95181f9003d014e4d8570c170eea",
+    "phase4_current_state_audit": "9e1b59455dc022db892cc5f48b02451f0a2e78a93376e25b87f5b45cae536c78",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
+    "phase4_main_record": "ded4db3e0bf6663998bbc2ee92f21f1f07767efbbf839b7a32d52efa2bca9e05",
     "phase4_local_validation": "3547d57750ed3a93f714ddf7f094c2c8d4a9caba331d5d4ee3863074becedc9b"
   },
   "database": {
