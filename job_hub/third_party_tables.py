@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Any, Iterable
 from urllib.request import Request, urlopen
 from urllib.parse import urljoin, urlparse
+from urllib.error import HTTPError
+from urllib.robotparser import RobotFileParser
 from html.parser import HTMLParser
 
 from job_hub.government_table_parser import parse_position_table_rows
@@ -27,6 +29,11 @@ BATCH_CANDIDATE_SOURCES = frozenset(
     {"offcn-discovery", "fenbi-discovery", "huatu-discovery", "gongkaoleida-discovery", "gongkaozixun-discovery"}
 )
 ADAPTER_CONFIG_PATH = Path(__file__).resolve().parent.parent / "data" / "third_party_table_adapters.json"
+THIRD_PARTY_TABLE_USER_AGENT = "job-hub-phase4-table-review/1.0"
+
+
+class ThirdPartyTableAccessLimited(ValueError):
+    """Raised when a third-party table cannot be fetched under access policy."""
 
 
 class _LinkParser(HTMLParser):
@@ -173,7 +180,7 @@ def normalize_third_party_table(
 
 
 def _bounded_download(url: str, *, timeout: int, max_bytes: int) -> tuple[bytes, str]:
-    request = Request(url, headers={"User-Agent": "job-hub-phase3-table-review/1.0"})
+    request = Request(url, headers={"User-Agent": THIRD_PARTY_TABLE_USER_AGENT})
     with urlopen(request, timeout=timeout) as response:  # nosec B310: reviewed URL is operator supplied
         content_type = str(response.headers.get("Content-Type") or "").split(";", 1)[0].strip()
         chunks: list[bytes] = []
@@ -187,6 +194,62 @@ def _bounded_download(url: str, *, timeout: int, max_bytes: int) -> tuple[bytes,
                 raise ValueError(f"third-party table exceeds {max_bytes} bytes")
             chunks.append(chunk)
         return b"".join(chunks), content_type
+
+
+def _robots_permit(url: str, *, timeout: int) -> dict[str, Any]:
+    """Require a verified robots policy before downloading a third-party file.
+
+    A robots denial or an unverifiable policy is an access limitation, not an
+    invitation to retry through another transport. A missing robots document
+    (HTTP 404) follows the project-wide policy and permits the URL.
+    """
+
+    parsed = urlparse(url)
+    root = f"{parsed.scheme}://{parsed.netloc}"
+    robots_url = urljoin(root, "/robots.txt")
+    request = Request(robots_url, headers={"User-Agent": THIRD_PARTY_TABLE_USER_AGENT})
+    checked_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    try:
+        with urlopen(request, timeout=min(timeout, 10)) as response:  # nosec B310: reviewed host
+            status = int(getattr(response, "status", response.getcode()))
+            body = response.read(512_000).decode("utf-8", errors="replace")
+    except HTTPError as error:
+        if int(error.code) == 404:
+            return {
+                "robots_url": robots_url,
+                "robots_status": 404,
+                "robots_allowed": True,
+                "robots_checked_at": checked_at,
+                "robots_detail": "robots.txt not found; access allowed by policy",
+            }
+        raise ThirdPartyTableAccessLimited(
+            f"unable to verify robots.txt for {root}: HTTP {error.code}"
+        ) from error
+    except OSError as error:
+        raise ThirdPartyTableAccessLimited(
+            f"unable to verify robots.txt for {root}: {error.__class__.__name__}"
+        ) from error
+
+    if not 200 <= status < 300:
+        raise ThirdPartyTableAccessLimited(
+            f"unable to verify robots.txt for {root}: HTTP {status}"
+        )
+    parser = RobotFileParser()
+    parser.set_url(robots_url)
+    parser.parse(body.splitlines())
+    allowed = bool(parser.can_fetch(THIRD_PARTY_TABLE_USER_AGENT, url))
+    evidence = {
+        "robots_url": robots_url,
+        "robots_status": status,
+        "robots_allowed": allowed,
+        "robots_checked_at": checked_at,
+        "robots_detail": "robots.txt permits access" if allowed else "robots.txt disallows access",
+    }
+    if not allowed:
+        raise ThirdPartyTableAccessLimited(
+            f"robots.txt does not permit third-party table access: {url}"
+        )
+    return evidence
 
 
 _TABLE_SUFFIXES = {
@@ -238,6 +301,7 @@ def _normalize_table_bytes(
     location: str = "",
     storage_dir: Path | None = None,
     capture_mode: str = "network_download",
+    robots_evidence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Normalize retained bytes through one auditable path for network/file input."""
     digest = hashlib.sha256(body).hexdigest()
@@ -275,6 +339,8 @@ def _normalize_table_bytes(
         "retained_path": None,
         "capture_mode": capture_mode,
     }
+    if robots_evidence:
+        parsed["download"].update(robots_evidence)
     if storage_dir is not None:
         storage_dir.mkdir(parents=True, exist_ok=True)
         retained = storage_dir / f"{batch_id}-{digest[:16]}{normalized_suffix}"
@@ -380,6 +446,7 @@ def fetch_and_normalize_third_party_table(
     """
 
     parsed_url = _validate_table_url(source_id, third_party_table_url)
+    robots_evidence = _robots_permit(third_party_table_url, timeout=timeout)
     body, content_type = _bounded_download(
         third_party_table_url, timeout=timeout, max_bytes=max_bytes
     )
@@ -399,6 +466,7 @@ def fetch_and_normalize_third_party_table(
         deadline_date=deadline_date,
         location=location,
         storage_dir=storage_dir,
+        robots_evidence=robots_evidence,
     )
 
 
@@ -450,11 +518,17 @@ def ingest_third_party_table_file(
         location=location,
         storage_dir=storage_dir,
         capture_mode="operator_provided_file",
+        robots_evidence={
+            "robots_checked_at": None,
+            "robots_allowed": None,
+            "robots_detail": "operator-provided file; no network fetch performed",
+        },
     )
 
 
 __all__ = [
     "BATCH_CANDIDATE_SOURCES",
+    "ThirdPartyTableAccessLimited",
     "fetch_and_normalize_third_party_table",
     "ingest_third_party_table_file",
     "normalize_third_party_table",

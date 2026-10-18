@@ -74,6 +74,17 @@ def test_fetch_retains_official_table_evidence_and_hash(monkeypatch, tmp_path):
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         ),
     )
+    monkeypatch.setattr(
+        third_party_tables,
+        "_robots_permit",
+        lambda url, timeout: {
+            "robots_url": "https://www.offcn.com/robots.txt",
+            "robots_status": 200,
+            "robots_allowed": True,
+            "robots_checked_at": "2026-10-18T00:00:00Z",
+            "robots_detail": "robots.txt permits access",
+        },
+    )
 
     payload = fetch_and_normalize_third_party_table(
         source_id="offcn-discovery",
@@ -91,6 +102,7 @@ def test_fetch_retains_official_table_evidence_and_hash(monkeypatch, tmp_path):
         "https://www.gov.cn/notice/2026/positions.xlsx"
     )
     assert payload["download"]["sha256"] == hashlib.sha256(body).hexdigest()
+    assert payload["download"]["robots_allowed"] is True
     retained = Path(payload["download"]["retained_path"])
     assert retained.is_file()
     assert retained.read_bytes() == body
@@ -98,6 +110,34 @@ def test_fetch_retains_official_table_evidence_and_hash(monkeypatch, tmp_path):
     assert payload["candidates"][0]["official_table_url"] == (
         "https://www.gov.cn/notice/2026/positions.xlsx"
     )
+
+
+def test_fetch_refuses_robots_denied_before_table_download(monkeypatch):
+    downloaded = False
+
+    def fail_download(*args, **kwargs):
+        nonlocal downloaded
+        downloaded = True
+        raise AssertionError("robots denial must stop before downloading")
+
+    monkeypatch.setattr(
+        third_party_tables,
+        "_robots_permit",
+        lambda url, timeout: (_ for _ in ()).throw(
+            third_party_tables.ThirdPartyTableAccessLimited("robots denied")
+        ),
+    )
+    monkeypatch.setattr(third_party_tables, "_bounded_download", fail_download)
+
+    with pytest.raises(third_party_tables.ThirdPartyTableAccessLimited, match="robots denied"):
+        fetch_and_normalize_third_party_table(
+            source_id="offcn-discovery",
+            third_party_table_url="https://www.offcn.com/2026/positions.xlsx",
+            batch_id="offcn-robots-blocked",
+            position_type="civil_service",
+            province="北京",
+        )
+    assert downloaded is False
 
 
 def test_operator_provided_table_file_uses_same_private_evidence_contract(tmp_path):
