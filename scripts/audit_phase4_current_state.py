@@ -227,6 +227,7 @@ def main() -> None:
     hrinm_trial = ROOT / "docs" / "current" / "phase4-third-party-hrinm-2026-10-18.json"
     cgs_trial = ROOT / "docs" / "current" / "phase4-third-party-cgs-2026-10-18.json"
     blocked_batches = ROOT / "docs" / "current" / "phase4-third-party-blocked-batches-2026-10-18.json"
+    third_party_funnel = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
     local_web_recheck = ROOT / "docs" / "current" / "phase4-local-web-recheck-2026-10-18.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     report = {
@@ -278,6 +279,10 @@ def main() -> None:
             "phase4_third_party_blocked_batches": {
                 "path": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
                 "sha256": sha256(blocked_batches),
+            },
+            "phase4_third_party_funnel": {
+                "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
+                "sha256": sha256(third_party_funnel),
             },
             "phase4_local_web_recheck": {
                 "path": "docs/current/phase4-local-web-recheck-2026-10-18.json",

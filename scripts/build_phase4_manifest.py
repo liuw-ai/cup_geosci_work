@@ -159,6 +159,7 @@ def main() -> None:
     hrinm_trial = ROOT / "docs" / "current" / "phase4-third-party-hrinm-2026-10-18.json"
     cgs_trial = ROOT / "docs" / "current" / "phase4-third-party-cgs-2026-10-18.json"
     blocked_batches = ROOT / "docs" / "current" / "phase4-third-party-blocked-batches-2026-10-18.json"
+    third_party_funnel = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
     local_web_recheck = ROOT / "docs" / "current" / "phase4-local-web-recheck-2026-10-18.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     working_tree_dirty = dirty()
@@ -214,6 +215,7 @@ def main() -> None:
             "phase4_third_party_hrinm": sha256(hrinm_trial),
             "phase4_third_party_cgs": sha256(cgs_trial),
             "phase4_third_party_blocked_batches": sha256(blocked_batches),
+            "phase4_third_party_funnel": sha256(third_party_funnel),
             "phase4_local_web_recheck": sha256(local_web_recheck),
             "phase4_main_record": sha256(phase4_record),
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
@@ -231,6 +233,7 @@ def main() -> None:
             "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
             "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
             "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
+            "funnel_audit": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
         "document_policy": {
