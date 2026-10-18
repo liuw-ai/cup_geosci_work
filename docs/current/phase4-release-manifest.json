@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T11:25:41Z",
+  "generated_at": "2026-10-18T11:26:57Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "e13e0be4435e0bc1f3cdeba08610aec89f444ff0",
+  "git_sha": "6e4941ae487367f4e10f1b5b231ff4e0e9e85c63",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -21,11 +21,11 @@
     "phase4_three_oil_unit_entry_matrix": "f3c74cf8149291be9a286e6981cabc6e0cad9feac1c8a435b2b5d1e502129777",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "01a9c1e519d758246c0f2eca9efe15f591b1628ea17c637324cb34652ead8f90",
+    "phase4_current_state_audit": "6f707d3dbfed753a342fdb579019bf070b52614fff9fd47eae52971ca7bc56b5",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_blocked_batches": "133f06dbc69109b53812d6366d9acd18bc29c1dde3de7697261f64262304f2d8",
-    "phase4_main_record": "4f655c1fe55e28da529275bdb79379e22ff1556964e9fdd23e9852f54591ff23",
+    "phase4_main_record": "e6ac0619e3442371f9fefb879b480ddae41ec58b163e9b8c24952d751d771650",
     "phase4_local_validation": "400463ff433c0afdb36bece1bc323938272d0ecbae9b583bb6f9e2b77f76c68a"
   },
   "database": {
