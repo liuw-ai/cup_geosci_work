@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-18T22:35:33Z",
+  "generated_at": "2026-10-18T22:35:53Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "67c40642c074af6ab9f12b12b7d651ce45e9dd7b",
-  "working_tree_dirty": true,
+  "git_sha": "5fe46e9ba8fa426425b54223188aa482368bedf8",
+  "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
   "dockerfile_sha256": {
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "d5ffaece4876052adcc7d7378f2dbf4d0fa3a05dd53bb14fb8d3e2b515585a60",
-    "phase4_document_consistency": "d5ffaece4876052adcc7d7378f2dbf4d0fa3a05dd53bb14fb8d3e2b515585a60",
+    "phase4_current_state_audit": "eebbcc811caf331a31ed2639bef39d9db9d88fadf8bf47ed1e07be6a8a4a2476",
+    "phase4_document_consistency": "eebbcc811caf331a31ed2639bef39d9db9d88fadf8bf47ed1e07be6a8a4a2476",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -50,8 +50,8 @@
     "phase4_local_validation": "a3d982ea72c044c11f79ded5c00929756f6695b1f9069bc3e2815539a13f9286",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "922a8937f2efad212b3d2cad2d91c42a6623e18124583e0cfed8d42e7c09e347",
-    "phase4_completion_audit": "fd2c96e6689ec8c3370c4aa0d2aa8039555eca04ae7e76ad73f1ed94e60335b4",
-    "phase4_workspace_layout": "d11929dca41102a23fefacea74b7854f68d7e796ac508dfc5e20b348b67cd3c0"
+    "phase4_completion_audit": "208cfc862229d604e0b3fc30ae21f8ced6494fc772e8908b97a17d8522cfa0c9",
+    "phase4_workspace_layout": "57e910058f9fdfbda3dfb7af871aa51a0bdd97e2cd27e9b1253ffd88114d8548"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -345,7 +345,6 @@
   "automation_status": "paused",
   "production_deployment": "not_performed",
   "release_blockers": [
-    "working_tree_contains_uncommitted_or_untracked_changes",
     "third_party_batch_expansion_incomplete",
     "three_oil_external_identity_evidence_pending",
     "three_oil_unit_entry_evidence_incomplete",
