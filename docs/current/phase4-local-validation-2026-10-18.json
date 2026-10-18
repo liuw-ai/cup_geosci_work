@@ -1,9 +1,10 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-18T19:38:04+08:00",
+  "validated_at": "2026-10-18T20:04:37+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "154b983e29ad344b264707603a4bf64f228bd882",
+  "git_sha_before_metadata_commit": "d7050146b2d9df5b3fb8d128dca6fc4efc0ef174",
+  "git_sha_at_validation": "d7050146b2d9df5b3fb8d128dca6fc4efc0ef174",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1066,
@@ -52,7 +53,7 @@
     "robots_or_permission_blocked_followups": 1
   },
   "local_web_read_only": {
-    "base_url": "http://127.0.0.1:8094",
+    "base_url": "http://127.0.0.1:8095",
     "database_mode": "temporary_copy_of_runtime_database",
     "healthz_status": 200,
     "home_status": 200,
