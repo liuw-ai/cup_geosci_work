@@ -36,15 +36,15 @@
       "not_public": 2955,
       "source_unavailable": 166
     },
-    "student_read_as_of_date": "2026-10-17",
+    "student_read_as_of_date": "2026-10-18",
     "student_visible_layer_counts": {
       "broad_geoscience_match": 1,
       "exact_match": 145,
-      "incomplete_but_basic_match": 368,
+      "incomplete_but_basic_match": 367,
       "not_public": 0,
       "source_unavailable": 111
     },
-    "student_visible_total": 625,
+    "student_visible_total": 624,
     "candidate_lead_count": 0
   },
   "local_validation": {
