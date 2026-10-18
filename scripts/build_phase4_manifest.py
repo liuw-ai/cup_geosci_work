@@ -178,6 +178,7 @@ def main() -> None:
     cgs_trial = ROOT / "docs" / "current" / "phase4-third-party-cgs-2026-10-18.json"
     blocked_batches = ROOT / "docs" / "current" / "phase4-third-party-blocked-batches-2026-10-18.json"
     nhri_official_page = ROOT / "docs" / "current" / "phase4-third-party-nhri-official-page-2026-10-19.json"
+    lead_recheck = ROOT / "docs" / "current" / "phase4-third-party-lead-recheck-2026-10-19.json"
     cnpc_entry_recheck = ROOT / "docs" / "current" / "phase4-cnpc-entry-recheck-2026-10-19.json"
     access_recheck = ROOT / "docs" / "current" / "phase4-third-party-access-recheck-2026-10-19.json"
     local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
@@ -241,6 +242,7 @@ def main() -> None:
             "phase4_third_party_cgs": sha256(cgs_trial),
             "phase4_third_party_blocked_batches": sha256(blocked_batches),
             "phase4_third_party_nhri_official_page": sha256(nhri_official_page),
+            "phase4_third_party_lead_recheck": sha256(lead_recheck),
             "phase4_cnpc_entry_recheck": sha256(cnpc_entry_recheck),
             "phase4_third_party_access_recheck": sha256(access_recheck),
             "phase4_local_repair": sha256(local_repair),
@@ -282,6 +284,7 @@ def main() -> None:
             "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
             "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
             "nhri_official_page_evidence": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
+            "unresolved_lead_recheck": "docs/current/phase4-third-party-lead-recheck-2026-10-19.json",
             "cnpc_entry_recheck": "docs/current/phase4-cnpc-entry-recheck-2026-10-19.json",
             "funnel_audit": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
         },

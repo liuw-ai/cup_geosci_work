@@ -1,0 +1,45 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-19T02:31:00+08:00",
+  "candidate_lead_id": 1,
+  "discovery_source_id": "geotalent-discovery",
+  "discovery_url": "https://geo.36hjob.com/job-Ucrql.html",
+  "candidate": {
+    "employer": "常德市鼎城祥荣矿业有限公司",
+    "title": "生产技术部",
+    "location": "湖南·常德",
+    "deadline_date": "2026-11-29",
+    "major_text": "相关地质专业应届毕业生也可"
+  },
+  "official_recovery": {
+    "status": "not_found",
+    "official_notice_url": null,
+    "official_application_url": null,
+    "official_table_url": null,
+    "checked_domains": [
+      "https://www.dingcheng.gov.cn/",
+      "https://www.changde.gov.cn/"
+    ],
+    "observations": [
+      "Exact-employer search returned third-party business listings and public regulatory references, but no official recruitment notice, job detail, position table, or application entry for this title.",
+      "Direct HTTPS probes to the two relevant government domains failed with TLS EOF in the current environment; no TLS bypass or alternate certificate handling was attempted.",
+      "Search-engine follow-up queries were rate-limited behind a verification page; no CAPTCHA or login was bypassed.",
+      "The candidate page itself remains third-party evidence and cannot be used as a student-facing application link."
+    ],
+    "evidence_boundary": {
+      "employer_identity_only": true,
+      "recruitment_evidence_verified": false,
+      "row_level_official_evidence": false,
+      "student_visible": false
+    }
+  },
+  "policy_decision": {
+    "verification_status": "candidate",
+    "conversion_status": "unresolved",
+    "keep_private_candidate": true,
+    "formal_job_created": false,
+    "student_link": null,
+    "reason": "企业存在的公开痕迹不等于该招聘岗位的官方证据；在取得官方招聘原文或官方岗位表逐行证据前不得发布。"
+  },
+  "next_action": "等待合法可访问的官方招聘原文、官方岗位表或企业官方报名入口；下次复核仍需记录访问结果，不因一次失败撤回或删除候选线索。"
+}
