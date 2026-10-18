@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T21:15:32Z",
+  "generated_at": "2026-10-18T21:25:44Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "241792f1afec6d9e8ebe707a68575e64983df19a",
+  "git_sha": "1f77f5ec193595d98e32a2ee4da038ce45abf763",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -134,12 +134,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "494173e66e8154750a3e6128bad98cf58240164368955587afdfb658b38f352c"
+        "sha256": "5f4fd7afff0a32d102eecd2dce747bba5a4b2e4a4d17ce990b9a9ad03b62084d"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "fa83b67644415c5afeb40a4cae51e52a313ef0af4f7c0bef2590afb870434086"
+        "sha256": "88fb57a0cb5d548be52cf335e87c20c21bb69050ed299c30bd2e2dfd7746ba55"
       }
     ],
     "metadata_documents": [
@@ -195,7 +195,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "fa83b67644415c5afeb40a4cae51e52a313ef0af4f7c0bef2590afb870434086"
+      "sha256": "88fb57a0cb5d548be52cf335e87c20c21bb69050ed299c30bd2e2dfd7746ba55"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -267,7 +267,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "494173e66e8154750a3e6128bad98cf58240164368955587afdfb658b38f352c"
+      "sha256": "5f4fd7afff0a32d102eecd2dce747bba5a4b2e4a4d17ce990b9a9ad03b62084d"
     }
   },
   "code_inventory": [
@@ -813,8 +813,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 169,
-      "sha256": "350740b88283e252e88dfd550480d9ad7e43130fa15ffd4b1b8d7aad607c01e1"
+      "line_count": 225,
+      "sha256": "deebc3e938939bec8a87a4f7f155c000e7595a1a0ff0177e4f48c29561872a10"
     },
     {
       "path": "tests/conftest.py",
@@ -1218,8 +1218,8 @@
     },
     {
       "path": "tests/test_phase4_manifest.py",
-      "line_count": 62,
-      "sha256": "67d58e5bb974ec6e935fb51ac28c7134ae7e46f9e54a9b289dc7d54cd2399ba7"
+      "line_count": 76,
+      "sha256": "c12c8c4d7b1359b6c58e0ed1471557d3a44545a81df0e3d58f79838037e28bc8"
     },
     {
       "path": "tests/test_phase4_third_party_funnel.py",
