@@ -4831,6 +4831,14 @@ class Database:
         metadata = changes.get("metadata", current.get("metadata", {}))
         if not isinstance(metadata, dict):
             raise ValueError("Candidate lead metadata must be an object")
+        requested_conversion_status = self._optional_text(
+            changes.get("conversion_status")
+        )
+        conversion_status = requested_conversion_status or (
+            self._optional_text(current.get("conversion_status")) or "unresolved"
+        )
+        if requested_conversion_status is None and next_status == "official_content_verified":
+            conversion_status = "official_content_verified"
         fields = {
             "employer_hint": self._optional_text(
                 changes.get("employer_hint", current.get("employer_hint"))
@@ -4850,6 +4858,9 @@ class Database:
             "metadata_json": json.dumps(metadata, ensure_ascii=False),
             "updated_at": utc_now(),
         }
+        conversion_checked_at = current.get("conversion_checked_at")
+        if "conversion_status" in changes or next_status == "official_content_verified":
+            conversion_checked_at = fields["updated_at"]
         with self.transaction() as connection:
             assessment = self._assess_official_url(
                 connection,
@@ -4919,7 +4930,8 @@ class Database:
                     official_domain_status = ?, official_checked_at = ?,
                     trust_grade = ?, official_table_url = ?, third_party_table_url = ?,
                     official_application_url = ?,
-                    conversion_status = ?, verification_status = ?, verification_note = ?, metadata_json = ?,
+                    conversion_status = ?, conversion_checked_at = ?,
+                    verification_status = ?, verification_note = ?, metadata_json = ?,
                     updated_at = ?
                 WHERE id = ?
                 """,
@@ -4936,7 +4948,8 @@ class Database:
                     self._optional_text(changes.get("official_table_url", current.get("official_table_url"))),
                     self._optional_text(changes.get("third_party_table_url", current.get("third_party_table_url"))),
                     official_application_url,
-                    self._optional_text(changes.get("conversion_status", current.get("conversion_status"))) or "unresolved",
+                    conversion_status,
+                    conversion_checked_at,
                     fields["verification_status"],
                     fields["verification_note"],
                     fields["metadata_json"],
@@ -5014,10 +5027,12 @@ class Database:
             connection.execute(
                 """
                 UPDATE candidate_leads
-                SET verification_status = 'published', published_job_id = ?, updated_at = ?
+                SET verification_status = 'published', published_job_id = ?,
+                    conversion_checked_at = COALESCE(conversion_checked_at, ?),
+                    updated_at = ?
                 WHERE id = ?
                 """,
-                (job_id, now, lead_id),
+                (job_id, now, now, lead_id),
             )
             self._record_candidate_lead_event(
                 connection,

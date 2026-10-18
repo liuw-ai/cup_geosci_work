@@ -85,6 +85,9 @@ def test_candidate_leads_stay_private_until_official_content_is_verified(tmp_pat
         },
     )
     assert verified.status_code == 200
+    verified_lead = database.get_candidate_lead(lead_id)
+    assert verified_lead["conversion_status"] == "official_content_verified"
+    assert verified_lead["conversion_checked_at"]
 
     published = client.post(
         f"/api/admin/leads/{lead_id}/publish", headers=headers
@@ -98,6 +101,8 @@ def test_candidate_leads_stay_private_until_official_content_is_verified(tmp_pat
     assert jobs["items"][0]["application_url"] == (
         "https://official.example.gov.cn/apply/1"
     )
+    published_lead = database.get_candidate_lead(lead_id)
+    assert published_lead["conversion_checked_at"]
 
 
 def test_candidate_lead_rejects_non_http_official_application_url(tmp_path) -> None:

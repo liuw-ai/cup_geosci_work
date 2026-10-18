@@ -131,6 +131,7 @@ def main() -> None:
     )
     pre_candidate_backup = ROOT / "backups" / "job_hub-pre-phase4-third-party-candidate-20261018.sqlite3"
     pre_hrinm_backup = ROOT / "backups" / "job_hub-pre-phase4-hrinm-20261018.sqlite3"
+    pre_conversion_audit_backup = ROOT / "backups" / "job_hub-pre-phase4-conversion-audit-20261018.sqlite3"
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
     database["pre_third_party_candidate_backup"] = {
         "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
@@ -139,6 +140,10 @@ def main() -> None:
     database["pre_hrinm_backup"] = {
         "path": "backups/job_hub-pre-phase4-hrinm-20261018.sqlite3",
         "sha256": sha256(pre_hrinm_backup),
+    }
+    database["pre_conversion_audit_backup"] = {
+        "path": "backups/job_hub-pre-phase4-conversion-audit-20261018.sqlite3",
+        "sha256": sha256(pre_conversion_audit_backup),
     }
     validation = local_validation_facts()
     trial_report = ROOT / "docs" / "current" / "phase4-third-party-trial-2026-10-18.json"
