@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T11:56:08Z",
+  "generated_at": "2026-10-18T11:57:41Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "6a4d35f6f96b9381fb528958d6f2c2b6148c40dd",
-  "git_status_porcelain": "M docs/current/PHASE4-2026-10-17.md\n M docs/current/phase4-local-validation-2026-10-18.json\n M docs/current/phase4-third-party-blocked-batches-2026-10-18.json\n M scripts/audit_phase4_current_state.py\n M scripts/build_phase4_manifest.py\n M tests/test_phase4_current_audit.py",
+  "git_sha": "385a5a7e4df45f6352ea9287a62259a4ff485249",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62",
@@ -93,7 +93,7 @@
       {
         "path": "docs/current/phase4-current-state-audit-2026-10-18.json",
         "exists": true,
-        "sha256": "9af082cfbe7bd7d34f65645bea1a444d795e9a94df93ab448487cf4efb672e4e"
+        "sha256": "e85435896feb2cc47ce6205ca1272fd82a8db7233ff186d8df7846c3b3aa4211"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
@@ -103,7 +103,7 @@
       {
         "path": "docs/current/phase4-release-manifest.json",
         "exists": true,
-        "sha256": "45ae3266a879d5319ce346c80d7ed8f6832b311ca13001064ac15113c061e2c9"
+        "sha256": "b99d062b068da75fcc785119c5f6d472dd15506d652084ade01ad1a2db7893e0"
       }
     ],
     "historical_documents_are_publish_inputs": false
@@ -623,8 +623,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 247,
-      "sha256": "077d0adb17c2e0cde2aaf2d58c47d3b4ef0e51aaf6662dc3af474f475255ca90"
+      "line_count": 248,
+      "sha256": "e657a18b9c3691075cf98b913b51e468c5d127902d8ab079fb5a39208c920791"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
