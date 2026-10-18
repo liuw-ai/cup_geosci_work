@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T23:06:06Z",
+  "generated_at": "2026-10-18T23:17:43Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -75,6 +75,20 @@
       "facts": {
         "formal_jobs": 5,
         "blocker": "remaining sources or table assets are inaccessible under current TLS/robots/browser policy"
+      }
+    },
+    {
+      "id": "third_party_official_recovery_evidence",
+      "status": "partial",
+      "evidence": [
+        "docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json"
+      ],
+      "facts": {
+        "official_notice_reachable": true,
+        "official_table_links_observed": 2,
+        "download_permission": "denied_by_browser_policy",
+        "row_level_evidence_obtained": false,
+        "publication_status": "not_published"
       }
     },
     {

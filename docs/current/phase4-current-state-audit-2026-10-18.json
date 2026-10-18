@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T23:06:03Z",
+  "generated_at": "2026-10-18T23:17:39Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "fd113ea2aa1b92f590c5309ace2b69419c992057",
-  "git_status_porcelain": "",
+  "git_sha": "fa7cd724da65a1f1128ec62d4f6ab9f0ab5978e8",
+  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
@@ -260,6 +260,10 @@
     "phase4_third_party_bingtuan_official_recovery": {
       "path": "docs/current/phase4-third-party-bingtuan-official-recovery-2026-10-19.json",
       "sha256": "d71105dbb62be53489cdedbaaa20c11e1c00d93a739bf4b9a1b7c9b6672f8634"
+    },
+    "phase4_third_party_huatu_shanxi_geology_group": {
+      "path": "docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json",
+      "sha256": "81808418c668aeb800754e01982ef01905f56762edb5a45512858ce2e146c7b0"
     },
     "phase4_local_db_write_incident": {
       "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",
@@ -737,13 +741,13 @@
     },
     {
       "path": "scripts/audit_phase4_completion.py",
-      "line_count": 215,
-      "sha256": "523b007ec42e631d64f2c8e03a1ecf6117385d25029980bce4e6117e11c889ce"
+      "line_count": 230,
+      "sha256": "983826c3cddcfde3d8672f4f20ddd2b05e632f9a557ad9f5860bd26d6bfeefe3"
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 436,
-      "sha256": "8a867138b4f03a190d1d05394286593dfc5f6a29bc59deedbd63eedf2236fa3b"
+      "line_count": 441,
+      "sha256": "81ba79a14210db85b6b77b2aca552d7f305da9ee0bf4753177db2bb6e1395c18"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -767,8 +771,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 374,
-      "sha256": "047a7df999ec082c60c49c70c5d3bed795a0e896ad085fa3276dc7a600a0563c"
+      "line_count": 376,
+      "sha256": "e88fc00a60c2ed352df97130b738fc45fba61f3ffe0eb6be3e8084ca59902da5"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -832,8 +836,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 230,
-      "sha256": "2ffd27925df9c3c3ae06dc314605cb83f3eb2eb023c90e7e7b0c1f6d2086bce8"
+      "line_count": 231,
+      "sha256": "0efa076cd2ed21cc52c90c97975fbb5bb6c35281d5eaa5d24794166b18520d1b"
     },
     {
       "path": "tests/conftest.py",
