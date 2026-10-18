@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T23:24:26Z",
+  "generated_at": "2026-10-18T23:25:25Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "807cbda40d9bb726130f9ae4faae9e5b639fbfaf",
+  "git_sha": "9a7cfa979532c1ec26b24d869232d3f67a2a5bbc",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -775,8 +775,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 378,
-      "sha256": "c9b14654a6e195d63bb3741343ecbd43de622dfca4b44ca83dfb9093dcdfb98c"
+      "line_count": 379,
+      "sha256": "3e68d4003a323b054115655eeb52022b4a15a2a44740643680e9438680d26924"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -1240,13 +1240,18 @@
     },
     {
       "path": "tests/test_phase4_completion_audit.py",
-      "line_count": 16,
-      "sha256": "101b3de148b5115820fb0081f918c8c0f8fefa113b586f455360d4279b12bd1c"
+      "line_count": 17,
+      "sha256": "ccf37255f4daa9400627f61939d936bb56a6bc60d0af5ab9aa54d3f4b6e6a5f3"
     },
     {
       "path": "tests/test_phase4_current_audit.py",
       "line_count": 39,
       "sha256": "499f6a92368a3a575ed43ffeb29b71a20a1cd2fd82e157bef82c075bc4264206"
+    },
+    {
+      "path": "tests/test_phase4_hbdk_evidence.py",
+      "line_count": 30,
+      "sha256": "536e3e6d7577d486d56e96aa3e92fbbb08f8bf7c9196301ff3adf4be1aa6acb3"
     },
     {
       "path": "tests/test_phase4_manifest.py",
