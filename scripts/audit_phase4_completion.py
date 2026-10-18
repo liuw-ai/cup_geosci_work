@@ -55,6 +55,7 @@ def build_report() -> dict[str, Any]:
     validation = _read("docs/current/phase4-local-validation-2026-10-19.json")
     funnel = _read("docs/current/phase4-third-party-funnel-audit-2026-10-18.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
+    workspace_layout = _read("docs/current/phase4-workspace-layout-audit-2026-10-19.json")
     database = _database_facts()
     manifest_boundary_ok = (
         manifest.get("working_tree_dirty") is False
@@ -169,6 +170,17 @@ def build_report() -> dict[str, Any]:
                 "production_deployment": manifest.get("production_deployment"),
                 "automation_status": manifest.get("automation_status"),
                 "release_blockers": manifest.get("release_blockers", []),
+            },
+        },
+        {
+            "id": "workspace_layout_audit",
+            "status": workspace_layout.get("status", "review_required"),
+            "evidence": ["docs/current/phase4-workspace-layout-audit-2026-10-19.json"],
+            "facts": {
+                "production_entrypoint": workspace_layout.get("production_entrypoint"),
+                "root_compatibility_files": len(workspace_layout.get("root_compatibility_files", [])),
+                "current_docs_database_files": workspace_layout.get("current_docs_database_files", []),
+                "history_is_present": workspace_layout.get("history_is_present", False),
             },
         },
     ]

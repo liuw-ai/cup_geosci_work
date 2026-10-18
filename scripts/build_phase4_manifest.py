@@ -32,6 +32,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
     ":!docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
     ":!docs/current/phase4-completion-audit-2026-10-19.json",
+    ":!docs/current/phase4-workspace-layout-audit-2026-10-19.json",
 )
 
 
@@ -200,6 +201,7 @@ def main() -> None:
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
     completion_audit = ROOT / "docs" / "current" / "phase4-completion-audit-2026-10-19.json"
+    workspace_layout = ROOT / "docs" / "current" / "phase4-workspace-layout-audit-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     working_tree_dirty = dirty()
     release_blockers = []
@@ -278,6 +280,7 @@ def main() -> None:
             "phase4_local_db_write_incident": sha256(local_db_write_incident),
             "phase4_three_oil_homepage_probe": sha256(three_oil_homepage_probe),
             "phase4_completion_audit": sha256(completion_audit),
+            "phase4_workspace_layout": sha256(workspace_layout),
         },
         "database": database,
         "target_metrics": {
