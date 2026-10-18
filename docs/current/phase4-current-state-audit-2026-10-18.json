@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T10:55:17Z",
+  "generated_at": "2026-10-18T11:14:11Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "8ff4fab69061ca7d0d0a94039c47d478f1e5db96",
+  "git_sha": "c800416e0c035693debaacda22cfe26700bf61a0",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -79,7 +79,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-18.json",
-      "sha256": "c4b87379877ef06258a28efa92ed18ed7d7059b468b23cc4e2d3d94cf486a0bc"
+      "sha256": "400463ff433c0afdb36bece1bc323938272d0ecbae9b583bb6f9e2b77f76c68a"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -95,7 +95,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "0f42b8b19f32a548f80b83a8d0c8b690c65de4c6d9c4e7e486c0e380da4379ed"
+      "sha256": "8ec5b332697e73dc4e3d48fc8ac4df52c8297525de09a6e0679eb14934248348"
     }
   },
   "code_inventory": [
@@ -521,8 +521,8 @@
     },
     {
       "path": "job_hub/third_party_tables.py",
-      "line_count": 464,
-      "sha256": "e70ba7dc874f2b6916554937c2edb63d2c7d81660b6b218c1410b214e2e69add"
+      "line_count": 538,
+      "sha256": "abd3ed92939e2c68812cd88567ca034f3a71e77a8b8a9c0e02ea6b9245245451"
     },
     {
       "path": "job_hub/three_oil_catalog.py",
@@ -1181,8 +1181,8 @@
     },
     {
       "path": "tests/test_third_party_tables.py",
-      "line_count": 222,
-      "sha256": "d0c9de13417a5211648a18cb68c2b9de207ec7113310cb7e0403f36fa0234ffc"
+      "line_count": 262,
+      "sha256": "d9bf52e944113898b63304828edac99848fd5bad4027419d60d6afae38ec08e9"
     },
     {
       "path": "tests/test_three_oil_catalog.py",
