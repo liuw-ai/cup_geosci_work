@@ -1,10 +1,10 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T01:56:02+08:00",
+  "validated_at": "2026-10-19T02:15:44+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "85d3b190395297ac06bb1f0d18283a8d4cdcba33",
-  "git_sha_at_validation": "85d3b190395297ac06bb1f0d18283a8d4cdcba33",
+  "git_sha_before_metadata_commit": "9b7c6dbe3904241f88eb983a7cc8f5d4f93eaafc",
+  "git_sha_at_validation": "9b7c6dbe3904241f88eb983a7cc8f5d4f93eaafc",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1075,
@@ -58,6 +58,7 @@
       "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
     },
     "robots_gate_targeted_tests": "13 passed (tests/test_third_party_tables.py, tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py)",
+    "source_disabled_visibility_regression": "included in full 1075-test run; disabled source remains student-visible without withdrawal",
     "robots_or_permission_blocked_followups": 1
   },
   "local_web_read_only": {

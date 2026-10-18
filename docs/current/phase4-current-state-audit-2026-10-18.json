@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T18:11:27Z",
+  "generated_at": "2026-10-18T18:16:08Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "accf099d9bc9d241f3b1f32d96994ff4a81b26fa",
-  "git_status_porcelain": "M docs/current/PHASE4-2026-10-17.md\n M job_hub/db.py\n M scripts/audit_phase4_current_state.py\n M scripts/build_phase4_manifest.py\n M tests/test_source_freshness.py\n?? docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
+  "git_sha": "9b7c6dbe3904241f88eb983a7cc8f5d4f93eaafc",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
@@ -93,7 +93,7 @@
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "27ef9a4a69d0a5c02315a6b70420b3e7cc4f9784fd1bf304b0c861efdb7b8222"
+        "sha256": "01e9274f1d299861ee1f92fd1a3c134e3420c37a7f8f2e618f32f53e3c0d251a"
       }
     ],
     "metadata_documents": [
@@ -137,7 +137,7 @@
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-      "sha256": "cafcd4845e0fe82470ba8d0dda9cb9b7905ef7f544ed5473555043f580228437"
+      "sha256": "25318540d79995e956bc1db156917b23bef0a39195f1acff8d7d111e7f143eef"
     },
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
@@ -145,7 +145,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "27ef9a4a69d0a5c02315a6b70420b3e7cc4f9784fd1bf304b0c861efdb7b8222"
+      "sha256": "01e9274f1d299861ee1f92fd1a3c134e3420c37a7f8f2e618f32f53e3c0d251a"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -177,7 +177,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "a606deb8e47fb1fc7dde15edf1aa03de7d2e678ffb624f840c2c8cea57d12577"
+      "sha256": "8467e55f19c137e49c53502e00b6a025382496b67a38767a35e4705a124784ba"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
