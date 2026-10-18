@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 MATRIX = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
 FULL_CNOOC_EVIDENCE = ROOT / "docs" / "current" / "phase4-cnooc-unit-job-evidence-2026-10-19.json"
 SINOPEC_PAGE_ROSTER = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
+COOEC_NEGATIVE_EVIDENCE = ROOT / "docs" / "current" / "phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json"
 
 
 def test_phase4_three_oil_entry_matrix_covers_every_formal_catalog_unit() -> None:
@@ -24,6 +25,12 @@ def test_phase4_three_oil_entry_matrix_covers_every_formal_catalog_unit() -> Non
     assert len(cnooc_observed) == 16
     assert sum(int(item["observed_official_job_count"]) for item in cnooc_observed) == 350
     assert all(item["observed_official_application_url"] for item in cnooc_observed)
+    cooec = next(item for item in units if item["catalog_id"] == "cnooc-engineering")
+    assert cooec["unit_specific_entry_status"] == "official_site_checked_no_unit_entry_found"
+    assert cooec["unit_specific_entry_url"] is None
+    negative = json.loads(COOEC_NEGATIVE_EVIDENCE.read_text(encoding="utf-8"))
+    assert negative["evidence_boundary"]["official_identity_verified"] is True
+    assert negative["evidence_boundary"]["unit_specific_recruitment_entry_verified"] is False
     full_evidence = json.loads(FULL_CNOOC_EVIDENCE.read_text(encoding="utf-8"))
     assert full_evidence["unit_count"] == 16
     assert full_evidence["total_job_cards"] == 350
