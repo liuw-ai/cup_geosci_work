@@ -114,6 +114,7 @@ def main() -> None:
     reconciliation = json.loads(
         (ROOT / "docs" / "current" / "phase4-organization-reconciliation-2026-10-17.json").read_text(encoding="utf-8")
     )
+    pre_candidate_backup = ROOT / "backups" / "job_hub-pre-phase4-third-party-candidate-20261018.sqlite3"
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
     database["pre_third_party_candidate_backup"] = {
         "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
@@ -126,7 +127,6 @@ def main() -> None:
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
     current_audit = ROOT / "docs" / "current" / "phase4-current-state-audit-2026-10-18.json"
     manual_candidate = ROOT / "docs" / "current" / "phase4-third-party-candidate-2026-10-18.json"
-    pre_candidate_backup = ROOT / "backups" / "job_hub-pre-phase4-third-party-candidate-20261018.sqlite3"
     working_tree_dirty = dirty()
     release_blockers = []
     if working_tree_dirty:
