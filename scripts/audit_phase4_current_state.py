@@ -254,6 +254,7 @@ def main() -> None:
     local_web_live_validation = ROOT / "docs" / "current" / "phase4-local-web-live-validation-2026-10-19.json"
     huatu_table_discovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-table-discovery-2026-10-19.json"
     huatu_discovery_scan = ROOT / "docs" / "current" / "phase4-third-party-huatu-discovery-2026-10-19.json"
+    bingtuan_official_recovery = ROOT / "docs" / "current" / "phase4-third-party-bingtuan-official-recovery-2026-10-19.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
@@ -390,6 +391,10 @@ def main() -> None:
             "phase4_huatu_discovery_scan": {
                 "path": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
                 "sha256": sha256(huatu_discovery_scan),
+            },
+            "phase4_third_party_bingtuan_official_recovery": {
+                "path": "docs/current/phase4-third-party-bingtuan-official-recovery-2026-10-19.json",
+                "sha256": sha256(bingtuan_official_recovery),
             },
             "phase4_local_db_write_incident": {
                 "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",

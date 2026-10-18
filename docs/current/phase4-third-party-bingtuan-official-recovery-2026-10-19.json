@@ -1,0 +1,49 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-19T00:00:00+08:00",
+  "discovery_source_id": "huatu-discovery",
+  "source_grade": "B",
+  "discovery_page_url": "http://www.huatu.com/2026/0127/2848190.html",
+  "discovery_title": "2026年度新疆生产建设兵团考试录用公务员职位表",
+  "official_recovery": {
+    "official_source_id": "bingtuan-exam-information",
+    "official_notice_url": "http://btpta.xjbt.gov.cn/c/2026-01-27/8469205.shtml",
+    "official_notice_title": "新疆生产建设兵团2026年度考试录用公务员公告",
+    "official_notice_published_date": "2026-01-27",
+    "official_table_url": "http://btpta.xjbt.gov.cn/upload/resources/file/2026/01/27/614535.xlsx",
+    "official_application_url": null,
+    "application_note": "公告说明通过兵团考试信息网相关报名系统报名；本公告 DOM 未提供可绑定到具体岗位的独立 HTTP 报名 URL。",
+    "official_evidence_observed": [
+      "公告确认职位表名称和官方附件链接",
+      "公告公布报名时间为2026-01-30 12:00至2026-02-06 18:00",
+      "公告提供专科以上学历门槛和官方报名说明"
+    ]
+  },
+  "third_party_attachment": {
+    "url": "https://u3.huatu.com/uploads/soft/260127/%E8%81%8C%E4%BD%8D%E8%A1%A8.xlsx",
+    "robots_status": "not_downloaded",
+    "downloaded": false,
+    "reason": "华图附件域名此前 robots 禁止抓取；不下载第三方副本。"
+  },
+  "official_table_capture": {
+    "downloaded": false,
+    "reason": "官方 XLSX 下载触发浏览器权限提示，本次权限被拒；未使用命令行或其他方式绕过。",
+    "rows_parsed": 0,
+    "sha256": null
+  },
+  "publication_decision": {
+    "candidate_leads_created": 0,
+    "formal_jobs_created": 0,
+    "student_visible": false,
+    "reason": "未取得官方职位表字节和岗位行，不能生成岗位候选；且公告报名截止日期已过（2026-02-06）。"
+  },
+  "policy_checks": {
+    "third_party_link_as_application": false,
+    "official_url_recovered": true,
+    "official_table_row_evidence": false,
+    "robots_bypass": false,
+    "browser_download_permission_bypass": false,
+    "server_deployment": false
+  },
+  "next_action": "若要把该批次作为历史解析测试，需用户在浏览器中明确允许官方 XLSX 下载或提供合法原始文件；不得把已截止批次发布到学生端。"
+}
