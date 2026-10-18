@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T15:05:18Z",
+  "generated_at": "2026-10-18T15:05:54Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "9af5a68774adc0c7738f84946c17ac703b6bc961",
-  "git_status_porcelain": "M docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
+  "git_sha": "2af4caa4219db891b34e499c35b7a1faf9636703",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
