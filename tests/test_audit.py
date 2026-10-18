@@ -112,3 +112,56 @@ def test_database_audit_does_not_trust_research_category_for_legacy_public_row(t
     codes = {item["code"] for item in result["issues"]}
     assert result["ok"] is False
     assert "public_job_publication_decision_mismatch" in codes
+
+
+def test_database_audit_does_not_use_relevance_threshold_against_incomplete_layer(
+    tmp_path,
+) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    source_record = source()
+    source_record["config"] = {"minimum_relevance": 99}
+    database.upsert_source(source_record)
+    pipeline = JobPipeline(settings, database)
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(
+            RawPosting(
+                title="地质工程岗位",
+                employer="测试能源集团",
+                source_url="https://careers.example.edu.cn/jobs/incomplete",
+                application_url=None,
+                text="专业要求：地质工程；学历要求：硕士研究生。",
+                summary="官方岗位。",
+                published_date="2026-10-01",
+                deadline_date="2099-12-31",
+                location="北京",
+                external_id="audit-incomplete-layer",
+                field_evidence={
+                    "evidence_scope": "official_html_table_row",
+                    "岗位名称": "地质工程岗位",
+                    "专业范围": "地质工程",
+                    "学历要求": "硕士研究生",
+                    "工作地点": "北京",
+                },
+            ),
+            source_record,
+        )
+    )
+    with database.connect() as connection:
+        connection.execute(
+            """
+            UPDATE jobs
+            SET relevance_score = 0,
+                publication_status = 'pending_evidence',
+                publication_layer = 'incomplete_but_basic_match'
+            WHERE id = ?
+            """,
+            (job_id,),
+        )
+        connection.commit()
+
+    result = audit_database(database, settings)
+    assert not any(
+        item["code"] == "below_source_threshold" for item in result["issues"]
+    )

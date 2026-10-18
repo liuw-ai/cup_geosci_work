@@ -1,24 +1,24 @@
 {
-  "generated_at": "2026-10-18T16:29:14Z",
+  "generated_at": "2026-10-18T16:49:07Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "f0c69b8600a47820b56ff6bddee6a8da0ef44888",
-  "git_status_porcelain": "",
+  "git_sha": "c715cb1f0bd871ae67540c850ec4fe0273278b3e",
+  "git_status_porcelain": "M README.md\n M docs/current/PHASE4-2026-10-17.md\n M job_hub/audit.py\n M scripts/audit_phase4_current_state.py\n M scripts/build_phase4_manifest.py\n M tests/test_audit.py\n?? docs/current/phase4-local-repair-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
+    "sha256": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
     "integrity_check": "ok",
     "job_count": 3952,
     "status_counts": {
-      "expired": 106,
-      "open": 3750,
+      "expired": 264,
+      "open": 3592,
       "superseded": 45,
       "withdrawn": 51
     },
     "publication_layer_counts": {
       "broad_geoscience_match": 5,
-      "exact_match": 211,
-      "incomplete_but_basic_match": 615,
+      "exact_match": 202,
+      "incomplete_but_basic_match": 624,
       "not_public": 2955,
       "source_unavailable": 166
     },
@@ -28,8 +28,8 @@
     "student_read_as_of_date": "2026-10-19",
     "student_visible_layer_counts": {
       "broad_geoscience_match": 5,
-      "exact_match": 146,
-      "incomplete_but_basic_match": 367,
+      "exact_match": 140,
+      "incomplete_but_basic_match": 373,
       "not_public": 0,
       "source_unavailable": 111
     },
@@ -88,7 +88,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "1dd245fa6724e864caec893fde317d64f98094609ec321f80598905a866c5fe3"
+        "sha256": "f37b9122c0e83c907adb2e615342b9a27c8d190944a88dd9ad31daf28f378a16"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
@@ -155,6 +155,10 @@
       "path": "docs/current/phase4-third-party-access-recheck-2026-10-19.json",
       "sha256": "2084cc2ff11ac68267ebe74b32e1a2a38c8d0c409343ec51c7a5cb55d54da7be"
     },
+    "phase4_local_repair": {
+      "path": "docs/current/phase4-local-repair-2026-10-19.json",
+      "sha256": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb"
+    },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
       "sha256": "7481c6cdd6939996069831b70e989ae4d779751c98b61fd60bb2e863a0cb0c9e"
@@ -165,7 +169,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "1dd245fa6724e864caec893fde317d64f98094609ec321f80598905a866c5fe3"
+      "sha256": "f37b9122c0e83c907adb2e615342b9a27c8d190944a88dd9ad31daf28f378a16"
     }
   },
   "code_inventory": [
@@ -191,8 +195,8 @@
     },
     {
       "path": "job_hub/audit.py",
-      "line_count": 461,
-      "sha256": "3009cd31b57734355de77c2b13ed5080e316c118b138406c179383a489f9f4d5"
+      "line_count": 475,
+      "sha256": "5039a704eb51292915744f02fe78e3a0117a4631108f25ee6961ec14260998ce"
     },
     {
       "path": "job_hub/backups.py",
@@ -631,8 +635,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 318,
-      "sha256": "ddc843274ac72140ea0731b79453af9350c9a889c7ebe97957bcdabc99494f26"
+      "line_count": 323,
+      "sha256": "ed6d489571e23d58fa29ef50c5d497832b686f621614cab4ef0ba8c09c8dfd0d"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -646,8 +650,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 279,
-      "sha256": "1840bc9d58a02299ecee75caa1d146e974f81d0f386eb4245755fcbccbe17836"
+      "line_count": 286,
+      "sha256": "c07abf5bdcec846ae6f42c15a7f361a9fd7287c5d96971a9aee94a9ed13aa850"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -726,8 +730,8 @@
     },
     {
       "path": "tests/test_audit.py",
-      "line_count": 114,
-      "sha256": "d5aba8079f61ae338c96c1f7129d1708287f71437cce75a33dde8ebacb5d3cdc"
+      "line_count": 167,
+      "sha256": "80d71df71a6b661b8d517a2893cede30da9cd4e5c74642f72deb5c813f151ce9"
     },
     {
       "path": "tests/test_backups.py",

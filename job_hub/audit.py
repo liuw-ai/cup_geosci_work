@@ -331,7 +331,21 @@ def audit_database(
                     "message": "来源 minimum_relevance 不是整数。",
                 }
             )
-        if int(job.get("relevance_score", 0)) < minimum:
+        # ``minimum_relevance`` is a source-side discovery/triage signal.  It
+        # must not override the Phase 3 publication layers: once a row has
+        # official evidence and a basic geoscience match, missing degree,
+        # location, deadline, or temporary source access belongs to its
+        # explicit layer rather than an implicit relevance-based rejection.
+        if (
+            int(job.get("relevance_score", 0)) < minimum
+            and job.get("publication_layer")
+            not in {
+                "exact_match",
+                "broad_geoscience_match",
+                "incomplete_but_basic_match",
+                "source_unavailable",
+            }
+        ):
             issues.append(
                 {
                     "code": "below_source_threshold",

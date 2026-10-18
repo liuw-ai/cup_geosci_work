@@ -1,13 +1,13 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T00:16:54+08:00",
+  "validated_at": "2026-10-19T00:52:12+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "af8eef7bbfb25f7d2b4e29bb7bf7f884215a8e94",
-  "git_sha_at_validation": "af8eef7bbfb25f7d2b4e29bb7bf7f884215a8e94",
+  "git_sha_before_metadata_commit": "pending-source-commit",
+  "git_sha_at_validation": "pending-source-commit",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1073,
+    "passed": 1074,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
@@ -20,8 +20,8 @@
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256_before_tests": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
-    "sha256_after_tests": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
+    "sha256_before_tests": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
+    "sha256_after_tests": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
     "integrity_check": "ok",
     "jobs": 3952,
     "candidate_leads": 6,
@@ -29,9 +29,9 @@
     "student_read_as_of_date": "2026-10-19",
     "student_visible_total": 629,
     "student_visible_layer_counts": {
-      "exact_match": 146,
+      "exact_match": 140,
       "broad_geoscience_match": 5,
-      "incomplete_but_basic_match": 367,
+      "incomplete_but_basic_match": 373,
       "source_unavailable": 111
     }
   },
@@ -83,7 +83,9 @@
       "third_party_discovery_url_is_student_visible": false
     },
     "broad_layer_total": 5,
-    "homepage_job_table_link_label_present": true,
+    "homepage_job_table_link_label_present": false,
+    "detail_job_id": 5433,
+    "detail_job_table_link_label_present": true,
     "homepage_third_party_discovery_domain_exposed": false,
     "server_deployment": false
   },

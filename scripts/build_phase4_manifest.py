@@ -54,6 +54,8 @@ def dirty() -> bool:
                 ".",
                 ":!docs/current/phase4-current-state-audit-2026-10-18.json",
                 ":!docs/current/phase4-release-manifest.json",
+                ":!docs/current/phase4-local-validation-2026-10-18.json",
+                ":!docs/current/phase4-local-web-recheck-2026-10-18.json",
             ],
             cwd=ROOT,
             text=True,
@@ -135,6 +137,7 @@ def main() -> None:
     pre_candidate_backup = ROOT / "backups" / "job_hub-pre-phase4-third-party-candidate-20261018.sqlite3"
     pre_hrinm_backup = ROOT / "backups" / "job_hub-pre-phase4-hrinm-20261018.sqlite3"
     pre_conversion_audit_backup = ROOT / "backups" / "job_hub-pre-phase4-conversion-audit-20261018.sqlite3"
+    pre_local_repair_backup = ROOT / "backups" / "job_hub-pre-phase4-deadline-location-repair-20261019.sqlite3"
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
     database["pre_third_party_candidate_backup"] = {
         "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
@@ -148,6 +151,10 @@ def main() -> None:
         "path": "backups/job_hub-pre-phase4-conversion-audit-20261018.sqlite3",
         "sha256": sha256(pre_conversion_audit_backup),
     }
+    database["pre_deadline_location_repair_backup"] = {
+        "path": "backups/job_hub-pre-phase4-deadline-location-repair-20261019.sqlite3",
+        "sha256": sha256(pre_local_repair_backup),
+    }
     validation = local_validation_facts()
     trial_report = ROOT / "docs" / "current" / "phase4-third-party-trial-2026-10-18.json"
     entry_evidence = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"
@@ -160,6 +167,7 @@ def main() -> None:
     cgs_trial = ROOT / "docs" / "current" / "phase4-third-party-cgs-2026-10-18.json"
     blocked_batches = ROOT / "docs" / "current" / "phase4-third-party-blocked-batches-2026-10-18.json"
     access_recheck = ROOT / "docs" / "current" / "phase4-third-party-access-recheck-2026-10-19.json"
+    local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
     third_party_funnel = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
     local_web_recheck = ROOT / "docs" / "current" / "phase4-local-web-recheck-2026-10-18.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
@@ -217,6 +225,7 @@ def main() -> None:
             "phase4_third_party_cgs": sha256(cgs_trial),
             "phase4_third_party_blocked_batches": sha256(blocked_batches),
             "phase4_third_party_access_recheck": sha256(access_recheck),
+            "phase4_local_repair": sha256(local_repair),
             "phase4_third_party_funnel": sha256(third_party_funnel),
             "phase4_local_web_recheck": sha256(local_web_recheck),
             "phase4_main_record": sha256(phase4_record),

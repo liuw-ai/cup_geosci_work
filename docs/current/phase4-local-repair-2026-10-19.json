@@ -1,0 +1,46 @@
+{
+  "phase": "phase4",
+  "repair_date": "2026-10-19",
+  "timezone": "Asia/Shanghai",
+  "scope": "local_database_policy_repair_only",
+  "server_deployment": false,
+  "backup_before_repair": {
+    "path": "backups/job_hub-pre-phase4-deadline-location-repair-20261019.sqlite3",
+    "sha256": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a"
+  },
+  "database_after_repair": {
+    "path": "runtime/job_hub.sqlite3",
+    "sha256": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
+    "integrity_check": "ok",
+    "job_count": 3952,
+    "status_counts": {
+      "expired": 264,
+      "open": 3592,
+      "superseded": 45,
+      "withdrawn": 51
+    },
+    "student_read_as_of": "2026-10-19",
+    "student_visible_total": 629,
+    "student_visible_layer_counts": {
+      "exact_match": 140,
+      "broad_geoscience_match": 5,
+      "incomplete_but_basic_match": 373,
+      "source_unavailable": 111
+    }
+  },
+  "changes": {
+    "deadline_expired_rows": 158,
+    "deadline_policy": "deadline_date_before_2026-10-19_only",
+    "location_split_rows_reclassified": [3471, 3474, 3482, 3631, 3634, 3642, 3770, 3774, 3777],
+    "location_reclassification_layer": "incomplete_but_basic_match",
+    "location_reclassification_reason": "官方详情存在多个地点变体，当前展示地点与岗位级地点证据未形成一一对应关系，待逐行复核。",
+    "direct_official_application_urls_repaired": [3471, 3474, 3482, 3631, 3634, 3642, 3770, 3774, 3777]
+  },
+  "verification": {
+    "database_audit": "pass",
+    "publication_decision_mismatch_count": 0,
+    "source_freshness_used_for_status": false,
+    "source_freshness_used_for_visibility": false,
+    "official_cancelled_or_professional_withdrawals_changed": false
+  }
+}
