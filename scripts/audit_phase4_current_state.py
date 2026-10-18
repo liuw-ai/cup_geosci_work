@@ -147,6 +147,7 @@ def main() -> None:
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
     validation = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-18.json"
     manual_candidate = ROOT / "docs" / "current" / "phase4-third-party-candidate-2026-10-18.json"
+    phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     report = {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "phase": "phase4",
@@ -179,6 +180,10 @@ def main() -> None:
             "phase4_third_party_candidate": {
                 "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
                 "sha256": sha256(manual_candidate),
+            },
+            "phase4_main_record": {
+                "path": "docs/current/PHASE4-2026-10-17.md",
+                "sha256": sha256(phase4_record),
             },
         },
         "code_inventory": code_facts(),
