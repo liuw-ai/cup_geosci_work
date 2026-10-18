@@ -53,6 +53,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_third_party_cgs": "docs/current/phase4-third-party-cgs-2026-10-18.json",
     "phase4_third_party_blocked_batches": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
     "phase4_third_party_nhri_official_page": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
+    "phase4_third_party_huatu_nanjing_land_center": "docs/current/phase4-third-party-huatu-nanjing-land-center-2026-10-19.json",
     "phase4_third_party_lead_recheck": "docs/current/phase4-third-party-lead-recheck-2026-10-19.json",
     "phase4_cnpc_entry_recheck": "docs/current/phase4-cnpc-entry-recheck-2026-10-19.json",
     "phase4_third_party_access_recheck": "docs/current/phase4-third-party-access-recheck-2026-10-19.json",

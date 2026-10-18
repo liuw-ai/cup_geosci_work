@@ -1,0 +1,58 @@
+{
+  "phase": "phase4",
+  "captured_at": "2026-10-18T22:53:22Z",
+  "discovery_source_id": "huatu-discovery",
+  "discovery_page_url": "https://sydw.huatu.com/2026/0930/2874333.html",
+  "discovery_title": "2026年江苏南京市国土资源信息中心公开招聘工作人员2人公告（第二批）",
+  "official_recovery": {
+    "publisher": "南京市规划和自然资源局",
+    "employer": "南京市国土资源信息中心",
+    "official_notice_url": "https://ghj.nanjing.gov.cn/njsgtzyj/202609/t20260929_5919792.html",
+    "official_notice_title": "南京市国土资源信息中心2026年编外人员公开招聘公告（第二批）",
+    "official_notice_date": "2026-09-30",
+    "official_table_url": "https://ghj.nanjing.gov.cn/njsgtzyj/202609/P020260929632911959398.pdf",
+    "official_application_url": "https://dengfeng.zhaopin.com",
+    "announced_headcount": 2,
+    "location": "南京市鼓楼区中山路171号",
+    "application_window": {
+      "start": "2026-09-30",
+      "deadline": "2026-10-14T17:00:00+08:00",
+      "timezone": "Asia/Shanghai"
+    },
+    "official_page_fields": [
+      "publisher",
+      "notice date",
+      "official table link",
+      "official application URL",
+      "headcount",
+      "location",
+      "deadline"
+    ]
+  },
+  "verification": {
+    "mode": "read_only_browser_dom",
+    "official_notice_reachable": true,
+    "official_table_link_observed": true,
+    "official_application_link_observed": true,
+    "row_level_evidence_obtained": false,
+    "third_party_attachment_download_attempted": false,
+    "official_attachment_download_permission": "denied",
+    "source_page_attachment_url": "https://u3.huatu.com/uploads/soft/260930/P020260929632911959398.pdf",
+    "source_page_attachment_robots": "not downloaded; prior Huatu u3 robots policy blocks this host",
+    "notes": "官方公告页可直接核验，但岗位表行级专业、学历和岗位编号未取得。"
+  },
+  "publication_decision": {
+    "status": "not_published",
+    "reason": "official_deadline_passed_and_row_level_table_evidence_unavailable",
+    "candidate_lead_created": false,
+    "formal_job_created": false,
+    "student_visible": false,
+    "student_counted": false
+  },
+  "link_policy": {
+    "third_party_discovery_url_internal_only": true,
+    "official_notice_url_retained": true,
+    "official_table_url_retained": true,
+    "official_application_url_retained": true
+  }
+}

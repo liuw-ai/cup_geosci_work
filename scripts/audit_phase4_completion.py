@@ -101,6 +101,7 @@ def build_report() -> dict[str, Any]:
             "evidence": [
                 "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
                 "docs/current/phase4-third-party-cgs-2026-10-18.json",
+                "docs/current/phase4-third-party-huatu-nanjing-land-center-2026-10-19.json",
             ],
             "facts": {
                 "candidate_leads": third_party.get("candidate_leads", 0),

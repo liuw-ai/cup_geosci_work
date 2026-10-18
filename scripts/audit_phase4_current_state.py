@@ -245,6 +245,7 @@ def main() -> None:
     cgs_trial = ROOT / "docs" / "current" / "phase4-third-party-cgs-2026-10-18.json"
     blocked_batches = ROOT / "docs" / "current" / "phase4-third-party-blocked-batches-2026-10-18.json"
     nhri_official_page = ROOT / "docs" / "current" / "phase4-third-party-nhri-official-page-2026-10-19.json"
+    huatu_nanjing_land_center = ROOT / "docs" / "current" / "phase4-third-party-huatu-nanjing-land-center-2026-10-19.json"
     lead_recheck = ROOT / "docs" / "current" / "phase4-third-party-lead-recheck-2026-10-19.json"
     cnpc_entry_recheck = ROOT / "docs" / "current" / "phase4-cnpc-entry-recheck-2026-10-19.json"
     access_recheck = ROOT / "docs" / "current" / "phase4-third-party-access-recheck-2026-10-19.json"
@@ -356,6 +357,10 @@ def main() -> None:
                 "path": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
                 "sha256": sha256(nhri_official_page),
             },
+            "phase4_third_party_huatu_nanjing_land_center": {
+                "path": "docs/current/phase4-third-party-huatu-nanjing-land-center-2026-10-19.json",
+                "sha256": sha256(huatu_nanjing_land_center),
+            },
             "phase4_third_party_lead_recheck": {
                 "path": "docs/current/phase4-third-party-lead-recheck-2026-10-19.json",
                 "sha256": sha256(lead_recheck),
@@ -417,6 +422,7 @@ def main() -> None:
             "notes": [
                 "One C-level discovery lead was recovered to an official employer notice and published as job 5432; four B-level Huatu discovery rows were recovered to the official CGS attachment and published as jobs 5433-5436; no server deployment was performed.",
                 "The remaining C-level lead (candidate 1) was rechecked on 2026-10-19; no job-specific official evidence or application URL was found, so it remains private and unresolved.",
+                "A second Huatu announcement was recovered to the Nanjing Planning and Natural Resources Bureau official notice, table URL, and application URL; its deadline had passed and row-level table evidence was unavailable, so no candidate or formal job was created.",
                 "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
                 "Historical snapshots remain archived and are not overwritten by current facts.",
             ],
