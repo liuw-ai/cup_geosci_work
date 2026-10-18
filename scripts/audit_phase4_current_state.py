@@ -34,6 +34,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-release-manifest.json",
     ":!docs/current/phase4-local-validation-2026-10-19.json",
     ":!docs/current/phase4-local-web-recheck-2026-10-19.json",
+    ":!docs/current/phase4-local-web-live-validation-2026-10-19.json",
     ":!docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
     ":!docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
 )
@@ -250,6 +251,7 @@ def main() -> None:
     local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
     third_party_funnel = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
     local_web_recheck = ROOT / "docs" / "current" / "phase4-local-web-recheck-2026-10-19.json"
+    local_web_live_validation = ROOT / "docs" / "current" / "phase4-local-web-live-validation-2026-10-19.json"
     huatu_table_discovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-table-discovery-2026-10-19.json"
     huatu_discovery_scan = ROOT / "docs" / "current" / "phase4-third-party-huatu-discovery-2026-10-19.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
@@ -348,6 +350,10 @@ def main() -> None:
             "phase4_local_web_recheck": {
                 "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
                 "sha256": sha256(local_web_recheck),
+            },
+            "phase4_local_web_live_validation": {
+                "path": "docs/current/phase4-local-web-live-validation-2026-10-19.json",
+                "sha256": sha256(local_web_live_validation),
             },
             "phase4_huatu_table_discovery": {
                 "path": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",

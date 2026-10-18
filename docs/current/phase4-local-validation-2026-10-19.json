@@ -104,7 +104,7 @@
     "server_deployment": false,
     "coverage_status": 200,
     "coverage_seconds": 24.629,
-    "latest_recheck_report": "docs/current/phase4-local-web-recheck-2026-10-19.json",
+    "latest_recheck_report": "docs/current/phase4-local-web-live-validation-2026-10-19.json",
     "database_mode_note": "all requests used a temporary copy; the earlier local Flask process was stopped and is recorded in phase4-local-db-write-incident-2026-10-19.json"
   },
   "release_boundary": {
