@@ -90,6 +90,43 @@ def registry_recruitment_entry(
     return None
 
 
+def registry_shared_group_entry(
+    registry: dict[str, object],
+    *,
+    unit_id: str,
+    group_entry_url: str | None,
+) -> dict[str, str] | None:
+    """Return an explicitly verified channel that is exactly the group portal."""
+
+    organizations = registry.get("organizations") if isinstance(registry, dict) else None
+    if not isinstance(organizations, list):
+        return None
+    shared = str(group_entry_url or "").strip().rstrip("/")
+    if not shared:
+        return None
+    for organization in organizations:
+        if not isinstance(organization, dict) or str(organization.get("id") or "") != unit_id:
+            continue
+        for channel in organization.get("channels", []):
+            if not isinstance(channel, dict):
+                continue
+            url = str(channel.get("official_url") or "").strip()
+            status = str(channel.get("verification_status") or "").strip()
+            if (
+                status in {"official_confirmed", "automation_ready"}
+                and str(channel.get("channel_type") or "").strip() == "campus_recruitment"
+                and url.startswith(("http://", "https://"))
+                and url.rstrip("/") == shared
+            ):
+                return {
+                    "url": url,
+                    "channel_id": str(channel.get("id") or ""),
+                    "channel_type": str(channel.get("channel_type") or ""),
+                    "verification_status": status,
+                }
+    return None
+
+
 def main() -> None:
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
@@ -140,6 +177,11 @@ def main() -> None:
                 unit_id=unit_id,
                 group_entry_url=group_entry_url,
             )
+            shared_entry = None if is_group else registry_shared_group_entry(
+                registry,
+                unit_id=unit_id,
+                group_entry_url=group_entry_url,
+            )
             if is_group:
                 unit_status = "group_portal_verified" if group_status == "official_portal_verified" else "group_portal_not_revalidated"
             elif unit_entry:
@@ -148,6 +190,8 @@ def main() -> None:
                 unit_status = "official_site_checked_no_unit_entry_found"
             elif displayed:
                 unit_status = "group_portal_unit_display_observed"
+            elif shared_entry:
+                unit_status = "group_portal_registered"
             else:
                 unit_status = "unit_specific_entry_pending"
             observed = cnooc_observations.get(unit_name) if group_id == "cnooc" else sinopec_display
@@ -163,6 +207,8 @@ def main() -> None:
                     "unit_specific_entry_channel_id": unit_entry["channel_id"] if unit_entry else None,
                     "unit_specific_entry_channel_type": unit_entry["channel_type"] if unit_entry else None,
                     "unit_specific_entry_verification_status": unit_entry["verification_status"] if unit_entry else None,
+                    "shared_group_entry_channel_id": shared_entry["channel_id"] if shared_entry else None,
+                    "shared_group_entry_verification_status": shared_entry["verification_status"] if shared_entry else None,
                     "unit_specific_entry_status": unit_status,
                     "official_display_name_observed": displayed,
                     "observed_official_job_count": observed.get("job_count") if observed else None,
@@ -192,10 +238,12 @@ def main() -> None:
                         if unit_entry
                         else "official_homepage_no_recruitment_entry_found"
                         if unit_id in negative_entry_by_catalog_id
-                        else "official_group_portal"
-                        if is_group
                         else "official_group_portal_display_roster"
                         if displayed
+                        else "official_registry_shared_group_entry"
+                        if shared_entry
+                        else "official_group_portal"
+                        if is_group
                         else "no_unit_specific_entry_evidence"
                     ),
                     "verified_at": (
