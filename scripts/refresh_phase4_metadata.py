@@ -22,10 +22,15 @@ def _run(script: str) -> None:
 
 
 def main() -> int:
+    # The completion audit reads the manifest boundary, while the manifest
+    # hashes the completion audit.  Build a boundary manifest first, then the
+    # completion report, and finally rebuild the manifest with that report's
+    # final hash so the two documents do not retain stale dirty-state facts.
     for script in (
         "audit_phase4_current_state.py",
-        "audit_phase4_completion.py",
         "audit_phase4_workspace_layout.py",
+        "build_phase4_manifest.py",
+        "audit_phase4_completion.py",
         "build_phase4_manifest.py",
     ):
         _run(script)
