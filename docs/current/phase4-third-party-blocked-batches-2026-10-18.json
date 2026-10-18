@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "phase": "phase4",
+  "generated_at": "2026-10-18T19:00:00+08:00",
+  "source_id": "huatu-discovery",
+  "trust_grade": "B",
+  "policy": "公告正文可以作为发现证据；没有逐岗位官方字段或合法表格副本时，不创建岗位候选，不进入学生端。",
+  "robots_observation": {
+    "url": "https://u3.huatu.com/robots.txt",
+    "status": 200,
+    "body": "User-agent: *\\nDisallow: /",
+    "observed_at": "2026-10-18T18:00:00+08:00"
+  },
+  "batches": [
+    {
+      "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875246.html",
+      "title": "2026年广东云浮市郁南县机关事业单位公开招聘紧缺人才9人公告",
+      "declared_official_source": "郁南县人民政府",
+      "third_party_table_url": "https://u3.huatu.com/uploads/soft/261016/da736cdc0c9303a81820ae74ad4dc63f87742.xls",
+      "official_source_urls_in_notice": [
+        "https://www.gdyunan.gov.cn/ynxrmzf/rdzt/gsgg/index.html",
+        "http://www.gdyunan.gov.cn/yfynrsj/gkmlpt/index"
+      ],
+      "capture_status": "not_downloaded_robots_disallowed",
+      "downloaded": false,
+      "sha256": null,
+      "candidate_rows_created": 0,
+      "formal_jobs_created": 0,
+      "reason": "附件域名明确禁止抓取；公告正文不足以逐岗位核验专业、学历和岗位编号。"
+    },
+    {
+      "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875238.html",
+      "title": "2026年安徽阜阳师范大学公开招聘高层次人才43人公告",
+      "declared_official_source": "安徽省人力资源和社会保障厅",
+      "third_party_table_url": "https://u3.huatu.com/uploads/soft/261016/wKg8FGrR1c-AeyvyAAA0kDF-Cb479.xlsx",
+      "official_source_urls_in_notice": [],
+      "capture_status": "not_downloaded_robots_disallowed",
+      "downloaded": false,
+      "sha256": null,
+      "candidate_rows_created": 0,
+      "formal_jobs_created": 0,
+      "reason": "附件域名明确禁止抓取；公告正文只引用附件计划表，无法安全提取地学岗位行。"
+    },
+    {
+      "discovery_page_url": "https://sydw.huatu.com/2026/1015/2875134.html",
+      "title": "2026年上海市部分事业单位公开招聘工作人员553人公告（第二批）",
+      "declared_official_source": "上海市人力资源和社会保障局",
+      "third_party_table_url": "https://u3.huatu.com/uploads/soft/261016/f1_2.xlsx",
+      "official_source_urls_in_notice": [],
+      "capture_status": "not_downloaded_robots_disallowed",
+      "downloaded": false,
+      "sha256": null,
+      "candidate_rows_created": 0,
+      "formal_jobs_created": 0,
+      "reason": "附件域名明确禁止抓取；公告只提供集中招聘规则，逐岗位专业字段位于附件。"
+    },
+    {
+      "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875231.html",
+      "title": "2027年江苏南京水利科学研究院公开招聘事业编制工作人员50人公告",
+      "declared_official_source": "南京水利科学研究院",
+      "third_party_table_url": "https://u3.huatu.com/uploads/soft/261016/83c02233b7dae819b7449c9c167b9e5471637.pdf",
+      "official_source_urls_in_notice": [
+        "https://www.nhri.cn/tzgg/zpxx/art/2026/art_01a4e42a69594ee88fac503a5cce8df5.html"
+      ],
+      "capture_status": "not_downloaded_robots_disallowed",
+      "downloaded": false,
+      "sha256": null,
+      "candidate_rows_created": 0,
+      "formal_jobs_created": 0,
+      "reason": "官方公告已找到，但第三方 PDF 不允许抓取且浏览器下载未完成；未伪造表格行。"
+    }
+  ],
+  "summary": {
+    "batches_reviewed": 4,
+    "third_party_files_downloaded": 0,
+    "candidate_rows_created": 0,
+    "formal_jobs_created": 0,
+    "robots_bypass": false
+  }
+}

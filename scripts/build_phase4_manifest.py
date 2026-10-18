@@ -149,6 +149,7 @@ def main() -> None:
     current_audit = ROOT / "docs" / "current" / "phase4-current-state-audit-2026-10-18.json"
     manual_candidate = ROOT / "docs" / "current" / "phase4-third-party-candidate-2026-10-18.json"
     hrinm_trial = ROOT / "docs" / "current" / "phase4-third-party-hrinm-2026-10-18.json"
+    blocked_batches = ROOT / "docs" / "current" / "phase4-third-party-blocked-batches-2026-10-18.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     working_tree_dirty = dirty()
     release_blockers = []
@@ -200,6 +201,7 @@ def main() -> None:
             "phase4_current_state_audit": sha256(current_audit),
             "phase4_third_party_candidate": sha256(manual_candidate),
             "phase4_third_party_hrinm": sha256(hrinm_trial),
+            "phase4_third_party_blocked_batches": sha256(blocked_batches),
             "phase4_main_record": sha256(phase4_record),
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
         },
@@ -214,6 +216,7 @@ def main() -> None:
             "formal_jobs_published": database.get("formal_third_party_job_count", 0),
             "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
             "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
+            "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
         "automation_model": "gpt-5.6-terra",
