@@ -3,7 +3,7 @@
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "67398d735107924fce222f5703053b963297d75a",
+  "git_sha": "67b66e78366f7589108b7f9170cd7d85b6ea7d41",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -17,7 +17,7 @@
     "phase4_three_oil_catalog_audit": "146bbc0bceaa60ccb27430464f417153781de43d0bc7a2587e0e47cba0eeda19",
     "phase4_third_party_trial": "cce5e6df73eefd143be566a459dcc89d3e15fc53ba3e1557616b2afe65e32218",
     "phase4_three_oil_entry_evidence": "c2d44f1c2445b0693a7dbe2b26be5dda1bab2d4b6898c90a5046ec652afa4931",
-    "phase4_local_validation": "7461e260191f8e7a4ce353c7e56137ea04eab75caa9daf16d10eaf3e13122dd1"
+    "phase4_local_validation": "5a0fa8488059b15c9b745620a8056b0fd12fc54e97a3db1c2746eba15c71279a"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -52,7 +52,7 @@
     "validated_at": "2026-10-17T12:02:00Z",
     "environment": "local",
     "server_deployment": false,
-      "git_sha": "67398d735107924fce222f5703053b963297d75a",
+      "git_sha": "67b66e78366f7589108b7f9170cd7d85b6ea7d41",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1061,
