@@ -4492,15 +4492,19 @@ class Database:
             raise ValueError("Candidate lead official_url must be an HTTP(S) URL")
         discovery_source_id = self._optional_text(lead.get("discovery_source_id"))
         official_source_id = self._optional_text(lead.get("official_source_id"))
+        metadata = lead.get("metadata", {})
+        if not isinstance(metadata, dict):
+            raise ValueError("Candidate lead metadata must be an object")
+        identity_hint = self._optional_text(
+            metadata.get("position_code") or metadata.get("locator")
+        )
         fingerprint = lead_fingerprint(
             lead_url,
             title=str(lead["title"]),
             employer_hint=str(lead.get("employer_hint") or ""),
+            identity_hint=identity_hint or "",
         )
         now = utc_now()
-        metadata = lead.get("metadata", {})
-        if not isinstance(metadata, dict):
-            raise ValueError("Candidate lead metadata must be an object")
         official_application_url = self._optional_text(
             lead.get("official_application_url") or metadata.get("application_url")
         )

@@ -437,6 +437,7 @@ def lead_fingerprint(
     *,
     title: str = "",
     employer_hint: str = "",
+    identity_hint: str = "",
 ) -> str:
     """Create a stable URL key for idempotent private lead ingestion.
 
@@ -445,7 +446,10 @@ def lead_fingerprint(
     useful fields on the first captured row, but must not create duplicates.
     """
     del title, employer_hint
-    return hashlib.sha256(normalize_lead_url(lead_url).encode("utf-8")).hexdigest()
+    identity = normalize_lead_url(lead_url)
+    if str(identity_hint).strip():
+        identity = f"{identity}\x00{str(identity_hint).strip()}"
+    return hashlib.sha256(identity.encode("utf-8")).hexdigest()
 
 
 def official_domain_assessment(

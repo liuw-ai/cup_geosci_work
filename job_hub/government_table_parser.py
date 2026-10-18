@@ -22,8 +22,8 @@ from job_hub.locations import extract_location_provinces
 FIELD_ALIASES: dict[str, tuple[str, ...]] = {
     "position_code": ("岗位代码", "职位代码", "招考职位代码", "职位编号", "岗位编号", "代码"),
     "employer": ("用人单位", "招聘单位", "招录机关", "招录单位", "部门名称", "单位名称", "机构名称"),
-    "title": ("岗位名称", "职位名称", "招考职位", "招聘岗位", "岗位", "职位"),
-    "major": ("专业要求", "专业条件", "专业条件要求", "专业", "需求专业", "岗位所需专业", "专业代码"),
+    "title": ("岗位名称", "职位名称", "招考职位", "招聘岗位", "招聘岗位类别", "具体岗位名称", "岗位类别", "岗位", "职位"),
+    "major": ("专业要求", "专业条件", "专业条件要求", "专业", "招聘专业", "招聘条件", "需求专业", "岗位所需专业", "专业代码"),
     "degree": ("学历要求", "学历", "学历学位", "学历及学位", "学位要求", "学位", "面向对象"),
     "headcount": ("招聘人数", "招录人数", "计划人数", "计划招录人数", "人数", "招聘计划"),
     "location": ("工作地点", "工作地", "工作城市", "所在地", "地点", "落户地点"),
@@ -198,6 +198,17 @@ def _is_header(values: list[Any]) -> bool:
     ))
 
 
+def _combined_header_rows(first: list[Any], second: list[Any]) -> list[str]:
+    """Join adjacent multi-row headers while preserving physical columns."""
+    width = max(len(first), len(second))
+    return [
+        _text(first[index]) if index < len(first) and _text(first[index])
+        else _text(second[index]) if index < len(second)
+        else ""
+        for index in range(width)
+    ]
+
+
 def _sheet_rows(
     sheet_name: str,
     values: Iterable[list[Any]],
@@ -206,8 +217,10 @@ def _sheet_rows(
 ) -> tuple[list[dict[str, Any]], int | None]:
     detected_header = None
     headers: list[str] = []
+    header_height = 1
     rows: list[dict[str, Any]] = []
-    for physical_row, values_row in enumerate(values, start=1):
+    buffered = list(values)
+    for physical_row, values_row in enumerate(buffered, start=1):
         if detected_header is None:
             if header_row is not None and physical_row != header_row:
                 continue
@@ -216,6 +229,14 @@ def _sheet_rows(
             if _is_header(values_row):
                 detected_header = physical_row
                 headers = [_text(value) for value in values_row]
+            elif header_row is None and physical_row < len(buffered):
+                combined = _combined_header_rows(values_row, buffered[physical_row])
+                if _is_header(combined):
+                    detected_header = physical_row
+                    headers = combined
+                    header_height = 2
+            continue
+        if physical_row <= detected_header + header_height - 1:
             continue
         if not any(value not in (None, "") for value in values_row):
             continue
@@ -459,13 +480,28 @@ def load_position_table_with_report(
     if suffix in {".xlsx", ".xlsm"}:
         from openpyxl import load_workbook
 
-        workbook = load_workbook(table_path, read_only=True, data_only=True)
+        workbook = load_workbook(table_path, read_only=False, data_only=True)
         try:
             if sheet_name and sheet_name not in workbook.sheetnames:
                 raise ValueError(f"position table sheet not found: {sheet_name}")
             worksheets = [workbook[sheet_name]] if sheet_name else workbook.worksheets
             for worksheet in worksheets:
-                add_sheet(worksheet.title, (list(row) for row in worksheet.iter_rows(values_only=True)))
+                merged_ranges = list(worksheet.merged_cells.ranges)
+
+                def values_with_merged_cells() -> Iterable[list[Any]]:
+                    for physical_row in range(1, worksheet.max_row + 1):
+                        values = [
+                            worksheet.cell(physical_row, column).value
+                            for column in range(1, worksheet.max_column + 1)
+                        ]
+                        for merged in merged_ranges:
+                            if merged.min_row <= physical_row <= merged.max_row:
+                                source = worksheet.cell(merged.min_row, merged.min_col).value
+                                for column in range(merged.min_col, merged.max_col + 1):
+                                    values[column - 1] = source
+                        yield values
+
+                add_sheet(worksheet.title, values_with_merged_cells())
         finally:
             workbook.close()
     elif suffix == ".xls":

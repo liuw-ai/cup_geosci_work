@@ -1,12 +1,12 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-17T12:02:00Z",
+  "validated_at": "2026-10-18T07:20:00Z",
   "environment": "local",
   "server_deployment": false,
-  "git_sha": "57b2099f7cd6fa370b358cbc853581c3aa19e570",
+  "git_sha": "pending-phase4-input-commit",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1057,
+    "passed": 1061,
     "skipped": 4,
     "failed": 0,
     "warnings": 1
@@ -16,11 +16,12 @@
     "config_check": "passed"
   },
   "third_party_access_revalidation": {
-    "source_id": "offcn-discovery",
-    "checked_at": "2026-10-17T11:08:36Z",
-    "status": "blocked",
-    "access_policy": "saved_browser_permission_blocked",
-    "action_taken": "read_only_navigation_attempted; no download, login, captcha, CDP, curl, or robots bypass"
+    "source_id": "huatu-discovery",
+    "checked_at": "2026-10-18T06:55:17Z",
+    "status": "trial_completed_in_isolated_database",
+    "access_policy": "read_only_browser_and_registered_asset_host",
+    "action_taken": "read_only_navigation; real XLSX captured and hashed; no login, captcha, CDP, curl, or robots bypass",
+    "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json"
   },
   "third_party_access_attempts": [
     {
@@ -57,6 +58,17 @@
       "action_taken": "read_only_navigation_attempted; no download or policy bypass"
     }
   ],
+  "third_party_trial": {
+    "source_id": "huatu-discovery",
+    "batch_id": "huatu-20261016-gansu-cmxy",
+    "input_rows": 12,
+    "accepted_rows": 11,
+    "rejected_rows": 1,
+    "isolated_candidate_leads": 11,
+    "formal_jobs_created": 0,
+    "student_visible_changes": 0,
+    "report": "docs/current/phase4-third-party-trial-2026-10-18.json"
+  },
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
@@ -84,7 +96,7 @@
     "incomplete_but_basic_match": 615,
     "source_unavailable": 166
   },
-  "release_status": "not_publishable",
+    "release_status": "not_publishable",
   "release_blockers": [
     "official_site_browser_permission_blocked",
     "no_audited_third_party_table_batch_imported",

@@ -143,6 +143,28 @@ def test_operator_provided_table_file_still_requires_registered_source_url(tmp_p
         )
 
 
+def test_huatu_asset_host_is_registered_for_real_position_tables():
+    adapters = third_party_tables.load_table_adapters()
+    assert "u3.huatu.com" in adapters["huatu-discovery"]["allowed_hosts"]
+
+    payload = ingest_third_party_table_file(
+        table_path=Path(__file__).resolve().parents[1]
+        / "runtime"
+        / "third-party-captures"
+        / "huatu"
+        / "2026-10-16-gansu-cmxy"
+        / "huatu-attachment-1-02248460f53feb09.xlsx",
+        source_id="huatu-discovery",
+        third_party_table_url="https://u3.huatu.com/uploads/soft/261016/df.xlsx",
+        batch_id="huatu-asset-host-contract",
+        position_type="public_institution",
+        province="甘肃",
+        discovery_page_url="https://sydw.huatu.com/2026/1016/2875151.html",
+    )
+    assert payload["download"]["capture_mode"] == "operator_provided_file"
+    assert payload["candidates"]
+
+
 def test_table_candidate_persists_discovery_source_for_funnel_audit(tmp_path):
     from openpyxl import Workbook
     from job_hub.db import Database
@@ -170,3 +192,31 @@ def test_table_candidate_persists_discovery_source_for_funnel_audit(tmp_path):
     assert stored["third_party_table_url"] == "https://www.offcn.com/2026/positions.xlsx"
     assert stored["official_url"] is None
     assert stored["verification_status"] == "candidate"
+
+
+def test_table_rows_from_one_url_keep_position_level_identity(tmp_path):
+    from openpyxl import Workbook
+    from job_hub.db import Database
+
+    table = tmp_path / "provided.xlsx"
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.append(["岗位代码", "用人单位", "岗位名称", "专业要求", "学历要求", "招聘人数", "工作地点"])
+    sheet.append(["B03", "某省地质院", "地质调查岗", "地质学", "本科", 1, "北京"])
+    sheet.append(["B04", "某省地质院", "水文地质岗", "地质工程", "硕士", 1, "北京"])
+    workbook.save(table)
+
+    payload = ingest_third_party_table_file(
+        table_path=table,
+        source_id="offcn-discovery",
+        third_party_table_url="https://www.offcn.com/2026/positions.xlsx",
+        batch_id="offcn-row-identity-2026",
+        position_type="public_institution",
+        province="北京",
+    )
+    database = Database(tmp_path / "isolated.sqlite3")
+    database.initialize()
+    for candidate in payload["candidates"]:
+        database.create_candidate_lead(candidate)
+
+    assert len(database.list_candidate_leads(discovery_source_id="offcn-discovery")) == 2

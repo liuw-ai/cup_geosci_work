@@ -1,0 +1,76 @@
+{
+  "phase": "phase4",
+  "trial_status": "completed_isolated_only",
+  "source_id": "huatu-discovery",
+  "source_grade": "B",
+  "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875151.html",
+  "discovery_index_url": "https://sydw.huatu.com/zt/sydwggk/",
+  "discovery_title": "2026年甘肃财贸职业学院公开考核引进博士研究生14人公告",
+  "discovery_declared_source": "甘肃财贸职业学院",
+  "third_party_table_url": "https://u3.huatu.com/uploads/soft/261016/df.xlsx",
+  "third_party_table_capture": {
+    "captured_at": "2026-10-18T06:55:17Z",
+    "http_status": 200,
+    "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "bytes": 11544,
+    "sha256": "02248460f53feb0936349cc411a537410a961539b12f3e80968b1f2b43d9a2c5",
+    "retained_path": "runtime/third-party-captures/huatu/2026-10-16-gansu-cmxy/huatu-attachment-1-02248460f53feb09.xlsx",
+    "isolated_retained_path": "runtime/third-party-validation/retained/huatu-20261016-gansu-cmxy-02248460f53feb09.xlsx"
+  },
+  "official_recovery": {
+    "employer": "甘肃财贸职业学院",
+    "official_homepage_url": "https://www.gscmxy.edu.cn/",
+    "official_notice_url": "https://www.gscmxy.edu.cn/info/1010/4255.htm",
+    "official_table_url": "https://www.gscmxy.edu.cn/system/_content/download.jsp?urltype=news.DownloadAttachUrl&owner=1796077919&wbfileid=4761750",
+    "official_notice_date": "2026-10-16",
+    "deadline_date": "2026-12-31",
+    "location": "甘肃省兰州市",
+    "official_application_url": null,
+    "application_url_note": "官方公告采用邮件报名，未提供独立HTTP报名地址；不得把华图页面或第三方表格地址伪装为申请链接。学生端只能保留官方公告作为详情/报名说明链接。"
+  },
+  "funnel": {
+    "input_rows": 12,
+    "accepted_rows": 11,
+    "rejected_rows": 1,
+    "isolated_candidate_leads": 11,
+    "official_recovery_bound": 11,
+    "formal_jobs_created": 0,
+    "student_visible_changes": 0,
+    "formal_database_candidate_leads_before": 0,
+    "formal_database_candidate_leads_after": 0
+  },
+  "candidate_storage": {
+    "database": "runtime/third-party-validation/job_hub-huatu-trial.sqlite3",
+    "integrity_check": "ok",
+    "status": "candidate",
+    "conversion_status": "unresolved",
+    "publication_status": "candidate_only"
+  },
+  "screening": {
+    "professional_result": "rejected_for_current_geoscience_scope",
+    "major_values": [
+      "设计学",
+      "食品科学与工程",
+      "应用经济学",
+      "管理科学与工程",
+      "马克思主义理论",
+      "会计学",
+      "会计",
+      "交通运输工程",
+      "网络空间安全",
+      "计算机科学与技术",
+      "软件工程",
+      "人工智能"
+    ],
+    "reason": "本批次未发现地质学、地质工程、地质资源与地质工程、资源勘查工程或有充分上下文支持的宽泛地学表达；不得发布到学生端。"
+  },
+  "policy_checks": {
+    "third_party_link_as_application": false,
+    "captcha_or_login_bypass": false,
+    "robots_bypass": false,
+    "official_evidence_required_before_publication": true,
+    "formal_database_written": false,
+    "server_deployment": false
+  },
+  "next_action": "继续选择含地学岗位的真实批次；每行完成官方公告/岗位表回溯、专业核验、截止日期和官方链接核验后，才允许从候选升级为正式岗位。"
+}

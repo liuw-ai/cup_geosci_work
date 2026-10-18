@@ -138,6 +138,70 @@ def test_excel_parser_reads_all_data_sheets_and_preserves_physical_rows(tmp_path
     ]
 
 
+def test_excel_parser_accepts_adjacent_two_row_headers(tmp_path) -> None:
+    from openpyxl import Workbook
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "岗位列表"
+    sheet.append(["岗位代码", "招聘单位", "招聘岗位类别", "招聘人数", "招聘专业", "", "", ""])
+    sheet.append(["", "", "", "", "专业", "专业代码", "学历", "其他条件"])
+    sheet.append(["YJ2601", "甘肃财贸职业学院", "专任教师", 1, "地质学", "0709", "博士研究生", "无"])
+    path = tmp_path / "two-row-header.xlsx"
+    workbook.save(path)
+
+    loaded = load_position_table_with_report(path)
+    assert loaded["sheets"][0]["header_row"] == 1
+    assert loaded["rows"][0]["__row_number"] == 3
+
+    result = parse_position_table_rows(
+        loaded["rows"],
+        batch_id="gansu-cmxy",
+        source_id="huatu-discovery",
+        position_type="public_institution",
+        province="甘肃",
+        official_notice_url="https://www.gscmxy.edu.cn/info/1010/4255.htm",
+        official_attachment_url="https://www.gscmxy.edu.cn/system/_content/download.jsp?urltype=news.DownloadAttachUrl&owner=1796077919&wbfileid=4761750",
+        location="甘肃省兰州市",
+    )
+    assert result["metrics"]["accepted_rows"] == 1
+    assert result["batch"]["rows"][0][0:6] == [
+        "YJ2601",
+        "甘肃财贸职业学院",
+        "专任教师",
+        "地质学",
+        "博士研究生",
+        1,
+    ]
+
+
+def test_excel_parser_expands_merged_employer_cells(tmp_path) -> None:
+    from openpyxl import Workbook
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "岗位列表"
+    sheet.append(["岗位代码", "招聘单位", "岗位名称", "专业要求", "学历要求", "招聘人数", "工作地点"])
+    sheet.append(["A01", "某省地质院", "地质岗", "地质学", "硕士", 1, "甘肃"])
+    sheet.append(["A02", None, "地质调查岗", "地质工程", "博士", 1, "甘肃"])
+    sheet.merge_cells("B2:B3")
+    path = tmp_path / "merged-employer.xlsx"
+    workbook.save(path)
+
+    loaded = load_position_table_with_report(path)
+    result = parse_position_table_rows(
+        loaded["rows"],
+        batch_id="merged-employer",
+        source_id="government-test",
+        position_type="public_institution",
+        province="甘肃",
+        official_notice_url="https://example.gov.cn/notice",
+        official_attachment_url="https://example.gov.cn/table.xlsx",
+    )
+    assert result["metrics"]["accepted_rows"] == 2
+    assert result["batch"]["rows"][1][1] == "某省地质院"
+
+
 def test_batch_parser_rejects_explicit_cross_province_sheet() -> None:
     result = parse_position_table_rows(
         [{
