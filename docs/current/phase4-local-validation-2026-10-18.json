@@ -6,7 +6,7 @@
   "git_sha_before_metadata_commit": "ddae96f",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1063,
+    "passed": 1064,
     "skipped": 4,
     "failed": 0,
     "warnings": 1,
