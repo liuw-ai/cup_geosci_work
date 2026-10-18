@@ -1,9 +1,9 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-18T10:15:00+08:00",
+  "validated_at": "2026-10-18T18:20:00+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "203ab434aa04ae49a2444491441475e19f6ba937",
+  "git_sha_before_metadata_commit": "c0b7d49f65aad16ba4c481c1d003cfe78d39183a",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1062,
@@ -19,11 +19,11 @@
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256_before_tests": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
-    "sha256_after_tests": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
+    "sha256_before_tests": "d151038a0fba7f0d8da022abd8f221177531db77d0b563365eca8ff65a10486a",
+    "sha256_after_tests": "d151038a0fba7f0d8da022abd8f221177531db77d0b563365eca8ff65a10486a",
     "integrity_check": "ok",
     "jobs": 3947,
-    "candidate_leads": 0,
+    "candidate_leads": 1,
     "phase3_withdrawal_audits": 3947,
     "student_read_as_of_date": "2026-10-18",
     "student_visible_total": 624,
@@ -36,6 +36,7 @@
   },
   "third_party": {
     "isolated_huatu_trial_candidate_leads": 11,
+    "formal_database_private_candidate_leads": 1,
     "formal_jobs_created": 0,
     "formal_database_unchanged": true,
     "robots_or_permission_blocked_followups": 1
