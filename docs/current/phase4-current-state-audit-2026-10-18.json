@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T16:01:04Z",
+  "generated_at": "2026-10-18T16:09:01Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "50471acb2233e776c09c525c922ac22e2565668a",
+  "git_sha": "dc76156e5b1c126d938f344bc1e592d8f47121f9",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -88,7 +88,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "c07ac08ea3e18cbc04a392f4d99a16457fd778238be61034093f9328d9bd9afc"
+        "sha256": "1dd245fa6724e864caec893fde317d64f98094609ec321f80598905a866c5fe3"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
@@ -151,6 +151,10 @@
       "path": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
       "sha256": "74da7ade28ae3e7310f78796f80dc2cc2ee27a7d4b13fcb65601667f667ed31c"
     },
+    "phase4_third_party_access_recheck": {
+      "path": "docs/current/phase4-third-party-access-recheck-2026-10-19.json",
+      "sha256": "2084cc2ff11ac68267ebe74b32e1a2a38c8d0c409343ec51c7a5cb55d54da7be"
+    },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
       "sha256": "7481c6cdd6939996069831b70e989ae4d779751c98b61fd60bb2e863a0cb0c9e"
@@ -161,7 +165,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "c07ac08ea3e18cbc04a392f4d99a16457fd778238be61034093f9328d9bd9afc"
+      "sha256": "1dd245fa6724e864caec893fde317d64f98094609ec321f80598905a866c5fe3"
     }
   },
   "code_inventory": [
@@ -627,8 +631,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 313,
-      "sha256": "afcb5c368e69e21f25858cd377040ec064bf5c0f2a87e4915bc4dc7618141e77"
+      "line_count": 318,
+      "sha256": "ddc843274ac72140ea0731b79453af9350c9a889c7ebe97957bcdabc99494f26"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -642,8 +646,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 277,
-      "sha256": "8f1fcf867dfc0a134b0026b765283c03d8ff980df598d9c114b85a758e6c3ece"
+      "line_count": 279,
+      "sha256": "1840bc9d58a02299ecee75caa1d146e974f81d0f386eb4245755fcbccbe17836"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
