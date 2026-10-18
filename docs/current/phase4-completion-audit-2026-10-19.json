@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T23:17:43Z",
+  "generated_at": "2026-10-18T23:24:29Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -89,6 +89,20 @@
         "download_permission": "denied_by_browser_policy",
         "row_level_evidence_obtained": false,
         "publication_status": "not_published"
+      }
+    },
+    {
+      "id": "third_party_hbdk_geoscience_recovery",
+      "status": "partial",
+      "evidence": [
+        "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json"
+      ],
+      "facts": {
+        "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/383.html",
+        "official_table_url": "https://docs.qq.com/doc/DTFFuZmpRQ1FxR3JU",
+        "rows_observed": 2,
+        "original_attachment_sha256": null,
+        "publication_status": "candidate_only"
       }
     },
     {
