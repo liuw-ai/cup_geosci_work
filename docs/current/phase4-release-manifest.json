@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T14:53:05Z",
+  "generated_at": "2026-10-18T15:03:51Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "8fc423f2eb2196d61c21d12d18cd2adde8f39fcf",
+  "git_sha": "352b4820ee547100314c651fdd70e029cafa6a2f",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -21,15 +21,16 @@
     "phase4_three_oil_unit_entry_matrix": "d4c5ef42c588fed5d394c51e8d441a998a49d8e820073333fcc15640bb427c2f",
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "8235f81bf4f2ba5121f512966c37b1073dd2106065d5a8b16966760522537413",
-    "phase4_document_consistency": "8235f81bf4f2ba5121f512966c37b1073dd2106065d5a8b16966760522537413",
+    "phase4_current_state_audit": "1a46f030020bc2190372c18b2f0cc5b6af673da9d766b9643c5f49585cf04780",
+    "phase4_document_consistency": "1a46f030020bc2190372c18b2f0cc5b6af673da9d766b9643c5f49585cf04780",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
     "phase4_third_party_blocked_batches": "74da7ade28ae3e7310f78796f80dc2cc2ee27a7d4b13fcb65601667f667ed31c",
+    "phase4_third_party_funnel": "f3ebf8b5d30770ac5fc0a5b475d453d90f0c302eef364d140a4524f919bf2b78",
     "phase4_local_web_recheck": "8f019cc8442713d3440847fc3ae37ce2efcde5e2178d2699b3808af26351bd23",
-    "phase4_main_record": "74e1912d2b454fed18daed5f99cc2bde6e4e804f9ec5015479658d9a16b3ddd9",
-    "phase4_local_validation": "ac0abb81d6cf09f745d9353abf7b141d771c3ba0535238aba3175d8fac53ba36"
+    "phase4_main_record": "a47b852e0fa62e153151003caba47189bbdd14684419fdedddd2bcb869945736",
+    "phase4_local_validation": "f2d99d6a8b227287e6ec7ec0b01d7c73168bbb1577c066d07698f960e3131c0f"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -75,14 +76,14 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-18T22:47:22+08:00",
+    "validated_at": "2026-10-18T23:03:09+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "832c10e",
-    "git_sha_at_validation": "832c10e",
+    "git_sha_before_metadata_commit": "de5b8a8",
+    "git_sha_at_validation": "de5b8a8",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1071,
+      "passed": 1072,
       "skipped": 4,
       "failed": 0,
       "warnings": 1,
@@ -201,7 +202,8 @@
     "formal_jobs_published": 5,
     "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
     "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
-    "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json"
+    "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
+    "funnel_audit": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json"
   },
   "three_oil_organization_reconciliation": {
     "catalog_group_count": 3,
