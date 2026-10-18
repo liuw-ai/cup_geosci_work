@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T09:27:25Z",
+  "generated_at": "2026-10-18T09:29:00Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "bfc302253eaf43ba736c87dbeed78687863b3670",
-  "git_status_porcelain": "M docs/current/phase4-release-manifest.json\n?? docs/current/phase4-current-state-audit-2026-10-18.json",
+  "git_sha": "5d247afcab26965478e00b2519168a8eacafc59e",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
@@ -535,8 +535,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 171,
-      "sha256": "79d9df51cac14c4894b2023636024f169115dd384bcc4c18c674ce2bcf5be23d"
+      "line_count": 191,
+      "sha256": "e26a1b135c6292f1eebd875bee7a74d996fc25d47fff9bc23b6a3f7efbef2ca6"
     },
     {
       "path": "scripts/build_phase3_manifest.py",
@@ -545,8 +545,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 190,
-      "sha256": "dcde5f130b8b34fd750c34f26689e860ca802ddcc3cc0a3b7e28c7df0d244628"
+      "line_count": 192,
+      "sha256": "88ff3e044a96e5a1d1bcf7ed9b14df8566679a8b1bff75971bd507799e857cb0"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
