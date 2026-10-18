@@ -29,21 +29,22 @@
       "trust_grade": "B",
       "batch_candidate_allowed": true,
       "official_domain_allowlist": [],
-      "last_checked_on": "2026-09-21",
+      "last_checked_on": "2026-10-19",
       "scan_config": {
         "scan_urls": [
           "https://www.huatu.com/",
           "https://sydw.huatu.com/zt/sydwggk/",
-          "https://www.huatu.com/gwy/"
+          "https://www.huatu.com/gwy/",
+          "https://www.sydw8.com/guoqi/zhaokao/"
         ],
-        "allowed_hosts": ["www.huatu.com", "sydw.huatu.com"],
-        "max_pages": 3,
+        "allowed_hosts": ["www.huatu.com", "sydw.huatu.com", "www.sydw8.com", "sydw8.com"],
+        "max_pages": 4,
         "max_links": 200,
         "detail_fetch_limit": 24,
         "include_patterns": ["招聘", "招考", "招录", "事业单位", "公务员", "校园", "校招", "人才", "博士后", "地质", "自然资源"],
         "exclude_patterns": ["登录", "注册", "课程", "题库", "直播", "培训", "广告"]
       },
-      "notes": "仅记录标题和线索链接；必须回溯政府或单位正式原文。"
+      "notes": "仅记录标题和线索链接；必须回溯政府或单位正式原文。2026-10-19 只读核验发现华图国企子站 www.sydw8.com/guoqi/zhaokao/ 及中国石油、中国石化、中国海油分类入口；该子站 robots.txt 在当前浏览器环境被客户端阻断，未下载、未生成候选。"
     },
     {
       "id": "fenbi-discovery",

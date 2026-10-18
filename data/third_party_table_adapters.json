@@ -20,10 +20,11 @@
     },
     {
       "source_id": "huatu-discovery",
-      "allowed_hosts": ["www.huatu.com", "bj.huatu.com", "sydw.huatu.com", "u3.huatu.com"],
+      "allowed_hosts": ["www.huatu.com", "bj.huatu.com", "sydw.huatu.com", "www.sydw8.com", "sydw8.com", "u3.huatu.com"],
       "scan_urls": [
         "https://www.huatu.com/gwy/",
-        "https://sydw.huatu.com/zt/sydwggk/"
+        "https://sydw.huatu.com/zt/sydwggk/",
+        "https://www.sydw8.com/guoqi/zhaokao/"
       ],
       "table_link_patterns": ["职位表", "岗位表", "下载", "xls", "xlsx", "pdf"],
       "official_url_required": true,

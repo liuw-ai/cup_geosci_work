@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T23:45:46Z",
+  "generated_at": "2026-10-18T23:54:47Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "3abcfbb7e03185cc449a9b8342909763ec9c4f17",
-  "git_status_porcelain": "",
+  "git_sha": "c4f3cf56df6bd71ece3856250fe7700b93212cab",
+  "git_status_porcelain": "M data/discovery_sources.json\n M data/third_party_table_adapters.json\n M tests/test_third_party_adapter_registry.py\n?? docs/current/phase4-third-party-huatu-state-owned-entry-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
@@ -1435,8 +1435,8 @@
     },
     {
       "path": "tests/test_third_party_adapter_registry.py",
-      "line_count": 26,
-      "sha256": "701be7f627d76b2bc037888aba8fb1135463885d38e53bb71272f1fd725a17bf"
+      "line_count": 33,
+      "sha256": "ba6edec27b601234a7d3f82da0b45ecf9beb401ac14a2c5a9b723943d58a553d"
     },
     {
       "path": "tests/test_third_party_tables.py",

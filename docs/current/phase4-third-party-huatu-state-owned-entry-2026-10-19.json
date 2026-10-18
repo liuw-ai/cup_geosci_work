@@ -1,0 +1,47 @@
+{
+  "phase": "phase4",
+  "source_id": "huatu-discovery",
+  "evidence_type": "third_party_discovery_entry",
+  "captured_at": "2026-10-19",
+  "page": {
+    "url": "https://www.sydw8.com/guoqi/zhaokao/",
+    "title": "国有企业招聘考试信息网_2027国有企业招聘考试报名入口_考试时间/公告-华图国企招聘网",
+    "document_sha256": "8d20ea49d09c445a5a391d4c3f75b00dc775f00ab3635c767b941bf39dc08904"
+  },
+  "observed_category_links": [
+    {
+      "label": "中国石油",
+      "url": "https://www.sydw8.com/guoqi/zgsy/zhaokao/"
+    },
+    {
+      "label": "中国石化",
+      "url": "https://www.sydw8.com/guoqi/zgsh/zhaokao/"
+    },
+    {
+      "label": "中国海油",
+      "url": "https://www.sydw8.com/guoqi/zghy/zhaokao/"
+    }
+  ],
+  "observed_recent_listing_examples": [
+    {
+      "title": "2026贵州省水利投资（集团）有限责任公司第一批次招聘20人公告",
+      "url": "https://www.sydw8.com/2026/0811/540392.html"
+    },
+    {
+      "title": "2026年国华能源投资有限公司社会招聘公告（19人）",
+      "url": "https://www.sydw8.com/2026/0811/540389.html"
+    },
+    {
+      "title": "2026年中国中煤华东分公司招聘公告（60人）",
+      "url": "https://www.sydw8.com/2026/0729/540194.html"
+    }
+  ],
+  "access_boundary": {
+    "robots_url": "https://www.sydw8.com/robots.txt",
+    "status": "blocked_by_browser_client",
+    "decision": "do_not_schedule_or_download",
+    "candidate_rows_created": 0,
+    "formal_jobs_created": 0,
+    "note": "这是华图发现入口证据，不是官方岗位证据；页面内容必须回溯到用人单位或政府官方公告后才可进入候选或正式库。"
+  }
+}

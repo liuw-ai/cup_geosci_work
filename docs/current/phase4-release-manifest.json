@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-18T23:45:51Z",
+  "generated_at": "2026-10-18T23:54:52Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "3abcfbb7e03185cc449a9b8342909763ec9c4f17",
-  "working_tree_dirty": false,
+  "git_sha": "c4f3cf56df6bd71ece3856250fe7700b93212cab",
+  "working_tree_dirty": true,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
   "dockerfile_sha256": {
@@ -13,9 +13,9 @@
   },
   "release_env_sha256": "49f2c7be91ff3cfadb0cc0f88a255e3e7d3ac2a1194f1e719d0207a85b79175d",
   "config_sha256": {
-    "discovery_sources": "9010280345a8d9393bdc84545c9e9ac372085c7148f44ae01827718d1cf9bf96",
+    "discovery_sources": "2c7a5f5b1b6735f451e4306e929f23063db7bd07df3e41ddc24dfe08fd82001e",
     "sources": "eac1bf2692955db358dff043dc16e5afc87cb6971256a8ee39a8bf23058e10cc",
-    "third_party_adapters": "73ec05d588eb378bd047470074a313a6f64912b48cd65ebccb1bb5781eec8aee",
+    "third_party_adapters": "2132d53195307a2b8710e651196adf0aa0cc7fe07081a6634407d60e75b49872",
     "organization_registry": "0e83da24ac0489b77064f6968568c6dde8f67eea7e847a4f2a8c493b65bdb35c",
     "three_oil_catalog": "a6d1979d99b5b027590acb07d4883910bca074c301ed8dc0e134bfdf57991394",
     "phase4_organization_reconciliation": "e4da77e84543f6d6a81c19e0e93d6370ff7a80655e5c54f2fd259ddeb4757d64",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "e4e11d8a1beb34299ba3f10cd464a2a3db28554f6b6f63d4466becc11914c746",
-    "phase4_document_consistency": "e4e11d8a1beb34299ba3f10cd464a2a3db28554f6b6f63d4466becc11914c746",
+    "phase4_current_state_audit": "cf334a0a7ea78da5f521add7a68e52a0f7a8bd403f20d8564d07de4be0931fe5",
+    "phase4_document_consistency": "cf334a0a7ea78da5f521add7a68e52a0f7a8bd403f20d8564d07de4be0931fe5",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -53,8 +53,8 @@
     "phase4_local_validation": "c86a1c0acd90e1c4904541d6b1f7062218afc8062cbc8fcd7cace464bb06c167",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "42ac32b0b953e34f70793fa78aa8d1c2b2637cd72cdc974da4453b3c2a423807",
-    "phase4_completion_audit": "6b03a740973e0a4b2f4095214672e6b39b5fc9463738cce81c187b8ffd2b2b53",
-    "phase4_workspace_layout": "114e4b27fed36e2e1bb21806fd8b5704a05e23397a9b5338ddb0c460e4f0e131"
+    "phase4_completion_audit": "f1a112a7192ccead8ec980122c0d1a1bf9256bc72ed0216c4a0bfee34c07f431",
+    "phase4_workspace_layout": "ee99504c8d92afa25bbbdda1a3f6b19aa314a039d13ac5c4459eae80bcbe04c7"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -351,6 +351,7 @@
   "automation_status": "paused",
   "production_deployment": "not_performed",
   "release_blockers": [
+    "working_tree_contains_uncommitted_or_untracked_changes",
     "third_party_batch_expansion_incomplete",
     "three_oil_external_identity_evidence_pending",
     "three_oil_unit_entry_evidence_incomplete",
