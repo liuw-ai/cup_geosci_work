@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T17:36:08Z",
+  "generated_at": "2026-10-18T17:48:10Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "21037de8ce05a9a1419377fb263e3387f455427a",
+  "git_sha": "7437b39f36a17b5664170420d0967c001aee5f4b",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -22,6 +22,7 @@
     "phase4_cnooc_unit_job_evidence": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
     "phase4_three_oil_unit_entry_matrix": "e071ff9b8e8ef5a88febb80153cfae8de53b187046f629cc8c094860e0047cc4",
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
+    "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
     "phase4_current_state_audit": "272dd70f44309d1e59893a47296734374611810665b94be6eefb30f162378828",
     "phase4_document_consistency": "272dd70f44309d1e59893a47296734374611810665b94be6eefb30f162378828",
@@ -33,7 +34,7 @@
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
     "phase4_third_party_funnel": "7481c6cdd6939996069831b70e989ae4d779751c98b61fd60bb2e863a0cb0c9e",
     "phase4_local_web_recheck": "c4558f29ff36ea1ccf00709837e34cc3a40e5b20d459aaa40ceca1ba4fd6ec08",
-    "phase4_main_record": "cdae173f7414f31c7bace82f068ea298699bddc7d19a311fd94ed5b274d0cd2f",
+    "phase4_main_record": "070d0961e86815283df9b831cbb0e020c890b5c128bd53bc32f58ae72f8d3486",
     "phase4_local_validation": "ac6eb474ec720dcd1617a7d6b4b3cc531e4dbcb849a61eb4027814bbc78a3990"
   },
   "database": {
