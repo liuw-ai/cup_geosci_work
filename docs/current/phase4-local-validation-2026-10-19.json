@@ -18,6 +18,15 @@
     "command": "docker compose -f deploy/compose.yaml config --quiet",
     "config_check": "passed"
   },
+  "docker_build_check": {
+    "commands": [
+      "docker buildx build --check --file deploy/docker/Dockerfile.app .",
+      "docker buildx build --check --file deploy/docker/Dockerfile.browser ."
+    ],
+    "status": "not_run_local_daemon_unavailable",
+    "error": "Docker Desktop Linux daemon is not reachable at npipe:////./pipe/dockerDesktopLinuxEngine",
+    "note": "No image build or dependency download was attempted."
+  },
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256_before_tests": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",

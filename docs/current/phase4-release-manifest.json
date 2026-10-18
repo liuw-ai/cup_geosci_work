@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T20:19:52Z",
+  "generated_at": "2026-10-18T20:20:53Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "78a3940f2f152b8abd4305af7d10331cce36049e",
+  "git_sha": "00a5828ec33d882d8be98cfbd4337f6af76f6248",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "6f45e006c1edc7ee123c83967b0e892235bb8d0c0a03524545d78d30e55a9db4",
-    "phase4_document_consistency": "6f45e006c1edc7ee123c83967b0e892235bb8d0c0a03524545d78d30e55a9db4",
+    "phase4_current_state_audit": "9f1289a53426473c289ca667ebeb010aeef20b55311358fa21b9028754270ff4",
+    "phase4_document_consistency": "9f1289a53426473c289ca667ebeb010aeef20b55311358fa21b9028754270ff4",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -46,7 +46,7 @@
     "phase4_huatu_table_discovery": "e13bea423404b688d1de2aa46ea316926e9692caa5cc3bb3c3bbfcc3a178fa22",
     "phase4_huatu_discovery_scan": "6084764bc34681e688a1bcfaa07851a8fb0c4fcb073680a308ffd219ea2fb277",
     "phase4_main_record": "f2ee6d7bf8e8127bb89ae47471a500574a56984170af07b31976e8cc8cf0647d",
-    "phase4_local_validation": "0c65d91399fc1b1375ab7b6ba55e3aeb0b11189c2868f8edc8bb11fa802e9332",
+    "phase4_local_validation": "3e40c2b2703c7561ee982bbb8bfa0fecee0ba915f9ecdc0a3d9bc1cce1da45e4",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935"
   },
   "database": {
@@ -133,6 +133,15 @@
       "path": "deploy/compose.yaml",
       "command": "docker compose -f deploy/compose.yaml config --quiet",
       "config_check": "passed"
+    },
+    "docker_build_check": {
+      "commands": [
+        "docker buildx build --check --file deploy/docker/Dockerfile.app .",
+        "docker buildx build --check --file deploy/docker/Dockerfile.browser ."
+      ],
+      "status": "not_run_local_daemon_unavailable",
+      "error": "Docker Desktop Linux daemon is not reachable at npipe:////./pipe/dockerDesktopLinuxEngine",
+      "note": "No image build or dependency download was attempted."
     },
     "database": {
       "path": "runtime/job_hub.sqlite3",
