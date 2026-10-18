@@ -17,6 +17,7 @@ services:
   web:
     build:
       context: ..
+      dockerfile: deploy/docker/Dockerfile.app
     image: ${JOB_HUB_IMAGE:-cupb-geoscience-job-hub:latest}
     env_file:
       - ../.env
@@ -70,6 +71,7 @@ services:
   worker:
     build:
       context: ..
+      dockerfile: deploy/docker/Dockerfile.app
     image: ${JOB_HUB_IMAGE:-cupb-geoscience-job-hub:latest}
     env_file:
       - ../.env

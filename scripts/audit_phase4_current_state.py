@@ -265,6 +265,33 @@ def main() -> None:
         "database": current_database_facts(),
         "sources_and_organizations": source_facts(),
         "three_oil_entry_matrix": entry_matrix_payload.get("summary", {}),
+        "deployment": {
+            "production_compose": {
+                "path": "deploy/compose.yaml",
+                "sha256": sha256(ROOT / "deploy" / "compose.yaml"),
+            },
+            "canonical_dockerfiles": {
+                "app": {
+                    "path": "deploy/docker/Dockerfile.app",
+                    "sha256": sha256(ROOT / "deploy" / "docker" / "Dockerfile.app"),
+                },
+                "browser": {
+                    "path": "deploy/docker/Dockerfile.browser",
+                    "sha256": sha256(ROOT / "deploy" / "docker" / "Dockerfile.browser"),
+                },
+            },
+            "root_compatibility_files_retained": [
+                "docker-compose.yml",
+                "docker-compose.browser.yml",
+                "docker-compose.location-fix.yml",
+                "docker-compose.public.yml",
+                "Dockerfile",
+                "Dockerfile.browser",
+                "Dockerfile.business-date",
+                "Dockerfile.experience-gate",
+            ],
+            "production_entrypoint": "deploy/compose.yaml",
+        },
         "document_consistency": document_consistency_facts(),
         "evidence_documents": {
             "phase4_three_oil_catalog_audit": {

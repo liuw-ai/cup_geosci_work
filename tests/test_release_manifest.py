@@ -108,8 +108,29 @@ def test_production_compose_is_single_canonical_entrypoint() -> None:
     text = production.read_text(encoding="utf-8")
     assert "x-release-environment: &release-environment" in text
     assert "context: .." in text
+    assert "dockerfile: deploy/docker/Dockerfile.app" in text
     assert "../data:/app/data:ro" in text
     assert "overlay" not in text.lower()
+
+
+def test_production_app_dockerfile_is_under_deploy_docker() -> None:
+    dockerfile = (
+        Path(__file__).resolve().parent.parent / "deploy" / "docker" / "Dockerfile.app"
+    )
+    text = dockerfile.read_text(encoding="utf-8")
+    assert text.startswith("FROM python:3.11-slim")
+    assert "COPY requirements.txt ." in text
+    assert "COPY --chown=jobhub:jobhub . ." in text
+
+
+def test_production_browser_dockerfile_is_under_deploy_docker() -> None:
+    dockerfile = (
+        Path(__file__).resolve().parent.parent / "deploy" / "docker" / "Dockerfile.browser"
+    )
+    text = dockerfile.read_text(encoding="utf-8")
+    assert "FROM ${RUNTIME_IMAGE}" in text
+    assert "requirements-browser.txt" in text
+    assert "job_hub/official_browser_worker.py" in text
 
 
 def test_phase3_manifest_reads_only_immutable_release_identity(tmp_path) -> None:

@@ -226,6 +226,10 @@ def main() -> None:
         "working_tree_dirty": working_tree_dirty,
         "compose_path": "deploy/compose.yaml",
         "compose_sha256": sha256(ROOT / "deploy" / "compose.yaml"),
+        "dockerfile_sha256": {
+            "app": sha256(ROOT / "deploy" / "docker" / "Dockerfile.app"),
+            "browser": sha256(ROOT / "deploy" / "docker" / "Dockerfile.browser"),
+        },
         "release_env_sha256": sha256(ROOT / ".release.env"),
         "config_sha256": {
             "discovery_sources": sha256(ROOT / "data" / "discovery_sources.json"),
