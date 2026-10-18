@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T19:45:06Z",
+  "generated_at": "2026-10-18T19:50:29Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "6139647539f336c4f2e46209b4beef19a4ec3ae2",
+  "git_sha": "29a5c9b603212964478b2dc1d23da1b6279858ba",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -25,8 +25,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "33a99ab4fb5490bfdd64c7715e405b9faa30060ce8d845f0238f16ab58932f7d",
-    "phase4_document_consistency": "33a99ab4fb5490bfdd64c7715e405b9faa30060ce8d845f0238f16ab58932f7d",
+    "phase4_current_state_audit": "362a5533a3d37a6bf439792bc68a436764d04554a3e2e19ff592df1853afec90",
+    "phase4_document_consistency": "362a5533a3d37a6bf439792bc68a436764d04554a3e2e19ff592df1853afec90",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -40,8 +40,9 @@
     "phase4_local_web_recheck": "c4558f29ff36ea1ccf00709837e34cc3a40e5b20d459aaa40ceca1ba4fd6ec08",
     "phase4_huatu_table_discovery": "e13bea423404b688d1de2aa46ea316926e9692caa5cc3bb3c3bbfcc3a178fa22",
     "phase4_huatu_discovery_scan": "6084764bc34681e688a1bcfaa07851a8fb0c4fcb073680a308ffd219ea2fb277",
-    "phase4_main_record": "cf4aac0304ed08bb7947322d5f88c9c6dc8d803a4fe5c09ad094f3589ff09357",
-    "phase4_local_validation": "27a46b8d0a06f07b337a96238f1d4fb7c6a62452f1301cc633ec5ce714409923"
+    "phase4_main_record": "f2ee6d7bf8e8127bb89ae47471a500574a56984170af07b31976e8cc8cf0647d",
+    "phase4_local_validation": "721986f8d8884b844df8906fd71d7399eac690e40a8596e9b1b3cea6b25133f9",
+    "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -87,6 +88,10 @@
     "pre_deadline_location_repair_backup": {
       "path": "backups/job_hub-pre-phase4-deadline-location-repair-20261019.sqlite3",
       "sha256": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a"
+    },
+    "current_after_local_server_stop_backup": {
+      "path": "backups/job_hub-phase4-current-after-local-server-stop-20261019.sqlite3",
+      "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688"
     }
   },
   "target_metrics": {
@@ -106,11 +111,11 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-19T03:18:00+08:00",
+    "validated_at": "2026-10-19T03:48:06+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "5350eb0",
-    "git_sha_at_validation": "5350eb0",
+    "git_sha_before_metadata_commit": "6139647",
+    "git_sha_at_validation": "6139647",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1075,
@@ -126,8 +131,8 @@
     },
     "database": {
       "path": "runtime/job_hub.sqlite3",
-      "sha256_before_tests": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
-      "sha256_after_tests": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
+      "sha256_before_tests": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
+      "sha256_after_tests": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
       "integrity_check": "ok",
       "jobs": 3952,
       "candidate_leads": 6,
@@ -139,7 +144,9 @@
         "broad_geoscience_match": 5,
         "incomplete_but_basic_match": 373,
         "source_unavailable": 111
-      }
+      },
+      "formal_database_stable_during_tests": true,
+      "current_hash_incident": "docs/current/phase4-local-db-write-incident-2026-10-19.json"
     },
     "third_party": {
       "isolated_huatu_trial_candidate_leads": 11,
@@ -153,7 +160,7 @@
         5436
       ],
       "formal_database_unchanged": false,
-      "formal_database_change_note": "The approved local HRINM recovery created job 5432; the B-level Huatu-to-CGS recovery then created jobs 5433-5436 from four official attachment rows. All subsequent tests used isolated databases or read-only inspection.",
+      "formal_database_change_note": "The approved local HRINM recovery created job 5432; the B-level Huatu-to-CGS recovery then created jobs 5433-5436 from four official attachment rows. A later local Flask process was found using the formal path; it was stopped and recorded separately. The current full test run kept the formal database hash stable.",
       "cgs_attachment_trial": {
         "candidate_lead_ids": [
           3,
@@ -225,7 +232,7 @@
       "coverage_status": 200,
       "coverage_seconds": 24.629,
       "latest_recheck_report": "docs/current/phase4-local-web-recheck-2026-10-19.json",
-      "database_mode_note": "all requests used a temporary copy; runtime/job_hub.sqlite3 was not opened for writing"
+      "database_mode_note": "all requests used a temporary copy; the earlier local Flask process was stopped and is recorded in phase4-local-db-write-incident-2026-10-19.json"
     },
     "release_boundary": {
       "status": "not_publishable",
