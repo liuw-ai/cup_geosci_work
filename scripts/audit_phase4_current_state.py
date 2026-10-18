@@ -236,6 +236,7 @@ def main() -> None:
     cooec_negative_entry = ROOT / "docs" / "current" / "phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json"
     sinopec_page_roster = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
     entry_matrix = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
+    entry_matrix_payload = json.loads(entry_matrix.read_text(encoding="utf-8")) if entry_matrix.is_file() else {}
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
     validation = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-19.json"
     manual_candidate = ROOT / "docs" / "current" / "phase4-third-party-candidate-2026-10-18.json"
@@ -258,6 +259,7 @@ def main() -> None:
         "git_status_porcelain": input_tree_status(),
         "database": current_database_facts(),
         "sources_and_organizations": source_facts(),
+        "three_oil_entry_matrix": entry_matrix_payload.get("summary", {}),
         "document_consistency": document_consistency_facts(),
         "evidence_documents": {
             "phase4_three_oil_catalog_audit": {

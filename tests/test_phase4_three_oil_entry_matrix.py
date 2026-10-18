@@ -31,6 +31,23 @@ def test_phase4_three_oil_entry_matrix_covers_every_formal_catalog_unit() -> Non
     negative = json.loads(COOEC_NEGATIVE_EVIDENCE.read_text(encoding="utf-8"))
     assert negative["evidence_boundary"]["official_identity_verified"] is True
     assert negative["evidence_boundary"]["unit_specific_recruitment_entry_verified"] is False
+    sinopec_displayed_ids = {
+        item["catalog_id"]
+        for item in units
+        if item["group_id"] == "sinopec"
+        and item["unit_specific_entry_status"] == "group_portal_unit_display_observed"
+    }
+    assert {
+        "sinopec-shengli",
+        "sinopec-zhongyuan",
+        "sinopec-henan",
+        "sinopec-jianghan",
+        "sinopec-jiangsu",
+        "sinopec-petroleum-engineering-research",
+        "sinopec-petroleum-machinery",
+        "sinopec-engineering-construction",
+        "sinopec-international-exploration",
+    } <= sinopec_displayed_ids
     full_evidence = json.loads(FULL_CNOOC_EVIDENCE.read_text(encoding="utf-8"))
     assert full_evidence["unit_count"] == 16
     assert full_evidence["total_job_cards"] == 350

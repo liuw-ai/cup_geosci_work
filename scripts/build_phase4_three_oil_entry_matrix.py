@@ -19,7 +19,25 @@ REGISTRY = ROOT / "data" / "organization_registry.json"
 ENTRY_EVIDENCE = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"
 CNOOC_UNIT_EVIDENCE = ROOT / "docs" / "current" / "phase4-cnooc-unit-display-evidence-2026-10-19.json"
 NEGATIVE_ENTRY_EVIDENCE = ROOT / "docs" / "current" / "phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json"
+SINOPEC_PAGE_ROSTER = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
 OUTPUT = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
+
+# These aliases are limited to names whose group-portal display text is
+# unambiguous against the formal catalog.  Similar-looking "石油局" or
+# "石油工程" labels are intentionally left unmatched until legal identity
+# evidence binds them to a catalog unit.
+SINOPEC_DISPLAY_ALIASES = {
+    "sinopec-shengli": {"胜利油田"},
+    "sinopec-zhongyuan": {"中原油田"},
+    "sinopec-henan": {"河南油田"},
+    "sinopec-jianghan": {"江汉油田"},
+    "sinopec-jiangsu": {"江苏油田"},
+    "sinopec-petroleum-exploration-production-research": {"石油勘探开发研究院"},
+    "sinopec-petroleum-engineering-research": {"石油工程技术研究院"},
+    "sinopec-petroleum-machinery": {"石油机械股份有限公司"},
+    "sinopec-engineering-construction": {"石油工程建设有限公司"},
+    "sinopec-international-exploration": {"国际石油勘探公司"},
+}
 
 
 def registry_recruitment_entry(
@@ -78,6 +96,7 @@ def main() -> None:
     evidence = json.loads(ENTRY_EVIDENCE.read_text(encoding="utf-8"))
     cnooc_unit_evidence = json.loads(CNOOC_UNIT_EVIDENCE.read_text(encoding="utf-8"))
     negative_entry_evidence = json.loads(NEGATIVE_ENTRY_EVIDENCE.read_text(encoding="utf-8"))
+    sinopec_roster = json.loads(SINOPEC_PAGE_ROSTER.read_text(encoding="utf-8"))
     negative_entry_by_catalog_id = {
         str(negative_entry_evidence.get("catalog_id") or "").strip(): negative_entry_evidence
     }
@@ -91,6 +110,11 @@ def main() -> None:
         for item in evidence.get("cnooc", {}).get("displayed_units", [])
         if str(item).strip()
     }
+    sinopec_display_records = {
+        str(item.get("display_name") or "").strip(): item
+        for item in sinopec_roster.get("records", [])
+        if isinstance(item, dict) and str(item.get("display_name") or "").strip()
+    }
     rows: list[dict[str, object]] = []
     for group in catalog.get("groups", []):
         group_id = str(group.get("id") or "").strip()
@@ -101,7 +125,16 @@ def main() -> None:
             unit_id = str(unit.get("id") or "").strip()
             unit_name = str(unit.get("name") or "").strip()
             is_group = unit_id == group_id
-            displayed = unit_name in displayed_cnooc if group_id == "cnooc" else False
+            display_aliases = SINOPEC_DISPLAY_ALIASES.get(unit_id, set())
+            sinopec_display = next(
+                (
+                    sinopec_display_records[alias]
+                    for alias in display_aliases
+                    if alias in sinopec_display_records
+                ),
+                None,
+            ) if group_id == "sinopec" else None
+            displayed = unit_name in displayed_cnooc if group_id == "cnooc" else bool(sinopec_display)
             unit_entry = None if is_group else registry_recruitment_entry(
                 registry,
                 unit_id=unit_id,
@@ -117,7 +150,7 @@ def main() -> None:
                 unit_status = "group_portal_unit_display_observed"
             else:
                 unit_status = "unit_specific_entry_pending"
-            observed = cnooc_observations.get(unit_name) if group_id == "cnooc" else None
+            observed = cnooc_observations.get(unit_name) if group_id == "cnooc" else sinopec_display
             rows.append(
                 {
                     "catalog_id": unit_id,
@@ -137,17 +170,21 @@ def main() -> None:
                     "observed_official_application_url_count": observed.get("unique_official_application_url_count") if observed else 0,
                     "observed_job_evidence_file": (
                         "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json"
-                        if observed
+                        if group_id == "cnooc" and observed
                         else None
                     ),
                     "observed_job_summary_evidence_file": (
                         "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json"
-                        if observed
+                        if group_id == "cnooc" and observed
+                        else "docs/current/phase4-sinopec-page-roster-2026-10-19.json"
+                        if group_id == "sinopec" and observed
                         else None
                     ),
                     "observed_job_evidence_scope": (
                         "official_group_portal_active_unit_job_cards"
-                        if observed
+                        if group_id == "cnooc" and observed
+                        else "official_group_portal_display_roster"
+                        if group_id == "sinopec" and observed
                         else None
                     ),
                     "evidence_scope": (

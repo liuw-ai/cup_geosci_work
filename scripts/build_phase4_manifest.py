@@ -170,6 +170,7 @@ def main() -> None:
     cnooc_full_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-unit-job-evidence-2026-10-19.json"
     cooec_negative_entry = ROOT / "docs" / "current" / "phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json"
     entry_matrix = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
+    entry_matrix_payload = json.loads(entry_matrix.read_text(encoding="utf-8")) if entry_matrix.is_file() else {}
     display_audit = ROOT / "docs" / "current" / "phase4-sinopec-display-units-2026-10-18.json"
     sinopec_page_roster = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
@@ -292,6 +293,7 @@ def main() -> None:
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
         "three_oil_entry_evidence": {
+            "matrix_summary": entry_matrix_payload.get("summary", {}),
             "cnooc_unit_display_evidence": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
             "cnooc_unit_job_evidence": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
             "cooec_negative_entry_evidence": "docs/current/phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json",
