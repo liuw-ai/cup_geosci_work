@@ -1,0 +1,18 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-19T02:15:44+08:00",
+  "group_id": "cnpc",
+  "group_name": "中国石油天然气集团有限公司",
+  "entry_url": "https://zhaopin.cnpc.com.cn/",
+  "verification_mode": "read_only_browser_navigation",
+  "status": "blocked_by_saved_browser_permission",
+  "observation": "当前浏览器保存的站点权限阻止访问该官方招聘入口。",
+  "evidence_boundary": {
+    "official_portal_verified_this_run": false,
+    "unit_display_roster_verified_this_run": false,
+    "unit_specific_recruitment_entries_verified": 0,
+    "portal_failure_means_no_jobs": false,
+    "url_failure_means_portal_invalid": false
+  },
+  "policy": "不绕过浏览器权限、不替换浏览器、不猜测 URL；保持已有目录和入口状态，等待合法访问条件恢复后再核验。"
+}
