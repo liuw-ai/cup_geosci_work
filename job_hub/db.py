@@ -1841,7 +1841,12 @@ class Database:
             if (
                 decision.status != publication_status
                 or decision.major_match_mode
-                not in {"exact_four_names", "similar_major", "public_unrestricted_rule"}
+                not in {
+                    "exact_four_names",
+                    "similar_major",
+                    "broad_geoscience",
+                    "public_unrestricted_rule",
+                }
                 or publication_basis.get("major_match_mode") != decision.major_match_mode
             ):
                 publication_status = "pending_evidence"

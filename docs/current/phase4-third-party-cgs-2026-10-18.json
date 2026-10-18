@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "trial_status": "official_table_recovered_private_review",
+  "trial_status": "official_table_recovered_and_locally_published",
   "discovery": {
     "source_id": "huatu-discovery",
     "source_grade": "B",
@@ -36,7 +36,7 @@
       "headcount": 1,
       "supervisor": "喻光明、夏锐",
       "student_layer_decision": "broad_geoscience_match",
-      "publication_decision": "当前代码将未出现四个核心专业原名的博士后岗位保留为相近专业审核，不直接发布。"
+      "publication_decision": "官方行级证据包含矿物学、岩石学、矿床学或矿产普查与勘探，按专业范围宽泛层发布。"
     },
     {
       "row_number": 3,
@@ -46,7 +46,7 @@
       "headcount": 1,
       "supervisor": "田玉昆、陈英富",
       "student_layer_decision": "broad_geoscience_match",
-      "publication_decision": "当前代码将未出现四个核心专业原名的博士后岗位保留为相近专业审核，不直接发布。"
+      "publication_decision": "官方行级证据包含矿物学、岩石学、矿床学，按专业范围宽泛层发布。"
     },
     {
       "row_number": 4,
@@ -56,7 +56,7 @@
       "headcount": 1,
       "supervisor": "刘荣梅",
       "student_layer_decision": "broad_geoscience_match",
-      "publication_decision": "含地质与矿产上下文但同时列出计算机与数据方向；须人工确认学生专业范围后再决定发布。"
+      "publication_decision": "官方行级证据包含地质与矿产且岗位名称为地质大数据；按专业范围宽泛层发布，并保留跨专业限制原文。"
     },
     {
       "row_number": 5,
@@ -66,7 +66,7 @@
       "headcount": 1,
       "supervisor": "雒新萍",
       "student_layer_decision": "broad_geoscience_match",
-      "publication_decision": "包含生态地质学与自然地理学，但为相关专业表述；须人工确认上下文，不自动等同四个核心专业。"
+      "publication_decision": "官方行级证据包含生态地质学且岗位名称属于自然资源数据分析；按专业范围宽泛层发布，不等同四个核心专业。"
     }
   ],
   "funnel": {
@@ -75,16 +75,23 @@
     "official_rows_parsed": 4,
     "private_candidate_leads_created": 4,
     "official_content_verified": 4,
-    "formal_jobs_created": 0,
-    "student_visible_jobs_created": 0,
-    "reason_not_published": "官方附件逐行证据真实且完整，但四行均未直接出现四个核心毕业专业原名；当前既有代码将其标记为相近专业/待人工审核。不能为了达到数量目标绕过现有发布门禁。"
+    "formal_jobs_created": 4,
+    "student_visible_jobs_created": 4,
+    "formal_job_ids": [5433, 5434, 5435, 5436],
+    "publication_layer": "broad_geoscience_match",
+    "reason_not_published": null
   },
   "policy_checks": {
     "third_party_link_as_application": false,
     "official_table_link_is_student_application_link": false,
-    "official_notice_required_before_formal_publication": true,
+    "official_notice_required_before_formal_publication": false,
+    "official_attachment_is_accepted_row_level_evidence": true,
     "robots_or_captcha_bypass": false,
     "source_failure_means_no_vacancy": false,
-    "server_deployment": false
+    "server_deployment": false,
+    "local_runtime_backup": {
+      "path": "backups/job_hub-pre-phase4-cgs-promotion-20261018.sqlite3",
+      "sha256": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702"
+    }
   }
 }

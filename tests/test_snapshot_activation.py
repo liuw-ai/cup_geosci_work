@@ -48,8 +48,7 @@ def test_activation_keeps_manual_source_auditable_without_enabling_live_sync(
 
     assert result["captured_rows"] == 363
     assert result["publication_status"] == {
-        "student_eligible": 62,
-        "similar_eligible": 1,
+        "student_eligible": 63,
         "pending_evidence": 12,
         "out_of_scope": 288,
     }
@@ -78,4 +77,4 @@ def test_activation_does_not_count_pending_or_out_of_scope_rows(tmp_path: Path) 
     assert len(public_rows) == 64
     assert audit_count == 363
     assert len(audit_rows) == 363
-    assert all(row["publication_status"] in {"student_eligible", "similar_eligible", "pending_evidence"} for row in public_rows)
+    assert all(row["publication_status"] in {"student_eligible", "pending_evidence"} for row in public_rows)

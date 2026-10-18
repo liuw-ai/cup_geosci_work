@@ -193,7 +193,7 @@ def audit_database(
             )
         if (
             job.get("publication_layer")
-            not in {"broad_geoscience_match", "incomplete_but_basic_match", "source_unavailable"}
+            not in {"incomplete_but_basic_match", "source_unavailable"}
             and not _audit_uses_public_broad_rule(job)
         ):
             decision = evaluate_student_publication(job)

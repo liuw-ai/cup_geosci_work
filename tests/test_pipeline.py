@@ -901,8 +901,8 @@ def test_reindex_restamps_enterprise_major_match_mode_and_rejects_broad_legacy_r
     assert exact["publication_status"] == "student_eligible"
     assert exact["publication_basis"]["major_match_mode"] == "exact_four_names"
     assert broad is not None
-    assert broad["publication_status"] == "out_of_scope"
-    assert broad["publication_basis"]["major_match_mode"] == ""
+    assert broad["publication_status"] == "student_eligible"
+    assert broad["publication_basis"]["major_match_mode"] == "broad_geoscience"
 
 
 def test_reindex_rolls_back_all_rows_when_one_normalization_fails(tmp_path, monkeypatch) -> None:

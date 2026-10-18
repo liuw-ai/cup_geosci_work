@@ -24,7 +24,7 @@ def test_freshness_failure_is_not_a_withdrawal_reason():
 
 def test_legacy_publication_status_maps_to_independent_layers():
     assert derive_publication_layer("student_eligible", {"major_match_mode": "exact_four_names"}) == "exact_match"
-    assert derive_publication_layer("similar_eligible", {"major_match_mode": "similar_major"}) == "broad_geoscience_match"
+    assert derive_publication_layer("similar_eligible", {"major_match_mode": "similar_major"}) == "not_public"
     assert derive_publication_layer("pending_evidence", has_basic_major_evidence=True) == "incomplete_but_basic_match"
     assert derive_publication_layer("source_unavailable") == "source_unavailable"
 

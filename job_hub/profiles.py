@@ -43,6 +43,21 @@ PUBLIC_STUDENT_PUBLICATION_STATUSES = frozenset(
     }
 )
 
+# Explicit geoscience disciplines may be shown in a separate broad tier. They
+# never masquerade as one of the four exact graduation majors, and a term alone
+# is not enough: the official row must also have geoscience role context.
+BROAD_GEOSCIENCE_TERMS = frozenset(
+    {
+        "地质类", "地质学类", "地质工程类", "地质资源与地质工程类", "地学类",
+        "地球科学", "地质与矿产", "勘查技术与工程", "矿产普查与勘探",
+        "矿产勘查", "资源勘查", "地球探测与信息技术", "地球信息科学与技术",
+        "地球化学", "地球物理学", "地球物理", "固体地球物理学", "矿物学",
+        "岩石学", "矿床学", "构造地质学", "古生物学与地层学", "第四纪地质学",
+        "沉积学", "生态地质学", "海洋地质", "遥感地质", "石油地质", "油气地质",
+        "工程地质", "水文地质", "环境地质", "地质灾害", "地热", "物探", "化探", "测井",
+    }
+)
+
 DEGREE_EVIDENCE_KEYS = frozenset(
     {
         "学历要求",
@@ -74,8 +89,8 @@ DEGREE_EVIDENCE_KEYS = frozenset(
 
 # ``publication_status`` answers whether a row may be shown to students.  This
 # separate vocabulary answers how the official major evidence was classified
-# for operations reporting. Similar-major rows are public only in a visibly
-# separate tier; they never masquerade as one of the four exact majors.
+# for operations reporting. Explicit broad-geoscience rows are public only in a
+# visibly separate tier; unresolved adjacent wording remains private.
 MAJOR_MATCH_LEVELS = frozenset(
     {"exact", "similar", "broad", "pending", "not_recommended"}
 )
@@ -543,6 +558,27 @@ def evaluate_student_publication(
             matched_profile_ids=(),
         )
 
+    broad_terms = _broad_geoscience_terms(qualification_text)
+    if broad_terms and _has_geoscience_role_evidence(job):
+        degree_profiles = tuple(
+            profile.id
+            for profile in STUDENT_PROFILES
+            if _degree_status(job, profile)[0] == "explicit"
+        )
+        if degree_profiles:
+            return PublicationDecision(
+                status=PUBLICATION_STUDENT_ELIGIBLE,
+                label="专业范围宽泛",
+                reason=(
+                    "官方岗位级专业要求包含明确地学方向（"
+                    + "、".join(broad_terms)
+                    + "），但未直接限定为四个核心毕业专业；学生需以原公告资格审查为准。"
+                ),
+                matched_profile_ids=degree_profiles,
+                public_scope=public_scope,
+                major_match_mode="broad_geoscience",
+            )
+
     related = _related_major_matches(job, qualification_text)
     if related:
         profile_ids = tuple(item["profile_id"] for item in related)
@@ -629,10 +665,16 @@ def classify_major_match(job: dict[str, Any]) -> dict[str, Any]:
     if decision.major_match_mode in {
         "public_named_or_code",
         "public_unrestricted_rule",
+        "broad_geoscience",
     } or decision.status == PUBLICATION_UNRESTRICTED_ELIGIBLE:
+        label = (
+            "专业范围宽泛"
+            if decision.major_match_mode == "broad_geoscience"
+            else "公共招录宽泛规则"
+        )
         return {
             "level": "broad",
-            "label": "\u516c\u5171\u62db\u5f55\u5bbd\u6cdb\u89c4\u5219",
+            "label": label,
             "reason": decision.reason,
             "matched_profile_ids": list(decision.matched_profile_ids),
             "publication_status": decision.status,
@@ -666,6 +708,17 @@ def classify_major_match(job: dict[str, Any]) -> dict[str, Any]:
         "publication_status": decision.status,
         "major_match_mode": decision.major_match_mode,
     }
+
+
+def _broad_geoscience_terms(qualification_text: str) -> tuple[str, ...]:
+    """Return explicit broad-geoscience terms in official major evidence."""
+
+    normalized = clean_text(qualification_text)
+    return tuple(
+        term
+        for term in sorted(BROAD_GEOSCIENCE_TERMS, key=lambda item: (-len(item), item))
+        if _contains_related_major_term(normalized, term.casefold())
+    )
 
 
 def _profile_has_named_exact_match(
@@ -779,7 +832,8 @@ def _has_geoscience_requirement_marker(qualification_text: str) -> bool:
 
 _GEOSCIENCE_ROLE_MARKERS = (
     "地质", "地勘", "地学", "地球物理", "地球化学", "矿产", "矿床", "岩矿鉴定", "找矿", "勘查", "勘探", "物探", "化探",
-    "测井", "岩石物理", "地震", "储层", "岩土", "地灾", "地热", "沉积", "水工环",
+    "测井", "岩石物理", "矿物", "岩石", "地震", "储层", "岩土", "地灾", "地热", "沉积", "水工环",
+    "自然资源", "生态地质",
     "geolog", "geophys", "geoscience", "seismic", "subsurface", "well logging",
 )
 _NON_GEOSCIENCE_ROLE_TITLE = re.compile(

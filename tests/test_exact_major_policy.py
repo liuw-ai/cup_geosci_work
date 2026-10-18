@@ -68,7 +68,7 @@ def test_adjacent_major_needs_geoscience_role_not_just_major_text() -> None:
         assert decision.is_public is False, title
 
 
-def test_adjacent_major_with_independent_geoscience_role_evidence_is_separate() -> None:
+def test_adjacent_major_with_independent_geoscience_role_evidence_is_broad() -> None:
     for title, description in (
         ("地质技术员", "专业要求：地球物理学。"),
         ("地球物理监测技术研发岗", "专业要求：地球物理学。"),
@@ -85,8 +85,8 @@ def test_adjacent_major_with_independent_geoscience_role_evidence_is_separate() 
         candidate["field_evidence"]["岗位"] = title
         candidate["description"] = description
         decision = evaluate_student_publication(candidate)
-        assert decision.status == "similar_eligible", title
-        assert decision.major_match_mode == "similar_major"
+        assert decision.status == "student_eligible", title
+        assert decision.major_match_mode == "broad_geoscience"
 
 
 def test_split_location_must_match_the_published_variant() -> None:

@@ -102,8 +102,8 @@ def test_database_write_gate_keeps_similar_rows_out_of_student_corpus(tmp_path) 
     stored = database.find_job(job_id, student_visible=False)
     assert stored is not None
     assert stored["publication_status"] == "similar_eligible"
-    assert database.list_jobs(page_size=None, student_visible=True)[1] == 1
-    assert database.list_jobs(page_size=None, student_visible=True)[0][0]["publication_layer"] == "broad_geoscience_match"
+    assert database.list_jobs(page_size=None, student_visible=True)[1] == 0
+    assert database.list_jobs(page_size=None, student_visible=False)[0][0]["publication_layer"] == "not_public"
 
 
 def test_database_write_gate_rejects_forged_exact_match_marker(tmp_path) -> None:

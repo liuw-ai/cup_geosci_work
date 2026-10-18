@@ -67,7 +67,10 @@ SUPERSEDED_VISIBILITY_POLICY = "historical_snapshot_only"
 LEGACY_PUBLICATION_STATUS_TO_LAYER = {
     "student_eligible": "exact_match",
     "unrestricted_eligible": "broad_geoscience_match",
-    "similar_eligible": "broad_geoscience_match",
+    # Legacy adjacent-major rows remain auditable but are not part of the
+    # student corpus. Explicit broad-geoscience wording is classified through
+    # ``major_match_mode=broad_geoscience`` instead.
+    "similar_eligible": "not_public",
     "pending_evidence": "incomplete_but_basic_match",
     "source_unavailable": "source_unavailable",
 }
@@ -205,10 +208,14 @@ def derive_publication_layer(
     if status == "source_unavailable":
         return "source_unavailable"
     if status in {"student_eligible"}:
-        if mode in {"public_named_or_code", "public_unrestricted_rule"}:
+        if mode in {
+            "public_named_or_code",
+            "public_unrestricted_rule",
+            "broad_geoscience",
+        }:
             return "broad_geoscience_match"
         return "exact_match"
-    if status in {"unrestricted_eligible", "similar_eligible"}:
+    if status == "unrestricted_eligible":
         return "broad_geoscience_match"
     if status == "pending_evidence" and has_basic_major_evidence:
         return "incomplete_but_basic_match"

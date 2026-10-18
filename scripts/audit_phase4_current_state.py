@@ -283,7 +283,7 @@ def main() -> None:
             "automation_status": "paused",
             "formal_third_party_jobs_published": True,
             "notes": [
-                "One locally approved third-party discovery lead was recovered to an official employer notice and published as job 5432; no server deployment was performed.",
+                "One C-level discovery lead was recovered to an official employer notice and published as job 5432; four B-level Huatu discovery rows were recovered to the official CGS attachment and published as jobs 5433-5436; no server deployment was performed.",
                 "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
                 "Historical snapshots remain archived and are not overwritten by current facts.",
             ],

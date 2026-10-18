@@ -207,9 +207,9 @@ def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) 
     # Enterprise rows are eligible only when the official requirement names
     # one of the four graduation majors; adjacent geoscience wording remains a
     # separate similar-major or pending-evidence tier.
-    assert statuses.count("student_eligible") == 35
+    assert statuses.count("student_eligible") == 41
     assert statuses.count("pending_evidence") == 10
-    assert statuses.count("similar_eligible") == 6
+    assert statuses.count("similar_eligible") == 0
     assert statuses.count("out_of_scope") == 2
     mixed_assignment = next(
         item for item in normalized if item["location"] == "蒙古国、山东"

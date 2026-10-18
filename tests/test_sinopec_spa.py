@@ -128,8 +128,7 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
 
     assert len(rows) == 756
     assert statuses == {
-        "student_eligible": 158,
-        "similar_eligible": 1,
+        "student_eligible": 159,
         "pending_evidence": 41,
         "out_of_scope": 556,
     }
@@ -146,9 +145,9 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
         if row["external_id"]
         == "sinopec-F76DDBE3-0690-412B-9A85-1B2DEB6F3FE3-01"
     )
-    assert huadong_research["publication_status"] == "similar_eligible"
+    assert huadong_research["publication_status"] == "student_eligible"
     assert huadong_research["publication_basis"]["matched_profile_ids"]
-    assert huadong_research["publication_basis"]["major_match_mode"] == "similar_major"
+    assert huadong_research["publication_basis"]["major_match_mode"] == "broad_geoscience"
     assert "矿产普查与勘探" in huadong_research["field_evidence"]["专业要求原文"]
     assert all(
         row["publication_basis"]["matched_profile_ids"]
@@ -162,9 +161,10 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
     )
     assert all(
         row["publication_basis"]["matched_profile_ids"]
-        and row["publication_basis"]["major_match_mode"] == "similar_major"
+        and row["publication_basis"]["major_match_mode"] == "broad_geoscience"
         for row in rows
-        if row["publication_status"] == "similar_eligible"
+        if row["publication_status"] == "student_eligible"
+        and row["publication_basis"]["major_match_mode"] == "broad_geoscience"
     )
 
 
@@ -185,7 +185,7 @@ def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
     result = pipeline.sync_source(source)
     assert result.status == "finished"
     assert result.discovered == 756
-    assert result.open_matches == 158
+    assert result.open_matches == 159
 
     public_rows, public_count = database.list_jobs(page_size=None)
     audit_rows, audit_count = database.list_jobs(
@@ -203,12 +203,11 @@ def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
     assert len(source_audit_rows) == 756
     assert all(
         row["publication_status"]
-        in {"student_eligible", "unrestricted_eligible", "similar_eligible", "pending_evidence"}
+        in {"student_eligible", "unrestricted_eligible", "pending_evidence"}
         for row in public_rows
     )
     assert {row["publication_status"] for row in source_audit_rows} == {
         "student_eligible",
-        "similar_eligible",
         "pending_evidence",
         "out_of_scope",
     }

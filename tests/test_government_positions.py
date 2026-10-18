@@ -600,10 +600,10 @@ def test_cea_batch_expands_verified_rows_with_unit_and_location_evidence() -> No
     # longer ``构造地质学`` token; the matcher must retain that valid later
     # occurrence instead of letting the preceding compound name mask it.
     # The historical registry marker is not trusted by the runtime matcher.
-    assert sum(decision.status == "student_eligible" for decision in decisions) == 77
-    assert sum(decision.status == "similar_eligible" for decision in decisions) == 8
+    assert sum(decision.status == "student_eligible" for decision in decisions) == 87
+    assert sum(decision.status == "similar_eligible" for decision in decisions) == 0
     assert sum(decision.status == "pending_evidence" for decision in decisions) == 2
-    assert sum(decision.status == "out_of_scope" for decision in decisions) == 4
+    assert sum(decision.status == "out_of_scope" for decision in decisions) == 2
 
 
 def test_position_batch_can_keep_row_level_province_when_one_notice_is_national() -> None:

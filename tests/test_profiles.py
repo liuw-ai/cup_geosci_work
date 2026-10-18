@@ -44,12 +44,12 @@ def test_supported_profiles_exactly_cover_requested_tracks() -> None:
     assert sum(item.degree == "博士" for item in profiles) == 3
 
 
-def test_major_match_projection_separates_exact_similar_and_public_broad() -> None:
+def test_major_match_projection_separates_exact_broad_and_public_broad() -> None:
     exact = classify_major_match(job())
     assert exact["level"] == "exact"
     assert exact["publication_status"] == "student_eligible"
 
-    similar = classify_major_match(
+    broad_geoscience = classify_major_match(
         job(
             title="\u77ff\u4ea7\u52d8\u67e5\u6280\u672f\u5c97",
             description="\u4e13\u4e1a\u8981\u6c42\uff1a\u77ff\u4ea7\u52d8\u67e5\uff1b\u5b66\u5386\u8981\u6c42\uff1a\u7855\u58eb\u7814\u7a76\u751f\u3002",
@@ -62,8 +62,8 @@ def test_major_match_projection_separates_exact_similar_and_public_broad() -> No
             },
         )
     )
-    assert similar["level"] == "similar"
-    assert similar["publication_status"] != "student_eligible"
+    assert broad_geoscience["level"] == "broad"
+    assert broad_geoscience["publication_status"] == "student_eligible"
 
     broad = classify_major_match(
         job(
@@ -81,7 +81,7 @@ def test_major_match_projection_separates_exact_similar_and_public_broad() -> No
     assert broad["level"] == "broad"
 
 
-def test_geophysics_is_retained_only_as_an_internal_similar_tier() -> None:
+def test_explicit_geophysics_is_a_visible_broad_geoscience_tier() -> None:
     result = evaluate_student_publication(
         job(
             title="岩石物理工程师",
@@ -98,11 +98,9 @@ def test_geophysics_is_retained_only_as_an_internal_similar_tier() -> None:
         )
     )
 
-    assert result.status == "similar_eligible"
-    assert result.major_match_mode == "similar_major"
-    # Adjacent geoscience wording is retained for internal review, but the
-    # student-facing corpus requires one of the four exact graduation majors.
-    assert result.is_public is False
+    assert result.status == "student_eligible"
+    assert result.major_match_mode == "broad_geoscience"
+    assert result.is_public is True
 
 
 def test_browser_detail_scopes_pass_the_same_job_level_gate() -> None:
@@ -639,8 +637,9 @@ def test_petroleum_engineering_filter_preserves_ambiguous_geophysical_direction(
         )
     )
 
-    assert decision.status == "similar_eligible"
-    assert decision.label == "相近专业机会"
+    assert decision.status == "student_eligible"
+    assert decision.major_match_mode == "broad_geoscience"
+    assert decision.label == "专业范围宽泛"
 
 
 def test_petroleum_engineering_filter_preserves_target_major_with_wrong_degree() -> None:
@@ -697,8 +696,8 @@ def test_publication_gate_classifies_named_geology_second_level_discipline_as_si
         )
     )
 
-    assert decision.status == "similar_eligible"
-    assert decision.major_match_mode == "similar_major"
+    assert decision.status == "student_eligible"
+    assert decision.major_match_mode == "broad_geoscience"
 
 
 def test_publication_gate_classifies_geological_resources_direction_as_similar() -> None:

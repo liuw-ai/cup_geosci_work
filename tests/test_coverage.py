@@ -124,7 +124,7 @@ def test_current_job_metrics_separates_public_counts_from_pending_rows() -> None
     assert report["government_jobs"] == 1
     assert report["domestic_enterprise_jobs"] == 1
     assert report["pending_evidence_jobs"] == 1
-    assert report["pending_evidence_by_match_level"]["similar"] == 1
+    assert report["pending_evidence_by_match_level"]["broad"] == 1
 
 
 def snapshot_report(

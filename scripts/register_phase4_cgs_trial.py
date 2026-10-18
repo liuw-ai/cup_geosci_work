@@ -24,7 +24,10 @@ EVIDENCE_PATH = PROJECT_ROOT / "docs/current/phase4-third-party-cgs-2026-10-18.j
 
 def _load_evidence(path: Path) -> dict:
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if payload.get("trial_status") != "official_table_recovered_private_review":
+    if payload.get("trial_status") not in {
+        "official_table_recovered_private_review",
+        "official_table_recovered_and_locally_published",
+    }:
         raise ValueError("unexpected CGS trial status")
     recovery = payload.get("official_recovery") or {}
     discovery = payload.get("discovery") or {}
@@ -83,8 +86,36 @@ def build_leads(payload: dict) -> list[dict]:
                     "deadline_policy": recovery["deadline_policy"],
                     "no_deadline_expires_at": recovery["no_deadline_expires_at"],
                     "row": row,
+                    "title": row["title"],
+                    "employer": recovery["employer"],
+                    "published_date": recovery["published_date"],
+                    "location": recovery["location"],
+                    "qualification_text": (
+                        f"专业要求：{row['major_requirement']}；"
+                        f"学历要求：{row['degree_requirement']}"
+                    ),
+                    "match_text": (
+                        f"{row['title']} {recovery['employer']} "
+                        f"{row['major_requirement']} {recovery['location']}"
+                    ),
+                    "field_evidence": {
+                        "evidence_scope": "official_attachment_row",
+                        "岗位": row["title"],
+                        "用人单位": recovery["employer"],
+                        "专业要求": row["major_requirement"],
+                        "学历要求": row["degree_requirement"],
+                        "工作地点": recovery["location"],
+                        "招聘人数": str(row["headcount"]),
+                        "指导教师": row.get("supervisor") or "",
+                        "官方发布日期": recovery["published_date"],
+                        "官方岗位表链接": recovery["official_table_url"],
+                        "官方岗位表哈希": recovery["official_table_sha256"],
+                        "官方岗位表行号": str(row_number),
+                        "官方报名方式": recovery["official_application_method"],
+                        "官方未公布截止日期": recovery["no_deadline_expires_at"],
+                    },
                     "publication_status": "candidate_only",
-                    "student_publication": "blocked_until_major_review",
+                    "student_publication": "broad_geoscience_reviewed",
                 },
             }
         )
