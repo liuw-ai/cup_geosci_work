@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T13:25:07Z",
+  "generated_at": "2026-10-18T13:28:57Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "b75fa2d1d81af1539f6a544389c519c615397a75",
+  "git_sha": "b30f9944b0b15d83a389a5396ba58ed9dd8b1917",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -88,22 +88,22 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "ae51de405e625a3ae5bb820738684c5b90a1a80af44115392c483859ef56b4f4"
+        "sha256": "7947e3b3c9a34ecda685714551bacc5a884e6c4ef31f1258581dd9c71ab19195"
       },
       {
         "path": "docs/current/phase4-current-state-audit-2026-10-18.json",
         "exists": true,
-        "sha256": "9acd5952879ad4f46b9e395cc544a865fd1875112c2f759187dfe0efc0789f09"
+        "sha256": "4e15a9fd47f277976d1a87fdba02bc0b7385cb4d46d3ef9a9f6e275334d9c4db"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
         "exists": true,
-        "sha256": "a34bd8a0958ea2e58b5fd7e8624ea413bc6806c8e64a4036fe7036f8bc3de19c"
+        "sha256": "d44d31425b25a50933cd3d540358f5db088b028e5164f089433c7385c68cc522"
       },
       {
         "path": "docs/current/phase4-release-manifest.json",
         "exists": true,
-        "sha256": "0d1d079645a0afafbd547fe402c0f8ea6d77aee140874e3ce5c0a23560639035"
+        "sha256": "68315c97863db0c886635921bc958d97def69a42d559725fb75506170b0bbe5d"
       }
     ],
     "historical_documents_are_publish_inputs": false
@@ -131,7 +131,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-18.json",
-      "sha256": "a34bd8a0958ea2e58b5fd7e8624ea413bc6806c8e64a4036fe7036f8bc3de19c"
+      "sha256": "d44d31425b25a50933cd3d540358f5db088b028e5164f089433c7385c68cc522"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -155,7 +155,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "ae51de405e625a3ae5bb820738684c5b90a1a80af44115392c483859ef56b4f4"
+      "sha256": "7947e3b3c9a34ecda685714551bacc5a884e6c4ef31f1258581dd9c71ab19195"
     }
   },
   "code_inventory": [
