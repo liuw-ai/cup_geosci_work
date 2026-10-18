@@ -6,15 +6,18 @@ import hashlib
 import json
 import sqlite3
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
 
 from job_hub.db import Database
 from job_hub.phase3_policy import PUBLICATION_LAYERS
 
 
-ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "docs" / "current" / "phase4-release-manifest.json"
 LOCAL_VALIDATION = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-17.json"
 
@@ -113,6 +116,10 @@ def main() -> None:
     )
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
     validation = local_validation_facts()
+    trial_report = ROOT / "docs" / "current" / "phase4-third-party-trial-2026-10-18.json"
+    entry_evidence = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"
+    display_audit = ROOT / "docs" / "current" / "phase4-sinopec-display-units-2026-10-18.json"
+    geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
     working_tree_dirty = dirty()
     release_blockers = []
     if working_tree_dirty:
@@ -154,6 +161,11 @@ def main() -> None:
             "phase4_three_oil_catalog_audit": sha256(
                 ROOT / "docs" / "current" / "phase4-three-oil-catalog-audit-2026-10-17.json"
             ),
+            "phase4_third_party_trial": sha256(trial_report),
+            "phase4_three_oil_entry_evidence": sha256(entry_evidence),
+            "phase4_sinopec_display_audit": sha256(display_audit),
+            "phase4_third_party_geoscience_followup": sha256(geoscience_followup),
+            "phase4_local_validation": sha256(LOCAL_VALIDATION),
         },
         "database": database,
         "local_validation": validation,
@@ -162,6 +174,7 @@ def main() -> None:
             "batch_candidate_sources": sum(1 for item in sources if item.get("batch_candidate_allowed")),
             "table_adapters": len(adapters),
             "real_candidate_leads_in_database": database["candidate_lead_count"],
+            "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
         "automation_model": "gpt-5.6-terra",

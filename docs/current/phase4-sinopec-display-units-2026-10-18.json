@@ -1,0 +1,1126 @@
+{
+  "phase": "phase4",
+  "generated_at": "2026-10-18T09:24:26Z",
+  "source": {
+    "portal_url": "https://job.sinopec.com/",
+    "observed_display_unit_total": 132,
+    "retained_registry_record_count": 123,
+    "missing_from_registry_count": 9,
+    "observation_note": "132 is the portal's observed display count. Only retained records are listed below; no missing names are invented."
+  },
+  "catalog_scope": {
+    "formal_sinopec_catalog_count": 17,
+    "matched_display_records": 0,
+    "unmatched_display_records": 123,
+    "promotion_rule": "A display name is not a formal unit or independent recruitment entry without legal/official identity evidence."
+  },
+  "records": [
+    {
+      "registry_id": "sinopec-display-002-unit",
+      "display_name": "中原油田",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-003-unit",
+      "display_name": "河南油田",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-005-unit",
+      "display_name": "江苏油田",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-006-unit",
+      "display_name": "新星石油公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-007-unit",
+      "display_name": "上海海洋油气分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-008-unit",
+      "display_name": "华东石油局",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-009-unit",
+      "display_name": "华北石油局",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-010-unit",
+      "display_name": "西北石油局",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-011-unit",
+      "display_name": "东北石油局",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-012-unit",
+      "display_name": "西南石油局",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-013-unit",
+      "display_name": "勘探分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-014-unit",
+      "display_name": "天然气分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-015-unit",
+      "display_name": "胜利石油工程有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-016-unit",
+      "display_name": "中原石油工程有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-017-unit",
+      "display_name": "江汉石油工程有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-018-unit",
+      "display_name": "西南石油工程有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-019-unit",
+      "display_name": "华东石油工程有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-020-unit",
+      "display_name": "地球物理有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-022-unit",
+      "display_name": "国际石油工程公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-023-unit",
+      "display_name": "海洋石油工程公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-024-unit",
+      "display_name": "经纬有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-025-unit",
+      "display_name": "燕山石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-026-unit",
+      "display_name": "齐鲁石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-027-unit",
+      "display_name": "上海石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-028-unit",
+      "display_name": "金陵石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-029-unit",
+      "display_name": "茂名石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-030-unit",
+      "display_name": "天津石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-031-unit",
+      "display_name": "扬子石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-032-unit",
+      "display_name": "仪征化纤",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-033-unit",
+      "display_name": "镇海炼化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-034-unit",
+      "display_name": "福建炼化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-035-unit",
+      "display_name": "南京化工公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-036-unit",
+      "display_name": "广州石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-037-unit",
+      "display_name": "安庆石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-038-unit",
+      "display_name": "荆门石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-039-unit",
+      "display_name": "重庆川维化工有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-040-unit",
+      "display_name": "九江石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-041-unit",
+      "display_name": "石家庄炼化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-042-unit",
+      "display_name": "济南炼化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-043-unit",
+      "display_name": "中韩石化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-045-unit",
+      "display_name": "北海炼化",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-046-unit",
+      "display_name": "塔河炼化公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-047-unit",
+      "display_name": "化工销售有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-048-unit",
+      "display_name": "宁夏能源化工有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-049-unit",
+      "display_name": "炼油销售有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-050-unit",
+      "display_name": "中科（广东）炼化有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-051-unit",
+      "display_name": "北京石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-052-unit",
+      "display_name": "天津石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-053-unit",
+      "display_name": "河北石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-054-unit",
+      "display_name": "山西石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-055-unit",
+      "display_name": "上海石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-056-unit",
+      "display_name": "江苏石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-057-unit",
+      "display_name": "浙江石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-058-unit",
+      "display_name": "安徽石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-059-unit",
+      "display_name": "福建石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-060-unit",
+      "display_name": "江西石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-061-unit",
+      "display_name": "山东石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-062-unit",
+      "display_name": "河南石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-063-unit",
+      "display_name": "湖北石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-064-unit",
+      "display_name": "湖南石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-065-unit",
+      "display_name": "广东石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-066-unit",
+      "display_name": "广西石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-067-unit",
+      "display_name": "海南石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-068-unit",
+      "display_name": "贵州石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-069-unit",
+      "display_name": "云南石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-070-unit",
+      "display_name": "销售华北分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-071-unit",
+      "display_name": "销售华东分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-072-unit",
+      "display_name": "销售华中分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-073-unit",
+      "display_name": "销售华南分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-074-unit",
+      "display_name": "销售西北分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-075-unit",
+      "display_name": "辽宁石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-076-unit",
+      "display_name": "黑龙江石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-077-unit",
+      "display_name": "吉林石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-078-unit",
+      "display_name": "陕西石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-079-unit",
+      "display_name": "宁夏石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-080-unit",
+      "display_name": "新疆石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-081-unit",
+      "display_name": "内蒙古石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-082-unit",
+      "display_name": "青海石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-083-unit",
+      "display_name": "甘肃石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-084-unit",
+      "display_name": "四川石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-085-unit",
+      "display_name": "重庆石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-086-unit",
+      "display_name": "西藏石油分公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-087-unit",
+      "display_name": "燃料油公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-088-unit",
+      "display_name": "第四建设公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-089-unit",
+      "display_name": "第五建设公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-090-unit",
+      "display_name": "第十建设公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-091-unit",
+      "display_name": "工程建设公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-092-unit",
+      "display_name": "广州工程公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-093-unit",
+      "display_name": "上海工程公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-094-unit",
+      "display_name": "宁波工程公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-095-unit",
+      "display_name": "南京工程公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-096-unit",
+      "display_name": "重型起重运输工程公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-097-unit",
+      "display_name": "洛阳技术研发中心",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-098-unit",
+      "display_name": "节能技术服务公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-100-unit",
+      "display_name": "石油化工科学研究院",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-101-unit",
+      "display_name": "北京化工研究院",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-102-unit",
+      "display_name": "大连石油化工研究院",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-103-unit",
+      "display_name": "上海石油化工研究院",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-104-unit",
+      "display_name": "安全工程研究院",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-106-unit",
+      "display_name": "石油物探技术研究院",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-107-unit",
+      "display_name": "催化剂公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-108-unit",
+      "display_name": "国际事业公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-111-unit",
+      "display_name": "联合石化公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-112-unit",
+      "display_name": "财务公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-113-unit",
+      "display_name": "百川公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-114-unit",
+      "display_name": "经济技术研究院",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-115-unit",
+      "display_name": "管理干部学院",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-116-unit",
+      "display_name": "石化报社",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-117-unit",
+      "display_name": "石化出版社",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-118-unit",
+      "display_name": "共享服务公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-119-unit",
+      "display_name": "项目管理公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-120-unit",
+      "display_name": "审计中心",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-121-unit",
+      "display_name": "中国航空油料有限责任公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-122-unit",
+      "display_name": "中国航油集团石油股份有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-123-unit",
+      "display_name": "中国航油集团物流有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-124-unit",
+      "display_name": "中国航油集团国际控股有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-125-unit",
+      "display_name": "中国航油集团通用航空发展有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-126-unit",
+      "display_name": "北京中航油工程建设有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-127-unit",
+      "display_name": "中航油石化管道有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-128-unit",
+      "display_name": "深圳承远航空油料有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-129-unit",
+      "display_name": "中国航油集团资产发展有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-130-unit",
+      "display_name": "中国航油集团投资有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    },
+    {
+      "registry_id": "sinopec-display-131-unit",
+      "display_name": "中国航油集团海南有限公司",
+      "identity_status": "official_display_name_pending_legal_normalization",
+      "formal_catalog_match": null,
+      "portal_url": "https://job.sinopec.com/",
+      "evidence_scope": "official_portal_display_roster",
+      "promotion_status": "display_candidate_only"
+    }
+  ]
+}

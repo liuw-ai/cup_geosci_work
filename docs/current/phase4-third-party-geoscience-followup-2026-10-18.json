@@ -1,0 +1,28 @@
+{
+  "phase": "phase4",
+  "verified_at": "2026-10-18",
+  "source_id": "huatu-discovery",
+  "source_grade": "B",
+  "discovery_page_url": "https://sydw.huatu.com/2026/0930/2874333.html",
+  "discovery_title": "2026年江苏南京市国土资源信息中心公开招聘工作人员2人公告（第二批）",
+  "discovery_observations": {
+    "published_at": "2026-09-30 10:13:09",
+    "declared_original_source": "南京市规划和自然资源局（华图页面原文表述）",
+    "employer_text": "南京市国土资源信息中心",
+    "work_context": "自然资源和地质环境动态监测、分析评价和预警预报等",
+    "third_party_attachment_url": "https://u3.huatu.com/uploads/soft/260930/P020260929632911959398.pdf",
+    "official_application_url_in_notice": "https://dengfeng.zhaopin.com",
+    "deadline_date": "2026-10-14"
+  },
+  "evidence_boundary": {
+    "third_party_page_read": true,
+    "job_level_rows_read": false,
+    "third_party_attachment_downloaded": false,
+    "official_position_table_verified": false,
+    "formal_database_written": false,
+    "student_visible": false,
+    "reason": "公告正文只确认招聘单位、2人总数和报名入口；岗位名称、专业、学历和岗位编号位于未取得的附件。不能据此生成具体岗位或假定地学专业符合。"
+  },
+  "policy_decision": "retain_as_discovery_evidence_only",
+  "next_action": "只有取得同一岗位表的合法副本，或在官方公告/官方岗位表中逐行核验后，才可生成候选线索并进入正式发布门禁。华图 URL 不得作为学生端申请链接。"
+}
