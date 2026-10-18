@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T22:45:54Z",
+  "generated_at": "2026-10-18T23:01:34Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "35f28b31eaefbe690db8718ffc4bb79615ae7c35",
-  "git_status_porcelain": "",
+  "git_sha": "0d8a4f671ec9a08d04d867ad56c49ac2226fb19c",
+  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
@@ -139,7 +139,7 @@
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "a3d982ea72c044c11f79ded5c00929756f6695b1f9069bc3e2815539a13f9286"
+        "sha256": "bcf9b8af0077d588cd1b795f825edcb27ba484acca9c41630f4092fd1d06bac1"
       }
     ],
     "metadata_documents": [
@@ -195,7 +195,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "a3d982ea72c044c11f79ded5c00929756f6695b1f9069bc3e2815539a13f9286"
+      "sha256": "bcf9b8af0077d588cd1b795f825edcb27ba484acca9c41630f4092fd1d06bac1"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -216,6 +216,10 @@
     "phase4_third_party_nhri_official_page": {
       "path": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
       "sha256": "1ad776f23b17f23d3774921107a34e9af3cd754cedd6bcf1cace3044dd1ca6f6"
+    },
+    "phase4_third_party_huatu_nanjing_land_center": {
+      "path": "docs/current/phase4-third-party-huatu-nanjing-land-center-2026-10-19.json",
+      "sha256": "d0185a7f3e01d72a9ae516ce4160f332bedd46c9c6df73040cb0fddf0c90c1c8"
     },
     "phase4_third_party_lead_recheck": {
       "path": "docs/current/phase4-third-party-lead-recheck-2026-10-19.json",
@@ -733,13 +737,13 @@
     },
     {
       "path": "scripts/audit_phase4_completion.py",
-      "line_count": 216,
-      "sha256": "b6f2019060d6d8aa5ce9ff093af6fdd4e0069dc1059e75235e40b63e3cea060a"
+      "line_count": 215,
+      "sha256": "523b007ec42e631d64f2c8e03a1ecf6117385d25029980bce4e6117e11c889ce"
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 430,
-      "sha256": "72075b9f153a4d2129d0872c105123e0cb84f35e52383ad617ea3c476672a08e"
+      "line_count": 436,
+      "sha256": "8a867138b4f03a190d1d05394286593dfc5f6a29bc59deedbd63eedf2236fa3b"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -763,8 +767,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 371,
-      "sha256": "e65aabf18e06878bea8fd6ec7abac70e28b468ede1a66411ddf0c878e68a80ea"
+      "line_count": 374,
+      "sha256": "047a7df999ec082c60c49c70c5d3bed795a0e896ad085fa3276dc7a600a0563c"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -818,8 +822,8 @@
     },
     {
       "path": "scripts/refresh_phase4_metadata.py",
-      "line_count": 37,
-      "sha256": "59b43a0f05dbc2bf7822c12b10eb67226a2dd9944149c7fb1462b7195c7272e5"
+      "line_count": 42,
+      "sha256": "c539d5ccdcd57642dcbc2c68a9447ca27d1f972fcad2346b5767114907a27cbc"
     },
     {
       "path": "scripts/register_phase4_cgs_trial.py",
@@ -828,8 +832,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 229,
-      "sha256": "19238500b4f799a1c59e064cec3e6ad736e8a389f2484eba970e0910b8fb5a5e"
+      "line_count": 230,
+      "sha256": "2ffd27925df9c3c3ae06dc314605cb83f3eb2eb023c90e7e7b0c1f6d2086bce8"
     },
     {
       "path": "tests/conftest.py",
@@ -1469,6 +1473,7 @@
     "notes": [
       "One C-level discovery lead was recovered to an official employer notice and published as job 5432; four B-level Huatu discovery rows were recovered to the official CGS attachment and published as jobs 5433-5436; no server deployment was performed.",
       "The remaining C-level lead (candidate 1) was rechecked on 2026-10-19; no job-specific official evidence or application URL was found, so it remains private and unresolved.",
+      "A second Huatu announcement was recovered to the Nanjing Planning and Natural Resources Bureau official notice, table URL, and application URL; its deadline had passed and row-level table evidence was unavailable, so no candidate or formal job was created.",
       "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
       "Historical snapshots remain archived and are not overwritten by current facts."
     ]

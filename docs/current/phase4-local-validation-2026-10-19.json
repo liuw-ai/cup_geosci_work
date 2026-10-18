@@ -1,10 +1,10 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T06:23:30+08:00",
+  "validated_at": "2026-10-19T06:59:53+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "6f7ddd0a496fcac1533e32714a6de15c36bc312c",
-  "git_sha_at_validation": "6f7ddd0a496fcac1533e32714a6de15c36bc312c",
+  "git_sha_before_metadata_commit": "81f6ab7",
+  "git_sha_at_validation": "81f6ab7",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1083,
@@ -52,7 +52,8 @@
     "formal_jobs_created": 5,
     "formal_third_party_job_ids": [5432, 5433, 5434, 5435, 5436],
     "formal_database_unchanged": false,
-    "formal_database_change_note": "The approved local HRINM recovery created job 5432; the B-level Huatu-to-CGS recovery then created jobs 5433-5436 from four official attachment rows. A later local Flask process was found using the formal path; it was stopped and recorded separately. The current full test run kept the formal database hash stable.",
+    "formal_database_change_note": "Historical local promotion created job 5432 and jobs 5433-5436; a later local Flask process using the formal path was stopped and recorded separately. This historical mutation is not part of the current test run.",
+    "formal_database_stable_during_current_tests": true,
     "cgs_attachment_trial": {
       "candidate_lead_ids": [3, 4, 5, 6],
       "official_rows": 4,

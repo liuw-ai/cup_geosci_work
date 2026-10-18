@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T22:45:57Z",
+  "generated_at": "2026-10-18T23:01:39Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "35f28b31eaefbe690db8718ffc4bb79615ae7c35",
+  "git_sha": "0d8a4f671ec9a08d04d867ad56c49ac2226fb19c",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,13 +29,14 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "27c478456b4373638ae0d00d41c77a9522370ecef8e6510fc8be0035bf6223cd",
-    "phase4_document_consistency": "27c478456b4373638ae0d00d41c77a9522370ecef8e6510fc8be0035bf6223cd",
+    "phase4_current_state_audit": "b81d536f2402fb99378ae0e2956f9f9c629fc1ddd81ab0c57d323c8a6387c850",
+    "phase4_document_consistency": "b81d536f2402fb99378ae0e2956f9f9c629fc1ddd81ab0c57d323c8a6387c850",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
     "phase4_third_party_blocked_batches": "74da7ade28ae3e7310f78796f80dc2cc2ee27a7d4b13fcb65601667f667ed31c",
     "phase4_third_party_nhri_official_page": "1ad776f23b17f23d3774921107a34e9af3cd754cedd6bcf1cace3044dd1ca6f6",
+    "phase4_third_party_huatu_nanjing_land_center": "d0185a7f3e01d72a9ae516ce4160f332bedd46c9c6df73040cb0fddf0c90c1c8",
     "phase4_third_party_lead_recheck": "ac9070e0f5d84ca2190b16df50fb232ab3c121a7b00d7106c0fb3e7f38cfa432",
     "phase4_cnpc_entry_recheck": "217753c1c99e2663308f27ce7a2cc9cc1606a63b73d6017cddf813f261bc0be1",
     "phase4_third_party_access_recheck": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d",
@@ -47,11 +48,11 @@
     "phase4_huatu_discovery_scan": "6084764bc34681e688a1bcfaa07851a8fb0c4fcb073680a308ffd219ea2fb277",
     "phase4_third_party_bingtuan_official_recovery": "d71105dbb62be53489cdedbaaa20c11e1c00d93a739bf4b9a1b7c9b6672f8634",
     "phase4_main_record": "ee4f22fafbbfc0a44c9f53d13c23c126c3e811d9813f36a67d6113bda6966560",
-    "phase4_local_validation": "a3d982ea72c044c11f79ded5c00929756f6695b1f9069bc3e2815539a13f9286",
+    "phase4_local_validation": "bcf9b8af0077d588cd1b795f825edcb27ba484acca9c41630f4092fd1d06bac1",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "922a8937f2efad212b3d2cad2d91c42a6623e18124583e0cfed8d42e7c09e347",
-    "phase4_completion_audit": "8f56c34415d1ca2f3270b40e1b85d3ed9278867d017d92a87c021641635d15e1",
-    "phase4_workspace_layout": "fa30a5c46fdee01b25717bc71ee27b5b3fdfde7debfea4c74edf60b42d1e1aab"
+    "phase4_completion_audit": "b46a06deb6abbee4256604abd7f423bfaf21bbb67606498e90eb192f57d5b2ea",
+    "phase4_workspace_layout": "6b49854694d55d24ebdc75e1a87165e527eaf07b05e37caf8887296f76ad96f9"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -120,11 +121,11 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-19T06:23:30+08:00",
+    "validated_at": "2026-10-19T06:59:53+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "6f7ddd0a496fcac1533e32714a6de15c36bc312c",
-    "git_sha_at_validation": "6f7ddd0a496fcac1533e32714a6de15c36bc312c",
+    "git_sha_before_metadata_commit": "81f6ab7",
+    "git_sha_at_validation": "81f6ab7",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1083,
@@ -178,7 +179,8 @@
         5436
       ],
       "formal_database_unchanged": false,
-      "formal_database_change_note": "The approved local HRINM recovery created job 5432; the B-level Huatu-to-CGS recovery then created jobs 5433-5436 from four official attachment rows. A later local Flask process was found using the formal path; it was stopped and recorded separately. The current full test run kept the formal database hash stable.",
+      "formal_database_change_note": "Historical local promotion created job 5432 and jobs 5433-5436; a later local Flask process using the formal path was stopped and recorded separately. This historical mutation is not part of the current test run.",
+      "formal_database_stable_during_current_tests": true,
       "cgs_attachment_trial": {
         "candidate_lead_ids": [
           3,
@@ -281,6 +283,7 @@
     "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
     "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
     "nhri_official_page_evidence": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
+    "official_recovery_recheck": "docs/current/phase4-third-party-huatu-nanjing-land-center-2026-10-19.json",
     "unresolved_lead_recheck": "docs/current/phase4-third-party-lead-recheck-2026-10-19.json",
     "cnpc_entry_recheck": "docs/current/phase4-cnpc-entry-recheck-2026-10-19.json",
     "funnel_audit": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
