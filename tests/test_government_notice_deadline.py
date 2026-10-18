@@ -190,7 +190,9 @@ def test_current_notice_and_code_free_official_table_pass_full_publication_gate(
         database, JobPipeline(settings, database), verification
     )
     assert published["published"] == 1, published
-    assert database.find_public_job(published["items"][0]["job_id"]) is not None
+    assert database.find_public_job(
+        published["items"][0]["job_id"], as_of_date=NOW.date().isoformat()
+    ) is not None
 
     job_id = published["items"][0]["job_id"]
     failed_cycle = auto_publish_verified_artifact_candidates(
@@ -199,7 +201,7 @@ def test_current_notice_and_code_free_official_table_pass_full_publication_gate(
         {"status": "failed", "items": []},
     )
     assert failed_cycle["withdrawn"] == 0
-    assert database.find_public_job(job_id) is not None
+    assert database.find_public_job(job_id, as_of_date=NOW.date().isoformat()) is not None
 
     stale = verify_government_artifacts(
         database, {"artifacts": []}, {"records": []}, now=NOW + timedelta(hours=49)
@@ -209,7 +211,7 @@ def test_current_notice_and_code_free_official_table_pass_full_publication_gate(
         database, JobPipeline(settings, database), stale
     )
     assert withdrawn["withdrawn"] == 0, withdrawn
-    assert database.find_public_job(job_id) is not None
+    assert database.find_public_job(job_id, as_of_date=NOW.date().isoformat()) is not None
     assert auto_publish_verified_artifact_candidates(
         database, JobPipeline(settings, database), stale
     )["withdrawn"] == 0
@@ -233,7 +235,7 @@ def test_current_notice_and_code_free_official_table_pass_full_publication_gate(
         database, JobPipeline(settings, database), recovered
     )
     assert restored["restored"] == 0, restored
-    assert database.find_public_job(job_id) is not None
+    assert database.find_public_job(job_id, as_of_date=NOW.date().isoformat()) is not None
 
     database.withdraw_missing_source_jobs(
         registered["id"], set(), reason="独立来源核验撤回"
@@ -245,4 +247,4 @@ def test_current_notice_and_code_free_official_table_pass_full_publication_gate(
         database, JobPipeline(settings, database), still_verified
     )
     assert unrelated["restored"] == 0
-    assert database.find_public_job(job_id) is not None
+    assert database.find_public_job(job_id, as_of_date=NOW.date().isoformat()) is not None
