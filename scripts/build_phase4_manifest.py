@@ -162,6 +162,7 @@ def main() -> None:
     cnooc_full_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-unit-job-evidence-2026-10-19.json"
     entry_matrix = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
     display_audit = ROOT / "docs" / "current" / "phase4-sinopec-display-units-2026-10-18.json"
+    sinopec_page_roster = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
     current_audit = ROOT / "docs" / "current" / "phase4-current-state-audit-2026-10-18.json"
     manual_candidate = ROOT / "docs" / "current" / "phase4-third-party-candidate-2026-10-18.json"
@@ -221,6 +222,7 @@ def main() -> None:
             "phase4_cnooc_unit_job_evidence": sha256(cnooc_full_job_evidence),
             "phase4_three_oil_unit_entry_matrix": sha256(entry_matrix),
             "phase4_sinopec_display_audit": sha256(display_audit),
+            "phase4_sinopec_page_roster": sha256(sinopec_page_roster),
             "phase4_third_party_geoscience_followup": sha256(geoscience_followup),
             "phase4_current_state_audit": sha256(current_audit),
             "phase4_document_consistency": sha256(current_audit),
