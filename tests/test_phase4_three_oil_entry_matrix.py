@@ -18,3 +18,7 @@ def test_phase4_three_oil_entry_matrix_covers_every_formal_catalog_unit() -> Non
     assert sum(item["unit_specific_entry_status"] == "unit_specific_entry_verified" for item in units) >= 3
     assert any(item["unit_specific_entry_url"] for item in units)
     assert any(item["unit_specific_entry_status"] == "unit_specific_entry_pending" for item in units)
+    cnooc_observed = [item for item in units if item["group_id"] == "cnooc" and item["observed_official_job_count"]]
+    assert len(cnooc_observed) == 16
+    assert sum(int(item["observed_official_job_count"]) for item in cnooc_observed) == 350
+    assert all(item["observed_official_application_url"] for item in cnooc_observed)

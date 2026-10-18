@@ -1,0 +1,48 @@
+{
+  "phase": "phase4",
+  "verified_at": "2026-10-18T17:15:07Z",
+  "verification_mode": "read_only_browser_active_unit_container",
+  "source": {
+    "group_portal_url": "https://cnooc.zhaopin.com/",
+    "job_index_url": "https://cnooc.zhaopin.com/job/index.html",
+    "official_application_host": "xiaoyuan.zhaopin.com",
+    "policy": "The group portal and unit tabs prove official group-page display only. A per-job official投递 URL is evidence of an observed official job, not proof of an independent unit recruitment website."
+  },
+  "extraction": {
+    "unit_selector": ".grace-dsc-web-tabs-bd-item",
+    "active_unit_selector": ".grace-dsc-web-tabs-bd-item-active",
+    "active_job_container_selector": ".grace-dsc-web-job-list-base__job-list",
+    "active_job_card_selector": ".grace-dsc-web-job-list-base__job-list .grace-dsc-web-job-card",
+    "wait_after_unit_switch_ms": 1300,
+    "all_active_cards_had_detail_text": true,
+    "all_active_cards_had_official_application_url": true,
+    "total_observed_job_cards": 350
+  },
+  "units": [
+    {"canonical_name":"中海石油（中国）有限公司天津分公司","job_count":14,"first_job_title":"采油操作类岗位","first_location":"天津","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972466215?srccode=448002","unique_official_application_url_count":14},
+    {"canonical_name":"中海石油（中国）有限公司深圳分公司","job_count":20,"first_job_title":"勘探地质助理工程师","first_location":"深圳","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972459115?srccode=448002","unique_official_application_url_count":20},
+    {"canonical_name":"中海石油（中国）有限公司湛江分公司","job_count":12,"first_job_title":"地质科研岗","first_location":"湛江","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972461115?srccode=448002","unique_official_application_url_count":12},
+    {"canonical_name":"中海石油（中国）有限公司海南分公司","job_count":20,"first_job_title":"勘探地质工程师","first_location":"海口","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972490315?srccode=448002","unique_official_application_url_count":20},
+    {"canonical_name":"中海石油（中国）有限公司上海分公司","job_count":14,"first_job_title":"操作工（海岗）","first_location":"上海","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972462315?srccode=448002","unique_official_application_url_count":14},
+    {"canonical_name":"中国海洋石油国际有限公司","job_count":4,"first_job_title":"勘探岗","first_location":"北京","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972463715?srccode=448002","unique_official_application_url_count":4},
+    {"canonical_name":"中海油研究总院有限责任公司","job_count":16,"first_job_title":"勘探类","first_location":"北京","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972486315?srccode=448002","unique_official_application_url_count":16},
+    {"canonical_name":"中联煤层气有限责任公司","job_count":16,"first_job_title":"压裂助理工程师","first_location":"北京","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972467615?srccode=448002","unique_official_application_url_count":16},
+    {"canonical_name":"中海石油气电集团有限责任公司","job_count":61,"first_job_title":"国际业务中心（国际业务部）-国际商务岗","first_location":"北京","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972530815?srccode=448002","unique_official_application_url_count":61},
+    {"canonical_name":"中海石油炼化有限责任公司","job_count":48,"first_job_title":"炼化本部统招数字化类岗位（全国统一分配）","first_location":"全国","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972510015?srccode=448002","unique_official_application_url_count":48},
+    {"canonical_name":"中海石油化学股份有限公司","job_count":45,"first_job_title":"审计中心审计岗","first_location":"海口","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972505615?srccode=448002","unique_official_application_url_count":45},
+    {"canonical_name":"中海油田服务股份有限公司","job_count":13,"first_job_title":"钻井现场操作岗","first_location":"全国","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972469215?srccode=448002","unique_official_application_url_count":13},
+    {"canonical_name":"海洋石油工程股份有限公司","job_count":12,"first_job_title":"技术研发工程师","first_location":"天津","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972470515?srccode=448002","unique_official_application_url_count":12},
+    {"canonical_name":"中海油能源发展股份有限公司","job_count":47,"first_job_title":"油气工程师（生产现场）","first_location":"全国","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972480615?srccode=448002","unique_official_application_url_count":47},
+    {"canonical_name":"中海油国际贸易有限责任公司","job_count":3,"first_job_title":"设备管理岗","first_location":"东营","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972476415?srccode=448002","unique_official_application_url_count":3},
+    {"canonical_name":"中海石油（中国）有限公司北京新能源分公司","job_count":5,"first_job_title":"风电岗","first_location":"汕尾","first_official_application_url":"https://xiaoyuan.zhaopin.com/job/CC258591510J40972465715?srccode=448002","unique_official_application_url_count":5}
+  ],
+  "summary": {
+    "formal_cnooc_catalog_units_observed": 16,
+    "unit_tabs_observed": 16,
+    "units_with_detail_text": 16,
+    "units_with_official_application_urls": 16,
+    "total_observed_job_cards": 350,
+    "independent_unit_recruitment_portals_proven": 0,
+    "interpretation": "These records may support official job-level evidence and group-portal unit-display evidence. They must not be used to populate unit_specific_entry_url or to claim 16 independent recruitment portals."
+  }
+}

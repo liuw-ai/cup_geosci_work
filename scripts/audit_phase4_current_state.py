@@ -222,6 +222,7 @@ def main() -> None:
     catalog_audit = ROOT / "docs" / "current" / "phase4-three-oil-catalog-audit-2026-10-17.json"
     trial_report = ROOT / "docs" / "current" / "phase4-third-party-trial-2026-10-18.json"
     entry_evidence = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"
+    cnooc_unit_evidence = ROOT / "docs" / "current" / "phase4-cnooc-unit-display-evidence-2026-10-19.json"
     entry_matrix = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
     validation = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-18.json"
@@ -255,6 +256,10 @@ def main() -> None:
             "phase4_three_oil_entry_evidence": {
                 "path": "docs/current/phase4-three-oil-entry-evidence-2026-10-18.json",
                 "sha256": sha256(entry_evidence),
+            },
+            "phase4_cnooc_unit_display_evidence": {
+                "path": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+                "sha256": sha256(cnooc_unit_evidence),
             },
             "phase4_three_oil_unit_entry_matrix": {
                 "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",

@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "data" / "three_oil_organization_catalog.json"
 REGISTRY = ROOT / "data" / "organization_registry.json"
 ENTRY_EVIDENCE = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"
+CNOOC_UNIT_EVIDENCE = ROOT / "docs" / "current" / "phase4-cnooc-unit-display-evidence-2026-10-19.json"
 OUTPUT = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
 
 
@@ -74,6 +75,12 @@ def main() -> None:
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
     evidence = json.loads(ENTRY_EVIDENCE.read_text(encoding="utf-8"))
+    cnooc_unit_evidence = json.loads(CNOOC_UNIT_EVIDENCE.read_text(encoding="utf-8"))
+    cnooc_observations = {
+        str(item.get("canonical_name") or "").strip(): item
+        for item in cnooc_unit_evidence.get("units", [])
+        if isinstance(item, dict) and str(item.get("canonical_name") or "").strip()
+    }
     displayed_cnooc = {
         str(item).strip()
         for item in evidence.get("cnooc", {}).get("displayed_units", [])
@@ -103,6 +110,7 @@ def main() -> None:
                 unit_status = "group_portal_unit_display_observed"
             else:
                 unit_status = "unit_specific_entry_pending"
+            observed = cnooc_observations.get(unit_name) if group_id == "cnooc" else None
             rows.append(
                 {
                     "catalog_id": unit_id,
@@ -117,6 +125,19 @@ def main() -> None:
                     "unit_specific_entry_verification_status": unit_entry["verification_status"] if unit_entry else None,
                     "unit_specific_entry_status": unit_status,
                     "official_display_name_observed": displayed,
+                    "observed_official_job_count": observed.get("job_count") if observed else None,
+                    "observed_official_application_url": observed.get("first_official_application_url") if observed else None,
+                    "observed_official_application_url_count": observed.get("unique_official_application_url_count") if observed else 0,
+                    "observed_job_evidence_file": (
+                        "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json"
+                        if observed
+                        else None
+                    ),
+                    "observed_job_evidence_scope": (
+                        "official_group_portal_active_unit_job_cards"
+                        if observed
+                        else None
+                    ),
                     "evidence_scope": (
                         "official_registry_recruitment_channel"
                         if unit_entry
@@ -126,7 +147,7 @@ def main() -> None:
                         if displayed
                         else "no_unit_specific_entry_evidence"
                     ),
-                    "verified_at": "2026-10-18",
+                    "verified_at": "2026-10-19" if observed else "2026-10-18",
                     "next_evidence_required": (
                         None
                         if is_group
@@ -157,6 +178,14 @@ def main() -> None:
                 row["unit_specific_entry_status"] == "unit_specific_entry_verified"
                 for row in rows
                 if row["catalog_id"] != row["group_id"]
+            ),
+            "cnooc_group_portal_units_with_active_job_evidence": sum(
+                1 for row in rows if row["group_id"] == "cnooc" and row["observed_official_job_count"]
+            ),
+            "cnooc_observed_job_cards": sum(
+                int(row["observed_official_job_count"] or 0)
+                for row in rows
+                if row["group_id"] == "cnooc"
             ),
         },
         "units": rows,
