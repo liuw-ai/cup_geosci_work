@@ -129,6 +129,11 @@ def main() -> None:
                     "observed_official_application_url": observed.get("first_official_application_url") if observed else None,
                     "observed_official_application_url_count": observed.get("unique_official_application_url_count") if observed else 0,
                     "observed_job_evidence_file": (
+                        "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json"
+                        if observed
+                        else None
+                    ),
+                    "observed_job_summary_evidence_file": (
                         "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json"
                         if observed
                         else None

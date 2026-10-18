@@ -159,6 +159,7 @@ def main() -> None:
     trial_report = ROOT / "docs" / "current" / "phase4-third-party-trial-2026-10-18.json"
     entry_evidence = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"
     cnooc_unit_evidence = ROOT / "docs" / "current" / "phase4-cnooc-unit-display-evidence-2026-10-19.json"
+    cnooc_full_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-unit-job-evidence-2026-10-19.json"
     entry_matrix = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
     display_audit = ROOT / "docs" / "current" / "phase4-sinopec-display-units-2026-10-18.json"
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
@@ -217,6 +218,7 @@ def main() -> None:
             "phase4_third_party_trial": sha256(trial_report),
             "phase4_three_oil_entry_evidence": sha256(entry_evidence),
             "phase4_cnooc_unit_display_evidence": sha256(cnooc_unit_evidence),
+            "phase4_cnooc_unit_job_evidence": sha256(cnooc_full_job_evidence),
             "phase4_three_oil_unit_entry_matrix": sha256(entry_matrix),
             "phase4_sinopec_display_audit": sha256(display_audit),
             "phase4_third_party_geoscience_followup": sha256(geoscience_followup),
@@ -270,6 +272,7 @@ def main() -> None:
         "three_oil_organization_reconciliation": reconciliation["summary"],
         "three_oil_entry_evidence": {
             "cnooc_unit_display_evidence": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+            "cnooc_unit_job_evidence": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
             "cnooc_units_with_active_job_evidence": int(
                 json.loads(cnooc_unit_evidence.read_text(encoding="utf-8"))
                 .get("summary", {})

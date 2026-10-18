@@ -8,6 +8,8 @@
     "official_application_host": "xiaoyuan.zhaopin.com",
     "policy": "The group portal and unit tabs prove official group-page display only. A per-job official投递 URL is evidence of an observed official job, not proof of an independent unit recruitment website."
   },
+  "full_job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+  "full_job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
   "extraction": {
     "unit_selector": ".grace-dsc-web-tabs-bd-item",
     "active_unit_selector": ".grace-dsc-web-tabs-bd-item-active",
