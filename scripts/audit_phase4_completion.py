@@ -54,6 +54,7 @@ def build_report() -> dict[str, Any]:
     manifest = _read("docs/current/phase4-release-manifest.json")
     validation = _read("docs/current/phase4-local-validation-2026-10-19.json")
     funnel = _read("docs/current/phase4-third-party-funnel-audit-2026-10-18.json")
+    huatu_shanxi = _read("docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
     workspace_layout = _read("docs/current/phase4-workspace-layout-audit-2026-10-19.json")
     database = _database_facts()
@@ -119,6 +120,20 @@ def build_report() -> dict[str, Any]:
             "facts": {
                 "formal_jobs": database["published_candidate_leads"],
                 "blocker": "remaining sources or table assets are inaccessible under current TLS/robots/browser policy",
+            },
+        },
+        {
+            "id": "third_party_official_recovery_evidence",
+            "status": "partial",
+            "evidence": [
+                "docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json",
+            ],
+            "facts": {
+                "official_notice_reachable": huatu_shanxi.get("verification", {}).get("official_notice_reachable"),
+                "official_table_links_observed": huatu_shanxi.get("verification", {}).get("official_table_links_observed"),
+                "download_permission": huatu_shanxi.get("verification", {}).get("official_table_download_permission"),
+                "row_level_evidence_obtained": huatu_shanxi.get("verification", {}).get("row_level_evidence_obtained"),
+                "publication_status": huatu_shanxi.get("publication_decision", {}).get("status"),
             },
         },
         {

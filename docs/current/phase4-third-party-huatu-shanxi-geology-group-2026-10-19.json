@@ -1,0 +1,86 @@
+{
+  "phase": "phase4",
+  "captured_at": "2026-10-19T07:30:00+08:00",
+  "discovery": {
+    "source_id": "huatu-discovery",
+    "source_grade_at_discovery": "B",
+    "discovery_page_url": "http://sx.huatu.com/shehui/kaoshi/gg/2026/1016/1281176.html",
+    "discovery_title": "2026年度山西地质集团秋季校园招聘公告",
+    "discovery_published_at": "2026-10-16T09:06:05+08:00",
+    "discovery_page_attribution": "文章来源：互联网"
+  },
+  "official_recovery": {
+    "official_publisher": "山西省地质勘查局",
+    "employer": "山西地质集团有限公司",
+    "official_notice_url": "http://www.sxdkj.com/xwzx/ggtz/art/2026/art_0eb48434b15443fab6aad025c09d60a8.html",
+    "official_notice_title": "山西地质集团2026年度秋季校园招聘公告",
+    "official_notice_date": "2026-10-15",
+    "official_notice_host": "www.sxdkj.com",
+    "official_table_urls": [
+      {
+        "label": "附件1：山西地质集团有限公司2026年秋季校园招聘需求表汇总表.xlsx",
+        "url": "http://www.sxdkj.com/api-gateway/jpaas-web-server/front/document/download?fileUrl=YW5UzzlvCwcM%2FNHHX%2FtT6NRwGCIRjP8Lpse%2BgyUPhqnslLpDNyzWDooE7sgGrk%2FPfCT5aB%2BjMB0LS3EHwFzQz9m2z%2FtMtj7f4v1kwt%2BknXodlaEYnjSXTn9%2F3xSewebiqHz1HGDxAQMXKdXNZbFX7KjD63ftwb6DhaDz7g3zTTs%3D&fileName=%E9%99%84%E4%BB%B61%EF%BC%9A%E5%B1%B1%E8%A5%BF%E5%9C%B0%E8%B4%A8%E9%9B%86%E5%9B%A2%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B82026%E5%B9%B4%E7%A7%8B%E5%AD%A3%E6%A0%A1%E5%9B%AD%E6%8B%9B%E8%81%98%E9%9C%80%E6%B1%82%E8%A1%A8%E6%B1%87%E6%80%BB%E8%A1%A8.xlsx",
+        "purpose": "2026 autumn recruitment demand table",
+        "row_level_evidence": false
+      },
+      {
+        "label": "附件2：山西地质集团2027年需求汇总表（用于2026年度秋季校园招聘）.xlsx",
+        "url": "http://www.sxdkj.com/api-gateway/jpaas-web-server/front/document/download?fileUrl=YW5UzzlvCwcM%2FNHHX%2FtT6NRwGCIRjP8Lpse%2BgyUPhqlzqdEQ1sc%2FDU7fwf5ZY74yS%2FEW2ttzOjw8G6Nfj45VAhmSJuXNPxENzoxb24vmKI8dlaEYnjSXTn9%2F3xSewebiqHz1HGDxAQMXKdXNZbFX7KjD63ftwb6DhaDz7g3zTTs%3D&fileName=%E9%99%84%E4%BB%B62%EF%BC%9A%E5%B1%B1%E8%A5%BF%E5%9C%B0%E8%B4%A8%E9%9B%86%E5%9B%A22027%E5%B9%B4%E9%9C%80%E6%B1%82%E6%B1%87%E6%80%BB%E8%A1%A8%EF%BC%88%E7%94%A8%E4%BA%8E2026%E5%B9%B4%E5%BA%A6%E7%A7%8B%E5%AD%A3%E6%A0%A1%E5%9B%AD%E6%8B%9B%E8%81%98%EF%BC%89.xlsx",
+        "purpose": "2027 graduate demand table used in the 2026 autumn campaign",
+        "row_level_evidence": false
+      }
+    ],
+    "application_window": {
+      "source_text": "线上自公告发布之日起至2026年10月29日24:00止",
+      "deadline": "2026-10-30T00:00:00+08:00",
+      "timezone": "Asia/Shanghai"
+    },
+    "application_method": "Applicants email materials to the relevant subsidiary contact or attend a campus double-selection event; no HTTP application URL was published in the official notice.",
+    "subsidiary_contact_count": 26,
+    "official_page_fields_observed": [
+      "official publisher",
+      "employer",
+      "notice date",
+      "recruitment population",
+      "application window",
+      "application method",
+      "official table links",
+      "subsidiary contact roster"
+    ]
+  },
+  "verification": {
+    "mode": "read_only_browser_dom",
+    "official_notice_reachable": true,
+    "official_table_links_observed": 2,
+    "official_table_download_attempted": true,
+    "official_table_download_permission": "denied_by_browser_policy",
+    "official_table_sha256": null,
+    "row_level_evidence_obtained": false,
+    "position_code_obtained": false,
+    "professional_and_degree_fields_obtained": false,
+    "official_application_url_obtained": false,
+    "notes": "The official notice is reachable and the two official XLSX links are visible. The browser denied the file download, so no table row was parsed and no applicant-facing URL was invented."
+  },
+  "publication_decision": {
+    "status": "not_published",
+    "reason": "official_notice_recovered_but_row_level_table_evidence_and_http_application_url_missing",
+    "candidate_lead_created": false,
+    "formal_job_created": false,
+    "student_visible": false,
+    "student_counted": false
+  },
+  "link_policy": {
+    "third_party_discovery_url_internal_only": true,
+    "official_notice_url_retained": true,
+    "official_table_urls_retained": true,
+    "official_application_url_required_for_publication": true,
+    "third_party_attachment_url_not_used": true
+  },
+  "next_evidence_required": [
+    "Obtain the real official XLSX through a permitted browser download or an operator-provided original file with its official URL preserved.",
+    "Hash and retain each official table before parsing.",
+    "Parse and review every row for subsidiary, position, professional requirement, degree, location, and deadline.",
+    "Record an official HTTP application URL if one exists; an email address alone does not satisfy the student-facing application-link gate.",
+    "Only then create private candidates and apply the existing professional and student-publication gates."
+  ]
+}
