@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T13:10:57Z",
+  "generated_at": "2026-10-18T13:22:22Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "603e1bc071a73bc436cf6778c8259a002b3436b2",
+  "git_sha": "e188c57d29ef542656325bc797c95a280ebeebf9",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -53,7 +53,7 @@
       "cnooc": 20
     },
     "three_oil_catalog_unit_count": 64,
-    "organization_registry_count": 323,
+    "organization_registry_count": 331,
     "official_confirmed_channel_count": 91
   },
   "document_consistency": {
@@ -93,7 +93,7 @@
       {
         "path": "docs/current/phase4-current-state-audit-2026-10-18.json",
         "exists": true,
-        "sha256": "9dcc3b9722988c8c05138462aeccc097f7f2ef1045b3f3dbd2246dadfa78be73"
+        "sha256": "38f93f4e5a2a492025c80fb2118f61af344e08aa8bfdee731fcf7752387577a5"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
@@ -103,7 +103,7 @@
       {
         "path": "docs/current/phase4-release-manifest.json",
         "exists": true,
-        "sha256": "e57b53423c3de024f36bb0ab40c57ec8f487050d62acf15de8c513fa732b0fde"
+        "sha256": "ebabd2c1e875f9866e7382f8815bdd7a40c19ff51cef8c37951b10a995ad947b"
       }
     ],
     "historical_documents_are_publish_inputs": false
@@ -641,8 +641,8 @@
     },
     {
       "path": "scripts/build_phase4_sinopec_display_audit.py",
-      "line_count": 78,
-      "sha256": "4a1f82f3e4eecf3bd68db7cd0a959c095ea526297546ea104e270cd47075d107"
+      "line_count": 86,
+      "sha256": "0c4ff3338a88e2bc42db302b7fcbfc29bb1925eb3a70a3c6b34c04948eb7037a"
     },
     {
       "path": "scripts/build_phase4_three_oil_entry_matrix.py",
@@ -1256,8 +1256,8 @@
     },
     {
       "path": "tests/test_three_oil_catalog.py",
-      "line_count": 431,
-      "sha256": "8f50f7d908d716c7b094a1c736e5c8404a4ede0665443effab83eb0f07abd3e6"
+      "line_count": 454,
+      "sha256": "c742b8a4760ecbfc8b529de06d83c7b381e4671ccdc74a7623bda10b6d93820e"
     },
     {
       "path": "tests/test_transport.py",
