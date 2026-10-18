@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T10:39:35Z",
+  "generated_at": "2026-10-18T10:54:12Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "44ef4167695f26afa45e33977c31c8a89a7a02bb",
+  "git_sha": "e9e2cb88e3924f7dc96280d07c0b50900125f886",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -21,10 +21,11 @@
     "phase4_three_oil_unit_entry_matrix": "f3c74cf8149291be9a286e6981cabc6e0cad9feac1c8a435b2b5d1e502129777",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "48afc3b501d3bdd4c07788e3f2a4daecfb305ad18ff860d1cca097350bd04c70",
+    "phase4_current_state_audit": "c429e05ff262da1de91b7a754b45ea1925943f487b16139ee57a8641b84120ca",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
-    "phase4_main_record": "c1cdd1fabc1c0e7d81007a0b141a4c4169856b0aa4eabc9c580a195c3368f73d",
+    "phase4_third_party_blocked_batches": "cafde30bdbe3deb152589c5da2e16181613c43223e614ea165bd6feaa6284e6b",
+    "phase4_main_record": "0f42b8b19f32a548f80b83a8d0c8b690c65de4c6d9c4e7e486c0e380da4379ed",
     "phase4_local_validation": "c4b87379877ef06258a28efa92ed18ed7d7059b468b23cc4e2d3d94cf486a0bc"
   },
   "database": {
@@ -155,7 +156,8 @@
     "private_candidate_evidence": "docs/current/phase4-third-party-candidate-2026-10-18.json",
     "formal_jobs_published": 1,
     "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
-    "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json"
+    "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
+    "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json"
   },
   "three_oil_organization_reconciliation": {
     "catalog_group_count": 3,
