@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T12:59:03Z",
+  "generated_at": "2026-10-18T13:04:33Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "605a8e4a762a61bb27ae5d714b65be4a8b4c5ac4",
+  "git_sha": "910c1e1bb31911bec85ca9fbbced3afed8cdda0c",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -93,17 +93,17 @@
       {
         "path": "docs/current/phase4-current-state-audit-2026-10-18.json",
         "exists": true,
-        "sha256": "f0a4adc320c30f347e34cd5f819985dae9d350ce73157ffc11e5e5d3a021d03b"
+        "sha256": "cc57ef4dfc297db2249169a8a0eface359416519d62ae21bcc39e680ffcfaf5d"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
         "exists": true,
-        "sha256": "e4e8ad6df1623292c74fad4fbaa13c34f4105d1e75b09149cbc971fe8c81e20d"
+        "sha256": "a34bd8a0958ea2e58b5fd7e8624ea413bc6806c8e64a4036fe7036f8bc3de19c"
       },
       {
         "path": "docs/current/phase4-release-manifest.json",
         "exists": true,
-        "sha256": "57df9bfb20ecd0e6bdb1529d41612036ab33a4d682d6fb3bd50f9d47113e296b"
+        "sha256": "03b8830fdf2464e375370d843977fd7bd7409ac6b4aca8220ebe187c47e13607"
       }
     ],
     "historical_documents_are_publish_inputs": false
@@ -131,7 +131,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-18.json",
-      "sha256": "e4e8ad6df1623292c74fad4fbaa13c34f4105d1e75b09149cbc971fe8c81e20d"
+      "sha256": "a34bd8a0958ea2e58b5fd7e8624ea413bc6806c8e64a4036fe7036f8bc3de19c"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
