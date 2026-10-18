@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T10:31:17Z",
+  "generated_at": "2026-10-18T10:33:38Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "c49532847c0ae116ccd8744d21bb92c57f35bb8a",
+  "git_sha": "09fa1ac7848bd3b69a4aa13935a58d2eec0cda86",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -20,11 +20,11 @@
     "phase4_three_oil_entry_evidence": "c2d44f1c2445b0693a7dbe2b26be5dda1bab2d4b6898c90a5046ec652afa4931",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "f8874d5407f677e9cc3b9bd68c2fe3744be85c2deb5e78e16ff4bb99fc0948cf",
+    "phase4_current_state_audit": "80e9a2a4829c973b74c496b1a231a009c6a6159a648937803d4969bcccd1793e",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_main_record": "b4cece2966a44e9794de44e14d36ac7baea51f245a58391310452e81f1971667",
-    "phase4_local_validation": "85465dd2faade0c2f6e8b47eaee99f2b09b6f4901dd793a08e24fbb22c69b11d"
+    "phase4_local_validation": "2f662edc26020af853d70d439d460bb1f5e0c86bcfadbf3990106963afdafc97"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -108,6 +108,30 @@
       ],
       "formal_database_unchanged": false,
       "robots_or_permission_blocked_followups": 1
+    },
+    "local_web_read_only": {
+      "base_url": "http://127.0.0.1:8094",
+      "database_mode": "temporary_copy_of_runtime_database",
+      "healthz_status": 200,
+      "home_status": 200,
+      "layer_api_statuses": {
+        "exact_match": 200,
+        "broad_geoscience_match": 200,
+        "incomplete_but_basic_match": 200,
+        "source_unavailable": 200
+      },
+      "formal_third_party_job_query": {
+        "query": "地质研发",
+        "status": 200,
+        "total": 1,
+        "job_id": 5432,
+        "publication_layer": "exact_match",
+        "official_notice_url": "https://www.hrinm.cn/xwxq/35.html",
+        "official_application_url": null,
+        "third_party_table_url": null,
+        "third_party_discovery_url_is_student_visible": false
+      },
+      "server_deployment": false
     },
     "release_boundary": {
       "status": "not_publishable",
