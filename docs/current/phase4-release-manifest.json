@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T13:22:25Z",
+  "generated_at": "2026-10-18T13:23:58Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "e188c57d29ef542656325bc797c95a280ebeebf9",
+  "git_sha": "822675b9c3486b4aaca1317cba47058d3ee10db9",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -14,15 +14,15 @@
     "third_party_adapters": "73ec05d588eb378bd047470074a313a6f64912b48cd65ebccb1bb5781eec8aee",
     "organization_registry": "0e83da24ac0489b77064f6968568c6dde8f67eea7e847a4f2a8c493b65bdb35c",
     "three_oil_catalog": "a6d1979d99b5b027590acb07d4883910bca074c301ed8dc0e134bfdf57991394",
-    "phase4_organization_reconciliation": "b81e3276160a5e89d203263796bae667ffdb44160afc949705e21393c19ba13d",
+    "phase4_organization_reconciliation": "e4da77e84543f6d6a81c19e0e93d6370ff7a80655e5c54f2fd259ddeb4757d64",
     "phase4_three_oil_catalog_audit": "146bbc0bceaa60ccb27430464f417153781de43d0bc7a2587e0e47cba0eeda19",
     "phase4_third_party_trial": "9e1d9a183117349b025b765d1c53f7e60b6bbc6fbf76d7dd529aab3b47f91656",
     "phase4_three_oil_entry_evidence": "c2d44f1c2445b0693a7dbe2b26be5dda1bab2d4b6898c90a5046ec652afa4931",
-    "phase4_three_oil_unit_entry_matrix": "f3c74cf8149291be9a286e6981cabc6e0cad9feac1c8a435b2b5d1e502129777",
+    "phase4_three_oil_unit_entry_matrix": "afd073160c9de41f9a879f5d406ca100213dfdc8a2a104e0f7699cf67ff58e98",
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "d6b876fec179a4340433026006b0fcde337488609fb9691aad0ec1455671ac79",
-    "phase4_document_consistency": "d6b876fec179a4340433026006b0fcde337488609fb9691aad0ec1455671ac79",
+    "phase4_current_state_audit": "9acd5952879ad4f46b9e395cc544a865fd1875112c2f759187dfe0efc0789f09",
+    "phase4_document_consistency": "9acd5952879ad4f46b9e395cc544a865fd1875112c2f759187dfe0efc0789f09",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "c9ac28c1b0026ef107897aa2516f67e13307ecced258882c4242a090ebd582da",
@@ -193,10 +193,10 @@
   "three_oil_organization_reconciliation": {
     "catalog_group_count": 3,
     "catalog_unit_count": 64,
-    "registry_related_organization_count": 295,
+    "registry_related_organization_count": 303,
     "scope_status_counts": {
       "formal_catalog": 64,
-      "display_candidate_unverified": 231
+      "display_candidate_unverified": 239
     },
     "catalog_units_by_group": {
       "cnpc": 27,
@@ -205,7 +205,7 @@
     },
     "registry_channel_verification_counts": {
       "official_confirmed": 75,
-      "candidate": 238,
+      "candidate": 246,
       "automation_ready": 1
     }
   },

@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T13:22:22Z",
+  "generated_at": "2026-10-18T13:23:55Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "e188c57d29ef542656325bc797c95a280ebeebf9",
+  "git_sha": "822675b9c3486b4aaca1317cba47058d3ee10db9",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -93,7 +93,7 @@
       {
         "path": "docs/current/phase4-current-state-audit-2026-10-18.json",
         "exists": true,
-        "sha256": "38f93f4e5a2a492025c80fb2118f61af344e08aa8bfdee731fcf7752387577a5"
+        "sha256": "d6b876fec179a4340433026006b0fcde337488609fb9691aad0ec1455671ac79"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
@@ -103,7 +103,7 @@
       {
         "path": "docs/current/phase4-release-manifest.json",
         "exists": true,
-        "sha256": "ebabd2c1e875f9866e7382f8815bdd7a40c19ff51cef8c37951b10a995ad947b"
+        "sha256": "52433192e544b5254ca4702eb5a16a0ad2b77426076ed5eaf6c0a76b45a8b12e"
       }
     ],
     "historical_documents_are_publish_inputs": false
@@ -123,7 +123,7 @@
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-      "sha256": "f3c74cf8149291be9a286e6981cabc6e0cad9feac1c8a435b2b5d1e502129777"
+      "sha256": "afd073160c9de41f9a879f5d406ca100213dfdc8a2a104e0f7699cf67ff58e98"
     },
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
