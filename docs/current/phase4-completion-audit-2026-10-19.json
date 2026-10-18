@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T21:35:06Z",
+  "generated_at": "2026-10-18T21:42:26Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -143,6 +143,19 @@
           "three_oil_unit_entry_evidence_incomplete",
           "local_phase4_validation_not_approved_for_server"
         ]
+      }
+    },
+    {
+      "id": "workspace_layout_audit",
+      "status": "pass",
+      "evidence": [
+        "docs/current/phase4-workspace-layout-audit-2026-10-19.json"
+      ],
+      "facts": {
+        "production_entrypoint": "deploy/compose.yaml",
+        "root_compatibility_files": 8,
+        "current_docs_database_files": [],
+        "history_is_present": true
       }
     }
   ],

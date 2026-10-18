@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T21:25:44Z",
+  "generated_at": "2026-10-18T21:42:09Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "1f77f5ec193595d98e32a2ee4da038ce45abf763",
-  "git_status_porcelain": "",
+  "git_sha": "039823e030d75781e4844bbf60f8b838d0765a0f",
+  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json\n?? docs/current/phase4-workspace-layout-audit-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
@@ -134,12 +134,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "5f4fd7afff0a32d102eecd2dce747bba5a4b2e4a4d17ce990b9a9ad03b62084d"
+        "sha256": "6c0e892ae2c3d811fadd9179572a3027699f81eb1e44e5573e0c2d1a8ff3d003"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "88fb57a0cb5d548be52cf335e87c20c21bb69050ed299c30bd2e2dfd7746ba55"
+        "sha256": "9d7e8f004047a8cfef4ddbd3318359c7c1957a13f00662840d04baecaed309a6"
       }
     ],
     "metadata_documents": [
@@ -195,7 +195,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "88fb57a0cb5d548be52cf335e87c20c21bb69050ed299c30bd2e2dfd7746ba55"
+      "sha256": "9d7e8f004047a8cfef4ddbd3318359c7c1957a13f00662840d04baecaed309a6"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -235,7 +235,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "4333b3edbbd62ec36500930f672480454fd8250a760a64c68abb402c644d67d2"
+      "sha256": "f6552e3a516f1e60beb6ffabc93f1ad754c66a38733d22832f86a718446997be"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -247,7 +247,7 @@
     },
     "phase4_huatu_table_discovery": {
       "path": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
-      "sha256": "e13bea423404b688d1de2aa46ea316926e9692caa5cc3bb3c3bbfcc3a178fa22"
+      "sha256": "66edfb676f30ec24c2a78a4a4bc284b31050c71096619330166cd420708c8eea"
     },
     "phase4_huatu_discovery_scan": {
       "path": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
@@ -267,7 +267,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "5f4fd7afff0a32d102eecd2dce747bba5a4b2e4a4d17ce990b9a9ad03b62084d"
+      "sha256": "6c0e892ae2c3d811fadd9179572a3027699f81eb1e44e5573e0c2d1a8ff3d003"
     }
   },
   "code_inventory": [
@@ -732,6 +732,11 @@
       "sha256": "556cc55e3dc5c56c6f9749ed33389deb28af9657a9e0ff2cda7f691efe3565c6"
     },
     {
+      "path": "scripts/audit_phase4_completion.py",
+      "line_count": 216,
+      "sha256": "b6f2019060d6d8aa5ce9ff093af6fdd4e0069dc1059e75235e40b63e3cea060a"
+    },
+    {
       "path": "scripts/audit_phase4_current_state.py",
       "line_count": 430,
       "sha256": "72075b9f153a4d2129d0872c105123e0cb84f35e52383ad617ea3c476672a08e"
@@ -740,6 +745,11 @@
       "path": "scripts/audit_phase4_third_party_funnel.py",
       "line_count": 128,
       "sha256": "c0e146d9c2c83ff55884fa2b6cc05ce8f5534fe6b1083a9abeda2c41e6e81336"
+    },
+    {
+      "path": "scripts/audit_phase4_workspace_layout.py",
+      "line_count": 121,
+      "sha256": "5a24ce1b646c0be8f9ff7bad012d25d3cc142bf390cc6603e7809ba58749f447"
     },
     {
       "path": "scripts/build_phase3_manifest.py",
@@ -753,8 +763,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 357,
-      "sha256": "538baf62a0318282cda9574ee1d40eb31e5c6f1232b2ee42de6fcdaadb3986ac"
+      "line_count": 371,
+      "sha256": "e65aabf18e06878bea8fd6ec7abac70e28b468ede1a66411ddf0c878e68a80ea"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -813,8 +823,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 225,
-      "sha256": "deebc3e938939bec8a87a4f7f155c000e7595a1a0ff0177e4f48c29561872a10"
+      "line_count": 229,
+      "sha256": "19238500b4f799a1c59e064cec3e6ad736e8a389f2484eba970e0910b8fb5a5e"
     },
     {
       "path": "tests/conftest.py",
@@ -1212,6 +1222,11 @@
       "sha256": "0f25550360dfd2b06c8573abf24b763c937b9ba92906aff9199461c99c189eaa"
     },
     {
+      "path": "tests/test_phase4_completion_audit.py",
+      "line_count": 16,
+      "sha256": "101b3de148b5115820fb0081f918c8c0f8fefa113b586f455360d4279b12bd1c"
+    },
+    {
       "path": "tests/test_phase4_current_audit.py",
       "line_count": 39,
       "sha256": "499f6a92368a3a575ed43ffeb29b71a20a1cd2fd82e157bef82c075bc4264206"
@@ -1230,6 +1245,11 @@
       "path": "tests/test_phase4_three_oil_entry_matrix.py",
       "line_count": 80,
       "sha256": "e574371d51ba8659ec98d1479731fcb358837fd1df57c61bac4c73318ce31644"
+    },
+    {
+      "path": "tests/test_phase4_workspace_layout.py",
+      "line_count": 49,
+      "sha256": "a9e2c5563607cd7384b9a986dae6288e7ad5db19aab35c726aeb150894297af2"
     },
     {
       "path": "tests/test_pipeline.py",

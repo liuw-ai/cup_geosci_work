@@ -1,0 +1,115 @@
+{
+  "phase": "phase4",
+  "generated_at": "2026-10-18T21:42:26Z",
+  "scope": "local_read_only_workspace_layout",
+  "production_entrypoint": "deploy/compose.yaml",
+  "canonical_paths": {
+    "deploy/compose.yaml": {
+      "exists": true,
+      "is_file": true
+    },
+    "deploy/docker/Dockerfile.app": {
+      "exists": true,
+      "is_file": true
+    },
+    "deploy/docker/Dockerfile.browser": {
+      "exists": true,
+      "is_file": true
+    },
+    "job_hub": {
+      "exists": true,
+      "is_file": false
+    },
+    "data": {
+      "exists": true,
+      "is_file": false
+    },
+    "tests": {
+      "exists": true,
+      "is_file": false
+    },
+    "docs/current": {
+      "exists": true,
+      "is_file": false
+    },
+    "runtime": {
+      "exists": true,
+      "is_file": false
+    },
+    "backups": {
+      "exists": true,
+      "is_file": false
+    },
+    "history": {
+      "exists": true,
+      "is_file": false
+    }
+  },
+  "root_compatibility_files": [
+    {
+      "path": "docker-compose.yml",
+      "exists": true,
+      "is_file": true,
+      "bytes": 3888,
+      "sha256": "31b60c50d6d65306216979ea65fa092435b3b9f7a10cce66f385fc9f2a0502d0"
+    },
+    {
+      "path": "docker-compose.browser.yml",
+      "exists": true,
+      "is_file": true,
+      "bytes": 13742,
+      "sha256": "3331983bcef47a370b22ba3d020bc264b59c98e33cd464db621f5c7f2ef401fb"
+    },
+    {
+      "path": "docker-compose.location-fix.yml",
+      "exists": true,
+      "is_file": true,
+      "bytes": 1303,
+      "sha256": "77638e3655f0bf8bace6725d09518590387348439ea925ade5b43771ec74c92b"
+    },
+    {
+      "path": "docker-compose.public.yml",
+      "exists": true,
+      "is_file": true,
+      "bytes": 665,
+      "sha256": "73adc890a078483713a3de38e45e503d9b8044123b3548332fad627be51b102d"
+    },
+    {
+      "path": "Dockerfile",
+      "exists": true,
+      "is_file": true,
+      "bytes": 772,
+      "sha256": "436cb8dbdd89b9834f99f800ba63f5648801ffeea866cf7af94f46c0f32f3a82"
+    },
+    {
+      "path": "Dockerfile.browser",
+      "exists": true,
+      "is_file": true,
+      "bytes": 4933,
+      "sha256": "671b7902b4f9e60b61154123dd04350ee311b5db0b92512684fa7dc6eeb3e7a1"
+    },
+    {
+      "path": "Dockerfile.business-date",
+      "exists": true,
+      "is_file": true,
+      "bytes": 339,
+      "sha256": "79edecaf5c844602794d7672c3430daf9c871358e84bd0fba55a2594d536c569"
+    },
+    {
+      "path": "Dockerfile.experience-gate",
+      "exists": true,
+      "is_file": true,
+      "bytes": 333,
+      "sha256": "780a3def17b5eda5d6a064edd848c6020d958a499ab0ede1005291e8cf8bf1bc"
+    }
+  ],
+  "current_docs_database_files": [],
+  "history_is_present": true,
+  "policy": {
+    "no_move_or_delete": true,
+    "root_compatibility_files_are_not_production_inputs": true,
+    "runtime_and_backups_are_not_source_code": true,
+    "history_is_evidence_only": true
+  },
+  "status": "pass"
+}
