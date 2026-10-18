@@ -1,0 +1,216 @@
+{
+  "phase": "phase4",
+  "generated_at": "2026-10-18T19:11:57Z",
+  "source_id": "huatu-discovery",
+  "policy": "仅发现已登记汇总页和职位表链接；不下载 robots 拒绝的附件，不生成候选或正式岗位。",
+  "items": [
+    {
+      "source_id": "huatu-discovery",
+      "discovery_page_url": "https://www.huatu.com/gwy/",
+      "robots": {
+        "robots_url": "https://www.huatu.com/robots.txt",
+        "status": 200,
+        "allowed": true,
+        "checked_at": "2026-10-18T19:11:42Z",
+        "reason": "permitted"
+      },
+      "http_status": 200,
+      "content_type": "text/html",
+      "table_links": [],
+      "status": "scanned"
+    },
+    {
+      "source_id": "huatu-discovery",
+      "discovery_page_url": "https://sydw.huatu.com/zt/sydwggk/",
+      "robots": {
+        "robots_url": "https://sydw.huatu.com/robots.txt",
+        "status": 200,
+        "allowed": true,
+        "checked_at": "2026-10-18T19:11:44Z",
+        "reason": "permitted"
+      },
+      "http_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "table_links": [],
+      "status": "scanned"
+    },
+    {
+      "source_id": "huatu-discovery",
+      "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875151.html",
+      "robots": {
+        "robots_url": "https://sydw.huatu.com/robots.txt",
+        "status": 200,
+        "allowed": true,
+        "checked_at": "2026-10-18T19:11:46Z",
+        "reason": "permitted"
+      },
+      "http_status": 200,
+      "content_type": "text/html",
+      "table_links": [
+        {
+          "source_id": "huatu-discovery",
+          "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875151.html",
+          "table_url": "https://u3.huatu.com/uploads/soft/261016/df.xlsx",
+          "label": "¸½¼þ1£º¸ÊËà²ÆÃ³Ö°ÒµÑ§Ôº2026Äê¹«¿ª¿¼ºËÒý½ø²©Ê¿ÑÐ¾¿Éú¸ÚÎ»ÁÐ±í.xlsx",
+          "trust_grade": "B",
+          "publication_status": "candidate_only",
+          "official_url": null,
+          "review_required": true,
+          "table_robots": {
+            "robots_url": "https://u3.huatu.com/robots.txt",
+            "status": 200,
+            "allowed": false,
+            "checked_at": "2026-10-18T19:11:47Z",
+            "reason": "disallowed"
+          },
+          "download_decision": "blocked_before_download"
+        },
+        {
+          "source_id": "huatu-discovery",
+          "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875151.html",
+          "table_url": "https://u3.huatu.com/uploads/soft/261016/f2.xls",
+          "label": "¸½¼þ2£º¸ÊËà²ÆÃ³Ö°ÒµÑ§Ôº2026Äê¹«¿ª¿¼ºËÒý½ø²©Ê¿ÑÐ¾¿Éú±¨Ãû±í.xls",
+          "trust_grade": "B",
+          "publication_status": "candidate_only",
+          "official_url": null,
+          "review_required": true,
+          "table_robots": {
+            "robots_url": "https://u3.huatu.com/robots.txt",
+            "status": 200,
+            "allowed": false,
+            "checked_at": "2026-10-18T19:11:49Z",
+            "reason": "disallowed"
+          },
+          "download_decision": "blocked_before_download"
+        }
+      ],
+      "status": "scanned"
+    },
+    {
+      "source_id": "huatu-discovery",
+      "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875231.html",
+      "robots": {
+        "robots_url": "https://sydw.huatu.com/robots.txt",
+        "status": 200,
+        "allowed": true,
+        "checked_at": "2026-10-18T19:11:49Z",
+        "reason": "permitted"
+      },
+      "http_status": 200,
+      "content_type": "text/html",
+      "table_links": [
+        {
+          "source_id": "huatu-discovery",
+          "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875231.html",
+          "table_url": "https://u3.huatu.com/uploads/soft/261016/83c02233b7dae819b7449c9c167b9e5471637.pdf",
+          "label": "¸½¼þ1£ºÄÏ¾©Ë®Àû¿ÆÑ§ÑÐ¾¿Ôº2027Äê¹«¿ªÕÐÆ¸ÊÂÒµ±àÖÆ¹¤×÷ÈËÔ±¸ÚÎ»±í.pdf",
+          "trust_grade": "B",
+          "publication_status": "candidate_only",
+          "official_url": null,
+          "review_required": true,
+          "table_robots": {
+            "robots_url": "https://u3.huatu.com/robots.txt",
+            "status": 200,
+            "allowed": false,
+            "checked_at": "2026-10-18T19:11:51Z",
+            "reason": "disallowed"
+          },
+          "download_decision": "blocked_before_download"
+        },
+        {
+          "source_id": "huatu-discovery",
+          "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875231.html",
+          "table_url": "https://u3.huatu.com/uploads/soft/261016/2974570dbdbabb0160adbf8ede2639ec42497.xls",
+          "label": "¸½¼þ2£ºÄÏ¾©Ë®Àû¿ÆÑ§ÑÐ¾¿Ôº2027Äê¹«¿ªÕÐÆ¸ÊÂÒµ±àÖÆ¹¤×÷ÈËÔ±±¨Ãû±í.xls",
+          "trust_grade": "B",
+          "publication_status": "candidate_only",
+          "official_url": null,
+          "review_required": true,
+          "table_robots": {
+            "robots_url": "https://u3.huatu.com/robots.txt",
+            "status": 200,
+            "allowed": false,
+            "checked_at": "2026-10-18T19:11:52Z",
+            "reason": "disallowed"
+          },
+          "download_decision": "blocked_before_download"
+        }
+      ],
+      "status": "scanned"
+    },
+    {
+      "source_id": "huatu-discovery",
+      "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875238.html",
+      "robots": {
+        "robots_url": "https://sydw.huatu.com/robots.txt",
+        "status": 200,
+        "allowed": true,
+        "checked_at": "2026-10-18T19:11:52Z",
+        "reason": "permitted"
+      },
+      "http_status": 200,
+      "content_type": "text/html",
+      "table_links": [
+        {
+          "source_id": "huatu-discovery",
+          "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875238.html",
+          "table_url": "https://u3.huatu.com/uploads/soft/261016/wKg8FGrR1c-AeyvyAAA0kDF-Cb479.xlsx",
+          "label": "¸½¼þ£º¸·ÑôÊ¦·¶´óÑ§2026Äê¶È¸ß²ã´ÎÈË²ÅÕÐÆ¸¼Æ»®»ã×Ü±í.xlsx",
+          "trust_grade": "B",
+          "publication_status": "candidate_only",
+          "official_url": null,
+          "review_required": true,
+          "table_robots": {
+            "robots_url": "https://u3.huatu.com/robots.txt",
+            "status": 200,
+            "allowed": false,
+            "checked_at": "2026-10-18T19:11:54Z",
+            "reason": "disallowed"
+          },
+          "download_decision": "blocked_before_download"
+        }
+      ],
+      "status": "scanned"
+    },
+    {
+      "source_id": "huatu-discovery",
+      "discovery_page_url": "https://sydw.huatu.com/2026/0717/2868457.html",
+      "robots": {
+        "robots_url": "https://sydw.huatu.com/robots.txt",
+        "status": 200,
+        "allowed": true,
+        "checked_at": "2026-10-18T19:11:55Z",
+        "reason": "permitted"
+      },
+      "http_status": 200,
+      "content_type": "text/html",
+      "table_links": [
+        {
+          "source_id": "huatu-discovery",
+          "discovery_page_url": "https://sydw.huatu.com/2026/0717/2868457.html",
+          "table_url": "https://u3.huatu.com/uploads/soft/260717/e66fcec80b405872b39eb223b7b5b24275155.xlsx",
+          "label": "¸½¼þ1£ºÉ½¶«Ê¡ÊÂÒµµ¥Î»¹«¿ªÕÐÆ¸ÈËÔ±¸ÚÎ»»ã×Ü±í",
+          "trust_grade": "B",
+          "publication_status": "candidate_only",
+          "official_url": null,
+          "review_required": true,
+          "table_robots": {
+            "robots_url": "https://u3.huatu.com/robots.txt",
+            "status": 200,
+            "allowed": false,
+            "checked_at": "2026-10-18T19:11:57Z",
+            "reason": "disallowed"
+          },
+          "download_decision": "blocked_before_download"
+        }
+      ],
+      "status": "scanned"
+    }
+  ],
+  "summary": {
+    "pages": 6,
+    "scanned_pages": 6,
+    "access_limited_pages": 0,
+    "table_links": 6
+  }
+}

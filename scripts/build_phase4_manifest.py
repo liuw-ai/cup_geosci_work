@@ -186,6 +186,8 @@ def main() -> None:
     local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
     third_party_funnel = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
     local_web_recheck = ROOT / "docs" / "current" / "phase4-local-web-recheck-2026-10-19.json"
+    huatu_table_discovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-table-discovery-2026-10-19.json"
+    huatu_discovery_scan = ROOT / "docs" / "current" / "phase4-third-party-huatu-discovery-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     working_tree_dirty = dirty()
     release_blockers = []
@@ -251,6 +253,8 @@ def main() -> None:
             "phase4_local_repair": sha256(local_repair),
             "phase4_third_party_funnel": sha256(third_party_funnel),
             "phase4_local_web_recheck": sha256(local_web_recheck),
+            "phase4_huatu_table_discovery": sha256(huatu_table_discovery),
+            "phase4_huatu_discovery_scan": sha256(huatu_discovery_scan),
             "phase4_main_record": sha256(phase4_record),
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
         },
@@ -290,6 +294,8 @@ def main() -> None:
             "unresolved_lead_recheck": "docs/current/phase4-third-party-lead-recheck-2026-10-19.json",
             "cnpc_entry_recheck": "docs/current/phase4-cnpc-entry-recheck-2026-10-19.json",
             "funnel_audit": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
+            "table_discovery_report": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
+            "discovery_scan_report": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
         "three_oil_entry_evidence": {

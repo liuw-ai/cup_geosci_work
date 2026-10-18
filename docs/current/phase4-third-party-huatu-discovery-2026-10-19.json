@@ -1,0 +1,766 @@
+{
+  "scope": "private_discovery_only",
+  "observed_at": "2026-10-19T03:10:03.911298+08:00",
+  "source_count": 1,
+  "scanned_source_count": 1,
+  "failed_source_count": 0,
+  "created_lead_count": 64,
+  "items": [
+    {
+      "source_id": "huatu-discovery",
+      "status": "scanned",
+      "scanned_urls": 3,
+      "discovered_leads": 65,
+      "created_leads": 64,
+      "enriched_leads": 24,
+      "leads": [
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://www.huatu.com/2026/1013/2874858.html",
+          "title": "招录 35691 人",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.732858+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/list/4554_1.html",
+          "title": "・ 招考汇总",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.734384+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://www.huatu.com/2026/1013/2874827.html",
+          "title": "招录 3.57万人",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.734384+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://www.huatu.com/2026/0901/2872149.html",
+          "title": "10月每日公职招聘公告汇总",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.735922+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://www.huatu.com/2026/1014/2875037.html",
+          "title": "2027国考招录公安岗1810人 本科生占75.69%",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.735922+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://www.huatu.com/2026/1014/2875038.html",
+          "title": "2027年国家公务员考试行测大纲解读",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.735922+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/",
+          "title": "2027事业单位",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.737446+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://www.huatu.com/szyf/20250214/2800817.html",
+          "title": "2026各省三支一扶招考公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.738971+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://www.huatu.com/z/25xdsgghz/",
+          "title": "2026选调生招录公告汇总",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.738971+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/",
+          "title": "2026国家公务员考试",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.740502+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/a/ztk/",
+          "title": "公务员考试试题",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.740502+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/zhaokao/bkzd/",
+          "title": "2026事业单位考试",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.740502+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com",
+          "title": "全国事业单位招聘信息",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/",
+            "captured_at": "2026-10-19T03:09:46.740502+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875265.html",
+          "title": "海南省保亭黎族苗族自治县2026年下半年公办学校学科教师校园招聘公告（第2号）",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.125551+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875264.html",
+          "title": "2026年广西来宾市金秀瑶族自治县机关事业单位招聘综合类编外聘用人员44人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.125551+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875263.html",
+          "title": "2026年山西长治市市直事业单位公开选调工作人员47人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.125551+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875250.html",
+          "title": "2026年福建技术师范学院公开招聘高层次人才19人公告（二）",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.125551+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875248.html",
+          "title": "2026年中共杭州市委党校公开招聘教研人员5人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.125551+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875247.html",
+          "title": "2027年浙江台州市仙居县卫生健康局校园公开招聘卫技人员7人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.125551+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875246.html",
+          "title": "2026年广东云浮市郁南县“百万英才汇南粤”机关事业单位公开招聘紧缺人才9人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.125551+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875243.html",
+          "title": "2026年海南省检察机关公开招聘聘用制书记员116人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.125551+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875238.html",
+          "title": "2026年安徽阜阳师范大学公开招聘高层次人才43人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.127153+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875231.html",
+          "title": "2027年江苏南京水利科学研究院公开招聘事业编制工作人员50人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.127153+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875229.html",
+          "title": "2026年辽宁省农业科学院面向社会公开招聘工作人员15人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.127153+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875172.html",
+          "title": "2026年广东省事业单位专项招聘喀什籍未就业少数民族高校毕业生16人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.127153+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875155.html",
+          "title": "2026年广东省事业单位专项招聘西藏籍少数民族高校毕业生45人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.127153+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "https://sydw.huatu.com/2026/1016/2875152.html",
+          "title": "2026年甘肃财贸职业学院公开考核招聘急需紧缺专业人才4人公告",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://sydw.huatu.com/zt/sydwggk/",
+            "captured_at": "2026-10-19T03:09:47.127153+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0803/2869824.html",
+          "title": "2026年山东省菏泽市定陶区区直事业单位引进高层",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0803/2869820.html",
+          "title": "2026年甘肃省天水市秦安县教育局所属事业单位选",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0803/2869816.html",
+          "title": "2026年湖南省长沙浏阳市招聘乡镇事业单位专业技",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0803/2869813.html",
+          "title": "2026河北省衡水市生态环境局枣强县分局公开招聘",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0803/2869812.html",
+          "title": "2026年河北承德宽城满族自治县公开选聘事业单位",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0115/2846675.html",
+          "title": "安徽省2026年度考试录用公务员笔试考试大纲",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2025/1103/2838494.html",
+          "title": "2026年浙江各级机关单位考试录用公务员公共科目",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2025/1031/2838388.html",
+          "title": "2026年度上海市考试录用公务员考试大纲",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2025/1031/2838228.html",
+          "title": "江苏省2026年度考试录用公务员公共科目笔试考试",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2025/1019/2836481.html",
+          "title": "2026年广东省公务员考试招考笔试科目",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0424/2860407.html",
+          "title": "2023北京事业单位公告-t",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0127/2848190.html",
+          "title": "2026年度新疆生产建设兵团考试录用公务员职位表",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0121/2847274.html",
+          "title": "2026年度江西省考试录用公务员职位表",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0119/2847095.html",
+          "title": "2026年山西省公务员考试招录-职位表",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0116/2846812.html",
+          "title": "福建省2026年度考试录用公务员职位表（4723人）",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0115/2846697.html",
+          "title": "海南省2026年度考试录用公务员职位表",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2025/1110/2839221.html",
+          "title": "2026年北京公务员职位表下载（1690个岗位 招录3",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.201847+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0127/2848193.html",
+          "title": "2026年度新疆生产建设兵团考试录用公务员考试时",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.203373+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0121/2847279.html",
+          "title": "2026年度江西省考试录用公务员考试科目",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.203373+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0112/2846231.html",
+          "title": "2026年湖北省公务员招录考试笔试时间",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.203373+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0112/2846222.html",
+          "title": "2026年湖北省公务员招录考试报名时间",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.203373+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2025/1103/2838491.html",
+          "title": "2026年度浙江省各级机关单位考试录用公务员笔试",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.203373+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0429/2861002.html",
+          "title": "2026年度湖北省人大常委会办公厅考试录用公务员",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.203373+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0429/2860985.html",
+          "title": "2026年度湖北省发展和改革委员会考试录用公务员",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.203373+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0227/2851780.html",
+          "title": "上海市2026年公务员录用考试第一轮行政执法类职",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.203373+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0225/2851282.html",
+          "title": "2026金华义乌市各级机关单位考试录用公务员递补",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.203373+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0417/2859537.html",
+          "title": "2026年全国公职考试招考公告信息汇总（4月17日",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.203373+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0803/2869771.html",
+          "title": "中共江安县委组织部关于拟补充录用10人为公务员",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.204915+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0803/2869769.html",
+          "title": "中共屏山县委组织部关于拟补充录用7人为公务员",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.204915+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0522/2863308.html",
+          "title": "大专生怎么考公务员",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.204915+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0522/2863307.html",
+          "title": "湖北省考税务系统公务员考试内容是什么",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.204915+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0521/2863096.html",
+          "title": "异地县城公务员值得考吗",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.204915+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0521/2863071.html",
+          "title": "公务员会资拖欠或降薪吗",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.204915+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0521/2863070.html",
+          "title": "公检法系统的专项补贴比普通公务员高多少",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.204915+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0521/2863063.html",
+          "title": "公务员一级科员到四级主任科员需要熬几年",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.204915+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2025/1014/2835899.html",
+          "title": "2026国家公务员考试公告公安岗全面解读",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.204915+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0609/2865029.html",
+          "title": "二战考事业单位，该换哪个有提分规划的班",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.204915+08:00"
+          }
+        },
+        {
+          "lead_provider": "华图教育招聘公告汇总",
+          "discovery_source_id": "huatu-discovery",
+          "lead_url": "http://www.huatu.com/2026/0609/2864947.html",
+          "title": "应届生小白考公务员，哪个机构有精细讲解",
+          "metadata": {
+            "discovery_scan": true,
+            "listing_url": "https://www.huatu.com/gwy/",
+            "captured_at": "2026-10-19T03:09:47.204915+08:00"
+          }
+        }
+      ],
+      "detail": "public discovery scan completed"
+    }
+  ],
+  "official_url_replay": {
+    "scanned": 70,
+    "resolved": 6,
+    "updated": 0,
+    "already_resolved": 0,
+    "deferred_generic_homepage": 5,
+    "unresolved": 49,
+    "skipped": 16,
+    "errors": 0,
+    "resolution_reasons": {
+      "no_registered_or_government_candidate": 44,
+      "no_candidate_links": 4,
+      "generic_homepage_only": 5,
+      "no_recovery_evidence": 1
+    }
+  },
+  "persisted_lead_recovery": {
+    "scanned": 41,
+    "enriched": 39,
+    "resolved": 8,
+    "unavailable": 2,
+    "skipped": 29
+  },
+  "navigation_reconciliation": {
+    "scanned": 6,
+    "rejected": 0,
+    "skipped": 5,
+    "errors": 0
+  },
+  "publication_policy": "第三方页面只产生私有线索；不会生成官方岗位、不会填写官方链接、不会进入学生端。"
+}
