@@ -1,0 +1,37 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-19T00:00:00+08:00",
+  "environment": "local_read_only",
+  "policy": "Access failure is a source health fact, not evidence that the source has no jobs. No robots, TLS, browser permission, login, or captcha restriction was bypassed.",
+  "sources": [
+    {
+      "source_id": "offcn-discovery",
+      "status": "access_limited",
+      "observations": ["command-line TLS handshake failed", "browser navigation blocked by saved site permission"],
+      "downloaded": false,
+      "candidate_rows_created": 0
+    },
+    {
+      "source_id": "fenbi-discovery",
+      "status": "access_limited",
+      "observations": ["command-line TLS handshake failed"],
+      "downloaded": false,
+      "candidate_rows_created": 0
+    },
+    {
+      "source_id": "gongkaoleida-discovery",
+      "status": "access_limited",
+      "observations": ["command-line TLS handshake failed"],
+      "downloaded": false,
+      "candidate_rows_created": 0
+    },
+    {
+      "source_id": "gongkaozixun-discovery",
+      "status": "access_limited",
+      "observations": ["command-line TLS handshake failed", "browser navigation previously returned DNS resolution failure"],
+      "downloaded": false,
+      "candidate_rows_created": 0
+    }
+  ],
+  "conclusion": "No new third-party batch can be audited in this environment. The channels remain registered B-level discovery sources and must be retried only when lawful access or an operator-provided original file with its source URL is available."
+}

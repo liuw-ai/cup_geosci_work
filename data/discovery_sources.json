@@ -14,8 +14,8 @@
       "trust_grade": "B",
       "batch_candidate_allowed": true,
       "official_domain_allowlist": [],
-      "last_checked_on": "2026-09-21",
-      "notes": "当前网络 TLS 检查未完成；不把中公页面作为学生端原文。"
+      "last_checked_on": "2026-10-19",
+      "notes": "2026-10-19 本机只读探测仍受 TLS 和浏览器保存权限限制；不把中公页面作为学生端原文，也不据此判断没有岗位。"
     },
     {
       "id": "huatu-discovery",
@@ -51,14 +51,14 @@
       "source_type": "aggregator",
       "homepage_url": "https://www.fenbi.com/",
       "access_mode": "manual",
-      "status": "registered",
+      "status": "access_limited",
       "scope": "公务员、事业单位统考职位表和公告线索",
       "publication_policy": "batch_candidate_allowed",
       "trust_grade": "B",
       "batch_candidate_allowed": true,
       "official_domain_allowlist": [],
-      "last_checked_on": "2026-10-16",
-      "notes": "允许读取完整职位表作为批量候选；学生端只展示官方公告或官方岗位表链接。"
+      "last_checked_on": "2026-10-19",
+      "notes": "允许读取完整职位表作为批量候选；2026-10-19 本机只读探测受 TLS 限制，未下载或生成候选；学生端只展示官方公告或官方岗位表链接。"
     },
     {
       "id": "gongkaoleida-discovery",
@@ -66,14 +66,14 @@
       "source_type": "aggregator",
       "homepage_url": "https://www.gongkaoleida.com/",
       "access_mode": "manual",
-      "status": "registered",
+      "status": "access_limited",
       "scope": "公务员、事业单位和地方招录线索",
       "publication_policy": "batch_candidate_allowed",
       "trust_grade": "B",
       "batch_candidate_allowed": true,
       "official_domain_allowlist": [],
-      "last_checked_on": "2026-10-16",
-      "notes": "批量候选和官方链接发现源，不作为最终申请来源。"
+      "last_checked_on": "2026-10-19",
+      "notes": "2026-10-19 本机只读探测受 TLS 限制，未下载或生成候选；批量候选和官方链接发现源，不作为最终申请来源。"
     },
     {
       "id": "gongkaozixun-discovery",
@@ -81,14 +81,14 @@
       "source_type": "aggregator",
       "homepage_url": "https://www.gkzixun.com/",
       "access_mode": "manual",
-      "status": "registered",
+      "status": "access_limited",
       "scope": "公务员和事业单位公告线索",
       "publication_policy": "batch_candidate_allowed",
       "trust_grade": "B",
       "batch_candidate_allowed": true,
       "official_domain_allowlist": [],
-      "last_checked_on": "2026-10-16",
-      "notes": "批量候选发现源；实际域名和可用性需每次运行记录。"
+      "last_checked_on": "2026-10-19",
+      "notes": "2026-10-19 本机只读探测受 TLS/DNS 限制，未下载或生成候选；实际域名和可用性需每次运行记录。"
     },
     {
       "id": "iguopin-discovery",
