@@ -56,7 +56,7 @@ def input_tree_status() -> str:
                 ".",
                 ":!docs/current/phase4-current-state-audit-2026-10-18.json",
                 ":!docs/current/phase4-release-manifest.json",
-                ":!docs/current/phase4-local-validation-2026-10-18.json",
+                ":!docs/current/phase4-local-validation-2026-10-19.json",
                 ":!docs/current/phase4-local-web-recheck-2026-10-18.json",
             ],
             cwd=ROOT,
@@ -177,7 +177,7 @@ def document_consistency_facts() -> dict[str, object]:
     # hashes are bound one way by the manifest.
     current_paths = [
         "docs/current/PHASE4-2026-10-17.md",
-        "docs/current/phase4-local-validation-2026-10-18.json",
+        "docs/current/phase4-local-validation-2026-10-19.json",
     ]
     metadata_paths = [
         "docs/current/phase4-current-state-audit-2026-10-18.json",
@@ -227,7 +227,7 @@ def main() -> None:
     sinopec_page_roster = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
     entry_matrix = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
-    validation = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-18.json"
+    validation = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-19.json"
     manual_candidate = ROOT / "docs" / "current" / "phase4-third-party-candidate-2026-10-18.json"
     hrinm_trial = ROOT / "docs" / "current" / "phase4-third-party-hrinm-2026-10-18.json"
     cgs_trial = ROOT / "docs" / "current" / "phase4-third-party-cgs-2026-10-18.json"
@@ -280,7 +280,7 @@ def main() -> None:
                 "sha256": sha256(geoscience_followup),
             },
             "phase4_local_validation": {
-                "path": "docs/current/phase4-local-validation-2026-10-18.json",
+                "path": "docs/current/phase4-local-validation-2026-10-19.json",
                 "sha256": sha256(validation),
             },
             "phase4_third_party_candidate": {
