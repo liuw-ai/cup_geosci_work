@@ -42,6 +42,30 @@
     "formal_database_unchanged": false,
     "robots_or_permission_blocked_followups": 1
   },
+  "local_web_read_only": {
+    "base_url": "http://127.0.0.1:8094",
+    "database_mode": "temporary_copy_of_runtime_database",
+    "healthz_status": 200,
+    "home_status": 200,
+    "layer_api_statuses": {
+      "exact_match": 200,
+      "broad_geoscience_match": 200,
+      "incomplete_but_basic_match": 200,
+      "source_unavailable": 200
+    },
+    "formal_third_party_job_query": {
+      "query": "地质研发",
+      "status": 200,
+      "total": 1,
+      "job_id": 5432,
+      "publication_layer": "exact_match",
+      "official_notice_url": "https://www.hrinm.cn/xwxq/35.html",
+      "official_application_url": null,
+      "third_party_table_url": null,
+      "third_party_discovery_url_is_student_visible": false
+    },
+    "server_deployment": false
+  },
   "release_boundary": {
     "status": "not_publishable",
     "automation_status": "paused",
