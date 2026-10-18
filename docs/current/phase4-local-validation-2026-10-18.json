@@ -1,12 +1,12 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-18T18:35:00+08:00",
+  "validated_at": "2026-10-18T19:12:18+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "ddae96f",
+  "git_sha_before_metadata_commit": "d99d62e",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1064,
+    "passed": 1065,
     "skipped": 4,
     "failed": 0,
     "warnings": 1,
@@ -40,6 +40,8 @@
     "formal_jobs_created": 1,
     "formal_third_party_job_ids": [5432],
     "formal_database_unchanged": false,
+    "formal_database_change_note": "The approved local HRINM recovery created job 5432; subsequent tests were read-only and preserved the SHA-256 recorded above.",
+    "robots_gate_targeted_tests": "13 passed (tests/test_third_party_tables.py, tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py)",
     "robots_or_permission_blocked_followups": 1
   },
   "local_web_read_only": {
