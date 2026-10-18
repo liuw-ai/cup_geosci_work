@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from scripts.build_phase4_manifest import local_validation_facts
+from scripts.verify_phase4_manifest import verify_manifest
 
 
 def test_phase4_manifest_builder_reads_isolated_validation_report(tmp_path: Path) -> None:
@@ -51,3 +52,11 @@ def test_phase4_manifest_distinguishes_overall_target_from_third_party_gate() ->
 
     facts = db_facts(Path("runtime/job_hub.sqlite3"))
     assert int(facts["student_visible_total"]) >= 500
+
+
+def test_phase4_manifest_recomputes_current_hashes_and_database_facts() -> None:
+    result = verify_manifest()
+
+    assert result["ok"] is True, result["errors"]
+    assert result["production_deployment"] == "not_performed"
+    assert result["automation_status"] == "paused"

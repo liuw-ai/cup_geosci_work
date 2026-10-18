@@ -10,6 +10,16 @@
 
 三桶油 64 个正式目录单位的逐项入口状态见 [phase4-three-oil-unit-entry-matrix-2026-10-18.json](phase4-three-oil-unit-entry-matrix-2026-10-18.json)。该矩阵明确区分集团共享入口、官方展示名单和单位独立入口，不把共享 URL 复制为下属单位 URL。组织登记账本另有 239 条官方展示名单候选，仍需法定名称和外部身份证据核验，不能当作已完成的正式目录。
 
+每次本地迭代后，先执行只读 Manifest 校验，再执行测试：
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+python scripts/verify_phase4_manifest.py
+python -m pytest -q
+```
+
+`verify_phase4_manifest.py` 会重新计算生产 Compose、Dockerfile、配置和运行数据库的 SHA-256，检查 SQLite 完整性、Manifest 统计、源提交存在性，以及“未部署/自动化暂停/发布阻塞项”边界。校验失败时不得生成部署批准。
+
 ## 1. 目标目录
 
 ```text
