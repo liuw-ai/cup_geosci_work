@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T14:23:36Z",
+  "generated_at": "2026-10-18T14:25:48Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "2b905adcd5fb55beb401f10b5045b6066b949125",
-  "git_status_porcelain": "M docs/current/phase4-local-validation-2026-10-18.json\n M docs/current/phase4-local-web-recheck-2026-10-18.json",
+  "git_sha": "f253f383573eb9141e00889859fa3e60873dde0d",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "4d4ab1ee53225e21724caa4663077a44d3c8be7fa60a05ec64d7f4f5272d0c3a",
@@ -93,7 +93,7 @@
       {
         "path": "docs/current/phase4-current-state-audit-2026-10-18.json",
         "exists": true,
-        "sha256": "74e5092b1301d2fabeec0df9e63b24a81c95e2519785a4e0c31a1b5d70a9d56a"
+        "sha256": "8d132eca856938a3105971ba1dee1a582b98e58a0b590708f972fecdd69a8e90"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
@@ -103,7 +103,7 @@
       {
         "path": "docs/current/phase4-release-manifest.json",
         "exists": true,
-        "sha256": "5a8228f5abc27f4120c1d1309e310a4807e70d214c6a17ef63accaaed7be3f80"
+        "sha256": "cef4d55fa7eba546df71fb8fc0242ccb47601bff612259567ecff1b4e252cf3d"
       }
     ],
     "historical_documents_are_publish_inputs": false
