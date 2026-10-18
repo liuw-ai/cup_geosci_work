@@ -72,5 +72,15 @@
     "formal_database_written": false,
     "server_deployment": false
   },
-  "next_action": "继续选择含地学岗位的真实批次；每行完成官方公告/岗位表回溯、专业核验、截止日期和官方链接核验后，才允许从候选升级为正式岗位。"
+  "next_action": "继续选择含地学岗位的真实批次；每行完成官方公告/岗位表回溯、专业核验、截止日期和官方链接核验后，才允许从候选升级为正式岗位。",
+  "next_real_batch_candidate": {
+    "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875231.html",
+    "title": "2027年江苏南京水利科学研究院公开招聘事业编制工作人员50人公告",
+    "third_party_table_url": "https://u3.huatu.com/uploads/soft/261016/83c02233b7dae819b7449c9c167b9e5471637.pdf",
+    "official_employer_url": "http://www.nhri.cn",
+    "official_notice_url": null,
+    "deadline_date": "2026-11-20",
+    "capture_status": "discovered_not_downloaded",
+    "reason": "官方回溯入口已在公告正文核验，但本轮职位表下载超时，未写入候选或正式数据库；需要下一轮在允许的下载条件下重新捕获并计算哈希。"
+  }
 }

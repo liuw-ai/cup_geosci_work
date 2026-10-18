@@ -69,6 +69,12 @@
     "student_visible_changes": 0,
     "report": "docs/current/phase4-third-party-trial-2026-10-18.json"
   },
+  "three_oil_entry_evidence": {
+    "report": "docs/current/phase4-three-oil-entry-evidence-2026-10-18.json",
+    "cnpc": "blocked_by_saved_browser_permission",
+    "sinopec": "official_portal_verified_132_display_units",
+    "cnooc": "official_portal_verified_16_display_units"
+  },
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",

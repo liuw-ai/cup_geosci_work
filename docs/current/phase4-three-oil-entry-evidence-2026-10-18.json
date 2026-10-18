@@ -1,0 +1,96 @@
+{
+  "phase": "phase4",
+  "verified_at": "2026-10-18",
+  "verification_mode": "read_only_browser",
+  "policy": "共享集团招聘入口只能证明官方入口和展示单位，不自动证明每个单位拥有独立招聘站；单位专属申请链接必须逐项保存。",
+  "cnpc": {
+    "group": "中国石油天然气集团有限公司",
+    "entry_url": "https://zhaopin.cnpc.com.cn/",
+    "status": "blocked_by_saved_browser_permission",
+    "evidence": null,
+    "note": "本轮未绕过浏览器权限、未使用替代浏览器或猜测 URL；不得据此判断入口失效。"
+  },
+  "sinopec": {
+    "group": "中国石油化工集团有限公司",
+    "entry_url": "https://job.sinopec.com/",
+    "status": "official_portal_verified",
+    "observed_urls": [
+      "https://job.sinopec.com/#/index",
+      "https://job.sinopec.com/#/school/index",
+      "https://job.sinopec.com/#/school/recruitmentPositions"
+    ],
+    "observations": {
+      "copyright": "Copyright©2026 中国石油化工集团公司版权所有",
+      "recruitment_unit_total": 132,
+      "page_size": 20,
+      "first_page_position": "1-20 共 132 条",
+      "categories": ["油田企业", "炼化企业", "成品油销售企业", "设计施工单位", "科研单位", "专业公司", "中航油", "优培计划"],
+      "sample_units": [
+        "胜利油田",
+        "中原油田",
+        "河南油田",
+        "江汉油田",
+        "江苏油田",
+        "新星石油公司",
+        "上海海洋油气分公司",
+        "华东石油局",
+        "华北石油局",
+        "西北石油局",
+        "东北石油局",
+        "西南石油局",
+        "勘探分公司",
+        "天然气分公司",
+        "胜利石油工程有限公司",
+        "中原石油工程有限公司",
+        "江汉石油工程有限公司",
+        "西南石油工程有限公司",
+        "华东石油工程有限公司"
+      ]
+    },
+    "entry_classification": "集团官方统一招聘门户；当前证据是 132 个展示单位和统一投递流程，不是 132 个独立入口。"
+  },
+  "cnooc": {
+    "group": "中国海洋石油集团有限公司",
+    "entry_url": "https://cnooc.zhaopin.com/",
+    "notice_url": "https://cnooc.zhaopin.com/notice/index.html",
+    "job_index_url": "https://cnooc.zhaopin.com/job/index.html",
+    "status": "official_portal_verified",
+    "notice_observations": {
+      "title": "中国海洋石油集团有限公司2027届校园招聘",
+      "registration_window": "2026-09-30 through 2026-10-31 24:00",
+      "application_entry": "cnooc.zhaopin.com",
+      "official_detail_rule": "具体应聘条件以各招聘单位岗位需求为准"
+    },
+    "displayed_units_count": 16,
+    "displayed_units": [
+      "中海石油（中国）有限公司天津分公司",
+      "中海石油（中国）有限公司深圳分公司",
+      "中海石油（中国）有限公司湛江分公司",
+      "中海石油（中国）有限公司海南分公司",
+      "中海石油（中国）有限公司上海分公司",
+      "中国海洋石油国际有限公司",
+      "中海油研究总院有限责任公司",
+      "中联煤层气有限责任公司",
+      "中海石油气电集团有限责任公司",
+      "中海石油炼化有限责任公司",
+      "中海石油化学股份有限公司",
+      "中海油田服务股份有限公司",
+      "海洋石油工程股份有限公司",
+      "中海油能源发展股份有限公司",
+      "中海油国际贸易有限责任公司",
+      "中海石油（中国）有限公司北京新能源分公司"
+    ],
+    "sample_official_job_urls": [
+      "https://xiaoyuan.zhaopin.com/job/CC258591510J40972466215?srccode=448002",
+      "https://xiaoyuan.zhaopin.com/job/CC258591510J40972466915?srccode=448002",
+      "https://xiaoyuan.zhaopin.com/job/CC258591510J40972467515?srccode=448002"
+    ],
+    "observed_geoscience_job_labels": ["勘探地质类岗位", "开发地质类岗位", "地球物理类岗位"],
+    "entry_classification": "集团统一招聘入口，单位和岗位在官方页面按单位展示；已取得单位级展示和岗位投递链接证据，但不是每个目录单位都已完成独立入口证据。"
+  },
+  "catalog_gap": {
+    "formal_catalog_units": 64,
+    "unit_specific_entry_evidence_complete": false,
+    "next_action": "继续逐单位保存正式名称、官方展示/详情 URL、入口类型、核验时间和自动采集状态；共享入口不得复制成独立入口。"
+  }
+}
