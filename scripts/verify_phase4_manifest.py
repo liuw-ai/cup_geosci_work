@@ -28,6 +28,45 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
 )
 
+# These reports are deliberately excluded from the source-tree dirty flag
+# because they are generated after the source/config commit.  They are still
+# release evidence, however, so every hash recorded by build_phase4_manifest
+# must be checked before the manifest can be considered valid.
+MANIFEST_BOUND_REPORTS = {
+    "phase4_organization_reconciliation": "docs/current/phase4-organization-reconciliation-2026-10-17.json",
+    "phase4_three_oil_catalog_audit": "docs/current/phase4-three-oil-catalog-audit-2026-10-17.json",
+    "phase4_third_party_trial": "docs/current/phase4-third-party-trial-2026-10-18.json",
+    "phase4_three_oil_entry_evidence": "docs/current/phase4-three-oil-entry-evidence-2026-10-18.json",
+    "phase4_cnooc_unit_display_evidence": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+    "phase4_cnooc_unit_job_evidence": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+    "phase4_three_oil_cooec_negative_entry": "docs/current/phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json",
+    "phase4_three_oil_unit_entry_matrix": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
+    "phase4_sinopec_display_audit": "docs/current/phase4-sinopec-display-units-2026-10-18.json",
+    "phase4_sinopec_page_roster": "docs/current/phase4-sinopec-page-roster-2026-10-19.json",
+    "phase4_third_party_geoscience_followup": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
+    "phase4_current_state_audit": "docs/current/phase4-current-state-audit-2026-10-18.json",
+    "phase4_document_consistency": "docs/current/phase4-current-state-audit-2026-10-18.json",
+    "phase4_third_party_candidate": "docs/current/phase4-third-party-candidate-2026-10-18.json",
+    "phase4_third_party_hrinm": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
+    "phase4_third_party_cgs": "docs/current/phase4-third-party-cgs-2026-10-18.json",
+    "phase4_third_party_blocked_batches": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
+    "phase4_third_party_nhri_official_page": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
+    "phase4_third_party_lead_recheck": "docs/current/phase4-third-party-lead-recheck-2026-10-19.json",
+    "phase4_cnpc_entry_recheck": "docs/current/phase4-cnpc-entry-recheck-2026-10-19.json",
+    "phase4_third_party_access_recheck": "docs/current/phase4-third-party-access-recheck-2026-10-19.json",
+    "phase4_local_repair": "docs/current/phase4-local-repair-2026-10-19.json",
+    "phase4_third_party_funnel": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
+    "phase4_local_web_recheck": "docs/current/phase4-local-web-recheck-2026-10-19.json",
+    "phase4_local_web_live_validation": "docs/current/phase4-local-web-live-validation-2026-10-19.json",
+    "phase4_huatu_table_discovery": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
+    "phase4_huatu_discovery_scan": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
+    "phase4_third_party_bingtuan_official_recovery": "docs/current/phase4-third-party-bingtuan-official-recovery-2026-10-19.json",
+    "phase4_main_record": "docs/current/PHASE4-2026-10-17.md",
+    "phase4_local_validation": "docs/current/phase4-local-validation-2026-10-19.json",
+    "phase4_local_db_write_incident": "docs/current/phase4-local-db-write-incident-2026-10-19.json",
+    "phase4_three_oil_homepage_probe": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
+}
+
 
 def sha256(path: Path) -> str | None:
     if not path.is_file():
@@ -132,6 +171,19 @@ def verify_manifest(path: Path = MANIFEST) -> dict[str, Any]:
         else:
             expected = manifest.get("dockerfile_sha256", {}).get(key.split(".", 1)[1])
         _record_error(errors, key, expected, sha256(file_path))
+
+    recorded_reports = manifest.get("config_sha256", {})
+    for key, relative_path in MANIFEST_BOUND_REPORTS.items():
+        expected = recorded_reports.get(key)
+        if expected is None:
+            errors.append(f"config_sha256.{key}: missing manifest hash")
+            continue
+        _record_error(
+            errors,
+            f"config_sha256.{key}",
+            expected,
+            sha256(ROOT / relative_path),
+        )
 
     database = _database_facts()
     recorded_database = manifest.get("database", {})

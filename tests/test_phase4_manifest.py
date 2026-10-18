@@ -60,3 +60,17 @@ def test_phase4_manifest_recomputes_current_hashes_and_database_facts() -> None:
     assert result["ok"] is True, result["errors"]
     assert result["production_deployment"] == "not_performed"
     assert result["automation_status"] == "paused"
+
+
+def test_phase4_manifest_rejects_changed_bound_evidence_report(tmp_path: Path) -> None:
+    manifest = json.loads(
+        Path("docs/current/phase4-release-manifest.json").read_text(encoding="utf-8")
+    )
+    manifest["config_sha256"]["phase4_third_party_funnel"] = "tampered"
+    path = tmp_path / "manifest.json"
+    path.write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
+
+    result = verify_manifest(path)
+
+    assert result["ok"] is False
+    assert any("phase4_third_party_funnel" in item for item in result["errors"])
