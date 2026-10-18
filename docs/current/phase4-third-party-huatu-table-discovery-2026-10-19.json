@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-18T21:42:25Z",
+  "generated_at": "2026-10-18T22:07:58Z",
   "source_id": "huatu-discovery",
   "policy": "仅发现已登记汇总页和职位表链接；不下载 robots 拒绝的附件，不生成候选或正式岗位。",
   "items": [
@@ -11,7 +11,7 @@
         "robots_url": "https://www.huatu.com/robots.txt",
         "status": 200,
         "allowed": true,
-        "checked_at": "2026-10-18T21:42:12Z",
+        "checked_at": "2026-10-18T22:07:43Z",
         "reason": "permitted"
       },
       "http_status": 200,
@@ -26,7 +26,7 @@
         "robots_url": "https://sydw.huatu.com/robots.txt",
         "status": 200,
         "allowed": true,
-        "checked_at": "2026-10-18T21:42:13Z",
+        "checked_at": "2026-10-18T22:07:45Z",
         "reason": "permitted"
       },
       "http_status": 200,
@@ -41,7 +41,7 @@
         "robots_url": "https://sydw.huatu.com/robots.txt",
         "status": 200,
         "allowed": true,
-        "checked_at": "2026-10-18T21:42:15Z",
+        "checked_at": "2026-10-18T22:07:46Z",
         "reason": "permitted"
       },
       "http_status": 200,
@@ -60,7 +60,7 @@
             "robots_url": "https://u3.huatu.com/robots.txt",
             "status": 200,
             "allowed": false,
-            "checked_at": "2026-10-18T21:42:16Z",
+            "checked_at": "2026-10-18T22:07:48Z",
             "reason": "disallowed"
           },
           "download_decision": "blocked_before_download"
@@ -78,7 +78,7 @@
             "robots_url": "https://u3.huatu.com/robots.txt",
             "status": 200,
             "allowed": false,
-            "checked_at": "2026-10-18T21:42:17Z",
+            "checked_at": "2026-10-18T22:07:49Z",
             "reason": "disallowed"
           },
           "download_decision": "blocked_before_download"
@@ -93,7 +93,7 @@
         "robots_url": "https://sydw.huatu.com/robots.txt",
         "status": 200,
         "allowed": true,
-        "checked_at": "2026-10-18T21:42:18Z",
+        "checked_at": "2026-10-18T22:07:50Z",
         "reason": "permitted"
       },
       "http_status": 200,
@@ -112,7 +112,7 @@
             "robots_url": "https://u3.huatu.com/robots.txt",
             "status": 200,
             "allowed": false,
-            "checked_at": "2026-10-18T21:42:19Z",
+            "checked_at": "2026-10-18T22:07:51Z",
             "reason": "disallowed"
           },
           "download_decision": "blocked_before_download"
@@ -130,7 +130,7 @@
             "robots_url": "https://u3.huatu.com/robots.txt",
             "status": 200,
             "allowed": false,
-            "checked_at": "2026-10-18T21:42:20Z",
+            "checked_at": "2026-10-18T22:07:52Z",
             "reason": "disallowed"
           },
           "download_decision": "blocked_before_download"
@@ -145,7 +145,7 @@
         "robots_url": "https://sydw.huatu.com/robots.txt",
         "status": 200,
         "allowed": true,
-        "checked_at": "2026-10-18T21:42:21Z",
+        "checked_at": "2026-10-18T22:07:53Z",
         "reason": "permitted"
       },
       "http_status": 200,
@@ -164,7 +164,7 @@
             "robots_url": "https://u3.huatu.com/robots.txt",
             "status": 200,
             "allowed": false,
-            "checked_at": "2026-10-18T21:42:22Z",
+            "checked_at": "2026-10-18T22:07:54Z",
             "reason": "disallowed"
           },
           "download_decision": "blocked_before_download"
@@ -179,7 +179,7 @@
         "robots_url": "https://sydw.huatu.com/robots.txt",
         "status": 200,
         "allowed": true,
-        "checked_at": "2026-10-18T21:42:23Z",
+        "checked_at": "2026-10-18T22:07:55Z",
         "reason": "permitted"
       },
       "http_status": 200,
@@ -198,7 +198,7 @@
             "robots_url": "https://u3.huatu.com/robots.txt",
             "status": 200,
             "allowed": false,
-            "checked_at": "2026-10-18T21:42:25Z",
+            "checked_at": "2026-10-18T22:07:56Z",
             "reason": "disallowed"
           },
           "download_decision": "blocked_before_download"
