@@ -1,41 +1,43 @@
 {
-  "generated_at": "2026-10-18T09:43:13Z",
+  "generated_at": "2026-10-18T10:30:55Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "7778d843e08e42ca95f837e5ccd28a710f2ff40f",
+  "git_sha": "12106ff28465a2645a1b21a298fb8df0e6317fba",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "d151038a0fba7f0d8da022abd8f221177531db77d0b563365eca8ff65a10486a",
+    "sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba",
     "integrity_check": "ok",
-    "job_count": 3947,
+    "job_count": 3948,
     "status_counts": {
       "expired": 106,
-      "open": 3745,
+      "open": 3746,
       "superseded": 45,
       "withdrawn": 51
     },
     "publication_layer_counts": {
       "broad_geoscience_match": 1,
-      "exact_match": 210,
+      "exact_match": 211,
       "incomplete_but_basic_match": 615,
       "not_public": 2955,
       "source_unavailable": 166
     },
     "phase3_withdrawal_audit_count": 3947,
-    "candidate_lead_count": 1,
+    "candidate_lead_count": 2,
+    "formal_third_party_job_count": 1,
     "student_read_as_of_date": "2026-10-18",
     "student_visible_layer_counts": {
       "broad_geoscience_match": 1,
-      "exact_match": 145,
+      "exact_match": 146,
       "incomplete_but_basic_match": 367,
       "not_public": 0,
       "source_unavailable": 111
     },
-    "student_visible_total": 624
+    "student_visible_total": 625
   },
   "sources_and_organizations": {
     "registered_source_count": 12,
+    "official_recovery_source_count": 1,
     "trust_grade_counts": {
       "A": 1,
       "A-": 0,
@@ -73,15 +75,19 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-18.json",
-      "sha256": "3547d57750ed3a93f714ddf7f094c2c8d4a9caba331d5d4ee3863074becedc9b"
+      "sha256": "85465dd2faade0c2f6e8b47eaee99f2b09b6f4901dd793a08e24fbb22c69b11d"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
       "sha256": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc"
     },
+    "phase4_third_party_hrinm": {
+      "path": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
+      "sha256": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878"
+    },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "ded4db3e0bf6663998bbc2ee92f21f1f07767efbbf839b7a32d52efa2bca9e05"
+      "sha256": "b4cece2966a44e9794de44e14d36ac7baea51f245a58391310452e81f1971667"
     }
   },
   "code_inventory": [
@@ -222,8 +228,8 @@
     },
     {
       "path": "job_hub/db.py",
-      "line_count": 5489,
-      "sha256": "25b5675f2afd9348745455f341b20956911d2049168dd3576c53ab9260a3b468"
+      "line_count": 5510,
+      "sha256": "c54614680e3bcc0cf43bc127cba30c4dc644380162da739f8400bf01f22c9850"
     },
     {
       "path": "job_hub/discovery.py",
@@ -547,8 +553,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 206,
-      "sha256": "2fb44602d94bb38ae8d63f5441182ef7dff6ddbba8abb665dc839ce100346f40"
+      "line_count": 232,
+      "sha256": "de8e814af8ecdc0f6c4651b6bc158445d82f43b61aba6c829cb99ede0d47026e"
     },
     {
       "path": "scripts/build_phase3_manifest.py",
@@ -557,8 +563,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 203,
-      "sha256": "d668a53f5e9be1b8dc7b512badcdd92970755b23e27b802d07253e37e288dd07"
+      "line_count": 227,
+      "sha256": "287911fefac0472c54827337093b843389427bfefe6455eeddd8a14be6b4aa24"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -902,8 +908,8 @@
     },
     {
       "path": "tests/test_leads.py",
-      "line_count": 154,
-      "sha256": "189898e884cac4ee042d7623aa99e89fb1da809ac724acaab9222bbd41816a23"
+      "line_count": 233,
+      "sha256": "bff3dc2351dcd6db706c22ac8201e6708ede5a7226d382bb692e04b729d7d8fd"
     },
     {
       "path": "tests/test_link_health.py",
@@ -1199,9 +1205,9 @@
   "release_boundary": {
     "server_deployment": false,
     "automation_status": "paused",
-    "formal_third_party_jobs_published": false,
+    "formal_third_party_jobs_published": true,
     "notes": [
-      "The formal database remains unchanged by this audit.",
+      "One locally approved third-party discovery lead was recovered to an official employer notice and published as job 5432; no server deployment was performed.",
       "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
       "Historical snapshots remain archived and are not overwritten by current facts."
     ]
