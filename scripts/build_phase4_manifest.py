@@ -52,6 +52,7 @@ def dirty() -> bool:
                 "--porcelain",
                 "--",
                 ".",
+                ":!docs/current/phase4-current-state-audit-2026-10-18.json",
                 ":!docs/current/phase4-release-manifest.json",
             ],
             cwd=ROOT,
