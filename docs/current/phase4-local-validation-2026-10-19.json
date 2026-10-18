@@ -1,10 +1,10 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T02:22:50+08:00",
+  "validated_at": "2026-10-19T03:18:00+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "38fecda4a711acbaafcdb19adf8ac85df2464f08",
-  "git_sha_at_validation": "38fecda4a711acbaafcdb19adf8ac85df2464f08",
+  "git_sha_before_metadata_commit": "b2f86ba",
+  "git_sha_at_validation": "b2f86ba",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1075,
@@ -59,7 +59,18 @@
     },
     "robots_gate_targeted_tests": "13 passed (tests/test_third_party_tables.py, tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py)",
     "source_disabled_visibility_regression": "included in full 1075-test run; disabled source remains student-visible without withdrawal",
-    "robots_or_permission_blocked_followups": 1
+    "robots_or_permission_blocked_followups": 1,
+    "huatu_discovery_scan": {
+      "discovered_announcements": 65,
+      "private_leads_created_in_isolated_database": 64,
+      "enriched_leads": 24,
+      "official_url_replay_resolved": 6,
+      "table_links_discovered": 6,
+      "table_links_blocked_by_robots_before_download": 6,
+      "formal_jobs_created": 0,
+      "report": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
+      "table_report": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json"
+    }
   },
   "local_web_read_only": {
     "base_url": "http://127.0.0.1:8097",
@@ -89,7 +100,10 @@
     "detail_job_table_link_label_present": true,
     "homepage_third_party_discovery_domain_exposed": false,
     "server_deployment": false,
-    "latest_recheck_report": "docs/current/phase4-local-web-recheck-2026-10-19.json"
+    "coverage_status": 200,
+    "coverage_seconds": 24.629,
+    "latest_recheck_report": "docs/current/phase4-local-web-recheck-2026-10-19.json",
+    "database_mode_note": "all requests used a temporary copy; runtime/job_hub.sqlite3 was not opened for writing"
   },
   "release_boundary": {
     "status": "not_publishable",

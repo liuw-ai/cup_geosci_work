@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T19:12:44Z",
+  "generated_at": "2026-10-18T19:25:27Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "3c6c87a8727d2f4574d9a361ecb5b3f1bd3e8239",
-  "git_status_porcelain": "M docs/current/PHASE4-2026-10-17.md\n M scripts/audit_phase4_current_state.py\n M scripts/build_phase4_manifest.py\n?? docs/current/phase4-third-party-huatu-discovery-2026-10-19.json\n?? docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json\n?? scripts/build_phase4_huatu_table_discovery.py",
+  "git_sha": "b2f86ba64876f04f616192e7e64336207dc5000a",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
@@ -107,12 +107,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "2037913cfd23763062824c5e72910a4f09d7affe50738344ef7f1d8cbb92af91"
+        "sha256": "f57a8909c5821a6af64e8c5d4642064509559e5501c3df4544413c0108f85999"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "50525036f4154d34e1bcbe01fa461b416148ec253d58e21314e2199d4a2889da"
+        "sha256": "ad6f43e636dd386b699291adf4c6704476a9d6581e4b9bee76c852361124c407"
       }
     ],
     "metadata_documents": [
@@ -168,7 +168,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "50525036f4154d34e1bcbe01fa461b416148ec253d58e21314e2199d4a2889da"
+      "sha256": "ad6f43e636dd386b699291adf4c6704476a9d6581e4b9bee76c852361124c407"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -224,7 +224,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "2037913cfd23763062824c5e72910a4f09d7affe50738344ef7f1d8cbb92af91"
+      "sha256": "f57a8909c5821a6af64e8c5d4642064509559e5501c3df4544413c0108f85999"
     }
   },
   "code_inventory": [

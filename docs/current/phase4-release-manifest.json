@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T19:01:21Z",
+  "generated_at": "2026-10-18T19:25:39Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "2c78af464662fd58265f46b6e22686731f9be558",
+  "git_sha": "b2f86ba64876f04f616192e7e64336207dc5000a",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -25,8 +25,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "eaabe19062c270873ea7c2bbffedc50ab5262d66ac47c4df93c8c5a61fe269b1",
-    "phase4_document_consistency": "eaabe19062c270873ea7c2bbffedc50ab5262d66ac47c4df93c8c5a61fe269b1",
+    "phase4_current_state_audit": "8f327e95c10e6c6d04a52209743109bf3f8d5752d55f1ba8726fc7dd308935bc",
+    "phase4_document_consistency": "8f327e95c10e6c6d04a52209743109bf3f8d5752d55f1ba8726fc7dd308935bc",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -38,8 +38,10 @@
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
     "phase4_third_party_funnel": "38d57511133557b9e26f9ab894fae5f538e83ab43c9224505415c80589153911",
     "phase4_local_web_recheck": "c4558f29ff36ea1ccf00709837e34cc3a40e5b20d459aaa40ceca1ba4fd6ec08",
-    "phase4_main_record": "64f660db58d2f6d3d837daf23ec57409252f69403ed4c515a5f78ebe70520e84",
-    "phase4_local_validation": "50525036f4154d34e1bcbe01fa461b416148ec253d58e21314e2199d4a2889da"
+    "phase4_huatu_table_discovery": "e13bea423404b688d1de2aa46ea316926e9692caa5cc3bb3c3bbfcc3a178fa22",
+    "phase4_huatu_discovery_scan": "6084764bc34681e688a1bcfaa07851a8fb0c4fcb073680a308ffd219ea2fb277",
+    "phase4_main_record": "f57a8909c5821a6af64e8c5d4642064509559e5501c3df4544413c0108f85999",
+    "phase4_local_validation": "ad6f43e636dd386b699291adf4c6704476a9d6581e4b9bee76c852361124c407"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -104,11 +106,11 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-19T02:22:50+08:00",
+    "validated_at": "2026-10-19T03:18:00+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "38fecda4a711acbaafcdb19adf8ac85df2464f08",
-    "git_sha_at_validation": "38fecda4a711acbaafcdb19adf8ac85df2464f08",
+    "git_sha_before_metadata_commit": "b2f86ba",
+    "git_sha_at_validation": "b2f86ba",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1075,
@@ -179,7 +181,18 @@
       },
       "robots_gate_targeted_tests": "13 passed (tests/test_third_party_tables.py, tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py)",
       "source_disabled_visibility_regression": "included in full 1075-test run; disabled source remains student-visible without withdrawal",
-      "robots_or_permission_blocked_followups": 1
+      "robots_or_permission_blocked_followups": 1,
+      "huatu_discovery_scan": {
+        "discovered_announcements": 65,
+        "private_leads_created_in_isolated_database": 64,
+        "enriched_leads": 24,
+        "official_url_replay_resolved": 6,
+        "table_links_discovered": 6,
+        "table_links_blocked_by_robots_before_download": 6,
+        "formal_jobs_created": 0,
+        "report": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
+        "table_report": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json"
+      }
     },
     "local_web_read_only": {
       "base_url": "http://127.0.0.1:8097",
@@ -209,7 +222,10 @@
       "detail_job_table_link_label_present": true,
       "homepage_third_party_discovery_domain_exposed": false,
       "server_deployment": false,
-      "latest_recheck_report": "docs/current/phase4-local-web-recheck-2026-10-19.json"
+      "coverage_status": 200,
+      "coverage_seconds": 24.629,
+      "latest_recheck_report": "docs/current/phase4-local-web-recheck-2026-10-19.json",
+      "database_mode_note": "all requests used a temporary copy; runtime/job_hub.sqlite3 was not opened for writing"
     },
     "release_boundary": {
       "status": "not_publishable",
@@ -238,7 +254,9 @@
     "nhri_official_page_evidence": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
     "unresolved_lead_recheck": "docs/current/phase4-third-party-lead-recheck-2026-10-19.json",
     "cnpc_entry_recheck": "docs/current/phase4-cnpc-entry-recheck-2026-10-19.json",
-    "funnel_audit": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json"
+    "funnel_audit": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
+    "table_discovery_report": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
+    "discovery_scan_report": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json"
   },
   "three_oil_organization_reconciliation": {
     "catalog_group_count": 3,
