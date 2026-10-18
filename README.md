@@ -2,11 +2,15 @@
 
 面向中国石油大学（北京）地球科学学院及相邻专业学生的公开就业信息服务。网站面向手机和微信浏览器设计：学生无需登录即可查看当日就业日报、历史日报、全部在招岗位和每条岗位的官方原文链接。
 
-> **当前事实来源（2026-10-18，Phase 4 本地审计）**：请以 [docs/current/PHASE4-2026-10-17.md](docs/current/PHASE4-2026-10-17.md)、[docs/current/phase4-current-state-audit-2026-10-18.json](docs/current/phase4-current-state-audit-2026-10-18.json)、[docs/current/phase4-release-manifest.json](docs/current/phase4-release-manifest.json) 和当前只读数据库为准。Manifest 绑定最后一个干净的本地内容提交，服务器未部署，自动化保持暂停。当前岗位状态为 `open=3750`、`expired=106`、`superseded=45`、`withdrawn=51`；全库层级为 `exact=211`、`broad=5`、`incomplete=615`、`source_unavailable=166`，按北京时间 `2026-10-18` 的截止日期门禁，学生端实际读集为 `629` 条（`146/5/367/111`）。第三方数据库候选线索为 `6` 条，其中 `5` 条已绑定官方证据并创建正式岗位；三桶油 `64` 个正式目录单位的单位级招聘入口证据仍未逐项补齐。本文其余 Phase 数字和报告链接属于历史记录，不得覆盖上述当前事实。
+> **当前事实来源（2026-10-19，Phase 4 本地审计）**：请以 [docs/current/PHASE4-2026-10-17.md](docs/current/PHASE4-2026-10-17.md)、[docs/current/phase4-current-state-audit-2026-10-18.json](docs/current/phase4-current-state-audit-2026-10-18.json)、[docs/current/phase4-release-manifest.json](docs/current/phase4-release-manifest.json) 和当前只读数据库为准。Manifest 绑定最后一个干净的本地内容提交，服务器未部署，自动化保持暂停。当前岗位状态为 `open=3750`、`expired=106`、`superseded=45`、`withdrawn=51`；全库层级为 `exact=211`、`broad=5`、`incomplete=615`、`source_unavailable=166`，按北京时间 `2026-10-19` 的截止日期门禁，学生端实际读集为 `629` 条（`146/5/367/111`）。第三方数据库候选线索为 `6` 条，其中 `5` 条已绑定官方证据并创建正式岗位；三桶油 `64` 个正式目录单位的单位级招聘入口证据仍未逐项补齐。本文后续的 Phase 0 至 Phase 440 段落是历史路线记录，不能覆盖上述当前事实。
 
 系统把数据库作为唯一事实来源，而不是把在线文档当作数据库。每晚 20:00 将当天已核验的新增、更新、清退数量和未来 7 天截止岗位固化为独立日报页面；超过截止日期的岗位会自动下线，不再出现在学生端，但会保留为 `expired` 历史记录和事件证据；/daily/latest 始终指向最新日报，适合固定在微信群公告中。
 
 完整的数据流、专业匹配边界、100 人模拟检查和运维边界见 [ARCHITECTURE.md](ARCHITECTURE.md)。生产部署、HTTPS 反向代理和手机/微信访问排查见 [DEPLOYMENT.md](DEPLOYMENT.md)。
+
+## 历史阶段记录
+
+以下内容仅用于回溯过去的设计和验收，不是当前生产配置、岗位统计或发布依据。需要核对当前事实时，只使用上面的 Phase 4 审计、Manifest 和只读数据库。
 
 Phase 83 将 31 省矩阵中已定位、但尚未启用的官方候选入口接入可重复的服务器只读探测：先核验 `robots.txt` 和正式栏目可访问性，再决定哪些入口值得逐条定位当前公告和职位表。探测不采集岗位、不启用来源，也不把访问失败写成“无岗位”。详见 [docs/phase-83/README.md](docs/phase-83/README.md)。
 
