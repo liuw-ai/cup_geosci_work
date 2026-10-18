@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T15:05:57Z",
+  "generated_at": "2026-10-18T15:17:21Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "2af4caa4219db891b34e499c35b7a1faf9636703",
+  "git_sha": "23d759a97568403d4487431c28933ec18323696d",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -21,16 +21,16 @@
     "phase4_three_oil_unit_entry_matrix": "d4c5ef42c588fed5d394c51e8d441a998a49d8e820073333fcc15640bb427c2f",
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "549c331605eaa29cfc36de740d7a24f7a820f83251157dd8bc3fe5d35f75a9b4",
-    "phase4_document_consistency": "549c331605eaa29cfc36de740d7a24f7a820f83251157dd8bc3fe5d35f75a9b4",
+    "phase4_current_state_audit": "3f20b7db5e6905c8fefac34bae514e66333ea0b81bef3e9c186d7b54cab6fd54",
+    "phase4_document_consistency": "3f20b7db5e6905c8fefac34bae514e66333ea0b81bef3e9c186d7b54cab6fd54",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
     "phase4_third_party_blocked_batches": "74da7ade28ae3e7310f78796f80dc2cc2ee27a7d4b13fcb65601667f667ed31c",
     "phase4_third_party_funnel": "08f6cbe7b3b79aada40fd4cae6e88cc4aab3ba0a33042258725066241214f97f",
     "phase4_local_web_recheck": "8f019cc8442713d3440847fc3ae37ce2efcde5e2178d2699b3808af26351bd23",
-    "phase4_main_record": "1b8bb0a2f698f1443b30679075103b6806807a38d6868aab788da64570b48918",
-    "phase4_local_validation": "f2d99d6a8b227287e6ec7ec0b01d7c73168bbb1577c066d07698f960e3131c0f"
+    "phase4_main_record": "9728a80c4dd7894b0c991803ad8b0a5439805577b5d677f34f153fd46a12a5d1",
+    "phase4_local_validation": "1e6cc52f75c25d77e4c73aff71e9237f2f07a4438c57aa21fc680b54dfb3d09f"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -76,18 +76,18 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-18T23:03:09+08:00",
+    "validated_at": "2026-10-18T23:16:33+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "de5b8a8",
-    "git_sha_at_validation": "de5b8a8",
+    "git_sha_before_metadata_commit": "9371ed5339e42fd0a141f7373d7b21d878439595",
+    "git_sha_at_validation": "9371ed5339e42fd0a141f7373d7b21d878439595",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1072,
       "skipped": 4,
       "failed": 0,
-      "warnings": 1,
-      "warning_scope": "BeautifulSoup MarkupResemblesLocatorWarning in discovery_scan.py; no test failure"
+      "warnings": 0,
+      "warning_scope": null
     },
     "compose": {
       "path": "deploy/compose.yaml",

@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T15:05:54Z",
+  "generated_at": "2026-10-18T15:17:18Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "2af4caa4219db891b34e499c35b7a1faf9636703",
+  "git_sha": "23d759a97568403d4487431c28933ec18323696d",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -88,12 +88,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "1b8bb0a2f698f1443b30679075103b6806807a38d6868aab788da64570b48918"
+        "sha256": "9728a80c4dd7894b0c991803ad8b0a5439805577b5d677f34f153fd46a12a5d1"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
         "exists": true,
-        "sha256": "f2d99d6a8b227287e6ec7ec0b01d7c73168bbb1577c066d07698f960e3131c0f"
+        "sha256": "1e6cc52f75c25d77e4c73aff71e9237f2f07a4438c57aa21fc680b54dfb3d09f"
       }
     ],
     "metadata_documents": [
@@ -133,7 +133,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-18.json",
-      "sha256": "f2d99d6a8b227287e6ec7ec0b01d7c73168bbb1577c066d07698f960e3131c0f"
+      "sha256": "1e6cc52f75c25d77e4c73aff71e9237f2f07a4438c57aa21fc680b54dfb3d09f"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -161,7 +161,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "1b8bb0a2f698f1443b30679075103b6806807a38d6868aab788da64570b48918"
+      "sha256": "9728a80c4dd7894b0c991803ad8b0a5439805577b5d677f34f153fd46a12a5d1"
     }
   },
   "code_inventory": [
@@ -312,8 +312,8 @@
     },
     {
       "path": "job_hub/discovery_scan.py",
-      "line_count": 838,
-      "sha256": "85249e576fd79822503f69f2fddeb1c7e2629ed470ce321d723813b54a7b9dcd"
+      "line_count": 844,
+      "sha256": "e3c84091235e13babd77037580dd5df32caa82bb44bea61b973a1371f02b98bb"
     },
     {
       "path": "job_hub/domain_probe.py",
