@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T09:29:13Z",
+  "generated_at": "2026-10-18T09:32:23Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "203ab434aa04ae49a2444491441475e19f6ba937",
+  "git_sha": "3c2c31b00b62eb99f3d9e2719181cea3edbd5651",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -19,8 +19,8 @@
     "phase4_three_oil_entry_evidence": "c2d44f1c2445b0693a7dbe2b26be5dda1bab2d4b6898c90a5046ec652afa4931",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "0a5f6370d08466fa75cd27bb0b84d795d1be62afd921c160fdd70423e4420c8a",
-    "phase4_local_validation": "705ab3c46a31bbb9037857c76a5031fa887354825b948c06c91f471bb7923b8a"
+    "phase4_current_state_audit": "38021040a16b44dfcc89f14ea555c0ba67ad6c3ec65bdd47b4ede61452efdcbe",
+    "phase4_local_validation": "3b959904bebdc95a393ecacb637885193d40e661b3f771ecd56fadb8749c9a4e"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -52,125 +52,58 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-18T07:20:00Z",
+    "validated_at": "2026-10-18T10:15:00+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha": "67398d735107924fce222f5703053b963297d75a",
+    "git_sha_before_metadata_commit": "203ab434aa04ae49a2444491441475e19f6ba937",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1061,
+      "passed": 1062,
       "skipped": 4,
       "failed": 0,
-      "warnings": 1
+      "warnings": 1,
+      "warning_scope": "BeautifulSoup MarkupResemblesLocatorWarning in discovery_scan.py; no test failure"
     },
     "compose": {
       "path": "deploy/compose.yaml",
+      "command": "docker compose -f deploy/compose.yaml config --quiet",
       "config_check": "passed"
-    },
-    "third_party_access_revalidation": {
-      "source_id": "huatu-discovery",
-      "checked_at": "2026-10-18T06:55:17Z",
-      "status": "trial_completed_in_isolated_database",
-      "access_policy": "read_only_browser_and_registered_asset_host",
-      "action_taken": "read_only_navigation; real XLSX captured and hashed; no login, captcha, CDP, curl, or robots bypass",
-      "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json"
-    },
-    "third_party_access_attempts": [
-      {
-        "source_id": "offcn-discovery",
-        "host": "www.offcn.com",
-        "status": "blocked",
-        "reason": "saved_browser_permission_blocked"
-      },
-      {
-        "source_id": "huatu-discovery",
-        "host": "www.huatu.com",
-        "status": "blocked",
-        "reason": "saved_browser_permission_blocked"
-      },
-      {
-        "source_id": "gongkaoleida-discovery",
-        "host": "www.gongkaoleida.com",
-        "status": "blocked",
-        "reason": "user_denied_browser_permission"
-      },
-      {
-        "source_id": "yingjiesheng-discovery",
-        "host": "www.yingjiesheng.com",
-        "status": "blocked",
-        "reason": "user_denied_browser_permission"
-      }
-    ],
-    "official_entry_access_attempts": [
-      {
-        "organization_group": "cnpc",
-        "url": "https://zhaopin.cnpc.com.cn/",
-        "status": "blocked",
-        "reason": "saved_browser_permission_blocked",
-        "action_taken": "read_only_navigation_attempted; no download or policy bypass"
-      }
-    ],
-    "third_party_trial": {
-      "source_id": "huatu-discovery",
-      "batch_id": "huatu-20261016-gansu-cmxy",
-      "input_rows": 12,
-      "accepted_rows": 11,
-      "rejected_rows": 1,
-      "isolated_candidate_leads": 11,
-      "formal_jobs_created": 0,
-      "student_visible_changes": 0,
-      "report": "docs/current/phase4-third-party-trial-2026-10-18.json"
-    },
-    "third_party_recovery_followup": {
-      "source_id": "huatu-discovery",
-      "title": "2027年江苏南京水利科学研究院公开招聘事业编制工作人员50人公告",
-      "official_notice_url": "https://www.nhri.cn/tzgg/zpxx/art/2026/art_01a4e42a69594ee88fac503a5cce8df5.html",
-      "official_table_url_verified": true,
-      "capture_status": "blocked_by_robots_and_browser_download_permission",
-      "formal_rows_created": 0,
-      "report": "docs/current/phase4-third-party-trial-2026-10-18.json"
-    },
-    "three_oil_entry_evidence": {
-      "report": "docs/current/phase4-three-oil-entry-evidence-2026-10-18.json",
-      "cnpc": "blocked_by_saved_browser_permission",
-      "sinopec": "official_portal_verified_132_display_units",
-      "cnooc": "official_portal_verified_16_display_units"
     },
     "database": {
       "path": "runtime/job_hub.sqlite3",
-      "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
+      "sha256_before_tests": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
+      "sha256_after_tests": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a",
       "integrity_check": "ok",
       "jobs": 3947,
       "candidate_leads": 0,
       "phase3_withdrawal_audits": 3947,
-      "sha256_before_and_after_test": "unchanged"
-    },
-    "student_read": {
-      "as_of_date": "2026-10-17",
-      "total": 625,
-      "layer_counts": {
+      "student_read_as_of_date": "2026-10-18",
+      "student_visible_total": 624,
+      "student_visible_layer_counts": {
         "exact_match": 145,
         "broad_geoscience_match": 1,
-        "incomplete_but_basic_match": 368,
+        "incomplete_but_basic_match": 367,
         "source_unavailable": 111
-      },
-      "healthz_open_jobs": 625,
-      "endpoint_status": 200
+      }
     },
-    "student_layers": {
-      "exact_match": 210,
-      "broad_geoscience_match": 1,
-      "incomplete_but_basic_match": 615,
-      "source_unavailable": 166
+    "third_party": {
+      "isolated_huatu_trial_candidate_leads": 11,
+      "formal_jobs_created": 0,
+      "formal_database_unchanged": true,
+      "robots_or_permission_blocked_followups": 1
     },
-    "release_status": "not_publishable",
-    "release_blockers": [
-      "official_site_browser_permission_blocked",
-      "no_audited_third_party_table_batch_imported",
-      "three_oil_external_identity_evidence_pending",
-      "three_oil_unit_entry_evidence_incomplete",
-      "local_phase4_validation_not_approved_for_server"
-    ]
+    "release_boundary": {
+      "status": "not_publishable",
+      "automation_status": "paused",
+      "model_policy": "gpt-5.6-terra",
+      "production_deployment": "not_performed",
+      "release_blockers": [
+        "no_audited_third_party_table_batch_imported",
+        "three_oil_external_identity_evidence_pending",
+        "three_oil_unit_entry_evidence_incomplete",
+        "local_phase4_validation_not_approved_for_server"
+      ]
+    }
   },
   "third_party": {
     "registered_sources": 12,
@@ -202,7 +135,6 @@
   "automation_status": "paused",
   "production_deployment": "not_performed",
   "release_blockers": [
-    "official_site_browser_permission_blocked",
     "no_audited_third_party_table_batch_imported",
     "three_oil_external_identity_evidence_pending",
     "three_oil_unit_entry_evidence_incomplete",
