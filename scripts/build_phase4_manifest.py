@@ -198,6 +198,7 @@ def main() -> None:
     bingtuan_official_recovery = ROOT / "docs" / "current" / "phase4-third-party-bingtuan-official-recovery-2026-10-19.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
+    completion_audit = ROOT / "docs" / "current" / "phase4-completion-audit-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     working_tree_dirty = dirty()
     release_blockers = []
@@ -275,6 +276,7 @@ def main() -> None:
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
             "phase4_local_db_write_incident": sha256(local_db_write_incident),
             "phase4_three_oil_homepage_probe": sha256(three_oil_homepage_probe),
+            "phase4_completion_audit": sha256(completion_audit),
         },
         "database": database,
         "target_metrics": {
@@ -297,6 +299,14 @@ def main() -> None:
             },
         },
         "local_validation": validation,
+        "completion_audit": {
+            "path": "docs/current/phase4-completion-audit-2026-10-19.json",
+            "status": (
+                json.loads(completion_audit.read_text(encoding="utf-8")).get("status")
+                if completion_audit.is_file()
+                else "missing"
+            ),
+        },
         "third_party": {
             "registered_sources": len(sources),
             "batch_candidate_sources": sum(1 for item in sources if item.get("batch_candidate_allowed")),

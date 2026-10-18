@@ -65,6 +65,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_local_validation": "docs/current/phase4-local-validation-2026-10-19.json",
     "phase4_local_db_write_incident": "docs/current/phase4-local-db-write-incident-2026-10-19.json",
     "phase4_three_oil_homepage_probe": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
+    "phase4_completion_audit": "docs/current/phase4-completion-audit-2026-10-19.json",
 }
 
 
