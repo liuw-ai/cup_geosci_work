@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T21:59:18Z",
+  "generated_at": "2026-10-18T22:07:31Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "615937744babd9aa17fbd585c1076333e1afb3ed",
+  "git_sha": "3ff41fe068f06192d7a901ff4b7cbe32f7e7024a",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "7e48941d36b81e94f09c107ce44e1687c07760d7b6ace42201ab1b9c52f5679b",
-    "phase4_document_consistency": "7e48941d36b81e94f09c107ce44e1687c07760d7b6ace42201ab1b9c52f5679b",
+    "phase4_current_state_audit": "ba82c8b93e9327eb99b74de3f63b5d8fe40ea801f7f65a984b25a7a388273238",
+    "phase4_document_consistency": "ba82c8b93e9327eb99b74de3f63b5d8fe40ea801f7f65a984b25a7a388273238",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -49,8 +49,8 @@
     "phase4_main_record": "0b5983ba9c233128a86d543cb46cabd9350d067b6effcd2df3ea29b77b84fb16",
     "phase4_local_validation": "47e88957b0c4e08f2a42222c209f5bf9c4201977c2d10e04a89c270bce554e75",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
-    "phase4_three_oil_homepage_probe": "5b44889b9ee2f3782efc0f24f0f9b3595c226d0463b3460d5e89c5068f3397b5",
-    "phase4_completion_audit": "ce5058589da6ff96a9323f8bdbf95a69c60946663df83d18a09ca904a079e947",
+    "phase4_three_oil_homepage_probe": "922a8937f2efad212b3d2cad2d91c42a6623e18124583e0cfed8d42e7c09e347",
+    "phase4_completion_audit": "98ab8c234dbfd86e18fc6d06ca240d8dfd119f60a6a858742dfa7414b6bd6fc1",
     "phase4_workspace_layout": "2e1533fd2c1f478edcfb8f1e91fa8f9f7b8e793889044e5643975d0a6c48c9e5"
   },
   "database": {
