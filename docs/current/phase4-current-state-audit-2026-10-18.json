@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T16:09:01Z",
+  "generated_at": "2026-10-18T16:17:19Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "dc76156e5b1c126d938f344bc1e592d8f47121f9",
+  "git_sha": "772fa3e0c72a20238edbc0b2b45e0e2eaa72e3b2",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -93,7 +93,7 @@
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
         "exists": true,
-        "sha256": "5704ccd3b8552c0f2bad25c7ad76615a041063a15b38436cc29ed516e1b64835"
+        "sha256": "56aba80940fe6efcb5cebdff38a8c22603d84aadf297d7dae2cfac4e7a85c75c"
       }
     ],
     "metadata_documents": [
@@ -133,7 +133,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-18.json",
-      "sha256": "5704ccd3b8552c0f2bad25c7ad76615a041063a15b38436cc29ed516e1b64835"
+      "sha256": "56aba80940fe6efcb5cebdff38a8c22603d84aadf297d7dae2cfac4e7a85c75c"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -961,8 +961,8 @@
     },
     {
       "path": "tests/test_government_notice_deadline.py",
-      "line_count": 248,
-      "sha256": "b340b3145698e8103c989be344ca34eff055a1b02a9e2b6f1b34695e53ed932f"
+      "line_count": 250,
+      "sha256": "a5274fbfb6e6734e9797fb7368fd1f8818cd2a79dc8f31e19c2f2fafd7b44b86"
     },
     {
       "path": "tests/test_government_position_cli.py",
