@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T23:01:34Z",
+  "generated_at": "2026-10-18T23:06:03Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "0d8a4f671ec9a08d04d867ad56c49ac2226fb19c",
-  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
+  "git_sha": "fd113ea2aa1b92f590c5309ace2b69419c992057",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
@@ -1247,8 +1247,8 @@
     },
     {
       "path": "tests/test_phase4_metadata_refresh.py",
-      "line_count": 14,
-      "sha256": "3c4126975c4b4207569e80feecd0d50e3010ad04fffa9f390d67492b8ee46de1"
+      "line_count": 15,
+      "sha256": "099ffc025ea3f00f7c1c1843e95f19c90a86b16bd167bc1e29c95e917ebe2f9b"
     },
     {
       "path": "tests/test_phase4_third_party_funnel.py",
