@@ -93,7 +93,7 @@
     "model_policy": "gpt-5.6-terra",
     "production_deployment": "not_performed",
     "release_blockers": [
-      "third_party_batch_import_target_not_yet_met",
+      "third_party_batch_expansion_incomplete",
       "three_oil_external_identity_evidence_pending",
       "three_oil_unit_entry_evidence_incomplete",
       "local_phase4_validation_not_approved_for_server"

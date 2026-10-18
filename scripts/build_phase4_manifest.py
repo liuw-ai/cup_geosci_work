@@ -175,7 +175,7 @@ def main() -> None:
     else:
         release_blockers.append("local_validation_report_missing")
     for blocker in (
-        "b_level_table_batch_target_not_yet_met",
+        "third_party_batch_expansion_incomplete",
         "three_oil_external_identity_evidence_pending",
         "three_oil_unit_entry_evidence_incomplete",
         "local_phase4_validation_not_approved_for_server",
@@ -221,6 +221,25 @@ def main() -> None:
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
         },
         "database": database,
+        "target_metrics": {
+            "student_job_target": {
+                "target": 500,
+                "actual": database.get("student_visible_total", 0),
+                "status": (
+                    "met"
+                    if int(database.get("student_visible_total", 0) or 0) >= 500
+                    else "not_met"
+                ),
+                "basis": "data/effective_job_target_plan.json",
+                "note": "This is the overall student-visible target; it is separate from third-party expansion readiness.",
+            },
+            "third_party_expansion": {
+                "candidate_leads": database.get("candidate_lead_count", 0),
+                "formal_jobs": database.get("formal_third_party_job_count", 0),
+                "status": "in_progress",
+                "release_gate": "third_party_batch_expansion_incomplete",
+            },
+        },
         "local_validation": validation,
         "third_party": {
             "registered_sources": len(sources),

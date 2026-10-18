@@ -44,3 +44,10 @@ def test_phase4_manifest_database_facts_separate_full_layer_counts_from_student_
         facts["student_visible_layer_counts"].values()
     )
     assert facts["student_visible_total"] <= sum(facts["publication_layer_counts"].values())
+
+
+def test_phase4_manifest_distinguishes_overall_target_from_third_party_gate() -> None:
+    from scripts.build_phase4_manifest import db_facts
+
+    facts = db_facts(Path("runtime/job_hub.sqlite3"))
+    assert int(facts["student_visible_total"]) >= 500
