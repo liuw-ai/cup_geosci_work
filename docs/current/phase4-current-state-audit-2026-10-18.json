@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-18T09:38:05Z",
+  "generated_at": "2026-10-18T09:41:04Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "44ec8d75f47638831593b4c1b61a045810095848",
+  "git_sha": "158c22499176af8464e2f1fd5c8c163be13d5f89",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -73,7 +73,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-18.json",
-      "sha256": "3b959904bebdc95a393ecacb637885193d40e661b3f771ecd56fadb8749c9a4e"
+      "sha256": "3547d57750ed3a93f714ddf7f094c2c8d4a9caba331d5d4ee3863074becedc9b"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -554,7 +554,7 @@
     {
       "path": "scripts/build_phase4_manifest.py",
       "line_count": 201,
-      "sha256": "50bd601fce7da617ca9fb356025cb846439ee9ba3d085d3d9c660b9631ccb792"
+      "sha256": "02432cbc0d0da5a3649babdd4c90a654e2b7ae17a160db753e646770e6f6b80f"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
