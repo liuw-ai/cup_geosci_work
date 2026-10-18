@@ -1,9 +1,9 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-18T19:12:18+08:00",
+  "validated_at": "2026-10-18T19:38:04+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "d99d62e",
+  "git_sha_before_metadata_commit": "154b983e29ad344b264707603a4bf64f228bd882",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1065,
@@ -19,8 +19,8 @@
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256_before_tests": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba",
-    "sha256_after_tests": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba",
+    "sha256_before_tests": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62",
+    "sha256_after_tests": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62",
     "integrity_check": "ok",
     "jobs": 3948,
     "candidate_leads": 2,
@@ -40,7 +40,14 @@
     "formal_jobs_created": 1,
     "formal_third_party_job_ids": [5432],
     "formal_database_unchanged": false,
-    "formal_database_change_note": "The approved local HRINM recovery created job 5432; subsequent tests were read-only and preserved the SHA-256 recorded above.",
+    "formal_database_change_note": "The approved local HRINM recovery created job 5432. A later local audit backfilled candidate lead 2 conversion_checked_at from its existing official_checked_at; subsequent tests were read-only and preserved the SHA-256 recorded above.",
+    "conversion_audit_backfill": {
+      "candidate_lead_id": 2,
+      "conversion_status": "official_content_verified",
+      "conversion_checked_at": "2026-10-18T10:02:26Z",
+      "backup_path": "backups/job_hub-pre-phase4-conversion-audit-20261018.sqlite3",
+      "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
+    },
     "robots_gate_targeted_tests": "13 passed (tests/test_third_party_tables.py, tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py)",
     "robots_or_permission_blocked_followups": 1
   },
