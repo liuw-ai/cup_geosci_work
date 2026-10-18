@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T17:23:10Z",
+  "generated_at": "2026-10-18T17:28:33Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "17f5b312aa56dc127894116533b8d993c341b293",
+  "git_sha": "5569dfbc1825fe9b36b6857f52b276a8d36fafc4",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -22,8 +22,8 @@
     "phase4_three_oil_unit_entry_matrix": "35e4ddadfaa54266ae61f9321f6a7041e4c043d6a5c31ff6c5cc6720a38ecebe",
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "acde34cfdc91f3298832c2f5be84843b9a1e7f690ac0f2637daad9fa70dcb53b",
-    "phase4_document_consistency": "acde34cfdc91f3298832c2f5be84843b9a1e7f690ac0f2637daad9fa70dcb53b",
+    "phase4_current_state_audit": "77053aa8cec956f91c6608d1e1e375ce7cd1f26f5acefdb7ecd9a0d5549939ac",
+    "phase4_document_consistency": "77053aa8cec956f91c6608d1e1e375ce7cd1f26f5acefdb7ecd9a0d5549939ac",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -31,9 +31,9 @@
     "phase4_third_party_access_recheck": "2084cc2ff11ac68267ebe74b32e1a2a38c8d0c409343ec51c7a5cb55d54da7be",
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
     "phase4_third_party_funnel": "7481c6cdd6939996069831b70e989ae4d779751c98b61fd60bb2e863a0cb0c9e",
-    "phase4_local_web_recheck": "8a2f67624ca29f264ef33a9cf3b46cd0ba1cc9b791221109f1c4d8f1c084df25",
-    "phase4_main_record": "033fa18e190266c6471ddc8e2e92839886c283a009883b8eedba1ea0299ef2ac",
-    "phase4_local_validation": "fb603a1a4094b39c68975a2063580cf8356c0493f9b7834431157fe7b7c62848"
+    "phase4_local_web_recheck": "c4558f29ff36ea1ccf00709837e34cc3a40e5b20d459aaa40ceca1ba4fd6ec08",
+    "phase4_main_record": "4494c4dc1cad45607b827384589bcc4129b8b8e97080dcf31406b047222dc356",
+    "phase4_local_validation": "ac6eb474ec720dcd1617a7d6b4b3cc531e4dbcb849a61eb4027814bbc78a3990"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -98,11 +98,11 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-19T00:52:12+08:00",
+    "validated_at": "2026-10-19T01:26:01+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "b35480da772a7365b4adc5e29dafefb023b07422",
-    "git_sha_at_validation": "b35480da772a7365b4adc5e29dafefb023b07422",
+    "git_sha_before_metadata_commit": "17f5b312aa56dc127894116533b8d993c341b293",
+    "git_sha_at_validation": "17f5b312aa56dc127894116533b8d993c341b293",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1074,
@@ -201,7 +201,8 @@
       "detail_job_id": 5433,
       "detail_job_table_link_label_present": true,
       "homepage_third_party_discovery_domain_exposed": false,
-      "server_deployment": false
+      "server_deployment": false,
+      "latest_recheck_report": "docs/current/phase4-local-web-recheck-2026-10-19.json"
     },
     "release_boundary": {
       "status": "not_publishable",
