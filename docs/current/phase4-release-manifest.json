@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T17:58:14Z",
+  "generated_at": "2026-10-18T17:59:10Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "3de9a091feff5f53b795da26760e796cf7a7381e",
+  "git_sha": "76086cf0d27cae115f8bf2b5c2051b9811813d3b",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -24,8 +24,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "e67b7ad6104a9b93c240f99f6813b1568bce6aa8b6ab801365732129430a740c",
-    "phase4_document_consistency": "e67b7ad6104a9b93c240f99f6813b1568bce6aa8b6ab801365732129430a740c",
+    "phase4_current_state_audit": "33ccc7869c9ab1968fdd80da9cf25b6350a99ee93bab28e039a0c6d5ca47730b",
+    "phase4_document_consistency": "33ccc7869c9ab1968fdd80da9cf25b6350a99ee93bab28e039a0c6d5ca47730b",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -34,7 +34,7 @@
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
     "phase4_third_party_funnel": "7481c6cdd6939996069831b70e989ae4d779751c98b61fd60bb2e863a0cb0c9e",
     "phase4_local_web_recheck": "c4558f29ff36ea1ccf00709837e34cc3a40e5b20d459aaa40ceca1ba4fd6ec08",
-    "phase4_main_record": "070d0961e86815283df9b831cbb0e020c890b5c128bd53bc32f58ae72f8d3486",
+    "phase4_main_record": "485c99c6d3bdae7913348cb68b977637e59e81f016b0790d3bd6aa6ca5b18218",
     "phase4_local_validation": "27ef9a4a69d0a5c02315a6b70420b3e7cc4f9784fd1bf304b0c861efdb7b8222"
   },
   "database": {
