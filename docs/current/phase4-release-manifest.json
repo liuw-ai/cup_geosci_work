@@ -3,7 +3,7 @@
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "d3b9e08f507c1d26fd7e4426f9f66b54e612e2c8",
+  "git_sha": "fc1b95dc9fffef9d5d12dd1d7c1d1379996ef262",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -52,7 +52,7 @@
     "validated_at": "2026-10-17T12:02:00Z",
     "environment": "local",
     "server_deployment": false,
-      "git_sha": "d3b9e08f507c1d26fd7e4426f9f66b54e612e2c8",
+      "git_sha": "fc1b95dc9fffef9d5d12dd1d7c1d1379996ef262",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1061,
