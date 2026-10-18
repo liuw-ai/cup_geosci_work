@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-18T12:52:01Z",
+  "generated_at": "2026-10-18T12:59:06Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "d0f1831f80572eb510a96a3aa51abfcc7fe6fb5a",
-  "working_tree_dirty": true,
+  "git_sha": "605a8e4a762a61bb27ae5d714b65be4a8b4c5ac4",
+  "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
   "release_env_sha256": "49f2c7be91ff3cfadb0cc0f88a255e3e7d3ac2a1194f1e719d0207a85b79175d",
@@ -21,8 +21,8 @@
     "phase4_three_oil_unit_entry_matrix": "f3c74cf8149291be9a286e6981cabc6e0cad9feac1c8a435b2b5d1e502129777",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "bc775684a0a5dc9adec6d2d98dcf38b31e7bd10212729481094085372ece41e9",
-    "phase4_document_consistency": "bc775684a0a5dc9adec6d2d98dcf38b31e7bd10212729481094085372ece41e9",
+    "phase4_current_state_audit": "cc57ef4dfc297db2249169a8a0eface359416519d62ae21bcc39e680ffcfaf5d",
+    "phase4_document_consistency": "cc57ef4dfc297db2249169a8a0eface359416519d62ae21bcc39e680ffcfaf5d",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "c9ac28c1b0026ef107897aa2516f67e13307ecced258882c4242a090ebd582da",
@@ -34,7 +34,8 @@
     "path": "runtime/job_hub.sqlite3",
     "sha256": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
     "integrity_check": "ok",
-    "job_status_counts": {
+    "job_count": 3948,
+    "status_counts": {
       "expired": 106,
       "open": 3746,
       "superseded": 45,
@@ -217,7 +218,6 @@
   "automation_status": "paused",
   "production_deployment": "not_performed",
   "release_blockers": [
-    "working_tree_contains_uncommitted_or_untracked_changes",
     "b_level_table_batch_target_not_yet_met",
     "three_oil_external_identity_evidence_pending",
     "three_oil_unit_entry_evidence_incomplete",

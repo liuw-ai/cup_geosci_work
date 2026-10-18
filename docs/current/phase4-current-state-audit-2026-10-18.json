@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T12:51:58Z",
+  "generated_at": "2026-10-18T12:59:03Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "d0f1831f80572eb510a96a3aa51abfcc7fe6fb5a",
-  "git_status_porcelain": "M data/sources.json\n M data/third_party_table_adapters.json\n M docs/current/PHASE4-2026-10-17.md\n M docs/current/README.md\n M docs/current/phase4-local-validation-2026-10-18.json\n M scripts/audit_phase4_current_state.py\n M scripts/build_phase4_manifest.py\n?? docs/current/phase4-third-party-cgs-2026-10-18.json\n?? scripts/register_phase4_cgs_trial.py\n?? tests/test_phase4_cgs_trial.py",
+  "git_sha": "605a8e4a762a61bb27ae5d714b65be4a8b4c5ac4",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702",
@@ -93,7 +93,7 @@
       {
         "path": "docs/current/phase4-current-state-audit-2026-10-18.json",
         "exists": true,
-        "sha256": "ff0afc28b9b6249a6498c355df6d9888152632b45959d4430076554bd97b5831"
+        "sha256": "f0a4adc320c30f347e34cd5f819985dae9d350ce73157ffc11e5e5d3a021d03b"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-18.json",
@@ -103,7 +103,7 @@
       {
         "path": "docs/current/phase4-release-manifest.json",
         "exists": true,
-        "sha256": "ece7c4dc86b95db78e4306ee886815dfe9b17f36aa07ab89303b9bba582f042e"
+        "sha256": "57df9bfb20ecd0e6bdb1529d41612036ab33a4d682d6fb3bd50f9d47113e296b"
       }
     ],
     "historical_documents_are_publish_inputs": false
@@ -627,8 +627,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 251,
-      "sha256": "886a010eb3d067a8bde254934b1de86290cd4d0facb477207a0f167b10703b4a"
+      "line_count": 253,
+      "sha256": "d9a82abff55b60e88ecaa99d304d02a9a51fc3fe2e3c831b7a280d7aba07ce58"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -1077,8 +1077,8 @@
     },
     {
       "path": "tests/test_phase4_manifest.py",
-      "line_count": 45,
-      "sha256": "ec53c2b30aaa8ff2db1a33febd7f9202c5f3db5511be4ca99257d35a50f9ebce"
+      "line_count": 46,
+      "sha256": "198a0e8b97018c8e216e4748fc07765b7a5a4ff9bbd3199553aa1177cbcd5c50"
     },
     {
       "path": "tests/test_phase4_three_oil_entry_matrix.py",
