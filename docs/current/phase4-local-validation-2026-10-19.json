@@ -1,13 +1,13 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T05:07:03+08:00",
+  "validated_at": "2026-10-19T05:22:30+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "867f97cfeb3bfe2e8760f0538dc91db84d61cbcb",
-  "git_sha_at_validation": "867f97cfeb3bfe2e8760f0538dc91db84d61cbcb",
+  "git_sha_before_metadata_commit": "2ceda071e1bf6de918c2bbb167553d04d574735f",
+  "git_sha_at_validation": "f8388fbc251a05f71f3ebd24d1e93bf8c3833ccf",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1078,
+    "passed": 1079,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
@@ -68,8 +68,8 @@
       "backup_path": "backups/job_hub-pre-phase4-conversion-audit-20261018.sqlite3",
       "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
     },
-    "robots_gate_targeted_tests": "20 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py)",
-    "source_disabled_visibility_regression": "included in full 1078-test run; disabled source remains student-visible without withdrawal",
+    "robots_gate_targeted_tests": "21 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py)",
+    "source_disabled_visibility_regression": "included in full 1079-test run; disabled source remains student-visible without withdrawal",
     "robots_or_permission_blocked_followups": 1,
     "huatu_discovery_scan": {
       "discovered_announcements": 65,
