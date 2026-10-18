@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T11:26:57Z",
+  "generated_at": "2026-10-18T11:40:02Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "6e4941ae487367f4e10f1b5b231ff4e0e9e85c63",
+  "git_sha": "2c15cee3cf63452d172469b4bdee1654bbd2fff4",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "958b02518771ad830abf5ef97b8240340dd35808ce6a1a84111fb225dc33f837",
@@ -21,16 +21,16 @@
     "phase4_three_oil_unit_entry_matrix": "f3c74cf8149291be9a286e6981cabc6e0cad9feac1c8a435b2b5d1e502129777",
     "phase4_sinopec_display_audit": "c1e336ea7e46c0c97812d32ff0e67bc1eeb96f20b26e12f8beecd6056383e8f1",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "6f707d3dbfed753a342fdb579019bf070b52614fff9fd47eae52971ca7bc56b5",
+    "phase4_current_state_audit": "6f46ff8940f5c6d77a3af74fb9673e583ab708e358379b7dce25cee06f7b7116",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_blocked_batches": "133f06dbc69109b53812d6366d9acd18bc29c1dde3de7697261f64262304f2d8",
-    "phase4_main_record": "e6ac0619e3442371f9fefb879b480ddae41ec58b163e9b8c24952d751d771650",
-    "phase4_local_validation": "400463ff433c0afdb36bece1bc323938272d0ecbae9b583bb6f9e2b77f76c68a"
+    "phase4_main_record": "1fa618a827c08297f36d21751caada84825dec659d48e646f4eece03c8f217b3",
+    "phase4_local_validation": "66daf1fa58be653397f3c10d2796744e4f6c2aa5d146b31679e3a9dac6f5a558"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba",
+    "sha256": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62",
     "integrity_check": "ok",
     "job_status_counts": {
       "expired": 106,
@@ -63,14 +63,18 @@
     "pre_hrinm_backup": {
       "path": "backups/job_hub-pre-phase4-hrinm-20261018.sqlite3",
       "sha256": "d151038a0fba7f0d8da022abd8f221177531db77d0b563365eca8ff65a10486a"
+    },
+    "pre_conversion_audit_backup": {
+      "path": "backups/job_hub-pre-phase4-conversion-audit-20261018.sqlite3",
+      "sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
     }
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-18T19:12:18+08:00",
+    "validated_at": "2026-10-18T19:38:04+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "d99d62e",
+    "git_sha_before_metadata_commit": "154b983e29ad344b264707603a4bf64f228bd882",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1065,
@@ -86,8 +90,8 @@
     },
     "database": {
       "path": "runtime/job_hub.sqlite3",
-      "sha256_before_tests": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba",
-      "sha256_after_tests": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba",
+      "sha256_before_tests": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62",
+      "sha256_after_tests": "aa211a295a5dc7476415e687cc4fa6266cad4cea129f325d24588cbefc90af62",
       "integrity_check": "ok",
       "jobs": 3948,
       "candidate_leads": 2,
@@ -109,7 +113,14 @@
         5432
       ],
       "formal_database_unchanged": false,
-      "formal_database_change_note": "The approved local HRINM recovery created job 5432; subsequent tests were read-only and preserved the SHA-256 recorded above.",
+      "formal_database_change_note": "The approved local HRINM recovery created job 5432. A later local audit backfilled candidate lead 2 conversion_checked_at from its existing official_checked_at; subsequent tests were read-only and preserved the SHA-256 recorded above.",
+      "conversion_audit_backfill": {
+        "candidate_lead_id": 2,
+        "conversion_status": "official_content_verified",
+        "conversion_checked_at": "2026-10-18T10:02:26Z",
+        "backup_path": "backups/job_hub-pre-phase4-conversion-audit-20261018.sqlite3",
+        "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
+      },
       "robots_gate_targeted_tests": "13 passed (tests/test_third_party_tables.py, tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py)",
       "robots_or_permission_blocked_followups": 1
     },
