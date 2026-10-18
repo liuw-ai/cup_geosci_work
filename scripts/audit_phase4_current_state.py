@@ -255,6 +255,7 @@ def main() -> None:
     huatu_table_discovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-table-discovery-2026-10-19.json"
     huatu_discovery_scan = ROOT / "docs" / "current" / "phase4-third-party-huatu-discovery-2026-10-19.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
+    three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     report = {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -393,6 +394,10 @@ def main() -> None:
             "phase4_local_db_write_incident": {
                 "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",
                 "sha256": sha256(local_db_write_incident),
+            },
+            "phase4_three_oil_homepage_probe": {
+                "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
+                "sha256": sha256(three_oil_homepage_probe),
             },
             "phase4_main_record": {
                 "path": "docs/current/PHASE4-2026-10-17.md",

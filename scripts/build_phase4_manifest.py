@@ -196,6 +196,7 @@ def main() -> None:
     huatu_table_discovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-table-discovery-2026-10-19.json"
     huatu_discovery_scan = ROOT / "docs" / "current" / "phase4-third-party-huatu-discovery-2026-10-19.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
+    three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     working_tree_dirty = dirty()
     release_blockers = []
@@ -271,6 +272,7 @@ def main() -> None:
             "phase4_main_record": sha256(phase4_record),
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
             "phase4_local_db_write_incident": sha256(local_db_write_incident),
+            "phase4_three_oil_homepage_probe": sha256(three_oil_homepage_probe),
         },
         "database": database,
         "target_metrics": {
@@ -317,6 +319,7 @@ def main() -> None:
             "cnooc_unit_display_evidence": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
             "cnooc_unit_job_evidence": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
             "cooec_negative_entry_evidence": "docs/current/phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json",
+            "homepage_probe": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
             "cnooc_units_with_active_job_evidence": int(
                 json.loads(cnooc_unit_evidence.read_text(encoding="utf-8"))
                 .get("summary", {})
