@@ -1,0 +1,65 @@
+{
+  "phase": "phase4",
+  "captured_at": "2026-10-19T15:28:43Z",
+  "discovery": {
+    "source_id": "huatu-discovery",
+    "trust_grade": "B",
+    "discovery_page_url": "https://www.sydw8.com/2026/0706/539659.html",
+    "title": "2026河北水文工程地质勘察院有限责任公司第一次公开招聘13人公告",
+    "page_status": 200,
+    "page_sha256": "9dbe7589d7776ebd2213ce25d05c363303c6941f4b87d92ce8a3e66e31685c79",
+    "page_bytes": 37316,
+    "robots": {
+      "url": "https://www.sydw8.com/robots.txt",
+      "status": 200,
+      "allowed": true,
+      "sha256": "6ec0df5692ddf0bfc3e8dd823e4f37548ebae82e4087a31b46ed1a9bea6e2431"
+    },
+    "declared_official_source": "河北地矿集团有限公司",
+    "declared_employer": "河北水文工程地质勘察院有限责任公司",
+    "declared_headcount": 13,
+    "declared_deadline": "2026-07-12",
+    "declared_application_method": "按公告要求将报名表、简历和证件材料发送至 skygszp@163.com；未提供独立 HTTP 报名地址。",
+    "third_party_attachment_urls": [
+      "https://u3.huatu.com/uploads/allimg/260706/655659-260F61631129546191253.png",
+      "https://u3.huatu.com/uploads/allimg/260706/655659-260F61631354134722922.png"
+    ],
+    "third_party_attachment_policy": "附件仍是华图托管资源，不能作为官方岗位证据或学生申请链接。"
+  },
+  "official_recovery": {
+    "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/337.html",
+    "official_notice_status": 404,
+    "official_notice_robots": {
+      "url": "https://www.hbdkjt.cn/robots.txt",
+      "status": 200,
+      "allowed": true,
+      "sha256": "b1c3ee948f0b22cc8f65647c9711b32c8387098a82bf3946c54f8b75e0ebc09e"
+    },
+    "employer_homepage_url": "https://www.hebsky.cn/",
+    "employer_homepage_status": "tls_error",
+    "employer_homepage_robots_status": "unverifiable_tls_or_network",
+    "related_group_homepage": {
+      "url": "https://www.hbdkjt.cn/",
+      "status": 200,
+      "observed_scope": "集团首页仍有集团招聘栏目及其他公告；未证明与华图 13 人批次相同。"
+    },
+    "row_level_evidence": false,
+    "official_table_sha256": null,
+    "official_application_url": null,
+    "official_evidence_boundary": "未取得同批官方公告或官方岗位表字节；不能确认岗位名称、岗位编号、专业、学历、地点或官方状态。"
+  },
+  "publication_decision": {
+    "status": "source_unavailable",
+    "candidate_rows_created": 0,
+    "formal_jobs_created": 0,
+    "student_visible": false,
+    "student_counted": false,
+    "reason": "第三方发现页可达，但同批官方公告返回 404、用人单位站点 TLS 失败且没有逐行官方证据；不把 13 人转换为岗位。"
+  },
+  "next_evidence_required": [
+    "取得同批官方公告或用人单位官方岗位表的原始字节并保存 SHA-256。",
+    "逐行核验用人单位、岗位名称/编号、专业、学历、地点和截止日期。",
+    "确认官方申请入口；邮箱报名只能作为报名方式文本，不能伪造 HTTP 链接。",
+    "完成专业匹配和学生端发布门禁后，才允许创建候选或正式岗位。"
+  ]
+}

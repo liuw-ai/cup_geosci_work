@@ -80,6 +80,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_completion_audit": "docs/current/phase4-completion-audit-2026-10-19.json",
     "phase4_workspace_layout": "docs/current/phase4-workspace-layout-audit-2026-10-19.json",
     "phase4_third_party_huatu_state_owned_entry": "docs/current/phase4-third-party-huatu-state-owned-entry-2026-10-19.json",
+    "phase4_third_party_huatu_hebei_water_geology": "docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json",
 }
 
 
