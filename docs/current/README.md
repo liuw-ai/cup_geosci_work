@@ -4,7 +4,7 @@
 
 ## 当前事实来源（2026-10-19 本地复核）
 
-当前岗位和代码事实以 [phase4-current-state-audit-2026-10-18.json](phase4-current-state-audit-2026-10-18.json) 及最新 [Phase 4 Manifest](phase4-release-manifest.json) 为准；该审计在 2026-10-19 重新只读复核。`CODEBASE-2026-10-17.md`、Phase 3 文档和更早的快照属于历史证据；其中的数量、哈希和测试结果不能覆盖当前审计。历史文件不删除、不作为生产输入，任何迁移或清理都必须保留原始哈希。
+当前岗位和代码事实以 [phase4-current-state-audit-2026-10-18.json](phase4-current-state-audit-2026-10-18.json) 及最新 [Phase 4 Manifest](phase4-release-manifest.json) 为准；该审计在 2026-10-19 重新只读复核。Phase 3、RESET、CODEBASE 和更早的快照已移入 `history/docs/`，仅作为历史证据；其中的数量、哈希和测试结果不能覆盖当前审计。历史文件不删除、不作为生产输入，任何迁移或清理都必须保留原始哈希。
 
 当前本地事实的边界以 [phase4-current-state-audit-2026-10-18.json](phase4-current-state-audit-2026-10-18.json) 和 [phase4-release-manifest.json](phase4-release-manifest.json) 的哈希绑定数据为准，不在本 README 重复维护易过期的岗位数量。当前已记录 8 条候选线索，其中 1 条已通过官方企业公告回溯并形成正式学生岗位，4 条华图发现已回溯至中国地质调查局官方附件并形成 4 条正式岗位，另有 2 条华图→河北省地球物理勘查有限公司候选已完成官方公告、岗位表和期限核验并形成 2 条正式岗位；服务器未部署，自动化保持暂停，第三方发现链接不作为学生申请链接。
 
@@ -134,7 +134,7 @@ runtime/
 - `docs/current/` 曾出现 SQLite 备份文件，后续应移出到受控 `backups/`，但本轮不执行移动；
 - 正式生产 Compose 入口已经收敛为 `deploy/compose.yaml`；根目录 Compose/Dockerfile 仅作为本地开发兼容入口保留，不得用于生产发布。根目录兼容文件仍未删除，避免破坏旧测试和本地工具；它们不属于生产输入。
 
-这些仍是结构治理事项，不代表已经形成可发布版本。历史移动记录及逐文件哈希见 `HISTORY-MIGRATION-2026-10-17.json`。
+这些仍是结构治理事项，不代表已经形成可发布版本。历史移动记录及逐文件哈希见 [history/docs/HISTORY-MIGRATION-2026-10-17.json](../../history/docs/HISTORY-MIGRATION-2026-10-17.json)。
 
 ## 5. Docker 运行原则
 
@@ -159,7 +159,7 @@ runtime/
 
 - [archive-manifest.json](archive-manifest.json)：当前工作区文件的路径、大小、修改时间、SHA-256、当前分类、建议目标和建议动作；
 - [generate_archive_manifest.ps1](../../scripts/generate_archive_manifest.ps1)：可重复生成清单的脚本。
-- [HISTORY-MIGRATION-2026-10-17.json](HISTORY-MIGRATION-2026-10-17.json)：已移动 5,314 个文件、约 2.25 GB 的逐文件迁移和 SHA-256 校验记录；
+- [history/docs/HISTORY-MIGRATION-2026-10-17.json](../../history/docs/HISTORY-MIGRATION-2026-10-17.json)：历史文件移动及 SHA-256 校验记录；
 - [archive_history.ps1](../../scripts/archive_history.ps1)：可重复校验或恢复迁移日志的归档脚本。
 
 扫描范围是项目根目录下的当前常规文件，明确排除 `.git/`、`.venv/` 和冻结的 `history/`。清单中的建议只是待审阅意见：

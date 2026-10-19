@@ -12,7 +12,7 @@ if ([string]::IsNullOrWhiteSpace($Root)) {
 $rootPath = (Resolve-Path -LiteralPath $Root).Path.TrimEnd("\")
 $historyPath = Join-Path $rootPath "history"
 if ([string]::IsNullOrWhiteSpace($LogPath)) {
-    $LogPath = Join-Path $rootPath "docs/current/HISTORY-MIGRATION-2026-10-17.json"
+    $LogPath = Join-Path $rootPath "history/docs/HISTORY-MIGRATION-2026-10-17.json"
 }
 $logPath = [IO.Path]::GetFullPath($LogPath)
 

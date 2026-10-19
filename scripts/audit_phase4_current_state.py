@@ -176,10 +176,13 @@ def code_facts() -> list[dict[str, object]]:
 def document_consistency_facts() -> dict[str, object]:
     """Make the current-vs-historical document boundary machine-readable."""
     historical_paths = [
-        "docs/current/CODEBASE-2026-10-17.md",
-        "docs/current/PHASE3-2026-10-17.md",
-        "docs/current/phase3-audit-preview-2026-10-17.json",
-        "docs/current/phase3-backfill-result-2026-10-17.json",
+        "history/docs/CODEBASE-2026-10-17.md",
+        "history/docs/PHASE3-2026-10-17.md",
+        "history/docs/phase3-audit-preview-2026-10-17.json",
+        "history/docs/phase3-backfill-result-2026-10-17.json",
+        "history/docs/phase3-release-manifest.json",
+        "history/docs/RESET-2026-10-17.md",
+        "history/docs/HISTORY-MIGRATION-2026-10-17.json",
     ]
     # The audit is consumed by the manifest, so hashing the audit itself or
     # the manifest here would create a self-referential, never-stable chain.

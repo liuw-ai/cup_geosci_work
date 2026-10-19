@@ -20,7 +20,7 @@ def test_document_consistency_marks_old_codebase_as_historical() -> None:
     old = next(
         item
         for item in facts["historical_documents"]
-        if item["path"] == "docs/current/CODEBASE-2026-10-17.md"
+        if item["path"] == "history/docs/CODEBASE-2026-10-17.md"
     )
     assert old["exists"] is True
     assert old["declared_historical"] is True
