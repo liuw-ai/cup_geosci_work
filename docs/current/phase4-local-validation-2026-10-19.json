@@ -93,7 +93,7 @@
         8
       ],
       "official_rows": 2,
-      "formal_jobs_created": 0,
+      "formal_jobs_created": 2,
       "backup_path": "backups/job_hub-pre-phase4-hbdk-candidates-20261019.sqlite3",
       "backup_sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
       "report": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
