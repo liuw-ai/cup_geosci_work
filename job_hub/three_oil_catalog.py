@@ -32,6 +32,18 @@ PHASE4_CNOOC_UNIT_EVIDENCE_PATH = (
 )
 GROUP_IDS = frozenset({"cnpc", "sinopec", "cnooc"})
 FORBIDDEN_GROUP_IDS = frozenset({"pipechina"})
+OFFICIAL_THREE_OIL_IDENTITY_SOURCE_IDS = frozenset(
+    {
+        "cnpc-career",
+        "cnpc-career-browser",
+        "cnpc-logging-campus",
+        "sinopec-career",
+        "sinopec-2027-geoscience-snapshot",
+        "sinopec-pepris-recruitment",
+        "cnooc-career-browser",
+        "cosl-career",
+    }
+)
 FALLBACK_CHANNEL_REQUIREMENTS = (
     {
         "channel_type": "official_announcement",
@@ -490,15 +502,21 @@ def build_three_oil_catalog_audit(
             or {"status": "pending"}
         )
         job_binding = job_binding_by_unit.get(unit["id"], {})
+        official_job_source_ids = [
+            source_id
+            for source_id in job_binding.get("source_ids", [])
+            if source_id in OFFICIAL_THREE_OIL_IDENTITY_SOURCE_IDS
+        ]
         if (
             str(identity_evidence.get("status") or "") != "verified"
             and str(job_binding.get("status") or "") == "verified"
+            and official_job_source_ids
         ):
             identity_evidence = {
                 "status": "verified",
                 "basis": "official_job_detail_employer_record",
                 "evidence_scope": "official_job_detail_employer_name",
-                "source_ids": list(job_binding.get("source_ids", [])),
+                "source_ids": official_job_source_ids,
                 "evidence_urls": list(job_binding.get("evidence_urls", [])),
                 "matched_job_count": int(job_binding.get("match_count", 0)),
                 "independent_unit_recruitment_portal_proven": False,

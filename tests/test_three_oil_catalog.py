@@ -160,7 +160,7 @@ def test_three_oil_job_detail_employer_record_is_identity_evidence_not_unit_port
         job_records=[
             {
                 "employer": "中国石化胜利油田分公司",
-                "source_id": "sinopec-career-browser",
+                "source_id": "sinopec-2027-geoscience-snapshot",
                 "official_evidence_url": "https://job.sinopec.com/official-job/1",
                 "field_evidence": {
                     "evidence_scope": "official_html_job_detail",
@@ -173,6 +173,26 @@ def test_three_oil_job_detail_employer_record_is_identity_evidence_not_unit_port
     assert item["external_identity_evidence"]["status"] == "verified"
     assert item["external_identity_evidence"]["basis"] == "official_job_detail_employer_record"
     assert item["external_identity_evidence"]["independent_unit_recruitment_portal_proven"] is False
+
+
+def test_third_party_employer_page_does_not_become_three_oil_identity_evidence() -> None:
+    report = build_three_oil_catalog_audit(
+        load_three_oil_catalog(),
+        organization_registry=load_organization_registry(),
+        job_records=[
+            {
+                "employer": "大庆油田有限责任公司",
+                "source_id": "cupb-career",
+                "official_evidence_url": "https://career.cup.edu.cn/campus/view/id/1",
+                "field_evidence": {
+                    "evidence_scope": "official_job_detail_employer_name",
+                    "用人单位": "大庆油田有限责任公司",
+                },
+            }
+        ],
+    )
+    item = next(row for row in report["items"] if row["catalog_id"] == "cnpc-daqing")
+    assert item["external_identity_evidence"]["status"] == "pending"
 
 
 def test_three_oil_catalog_audit_cli_does_not_write_database(monkeypatch, tmp_path) -> None:
