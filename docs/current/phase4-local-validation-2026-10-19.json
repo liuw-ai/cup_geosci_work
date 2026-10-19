@@ -7,7 +7,7 @@
   "git_sha_at_validation": "13d20ea7d3e3e920e4a42f304d4edbcad2c84a89",
   "tests": {
     "command": "pytest -q",
-    "passed": 1096,
+    "passed": 1097,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
@@ -99,7 +99,7 @@
       "report": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
     },
     "robots_gate_targeted_tests": "22 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py, tests/test_phase4_completion_audit.py)",
-    "source_disabled_visibility_regression": "included in full 1096-test run; disabled source remains student-visible without withdrawal",
+    "source_disabled_visibility_regression": "included in full 1097-test run; disabled source remains student-visible without withdrawal",
     "robots_or_permission_blocked_followups": 1,
     "huatu_discovery_scan": {
       "discovered_announcements": 65,
