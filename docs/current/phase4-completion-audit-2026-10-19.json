@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T01:02:19Z",
+  "generated_at": "2026-10-19T01:22:06Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -95,13 +95,20 @@
       "id": "third_party_hbdk_geoscience_recovery",
       "status": "partial",
       "evidence": [
-        "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json"
+        "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json",
+        "docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json"
       ],
       "facts": {
         "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/383.html",
         "official_table_url": "https://docs.qq.com/doc/DTFFuZmpRQ1FxR3JU",
         "rows_observed": 2,
-        "original_attachment_sha256": null,
+        "original_response_sha256": "6c81de3a013903e4036fc68b7d2dfeefb4fde552303b4515f5dc420c3c89974d",
+        "original_response_bytes": 537903,
+        "capture_path": "runtime/third-party-evidence/hbdk-hebei-2026-10-19/official-position-table.html",
+        "deadline_policy": "relative_working_days_unresolved",
+        "official_row_evidence": true,
+        "formal_jobs_created": 0,
+        "student_visible": false,
         "publication_status": "candidate_only"
       }
     },
@@ -166,7 +173,7 @@
         "docs/current/phase4-local-validation-2026-10-19.json"
       ],
       "facts": {
-        "passed": 1088,
+        "passed": 1089,
         "skipped": 4,
         "failed": 0,
         "formal_database_stable": true
