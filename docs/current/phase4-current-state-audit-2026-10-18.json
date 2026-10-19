@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T00:59:04Z",
+  "generated_at": "2026-10-19T01:02:15Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "345c0c5d553432d2309a8b406415228bc22dd293",
+  "git_sha": "1372e83d4a13aa1d8bdeab08a46f8c1d3be4c811",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -139,7 +139,7 @@
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "03f0099033cb0811f06fb102f2757c30daa0c2f2211808920aeaba18937007e4"
+        "sha256": "cb8f4945cbb68e4ca59faaea81db4ea27bdb881d187757893c15d3a0015b5113"
       }
     ],
     "metadata_documents": [
@@ -195,7 +195,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "03f0099033cb0811f06fb102f2757c30daa0c2f2211808920aeaba18937007e4"
+      "sha256": "cb8f4945cbb68e4ca59faaea81db4ea27bdb881d187757893c15d3a0015b5113"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
