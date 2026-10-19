@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T00:26:17Z",
+  "generated_at": "2026-10-19T00:31:58Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "ee2100ac6e4d8b0d083dc2e9007e749165bf0d80",
+  "git_sha": "5771b80dec620c37eba8cbcb92615ff97aba188c",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "c4906e29210977da073815351123d2c68562f1ee683dfe43e54ac21fadddfb38",
-    "phase4_document_consistency": "c4906e29210977da073815351123d2c68562f1ee683dfe43e54ac21fadddfb38",
+    "phase4_current_state_audit": "17f7c87fe5897f343fb6076146ba354b6c6824ae568a21da320d5d8f2a603376",
+    "phase4_document_consistency": "17f7c87fe5897f343fb6076146ba354b6c6824ae568a21da320d5d8f2a603376",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -50,11 +50,11 @@
     "phase4_third_party_huatu_shanxi_geology_group": "81808418c668aeb800754e01982ef01905f56762edb5a45512858ce2e146c7b0",
     "phase4_third_party_huatu_hbdk_geophysics": "f2ef342fc4c3a8f1cde1c0f0b439f333dfd5b10a52975560c1baa964d0f1adf3",
     "phase4_main_record": "66167c8c902d0c1311dbb0c6474f0f13047cb6717d313ebe26379622866c1153",
-    "phase4_local_validation": "b9669297f45e893b34428bd10ca5189b8a727fad9a0db3e4b089b381e6c47e9b",
+    "phase4_local_validation": "54c7d4937eecffc4967eccf970660e279ed9c03dbc49400a41af9f4e46680d98",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "42ac32b0b953e34f70793fa78aa8d1c2b2637cd72cdc974da4453b3c2a423807",
-    "phase4_completion_audit": "aaae7437a4335aad2265628863e6eff3edc264d4b7998d4650f7dcf0370aabdb",
-    "phase4_workspace_layout": "637588ffe64275d7f9454ff871fd284343a13e58366cd339137010bfe548aa2b"
+    "phase4_completion_audit": "baf9428ad893ee53727c0929bfcbaba9ab22aa2e1a27d8125b118d98f1a02e36",
+    "phase4_workspace_layout": "cfa93b415b8c9ec39e94acf2a44b726b0de5580176df3aafb2d415a2b20dcaa0"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -126,11 +126,11 @@
     "validated_at": "2026-10-19T08:04:24+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "0e468f3fc2f2cea317691deaf4b19cf41a8278a8",
-    "git_sha_at_validation": "0e468f3fc2f2cea317691deaf4b19cf41a8278a8",
+    "git_sha_before_metadata_commit": "5771b80dec620c37eba8cbcb92615ff97aba188c",
+    "git_sha_at_validation": "5771b80dec620c37eba8cbcb92615ff97aba188c",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1085,
+      "passed": 1086,
       "skipped": 4,
       "failed": 0,
       "warnings": 0,
@@ -209,7 +209,7 @@
         "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
       },
       "robots_gate_targeted_tests": "22 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py, tests/test_phase4_completion_audit.py)",
-      "source_disabled_visibility_regression": "included in full 1085-test run; disabled source remains student-visible without withdrawal",
+      "source_disabled_visibility_regression": "included in full 1086-test run; disabled source remains student-visible without withdrawal",
       "robots_or_permission_blocked_followups": 1,
       "huatu_discovery_scan": {
         "discovered_announcements": 65,

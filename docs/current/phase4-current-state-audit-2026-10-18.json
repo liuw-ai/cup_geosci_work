@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T00:26:11Z",
+  "generated_at": "2026-10-19T00:31:53Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "ee2100ac6e4d8b0d083dc2e9007e749165bf0d80",
-  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-three-oil-catalog-audit-2026-10-17.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
+  "git_sha": "5771b80dec620c37eba8cbcb92615ff97aba188c",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
@@ -139,7 +139,7 @@
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "b9669297f45e893b34428bd10ca5189b8a727fad9a0db3e4b089b381e6c47e9b"
+        "sha256": "54c7d4937eecffc4967eccf970660e279ed9c03dbc49400a41af9f4e46680d98"
       }
     ],
     "metadata_documents": [
@@ -195,7 +195,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "b9669297f45e893b34428bd10ca5189b8a727fad9a0db3e4b089b381e6c47e9b"
+      "sha256": "54c7d4937eecffc4967eccf970660e279ed9c03dbc49400a41af9f4e46680d98"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
