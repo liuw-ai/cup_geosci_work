@@ -1,0 +1,62 @@
+{
+  "phase": "phase4",
+  "captured_at": "2026-10-19T01:12:35Z",
+  "source": {
+    "discovery_source_id": "huatu-discovery",
+    "trust_grade": "B",
+    "discovery_page_url": "https://he.huatu.com/2026/1015/1714501.html",
+    "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/383.html",
+    "official_table_url": "https://docs.qq.com/doc/DTFFuZmpRQ1FxR3JU"
+  },
+  "capture": {
+    "capture_mode": "official_web_table_response",
+    "http_status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 537903,
+    "sha256": "6c81de3a013903e4036fc68b7d2dfeefb4fde552303b4515f5dc420c3c89974d",
+    "retained_path": "runtime/third-party-evidence/hbdk-hebei-2026-10-19/official-position-table.html"
+  },
+  "rows": [
+    {
+      "row_number": 1,
+      "department": "物化探（水土修复）部",
+      "title": "技术员",
+      "position_category": "技术岗",
+      "headcount": 1,
+      "major_requirement": "矿产地质/地质工程勘查相关专业",
+      "degree_requirement": "本科及以上",
+      "location": "河北省廊坊市经济技术开发区银杏路26号",
+      "student_layer_assessment": "broad_geoscience_match"
+    },
+    {
+      "row_number": 2,
+      "department": "物化探（水土修复）部",
+      "title": "部长副职",
+      "position_category": "管理岗",
+      "headcount": 1,
+      "major_requirement": "矿产地质/地质工程勘查相关专业",
+      "degree_requirement": "本科及以上",
+      "location": "河北省廊坊市经济技术开发区银杏路26号",
+      "student_layer_assessment": "broad_geoscience_match"
+    }
+  ],
+  "official_deadline": {
+    "published_date": "2026-10-15",
+    "text": "自发布之日起7个工作日内",
+    "resolved_calendar_date": null,
+    "policy": "relative_working_days_unresolved"
+  },
+  "publication_decision": {
+    "status": "candidate_only",
+    "candidate_leads_created": 0,
+    "formal_jobs_created": 0,
+    "student_visible": false,
+    "reason": "官方岗位表逐行可读，但相对工作日期限尚未绑定经确认的工作日日历；在截止日没有确定前不发布。"
+  },
+  "policy_checks": {
+    "third_party_discovery_is_not_application": true,
+    "official_table_is_student_link_candidate": true,
+    "robots_or_login_bypass": false,
+    "server_deployment": false
+  }
+}

@@ -67,6 +67,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_third_party_bingtuan_official_recovery": "docs/current/phase4-third-party-bingtuan-official-recovery-2026-10-19.json",
     "phase4_third_party_huatu_shanxi_geology_group": "docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json",
     "phase4_third_party_huatu_hbdk_geophysics": "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json",
+    "phase4_third_party_hbdk_official_table": "docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json",
     "phase4_main_record": "docs/current/PHASE4-2026-10-17.md",
     "phase4_local_validation": "docs/current/phase4-local-validation-2026-10-19.json",
     "phase4_local_db_write_incident": "docs/current/phase4-local-db-write-incident-2026-10-19.json",

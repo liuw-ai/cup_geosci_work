@@ -258,6 +258,7 @@ def main() -> None:
     bingtuan_official_recovery = ROOT / "docs" / "current" / "phase4-third-party-bingtuan-official-recovery-2026-10-19.json"
     huatu_shanxi_geology_group = ROOT / "docs" / "current" / "phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json"
     huatu_hbdk_geophysics = ROOT / "docs" / "current" / "phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json"
+    hbdk_official_table = ROOT / "docs" / "current" / "phase4-third-party-hbdk-official-table-2026-10-19.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
@@ -410,6 +411,10 @@ def main() -> None:
             "phase4_third_party_huatu_hbdk_geophysics": {
                 "path": "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json",
                 "sha256": sha256(huatu_hbdk_geophysics),
+            },
+            "phase4_third_party_hbdk_official_table": {
+                "path": "docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json",
+                "sha256": sha256(hbdk_official_table),
             },
             "phase4_local_db_write_incident": {
                 "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",

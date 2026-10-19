@@ -56,6 +56,7 @@ def build_report() -> dict[str, Any]:
     funnel = _read("docs/current/phase4-third-party-funnel-audit-2026-10-18.json")
     huatu_shanxi = _read("docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json")
     huatu_hbdk = _read("docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json")
+    hbdk_official_table = _read("docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
     catalog_audit = _read("docs/current/phase4-three-oil-catalog-audit-2026-10-17.json")
     workspace_layout = _read("docs/current/phase4-workspace-layout-audit-2026-10-19.json")
@@ -143,13 +144,20 @@ def build_report() -> dict[str, Any]:
             "status": "partial",
             "evidence": [
                 "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json",
+                "docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json",
             ],
             "facts": {
                 "official_notice_url": huatu_hbdk.get("official_recovery", {}).get("official_notice_url"),
                 "official_table_url": huatu_hbdk.get("official_recovery", {}).get("official_table_url"),
-                "rows_observed": len(huatu_hbdk.get("rows", [])),
-                "original_attachment_sha256": huatu_hbdk.get("table_capture", {}).get("original_attachment_sha256"),
-                "publication_status": huatu_hbdk.get("publication_decision", {}).get("status"),
+                "rows_observed": len(hbdk_official_table.get("rows", [])),
+                "original_response_sha256": hbdk_official_table.get("capture", {}).get("sha256"),
+                "original_response_bytes": hbdk_official_table.get("capture", {}).get("bytes"),
+                "capture_path": hbdk_official_table.get("capture", {}).get("retained_path"),
+                "deadline_policy": hbdk_official_table.get("official_deadline", {}).get("policy"),
+                "official_row_evidence": True,
+                "formal_jobs_created": 0,
+                "student_visible": False,
+                "publication_status": hbdk_official_table.get("publication_decision", {}).get("status"),
             },
         },
         {
