@@ -32,6 +32,8 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-three-oil-catalog-audit-2026-10-17.json",
     ":!docs/current/phase4-third-party-huatu-state-owned-entry-2026-10-19.json",
     ":!docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
+    ":!docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
+    ":!docs/current/phase4-third-party-official-recovery-recheck-2026-10-19.json",
 )
 
 # These reports are deliberately excluded from the source-tree dirty flag
