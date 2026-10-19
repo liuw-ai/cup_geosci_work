@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T04:33:09Z",
+  "generated_at": "2026-10-19T04:44:00Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "980f17d96ff33fa88461f01c701ce7f836cc1199",
-  "git_status_porcelain": "",
+  "git_sha": "3f7f468af188949ca8f80ce10b47faae5bf98bf0",
+  "git_status_porcelain": "M docs/current/PHASE4-2026-10-17.md\n M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -134,12 +134,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "41c63d91392ef543dfed31be811687347fa0551f1e057f6155f3bcd24344fd43"
+        "sha256": "c6cb12994421a943fb5ac704ae808a874f1235f9e75aa04fb2fba91e91308f10"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "b8a7c5e1877371a1c7875c9ff65e16e75b61e9a6632397df0d49021216b3dcf2"
+        "sha256": "076f9b7c15b8c1e8dce37e4bb18bd81addde2660b62923292978ab083a9c243f"
       }
     ],
     "metadata_documents": [
@@ -187,7 +187,7 @@
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-      "sha256": "a4c65e21870d656c680aba23fbfc561eb9c7eb1b1a26d0bdd60b6619e74cac2c"
+      "sha256": "4d1d9ab599df3140440cb2be3ec59b9372f4c19db5479582e3c753e895f1527f"
     },
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
@@ -195,7 +195,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "b8a7c5e1877371a1c7875c9ff65e16e75b61e9a6632397df0d49021216b3dcf2"
+      "sha256": "076f9b7c15b8c1e8dce37e4bb18bd81addde2660b62923292978ab083a9c243f"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -239,7 +239,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "884263c618a0992ecdfbd94bae351e4aeea8dbf22a47a4cdeb466af9ffb6f862"
+      "sha256": "27ad162a053d25d182a4d688b8d0ffef2c178d2b060d09222ddbb23cb89876e5"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -287,7 +287,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "41c63d91392ef543dfed31be811687347fa0551f1e057f6155f3bcd24344fd43"
+      "sha256": "c6cb12994421a943fb5ac704ae808a874f1235f9e75aa04fb2fba91e91308f10"
     }
   },
   "code_inventory": [
