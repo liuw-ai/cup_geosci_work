@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T07:47:55Z",
+  "generated_at": "2026-10-19T07:49:06Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "1d98af2b6456717171dbdaaa89e807d10d39f8e5",
-  "git_status_porcelain": "M docs/current/PHASE4-2026-10-17.md\n M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
+  "git_sha": "6ccf38ef58e8479aa45de140b9c743e704aaa390",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
