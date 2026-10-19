@@ -33,6 +33,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
     ":!docs/current/phase4-completion-audit-2026-10-19.json",
     ":!docs/current/phase4-workspace-layout-audit-2026-10-19.json",
+    ":!docs/current/phase4-three-oil-catalog-audit-2026-10-17.json",
 )
 
 
