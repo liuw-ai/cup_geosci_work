@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T17:59:09Z",
+  "generated_at": "2026-10-19T18:23:17Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "d191995940405342077d32cd5928cd8756cb897e",
+  "git_sha": "1cfe1cd5e6992e80eeae309b34a71ed227e1dcae",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -73,7 +73,9 @@
     },
     "unit_specific_entry_evidence_complete": false,
     "cnooc_group_portal_units_with_active_job_evidence": 16,
-    "cnooc_observed_job_cards": 350
+    "cnooc_observed_job_cards": 350,
+    "shared_portal_unit_job_evidence_verified": 16,
+    "shared_portal_unit_job_evidence_cards": 350
   },
   "deployment": {
     "production_compose": {
@@ -205,7 +207,7 @@
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-      "sha256": "6e3e11c303f6e26578b579cd8fed5ed2746ebca595d79f7404909399ae74fc03"
+      "sha256": "e697937510c1251a2950b7ce71aa44fece1d9eeb029facf59ea96e3fbd6dc420"
     },
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
@@ -265,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "fb29937fff7fc9f3fe215c70fb3ba153b333cda2527395d6ba0fc655cb5eab58"
+      "sha256": "9c2a75fedba65b6f6cbfd7002545de9ce1d90378ed277f1672cc8b8f5fd27ff1"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -836,8 +838,8 @@
     },
     {
       "path": "scripts/build_phase4_three_oil_entry_matrix.py",
-      "line_count": 328,
-      "sha256": "d988f7273edc3cb511552a35db21ff3aa771c30e705f9e2819f1089ef924001f"
+      "line_count": 349,
+      "sha256": "2e1835a21fed002ba8e82040a3fa91d016dc1d3cdaa0ec4b63f4f82abec049a7"
     },
     {
       "path": "scripts/build_phase4_three_oil_observed_roster.py",
@@ -1351,8 +1353,8 @@
     },
     {
       "path": "tests/test_phase4_three_oil_entry_matrix.py",
-      "line_count": 108,
-      "sha256": "0e491452d3d70eb61eb5c7ec65d62c68d2e7c8752eba7992e5e1d8bfe2e48e74"
+      "line_count": 116,
+      "sha256": "158ed5ce05630700bee7126a399915867c042a65a6306e564b67467613c0a54a"
     },
     {
       "path": "tests/test_phase4_three_oil_observed_roster.py",
