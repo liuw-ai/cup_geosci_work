@@ -148,6 +148,12 @@ def main() -> None:
         if isinstance(item, dict) and str(item.get("catalog_id") or "").strip()
     }
     rechecked_unit_entry_ids.update(rechecked_entries)
+    rechecked_negative_entries = {
+        str(item.get("catalog_id") or "").strip(): item
+        for item in unit_entry_recheck.get("negative_entries", [])
+        if isinstance(item, dict) and str(item.get("catalog_id") or "").strip()
+    }
+    negative_entry_by_catalog_id.update(rechecked_negative_entries)
     cnooc_observations = {
         str(item.get("canonical_name") or "").strip(): item
         for item in cnooc_unit_evidence.get("units", [])

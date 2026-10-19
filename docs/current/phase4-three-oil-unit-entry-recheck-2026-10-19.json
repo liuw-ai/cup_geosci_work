@@ -63,9 +63,52 @@
       }
     }
   ],
+  "negative_entries": [
+    {
+      "group_id": "sinopec",
+      "catalog_id": "sinopec-jianghan",
+      "canonical_name": "中国石化江汉油田分公司",
+      "official_homepage_url": "http://jhof.sinopec.com/jhof/",
+      "official_identity_observation": "官网页眉、正文和页脚明确显示中国石化江汉油田，页面介绍其油气勘探开发等业务。",
+      "recruitment_entry_check": {
+        "method": "read_only_homepage_navigation",
+        "recruitment_navigation_labels_found": [],
+        "recruitment_url_found": null,
+        "conclusion": "本次官网导航未发现招聘、人才、校园或职业入口；不能生成单位级招聘入口。"
+      },
+      "evidence_boundary": {
+        "official_identity_verified": true,
+        "unit_specific_recruitment_entry_verified": false,
+        "group_portal_is_not_copied": true,
+        "student_application_url": null,
+        "next_evidence_required": "该单位官方招聘公告、官方岗位表、官方招聘系统或官方公告明确的授权招聘入口。"
+      }
+    },
+    {
+      "group_id": "sinopec",
+      "catalog_id": "sinopec-shengli",
+      "canonical_name": "中国石化胜利油田分公司",
+      "official_homepage_url": "http://slof.sinopec.com/slof/",
+      "official_identity_observation": "官网正文明确说明胜利油田由中国石油化工集团胜利石油管理局有限公司、中国石油化工股份有限公司胜利油田分公司组成。",
+      "recruitment_entry_check": {
+        "method": "read_only_homepage_navigation",
+        "recruitment_navigation_labels_found": [],
+        "recruitment_url_found": null,
+        "conclusion": "本次官网导航未发现招聘、人才、校园或职业入口；不能生成单位级招聘入口。"
+      },
+      "evidence_boundary": {
+        "official_identity_verified": true,
+        "unit_specific_recruitment_entry_verified": false,
+        "group_portal_is_not_copied": true,
+        "student_application_url": null,
+        "next_evidence_required": "该单位官方招聘公告、官方岗位表、官方招聘系统或官方公告明确的授权招聘入口。"
+      }
+    }
+  ],
   "summary": {
-    "entries_checked": 2,
+    "entries_checked": 4,
     "unit_specific_entry_verified": 2,
+    "official_homepage_checked_no_unit_entry_found": 2,
     "current_open_position_claims": 0,
     "student_application_urls_created": 0
   }

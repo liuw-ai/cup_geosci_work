@@ -40,14 +40,22 @@ def test_phase4_three_oil_entry_matrix_covers_every_formal_catalog_unit() -> Non
     assert negative["evidence_boundary"]["unit_specific_recruitment_entry_verified"] is False
     recheck = json.loads(UNIT_ENTRY_RECHECK.read_text(encoding="utf-8"))
     assert recheck["summary"] == {
-        "entries_checked": 2,
+        "entries_checked": 4,
         "unit_specific_entry_verified": 2,
+        "official_homepage_checked_no_unit_entry_found": 2,
         "current_open_position_claims": 0,
         "student_application_urls_created": 0,
     }
     assert {
         item["catalog_id"] for item in recheck["entries"]
     } == {"sinopec-petroleum-exploration-production-research", "cosl"}
+    assert {
+        item["catalog_id"] for item in recheck["negative_entries"]
+    } == {"sinopec-jianghan", "sinopec-shengli"}
+    for catalog_id in ("sinopec-jianghan", "sinopec-shengli"):
+        row = next(item for item in units if item["catalog_id"] == catalog_id)
+        assert row["unit_specific_entry_status"] == "official_site_checked_no_unit_entry_found"
+        assert row["unit_specific_entry_url"] is None
     sinopec_displayed_ids = {
         item["catalog_id"]
         for item in units
@@ -55,10 +63,8 @@ def test_phase4_three_oil_entry_matrix_covers_every_formal_catalog_unit() -> Non
         and item["unit_specific_entry_status"] == "group_portal_unit_display_observed"
     }
     assert {
-        "sinopec-shengli",
         "sinopec-zhongyuan",
         "sinopec-henan",
-        "sinopec-jianghan",
         "sinopec-jiangsu",
         "sinopec-petroleum-engineering-research",
         "sinopec-petroleum-machinery",
