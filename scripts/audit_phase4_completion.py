@@ -85,6 +85,7 @@ def build_report() -> dict[str, Any]:
     huatu_shanxi = _read("docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json")
     huatu_hbdk = _read("docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json")
     huatu_hebei_water_geology = _read("docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json")
+    huatu_cnpc_chuanqing = _read("docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json")
     hbdk_official_table = _read("docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json")
     hbdk_registration = _read("docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
@@ -157,9 +158,12 @@ def build_report() -> dict[str, Any]:
                 "docs/current/phase4-third-party-access-recheck-2026-10-19.json",
                 "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
                 "docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json",
+                "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
             ],
             "facts": {
                 "formal_jobs": database["published_candidate_leads"],
+                "pending_chuanqing_rows": len(huatu_cnpc_chuanqing.get("candidates", [])),
+                "pending_chuanqing_official_recovery": huatu_cnpc_chuanqing.get("official_recovery", {}).get("status"),
                 "blocker": "remaining sources or table assets are inaccessible under current TLS/robots/browser policy",
                 "latest_discovery_boundary": huatu_hebei_water_geology.get("publication_decision", {}).get("reason"),
             },

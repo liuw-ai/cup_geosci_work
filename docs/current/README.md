@@ -8,6 +8,8 @@
 
 当前本地事实的边界以 [phase4-current-state-audit-2026-10-18.json](phase4-current-state-audit-2026-10-18.json) 和 [phase4-release-manifest.json](phase4-release-manifest.json) 的哈希绑定数据为准，不在本 README 重复维护易过期的岗位数量。当前已记录 8 条候选线索，其中 1 条已通过官方企业公告回溯并形成正式学生岗位，4 条华图发现已回溯至中国地质调查局官方附件并形成 4 条正式岗位，另有 2 条华图→河北省地球物理勘查有限公司候选已完成官方公告、岗位表和期限核验并形成 2 条正式岗位；服务器未部署，自动化保持暂停，第三方发现链接不作为学生申请链接。
 
+另有一份隔离的华图→中国石油集团川庆钻探页面证据报告，逐行记录 12 条候选；该页面只有 `cnpc.com.cn` 邮箱，没有可核验的中国石油官方公告、岗位表或 HTTP 报名 URL，因此 12 条不计入数据库候选数量、不进入学生端，状态保持 `pending`。
+
 Phase 4 的逐项完成状态见 [phase4-completion-audit-2026-10-19.json](phase4-completion-audit-2026-10-19.json)，目录和 Docker 边界见 [phase4-workspace-layout-audit-2026-10-19.json](phase4-workspace-layout-audit-2026-10-19.json)。审计为 `not_complete` 时，阻断项仍然有效，不能仅因测试通过而发布。
 
 三桶油 64 个正式目录单位的逐项入口状态见 [phase4-three-oil-unit-entry-matrix-2026-10-18.json](phase4-three-oil-unit-entry-matrix-2026-10-18.json)。该矩阵明确区分集团共享入口、官方展示名单和单位独立入口，不把共享 URL 复制为下属单位 URL。组织登记账本另有 239 条官方展示名单候选，仍需法定名称和外部身份证据核验，不能当作已完成的正式目录。
