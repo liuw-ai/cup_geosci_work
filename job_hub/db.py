@@ -28,6 +28,7 @@ from job_hub.policy_contract import publication_policy_digest
 from job_hub.phase3_policy import (
     PUBLICATION_LAYERS,
     SOURCE_AVAILABILITY_STATES,
+    SOURCE_UNAVAILABLE_REASONS,
     WITHDRAWAL_REASONS,
     derive_publication_layer,
     no_deadline_expiry,
@@ -3354,6 +3355,131 @@ class Database:
                             "reason": reason,
                             "artifact_candidate_id": candidate_id,
                             "artifact_evidence_lapsed": True,
+                        },
+                        ensure_ascii=False,
+                    ),
+                ),
+            )
+            return True
+
+    def mark_published_artifact_review_state(
+        self,
+        candidate_id: int,
+        *,
+        availability_status: str,
+        reason: str,
+        review_note: str,
+        evidence_url: str | None = None,
+    ) -> bool:
+        """Record a temporary evidence problem without withdrawing a job.
+
+        A dynamic attachment may be absent for one scan, fail to download, or
+        stop parsing after a structure change. Those observations are useful
+        operational evidence, but none proves that the vacancy was cancelled.
+        Keep the published job open and visible while recording the precise
+        review state for the next verification cycle.
+        """
+        state = str(availability_status or "").strip().lower()
+        if state not in {"source_unavailable", "degraded", "stale_pending_review"}:
+            raise ValueError(
+                "published artifact review state must be source_unavailable, "
+                "degraded, or stale_pending_review"
+            )
+        normalized_reason = str(reason or "").strip().lower()
+        if normalized_reason not in SOURCE_UNAVAILABLE_REASONS:
+            raise ValueError("published artifact review requires a known source reason")
+        note = self._optional_text(review_note)
+        if not note:
+            raise ValueError("published artifact review requires a review_note")
+        if evidence_url and not is_http_url(evidence_url):
+            raise ValueError("evidence_url must be an HTTP(S) URL")
+
+        now = utc_now()
+        with self.transaction() as connection:
+            row = connection.execute(
+                """
+                SELECT candidates.published_job_id, candidates.review_status,
+                       jobs.status, jobs.publication_layer
+                FROM artifact_job_candidates AS candidates
+                JOIN jobs ON jobs.id = candidates.published_job_id
+                WHERE candidates.id = ?
+                  AND candidates.review_status = 'published'
+                  AND jobs.status IN ('open', 'expired', 'superseded')
+                """,
+                (candidate_id,),
+            ).fetchone()
+            if row is None:
+                return False
+
+            current_layer = str(row["publication_layer"] or "not_public")
+            layer_before_unavailable = None
+            next_layer = current_layer
+            if state == "source_unavailable":
+                if current_layer != "source_unavailable":
+                    layer_before_unavailable = current_layer
+                    next_layer = "source_unavailable"
+                else:
+                    existing = connection.execute(
+                        "SELECT publication_layer_before_unavailable FROM jobs WHERE id = ?",
+                        (int(row["published_job_id"]),),
+                    ).fetchone()
+                    layer_before_unavailable = (
+                        existing["publication_layer_before_unavailable"]
+                        if existing
+                        else None
+                    )
+
+            connection.execute(
+                """
+                UPDATE jobs
+                   SET source_availability_status = ?,
+                       source_unavailable_reason = ?,
+                       publication_layer = ?,
+                       publication_layer_before_unavailable = COALESCE(
+                           ?, publication_layer_before_unavailable
+                       ),
+                       updated_at = ?
+                 WHERE id = ?
+                """,
+                (
+                    state,
+                    normalized_reason,
+                    next_layer,
+                    layer_before_unavailable,
+                    now,
+                    int(row["published_job_id"]),
+                ),
+            )
+            connection.execute(
+                """
+                UPDATE artifact_job_candidates
+                   SET review_note = CASE
+                       WHEN review_note IS NULL OR review_note = '' THEN ?
+                       WHEN review_note LIKE '%' || ? || '%' THEN review_note
+                       ELSE review_note || '；' || ?
+                   END,
+                       updated_at = ?
+                 WHERE id = ?
+                """,
+                (note, note, note, now, candidate_id),
+            )
+            connection.execute(
+                """
+                INSERT INTO job_events (job_id, event_type, occurred_at, payload_json)
+                VALUES (?, 'source_review_state', ?, ?)
+                """,
+                (
+                    int(row["published_job_id"]),
+                    now,
+                    json.dumps(
+                        {
+                            "artifact_candidate_id": int(candidate_id),
+                            "availability_status": state,
+                            "reason": normalized_reason,
+                            "review_note": note,
+                            "observed_url": str(evidence_url or "").strip(),
+                            "job_remains_open": row["status"] == "open",
+                            "withdrawal_allowed": False,
                         },
                         ensure_ascii=False,
                     ),

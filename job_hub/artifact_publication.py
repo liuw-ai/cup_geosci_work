@@ -55,6 +55,7 @@ def auto_publish_verified_artifact_candidates(
         "unchanged": 0,
         "blocked": 0,
         "withdrawn": 0,
+        "reviewed": 0,
         "restored": 0,
         "refreshed": 0,
         "items": [],
@@ -127,8 +128,17 @@ def _reconcile_published_dynamic_candidates(
                 outcome = database.refresh_published_artifact_job(
                     int(candidate["id"]), normalized
                 )
-            except ValueError:
+            except ValueError as error:
                 approved = False
+                if database.mark_published_artifact_review_state(
+                    int(candidate["id"]),
+                    availability_status="degraded",
+                    reason="parser_error",
+                    review_note=f"动态附件岗位本轮规范化失败，保留原岗位并待复核：{error}",
+                    evidence_url=str(candidate.get("official_page_url") or "") or None,
+                ):
+                    result["reviewed"] += 1
+                continue
             else:
                 if outcome in {"restored", "refreshed"}:
                     result[outcome] += 1
@@ -142,11 +152,14 @@ def _reconcile_published_dynamic_candidates(
                         }
                     )
                 continue
-        if not approved and database.withdraw_published_artifact_job(
+        if not approved and database.mark_published_artifact_review_state(
             int(candidate["id"]),
-            reason="动态官方附件岗位未通过本轮有效证据复核，暂不在学生端展示。",
+            availability_status="stale_pending_review",
+            reason="temporary_absence",
+            review_note="动态官方附件岗位本轮未出现；保留原岗位，不因一次扫描缺失撤回，等待下一轮官方复核。",
+            evidence_url=str(candidate.get("official_page_url") or "") or None,
         ):
-            result["withdrawn"] += 1
+            result["reviewed"] += 1
 
 
 def _publish_one(

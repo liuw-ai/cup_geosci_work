@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from job_hub.artifact_publication import auto_publish_verified_artifact_candidates
 from job_hub.db import Database
 from job_hub.government_artifact_verification import verify_government_artifacts
@@ -162,6 +164,32 @@ def test_current_fixed_artifact_candidate_is_published_without_admin_action(tmp_
     job = database.find_public_job(publication["items"][0]["job_id"])
     assert job is not None
     assert job["publication_status"] == "student_eligible"
+    assert database.mark_published_artifact_review_state(
+        int(candidate["id"]),
+        availability_status="source_unavailable",
+        reason="attachment_download_failed",
+        review_note="官方附件本轮暂时无法下载；保留岗位并等待下一轮复核。",
+        evidence_url=parent_url,
+    ) is True
+    reviewed_job = database.find_public_job(publication["items"][0]["job_id"])
+    assert reviewed_job is not None
+    assert reviewed_job["status"] == "open"
+    assert reviewed_job["publication_layer"] == "source_unavailable"
+    assert reviewed_job["source_availability_status"] == "source_unavailable"
+    with database.connect() as connection:
+        event = connection.execute(
+            "SELECT event_type, payload_json FROM job_events WHERE job_id = ? ORDER BY id DESC LIMIT 1",
+            (publication["items"][0]["job_id"],),
+        ).fetchone()
+    assert event["event_type"] == "source_review_state"
+    assert "attachment_download_failed" in event["payload_json"]
+    with pytest.raises(ValueError, match="review state"):
+        database.mark_published_artifact_review_state(
+            int(candidate["id"]),
+            availability_status="withdrawn",
+            reason="attachment_download_failed",
+            review_note="invalid",
+        )
     unrelated_cycle = auto_publish_verified_artifact_candidates(
         database, pipeline, {"items": []}
     )
