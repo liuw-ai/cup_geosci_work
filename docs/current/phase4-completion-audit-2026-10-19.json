@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T12:07:31Z",
+  "generated_at": "2026-10-19T12:25:38Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -129,9 +129,9 @@
         "unit_specific_entry_evidence_complete": false,
         "unit_specific_entry_status_counts": {
           "group_portal_verified": 2,
-          "group_portal_unit_display_observed": 23,
+          "group_portal_unit_display_observed": 21,
           "group_portal_registered": 34,
-          "official_site_checked_no_unit_entry_found": 1,
+          "official_site_checked_no_unit_entry_found": 3,
           "unit_specific_entry_verified": 3,
           "group_portal_not_revalidated": 1
         },
