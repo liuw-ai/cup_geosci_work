@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T12:46:09Z",
+  "generated_at": "2026-10-19T12:53:35Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "13d20ea33d5372e36dcdb0903e6ddbbff5d91632",
+  "git_sha": "406bb32bd2016744567eae98edad48dda99651c9",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -152,12 +152,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "5f040af1811dd7846b00cdc252bdc22350dea3e7d9d574e8fb1a266b6ceb99c2"
+        "sha256": "7f17f0ddda5786c5ecce000bc40b076b38812ae5b7b4f52b1b328fe2f5e45463"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "b7f5438f497af33fc2e1e0e7a2627bf17188eb9bc712b7c27b34f11b4562ca36"
+        "sha256": "84830f0982e65b6c5025610acd24f5de935e7519a209f5d9899ab65f7133dde8"
       }
     ],
     "metadata_documents": [
@@ -213,7 +213,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "b7f5438f497af33fc2e1e0e7a2627bf17188eb9bc712b7c27b34f11b4562ca36"
+      "sha256": "84830f0982e65b6c5025610acd24f5de935e7519a209f5d9899ab65f7133dde8"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -265,7 +265,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "9c970924e922810acdc1cd95bbd7ef437044a6c73e4fd0c67b0c922bc78c8263"
+      "sha256": "ab5768958a4a9baab628ba42dc3a8543d4be746453d5c8ab4af8bde8fdea8683"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -313,7 +313,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "5f040af1811dd7846b00cdc252bdc22350dea3e7d9d574e8fb1a266b6ceb99c2"
+      "sha256": "7f17f0ddda5786c5ecce000bc40b076b38812ae5b7b4f52b1b328fe2f5e45463"
     }
   },
   "code_inventory": [
