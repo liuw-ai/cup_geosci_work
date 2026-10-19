@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from scripts.audit_phase4_current_state import (
@@ -41,6 +42,24 @@ def test_current_readme_does_not_duplicate_stale_database_totals() -> None:
     # literal here would become a second, conflicting source of truth.
     assert "正式数据库只读审计为 3948 条岗位" not in content
     assert "formal_third_party_job_count" not in content
+
+
+def test_current_phase4_record_matches_local_validation_test_count() -> None:
+    validation = json.loads(
+        Path("docs/current/phase4-local-validation-2026-10-19.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    record = Path("docs/current/PHASE4-2026-10-17.md").read_text(encoding="utf-8")
+
+    passed = int(validation["tests"]["passed"])
+    skipped = int(validation["tests"]["skipped"])
+    failed = int(validation["tests"]["failed"])
+    warnings = int(validation["tests"]["warnings"])
+    expected = (
+        f"`{passed} passed, {skipped} skipped, {failed} failed, {warnings} warning`"
+    )
+    assert expected in record
 
 
 def test_current_audit_excludes_all_metadata_outputs_from_input_status() -> None:
