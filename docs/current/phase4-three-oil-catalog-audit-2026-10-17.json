@@ -33,10 +33,9 @@
   "name_match_semantics": "name_exact_match and name_evidence_status only describe the normalized catalog-to-organization_registry mapping; they do not prove an external legal-registration or independently archived official-name review. This mapping does not prove that review.",
   "external_identity_evidence_review": {
     "status": "partial",
-    "verified_unit_count": 22,
-    "pending_unit_count": 42,
+    "verified_unit_count": 21,
+    "pending_unit_count": 43,
     "verified_unit_ids": [
-      "cnpc-daqing",
       "sinopec-shengli",
       "sinopec-jianghan",
       "sinopec-petroleum-exploration-production-research",
@@ -3367,17 +3366,7 @@
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
       "external_identity_evidence": {
-        "status": "verified",
-        "basis": "official_job_detail_employer_record",
-        "evidence_scope": "official_job_detail_employer_name",
-        "source_ids": [
-          "cupb-career"
-        ],
-        "evidence_urls": [
-          "https://career.cup.edu.cn/campus/view/id/460397"
-        ],
-        "matched_job_count": 1,
-        "independent_unit_recruitment_portal_proven": false
+        "status": "pending"
       },
       "channels": [
         {
