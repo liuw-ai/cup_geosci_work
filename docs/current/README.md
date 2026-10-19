@@ -2,13 +2,13 @@
 
 本文件定义新项目应采用的目录边界和 Docker 文件保存方式。历史产物已在本地移动到 `history/`，未删除、不覆盖，也不作为新生产输入。
 
-## 当前事实来源（2026-10-19 本地复核）
+## 当前事实来源（2026-10-20 本地复核）
 
 当前岗位和代码事实以 [phase4-current-state-audit-2026-10-18.json](phase4-current-state-audit-2026-10-18.json) 及最新 [Phase 4 Manifest](phase4-release-manifest.json) 为准；该审计在 2026-10-19 重新只读复核。Phase 3、RESET、CODEBASE 和更早的快照已移入 `history/docs/`，仅作为历史证据；其中的数量、哈希和测试结果不能覆盖当前审计。历史文件不删除、不作为生产输入，任何迁移或清理都必须保留原始哈希。
 
 当前本地事实的边界以 [phase4-current-state-audit-2026-10-18.json](phase4-current-state-audit-2026-10-18.json) 和 [phase4-release-manifest.json](phase4-release-manifest.json) 的哈希绑定数据为准，不在本 README 重复维护易过期的岗位数量。当前已记录 8 条候选线索，其中 1 条已通过官方企业公告回溯并形成正式学生岗位，4 条华图发现已回溯至中国地质调查局官方附件并形成 4 条正式岗位，另有 2 条华图→河北省地球物理勘查有限公司候选已完成官方公告、岗位表和期限核验并形成 2 条正式岗位；服务器未部署，自动化保持暂停，第三方发现链接不作为学生申请链接。
 
-另有一份隔离的华图→中国石油集团川庆钻探页面证据报告，逐行记录 12 条候选；该页面只有 `cnpc.com.cn` 邮箱，没有可核验的中国石油官方公告、岗位表或 HTTP 报名 URL，因此 12 条不计入数据库候选数量、不进入学生端，状态保持 `pending`。
+另有一份隔离的华图→中国石油集团川庆钻探页面证据报告，逐行记录 12 条候选；该页面只有 `cnpc.com.cn` 邮箱，没有可核验的中国石油官方公告、岗位表或 HTTP 报名 URL，因此 12 条不计入数据库候选数量、不进入学生端，状态保持 `pending`。南京水利科学研究院的华图发现页已回溯到可读的官方公告和岗位表 URL，但附件下载受 robots/TLS/浏览器权限限制，只有公告级证据，未创建候选或正式岗位；详见 `phase4-third-party-nhri-browser-recheck-2026-10-20.json`。
 
 Phase 4 的逐项完成状态见 [phase4-completion-audit-2026-10-19.json](phase4-completion-audit-2026-10-19.json)，目录和 Docker 边界见 [phase4-workspace-layout-audit-2026-10-19.json](phase4-workspace-layout-audit-2026-10-19.json)。审计为 `not_complete` 时，阻断项仍然有效，不能仅因测试通过而发布。
 
