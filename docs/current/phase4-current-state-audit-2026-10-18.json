@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T05:27:23Z",
+  "generated_at": "2026-10-19T05:32:38Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "3a750b39bab7fafe8e62957445dd2988b5c64718",
-  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
+  "git_sha": "0a098b35020ea55505795a35d10d7b12b6da4c89",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -263,7 +263,7 @@
     },
     "phase4_third_party_huatu_shanxi_geology_group": {
       "path": "docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json",
-      "sha256": "81808418c668aeb800754e01982ef01905f56762edb5a45512858ce2e146c7b0"
+      "sha256": "4a8efc86d1267e56059af8553a03b0b9923df9f116d9a479ab0c1c9e200f1b0e"
     },
     "phase4_third_party_huatu_hbdk_geophysics": {
       "path": "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json",
