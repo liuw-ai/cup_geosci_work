@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T16:17:18Z",
+  "generated_at": "2026-10-19T16:45:44Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "a2dc47e1e149a91cc77e112e6b4290001073bc7c",
+  "git_sha": "0f59c832f820a128d1009d409cb06fe299a8eb13",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -152,12 +152,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "33e84e5ae9febee38f388ea5be0e4c91ed34a37736ffbff6bfae25bc2c02274c"
+        "sha256": "3469f627c4eedd7a5bd87073e6d153b52688b8e51ca1429a6739e0e2c06e9538"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "732c7cb00596d9e3c4c5794c6437b67caae5604f174f9b62e88304bea242b535"
+        "sha256": "2d9456e9951c61469cd71df6e2432036feb3218d784b45bcabb57b1ea86c1d7e"
       }
     ],
     "metadata_documents": [
@@ -213,7 +213,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "732c7cb00596d9e3c4c5794c6437b67caae5604f174f9b62e88304bea242b535"
+      "sha256": "2d9456e9951c61469cd71df6e2432036feb3218d784b45bcabb57b1ea86c1d7e"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -265,7 +265,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "db1fe9c50cf0dfc02df5808c9327d085794c55a1d5f0963c3966b81ac83355ae"
+      "sha256": "5f77f37793b3f230f90bacef99438b41568519766312b1f56e6e04a278bea0f3"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -325,7 +325,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "33e84e5ae9febee38f388ea5be0e4c91ed34a37736ffbff6bfae25bc2c02274c"
+      "sha256": "3469f627c4eedd7a5bd87073e6d153b52688b8e51ca1429a6739e0e2c06e9538"
     }
   },
   "code_inventory": [
@@ -976,8 +976,8 @@
     },
     {
       "path": "tests/test_browser_worker_cli.py",
-      "line_count": 40,
-      "sha256": "dbd038d9981ca6019b26d5b2ca47e037cfb1b991dc935546c2ea26031dcfbf44"
+      "line_count": 44,
+      "sha256": "a0621ace1800f95ec74b0dc6bddc54094f4dd956f6c5bb6ae87c5c712981768e"
     },
     {
       "path": "tests/test_business_date.py",
