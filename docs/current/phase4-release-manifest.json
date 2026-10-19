@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T01:22:08Z",
+  "generated_at": "2026-10-19T01:42:55Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "55d0346b21e3372e0f002e31a41b6d522c1ee629",
+  "git_sha": "5e63256fa9aa9556ee8d28f8cd5fe112066084b4",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -14,7 +14,7 @@
   "release_env_sha256": "49f2c7be91ff3cfadb0cc0f88a255e3e7d3ac2a1194f1e719d0207a85b79175d",
   "config_sha256": {
     "discovery_sources": "2c7a5f5b1b6735f451e4306e929f23063db7bd07df3e41ddc24dfe08fd82001e",
-    "sources": "eac1bf2692955db358dff043dc16e5afc87cb6971256a8ee39a8bf23058e10cc",
+    "sources": "249cda48732868d427f2447a37c135524b979654e56a87a98f914df05a141ff2",
     "third_party_adapters": "2132d53195307a2b8710e651196adf0aa0cc7fe07081a6634407d60e75b49872",
     "organization_registry": "0e83da24ac0489b77064f6968568c6dde8f67eea7e847a4f2a8c493b65bdb35c",
     "three_oil_catalog": "a6d1979d99b5b027590acb07d4883910bca074c301ed8dc0e134bfdf57991394",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "b298d942e68c86766954ead4b6f9c87953898e43a018acb0d48941d4541ea81b",
-    "phase4_document_consistency": "b298d942e68c86766954ead4b6f9c87953898e43a018acb0d48941d4541ea81b",
+    "phase4_current_state_audit": "d087067c90e35b7ad49bdffbfe0fddc268ddc90ab92ebe8add20fa5bb48b5876",
+    "phase4_document_consistency": "d087067c90e35b7ad49bdffbfe0fddc268ddc90ab92ebe8add20fa5bb48b5876",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -41,7 +41,7 @@
     "phase4_cnpc_entry_recheck": "217753c1c99e2663308f27ce7a2cc9cc1606a63b73d6017cddf813f261bc0be1",
     "phase4_third_party_access_recheck": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d",
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
-    "phase4_third_party_funnel": "07c70492a5dd871a24f0f94b27c15c3a631c8242d5da025b635f38d538815f6c",
+    "phase4_third_party_funnel": "6739f32850b817fd51eaf3eeeb6c2bf73b2325bc172c5f0cfd4f5bf9bc21155a",
     "phase4_local_web_recheck": "c4558f29ff36ea1ccf00709837e34cc3a40e5b20d459aaa40ceca1ba4fd6ec08",
     "phase4_local_web_live_validation": "ce5ca5f99d6b8b1042411127069d64e51f44ff795bcf53a100022de5a56585ef",
     "phase4_huatu_table_discovery": "59f0496bc2696f0ecbc71a70210b208f4c3fe6cfd6791ca991bf5785dca7ce8d",
@@ -50,16 +50,17 @@
     "phase4_third_party_huatu_shanxi_geology_group": "81808418c668aeb800754e01982ef01905f56762edb5a45512858ce2e146c7b0",
     "phase4_third_party_huatu_hbdk_geophysics": "f2ef342fc4c3a8f1cde1c0f0b439f333dfd5b10a52975560c1baa964d0f1adf3",
     "phase4_third_party_hbdk_official_table": "f262411bc456d975df53c3062d7b36486c51439870029e63e228ac036af40853",
-    "phase4_main_record": "e21620326174da8d139488823125e683161632aa121ef697c016168a4f6caa8b",
-    "phase4_local_validation": "9734601c78d8b63d64c1bb16cfacb479e216567543d61b01cdec0ea39b6fe5b9",
+    "phase4_third_party_hbdk_candidate_registration": "c08ec2945d0acd039d3fddbe566a38a37409b5fb572fda3ece31c248d1f54f10",
+    "phase4_main_record": "fa55b05503135c90218d87dbbb91a2841c9412910b161e15421c91e0ea287c4c",
+    "phase4_local_validation": "28cb8e99fa5037226319cd4399fac479be6750d9e81a346b262e5703297d7d4e",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "42ac32b0b953e34f70793fa78aa8d1c2b2637cd72cdc974da4453b3c2a423807",
-    "phase4_completion_audit": "59d14553341aa2855377b61041be6e57329497dcd3eee31447b565901889c990",
-    "phase4_workspace_layout": "b87dab5fd2746c7e1cf9fa6688166f36ae85d1346f32f8b91d2b372c49e8e151"
+    "phase4_completion_audit": "a4af8c36dc2d6515dd9b39d675927cb084b4c36c1ad44f061f4f371617bd110e",
+    "phase4_workspace_layout": "a80c9c5751d615ac651c186927040d7d6c78502cd3c0d7a8ad94694ebbdbab5e"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
+    "sha256": "128aa6f3d365f063be467067fbe6fea7ba5b3f56473f4f887a86347e5d4160df",
     "integrity_check": "ok",
     "job_count": 3952,
     "status_counts": {
@@ -84,7 +85,7 @@
       "source_unavailable": 111
     },
     "student_visible_total": 629,
-    "candidate_lead_count": 6,
+    "candidate_lead_count": 8,
     "formal_third_party_job_count": 5,
     "pre_third_party_candidate_backup": {
       "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
@@ -116,7 +117,7 @@
       "note": "This is the overall student-visible target; it is separate from third-party expansion readiness."
     },
     "third_party_expansion": {
-      "candidate_leads": 6,
+      "candidate_leads": 8,
       "formal_jobs": 5,
       "status": "in_progress",
       "release_gate": "third_party_batch_expansion_incomplete"
@@ -127,11 +128,11 @@
     "validated_at": "2026-10-19T09:02:01+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "d907e3b15bd02710a15cd173294e16a6e49ddf84",
-    "git_sha_at_validation": "d907e3b15bd02710a15cd173294e16a6e49ddf84",
+    "git_sha_before_metadata_commit": "18f77fbd0eae998fb9a10e758de652dc958aeac9",
+    "git_sha_at_validation": "18f77fbd0eae998fb9a10e758de652dc958aeac9",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1089,
+      "passed": 1091,
       "skipped": 4,
       "failed": 0,
       "warnings": 0,
@@ -153,11 +154,11 @@
     },
     "database": {
       "path": "runtime/job_hub.sqlite3",
-      "sha256_before_tests": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
-      "sha256_after_tests": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
+      "sha256_before_tests": "128aa6f3d365f063be467067fbe6fea7ba5b3f56473f4f887a86347e5d4160df",
+      "sha256_after_tests": "128aa6f3d365f063be467067fbe6fea7ba5b3f56473f4f887a86347e5d4160df",
       "integrity_check": "ok",
       "jobs": 3952,
-      "candidate_leads": 6,
+      "candidate_leads": 8,
       "phase3_withdrawal_audits": 3947,
       "student_read_as_of_date": "2026-10-19",
       "student_visible_total": 629,
@@ -172,7 +173,7 @@
     },
     "third_party": {
       "isolated_huatu_trial_candidate_leads": 11,
-      "formal_database_private_candidate_leads": 6,
+      "formal_database_private_candidate_leads": 8,
       "formal_jobs_created": 5,
       "formal_third_party_job_ids": [
         5432,
@@ -209,8 +210,19 @@
         "backup_path": "backups/job_hub-pre-phase4-conversion-audit-20261018.sqlite3",
         "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
       },
+      "hbdk_candidate_registration": {
+        "candidate_lead_ids": [
+          7,
+          8
+        ],
+        "official_rows": 2,
+        "formal_jobs_created": 0,
+        "backup_path": "backups/job_hub-pre-phase4-hbdk-candidates-20261019.sqlite3",
+        "backup_sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
+        "report": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
+      },
       "robots_gate_targeted_tests": "22 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py, tests/test_phase4_completion_audit.py)",
-      "source_disabled_visibility_regression": "included in full 1089-test run; disabled source remains student-visible without withdrawal",
+      "source_disabled_visibility_regression": "included in full 1091-test run; disabled source remains student-visible without withdrawal",
       "robots_or_permission_blocked_followups": 1,
       "huatu_discovery_scan": {
         "discovered_announcements": 65,
@@ -278,7 +290,7 @@
     "registered_sources": 12,
     "batch_candidate_sources": 5,
     "table_adapters": 5,
-    "real_candidate_leads_in_database": 6,
+    "real_candidate_leads_in_database": 8,
     "private_candidate_evidence": "docs/current/phase4-third-party-candidate-2026-10-18.json",
     "official_attachment_trial": "docs/current/phase4-third-party-cgs-2026-10-18.json",
     "formal_jobs_published": 5,

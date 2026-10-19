@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T01:22:06Z",
+  "generated_at": "2026-10-19T01:42:53Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -9,7 +9,7 @@
       "deadline_passed": 51
     },
     "phase3_withdrawal_audits": 3947,
-    "candidate_leads": 6,
+    "candidate_leads": 8,
     "published_candidate_leads": 5
   },
   "student_target": {
@@ -60,7 +60,7 @@
         "docs/current/phase4-third-party-huatu-nanjing-land-center-2026-10-19.json"
       ],
       "facts": {
-        "candidate_leads": 6,
+        "candidate_leads": 8,
         "published_leads": 5,
         "failed_leads": 0
       }
@@ -108,6 +108,11 @@
         "deadline_policy": "relative_working_days_unresolved",
         "official_row_evidence": true,
         "formal_jobs_created": 0,
+        "candidate_leads_registered": 2,
+        "candidate_lead_ids": [
+          7,
+          8
+        ],
         "student_visible": false,
         "publication_status": "candidate_only"
       }
@@ -173,7 +178,7 @@
         "docs/current/phase4-local-validation-2026-10-19.json"
       ],
       "facts": {
-        "passed": 1089,
+        "passed": 1091,
         "skipped": 4,
         "failed": 0,
         "formal_database_stable": true
