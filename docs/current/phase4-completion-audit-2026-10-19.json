@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T19:38:51Z",
+  "generated_at": "2026-10-19T19:54:41Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -94,6 +94,24 @@
         "download_permission": "denied_by_browser_policy",
         "row_level_evidence_obtained": false,
         "publication_status": "not_published"
+      }
+    },
+    {
+      "id": "third_party_nhri_browser_recheck",
+      "status": "partial",
+      "evidence": [
+        "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
+        "docs/current/phase4-third-party-nhri-browser-recheck-2026-10-20.json"
+      ],
+      "facts": {
+        "official_notice_url": "https://www.nhri.cn/tzgg/zpxx/art/2026/art_01a4e42a69594ee88fac503a5cce8df5.html",
+        "official_table_url_observed": true,
+        "deadline_date": "2026-11-20",
+        "attachment_status": "source_unavailable",
+        "row_level_evidence_obtained": false,
+        "candidate_leads_created": 0,
+        "formal_jobs_created": 0,
+        "publication_boundary": "公告级事实保留；未取得逐行官方表格证据，不进入正式岗位库。"
       }
     },
     {
