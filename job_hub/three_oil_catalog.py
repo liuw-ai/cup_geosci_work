@@ -9,6 +9,7 @@ in this catalog is therefore not automatically crawlable or publishable.
 from __future__ import annotations
 
 import json
+import hashlib
 import socket
 from collections import Counter
 from datetime import datetime, timezone
@@ -23,6 +24,12 @@ from job_hub.contracts import ContractValidationError
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CATALOG_PATH = PROJECT_ROOT / "data" / "three_oil_organization_catalog.json"
+PHASE4_CNOOC_UNIT_EVIDENCE_PATH = (
+    PROJECT_ROOT
+    / "docs"
+    / "current"
+    / "phase4-cnooc-unit-display-evidence-2026-10-19.json"
+)
 GROUP_IDS = frozenset({"cnpc", "sinopec", "cnooc"})
 FORBIDDEN_GROUP_IDS = frozenset({"pipechina"})
 FALLBACK_CHANNEL_REQUIREMENTS = (
@@ -51,6 +58,13 @@ FALLBACK_CHANNEL_REQUIREMENTS = (
         ),
     },
 )
+
+
+def _sha256_file(path: Path) -> str:
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        return ""
 # ``role`` is retained in the JSON for backwards-compatible imports, but the
 # public/admin contract uses these neutral, inspectable organization roles.
 # They describe what the unit does, not an assumed legal "party A/B" relation.
@@ -228,6 +242,73 @@ def three_oil_catalog_summary(
     }
 
 
+def build_phase4_external_identity_evidence(
+    catalog: dict[str, Any] | None = None,
+    *,
+    evidence_path: Path = PHASE4_CNOOC_UNIT_EVIDENCE_PATH,
+) -> dict[str, dict[str, Any]]:
+    """Map exact official employer records to formal catalog units.
+
+    The CNOOC group portal evidence contains exact employer display names and
+    official job application URLs for 16 units.  It proves an official portal
+    employer record, not an independent unit recruitment website or a legal
+    registration extract.  Keep this evidence separate from the catalog so
+    abbreviated or ambiguous names remain pending instead of being guessed.
+    """
+    if not evidence_path.is_file():
+        return {}
+    try:
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    observed_units = evidence.get("units")
+    if not isinstance(observed_units, list):
+        return {}
+
+    def normalized(value: Any) -> str:
+        return "".join(str(value or "").lower().split())
+
+    catalog_units = {
+        normalized(unit["name"]): unit
+        for unit in three_oil_units(catalog or _cached_catalog(str(CATALOG_PATH)))
+    }
+    display_evidence_relpath = evidence_path.relative_to(PROJECT_ROOT).as_posix()
+    full_job_evidence_relpath = str(
+        evidence.get("full_job_evidence_file")
+        or "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json"
+    ).replace("\\", "/")
+    full_job_evidence_path = PROJECT_ROOT / full_job_evidence_relpath
+    full_job_evidence_sha256 = str(evidence.get("full_job_evidence_sha256") or "")
+    result: dict[str, dict[str, Any]] = {}
+    for observed in observed_units:
+        if not isinstance(observed, dict):
+            continue
+        observed_name = str(observed.get("canonical_name") or "").strip()
+        unit = catalog_units.get(normalized(observed_name))
+        if unit is None or unit["group_id"] != "cnooc":
+            continue
+        result[str(unit["id"])] = {
+            "status": "verified",
+            "basis": "official_portal_employer_record",
+            "evidence_scope": "official_group_portal_active_unit_job_cards",
+            "display_evidence_file": display_evidence_relpath,
+            "display_evidence_sha256": _sha256_file(evidence_path),
+            "job_evidence_file": full_job_evidence_relpath,
+            "job_evidence_sha256": full_job_evidence_sha256,
+            "job_evidence_file_present": full_job_evidence_path.is_file(),
+            "observed_name": observed_name,
+            "observed_job_count": int(observed.get("job_count") or 0),
+            "official_application_url": str(
+                observed.get("first_official_application_url") or ""
+            ),
+            "official_application_url_count": int(
+                observed.get("unique_official_application_url_count") or 0
+            ),
+            "verified_at": str(evidence.get("verified_at") or "2026-10-19"),
+        }
+    return result
+
+
 def build_three_oil_dns_audit(
     catalog: dict[str, Any] | None = None,
     *,
@@ -307,6 +388,7 @@ def build_three_oil_catalog_audit(
     organization_registry: dict[str, Any] | None = None,
     source_records: list[dict[str, Any]] | tuple[dict[str, Any], ...] | None = None,
     job_records: Iterable[dict[str, Any]] | None = None,
+    external_identity_evidence: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Compare the scope catalog with individually reviewed runtime entries.
 
@@ -317,6 +399,7 @@ def build_three_oil_catalog_audit(
     subsidiary has an independently verified adapter.
     """
     payload = catalog or _cached_catalog(str(CATALOG_PATH))
+    external_identity_evidence = external_identity_evidence or {}
     if organization_registry is None:
         from job_hub.organizations import load_organization_registry
 
@@ -455,6 +538,10 @@ def build_three_oil_catalog_audit(
                     and normalized(unit["name"]) == normalized(organization.get("canonical_name"))
                     else "manual_name_review_required"
                 ),
+                "external_identity_evidence": dict(
+                    external_identity_evidence.get(unit["id"], {})
+                    or {"status": "pending"}
+                ),
                 "channels": channel_rows,
                 "official_channel_count": len(channel_rows),
                 "automation_ready_enabled": bool(eligible),
@@ -540,6 +627,14 @@ def build_three_oil_catalog_audit(
     name_unverified = [row for row in rows if not row["name_exact_match"]]
     mapped = [row for row in rows if row["registry_match"] != "missing"]
     ready = [row for row in rows if row["automation_ready_enabled"]]
+    external_identity_verified = [
+        row
+        for row in rows
+        if str(row["external_identity_evidence"].get("status") or "") == "verified"
+    ]
+    external_identity_pending = [
+        row for row in rows if row not in external_identity_verified
+    ]
     fallback_summary: dict[str, dict[str, int]] = {}
     for group_id in sorted(GROUP_IDS):
         group_rows = [row for row in rows if row["group_id"] == group_id]
@@ -640,8 +735,18 @@ def build_three_oil_catalog_audit(
             "This mapping does not prove that review."
         ),
         "external_identity_evidence_review": {
-            "status": "pending",
-            "pending_unit_count": int(three_oil_catalog_summary(payload)["unit_count"]),
+            "status": (
+                "verified"
+                if not external_identity_pending
+                else "partial"
+                if external_identity_verified
+                else "pending"
+            ),
+            "verified_unit_count": len(external_identity_verified),
+            "pending_unit_count": len(external_identity_pending),
+            "verified_unit_ids": [
+                row["catalog_id"] for row in external_identity_verified
+            ],
             "required_evidence": [
                 "official group or unit page",
                 "official recruitment notice or portal employer record",

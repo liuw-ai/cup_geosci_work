@@ -12,6 +12,7 @@ from job_hub.contracts import ContractValidationError
 from job_hub.cli import main as cli_main
 from job_hub.db import Database
 from job_hub.three_oil_catalog import (
+    build_phase4_external_identity_evidence,
     build_three_oil_catalog_audit,
     build_three_oil_dns_audit,
     load_three_oil_catalog,
@@ -117,6 +118,37 @@ def test_real_three_oil_catalog_units_are_all_mapped_to_the_registry() -> None:
     assert riped["fallback_entry_coverage"]["group_or_shared_recruitment_platform"] is True
     assert riped["unit_scoped_recruitment_entry_count"] == 0
     assert riped["shared_recruitment_entry_count"] == 1
+
+
+def test_phase4_cnooc_employer_records_are_distinct_from_unit_portals() -> None:
+    evidence = build_phase4_external_identity_evidence(load_three_oil_catalog())
+    assert len(evidence) == 16
+    assert all(
+        item["basis"] == "official_portal_employer_record"
+        for item in evidence.values()
+    )
+    assert all(
+        item["display_evidence_file"]
+        and item["display_evidence_sha256"]
+        and item["job_evidence_file"]
+        and item["job_evidence_sha256"]
+        and item["job_evidence_file_present"]
+        for item in evidence.values()
+    )
+    report = build_three_oil_catalog_audit(
+        load_three_oil_catalog(),
+        organization_registry=load_organization_registry(),
+        external_identity_evidence=evidence,
+    )
+    identity = report["external_identity_evidence_review"]
+    assert identity["status"] == "partial"
+    assert identity["verified_unit_count"] == 16
+    assert identity["pending_unit_count"] == 48
+    assert all(
+        item["external_identity_evidence"]["status"] == "verified"
+        for item in report["items"]
+        if item["catalog_id"] in evidence
+    )
 
 
 def test_three_oil_catalog_audit_cli_does_not_write_database(monkeypatch, tmp_path) -> None:

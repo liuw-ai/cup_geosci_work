@@ -117,6 +117,7 @@ from job_hub.organizations import (
     organization_matrix_summary,
 )
 from job_hub.three_oil_catalog import (
+    build_phase4_external_identity_evidence,
     build_three_oil_catalog_audit,
     build_three_oil_dns_audit,
     load_three_oil_catalog,
@@ -1656,7 +1657,10 @@ def main() -> None:
             page_size=None,
             as_of_date=coverage_snapshot_date(settings),
         )
-        result = build_three_oil_catalog_audit(job_records=jobs)
+        result = build_three_oil_catalog_audit(
+            job_records=jobs,
+            external_identity_evidence=build_phase4_external_identity_evidence(),
+        )
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(

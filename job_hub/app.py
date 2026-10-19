@@ -49,7 +49,10 @@ from job_hub.organizations import (
     organization_matrix_rows,
     organization_matrix_summary,
 )
-from job_hub.three_oil_catalog import build_three_oil_catalog_audit
+from job_hub.three_oil_catalog import (
+    build_phase4_external_identity_evidence,
+    build_three_oil_catalog_audit,
+)
 from job_hub.national_sources import (
     load_national_source_matrix,
     national_source_matrix_rows,
@@ -859,6 +862,7 @@ def create_app(settings: Settings | None = None) -> Flask:
                 organization_registry=load_organization_registry(),
                 source_records=database.list_sources(),
                 job_records=jobs,
+                external_identity_evidence=build_phase4_external_identity_evidence(),
             )
         )
 
