@@ -22,6 +22,8 @@ def test_browser_workers_handle_help_without_starting_a_worker() -> None:
             check=False,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
         assert result.returncode == 0, (module, result.stdout, result.stderr)
@@ -35,6 +37,8 @@ def test_browser_workers_reject_unknown_cli_arguments() -> None:
             check=False,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
         assert result.returncode == 2, (module, result.stdout, result.stderr)
