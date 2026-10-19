@@ -44,9 +44,9 @@ def test_current_readme_does_not_duplicate_stale_database_totals() -> None:
     assert "formal_third_party_job_count" not in content
 
 
-def test_current_phase4_record_matches_local_validation_test_count() -> None:
+def test_current_phase4_record_matches_latest_local_validation_test_count() -> None:
     validation = json.loads(
-        Path("docs/current/phase4-local-validation-2026-10-19.json").read_text(
+        Path("docs/current/phase4-local-validation-2026-10-20.json").read_text(
             encoding="utf-8"
         )
     )
