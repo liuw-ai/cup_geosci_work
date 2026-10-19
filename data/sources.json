@@ -92,7 +92,7 @@
       "listing_page_limit": 6,
       "deduplicate_by_title": true,
       "allow_shared_source_url": true,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "skip_expired_before_persist": true,
       "require_detail_content": true,
       "minimum_detail_characters": 80,
@@ -260,10 +260,10 @@
       ],
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "skip_expired_before_persist": true,
       "request_interval_seconds": 1.0,
-      "note": "主入口为中国地质调查局官网“招聘信息”栏目；只从官方公告中保留明确招聘、人才引进、博士后、科研助理或实习信息。动态目录会长期保留旧公告：有明确截止日或超过45天且未说明期限的条目只计入扫描过滤，不写入私有复核队列。发现的官方附件先进入私有复核队列，采购、招标和流程公示会被排除。"
+      "note": "主入口为中国地质调查局官网“招聘信息”栏目；只从官方公告中保留明确招聘、人才引进、博士后、科研助理或实习信息。动态目录会长期保留旧公告：有明确截止日或超过90天且未说明期限的条目只计入扫描过滤，不写入私有复核队列。发现的官方附件先进入私有复核队列，采购、招标和流程公示会被排除。"
     }
   },
   {
@@ -586,7 +586,7 @@
       "require_capture_manifest": true,
       "allow_missing_deadline": true,
       "deadline_policy": "official_portal_may_use_rolling_recruitment",
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "reconcile_missing_external_ids": true,
       "split_location_rows": true,
       "source_id": "cnooc-career-browser",
@@ -788,7 +788,7 @@
       "detail_exclude_patterns": [],
       "minimum_relevance": 40,
       "max_items": 18,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "infer_employer_from_title": true,
       "request_interval_seconds": 1.2,
       "note": "已核验北京市人力资源和社会保障局事业单位公开招聘栏目。只读取公开招聘、人才引进、博士后、科研助理和实习公告；原公告与公开附件是唯一依据，过期和非地学相关信息不会作为在招岗位展示。"
@@ -853,7 +853,7 @@
       "allow_international_public": false,
       "minimum_detail_characters": 250,
       "require_location_evidence": true,
-      "undated_open_window_days": 60,
+      "undated_open_window_days": 90,
       "deadline_policy": "official_page_does_not_publish_a_fixed_deadline",
       "minimum_relevance": 45,
       "request_interval_seconds": 1.2,
@@ -932,10 +932,10 @@
       "exclude_patterns": ["拟录用|拟接收|录用公示|采购|招标|中标|会议|培训"],
       "minimum_relevance": 42,
       "max_items": 18,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "skip_expired_before_persist": true,
       "request_interval_seconds": 1.2,
-      "note": "已核验的人力资源公开栏目。只从中国煤炭地质总局官方网站读取可回溯的招聘公告；正文必须达到地学专业相关度阈值后才入库。栏目会保留历史公告，已由官方截止日期或45天无期限窗口判定过期的条目只计入扫描指标，不进入私有复核队列。"
+      "note": "已核验的人力资源公开栏目。只从中国煤炭地质总局官方网站读取可回溯的招聘公告；正文必须达到地学专业相关度阈值后才入库。栏目会保留历史公告，已由官方截止日期或90天无截止日期窗口判定过期的条目只计入扫描指标，不进入私有复核队列。"
     }
   },
   {
@@ -959,7 +959,7 @@
       "exclude_patterns": ["拟录用|拟接收|录用公示|采购|招标|中标|会议|培训"],
       "minimum_relevance": 40,
       "max_items": 16,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "infer_employer_from_title": true,
       "note": "已核验的人力资源公开栏目，robots.txt 允许抓取。只保留可回溯的公开招聘公告，并按地学专业相关度阈值过滤。"
@@ -988,7 +988,7 @@
       "minimum_relevance": 40,
       "max_items": 30,
       "page_size": 50,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "deadline_policy": "official_portal_may_use_rolling_recruitment",
       "request_interval_seconds": 1.2,
       "allowed_hosts": ["app.mokahr.com"],
@@ -1018,7 +1018,7 @@
       "minimum_relevance": 40,
       "max_items": 30,
       "page_size": 50,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "deadline_policy": "official_portal_may_use_rolling_recruitment",
       "request_interval_seconds": 1.2,
       "allowed_hosts": ["join.zjky.cn"],
@@ -1094,7 +1094,7 @@
       "allow_international_public": false,
     "max_items": 4,
       "request_interval_seconds": 1.0,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "allow_shared_source_url": true,
       "note": "官方单页公告。仅按明确的编号岗位行拆分；地质岗位报名期限为2026-09-27，环境工程岗位不符合地球科学学院专业边界，因此不会发布。"
     }
@@ -1323,7 +1323,7 @@
       "require_major_match": true,
       "minimum_relevance": 40,
       "max_items": 4,
-      "undated_open_window_days": 120,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "2026-09-22 直连核验的中国石油集团东方地球物理勘探有限责任公司公开招聘页。页面原文含 Job Title、Work Location、学历与地学专业要求及 Date；未发布固定截止日时按 120 天窗口管理，不把静态旧页面永久标成在招。"
     }

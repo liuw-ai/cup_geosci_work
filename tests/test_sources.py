@@ -123,8 +123,15 @@ def test_observed_historical_notice_feeds_skip_expired_rows_before_review() -> N
 
     for source_id in ("ccgc-careers", "hunan-geology-institute", "cupb-career"):
         config = sources[source_id]["config"]
-        assert config["undated_open_window_days"] == 45
+        assert config["undated_open_window_days"] == 90
         assert config["skip_expired_before_persist"] is True
+
+    # The confirmed policy is global: a configured undated window is always
+    # 90 Asia/Shanghai calendar days. ``null`` remains reserved for sources
+    # whose official contract does not use a finite undated window.
+    for source in [*primary_sources, *provincial_sources]:
+        value = source.get("config", {}).get("undated_open_window_days")
+        assert value in {None, 90}, source["id"]
 
 
 def test_verified_provincial_position_sources_opt_into_daily_evidence_recheck() -> None:

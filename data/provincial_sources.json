@@ -30,7 +30,7 @@
       "content_selector": "article, main, .TRS_Editor, .content, body",
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验北京市规划和自然资源委员会人事信息公开栏目与详情页结构。只发布明确招聘、人才引进、博士后、科研助理和实习公告。"
     }
@@ -67,7 +67,7 @@
       "content_selector": "article, main, .TRS_Editor, .content, body",
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验天津市规划和自然资源局招考录用公开栏目与详情页结构。"
     }
@@ -115,7 +115,7 @@
       "detail_exclude_patterns": [],
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验河北省地矿局官方最新公告栏目、robots 规则和详情页正文容器。只发布独立招聘公告；拟聘、体检、面试、递补和公务员后续流程通知不会作为岗位发布。"
     }
@@ -204,7 +204,7 @@
       "content_selector": "article, main, .TRS_Editor, .content, body",
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验上海市规划和自然资源局人事信息公开栏目。"
     }
@@ -238,7 +238,7 @@
       "content_selector": "article, main, .TRS_Editor, .content, body",
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验江苏省自然资源厅公告公示栏目；仅接受带有正式招聘语义的公告。"
     }
@@ -272,7 +272,7 @@
       "content_selector": "article, main, .TRS_Editor, .content, body",
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已将入口更正为浙江省自然资源厅干部人事考录栏目，并核验公开详情页。"
     }
@@ -306,7 +306,7 @@
       "content_selector": "article, main, .TRS_Editor, .content, body",
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验安徽省自然资源厅通知公告栏目；只采集正式招聘类条目。"
     }
@@ -340,7 +340,7 @@
       "content_selector": "article, main, .TRS_Editor, .content, body",
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验福建省自然资源厅人事信息公开栏目与详情页结构。"
     }
@@ -399,7 +399,7 @@
         "detail_exclude_patterns": [],
       "minimum_relevance": 40,
       "max_items": 20,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验山东省地矿局官方人事栏目、robots 规则、嵌套公告列表和详情页。仅发布仍在报名期且具备地学专业证据的公告。"
     }
@@ -437,7 +437,7 @@
       "detail_exclude_patterns": [],
       "minimum_relevance": 40,
       "max_items": 12,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已通过公开页面和离线回归夹具验证省属事业单位招聘公告、岗位汇总表附件与详情结构；2026-09-26 服务器直连确认 robots 与正式栏目可访问。仍须以公告/附件中的专业、学历、地点、截止日期证据为发布门禁。"
     }
@@ -486,7 +486,7 @@
       "detail_exclude_patterns": [],
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验河南省地质局官网通知公告栏目、robots 规则、详情页标题和正文容器。仅发布独立招聘公告，面试、体检、递补、资格确认及公示不会被发布为岗位。"
     }
@@ -523,7 +523,7 @@
       "content_selector": "article, main, .TRS_Editor, .content, body",
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验湖北省自然资源厅招考录用公开栏目与详情页结构。"
     }
@@ -572,10 +572,10 @@
       "detail_exclude_patterns": [],
       "minimum_relevance": 40,
       "max_items": 20,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "skip_expired_before_persist": true,
       "request_interval_seconds": 1.2,
-      "note": "已核验湖南省地质院政府网站通知公告栏目、robots 规则和详情正文容器。汇总招聘公告只有出现地学专业证据时才发布；已由官方截止日期或45天无期限窗口判定过期的历史公告只计入扫描指标，不进入私有复核队列。"
+      "note": "已核验湖南省地质院政府网站通知公告栏目、robots 规则和详情正文容器。汇总招聘公告只有出现地学专业证据时才发布；已由官方截止日期或90天无截止日期窗口判定过期的历史公告只计入扫描指标，不进入私有复核队列。"
     }
   },
   {
@@ -729,7 +729,7 @@
       "detail_exclude_patterns": [],
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已在服务器直连核验正式人事信息栏目、公告详情和岗位表证据；岗位级样例已进入政府职位台账。准考证、缴费、补充和招聘流程结果通知已预先列为排除项。"
     }
@@ -791,7 +791,7 @@
       "allow_shared_source_url": true,
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验安徽省地矿局官方通知公告、robots 规则、相对链接规范化和详情正文。只保留独立招聘公告；未列明目标专业或学历时，学生画像会标为需核验原公告。"
     }
@@ -838,7 +838,7 @@
       "detail_exclude_patterns": [],
       "minimum_relevance": 40,
       "max_items": 24,
-      "undated_open_window_days": 45,
+      "undated_open_window_days": 90,
       "request_interval_seconds": 1.2,
       "note": "已核验宁夏地质局官方人事栏目、robots 规则、公告列表和详情正文。标题白名单只保留独立招聘公告，详情需存在地学专业证据后才会公开。"
     }
