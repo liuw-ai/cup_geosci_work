@@ -89,6 +89,7 @@ def build_report() -> dict[str, Any]:
     nhri_browser_recheck = _read("docs/current/phase4-third-party-nhri-browser-recheck-2026-10-20.json")
     cnpc_bgp_entry_recheck = _read("docs/current/phase4-cnpc-bgp-entry-recheck-2026-10-20.json")
     cnooc_energy_development_browser_recheck = _read("docs/current/phase4-cnooc-energy-development-browser-recheck-2026-10-20.json")
+    cnooc_portal_unit_display_recheck = _read("docs/current/phase4-cnooc-portal-unit-display-recheck-2026-10-20.json")
     hbdk_official_table = _read("docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json")
     hbdk_registration = _read("docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
@@ -257,6 +258,11 @@ def build_report() -> dict[str, Any]:
                     "student_job_created": cnpc_bgp_entry_recheck.get("policy_checks", {}).get("student_job_created"),
                     "cnooc_energy_development_browser_status": cnooc_energy_development_browser_recheck.get("browser_result", {}).get("status"),
                     "cnooc_energy_development_entry_created": cnooc_energy_development_browser_recheck.get("entry_decision", {}).get("unit_specific_entry_url_created"),
+                    "latest_cnooc_portal_unit_display": {
+                        "observed_unit_count": cnooc_portal_unit_display_recheck.get("observed_unit_count"),
+                        "independent_portals_proven": cnooc_portal_unit_display_recheck.get("interpretation", {}).get("independent_unit_recruitment_portals_proven"),
+                        "catalog_units_not_observed": cnooc_portal_unit_display_recheck.get("formal_catalog_units_not_observed_in_current_unit_tabs", []),
+                    },
                 },
             },
         },

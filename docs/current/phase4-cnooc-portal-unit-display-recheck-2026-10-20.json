@@ -1,0 +1,44 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-20T04:22:36+08:00",
+  "verification_mode": "read_only_browser_dom_after_dynamic_load",
+  "source": {
+    "group_portal_url": "https://cnooc.zhaopin.com/job/index.html",
+    "page_title": "中国海洋石油集团有限公司2027届校园招聘",
+    "portal_type": "official_group_recruitment_portal",
+    "displayed_registration_date": "2026年9月30日00:00开放报名"
+  },
+  "observed_units": [
+    "中海石油（中国）有限公司天津分公司",
+    "中海石油（中国）有限公司深圳分公司",
+    "中海石油（中国）有限公司湛江分公司",
+    "中海石油（中国）有限公司海南分公司",
+    "中海石油（中国）有限公司上海分公司",
+    "中国海洋石油国际有限公司",
+    "中海油研究总院有限责任公司",
+    "中联煤层气有限责任公司",
+    "中海石油气电集团有限责任公司",
+    "中海石油炼化有限责任公司",
+    "中海石油化学股份有限公司",
+    "中海油田服务股份有限公司",
+    "海洋石油工程股份有限公司",
+    "中海油能源发展股份有限公司",
+    "中海油国际贸易有限责任公司",
+    "中海石油（中国）有限公司北京新能源分公司"
+  ],
+  "observed_unit_count": 16,
+  "formal_catalog_units_not_observed_in_current_unit_tabs": [
+    "中海石油（中国）有限公司福建分公司",
+    "中海石油（中国）有限公司",
+    "中国海洋石油有限公司",
+    "中国海洋石油集团有限公司"
+  ],
+  "interpretation": {
+    "group_portal_unit_display_evidence": true,
+    "independent_unit_recruitment_portals_proven": false,
+    "official_application_urls_are_job_level_only": true,
+    "unit_specific_entry_urls_created": 0,
+    "student_jobs_created": 0,
+    "policy": "共享招聘页的单位标签只证明官方集团页展示；不把共享 URL 复制为单位独立招聘入口。未展示不等于单位不存在或没有招聘。"
+  }
+}
