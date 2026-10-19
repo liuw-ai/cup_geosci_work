@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T20:02:57Z",
+  "generated_at": "2026-10-19T20:14:52Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -203,6 +203,12 @@
           "legal_identity_verified_count": 0,
           "unit_specific_entry_verified_count": 0,
           "formal_catalog_additions": 0
+        },
+        "latest_bgp_entry_recheck": {
+          "catalog_id": "cnpc-bgp",
+          "entry_status": "unit_specific_entry_verified",
+          "recruitment_url": "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml",
+          "student_job_created": false
         }
       }
     },
