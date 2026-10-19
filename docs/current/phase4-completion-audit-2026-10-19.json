@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T19:33:05Z",
+  "generated_at": "2026-10-19T19:38:51Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -71,10 +71,13 @@
       "evidence": [
         "docs/current/phase4-third-party-access-recheck-2026-10-19.json",
         "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
-        "docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json"
+        "docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json",
+        "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json"
       ],
       "facts": {
         "formal_jobs": 7,
+        "pending_chuanqing_rows": 12,
+        "pending_chuanqing_official_recovery": "pending",
         "blocker": "remaining sources or table assets are inaccessible under current TLS/robots/browser policy",
         "latest_discovery_boundary": "第三方发现页可达，但同批官方公告返回 404、用人单位站点 TLS 失败且没有逐行官方证据；不把 13 人转换为岗位。"
       }
