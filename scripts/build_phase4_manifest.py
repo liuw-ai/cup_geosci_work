@@ -30,6 +30,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-local-web-recheck-2026-10-19.json",
     ":!docs/current/phase4-local-web-live-validation-2026-10-19.json",
     ":!docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
+    ":!docs/current/phase4-third-party-official-recovery-recheck-2026-10-19.json",
     ":!docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
     ":!docs/current/phase4-completion-audit-2026-10-19.json",
     ":!docs/current/phase4-workspace-layout-audit-2026-10-19.json",
@@ -199,6 +200,7 @@ def main() -> None:
     lead_recheck = ROOT / "docs" / "current" / "phase4-third-party-lead-recheck-2026-10-19.json"
     cnpc_entry_recheck = ROOT / "docs" / "current" / "phase4-cnpc-entry-recheck-2026-10-19.json"
     access_recheck = ROOT / "docs" / "current" / "phase4-third-party-access-recheck-2026-10-19.json"
+    official_recovery_recheck = ROOT / "docs" / "current" / "phase4-third-party-official-recovery-recheck-2026-10-19.json"
     local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
     third_party_funnel = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
     local_web_recheck = ROOT / "docs" / "current" / "phase4-local-web-recheck-2026-10-19.json"
@@ -281,6 +283,7 @@ def main() -> None:
             "phase4_third_party_lead_recheck": sha256(lead_recheck),
             "phase4_cnpc_entry_recheck": sha256(cnpc_entry_recheck),
             "phase4_third_party_access_recheck": sha256(access_recheck),
+            "phase4_third_party_official_recovery_recheck": sha256(official_recovery_recheck),
             "phase4_local_repair": sha256(local_repair),
             "phase4_third_party_funnel": sha256(third_party_funnel),
             "phase4_local_web_recheck": sha256(local_web_recheck),
