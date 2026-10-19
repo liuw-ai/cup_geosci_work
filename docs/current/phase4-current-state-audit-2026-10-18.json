@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T06:13:20Z",
+  "generated_at": "2026-10-19T06:34:38Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "59253e586f8e321d21fb031c87588b8c1bb64f6e",
-  "git_status_porcelain": "",
+  "git_sha": "e0ab69460b019e0dd2cfa83c502ad510573626e0",
+  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -269,7 +269,7 @@
     },
     "phase4_huatu_table_discovery": {
       "path": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
-      "sha256": "59f0496bc2696f0ecbc71a70210b208f4c3fe6cfd6791ca991bf5785dca7ce8d"
+      "sha256": "a53c48542c56638fadf7bac29ccd0832ad40ef67e4d4ed225e429febda785084"
     },
     "phase4_huatu_discovery_scan": {
       "path": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
@@ -301,7 +301,7 @@
     },
     "phase4_three_oil_homepage_probe": {
       "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
-      "sha256": "57f72fa775c926004f9e5510382456f96053aa444cdd5b1c14a86fa7e30fda11"
+      "sha256": "8abeae2961123584e33e22102108cfad5ade5d0e94ff11255b52835b6f0313ad"
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
