@@ -231,6 +231,7 @@ def main() -> None:
     completion_audit = ROOT / "docs" / "current" / "phase4-completion-audit-2026-10-19.json"
     workspace_layout = ROOT / "docs" / "current" / "phase4-workspace-layout-audit-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
+    huatu_cnpc_chuanqing_payload = json.loads(huatu_cnpc_chuanqing.read_text(encoding="utf-8"))
     working_tree_dirty = dirty()
     release_blockers = []
     if working_tree_dirty:
@@ -374,6 +375,9 @@ def main() -> None:
             "hbdk_geophysics_visual_evidence": "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json",
             "hebei_water_geology_discovery": "docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json",
             "cnpc_chuanqing_discovery_evidence": "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
+            "cnpc_chuanqing_candidate_rows": len(huatu_cnpc_chuanqing_payload.get("candidates", [])),
+            "cnpc_chuanqing_official_recovery_status": huatu_cnpc_chuanqing_payload.get("official_recovery", {}).get("status"),
+            "cnpc_chuanqing_formal_jobs_created": 0,
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
         "three_oil_entry_evidence": {
