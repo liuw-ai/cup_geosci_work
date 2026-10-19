@@ -533,11 +533,10 @@ def government_position_quality_report(
     reference = reference.astimezone(timezone.utc)
     evaluation_reference = reference if now is not None else None
     fallback_fresh = _registry_fresh(str(payload.get("as_of") or ""), reference, max_age_hours)
-    # A stale reviewed ledger correctly removes rows from the student-facing
-    # list, but that must not be reported as a successful empty scan.  Track
-    # the source IDs whose otherwise eligible rows now need a fresh official
-    # check.  This also catches a source whose last successful verification
-    # has aged out while its old snapshot remains in the registry.
+    # Verification health is reported separately from publication authority.
+    # A stale reviewed ledger or a failed recheck must not remove a previously
+    # verified row from the student-facing list.  Keep the source-level health
+    # signal for operators without turning it into a lifecycle decision.
     pending_evidence_sources = sorted(
         {
             str(item.get("source_id") or "")
@@ -551,7 +550,7 @@ def government_position_quality_report(
                 payload.get("source_opening_at") or {},
                 reference=evaluation_reference,
             )
-            and not _source_evidence_is_current(
+            and not _source_evidence_health_is_current(
                 str(item.get("source_id") or ""),
                 source_verifications or {},
                 reference,
@@ -601,7 +600,7 @@ def government_position_quality_report(
             for item in records
             if str(item.get("source_id") or "") in manual_only_sources
             and item.get("record_status") == "verified_open"
-            and not _source_evidence_is_current(
+            and not _source_evidence_health_is_current(
                 str(item.get("source_id") or ""),
                 source_verifications or {},
                 reference,
@@ -694,7 +693,7 @@ def government_position_quality_report(
                 for item in open_records
                 if _requires_current_availability_confirmation(item)
             ),
-            "blocked_records": sum(
+            "health_pending_records": sum(
                 1
                 for item in records
                 if item.get("record_status") == "verified_open"
@@ -713,7 +712,10 @@ def government_position_quality_report(
                     max_age_hours,
                 )
             ),
-            "rule": "招满即止岗位必须有未过期的当前名额确认；公告或附件仍可访问不足以发布。",
+            # Kept as a compatibility field for existing reports.  Health
+            # revalidation never blocks the public read set under Phase 4.
+            "blocked_records": 0,
+            "rule": "招满即止仅作为官方截止策略标签；来源名额复核是健康告警，不改变学生端可见性。",
         },
         "verified_scan_no_current_match": scan_no_current_match,
         "source_activation_tasks": source_activation_tasks(
@@ -727,7 +729,7 @@ def government_position_quality_report(
         "source_evidence_verifications": {
             "total": sum(verification_counts.values()),
             "by_status": dict(sorted(verification_counts.items())),
-            "note": "来源复核失败不等于无岗位；超过新鲜度窗口后才会从学生端清退。",
+            "note": "来源复核失败或超过新鲜度窗口不等于无岗位；历史官方证据仍可继续展示，并标记来源状态。",
         },
         "source_refresh_gate": {
             "required_successful_refreshes": 2,
@@ -871,7 +873,7 @@ def source_activation_tasks(
         ):
             status = "scheduled"
         else:
-            fresh = _source_evidence_is_current(
+            fresh = _source_evidence_health_is_current(
                 source_id,
                 verification_map,
                 reference,
@@ -927,13 +929,14 @@ def current_publishable_position_records(
     artifact_manifest_available: bool = True,
     now: datetime | None = None,
 ) -> list[dict[str, Any]]:
-    """Return current rows with per-source official-evidence freshness.
+    """Return rows eligible for the current student-facing read set.
 
-    ``as_of`` is retained as a short bootstrap window for a reviewed ledger.
-    Once the worker has rechecked a source, its own ``last_success_at`` becomes
-    the freshness clock. A temporary source failure preserves that timestamp;
-    it is not represented as a successful empty scan. An explicit official
-    cancellation withdraws the source immediately.
+    Source verification timestamps are health evidence, not vacancy lifetime.
+    A stale or temporarily unavailable recheck therefore keeps a previously
+    verified row eligible; the caller can expose the corresponding health label
+    separately. Only the official lifecycle boundaries (opening window,
+    deadline, explicit cancellation, and controlled attachment evidence) are
+    applied here.
     """
     target = date.fromisoformat(today)
     verification_map = source_verifications or {}
@@ -976,18 +979,6 @@ def current_publishable_position_records(
             requires_manual_confirmation=(
                 str(item.get("source_id") or "") in manual_only_sources
             ),
-        ):
-            continue
-        # A surviving notice and attachment prove that the official recruitment
-        # material still exists.  For "招满即止" rows, however, they do not prove
-        # that this particular position still has a vacancy.  Require a separate,
-        # expiring confirmation of current availability before showing the row to
-        # students.  This deliberately fails closed instead of treating a missing
-        # status update as an open position.
-        if _requires_current_availability_confirmation(item) and not _source_current_availability_is_fresh(
-            verification_map.get(str(item.get("source_id") or "")),
-            reference,
-            max_age_hours,
         ):
             continue
         rows.append(dict(item))
@@ -1047,8 +1038,17 @@ def upcoming_position_records(
             artifact_manifest_available=artifact_manifest_available,
         ):
             continue
+        source_id = str(item.get("source_id") or "")
+        if source_id in manual_only_sources:
+            verification = verification_map.get(source_id) or {}
+            # Before the official opening instant, a static planning ledger is
+            # not enough for the public upcoming page.  This is a scheduling
+            # gate, not a freshness gate: once the window opens, a later
+            # source failure must not hide the previously verified row.
+            if str(verification.get("status") or "") != "verified":
+                continue
         if not _source_evidence_is_current(
-            str(item.get("source_id") or ""),
+            source_id,
             verification_map,
             reference,
             max_age_hours,
@@ -1182,17 +1182,42 @@ def _source_evidence_is_current(
     *,
     requires_manual_confirmation: bool = False,
 ) -> bool:
+    """Return whether a row still has publication authority.
+
+    The historical function name is kept for callers and reports, but age is
+    deliberately ignored. ``source_unavailable`` and ``not_configured`` mean
+    that the latest check could not complete; when ``last_success_at`` exists,
+    the old official evidence still authorizes visibility. ``withdrawn`` is
+    reserved for an explicit official cancellation/closure/replacement result.
+    The reviewed ledger already supplies the official row evidence, so manual
+    recheck mode does not turn a transient access failure into a visibility
+    failure.  Only an explicit official withdrawal blocks publication.
+    """
+    verification = verifications.get(source_id)
+    if not verification:
+        # The reviewed registry itself is official evidence.
+        return True
+    status = str(verification.get("status") or "").strip()
+    if status == "withdrawn":
+        return False
+    return True
+
+
+def _source_evidence_health_is_current(
+    source_id: str,
+    verifications: dict[str, dict[str, Any]],
+    reference: datetime,
+    max_age_hours: float | None,
+    fallback_fresh: bool,
+    *,
+    requires_manual_confirmation: bool = False,
+) -> bool:
+    """Report freshness health without changing publication authority."""
     verification = verifications.get(source_id)
     if requires_manual_confirmation and not verification:
         return False
     if not verification:
         return fallback_fresh
-    if requires_manual_confirmation and str(verification.get("status") or "") != "verified":
-        return False
-    # A withdrawn or unconfigured source has no current publication authority.
-    # Do not fall back to the static ledger in either case: otherwise removing
-    # a broken source configuration could leave its old rows visible until the
-    # registry age window happens to expire.
     if str(verification.get("status") or "") in {"withdrawn", "not_configured"}:
         return False
     raw_success = str(verification.get("last_success_at") or "").strip()
@@ -1206,17 +1231,19 @@ def _source_evidence_is_current(
         success = success.replace(tzinfo=timezone.utc)
     if max_age_hours is None:
         return True
-    age_hours = max(0.0, (reference - success.astimezone(timezone.utc)).total_seconds() / 3600)
+    age_hours = max(
+        0.0,
+        (reference - success.astimezone(timezone.utc)).total_seconds() / 3600,
+    )
     return age_hours <= float(max_age_hours)
 
 
 def _requires_current_availability_confirmation(record: dict[str, Any]) -> bool:
     """Return whether source evidence alone cannot establish a live vacancy.
 
-    A fixed official deadline supplies a public time boundary.  "Open until
-    filled" does not: an unchanged notice may remain online after every seat is
-    taken.  These records therefore need an explicit, fresh confirmation that
-    the source still accepts applications for the recorded vacancies.
+    The field remains available for health reporting and operator follow-up.
+    It must not be used as a student-visibility gate: an unavailable or stale
+    source check is not evidence that an otherwise valid official job closed.
     """
     return str(record.get("deadline_policy") or "") == "open_until_filled"
 

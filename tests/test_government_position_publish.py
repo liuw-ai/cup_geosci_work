@@ -42,7 +42,7 @@ def test_current_publishable_rows_require_open_explicit_match() -> None:
     assert [item["id"] for item in current_publishable_position_records(registry, today="2026-09-26")] == ["open"]
 
 
-def test_stale_review_snapshot_is_not_publishable() -> None:
+def test_stale_review_snapshot_remains_publishable_with_health_label_only() -> None:
     registry = {
         "as_of": "2026-09-25",
         "records": [
@@ -56,11 +56,11 @@ def test_stale_review_snapshot_is_not_publishable() -> None:
         ],
     }
 
-    assert current_publishable_position_records(
+    assert [item["id"] for item in current_publishable_position_records(
         registry,
         today="2026-09-28",
         max_age_hours=48,
-    ) == []
+    )] == ["open"]
 
 
 def test_future_official_application_window_is_not_published_early() -> None:

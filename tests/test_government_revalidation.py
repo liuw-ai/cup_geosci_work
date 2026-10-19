@@ -490,14 +490,14 @@ def test_manual_only_recheck_performs_zero_http_requests(tmp_path) -> None:
     assert session.calls == 0
 
 
-def test_manual_only_source_never_uses_registry_fallback_as_publication_evidence() -> None:
+def test_manual_only_source_keeps_reviewed_registry_rows_visible_on_recheck_gap() -> None:
     manual_sources = {"official-test-source"}
-    assert current_publishable_position_records(
+    assert len(current_publishable_position_records(
         _registry(),
         today="2026-09-28",
         max_age_hours=None,
         manual_confirmation_source_ids=manual_sources,
-    ) == []
+    )) == 1
 
     confirmed = current_publishable_position_records(
         _registry(),
@@ -992,7 +992,7 @@ def test_failed_refresh_resets_automatic_activation_streak(tmp_path, monkeypatch
     assert worker.database.get_source("official-test-source")["enabled"] is False
 
 
-def test_source_recheck_failure_preserves_last_success_but_eventually_expires(tmp_path) -> None:
+def test_source_recheck_failure_preserves_last_success_without_visibility_expiry(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
     database.initialize()
@@ -1035,7 +1035,7 @@ def test_source_recheck_failure_preserves_last_success_but_eventually_expires(tm
         source_verifications={"official-test-source": verification},
         now=datetime(2026, 10, 1, 2, tzinfo=timezone.utc),
     )
-    assert expired == []
+    assert len(expired) == 1
 
 
 def test_explicit_official_withdrawal_immediately_blocks_publication() -> None:
@@ -1055,7 +1055,7 @@ def test_explicit_official_withdrawal_immediately_blocks_publication() -> None:
     assert records == []
 
 
-def test_unconfigured_source_immediately_blocks_publication() -> None:
+def test_unconfigured_source_does_not_hide_reviewed_official_rows() -> None:
     records = current_publishable_position_records(
         _registry(),
         today="2026-09-28",
@@ -1069,7 +1069,7 @@ def test_unconfigured_source_immediately_blocks_publication() -> None:
         now=datetime(2026, 9, 28, 1, tzinfo=timezone.utc),
     )
 
-    assert records == []
+    assert len(records) == 1
 
 
 def test_recheck_stops_after_the_configured_range_limit(tmp_path) -> None:

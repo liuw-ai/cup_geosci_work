@@ -28,12 +28,11 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
 
     assert report["source_assessments"] == 12
     assert report["records"] == 157
-    # The 41 rolling "招满即止" rows have official table evidence, but an
-    # unchanged notice cannot prove that a seat remains. They stay out of the
-    # public current count until an explicit, fresh availability confirmation.
-    assert report["verified_open_records"] == 9
+    # Rolling rows with official evidence remain visible. Current-availability
+    # rechecks are health signals, not a student-visibility gate.
+    assert report["verified_open_records"] == 50
     assert report["verified_upcoming_records"] == 91
-    assert report["explicit_student_matches"] == 9
+    assert report["explicit_student_matches"] == 50
     assert report["source_failures_or_pending"] == 5
     assert report["availability_confirmation_required_sources"] == [
         "gansu-geology-bureau",
@@ -41,7 +40,8 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
         "hunan-geology-institute",
         "ningxia-geology-bureau",
     ]
-    assert report["open_until_filled_policy"]["blocked_records"] == 41
+    assert report["open_until_filled_policy"]["current_records"] == 41
+    assert report["open_until_filled_policy"]["blocked_records"] == 0
     assert report["verified_scan_no_current_match"] == 3
     assert "不能把缺少岗位解释为无岗位" in report["scan_interpretation"]
 
@@ -358,7 +358,7 @@ def test_source_activation_tasks_make_future_batches_operationally_visible() -> 
     assert cea_expired["status"] == "expired"
 
 
-def test_stale_registry_report_excludes_rows_from_current_open_count() -> None:
+def test_stale_registry_report_keeps_rows_in_current_open_count() -> None:
     registry = load_position_registry(PROJECT_ROOT / "data" / "government_position_registry.json")
     report = government_position_quality_report(
         registry,
@@ -367,10 +367,16 @@ def test_stale_registry_report_excludes_rows_from_current_open_count() -> None:
     )
 
     assert report["registry_freshness"] == "stale"
-    assert report["verified_open_records"] == 0
-    assert report["explicit_student_matches"] == 0
-    assert "hunan-geology-institute" in report["pending_evidence_sources"]
-    assert report["source_failures_or_pending"] > 0
+    assert report["verified_open_records"] == 50
+    assert report["explicit_student_matches"] == 50
+    assert report["pending_evidence_sources"] == [
+        "cgs-notices",
+        "gansu-geology-bureau",
+        "hubei-natural-resources",
+        "hunan-geology-institute",
+        "ningxia-geology-bureau",
+    ]
+    assert report["source_failures_or_pending"] == 6
     assert "不能把缺少岗位解释为无岗位" in report["scan_interpretation"]
 
 
@@ -523,7 +529,7 @@ def test_stale_source_verification_is_reported_as_pending_without_duplicate_fail
 
     assert report["pending_evidence_sources"] == ["official-test-source"]
     assert report["source_failures_or_pending"] == 1
-    assert report["verified_open_records"] == 0
+    assert report["verified_open_records"] == 1
 
 
 def test_provincial_civil_service_scans_keep_closed_or_non_student_entries_out() -> None:
@@ -787,7 +793,7 @@ def test_open_until_filled_row_rejects_invented_fixed_deadline() -> None:
         validate_position_record(record)
 
 
-def test_open_until_filled_rows_require_fresh_current_availability_confirmation() -> None:
+def test_open_until_filled_rows_remain_visible_without_fresh_current_availability_confirmation() -> None:
     registry = {
         "as_of": "2026-10-03",
         "records": [
@@ -820,13 +826,13 @@ def test_open_until_filled_rows_require_fresh_current_availability_confirmation(
         }
     }
 
-    assert current_publishable_position_records(
+    assert [row["id"] for row in current_publishable_position_records(
         registry,
         today="2026-10-03",
         max_age_hours=48,
         source_verifications=source_verifications,
         now=datetime.fromisoformat("2026-10-03T01:00:00+00:00"),
-    ) == []
+    )] == ["rolling-position"]
 
     source_verifications["official-test-source"]["availability_confirmed_at"] = (
         "2026-10-03T00:30:00Z"
@@ -847,4 +853,4 @@ def test_open_until_filled_rows_require_fresh_current_availability_confirmation(
         source_verifications=source_verifications,
         now=datetime.fromisoformat("2026-10-06T01:00:00+00:00"),
     )
-    assert expired_confirmation == []
+    assert [row["id"] for row in expired_confirmation] == ["rolling-position"]
