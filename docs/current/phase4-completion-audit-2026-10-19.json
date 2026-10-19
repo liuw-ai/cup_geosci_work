@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T20:19:36Z",
+  "generated_at": "2026-10-19T20:23:49Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -210,7 +210,17 @@
           "recruitment_url": "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml",
           "student_job_created": false,
           "cnooc_energy_development_browser_status": "source_unavailable",
-          "cnooc_energy_development_entry_created": false
+          "cnooc_energy_development_entry_created": false,
+          "latest_cnooc_portal_unit_display": {
+            "observed_unit_count": 16,
+            "independent_portals_proven": false,
+            "catalog_units_not_observed": [
+              "中海石油（中国）有限公司福建分公司",
+              "中海石油（中国）有限公司",
+              "中国海洋石油有限公司",
+              "中国海洋石油集团有限公司"
+            ]
+          }
         }
       }
     },
