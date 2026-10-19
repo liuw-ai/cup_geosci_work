@@ -272,13 +272,17 @@ def build_phase4_external_identity_evidence(
         normalized(unit["name"]): unit
         for unit in three_oil_units(catalog or _cached_catalog(str(CATALOG_PATH)))
     }
-    display_evidence_relpath = evidence_path.relative_to(PROJECT_ROOT).as_posix()
+    try:
+        display_evidence_relpath = evidence_path.relative_to(PROJECT_ROOT).as_posix()
+    except ValueError:
+        display_evidence_relpath = str(evidence_path)
     full_job_evidence_relpath = str(
         evidence.get("full_job_evidence_file")
         or "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json"
     ).replace("\\", "/")
     full_job_evidence_path = PROJECT_ROOT / full_job_evidence_relpath
     full_job_evidence_sha256 = str(evidence.get("full_job_evidence_sha256") or "")
+    full_job_evidence_actual_sha256 = _sha256_file(full_job_evidence_path)
     result: dict[str, dict[str, Any]] = {}
     for observed in observed_units:
         if not isinstance(observed, dict):
@@ -287,14 +291,21 @@ def build_phase4_external_identity_evidence(
         unit = catalog_units.get(normalized(observed_name))
         if unit is None or unit["group_id"] != "cnooc":
             continue
+        hash_matches = bool(
+            full_job_evidence_sha256
+            and full_job_evidence_actual_sha256
+            and full_job_evidence_sha256.lower() == full_job_evidence_actual_sha256.lower()
+        )
         result[str(unit["id"])] = {
-            "status": "verified",
+            "status": "verified" if hash_matches else "pending",
             "basis": "official_portal_employer_record",
             "evidence_scope": "official_group_portal_active_unit_job_cards",
             "display_evidence_file": display_evidence_relpath,
             "display_evidence_sha256": _sha256_file(evidence_path),
             "job_evidence_file": full_job_evidence_relpath,
             "job_evidence_sha256": full_job_evidence_sha256,
+            "job_evidence_actual_sha256": full_job_evidence_actual_sha256,
+            "job_evidence_hash_matches": hash_matches,
             "job_evidence_file_present": full_job_evidence_path.is_file(),
             "observed_name": observed_name,
             "observed_job_count": int(observed.get("job_count") or 0),

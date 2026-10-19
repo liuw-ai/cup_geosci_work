@@ -132,6 +132,8 @@ def test_phase4_cnooc_employer_records_are_distinct_from_unit_portals() -> None:
         and item["display_evidence_sha256"]
         and item["job_evidence_file"]
         and item["job_evidence_sha256"]
+        and item["job_evidence_actual_sha256"]
+        and item["job_evidence_hash_matches"] is True
         and item["job_evidence_file_present"]
         for item in evidence.values()
     )
