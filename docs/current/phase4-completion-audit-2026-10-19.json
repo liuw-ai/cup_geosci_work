@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T21:48:58Z",
+  "generated_at": "2026-10-19T22:17:29Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -204,6 +204,12 @@
           "unit_specific_entry_verified_count": 0,
           "formal_catalog_additions": 0
         },
+        "latest_cnooc_geoscience_job_evidence": {
+          "source_url": "https://cnooc.zhaopin.com/job/index.html",
+          "selected_unit": "中海石油（中国）有限公司天津分公司",
+          "geoscience_job_count": 3,
+          "independent_unit_entry_proven": false
+        },
         "latest_bgp_entry_recheck": {
           "catalog_id": "cnpc-bgp",
           "entry_status": "unit_specific_entry_verified",
@@ -228,13 +234,13 @@
       "id": "isolated_local_regression",
       "status": "pass",
       "evidence": [
-        "docs/current/phase4-local-validation-2026-10-19.json"
+        "docs/current/phase4-local-validation-2026-10-20.json"
       ],
       "facts": {
         "passed": 1102,
         "skipped": 4,
         "failed": 0,
-        "formal_database_stable": true
+        "formal_database_stable": false
       }
     },
     {

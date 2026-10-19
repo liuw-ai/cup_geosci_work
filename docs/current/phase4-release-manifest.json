@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T21:49:00Z",
+  "generated_at": "2026-10-19T22:17:30Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "5571ef22a0faaa433b162565caa66d986eb55826",
+  "git_sha": "7cb052ea740761ab255a0394437f2389647f2473",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "91f42d1076508eb78b06d8b6c2e2b0934ea2604cf083b99c01e5f3ae9c03d17a",
-    "phase4_document_consistency": "91f42d1076508eb78b06d8b6c2e2b0934ea2604cf083b99c01e5f3ae9c03d17a",
+    "phase4_current_state_audit": "2c513288bf1c5f069cea6e2151bd2baf9dd6380e99c31d35305286d302cfb93b",
+    "phase4_document_consistency": "2c513288bf1c5f069cea6e2151bd2baf9dd6380e99c31d35305286d302cfb93b",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -45,7 +45,7 @@
     "phase4_third_party_access_recheck": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d",
     "phase4_third_party_official_recovery_recheck": "5467d6a16316293d4790ec17292ac8c2bc8fadb91ae9ce72cd3949b9f136ad8a",
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
-    "phase4_third_party_funnel": "7f514b2413ddbecdc55913c1bcd2d03ed81701dade6bd9f4fd89282b06558517",
+    "phase4_third_party_funnel": "bc0a31fbe83036a34f5ef4e2eec0f083c1dc51e0e799bd27bc13b2bf7b8096cb",
     "phase4_local_web_recheck": "1ce3aa772e20a7216ecf9bcc86f54c121ef1457fa896804f636d73a3aacb017f",
     "phase4_local_web_live_validation": "fb033fe9e0e12cf702e5c716a23f98b19818b6d12de6aee23f6b4890bcdb4920",
     "phase4_huatu_table_discovery": "35e2b08f1fc24c194cdf9407cf1597fe2338b819601a4fadd2ced8e218399930",
@@ -59,12 +59,13 @@
     "phase4_third_party_hbdk_candidate_registration": "da07a5893f136d88905135a88fa6b83606dff3d70731e14e3eb76a01d8e9d7ea",
     "phase4_third_party_huatu_cnpc_chuanqing": "10bf8f283ba174b573edfa0336a8b941320ad439462af4c7cc2ef7900f9d8fc0",
     "phase4_main_record": "7778db35b673b6187b6fca7fc9842d6acd54e616cf20b5c410f7059251ee0305",
-    "phase4_local_validation": "40bed7b90905fa03d0840c20cca0c64bde8e3ea8bc5f38e90f9699fd36163ffd",
+    "phase4_local_validation": "267ad3bef4abb2faaeff3f8e1c4b41651bd1f7d46105c4fcd3950927fbf12630",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "947f1ab9f3138fa743a10301b8b5fb8618ca66281d11a0f1cde7d344c2479ae2",
     "phase4_three_oil_observed_roster": "aecf4e0083cf5fcbbee1c6af3446771611b2043e2bdecc60bab8f5463be52b9a",
-    "phase4_completion_audit": "d0531156b9903f6162551d6f7c214459f20020c5bf30d08ea778950e4d27a76d",
-    "phase4_workspace_layout": "b6f2c2206f0bd70259b042d0ae18bdda525f76c3d324929099b8f840a4bfde87"
+    "phase4_cnooc_geoscience_job_evidence": "2600afb33bad17ba4201e69dc7ecd25f30359b8d79b661a2b3595165eab99491",
+    "phase4_completion_audit": "1db5eb2322c43976bc50e401e864bb14416d70ec3e6683974719dc28581c35fa",
+    "phase4_workspace_layout": "ca0f6eb72c3ac3e22d6f914b2ff4fcc2580779314038d0b5ad7db8033259dd14"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -138,121 +139,23 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-19T21:41:07Z",
+    "validated_at": "2026-10-20T06:14:00+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "2a2139cc646fb29ccd3be7fa76cb3dbfcda713cf",
-    "git_sha_at_validation": "2a2139cc646fb29ccd3be7fa76cb3dbfcda713cf",
+    "git_sha": "ed82177",
     "tests": {
-      "command": "pytest -q",
+      "command": "python -m pytest -q",
       "passed": 1102,
       "skipped": 4,
       "failed": 0,
       "warnings": 0,
-      "warning_scope": null
-    },
-    "compose": {
-      "path": "deploy/compose.yaml",
-      "command": "docker compose -f deploy/compose.yaml config --quiet",
-      "config_check": "passed"
-    },
-    "docker_build_check": {
-      "commands": [
-        "docker buildx build --check --file deploy/docker/Dockerfile.app .",
-        "docker buildx build --check --file deploy/docker/Dockerfile.browser ."
-      ],
-      "status": "not_run_local_daemon_unavailable",
-      "error": "Docker Desktop Linux daemon is not reachable at npipe:////./pipe/dockerDesktopLinuxEngine",
-      "note": "No image build or dependency download was attempted."
-    },
-    "database": {
-      "path": "runtime/job_hub.sqlite3",
-      "sha256_before_tests": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
-      "sha256_after_tests": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
-      "integrity_check": "ok",
-      "jobs": 3954,
-      "candidate_leads": 8,
-      "phase3_withdrawal_audits": 3947,
-      "student_read_as_of_date": "2026-10-19",
-      "student_visible_total": 631,
-      "student_visible_layer_counts": {
-        "exact_match": 140,
-        "broad_geoscience_match": 7,
-        "incomplete_but_basic_match": 373,
-        "source_unavailable": 111
-      },
-      "formal_database_stable_during_tests": true,
-      "current_hash_incident": "docs/current/phase4-local-db-write-incident-2026-10-19.json"
-    },
-    "third_party": {
-      "isolated_huatu_trial_candidate_leads": 11,
-      "formal_database_private_candidate_leads": 8,
-      "formal_jobs_created": 7,
-      "formal_third_party_job_ids": [
-        5432,
-        5433,
-        5434,
-        5435,
-        5436,
-        5437,
-        5438
-      ],
-      "formal_database_unchanged": false,
-      "formal_database_change_note": "Historical local promotions created jobs 5432-5438; a later local Flask process using the formal path was stopped and recorded separately. This historical mutation is not part of the current test run.",
-      "formal_database_stable_during_current_tests": true,
-      "cgs_attachment_trial": {
-        "candidate_lead_ids": [
-          3,
-          4,
-          5,
-          6
-        ],
-        "official_rows": 4,
-        "formal_jobs_created": 4,
-        "formal_job_ids": [
-          5433,
-          5434,
-          5435,
-          5436
-        ],
-        "backup_path": "backups/job_hub-pre-phase4-cgs-promotion-20261018.sqlite3",
-        "backup_sha256": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702"
-      },
-      "conversion_audit_backfill": {
-        "candidate_lead_id": 2,
-        "conversion_status": "official_content_verified",
-        "conversion_checked_at": "2026-10-18T10:02:26Z",
-        "backup_path": "backups/job_hub-pre-phase4-conversion-audit-20261018.sqlite3",
-        "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
-      },
-      "hbdk_candidate_registration": {
-        "candidate_lead_ids": [
-          7,
-          8
-        ],
-        "official_rows": 2,
-        "formal_jobs_created": 2,
-        "backup_path": "backups/job_hub-pre-phase4-hbdk-candidates-20261019.sqlite3",
-        "backup_sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
-        "report": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
-      },
-      "robots_gate_targeted_tests": "22 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py, tests/test_phase4_completion_audit.py)",
-      "source_disabled_visibility_regression": "included in full 1102-test run; disabled source remains student-visible without withdrawal",
-      "robots_or_permission_blocked_followups": 1,
-      "huatu_discovery_scan": {
-        "discovered_announcements": 65,
-        "private_leads_created_in_isolated_database": 64,
-        "enriched_leads": 24,
-        "official_url_replay_resolved": 6,
-        "table_links_discovered": 6,
-        "table_links_blocked_by_robots_before_download": 6,
-        "formal_jobs_created": 0,
-        "report": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
-        "table_report": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json"
-      }
+      "database_path": "runtime/job_hub.sqlite3",
+      "database_sha256_before": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+      "database_sha256_after": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+      "formal_database_stable_during_tests": true
     },
     "local_web_read_only": {
-      "base_url": "http://127.0.0.1:8097",
+      "base_url": "http://127.0.0.1:8098",
       "database_mode": "temporary_copy_of_runtime_database",
       "healthz_status": 200,
       "home_status": 200,
@@ -262,39 +165,13 @@
         "incomplete_but_basic_match": 200,
         "source_unavailable": 200
       },
-      "formal_third_party_job_query": {
-        "query": "金属矿床",
-        "status": 200,
-        "total": 2,
-        "job_id": 5433,
-        "publication_layer": "broad_geoscience_match",
-        "official_notice_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
-        "official_application_url": null,
-        "third_party_table_url": null,
-        "third_party_discovery_url_is_student_visible": false
-      },
-      "broad_layer_total": 7,
-      "homepage_job_table_link_label_present": false,
-      "detail_job_id": 5433,
-      "detail_job_table_link_label_present": true,
-      "homepage_third_party_discovery_domain_exposed": false,
-      "server_deployment": false,
       "coverage_status": 200,
-      "coverage_seconds": 24.629,
-      "latest_recheck_report": "docs/current/phase4-local-web-live-validation-2026-10-19.json",
-      "database_mode_note": "all requests used a temporary copy; the earlier local Flask process was stopped and is recorded in phase4-local-db-write-incident-2026-10-19.json"
+      "server_deployment": false
     },
     "release_boundary": {
       "status": "not_publishable",
       "automation_status": "paused",
-      "model_policy": "gpt-5.6-terra",
-      "production_deployment": "not_performed",
-      "release_blockers": [
-        "third_party_batch_expansion_incomplete",
-        "three_oil_external_identity_evidence_pending",
-        "three_oil_unit_entry_evidence_incomplete",
-        "local_phase4_validation_not_approved_for_server"
-      ]
+      "reason": "local validation is evidence only; third-party expansion and three-oil entry evidence remain incomplete"
     }
   },
   "completion_audit": {
