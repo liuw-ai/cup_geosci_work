@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T05:35:44Z",
+  "generated_at": "2026-10-19T05:54:23Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -178,7 +178,7 @@
         "docs/current/phase4-local-validation-2026-10-19.json"
       ],
       "facts": {
-        "passed": 1093,
+        "passed": 1094,
         "skipped": 4,
         "failed": 0,
         "formal_database_stable": true
@@ -204,15 +204,16 @@
     },
     {
       "id": "manifest_and_deployment_boundary",
-      "status": "pass",
+      "status": "fail",
       "evidence": [
         "docs/current/phase4-release-manifest.json"
       ],
       "facts": {
-        "manifest_boundary_fields_valid": true,
+        "manifest_boundary_fields_valid": false,
         "production_deployment": "not_performed",
         "automation_status": "paused",
         "release_blockers": [
+          "working_tree_contains_uncommitted_or_untracked_changes",
           "third_party_batch_expansion_incomplete",
           "three_oil_external_identity_evidence_pending",
           "three_oil_unit_entry_evidence_incomplete",
@@ -238,7 +239,8 @@
     "local_phase4_validation_not_approved_for_server",
     "third_party_batch_expansion_incomplete",
     "three_oil_external_identity_evidence_pending",
-    "three_oil_unit_entry_evidence_incomplete"
+    "three_oil_unit_entry_evidence_incomplete",
+    "working_tree_contains_uncommitted_or_untracked_changes"
   ],
   "policy": "A pass means the scoped evidence exists; blocked or partial items remain release blockers and cannot be inferred complete from tests alone."
 }
