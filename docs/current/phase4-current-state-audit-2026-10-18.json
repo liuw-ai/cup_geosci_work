@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T19:11:16Z",
+  "generated_at": "2026-10-19T19:30:22Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "9ad9b26922e4bd67fe4db7c7f76957d9e6a35b43",
+  "git_sha": "b439956192d1a500f8fe53d9f04b281c3fddce42",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -154,12 +154,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "4e0d7f5e7352f3a5afbb06f48c232967f15f512bfc94a6886e93b9e72f09a0a1"
+        "sha256": "e78877ea14d3a7c4b6be24e30cd92656d5082470e549a2d4efd60054d73633f5"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "2ce82d2e2add8e4dca7ea2f0e8847fbbcb8089b049e2a89f2e721e784d88cca3"
+        "sha256": "35ed59a3c9d07aad02610ca1eb94b1d48dc84220c40e52d6a61765d646afdaae"
       }
     ],
     "metadata_documents": [
@@ -215,7 +215,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "2ce82d2e2add8e4dca7ea2f0e8847fbbcb8089b049e2a89f2e721e784d88cca3"
+      "sha256": "35ed59a3c9d07aad02610ca1eb94b1d48dc84220c40e52d6a61765d646afdaae"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "c4050e569ac0068c9f4bc23598f26a35c424f26e20e37d6da74ee67d336e61b5"
+      "sha256": "b00d6eff861166f788cb7101cdfdd3539bd0da3331086deeff9b46b4af55a1ae"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -313,6 +313,10 @@
       "path": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json",
       "sha256": "da07a5893f136d88905135a88fa6b83606dff3d70731e14e3eb76a01d8e9d7ea"
     },
+    "phase4_third_party_huatu_cnpc_chuanqing": {
+      "path": "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
+      "sha256": "10bf8f283ba174b573edfa0336a8b941320ad439462af4c7cc2ef7900f9d8fc0"
+    },
     "phase4_local_db_write_incident": {
       "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",
       "sha256": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935"
@@ -327,7 +331,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "4e0d7f5e7352f3a5afbb06f48c232967f15f512bfc94a6886e93b9e72f09a0a1"
+      "sha256": "e78877ea14d3a7c4b6be24e30cd92656d5082470e549a2d4efd60054d73633f5"
     }
   },
   "code_inventory": [
@@ -798,8 +802,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 493,
-      "sha256": "bf4c1faed67d2b48d9841740b1ee96899d13cb11279513cc57b3225ac96bc4e8"
+      "line_count": 500,
+      "sha256": "bc7ef9bbecbb286c73f5823a4b0c7477f2080e95584751ae092d4844123ac27e"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -1585,6 +1589,7 @@
       "One C-level discovery lead was recovered to an official employer notice and published as job 5432; four B-level Huatu discovery rows were recovered to the official CGS attachment and published as jobs 5433-5436; no server deployment was performed.",
       "The remaining C-level lead (candidate 1) was rechecked on 2026-10-19; no job-specific official evidence or application URL was found, so it remains private and unresolved.",
       "A second Huatu announcement was recovered to the Nanjing Planning and Natural Resources Bureau official notice, table URL, and application URL; its deadline had passed and row-level table evidence was unavailable, so no candidate or formal job was created.",
+      "The Huatu Chuanqing high-level recruitment page yielded 12 row-level private candidates; it supplied a cnpc.com.cn application mailbox but no verifiable official notice, table, or application URL, so all 12 remain private pending official recovery.",
       "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
       "Historical snapshots remain archived and are not overwritten by current facts."
     ]
