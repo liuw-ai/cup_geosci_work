@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T04:53:03Z",
+  "generated_at": "2026-10-19T04:58:38Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "6c494fdb00bd27a7041df3fc92053290fb126d37",
+  "git_sha": "a1a11ce7fec498cd328a9734a1dd68bcf5dd687f",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -283,7 +283,7 @@
     },
     "phase4_three_oil_homepage_probe": {
       "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
-      "sha256": "42ac32b0b953e34f70793fa78aa8d1c2b2637cd72cdc974da4453b3c2a423807"
+      "sha256": "57f72fa775c926004f9e5510382456f96053aa444cdd5b1c14a86fa7e30fda11"
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
