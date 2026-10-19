@@ -52,7 +52,7 @@ def test_activation_keeps_manual_source_auditable_without_enabling_live_sync(
         "pending_evidence": 12,
         "out_of_scope": 288,
     }
-    assert result["visible_rows"] == 64
+    assert result["visible_rows"] == 65
     assert result["live_replacement_source_id"] is None
     assert database.get_source("sinopec-2027-geoscience-snapshot")["enabled"] is False
     freshness = database.get_source_capture_freshness(
@@ -73,8 +73,8 @@ def test_activation_does_not_count_pending_or_out_of_scope_rows(tmp_path: Path) 
         page_size=None, student_visible=False, only_open=False
     )
 
-    assert public_count == 64
-    assert len(public_rows) == 64
+    assert public_count == 65
+    assert len(public_rows) == 65
     assert audit_count == 363
     assert len(audit_rows) == 363
     assert all(row["publication_status"] in {"student_eligible", "pending_evidence"} for row in public_rows)

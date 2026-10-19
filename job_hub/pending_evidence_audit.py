@@ -133,7 +133,10 @@ def _primary_blocker_code(*, label: str, reason: str) -> str:
     state or to infer facts absent from the official record.
     """
 
-    if label == "待补岗位地点":
+    if label == "待补岗位地点" or (
+        label == "官方信息不完整"
+        and any(marker in reason for marker in ("工作地点", "岗位地点", "地点"))
+    ):
         return "mainland_location_unverified"
     if "学历层次" in reason:
         return "degree_level_unrecognized"
@@ -158,6 +161,13 @@ def _supplemental_blocker_codes(job: dict[str, Any]) -> tuple[list[str], str | N
     """
 
     codes: list[str] = []
+    # The publication gate may continue to a later blocker (for example
+    # work experience) after the new incomplete-location policy. Keep the
+    # location defect visible in the diagnostic audit as an independent
+    # blocker, so the report does not lose evidence that the mainland scope
+    # is still unresolved.
+    if "country_or_region" in job and not str(job.get("country_or_region") or "").strip():
+        codes.append("mainland_location_unverified")
     experience = student_blocking_work_experience_requirement(job)
     if experience:
         codes.append("requires_work_experience")
@@ -205,6 +215,8 @@ def build_pending_evidence_audit(
             )
         ]
         supplemental_codes, blocking_experience = _supplemental_blocker_codes(job)
+        if supplemental_codes and blocker_codes == ["other_pending_evidence"]:
+            blocker_codes = []
         blocker_codes.extend(
             code for code in supplemental_codes if code not in blocker_codes
         )

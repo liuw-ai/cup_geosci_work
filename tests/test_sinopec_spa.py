@@ -129,8 +129,8 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
     assert len(rows) == 756
     assert statuses == {
         "student_eligible": 159,
-        "pending_evidence": 41,
-        "out_of_scope": 556,
+        "pending_evidence": 30,
+        "out_of_scope": 567,
     }
     mixed_assignment = next(
         row
@@ -197,8 +197,8 @@ def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
         row for row in audit_rows if row["source_id"] == "sinopec-career"
     ]
 
-    assert public_count == 160
-    assert len(public_rows) == 160
+    assert public_count == 166
+    assert len(public_rows) == 166
     assert audit_count == 756
     assert len(source_audit_rows) == 756
     assert all(
