@@ -3404,7 +3404,7 @@ class Database:
                 JOIN jobs ON jobs.id = candidates.published_job_id
                 WHERE candidates.id = ?
                   AND candidates.review_status = 'published'
-                  AND jobs.status IN ('open', 'expired', 'superseded')
+                  AND jobs.status = 'open'
                 """,
                 (candidate_id,),
             ).fetchone()
