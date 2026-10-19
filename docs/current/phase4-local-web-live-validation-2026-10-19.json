@@ -1,14 +1,14 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T10:24:01+08:00",
+  "validated_at": "2026-10-20T07:34:50+08:00",
   "environment": "local",
-  "base_url": "http://127.0.0.1:8097",
-  "server_pid": 40904,
+  "base_url": "http://127.0.0.1:8099",
+  "server_pid": null,
   "database_mode": "temporary_copy_of_runtime_database",
   "formal_database_sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
   "temporary_database": {
-    "path": "runtime/phase4-web-validation-current-20261019/job_hub.sqlite3",
-    "sha256_after_startup_and_checks": "51de7ffe69dac30cce56e55cfa491547f82790d2723afcb158d63ee0c6dd50b9"
+    "path": "runtime/phase4-web-validation-20261020/job_hub.sqlite3",
+    "sha256_after_startup_and_checks": "baa8462306240c437cdfdebfe9ca85b0a52b5628afd38884042eb02fb63d8981"
   },
   "http_checks": {
     "/healthz": 200,
@@ -18,13 +18,20 @@
     "/api/jobs?layer=broad_geoscience_match": 200,
     "/api/jobs?layer=incomplete_but_basic_match": 200,
     "/api/jobs?layer=source_unavailable": 200,
+    "/api/coverage": 200,
     "/jobs/5433": 200
   },
   "layer_totals": {
     "exact_match": 140,
     "broad_geoscience_match": 7,
-    "incomplete_but_basic_match": 373,
+    "incomplete_but_basic_match": 442,
     "source_unavailable": 111
+  },
+  "performance_observation": {
+    "coverage_response_seconds_approx": 30,
+    "status": "slow_but_successful",
+    "release_blocking": false,
+    "note": "覆盖统计是重型聚合请求，已返回 200；岗位列表和四个层级接口均为快速 200。"
   },
   "third_party_job_detail": {
     "job_id": 5433,
@@ -39,5 +46,5 @@
   "formal_database_unchanged": true,
   "server_deployment": false,
   "automation_status": "paused",
-  "note": "The local service may write only its temporary copy; it must be stopped after user acceptance. The service is never a production deployment."
+  "note": "The local service used only the temporary copy and was stopped after acceptance. The service is never a production deployment."
 }

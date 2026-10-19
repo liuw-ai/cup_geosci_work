@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T23:23:36Z",
+  "generated_at": "2026-10-19T23:43:54Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "cab33d083f7ff91b979cd1c7280bf3d201691461",
+  "git_sha": "56a16493ae6c6344dd84f800352478ff074ab829",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "e1daf4a1367995d45118202af6c90debad4f8b998244f51f7c5a9801017fdb8b"
+      "sha256": "4ddb915a4a03a0b8c3b7a2186071e8fc83dca2183228842c4b4242ea6bb26178"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -275,7 +275,7 @@
     },
     "phase4_local_web_live_validation": {
       "path": "docs/current/phase4-local-web-live-validation-2026-10-19.json",
-      "sha256": "fb033fe9e0e12cf702e5c716a23f98b19818b6d12de6aee23f6b4890bcdb4920"
+      "sha256": "77be72a7464556aba378352644c45d014abd5263adeca2974aece52013cef6c4"
     },
     "phase4_huatu_table_discovery": {
       "path": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
