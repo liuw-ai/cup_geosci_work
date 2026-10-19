@@ -40,6 +40,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-huatu-state-owned-entry-2026-10-19.json",
     ":!docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json",
     ":!docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
+    ":!docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
 )
 
 
