@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T07:07:27Z",
+  "generated_at": "2026-10-19T07:47:55Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "46382552b9ea8d716824fddac4e917a5171db9d3",
-  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json",
+  "git_sha": "1d98af2b6456717171dbdaaa89e807d10d39f8e5",
+  "git_status_porcelain": "M docs/current/PHASE4-2026-10-17.md\n M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -152,7 +152,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "81545e889076b925453b0f896e73f2c1215775fbbf27d468157ad1f1df125551"
+        "sha256": "33756fe398b08d70131eb7c615cc0f79caeda6bec2695d45c1740c4453b752d7"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -205,7 +205,7 @@
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-      "sha256": "3953372cf0a93f506426c18a644e6442a339176aa5dc06ddee9f50baa864ab3b"
+      "sha256": "a223d56dea2719a4e8438199d9dd87b33ebac533e23d5f15f20a73ccdef4237b"
     },
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
@@ -257,7 +257,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "fb03e791a7e29fdaa75225cf199e50c1347af343e98a49a5693249ebd883dd48"
+      "sha256": "9b7e1ec2d872c2cd2e67076fa3a1b230185e41e20da76858f78e961519a25d1d"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -305,7 +305,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "81545e889076b925453b0f896e73f2c1215775fbbf27d468157ad1f1df125551"
+      "sha256": "33756fe398b08d70131eb7c615cc0f79caeda6bec2695d45c1740c4453b752d7"
     }
   },
   "code_inventory": [
@@ -332,7 +332,7 @@
     {
       "path": "job_hub/audit.py",
       "line_count": 475,
-      "sha256": "5039a704eb51292915744f02fe78e3a0117a4631108f25ee6961ec14260998ce"
+      "sha256": "722dc0f2234147ebbbd69d256a80d4ccfe54a6f4fe19fd7d668434a5781f99c0"
     },
     {
       "path": "job_hub/backups.py",
@@ -446,8 +446,8 @@
     },
     {
       "path": "job_hub/db.py",
-      "line_count": 5611,
-      "sha256": "8c8cfdc8f79a1e0cc05e94f8200cddb73f8fff56c836f999cb60173b5daade0b"
+      "line_count": 5610,
+      "sha256": "2de0e2496b587cc0acb89ebb8cdc9d40a6f5ab0fa118a250a6ec19b671ceed62"
     },
     {
       "path": "job_hub/discovery.py",
@@ -481,8 +481,8 @@
     },
     {
       "path": "job_hub/employers.py",
-      "line_count": 1238,
-      "sha256": "8da87529c6e1bff7b2b3c70f8ddcd5758d13e965c3068ef06f5f08cc23a90e27"
+      "line_count": 1239,
+      "sha256": "a3eb421ffa24b6da1fed092f4ac2e8fe1ef5d8b673bdafd7471dd7462e73c6af"
     },
     {
       "path": "job_hub/entry_probes.py",
@@ -606,8 +606,8 @@
     },
     {
       "path": "job_hub/phase3_policy.py",
-      "line_count": 290,
-      "sha256": "6e1cb0a872e10f1c4c985d59c9dfd198976d4b33babdc10cb1d7191f43b22ab7"
+      "line_count": 299,
+      "sha256": "815f965ad3cb5e740aaae67234a4b14c787a9015ea4d5a713f833a62d4b49a17"
     },
     {
       "path": "job_hub/pipeline.py",
@@ -621,8 +621,8 @@
     },
     {
       "path": "job_hub/profiles.py",
-      "line_count": 1848,
-      "sha256": "a0dbfa9903b361b71bfbc3ef0de457dffb70057ad55d80e8d26b330a83d4001e"
+      "line_count": 1853,
+      "sha256": "9f22ddd7bcfbbdd4d1a57537609c29c36a2cb71f53e44e6270c01ba352d3b079"
     },
     {
       "path": "job_hub/provincial_matrix_audit.py",
@@ -1341,8 +1341,8 @@
     },
     {
       "path": "tests/test_profiles.py",
-      "line_count": 1221,
-      "sha256": "1b2461ae1e93f8d8ee9e48005137e5e51e67bf0c96c7cb7ae1a58bc88078273f"
+      "line_count": 1222,
+      "sha256": "45839691ac4caf3bb39c1bed0fa3663a6af995508d646a16145ac1100c4e8da3"
     },
     {
       "path": "tests/test_provincial_matrix_audit.py",
