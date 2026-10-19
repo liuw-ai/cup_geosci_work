@@ -36,6 +36,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-completion-audit-2026-10-19.json",
     ":!docs/current/phase4-workspace-layout-audit-2026-10-19.json",
     ":!docs/current/phase4-three-oil-catalog-audit-2026-10-17.json",
+    ":!docs/current/phase4-third-party-huatu-state-owned-entry-2026-10-19.json",
 )
 
 
@@ -211,6 +212,7 @@ def main() -> None:
     local_web_live_validation = ROOT / "docs" / "current" / "phase4-local-web-live-validation-2026-10-19.json"
     huatu_table_discovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-table-discovery-2026-10-19.json"
     huatu_discovery_scan = ROOT / "docs" / "current" / "phase4-third-party-huatu-discovery-2026-10-19.json"
+    huatu_state_owned_entry = ROOT / "docs" / "current" / "phase4-third-party-huatu-state-owned-entry-2026-10-19.json"
     bingtuan_official_recovery = ROOT / "docs" / "current" / "phase4-third-party-bingtuan-official-recovery-2026-10-19.json"
     huatu_shanxi_geology_group = ROOT / "docs" / "current" / "phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json"
     huatu_hbdk_geophysics = ROOT / "docs" / "current" / "phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json"
@@ -297,6 +299,7 @@ def main() -> None:
             "phase4_local_web_live_validation": sha256(local_web_live_validation),
             "phase4_huatu_table_discovery": sha256(huatu_table_discovery),
             "phase4_huatu_discovery_scan": sha256(huatu_discovery_scan),
+            "phase4_third_party_huatu_state_owned_entry": sha256(huatu_state_owned_entry),
             "phase4_third_party_bingtuan_official_recovery": sha256(bingtuan_official_recovery),
             "phase4_third_party_huatu_shanxi_geology_group": sha256(huatu_shanxi_geology_group),
             "phase4_third_party_huatu_hbdk_geophysics": sha256(huatu_hbdk_geophysics),

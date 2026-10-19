@@ -6,7 +6,8 @@
   "page": {
     "url": "https://www.sydw8.com/guoqi/zhaokao/",
     "title": "国有企业招聘考试信息网_2027国有企业招聘考试报名入口_考试时间/公告-华图国企招聘网",
-    "document_sha256": "8d20ea49d09c445a5a391d4c3f75b00dc775f00ab3635c767b941bf39dc08904"
+    "document_sha256": "8916f0bf8b335fcd7a63076d45166cc2d663414d35610234a175469f459f9bdb",
+    "document_bytes": 34564
   },
   "observed_category_links": [
     {
@@ -38,10 +39,11 @@
   ],
   "access_boundary": {
     "robots_url": "https://www.sydw8.com/robots.txt",
-    "status": "blocked_by_browser_client",
-    "decision": "do_not_schedule_or_download",
+    "status": "verified_allowed",
+    "decision": "scan_page_only; do_not_download_unverified_attachments",
     "candidate_rows_created": 0,
     "formal_jobs_created": 0,
-    "note": "这是华图发现入口证据，不是官方岗位证据；页面内容必须回溯到用人单位或政府官方公告后才可进入候选或正式库。"
+    "robots_body_sha256": "6ec0df5692ddf0bfc3e8dd823e4f37548ebae82e4087a31b46ed1a9bea6e2431",
+    "note": "普通栏目页已通过同一 User-Agent 的 robots 核验，可以读取栏目和文章索引；这仍然只是华图发现入口证据，不是官方岗位证据。文章附件若位于 robots 拒绝的 u3.huatu.com，必须在下载前阻断；所有岗位仍需回溯用人单位或政府官方公告后才可进入候选或正式库。"
   }
 }

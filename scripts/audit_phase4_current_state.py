@@ -40,6 +40,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
     ":!docs/current/phase4-cnpc-bgp-entry-recheck-2026-10-19.json",
     ":!docs/current/phase4-three-oil-catalog-audit-2026-10-17.json",
+    ":!docs/current/phase4-third-party-huatu-state-owned-entry-2026-10-19.json",
     ":!docs/current/phase4-completion-audit-2026-10-19.json",
     ":!docs/current/phase4-workspace-layout-audit-2026-10-19.json",
 )
@@ -265,6 +266,7 @@ def main() -> None:
     local_web_live_validation = ROOT / "docs" / "current" / "phase4-local-web-live-validation-2026-10-19.json"
     huatu_table_discovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-table-discovery-2026-10-19.json"
     huatu_discovery_scan = ROOT / "docs" / "current" / "phase4-third-party-huatu-discovery-2026-10-19.json"
+    huatu_state_owned_entry = ROOT / "docs" / "current" / "phase4-third-party-huatu-state-owned-entry-2026-10-19.json"
     bingtuan_official_recovery = ROOT / "docs" / "current" / "phase4-third-party-bingtuan-official-recovery-2026-10-19.json"
     huatu_shanxi_geology_group = ROOT / "docs" / "current" / "phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json"
     huatu_hbdk_geophysics = ROOT / "docs" / "current" / "phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json"
@@ -418,6 +420,10 @@ def main() -> None:
             "phase4_huatu_discovery_scan": {
                 "path": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
                 "sha256": sha256(huatu_discovery_scan),
+            },
+            "phase4_third_party_huatu_state_owned_entry": {
+                "path": "docs/current/phase4-third-party-huatu-state-owned-entry-2026-10-19.json",
+                "sha256": sha256(huatu_state_owned_entry),
             },
             "phase4_third_party_bingtuan_official_recovery": {
                 "path": "docs/current/phase4-third-party-bingtuan-official-recovery-2026-10-19.json",
