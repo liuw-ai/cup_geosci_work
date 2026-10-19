@@ -33,6 +33,14 @@ def test_phase4_three_oil_entry_matrix_covers_every_formal_catalog_unit() -> Non
     assert len(cnooc_observed) == 16
     assert sum(int(item["observed_official_job_count"]) for item in cnooc_observed) == 350
     assert all(item["observed_official_application_url"] for item in cnooc_observed)
+    assert payload["summary"]["shared_portal_unit_job_evidence_verified"] == 16
+    assert payload["summary"]["shared_portal_unit_job_evidence_cards"] == 350
+    assert all(
+        item["shared_portal_unit_job_evidence_verified"] is True
+        and item["shared_portal_unit_job_evidence_count"] > 0
+        and item["shared_portal_unit_application_url_count"] > 0
+        for item in cnooc_observed
+    )
     cooec = next(item for item in units if item["catalog_id"] == "cnooc-engineering")
     assert cooec["unit_specific_entry_status"] == "official_site_checked_no_unit_entry_found"
     assert cooec["unit_specific_entry_url"] is None

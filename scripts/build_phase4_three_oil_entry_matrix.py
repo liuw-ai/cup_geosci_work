@@ -239,6 +239,20 @@ def main() -> None:
                     "observed_official_job_count": observed.get("job_count") if observed else None,
                     "observed_official_application_url": observed.get("first_official_application_url") if observed else None,
                     "observed_official_application_url_count": observed.get("unique_official_application_url_count") if observed else 0,
+                    # CNOOC's shared recruitment portal provides an official
+                    # employer-labelled job card and an official application
+                    # URL.  This is useful unit-level evidence, but it is not
+                    # an independent unit recruitment website and must remain
+                    # separate from unit_specific_entry_url.
+                    "shared_portal_unit_job_evidence_verified": bool(
+                        group_id == "cnooc" and observed and observed.get("job_count")
+                    ),
+                    "shared_portal_unit_job_evidence_count": int(
+                        observed.get("job_count") or 0
+                    ) if group_id == "cnooc" and observed else 0,
+                    "shared_portal_unit_application_url_count": int(
+                        observed.get("unique_official_application_url_count") or 0
+                    ) if group_id == "cnooc" and observed else 0,
                     "observed_job_evidence_file": (
                         "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json"
                         if group_id == "cnooc" and observed
@@ -316,6 +330,13 @@ def main() -> None:
                 int(row["observed_official_job_count"] or 0)
                 for row in rows
                 if row["group_id"] == "cnooc"
+            ),
+            "shared_portal_unit_job_evidence_verified": sum(
+                1 for row in rows if row["shared_portal_unit_job_evidence_verified"]
+            ),
+            "shared_portal_unit_job_evidence_cards": sum(
+                int(row["shared_portal_unit_job_evidence_count"] or 0)
+                for row in rows
             ),
         },
         "units": rows,
