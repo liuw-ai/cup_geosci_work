@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T13:34:39Z",
+  "generated_at": "2026-10-19T14:32:55Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "90972a662f8a978dd101046867d0b99232b8be15",
+  "git_sha": "4076212213d060f878b6486309e62905af7e20ca",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -152,7 +152,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "b035bb03f843a8fad07184cc07d7bdc62c9a2dfa01833eba7e32921a89cb90da"
+        "sha256": "c1d066d058597623058eea0cf031cce17571009bc1db0a3a83bebbe3b8e7482f"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -265,7 +265,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "c5cad3e70a98c20b204665654561d7edb8b8d6e8371c7680342a6247fa59dc78"
+      "sha256": "5d662d5a45762c859ccb26e0b48f3dea9e71518f5da7e97c384298ba6115dae0"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -277,11 +277,15 @@
     },
     "phase4_huatu_table_discovery": {
       "path": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
-      "sha256": "a53c48542c56638fadf7bac29ccd0832ad40ef67e4d4ed225e429febda785084"
+      "sha256": "35e2b08f1fc24c194cdf9407cf1597fe2338b819601a4fadd2ced8e218399930"
     },
     "phase4_huatu_discovery_scan": {
       "path": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
       "sha256": "6084764bc34681e688a1bcfaa07851a8fb0c4fcb073680a308ffd219ea2fb277"
+    },
+    "phase4_third_party_huatu_state_owned_entry": {
+      "path": "docs/current/phase4-third-party-huatu-state-owned-entry-2026-10-19.json",
+      "sha256": "de1b954cf85023f390671163dc8350d396936716026e60ace0979cd00aa49400"
     },
     "phase4_third_party_bingtuan_official_recovery": {
       "path": "docs/current/phase4-third-party-bingtuan-official-recovery-2026-10-19.json",
@@ -313,7 +317,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "b035bb03f843a8fad07184cc07d7bdc62c9a2dfa01833eba7e32921a89cb90da"
+      "sha256": "c1d066d058597623058eea0cf031cce17571009bc1db0a3a83bebbe3b8e7482f"
     }
   },
   "code_inventory": [
@@ -784,8 +788,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 474,
-      "sha256": "1b60c9fde75d19045e3b8cc0868f07597b18077b979740e09693a614be2b2786"
+      "line_count": 481,
+      "sha256": "247ec8776d77a762125d7242152ca9e27c690e8d3ea88ed781eb08eb3ed4f85f"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -809,8 +813,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 401,
-      "sha256": "6a12847d104557768306d50914f0343915ff2cb9b924999e91d74b217af33d94"
+      "line_count": 405,
+      "sha256": "9ee51536e71527c62d2a6134049bcca66c5c4aa63bb42a92ca8f34724cef383d"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -894,8 +898,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 237,
-      "sha256": "b6aaa446533655348934e50cf9e6a0f05575b22b4b3acad2d83f1c5f2614a137"
+      "line_count": 240,
+      "sha256": "a5c68ddd1455c89bff3bc5a7fa1140eb985ececb1533a265ed06262cf37cf293"
     },
     {
       "path": "tests/conftest.py",
