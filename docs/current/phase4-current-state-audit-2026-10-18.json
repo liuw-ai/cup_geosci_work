@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T12:25:35Z",
+  "generated_at": "2026-10-19T12:46:09Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "205ac35887290ee01e90819ddf5d733a5cc73110",
+  "git_sha": "13d20ea33d5372e36dcdb0903e6ddbbff5d91632",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -152,12 +152,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "dd09ce38c5ec57aef30d4112d974f07f0b33ba4b4555b62c63e8560c9f984021"
+        "sha256": "5f040af1811dd7846b00cdc252bdc22350dea3e7d9d574e8fb1a266b6ceb99c2"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "52f0de44319c76266e07db566314fb0a97c319207c2ecee5278d0c66685776e8"
+        "sha256": "b7f5438f497af33fc2e1e0e7a2627bf17188eb9bc712b7c27b34f11b4562ca36"
       }
     ],
     "metadata_documents": [
@@ -213,7 +213,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "52f0de44319c76266e07db566314fb0a97c319207c2ecee5278d0c66685776e8"
+      "sha256": "b7f5438f497af33fc2e1e0e7a2627bf17188eb9bc712b7c27b34f11b4562ca36"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -251,6 +251,10 @@
       "path": "docs/current/phase4-three-oil-unit-entry-recheck-2026-10-19.json",
       "sha256": "0df0edf397c90cd54801c1cd434599a4d11e318905fd25f591988d6db27110f5"
     },
+    "phase4_sinopec_official_job_evidence": {
+      "path": "docs/current/phase4-sinopec-official-job-evidence-2026-10-19.json",
+      "sha256": "c6320650db23a20acec5804713813f3f8a4830fa05f22ff83c965238fdcbe3d4"
+    },
     "phase4_third_party_access_recheck": {
       "path": "docs/current/phase4-third-party-access-recheck-2026-10-19.json",
       "sha256": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d"
@@ -261,7 +265,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "69f2892f86f0ac9e85ada3ed39469d9bf85fc8f268d0428b390cd03b7e39b40a"
+      "sha256": "9c970924e922810acdc1cd95bbd7ef437044a6c73e4fd0c67b0c922bc78c8263"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -309,7 +313,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "dd09ce38c5ec57aef30d4112d974f07f0b33ba4b4555b62c63e8560c9f984021"
+      "sha256": "5f040af1811dd7846b00cdc252bdc22350dea3e7d9d574e8fb1a266b6ceb99c2"
     }
   },
   "code_inventory": [
@@ -780,8 +784,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 469,
-      "sha256": "aaa5307600777ae1c2e235d2ea8d7c41429e5dfbf725d3f7fc2b2f3c9c95d2e6"
+      "line_count": 474,
+      "sha256": "1b60c9fde75d19045e3b8cc0868f07597b18077b979740e09693a614be2b2786"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -805,8 +809,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 399,
-      "sha256": "f1a8b50daed269b72a9e435d3b287ee9b322333c835be5e1bbbd6d7238bdeae0"
+      "line_count": 401,
+      "sha256": "6a12847d104557768306d50914f0343915ff2cb9b924999e91d74b217af33d94"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -890,8 +894,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 236,
-      "sha256": "1a74317e92130968f5e9a16be93b8e8e79fae62a681ef2008eae9b658f4540af"
+      "line_count": 237,
+      "sha256": "b6aaa446533655348934e50cf9e6a0f05575b22b4b3acad2d83f1c5f2614a137"
     },
     {
       "path": "tests/conftest.py",
@@ -1330,8 +1334,8 @@
     },
     {
       "path": "tests/test_phase4_three_oil_entry_matrix.py",
-      "line_count": 97,
-      "sha256": "1b68905a69334eb5b2006a06657666708ed30a9d15f7ab551c36a1bb23890266"
+      "line_count": 108,
+      "sha256": "0e491452d3d70eb61eb5c7ec65d62c68d2e7c8752eba7992e5e1d8bfe2e48e74"
     },
     {
       "path": "tests/test_phase4_workspace_layout.py",
