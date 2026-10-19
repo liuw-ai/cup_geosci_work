@@ -1,9 +1,10 @@
 {
   "phase": "phase4",
-  "checked_at": "2026-10-20T00:00:00+08:00",
+  "recorded_at": "2026-10-20T04:00:00+08:00",
+  "source_browser_recheck_at": "2026-10-19T05:34:34Z",
   "discovery_source_id": "huatu-discovery",
   "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875231.html",
-  "verification_mode": "official_browser_read_only",
+  "verification_mode": "existing_official_browser_evidence_rebound",
   "official_source": {
     "employer": "南京水利科学研究院",
     "homepage_url": "https://www.nhri.cn/",
@@ -40,6 +41,7 @@
     "official_table_url": true,
     "official_application_url": false,
     "third_party_links_student_visible": false,
-    "next_allowed_action": "只有在合法取得官方岗位表字节或用户提供原始官方文件并保留来源、哈希和行定位后，才可逐行核验并创建候选。"
+    "next_allowed_action": "只有在合法取得官方岗位表字节或用户提供原始官方文件并保留来源、哈希和行定位后，才可逐行核验并创建候选。",
+    "timestamp_policy": "本文件的 recorded_at 是本地审计记录时间；source_browser_recheck_at 保留原始浏览器复核时间，不把记录整编时间当作新的网络访问时间。"
   }
 }
