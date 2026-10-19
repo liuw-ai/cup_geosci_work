@@ -34,12 +34,19 @@
     "rejected_rows": 1,
     "isolated_candidate_leads": 11,
     "official_recovery_bound": 11,
-    "formal_jobs_created": 4,
-    "student_visible_changes": 4,
+    "formal_jobs_created": 0,
+    "student_visible_changes": 0,
     "formal_database_candidate_leads_before": 6,
     "formal_database_candidate_leads_after": 6,
-    "formal_job_ids": [5433, 5434, 5435, 5436],
-    "formal_job_source": "docs/current/phase4-third-party-cgs-2026-10-18.json"
+    "formal_job_ids": [],
+    "formal_job_source": null,
+    "related_followup_trial": {
+      "description": "The four formal jobs from the same B-level discovery channel came from a separate Huatu-to-CGS batch, not from the Gansu table rows above.",
+      "evidence_report": "docs/current/phase4-third-party-cgs-2026-10-18.json",
+      "formal_job_ids": [5433, 5434, 5435, 5436],
+      "formal_jobs_created": 4,
+      "student_visible_changes": 4
+    }
   },
   "candidate_storage": {
     "database": "runtime/third-party-validation/job_hub-huatu-trial.sqlite3",

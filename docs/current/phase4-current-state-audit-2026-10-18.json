@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T17:38:22Z",
+  "generated_at": "2026-10-19T17:55:58Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "bc0657d6410cc9429f2a5d9dc19b55b51b5e8a03",
-  "git_status_porcelain": "",
+  "git_sha": "15f912b65e9e15fdc3c6f931635befb216f5f678",
+  "git_status_porcelain": "M docs/current/phase4-third-party-trial-2026-10-18.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -181,7 +181,7 @@
     },
     "phase4_third_party_trial": {
       "path": "docs/current/phase4-third-party-trial-2026-10-18.json",
-      "sha256": "57d91e1e205f3dc229c7ec4ec0c3a71fb702bf54e415d9057bf0ad34553f8232"
+      "sha256": "72763deac5d8ea560a05cba4bc0651547b68034f2228af81830db9444130d148"
     },
     "phase4_three_oil_entry_evidence": {
       "path": "docs/current/phase4-three-oil-entry-evidence-2026-10-18.json",
@@ -265,7 +265,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "a26b07effcef036d9fdfcaf9a8182d5a7805d8f080aa2d318e145709526a29a0"
+      "sha256": "149bd8f5151e58b8dc18c1bf2ee180626870c64970acb27c0827815377392c8d"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
