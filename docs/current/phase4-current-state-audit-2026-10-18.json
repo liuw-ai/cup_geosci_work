@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T20:14:48Z",
+  "generated_at": "2026-10-19T20:19:32Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "5cab5484c5cfaef69d7de7d6b216c59de324771e",
+  "git_sha": "7b951864068ee75e76eb7f36cc66417fc361fead",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -154,7 +154,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "dab2e86985d362de8aae2ed5750dbeed9b17328b4341fb8bf3fe1e60b57ded6e"
+        "sha256": "5139e15420f66655fc9a8890b9c6c9092f6ba5a30e74a965082c33d71a989603"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "4b4eb4bfd1fb070a73693e048ab5ed96d4e01cc0236355395ec0b464d62e3e53"
+      "sha256": "4f1f86b956bf4d8b76cc8e130269b418e921d61c33cbcedd96b102aa99e453b4"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -325,6 +325,10 @@
       "path": "docs/current/phase4-cnpc-bgp-entry-recheck-2026-10-20.json",
       "sha256": "4188ebc3ca0685a5ad50ed9951e10db6374e06fe5ce172b2bbfb8230f4c70ce1"
     },
+    "phase4_cnooc_energy_development_browser_recheck": {
+      "path": "docs/current/phase4-cnooc-energy-development-browser-recheck-2026-10-20.json",
+      "sha256": "84f7843a73fdd37f9024378dbec4d0c06779d60ab1a1ae660cda8a43496c4eac"
+    },
     "phase4_local_db_write_incident": {
       "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",
       "sha256": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935"
@@ -339,7 +343,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "dab2e86985d362de8aae2ed5750dbeed9b17328b4341fb8bf3fe1e60b57ded6e"
+      "sha256": "5139e15420f66655fc9a8890b9c6c9092f6ba5a30e74a965082c33d71a989603"
     }
   },
   "code_inventory": [
@@ -805,13 +809,13 @@
     },
     {
       "path": "scripts/audit_phase4_completion.py",
-      "line_count": 334,
-      "sha256": "bec702d570c093beb1973aefc9885f490e581f9560da0443ee75d621516eaad6"
+      "line_count": 337,
+      "sha256": "8a2022ed99d7af3be53aee84e930360c9c08d28d583c95969dcde71846267c86"
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 511,
-      "sha256": "f6d700e23c1bbba37a4151715d53983e39693d305b2f3caae554a1fb6c9e6812"
+      "line_count": 516,
+      "sha256": "e87983f86068ab6c67ab6a842ee70b5c66d2a8c0e51eb457349c7de9e64a4ce2"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",

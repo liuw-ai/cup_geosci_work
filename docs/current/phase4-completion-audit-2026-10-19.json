@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T20:14:52Z",
+  "generated_at": "2026-10-19T20:19:36Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -208,7 +208,9 @@
           "catalog_id": "cnpc-bgp",
           "entry_status": "unit_specific_entry_verified",
           "recruitment_url": "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml",
-          "student_job_created": false
+          "student_job_created": false,
+          "cnooc_energy_development_browser_status": "source_unavailable",
+          "cnooc_energy_development_entry_created": false
         }
       }
     },
