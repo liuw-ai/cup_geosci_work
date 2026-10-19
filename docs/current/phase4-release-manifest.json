@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T00:53:19Z",
+  "generated_at": "2026-10-19T00:57:10Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "bbae39685aff60d493a56cdb4419d6745f66326a",
+  "git_sha": "928aae14d0d6fe55230b3f5fe8edfe4d8b6c1a2b",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "e4cfe0757407c437daddd13d71fa646bfe7409d868c09e50b6fe6b4f7663a27b",
-    "phase4_document_consistency": "e4cfe0757407c437daddd13d71fa646bfe7409d868c09e50b6fe6b4f7663a27b",
+    "phase4_current_state_audit": "091cbbff8ebe389c2be94172c39cefc04d099d9c3ee9b7d1b363b9bf4573eee6",
+    "phase4_document_consistency": "091cbbff8ebe389c2be94172c39cefc04d099d9c3ee9b7d1b363b9bf4573eee6",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -49,12 +49,12 @@
     "phase4_third_party_bingtuan_official_recovery": "d71105dbb62be53489cdedbaaa20c11e1c00d93a739bf4b9a1b7c9b6672f8634",
     "phase4_third_party_huatu_shanxi_geology_group": "81808418c668aeb800754e01982ef01905f56762edb5a45512858ce2e146c7b0",
     "phase4_third_party_huatu_hbdk_geophysics": "f2ef342fc4c3a8f1cde1c0f0b439f333dfd5b10a52975560c1baa964d0f1adf3",
-    "phase4_main_record": "600e8eb5ac389e7d3bab78658caa183ebf859d2a5e4a2805c243e8b55cb9c89d",
-    "phase4_local_validation": "03d1583c8d5627873a95c8cf4dbe59777aeea6d672fb982173d0ff44c1a1808b",
+    "phase4_main_record": "b77cd241a697e438159defeb01257f25245b23f0611ae199f9a373b5411b9f46",
+    "phase4_local_validation": "03f0099033cb0811f06fb102f2757c30daa0c2f2211808920aeaba18937007e4",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "42ac32b0b953e34f70793fa78aa8d1c2b2637cd72cdc974da4453b3c2a423807",
-    "phase4_completion_audit": "403e08628ff29f8cc81d1ec1c5c02a4341041d2fd2547f795be8453e56713b05",
-    "phase4_workspace_layout": "6ff3b4da2b5081820feb68badb2989a86249e1170b6b1659e50b620cde3eba37"
+    "phase4_completion_audit": "0ef76f62f70c0329a034173f8e7f28be9961202dd9261a860758c07c5aa114a5",
+    "phase4_workspace_layout": "4e9ebeec2a8da9cbee00f0aafffad9744786ce0aea22fb12ad3c67812b85104b"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -123,14 +123,14 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-19T08:52:56+08:00",
+    "validated_at": "2026-10-19T08:56:37+08:00",
     "environment": "local",
     "server_deployment": false,
     "git_sha_before_metadata_commit": "545eae1e9a332270da1d04b9178efed5fcf8bb3c",
     "git_sha_at_validation": "545eae1e9a332270da1d04b9178efed5fcf8bb3c",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1087,
+      "passed": 1088,
       "skipped": 4,
       "failed": 0,
       "warnings": 0,
@@ -209,7 +209,7 @@
         "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
       },
       "robots_gate_targeted_tests": "22 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py, tests/test_phase4_completion_audit.py)",
-      "source_disabled_visibility_regression": "included in full 1087-test run; disabled source remains student-visible without withdrawal",
+      "source_disabled_visibility_regression": "included in full 1088-test run; disabled source remains student-visible without withdrawal",
       "robots_or_permission_blocked_followups": 1,
       "huatu_discovery_scan": {
         "discovered_announcements": 65,
