@@ -24,16 +24,35 @@
       "pipechina"
     ]
   },
-  "registry_organization_count": 323,
-  "registered_source_count": 93,
+  "registry_organization_count": 331,
+  "registered_source_count": 94,
   "mapped_unit_count": 64,
   "missing_registry_unit_count": 0,
   "name_unverified_unit_count": 0,
   "name_unverified_unit_ids": [],
   "name_match_semantics": "name_exact_match and name_evidence_status only describe the normalized catalog-to-organization_registry mapping; they do not prove an external legal-registration or independently archived official-name review. This mapping does not prove that review.",
   "external_identity_evidence_review": {
-    "status": "pending",
-    "pending_unit_count": 64,
+    "status": "partial",
+    "verified_unit_count": 16,
+    "pending_unit_count": 48,
+    "verified_unit_ids": [
+      "cnooc-tianjin",
+      "cnooc-shanghai",
+      "cnooc-shenzhen",
+      "cnooc-zhanjiang",
+      "cnooc-hainan",
+      "cnooc-research",
+      "cosl",
+      "cnooc-engineering",
+      "cnooc-energy-development",
+      "cnooc-international",
+      "cnooc-beijing-new-energy",
+      "cnooc-chemicals",
+      "cnooc-refining",
+      "cnooc-gas-power",
+      "cnooc-international-trade",
+      "cnooc-coalbed-gas"
+    ],
     "required_evidence": [
       "official group or unit page",
       "official recruitment notice or portal employer record",
@@ -3229,6 +3248,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-homepage",
@@ -3289,6 +3311,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-petrochina-campus-portal",
@@ -3335,6 +3360,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-daqing-campus-portal",
@@ -3383,6 +3411,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-changqing-homepage",
@@ -3443,6 +3474,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-liaohe-campus-portal",
@@ -3489,6 +3523,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-xinjiang-campus-portal",
@@ -3535,6 +3572,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-tarim-campus-portal",
@@ -3581,6 +3621,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-southwest-gas-campus-portal",
@@ -3627,6 +3670,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-huabei-campus-portal",
@@ -3673,6 +3719,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-jilin-campus-portal",
@@ -3719,6 +3768,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-tuha-campus-portal",
@@ -3765,6 +3817,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-qinghai-campus-portal",
@@ -3811,6 +3866,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-yumen-campus-portal",
@@ -3857,6 +3915,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-dagang-campus-portal",
@@ -3903,6 +3964,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-jidong-campus-portal",
@@ -3949,6 +4013,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-riped-homepage",
@@ -4009,6 +4076,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-bgp-homepage",
@@ -4086,6 +4156,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-logging-homepage",
@@ -4146,6 +4219,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-cqdrilling-homepage",
@@ -4206,6 +4282,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-gwdrilling-homepage",
@@ -4266,6 +4345,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-bhdrilling-homepage",
@@ -4326,6 +4408,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-xbzk-homepage",
@@ -4386,6 +4471,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-engineering-construction-campus-portal",
@@ -4432,6 +4520,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-economic-research-campus-portal",
@@ -4478,6 +4569,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-pipeline-engineering-campus-portal",
@@ -4524,6 +4618,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-cnodc-campus-portal",
@@ -4570,6 +4667,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnpc-hqccec-campus-portal",
@@ -4616,6 +4716,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-homepage",
@@ -4676,6 +4779,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-corp-campus-portal",
@@ -4722,6 +4828,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-shengli-homepage",
@@ -4784,6 +4893,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-zhongyuan-campus-portal",
@@ -4830,6 +4942,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-jianghan-homepage",
@@ -4892,6 +5007,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-jiangsu-campus-portal",
@@ -4938,6 +5056,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-henan-campus-portal",
@@ -4984,6 +5105,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-northwest-campus-portal",
@@ -5030,6 +5154,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-northeast-gas-campus-portal",
@@ -5076,6 +5203,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-huabei-gas-campus-portal",
@@ -5122,6 +5252,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-east-gas-campus-portal",
@@ -5168,6 +5301,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-pepris-homepage",
@@ -5230,6 +5366,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-petroleum-engineering-research-campus-portal",
@@ -5278,6 +5417,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-oss-homepage",
@@ -5338,6 +5480,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-international-exploration-campus-portal",
@@ -5384,6 +5529,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-petroleum-machinery-campus-portal",
@@ -5430,6 +5578,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "sinopec-engineering-construction-campus-portal",
@@ -5478,6 +5629,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnooc-homepage",
@@ -5538,6 +5692,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnooc-limited-campus-portal",
@@ -5584,6 +5741,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnooc-china-campus-portal",
@@ -5630,6 +5790,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海石油（中国）有限公司天津分公司",
+        "observed_job_count": 14,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972466215?srccode=448002",
+        "official_application_url_count": 14,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-tianjin-homepage",
@@ -5678,6 +5853,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海石油（中国）有限公司上海分公司",
+        "observed_job_count": 14,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972462315?srccode=448002",
+        "official_application_url_count": 14,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-shanghai-homepage",
@@ -5726,6 +5916,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海石油（中国）有限公司深圳分公司",
+        "observed_job_count": 20,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972459115?srccode=448002",
+        "official_application_url_count": 20,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-shenzhen-campus-portal",
@@ -5774,6 +5979,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海石油（中国）有限公司湛江分公司",
+        "observed_job_count": 12,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972461115?srccode=448002",
+        "official_application_url_count": 12,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-zhanjiang-campus-portal",
@@ -5822,6 +6042,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海石油（中国）有限公司海南分公司",
+        "observed_job_count": 20,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972490315?srccode=448002",
+        "official_application_url_count": 20,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-hainan-homepage",
@@ -5870,6 +6105,9 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "pending"
+      },
       "channels": [
         {
           "id": "cnooc-fujian-campus-portal",
@@ -5916,6 +6154,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海油研究总院有限责任公司",
+        "observed_job_count": 16,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972486315?srccode=448002",
+        "official_application_url_count": 16,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-research-campus-portal",
@@ -5964,6 +6217,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海油田服务股份有限公司",
+        "observed_job_count": 13,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972469215?srccode=448002",
+        "official_application_url_count": 13,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cosl-homepage",
@@ -6041,6 +6309,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "海洋石油工程股份有限公司",
+        "observed_job_count": 12,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972470515?srccode=448002",
+        "official_application_url_count": 12,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-engineering-campus-portal",
@@ -6089,6 +6372,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海油能源发展股份有限公司",
+        "observed_job_count": 47,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972480615?srccode=448002",
+        "official_application_url_count": 47,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-energy-development-homepage",
@@ -6151,6 +6449,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中国海洋石油国际有限公司",
+        "observed_job_count": 4,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972463715?srccode=448002",
+        "official_application_url_count": 4,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-international-campus-portal",
@@ -6199,6 +6512,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海石油（中国）有限公司北京新能源分公司",
+        "observed_job_count": 5,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972465715?srccode=448002",
+        "official_application_url_count": 5,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-beijing-new-energy-campus",
@@ -6247,6 +6575,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海石油化学股份有限公司",
+        "observed_job_count": 45,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972505615?srccode=448002",
+        "official_application_url_count": 45,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-chemicals-campus",
@@ -6295,6 +6638,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海石油炼化有限责任公司",
+        "observed_job_count": 48,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972510015?srccode=448002",
+        "official_application_url_count": 48,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-refining-campus",
@@ -6343,6 +6701,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海石油气电集团有限责任公司",
+        "observed_job_count": 61,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972530815?srccode=448002",
+        "official_application_url_count": 61,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-gas-power-campus",
@@ -6391,6 +6764,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中海油国际贸易有限责任公司",
+        "observed_job_count": 3,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972476415?srccode=448002",
+        "official_application_url_count": 3,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-international-trade-campus",
@@ -6437,6 +6825,21 @@
       "registry_match": "id",
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
+      "external_identity_evidence": {
+        "status": "verified",
+        "basis": "official_portal_employer_record",
+        "evidence_scope": "official_group_portal_active_unit_job_cards",
+        "display_evidence_file": "docs/current/phase4-cnooc-unit-display-evidence-2026-10-19.json",
+        "display_evidence_sha256": "870868b17951f53f5b09cf02c5eeb1fbf8521cdb494378e61a04899895d39012",
+        "job_evidence_file": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
+        "job_evidence_sha256": "79ae86352d4d347344a66c731f168a04ddfb332c11f2bb9f36b54a67aa020288",
+        "job_evidence_file_present": true,
+        "observed_name": "中联煤层气有限责任公司",
+        "observed_job_count": 16,
+        "official_application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972467615?srccode=448002",
+        "official_application_url_count": 16,
+        "verified_at": "2026-10-18T17:15:07Z"
+      },
       "channels": [
         {
           "id": "cnooc-coalbed-gas-campus",
