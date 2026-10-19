@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T07:49:06Z",
+  "generated_at": "2026-10-19T07:57:01Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "6ccf38ef58e8479aa45de140b9c743e704aaa390",
+  "git_sha": "d278b8d513ee2dd6577913ef9e2577a44fcc3545",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -622,7 +622,7 @@
     {
       "path": "job_hub/profiles.py",
       "line_count": 1853,
-      "sha256": "9f22ddd7bcfbbdd4d1a57537609c29c36a2cb71f53e44e6270c01ba352d3b079"
+      "sha256": "679a33b93a1bd56a77560cd9977d09c6184bb9e3b5490fec2cfd72ce297c093f"
     },
     {
       "path": "job_hub/provincial_matrix_audit.py",
