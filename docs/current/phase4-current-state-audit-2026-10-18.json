@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T11:59:07Z",
+  "generated_at": "2026-10-19T12:00:51Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "dc04d8cdd0a6c53a0917649917c1cbd9a1b8c951",
-  "git_status_porcelain": "M docs/current/PHASE4-2026-10-17.md\n M scripts/audit_phase4_current_state.py\n M scripts/build_phase4_manifest.py\n M scripts/build_phase4_three_oil_entry_matrix.py\n M scripts/verify_phase4_manifest.py\n M tests/test_phase4_three_oil_entry_matrix.py\n?? docs/current/phase4-three-oil-unit-entry-recheck-2026-10-19.json",
+  "git_sha": "4d6371cf3f486aa51de239e6139f56477685ab89",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -261,7 +261,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "cc6bde735705f9a9995b4482247f369c1452ced72a635fc1ae985d76150f5c9a"
+      "sha256": "e5c547ec5644e4e40ccd6d720c739479821c8707eabd1c5be1e595f2874c1aa6"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
