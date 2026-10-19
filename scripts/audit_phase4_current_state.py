@@ -47,6 +47,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-completion-audit-2026-10-19.json",
     ":!docs/current/phase4-workspace-layout-audit-2026-10-19.json",
     ":!docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
+    ":!docs/current/phase4-third-party-nhri-browser-recheck-2026-10-20.json",
 )
 
 
@@ -278,6 +279,7 @@ def main() -> None:
     hbdk_official_table = ROOT / "docs" / "current" / "phase4-third-party-hbdk-official-table-2026-10-19.json"
     hbdk_registration = ROOT / "docs" / "current" / "phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
     huatu_cnpc_chuanqing = ROOT / "docs" / "current" / "phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json"
+    nhri_browser_recheck = ROOT / "docs" / "current" / "phase4-third-party-nhri-browser-recheck-2026-10-20.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
     three_oil_observed_roster = ROOT / "docs" / "current" / "phase4-three-oil-observed-roster-2026-10-20.json"
@@ -459,6 +461,10 @@ def main() -> None:
             "phase4_third_party_huatu_cnpc_chuanqing": {
                 "path": "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
                 "sha256": sha256(huatu_cnpc_chuanqing),
+            },
+            "phase4_third_party_nhri_browser_recheck": {
+                "path": "docs/current/phase4-third-party-nhri-browser-recheck-2026-10-20.json",
+                "sha256": sha256(nhri_browser_recheck),
             },
             "phase4_local_db_write_incident": {
                 "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",

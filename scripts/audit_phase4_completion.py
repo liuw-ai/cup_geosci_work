@@ -86,6 +86,7 @@ def build_report() -> dict[str, Any]:
     huatu_hbdk = _read("docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json")
     huatu_hebei_water_geology = _read("docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json")
     huatu_cnpc_chuanqing = _read("docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json")
+    nhri_browser_recheck = _read("docs/current/phase4-third-party-nhri-browser-recheck-2026-10-20.json")
     hbdk_official_table = _read("docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json")
     hbdk_registration = _read("docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
@@ -180,6 +181,24 @@ def build_report() -> dict[str, Any]:
                 "download_permission": huatu_shanxi.get("verification", {}).get("official_table_download_permission"),
                 "row_level_evidence_obtained": huatu_shanxi.get("verification", {}).get("row_level_evidence_obtained"),
                 "publication_status": huatu_shanxi.get("publication_decision", {}).get("status"),
+            },
+        },
+        {
+            "id": "third_party_nhri_browser_recheck",
+            "status": "partial",
+            "evidence": [
+                "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
+                "docs/current/phase4-third-party-nhri-browser-recheck-2026-10-20.json",
+            ],
+            "facts": {
+                "official_notice_url": nhri_browser_recheck.get("official_source", {}).get("notice_url"),
+                "official_table_url_observed": bool(nhri_browser_recheck.get("official_source", {}).get("official_table_url")),
+                "deadline_date": nhri_browser_recheck.get("official_source", {}).get("deadline_date"),
+                "attachment_status": nhri_browser_recheck.get("attachment_recheck", {}).get("status"),
+                "row_level_evidence_obtained": False,
+                "candidate_leads_created": nhri_browser_recheck.get("publication_decision", {}).get("candidate_leads_created", 0),
+                "formal_jobs_created": nhri_browser_recheck.get("publication_decision", {}).get("formal_jobs_created", 0),
+                "publication_boundary": "公告级事实保留；未取得逐行官方表格证据，不进入正式岗位库。",
             },
         },
         {
