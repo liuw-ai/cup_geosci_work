@@ -485,6 +485,24 @@ def build_three_oil_catalog_audit(
     for unit in three_oil_units(payload):
         organization, match_method = find_organization(unit)
         channels = list(organization.get("channels", [])) if organization else []
+        identity_evidence = dict(
+            external_identity_evidence.get(unit["id"], {})
+            or {"status": "pending"}
+        )
+        job_binding = job_binding_by_unit.get(unit["id"], {})
+        if (
+            str(identity_evidence.get("status") or "") != "verified"
+            and str(job_binding.get("status") or "") == "verified"
+        ):
+            identity_evidence = {
+                "status": "verified",
+                "basis": "official_job_detail_employer_record",
+                "evidence_scope": "official_job_detail_employer_name",
+                "source_ids": list(job_binding.get("source_ids", [])),
+                "evidence_urls": list(job_binding.get("evidence_urls", [])),
+                "matched_job_count": int(job_binding.get("match_count", 0)),
+                "independent_unit_recruitment_portal_proven": False,
+            }
         channel_rows: list[dict[str, Any]] = []
         for channel in channels:
             source_id = str(channel.get("source_id") or "") or None
@@ -549,10 +567,7 @@ def build_three_oil_catalog_audit(
                     and normalized(unit["name"]) == normalized(organization.get("canonical_name"))
                     else "manual_name_review_required"
                 ),
-                "external_identity_evidence": dict(
-                    external_identity_evidence.get(unit["id"], {})
-                    or {"status": "pending"}
-                ),
+                "external_identity_evidence": identity_evidence,
                 "channels": channel_rows,
                 "official_channel_count": len(channel_rows),
                 "automation_ready_enabled": bool(eligible),

@@ -153,6 +153,28 @@ def test_phase4_cnooc_employer_records_are_distinct_from_unit_portals() -> None:
     )
 
 
+def test_three_oil_job_detail_employer_record_is_identity_evidence_not_unit_portal() -> None:
+    report = build_three_oil_catalog_audit(
+        load_three_oil_catalog(),
+        organization_registry=load_organization_registry(),
+        job_records=[
+            {
+                "employer": "中国石化胜利油田分公司",
+                "source_id": "sinopec-career-browser",
+                "official_evidence_url": "https://job.sinopec.com/official-job/1",
+                "field_evidence": {
+                    "evidence_scope": "official_html_job_detail",
+                    "用人单位": "中国石化胜利油田分公司",
+                },
+            }
+        ],
+    )
+    item = next(row for row in report["items"] if row["catalog_id"] == "sinopec-shengli")
+    assert item["external_identity_evidence"]["status"] == "verified"
+    assert item["external_identity_evidence"]["basis"] == "official_job_detail_employer_record"
+    assert item["external_identity_evidence"]["independent_unit_recruitment_portal_proven"] is False
+
+
 def test_three_oil_catalog_audit_cli_does_not_write_database(monkeypatch, tmp_path) -> None:
     database_path = tmp_path / "job_hub.sqlite3"
     Database(database_path).initialize()
