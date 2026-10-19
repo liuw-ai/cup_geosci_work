@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T08:54:43Z",
+  "generated_at": "2026-10-19T08:58:47Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "986c71fdf3ae39da6e204b87cca92dc4f031d75b",
+  "git_sha": "3fb581b1454afafd7867393856348bea3fd995b2",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -447,7 +447,7 @@
     {
       "path": "job_hub/db.py",
       "line_count": 5736,
-      "sha256": "5356fa70d78d2e1cd11cab18603fdb53dcf2ef5a8202f9473e6c0f1dd4d7921f"
+      "sha256": "0ec9356f4623f8eb568a17b05a5c6738b505092cb626d90e788fb3e9d13b8d0b"
     },
     {
       "path": "job_hub/discovery.py",
