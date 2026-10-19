@@ -51,13 +51,15 @@ Phase 62 为该队列补上附件用途和岗位行语义门禁：报名表、�
 
 最新的中国石油官方浏览器索引捕获与安徽事业编附件队列见 [docs/phase-33/README.md](docs/phase-33/README.md)。浏览器捕获只记录 13 页、122 条官方公告索引和重点详情状态；详情字段缺失时不把公告索引当作学生端岗位。
 
+以下 Phase 435 段落是历史快照，不再是当前审计基线；当前数字只以本文件顶部的 Phase 4 审计链接为准。
+
 当前最新本地审计基线为 Phase 435：国聘 7/7 批次完整捕获通过，正式快照包含 302 页、2032 个详情决策、0 个详情失败；政府附件全量发现覆盖 `13` 个来源、`33` 条公告，登记 `46` 个附件（岗位表 `9`），其中 `9` 个附件成功解析 `103` 行但没有生成可发布候选；随后按 worker 同一逻辑复核政府台账，结果 `verified=1`、`source_unavailable=5`、`withdrawn=0`、`activated=0`，失败未被误判为无岗位或清退。全量回归为 `860 passed/3 skipped`，待证据 `752` 条（地学信号 `141`），三桶油目录 `64/64` 映射且仅 `cnpc-bgp` automation-ready。湖北省自然资源厅因 robots 错误页明确阻断，不能解释为无岗位。学生端为 `287` 条中国大陆有效岗位（67 条三桶油、220 条其他国内官方来源），距离招聘季 500 条目标还差 `213` 条。候选、证据完整、人工复核、开放匹配、附件解析行和计划名额不能直接计入学生端。中国海油继续保持 50 条岗位通过学生端门禁；中国石油主入口 HTTP 412、中国石化 robots HTTP 403，不能用旧快照补数。CEA 已在 2026-10-10 08:00（Asia/Shanghai）开窗后执行两次环境传输复核和一次直连复核：前两次因官方 robots TLS `SSLError` 失败，直连明确 robots 拒绝；来源保持 disabled、连续成功 `0/2`，91 条计划岗位和 112 个计划名额不计入学生端。worker 失败重试已修复为默认 60 秒并保持 degraded 心跳，成功后恢复 running。自动同步、截止日期过期和来源新鲜度撤回逻辑已完成代码审计并通过回归测试。浏览器 worker 已统一纳入 Compose（含 CUPB），但本机没有连续运行 worker、日报和备份闭环，因此 production-readiness 仍保持 false。所有当前报表统一使用招聘季 500 条、三桶油 360 条。详见 [docs/phase-435/README.md](docs/phase-435/README.md)、[docs/phase-434/README.md](docs/phase-434/README.md) 及此前各阶段文档。
 
 Phase 436 已把历史数据库记录、旧阶段快照与学生端当前可见数统一：当前唯一有效口径仍为 `287`，不是历史的 `309` 或 `173`。Phase 437 修复了学生端专业关键词只检索标题/正文而漏掉岗位级结构化专业证据的问题；现在“地质工程”等查询同时检索核验专业标签与官方专业字段。详见 [docs/phase-436/README.md](docs/phase-436/README.md) 和 [docs/phase-437/README.md](docs/phase-437/README.md)。
 
 Phase 438 复核了政府与三桶油官方来源健康：当前访问受限、海外/社招和证据过期记录不会被误发；学生端保持 `287/500`。Phase 439 将生产发布改为不可变镜像 digest 与独立 `.release.env` 清单，Phase 440 为全部浏览器 worker 补上空闲等待期间的心跳，抓取卡死仍由 watchdog 处理。详见 [docs/phase-438/README.md](docs/phase-438/README.md)、[docs/phase-439/README.md](docs/phase-439/README.md) 和 [docs/phase-440/README.md](docs/phase-440/README.md)。
 
-Phase 441 将“仅确认官方主体”的五个扩源候选接入 worker 的私有入口健康检查：它只检测官方入口和 robots，绝不创建岗位或把入口可达当成招聘存在。当前数据库权威学生端读集仍为 `287`，历史 `309` 不是当前有效口径；第三方发现池当前为 `0` 条线索，因此中公、华图等发现渠道尚未形成无人值守采集。详见 [docs/phase-441/README.md](docs/phase-441/README.md)。
+Phase 441 历史快照：将“仅确认官方主体”的五个扩源候选接入 worker 的私有入口健康检查；它只检测官方入口和 robots，绝不创建岗位或把入口可达当成招聘存在。该阶段记录的学生端 `287` 和第三方发现池 `0` 已被 Phase 4 当前审计取代，不能作为当前数据口径。详见 [docs/phase-441/README.md](docs/phase-441/README.md)。
 
 Phase 318 完成了开放后自动再验证来源的无人值守门禁：开放前零请求，开放后先校验 robots、完整下载并核对官方附件哈希，连续两次成功后才自动启用；公共“即将开放”页面不再把 automatic-after-opening 来源的静态台账当作实时岗位。详见 [docs/phase-318/README.md](docs/phase-318/README.md)。
 
