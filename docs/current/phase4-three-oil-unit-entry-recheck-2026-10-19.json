@@ -1,0 +1,72 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-19T15:00:00+08:00",
+  "verification_mode": "read_only_official_source_recheck",
+  "policy": "A unit-specific official announcement or recruitment ATS may prove a unit-level entry, but it does not prove that a current position is open. A shared group portal is not copied into unit_specific_entry_url.",
+  "entries": [
+    {
+      "group_id": "sinopec",
+      "catalog_id": "sinopec-petroleum-exploration-production-research",
+      "canonical_name": "中国石化石油勘探开发研究院有限公司",
+      "official_identity": {
+        "official_domain": "pepris.sinopec.com",
+        "identity_source_url": "https://pepris.sinopec.com/",
+        "identity_note": "单位登记记录绑定至中国石化石油勘探开发研究院有限公司及其 pepris.sinopec.com 官方域名。"
+      },
+      "entry": {
+        "official_announcement_url": "http://pepris.sinopec.com/pepris/careers/rwzl/2026/6/I1519026538069098496.shtml",
+        "entry_type": "official_announcement",
+        "entry_status": "unit_specific_entry_verified",
+        "observations": [
+          "链接位于该单位官方域名 pepris.sinopec.com 的 careers 路径。",
+          "登记表将该链接绑定到中国石化石油勘探开发研究院有限公司，而不是集团共享招聘首页。",
+          "该公告及岗位表已作为历史解析证据登记；不能据此断言 2026-10-19 仍在招。"
+        ],
+        "official_application_url": null,
+        "application_note": "当前证据未提供可复核的独立 HTTP 投递地址，不生成 official_application_url。"
+      },
+      "policy_checks": {
+        "group_portal_copied_as_unit_entry": false,
+        "third_party_source_used_as_application": false,
+        "captcha_or_login_bypass": false,
+        "student_job_created": false,
+        "server_deployment": false
+      }
+    },
+    {
+      "group_id": "cnooc",
+      "catalog_id": "cosl",
+      "canonical_name": "中海油田服务股份有限公司",
+      "official_identity": {
+        "official_domain": "cosl.com.cn",
+        "identity_source_url": "https://www.cosl.com.cn/",
+        "identity_note": "单位登记记录绑定至中海油田服务股份有限公司及其官方域名。"
+      },
+      "entry": {
+        "official_recruitment_url": "http://cosl.zhiye.com/",
+        "entry_type": "official_campus_recruitment_ats",
+        "entry_status": "unit_specific_entry_verified",
+        "observations": [
+          "中海油服官方登记记录明确将 cosl.zhiye.com 作为其校园招聘入口。",
+          "该入口与中国海油集团共享招聘平台不同，未将集团 URL 复制为单位入口。",
+          "本轮只保存官方入口证据；ATS 当前可达性和开放岗位需另行复测。"
+        ],
+        "official_application_url": null,
+        "application_note": "入口证据不等于具体岗位投递地址；未取得岗位级官方 HTTP 地址时保持为空。"
+      },
+      "policy_checks": {
+        "group_portal_copied_as_unit_entry": false,
+        "third_party_source_used_as_application": false,
+        "captcha_or_login_bypass": false,
+        "student_job_created": false,
+        "server_deployment": false
+      }
+    }
+  ],
+  "summary": {
+    "entries_checked": 2,
+    "unit_specific_entry_verified": 2,
+    "current_open_position_claims": 0,
+    "student_application_urls_created": 0
+  }
+}

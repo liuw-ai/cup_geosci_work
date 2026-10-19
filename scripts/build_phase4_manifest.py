@@ -201,6 +201,7 @@ def main() -> None:
     lead_recheck = ROOT / "docs" / "current" / "phase4-third-party-lead-recheck-2026-10-19.json"
     cnpc_entry_recheck = ROOT / "docs" / "current" / "phase4-cnpc-entry-recheck-2026-10-19.json"
     cnpc_bgp_entry_recheck = ROOT / "docs" / "current" / "phase4-cnpc-bgp-entry-recheck-2026-10-19.json"
+    three_oil_unit_entry_recheck = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-recheck-2026-10-19.json"
     access_recheck = ROOT / "docs" / "current" / "phase4-third-party-access-recheck-2026-10-19.json"
     official_recovery_recheck = ROOT / "docs" / "current" / "phase4-third-party-official-recovery-recheck-2026-10-19.json"
     local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
@@ -285,6 +286,7 @@ def main() -> None:
             "phase4_third_party_lead_recheck": sha256(lead_recheck),
             "phase4_cnpc_entry_recheck": sha256(cnpc_entry_recheck),
             "phase4_cnpc_bgp_entry_recheck": sha256(cnpc_bgp_entry_recheck),
+            "phase4_three_oil_unit_entry_recheck": sha256(three_oil_unit_entry_recheck),
             "phase4_third_party_access_recheck": sha256(access_recheck),
             "phase4_third_party_official_recovery_recheck": sha256(official_recovery_recheck),
             "phase4_local_repair": sha256(local_repair),
@@ -349,6 +351,7 @@ def main() -> None:
             "official_recovery_recheck": "docs/current/phase4-third-party-huatu-nanjing-land-center-2026-10-19.json",
             "unresolved_lead_recheck": "docs/current/phase4-third-party-lead-recheck-2026-10-19.json",
             "cnpc_entry_recheck": "docs/current/phase4-cnpc-entry-recheck-2026-10-19.json",
+            "unit_entry_recheck": "docs/current/phase4-three-oil-unit-entry-recheck-2026-10-19.json",
             "funnel_audit": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
             "table_discovery_report": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
             "discovery_scan_report": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",

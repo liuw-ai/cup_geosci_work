@@ -9,6 +9,7 @@ MATRIX = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10
 FULL_CNOOC_EVIDENCE = ROOT / "docs" / "current" / "phase4-cnooc-unit-job-evidence-2026-10-19.json"
 SINOPEC_PAGE_ROSTER = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
 COOEC_NEGATIVE_EVIDENCE = ROOT / "docs" / "current" / "phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json"
+UNIT_ENTRY_RECHECK = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-recheck-2026-10-19.json"
 
 
 def test_phase4_three_oil_entry_matrix_covers_every_formal_catalog_unit() -> None:
@@ -37,6 +38,16 @@ def test_phase4_three_oil_entry_matrix_covers_every_formal_catalog_unit() -> Non
     negative = json.loads(COOEC_NEGATIVE_EVIDENCE.read_text(encoding="utf-8"))
     assert negative["evidence_boundary"]["official_identity_verified"] is True
     assert negative["evidence_boundary"]["unit_specific_recruitment_entry_verified"] is False
+    recheck = json.loads(UNIT_ENTRY_RECHECK.read_text(encoding="utf-8"))
+    assert recheck["summary"] == {
+        "entries_checked": 2,
+        "unit_specific_entry_verified": 2,
+        "current_open_position_claims": 0,
+        "student_application_urls_created": 0,
+    }
+    assert {
+        item["catalog_id"] for item in recheck["entries"]
+    } == {"sinopec-petroleum-exploration-production-research", "cosl"}
     sinopec_displayed_ids = {
         item["catalog_id"]
         for item in units
