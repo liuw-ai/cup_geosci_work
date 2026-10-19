@@ -1,12 +1,12 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T10:25:21+08:00",
+  "validated_at": "2026-10-19T04:52:47Z",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "ed29671c6ff04d8960a580d1d3fd1f38938c308e",
-  "git_sha_at_validation": "ed29671c6ff04d8960a580d1d3fd1f38938c308e",
+  "git_sha_before_metadata_commit": "19733807f71f98b23e99109c021d8835f77cab1c",
+  "git_sha_at_validation": "19733807f71f98b23e99109c021d8835f77cab1c",
   "tests": {
-    "command": "python -m pytest -q",
+    "command": "pytest -q",
     "passed": 1094,
     "skipped": 4,
     "failed": 0,
@@ -50,15 +50,33 @@
     "isolated_huatu_trial_candidate_leads": 11,
     "formal_database_private_candidate_leads": 8,
     "formal_jobs_created": 7,
-    "formal_third_party_job_ids": [5432, 5433, 5434, 5435, 5436, 5437, 5438],
+    "formal_third_party_job_ids": [
+      5432,
+      5433,
+      5434,
+      5435,
+      5436,
+      5437,
+      5438
+    ],
     "formal_database_unchanged": false,
     "formal_database_change_note": "Historical local promotions created jobs 5432-5438; a later local Flask process using the formal path was stopped and recorded separately. This historical mutation is not part of the current test run.",
     "formal_database_stable_during_current_tests": true,
     "cgs_attachment_trial": {
-      "candidate_lead_ids": [3, 4, 5, 6],
+      "candidate_lead_ids": [
+        3,
+        4,
+        5,
+        6
+      ],
       "official_rows": 4,
       "formal_jobs_created": 4,
-      "formal_job_ids": [5433, 5434, 5435, 5436],
+      "formal_job_ids": [
+        5433,
+        5434,
+        5435,
+        5436
+      ],
       "backup_path": "backups/job_hub-pre-phase4-cgs-promotion-20261018.sqlite3",
       "backup_sha256": "e324eb2fd0e54308ac6da7eb7e18d080ffe93a355648e2c8f069a72b0a54b702"
     },
@@ -70,7 +88,10 @@
       "backup_sha256": "78da4698ce41431cbd434ae1ef52fdd4295cac8eeb66515fd39defa086fef0ba"
     },
     "hbdk_candidate_registration": {
-      "candidate_lead_ids": [7, 8],
+      "candidate_lead_ids": [
+        7,
+        8
+      ],
       "official_rows": 2,
       "formal_jobs_created": 0,
       "backup_path": "backups/job_hub-pre-phase4-hbdk-candidates-20261019.sqlite3",
@@ -78,7 +99,7 @@
       "report": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
     },
     "robots_gate_targeted_tests": "22 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py, tests/test_phase4_completion_audit.py)",
-      "source_disabled_visibility_regression": "included in full 1094-test run; disabled source remains student-visible without withdrawal",
+    "source_disabled_visibility_regression": "included in full 1094-test run; disabled source remains student-visible without withdrawal",
     "robots_or_permission_blocked_followups": 1,
     "huatu_discovery_scan": {
       "discovered_announcements": 65,
