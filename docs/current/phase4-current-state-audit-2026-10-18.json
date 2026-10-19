@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T05:33:31Z",
+  "generated_at": "2026-10-19T05:35:40Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "52889bab377ff9b72959c56376de03f415087014",
+  "git_sha": "d2161f47698f1dd0f2ab8901fcfbc62e0e5909c5",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -215,7 +215,7 @@
     },
     "phase4_third_party_nhri_official_page": {
       "path": "docs/current/phase4-third-party-nhri-official-page-2026-10-19.json",
-      "sha256": "1ad776f23b17f23d3774921107a34e9af3cd754cedd6bcf1cace3044dd1ca6f6"
+      "sha256": "9218b6bcbdaa6721b0ee8cc53321bcfe5f44afd8583e5e0a628671c0d7ea9d8e"
     },
     "phase4_third_party_huatu_nanjing_land_center": {
       "path": "docs/current/phase4-third-party-huatu-nanjing-land-center-2026-10-19.json",
