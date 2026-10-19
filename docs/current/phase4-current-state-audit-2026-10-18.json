@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T18:23:17Z",
+  "generated_at": "2026-10-19T18:30:05Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "1cfe1cd5e6992e80eeae309b34a71ed227e1dcae",
+  "git_sha": "5e04166d996ad98c48c26f56b1420c994ba883b7",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -154,7 +154,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "bec71e8130b46c8fc26beedb8342ad1c243d64c8f76127c2675dc6bd14c7a419"
+        "sha256": "9e2f0a80dc481409885fdadefe9336836d5e8439d6253ee80e3688564c1f46ad"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "9c2a75fedba65b6f6cbfd7002545de9ce1d90378ed277f1672cc8b8f5fd27ff1"
+      "sha256": "8d898b3d58f835104352b2d85737cdd58da8de3804396760431b803721b638b4"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -327,7 +327,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "bec71e8130b46c8fc26beedb8342ad1c243d64c8f76127c2675dc6bd14c7a419"
+      "sha256": "9e2f0a80dc481409885fdadefe9336836d5e8439d6253ee80e3688564c1f46ad"
     }
   },
   "code_inventory": [
