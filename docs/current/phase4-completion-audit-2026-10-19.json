@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T00:57:08Z",
+  "generated_at": "2026-10-19T00:59:07Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -122,6 +122,40 @@
           "official_site_checked_no_unit_entry_found": 1,
           "unit_specific_entry_verified": 3,
           "group_portal_not_revalidated": 1
+        },
+        "external_identity_evidence_review": {
+          "status": "partial",
+          "verified_unit_count": 21,
+          "pending_unit_count": 43,
+          "verified_unit_ids": [
+            "sinopec-shengli",
+            "sinopec-jianghan",
+            "sinopec-petroleum-exploration-production-research",
+            "sinopec-petroleum-engineering-research",
+            "sinopec-engineering-construction",
+            "cnooc-tianjin",
+            "cnooc-shanghai",
+            "cnooc-shenzhen",
+            "cnooc-zhanjiang",
+            "cnooc-hainan",
+            "cnooc-research",
+            "cosl",
+            "cnooc-engineering",
+            "cnooc-energy-development",
+            "cnooc-international",
+            "cnooc-beijing-new-energy",
+            "cnooc-chemicals",
+            "cnooc-refining",
+            "cnooc-gas-power",
+            "cnooc-international-trade",
+            "cnooc-coalbed-gas"
+          ],
+          "required_evidence": [
+            "official group or unit page",
+            "official recruitment notice or portal employer record",
+            "legal-registration record when the display name is abbreviated or ambiguous"
+          ],
+          "student_publication_effect": "none"
         }
       }
     },
