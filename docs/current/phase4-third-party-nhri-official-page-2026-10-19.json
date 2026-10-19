@@ -25,6 +25,18 @@
     "status": "blocked_by_robots_and_browser_download_permission",
     "reason": "逐岗位专业、学历和岗位编号位于附件；第三方附件域名禁止抓取，且浏览器下载权限被拒绝。不能使用 TLS 绕过、验证码、登录或替代传输。"
   },
+  "official_table_recheck": {
+    "checked_at": "2026-10-19T05:34:34Z",
+    "url": "official_source.official_table_url",
+    "robots_url": "https://www.nhri.cn/robots.txt",
+    "robots_status": "unavailable_tls_unexpected_eof",
+    "robots_allowed": null,
+    "fetch_status": "blocked_before_download",
+    "fetch_error": "TLS UNEXPECTED_EOF_WHILE_READING",
+    "downloaded": false,
+    "sha256": null,
+    "policy_result": "source_unavailable; no file downloaded and no candidate rows created"
+  },
   "publication_decision": {
     "candidate_leads_created": 0,
     "formal_jobs_created": 0,
