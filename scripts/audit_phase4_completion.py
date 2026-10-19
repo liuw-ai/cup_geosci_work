@@ -80,7 +80,7 @@ def _published_candidate_facts(candidate_ids: list[int]) -> dict[str, int]:
 
 def build_report() -> dict[str, Any]:
     manifest = _read("docs/current/phase4-release-manifest.json")
-    validation = _read("docs/current/phase4-local-validation-2026-10-19.json")
+    validation = _read("docs/current/phase4-local-validation-2026-10-20.json")
     funnel = _read("docs/current/phase4-third-party-funnel-audit-2026-10-18.json")
     huatu_shanxi = _read("docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json")
     huatu_hbdk = _read("docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json")
@@ -276,7 +276,7 @@ def build_report() -> dict[str, Any]:
         {
             "id": "isolated_local_regression",
             "status": "pass",
-            "evidence": ["docs/current/phase4-local-validation-2026-10-19.json"],
+            "evidence": ["docs/current/phase4-local-validation-2026-10-20.json"],
             "facts": {
                 "passed": validation_tests.get("passed", 0),
                 "skipped": validation_tests.get("skipped", 0),

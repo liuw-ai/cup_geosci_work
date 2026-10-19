@@ -1,0 +1,37 @@
+{
+  "phase": "phase4",
+  "validated_at": "2026-10-20T06:14:00+08:00",
+  "environment": "local",
+  "server_deployment": false,
+  "git_sha": "ed82177",
+  "tests": {
+    "command": "python -m pytest -q",
+    "passed": 1102,
+    "skipped": 4,
+    "failed": 0,
+    "warnings": 0,
+    "database_path": "runtime/job_hub.sqlite3",
+    "database_sha256_before": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+    "database_sha256_after": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+    "formal_database_stable_during_tests": true
+  },
+  "local_web_read_only": {
+    "base_url": "http://127.0.0.1:8098",
+    "database_mode": "temporary_copy_of_runtime_database",
+    "healthz_status": 200,
+    "home_status": 200,
+    "layer_api_statuses": {
+      "exact_match": 200,
+      "broad_geoscience_match": 200,
+      "incomplete_but_basic_match": 200,
+      "source_unavailable": 200
+    },
+    "coverage_status": 200,
+    "server_deployment": false
+  },
+  "release_boundary": {
+    "status": "not_publishable",
+    "automation_status": "paused",
+    "reason": "local validation is evidence only; third-party expansion and three-oil entry evidence remain incomplete"
+  }
+}

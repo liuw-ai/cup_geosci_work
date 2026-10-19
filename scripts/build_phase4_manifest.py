@@ -19,7 +19,7 @@ from job_hub.phase3_policy import PUBLICATION_LAYERS
 
 
 OUTPUT = ROOT / "docs" / "current" / "phase4-release-manifest.json"
-LOCAL_VALIDATION = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-19.json"
+LOCAL_VALIDATION = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-20.json"
 
 # Keep the dirty flag about source/config/database inputs. These reports are
 # generated after the source commit and are committed as metadata afterward.
@@ -27,6 +27,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-current-state-audit-2026-10-18.json",
     ":!docs/current/phase4-release-manifest.json",
     ":!docs/current/phase4-local-validation-2026-10-19.json",
+    ":!docs/current/phase4-local-validation-2026-10-20.json",
     ":!docs/current/phase4-local-web-recheck-2026-10-19.json",
     ":!docs/current/phase4-local-web-live-validation-2026-10-19.json",
     ":!docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
