@@ -50,6 +50,34 @@ def _database_facts() -> dict[str, Any]:
     }
 
 
+def _published_candidate_facts(candidate_ids: list[int]) -> dict[str, int]:
+    """Read current publication facts for a named candidate batch."""
+    if not candidate_ids:
+        return {"formal_jobs_created": 0, "student_visible": 0}
+    placeholders = ", ".join("?" for _ in candidate_ids)
+    with sqlite3.connect(f"file:{DATABASE.resolve().as_posix()}?mode=ro", uri=True) as connection:
+        row = connection.execute(
+            f"""
+            SELECT
+                COUNT(CASE WHEN cl.verification_status = 'published'
+                           AND cl.published_job_id IS NOT NULL THEN 1 END),
+                COUNT(CASE WHEN cl.verification_status = 'published'
+                           AND cl.published_job_id IS NOT NULL
+                           AND j.status = 'open'
+                           AND j.publication_status IN ('student_eligible', 'unrestricted_eligible')
+                           THEN 1 END)
+            FROM candidate_leads cl
+            LEFT JOIN jobs j ON j.id = cl.published_job_id
+            WHERE cl.id IN ({placeholders})
+            """,
+            candidate_ids,
+        ).fetchone()
+    return {
+        "formal_jobs_created": int(row[0] or 0),
+        "student_visible": int(row[1] or 0),
+    }
+
+
 def build_report() -> dict[str, Any]:
     manifest = _read("docs/current/phase4-release-manifest.json")
     validation = _read("docs/current/phase4-local-validation-2026-10-19.json")
@@ -73,6 +101,12 @@ def build_report() -> dict[str, Any]:
     entry_summary = entry_matrix.get("summary", {})
     validation_tests = validation.get("tests", {})
     web = validation.get("local_web_read_only", {})
+    hbdk_candidate_ids = [
+        int(item)
+        for item in hbdk_registration.get("candidate_leads", {}).get("ids", [])
+        if str(item).isdigit()
+    ]
+    hbdk_publication = _published_candidate_facts(hbdk_candidate_ids)
 
     requirements = [
         {
@@ -156,10 +190,10 @@ def build_report() -> dict[str, Any]:
                 "capture_path": hbdk_official_table.get("capture", {}).get("retained_path"),
                 "deadline_policy": hbdk_official_table.get("official_deadline", {}).get("policy"),
                 "official_row_evidence": True,
-                "formal_jobs_created": 0,
+                "formal_jobs_created": hbdk_publication["formal_jobs_created"],
                 "candidate_leads_registered": hbdk_registration.get("candidate_leads", {}).get("count", 0),
                 "candidate_lead_ids": hbdk_registration.get("candidate_leads", {}).get("ids", []),
-                "student_visible": False,
+                "student_visible": hbdk_publication["student_visible"] > 0,
                 "publication_status": hbdk_official_table.get("publication_decision", {}).get("status"),
             },
         },

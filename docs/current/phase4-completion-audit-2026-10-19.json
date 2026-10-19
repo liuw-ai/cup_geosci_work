@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T02:55:36Z",
+  "generated_at": "2026-10-19T03:02:42Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -107,13 +107,13 @@
         "capture_path": "runtime/third-party-evidence/hbdk-hebei-2026-10-19/official-position-table.html",
         "deadline_policy": "asia_shanghai_weekdays_inclusive",
         "official_row_evidence": true,
-        "formal_jobs_created": 0,
+        "formal_jobs_created": 2,
         "candidate_leads_registered": 2,
         "candidate_lead_ids": [
           7,
           8
         ],
-        "student_visible": false,
+        "student_visible": true,
         "publication_status": "official_content_verified_ready_for_local_review"
       }
     },
