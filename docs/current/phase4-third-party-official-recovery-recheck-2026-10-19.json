@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-19T11:04:57Z",
+  "generated_at": "2026-10-19T17:10:21Z",
   "environment": "local_read_only",
   "policy": "只在 robots 可验证且允许时请求官方 URL；不下载附件、不解析岗位、不写数据库。robots、TLS、网络或权限失败是来源暂时不可用证据，不表示岗位不存在。",
   "targets": [
@@ -10,7 +10,7 @@
       "discovery_page_url": "https://sydw.huatu.com/2026/0717/2868457.html",
       "official_url": "http://dkj.shandong.gov.cn/art/2026/7/17/art_356047_10333801.html",
       "kind": "official_notice",
-      "checked_at": "2026-10-19T11:04:56Z",
+      "checked_at": "2026-10-19T17:10:17Z",
       "robots": {
         "robots_url": "http://dkj.shandong.gov.cn/robots.txt",
         "robots_status": 502,
@@ -28,7 +28,7 @@
       "discovery_page_url": "https://sydw.huatu.com/2026/0717/2868457.html",
       "official_url": "http://dkj.shandong.gov.cn/module/download/downfile.jsp?classid=0&filename=732c4f35c08742398d1c946003273bca.xlsx",
       "kind": "official_position_table",
-      "checked_at": "2026-10-19T11:04:56Z",
+      "checked_at": "2026-10-19T17:10:18Z",
       "robots": {
         "robots_url": "http://dkj.shandong.gov.cn/robots.txt",
         "robots_status": 502,
@@ -46,7 +46,7 @@
       "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875246.html",
       "official_url": "https://www.gdyunan.gov.cn/ynxrmzf/rdzt/gsgg/index.html",
       "kind": "official_notice_index",
-      "checked_at": "2026-10-19T11:04:56Z",
+      "checked_at": "2026-10-19T17:10:18Z",
       "robots": {
         "robots_url": "https://www.gdyunan.gov.cn/robots.txt",
         "robots_status": null,
@@ -64,7 +64,7 @@
       "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875246.html",
       "official_url": "http://www.gdyunan.gov.cn/yfynrsj/gkmlpt/index",
       "kind": "official_notice_index",
-      "checked_at": "2026-10-19T11:04:56Z",
+      "checked_at": "2026-10-19T17:10:19Z",
       "robots": {
         "robots_url": "http://www.gdyunan.gov.cn/robots.txt",
         "robots_status": 502,
@@ -82,7 +82,7 @@
       "discovery_page_url": "https://sx.huatu.com/shehui/kaoshi/gg/2026/1017/1281187.html",
       "official_url": "https://www.sxddy.com/xinwendongtai/tongzhigonggao/2026-10-16/3507.html",
       "kind": "official_notice",
-      "checked_at": "2026-10-19T11:04:57Z",
+      "checked_at": "2026-10-19T17:10:19Z",
       "robots": {
         "robots_url": "https://www.sxddy.com/robots.txt",
         "robots_status": null,
@@ -100,7 +100,7 @@
       "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875231.html",
       "official_url": "https://www.nhri.cn/tzgg/zpxx/art/2026/art_01a4e42a69594ee88fac503a5cce8df5.html",
       "kind": "official_notice",
-      "checked_at": "2026-10-19T11:04:57Z",
+      "checked_at": "2026-10-19T17:10:20Z",
       "robots": {
         "robots_url": "https://www.nhri.cn/robots.txt",
         "robots_status": null,
@@ -118,7 +118,7 @@
       "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875231.html",
       "official_url": "https://www.nhri.cn/api-gateway/jpaas-web-server/front/document/download?fileUrl=YW5UzzlvCwcM%2FNHHX%2FtT6Du%2BYe4yVKZJwpy7%2FX41ZtH3jzrjBAGNZ7eb4VNI%2B6APA58hw%2FF1WFUBMght3OIgkp7GAzci%2F3n2KEszI2FJL6bAf3NVTU8toxcwhvxoQio5k%2BdtCRdf5Grdlw25haK7zN0%2BkqF4%2F7DxmTiQZ6sH7k%3D&fileName=%E9%99%84%E4%BB%B61%EF%BC%9A%E5%8D%97%E4%BA%AC%E6%B0%B4%E5%88%A9%E7%A7%91%E5%AD%A6%E7%A0%94%E7%A9%B6%E9%99%A2%E5%8F%AC%E5%BC%80%E6%8B%9B%E8%81%98%E4%BA%8B%E4%B8%9A%E7%BC%96%E5%88%B6%E5%B7%A5%E4%BD%9C%E4%BA%BA%E5%91%98%E5%B2%97%E4%BD%8D%E8%A1%A8.pdf",
       "kind": "official_position_table",
-      "checked_at": "2026-10-19T11:04:57Z",
+      "checked_at": "2026-10-19T17:10:21Z",
       "robots": {
         "robots_url": "https://www.nhri.cn/robots.txt",
         "robots_status": null,

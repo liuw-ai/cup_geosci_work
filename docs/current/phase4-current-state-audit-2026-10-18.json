@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T17:07:34Z",
+  "generated_at": "2026-10-19T17:14:26Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "382398535f3dbc9023f5399561f6230fcb4f9925",
-  "git_status_porcelain": "",
+  "git_sha": "9986cf7db42b7f40ed79cb09de057787be9f8f38",
+  "git_status_porcelain": "M docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -265,7 +265,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "eafbc1106ae0bf68232f3b1f3053b759d2ddff70bae5a79b70b20b198f5082f5"
+      "sha256": "a57583b8627c867bb7df26ff3a46cc5aac9efbc58ed99b473e9824c3272351fc"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -317,7 +317,7 @@
     },
     "phase4_three_oil_homepage_probe": {
       "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
-      "sha256": "8abeae2961123584e33e22102108cfad5ade5d0e94ff11255b52835b6f0313ad"
+      "sha256": "947f1ab9f3138fa743a10301b8b5fb8618ca66281d11a0f1cde7d344c2479ae2"
     },
     "phase4_three_oil_observed_roster": {
       "path": "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
@@ -821,8 +821,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 412,
-      "sha256": "eecb03efeedb3a7580b713f1bdd381f42fad31c097ab138c1ab2139031f38940"
+      "line_count": 413,
+      "sha256": "80f3bc0cf39c24377a83f8d78a946e7c8595281b7703415c861e333168e05eb9"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -911,8 +911,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 243,
-      "sha256": "dc80bdef8824d3c8d9fa039a989e3428d17c1bca1d53e8efa7caddb4e0a529dd"
+      "line_count": 245,
+      "sha256": "b0fe30484ce88a156f040e037d8ce4a964647478b48bbbfb9b2df012982bf9c8"
     },
     {
       "path": "tests/conftest.py",
