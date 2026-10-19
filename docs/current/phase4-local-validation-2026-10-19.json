@@ -3,8 +3,8 @@
   "validated_at": "2026-10-19T10:25:21+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "f5d81791f434472de2d34334d65b9a80f2a9f37e",
-  "git_sha_at_validation": "f5d81791f434472de2d34334d65b9a80f2a9f37e",
+  "git_sha_before_metadata_commit": "ed29671c6ff04d8960a580d1d3fd1f38938c308e",
+  "git_sha_at_validation": "ed29671c6ff04d8960a580d1d3fd1f38938c308e",
   "tests": {
     "command": "python -m pytest -q",
     "passed": 1093,
