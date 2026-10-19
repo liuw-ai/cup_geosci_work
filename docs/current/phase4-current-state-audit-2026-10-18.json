@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T17:14:26Z",
+  "generated_at": "2026-10-19T17:21:17Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "9986cf7db42b7f40ed79cb09de057787be9f8f38",
-  "git_status_porcelain": "M docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
+  "git_sha": "a4e5ab23707f18c078e6667880d1eca292aaddff",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -157,7 +157,7 @@
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "3fc609fbcb6eb1f458bde666a116e965a66f5917298bd92b53fc1d731276e63a"
+        "sha256": "2ce82d2e2add8e4dca7ea2f0e8847fbbcb8089b049e2a89f2e721e784d88cca3"
       }
     ],
     "metadata_documents": [
@@ -213,7 +213,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "3fc609fbcb6eb1f458bde666a116e965a66f5917298bd92b53fc1d731276e63a"
+      "sha256": "2ce82d2e2add8e4dca7ea2f0e8847fbbcb8089b049e2a89f2e721e784d88cca3"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -265,7 +265,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "a57583b8627c867bb7df26ff3a46cc5aac9efbc58ed99b473e9824c3272351fc"
+      "sha256": "15fa2949807e80fac6aa946b0cae2e745ed6c6433d915fa471ebd4fea3edb681"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
