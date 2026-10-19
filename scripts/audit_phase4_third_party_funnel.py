@@ -10,6 +10,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -22,6 +23,11 @@ PUBLICATION_LAYERS = {
     "incomplete_but_basic_match",
     "source_unavailable",
 }
+
+
+def _is_http_url(value: Any) -> bool:
+    parsed = urlparse(str(value or "").strip())
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
 def sha256(path: Path) -> str:
@@ -76,11 +82,23 @@ def audit_database(path: Path) -> dict[str, Any]:
             )
             if not official_evidence:
                 lead_issues.append("published_lead_missing_official_evidence_url")
+            # The discovery record is internal provenance.  It must survive
+            # promotion even though it is never exposed as the application
+            # link.  Without it, a published row cannot be attributed to a
+            # third-party batch during audit or deduplication.
+            if not _is_http_url(item.get("lead_url")):
+                lead_issues.append("published_lead_missing_discovery_url")
+            if not str(item.get("discovery_source_id") or "").strip():
+                lead_issues.append("published_lead_missing_discovery_source")
             application_url = item.get("job_official_application_url") or item.get(
                 "official_application_url"
             )
             if application_url and not str(application_url).startswith(("http://", "https://")):
                 lead_issues.append("official_application_url_not_http")
+            # A third-party URL is evidence only; it must never be copied to
+            # the job's student-facing application field.
+            if application_url and item.get("lead_url") == application_url:
+                lead_issues.append("third_party_discovery_url_used_as_application")
         item["audit_status"] = "pass" if not lead_issues else "fail"
         item["issues"] = lead_issues
         rows.append(item)

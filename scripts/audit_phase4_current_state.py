@@ -43,6 +43,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-three-oil-catalog-audit-2026-10-17.json",
     ":!docs/current/phase4-third-party-huatu-state-owned-entry-2026-10-19.json",
     ":!docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json",
+    ":!docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
     ":!docs/current/phase4-completion-audit-2026-10-19.json",
     ":!docs/current/phase4-workspace-layout-audit-2026-10-19.json",
 )
@@ -277,6 +278,7 @@ def main() -> None:
     hbdk_registration = ROOT / "docs" / "current" / "phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
+    three_oil_observed_roster = ROOT / "docs" / "current" / "phase4-three-oil-observed-roster-2026-10-20.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     report = {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -459,6 +461,10 @@ def main() -> None:
             "phase4_three_oil_homepage_probe": {
                 "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
                 "sha256": sha256(three_oil_homepage_probe),
+            },
+            "phase4_three_oil_observed_roster": {
+                "path": "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
+                "sha256": sha256(three_oil_observed_roster),
             },
             "phase4_main_record": {
                 "path": "docs/current/PHASE4-2026-10-17.md",

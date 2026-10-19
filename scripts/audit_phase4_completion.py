@@ -89,6 +89,7 @@ def build_report() -> dict[str, Any]:
     hbdk_registration = _read("docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
     catalog_audit = _read("docs/current/phase4-three-oil-catalog-audit-2026-10-17.json")
+    observed_roster = _read("docs/current/phase4-three-oil-observed-roster-2026-10-20.json")
     workspace_layout = _read("docs/current/phase4-workspace-layout-audit-2026-10-19.json")
     database = _database_facts()
     manifest_boundary_ok = (
@@ -210,6 +211,7 @@ def build_report() -> dict[str, Any]:
             "evidence": [
                 "data/three_oil_organization_catalog.json",
                 "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
+                "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
             ],
             "facts": {
                 "formal_catalog_units": entry_summary.get("formal_catalog_units", 0),
@@ -222,6 +224,7 @@ def build_report() -> dict[str, Any]:
                 "external_identity_evidence_review": catalog_audit.get(
                     "external_identity_evidence_review", {}
                 ),
+                "observed_display_roster": observed_roster.get("summary", {}),
             },
         },
         {
