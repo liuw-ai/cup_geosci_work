@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T02:47:04Z",
+  "generated_at": "2026-10-19T02:48:50Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "f5d81791f434472de2d34334d65b9a80f2a9f37e",
-  "git_status_porcelain": "M README.md\n M data/sources.json\n M docs/current/PHASE4-2026-10-17.md\n M docs/current/README.md\n M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json\n M docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json\n M docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json\n M job_hub/db.py\n M job_hub/phase3_policy.py\n M job_hub/profiles.py\n M scripts/build_phase4_manifest.py\n M scripts/capture_phase4_hbdk_official_table.py\n M scripts/register_phase4_hbdk_candidates.py\n M tests/test_phase3_policy.py\n M tests/test_phase4_hbdk_candidates.py\n M tests/test_phase4_hbdk_evidence.py\n M tests/test_phase4_hbdk_official_table.py\n M tests/test_phase4_third_party_funnel.py\n?? scripts/publish_phase4_hbdk_trial.py",
+  "git_sha": "46dbc9fece992ec9f75416bccb8aa8aebe4186be",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
