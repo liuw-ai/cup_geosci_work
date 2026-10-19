@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T05:17:46Z",
+  "generated_at": "2026-10-19T05:19:54Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "2f31d6b006d6014537e6167fa5c9140f4f8cfb01",
+  "git_sha": "90dc035df30ef623e0c46be47832c6a46e527333",
   "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -134,7 +134,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "c6cb12994421a943fb5ac704ae808a874f1235f9e75aa04fb2fba91e91308f10"
+        "sha256": "9de6482cabc6cc122d66d31d3a47bfa91825fd5e16819503c049e53a2c1d5e37"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -287,7 +287,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "c6cb12994421a943fb5ac704ae808a874f1235f9e75aa04fb2fba91e91308f10"
+      "sha256": "9de6482cabc6cc122d66d31d3a47bfa91825fd5e16819503c049e53a2c1d5e37"
     }
   },
   "code_inventory": [
