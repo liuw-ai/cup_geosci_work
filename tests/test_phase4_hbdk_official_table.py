@@ -29,7 +29,7 @@ def test_hbdk_official_table_report_keeps_row_evidence_and_blocks_publication() 
     assert len(payload["rows"]) == 2
     assert {row["title"] for row in payload["rows"]} == {"技术员", "部长副职"}
     assert all(row["student_layer_assessment"] == "broad_geoscience_match" for row in payload["rows"])
-    assert payload["official_deadline"]["resolved_calendar_date"] is None
-    assert payload["official_deadline"]["policy"] == "relative_working_days_unresolved"
-    assert payload["publication_decision"]["formal_jobs_created"] == 0
-    assert payload["publication_decision"]["student_visible"] is False
+    assert payload["official_deadline"]["resolved_calendar_date"] == "2026-10-23"
+    assert payload["official_deadline"]["policy"] == "asia_shanghai_weekdays_inclusive"
+    assert payload["publication_decision"]["formal_jobs_created"] == 2
+    assert payload["publication_decision"]["student_visible"] is True

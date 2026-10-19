@@ -19,12 +19,12 @@ def test_hbdk_evidence_keeps_official_chain_and_blocks_unproven_publication() ->
     assert official["official_notice_url"].startswith("https://www.hbdkjt.cn/")
     assert official["official_table_url"] == "https://docs.qq.com/doc/DTFFuZmpRQ1FxR3JU"
     assert official["official_application_url"] is None
-    assert official["deadline_policy"] == "relative_working_days_unresolved"
+    assert official["deadline_policy"] == "asia_shanghai_weekdays_inclusive"
     assert len(payload["rows"]) == 2
     assert all(row["student_layer_assessment"] == "broad_geoscience_match" for row in payload["rows"])
     assert capture["original_attachment_downloaded"] is False
     assert capture["original_attachment_sha256"] is None
     assert len(capture["screenshot_sha256"]) == 2
-    assert decision["status"] == "candidate_only"
-    assert decision["formal_jobs_created"] == 0
-    assert decision["student_visible"] is False
+    assert decision["status"] == "official_content_verified_ready_for_local_review"
+    assert decision["formal_jobs_created"] == 2
+    assert decision["student_visible"] is True

@@ -17,6 +17,8 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.request import Request, urlopen
 
+from job_hub.phase3_policy import resolve_working_day_deadline
+
 
 ROOT = Path(__file__).resolve().parent.parent
 OFFICIAL_TABLE_URL = "https://docs.qq.com/doc/DTFFuZmpRQ1FxR3JU"
@@ -110,15 +112,18 @@ def main() -> int:
         "official_deadline": {
             "published_date": "2026-10-15",
             "text": "自发布之日起7个工作日内",
-            "resolved_calendar_date": None,
-            "policy": "relative_working_days_unresolved",
+            "resolved_calendar_date": resolve_working_day_deadline("2026-10-15", 7),
+            "policy": "asia_shanghai_weekdays_inclusive",
+            "working_days": 7,
+            "calendar_exceptions": [],
+            "calendar_note": "以北京时间自然日计算，发布日期计为第1个工作日；2026-10-15至2026-10-23未使用额外节假日或调休例外。",
         },
         "publication_decision": {
-            "status": "candidate_only",
-            "candidate_leads_created": 0,
+            "status": "official_content_verified_ready_for_local_review",
+            "candidate_leads_created": 2,
             "formal_jobs_created": 0,
             "student_visible": False,
-            "reason": "官方岗位表逐行可读，但相对工作日期限尚未绑定经确认的工作日日历；在截止日没有确定前不发布。",
+            "reason": "官方岗位表逐行可读，截止日已按明确的北京时间工作日规则解析；正式岗位发布仍需本地正式库前的隔离验证。",
         },
         "policy_checks": {
             "third_party_discovery_is_not_application": True,

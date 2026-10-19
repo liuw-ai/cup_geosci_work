@@ -10,19 +10,19 @@
   },
   "database_after": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "128aa6f3d365f063be467067fbe6fea7ba5b3f56473f4f887a86347e5d4160df",
+    "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
     "integrity_check": "ok"
   },
   "candidate_leads": {
     "ids": [7, 8],
     "count": 2,
     "verification_status": "official_content_verified",
-    "conversion_status": "official_content_verified_not_student_published",
-    "published_job_ids": [],
-    "student_visible": false
+    "conversion_status": "official_content_verified",
+    "published_job_ids": [5437, 5438],
+    "student_visible": true
   },
-  "formal_jobs_created": 0,
-  "deadline_policy": "relative_working_days_unresolved",
+  "formal_jobs_created": 2,
+  "deadline_policy": "asia_shanghai_weekdays_inclusive",
   "idempotence_check": {
     "rerun_candidate_ids": [7, 8],
     "duplicate_rows_created": false

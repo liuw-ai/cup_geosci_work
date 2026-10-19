@@ -35,8 +35,11 @@ def _load(path: Path) -> dict:
         raise ValueError("HBDK raw official table capture hash does not match the report")
     if payload.get("publication_decision", {}).get("formal_jobs_created") != 0:
         raise ValueError("HBDK evidence must not already claim formal jobs")
-    if payload.get("official_deadline", {}).get("policy") != "relative_working_days_unresolved":
-        raise ValueError("HBDK candidate registration requires unresolved relative deadline")
+    deadline = payload.get("official_deadline") or {}
+    if deadline.get("policy") != "asia_shanghai_weekdays_inclusive":
+        raise ValueError("HBDK evidence must use the explicit Asia/Shanghai relative deadline policy")
+    if not str(deadline.get("resolved_calendar_date") or "").strip():
+        raise ValueError("HBDK evidence is missing the resolved calendar deadline")
     rows = payload.get("rows")
     if not isinstance(rows, list) or len(rows) != 2:
         raise ValueError("expected exactly two reviewed HBDK rows")
@@ -69,7 +72,7 @@ def build_leads(payload: dict) -> list[dict]:
                 "verification_note": (
                     "华图发现页已回溯至河北省地球物理勘查有限公司官方公告和官方岗位表；"
                     "已逐行读取岗位、专业、学历和地点。官方报名期限为相对工作日文本，"
-                    "截止日尚未按确认的工作日日历解析，因此只保留私有候选。"
+                    "已按北京时间发布日期计第1个工作日的规则解析截止日；正式岗位发布仍需通过隔离数据库验证。"
                 ),
                 "metadata": {
                     "batch_id": "huatu-hbdk-2026-10-15",
@@ -82,6 +85,9 @@ def build_leads(payload: dict) -> list[dict]:
                     "official_table_capture_path": capture["retained_path"],
                     "deadline_text": deadline["text"],
                     "deadline_policy": deadline["policy"],
+                    "deadline_date": deadline["resolved_calendar_date"],
+                    "deadline_working_days": deadline["working_days"],
+                    "deadline_calendar_exceptions": deadline.get("calendar_exceptions", []),
                     "locator": f"official-row-{row_number}",
                     "row": row,
                     "publication_status": "candidate_only",

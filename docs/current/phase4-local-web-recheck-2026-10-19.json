@@ -1,10 +1,10 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T01:26:01+08:00",
+  "validated_at": "2026-10-19T10:24:01+08:00",
   "environment": "local",
   "base_url": "http://127.0.0.1:8097",
   "database_mode": "temporary_copy_of_runtime_database",
-  "formal_database_sha256_at_copy": "fe5691545749824e3261b9e3a2374b45b8baeb5b36f2d53287b2ace1bd4b198b",
+  "formal_database_sha256_at_copy": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
   "server_deployment": false,
   "http_checks": {
     "/healthz": 200,
@@ -16,7 +16,7 @@
     "/api/jobs?layer=source_unavailable": 200,
     "layer_totals": {
       "exact_match": 140,
-      "broad_geoscience_match": 5,
+      "broad_geoscience_match": 7,
       "incomplete_but_basic_match": 373,
       "source_unavailable": 111
     }

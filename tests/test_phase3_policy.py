@@ -4,8 +4,10 @@ from job_hub.phase3_policy import (
     derive_publication_layer,
     deadline_is_expired,
     no_deadline_expiry,
+    resolve_working_day_deadline,
     source_failure_state,
 )
+from job_hub.profiles import evaluate_student_publication
 from job_hub.employers import enrich_job
 
 
@@ -14,6 +16,13 @@ def test_no_deadline_uses_asia_shanghai_calendar_days():
     assert no_deadline_expiry(None, "2026-10-16T00:30:00Z") == "2027-01-14"
     assert deadline_is_expired(None, "2027-01-14", date(2027, 1, 14)) is False
     assert deadline_is_expired(None, "2027-01-14", date(2027, 1, 15)) is True
+
+
+def test_relative_deadline_counts_asia_shanghai_weekdays_and_explicit_exceptions():
+    assert resolve_working_day_deadline("2026-10-15", 7) == "2026-10-23"
+    assert resolve_working_day_deadline(
+        "2026-10-15", 7, non_working_dates={"2026-10-19"}
+    ) == "2026-10-26"
 
 
 def test_freshness_failure_is_not_a_withdrawal_reason():
@@ -50,3 +59,25 @@ def test_student_display_uses_phase3_publication_layer_labels():
     )
     assert broad["publication_status_label"] == "专业范围宽泛"
     assert incomplete["publication_status_label"] == "官方信息不完整"
+
+
+def test_broad_geoscience_context_includes_mineral_geology_expressions():
+    decision = evaluate_student_publication(
+        {
+            "title": "技术员",
+            "employer": "河北省地球物理勘查有限公司",
+            "location": "河北省廊坊市",
+            "province": "河北",
+            "country_or_region": "中国大陆",
+            "field_evidence": {
+                "evidence_scope": "official_attachment_row",
+                "岗位": "技术员",
+                "岗位方向": "物化探（水土修复）部",
+                "专业要求": "矿产地质/地质工程勘查相关专业",
+                "学历要求": "本科及以上",
+                "工作地点": "河北省廊坊市",
+            },
+        }
+    )
+    assert decision.status == "student_eligible"
+    assert decision.major_match_mode == "broad_geoscience"

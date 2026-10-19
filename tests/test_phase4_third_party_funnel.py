@@ -8,6 +8,6 @@ def test_current_third_party_funnel_has_no_published_evidence_gaps() -> None:
 
     assert report["database"]["integrity_check"] == "ok"
     assert report["summary"]["candidate_leads"] == 8
-    assert report["summary"]["published_leads"] == 5
+    assert report["summary"]["published_leads"] == 7
     assert report["summary"]["failed_leads"] == 0
     assert report["summary"]["audit_status"] == "pass"

@@ -19,8 +19,9 @@
     "official_application_url": null,
     "official_application_method": "官方公告要求下载报名材料并将岗位、个人信息及证件材料发送至 hbdqwl2020@163.com；未公布独立 HTTP 报名地址。",
     "application_window_text": "自发布之日起7个工作日内",
-    "deadline_date": null,
-    "deadline_policy": "relative_working_days_unresolved",
+    "deadline_date": "2026-10-23",
+    "deadline_policy": "asia_shanghai_weekdays_inclusive",
+    "deadline_working_days": 7,
     "location": "河北省廊坊市经济技术开发区银杏路26号",
     "official_fields_observed": [
       "用人单位",
@@ -73,15 +74,16 @@
     }
   ],
   "publication_decision": {
-    "status": "candidate_only",
-    "candidate_leads_created": 0,
-    "formal_jobs_created": 0,
-    "student_visible": false,
-    "student_counted": false,
+    "status": "official_content_verified_ready_for_local_review",
+    "candidate_leads_created": 2,
+    "formal_jobs_created": 2,
+    "formal_job_ids": [5437, 5438],
+    "student_visible": true,
+    "student_counted": true,
     "reasons": [
-      "官方原始岗位表附件未取得 SHA-256，仅保存了浏览器可见截图证据",
-      "官方报名期限为相对工作日文本，尚未按经过确认的工作日历解析为确定日期",
-      "官方提供邮箱报名而非 HTTP 申请链接，需沿用现有无 HTTP 报名方式的发布门禁判断"
+      "官方岗位表响应已保留 SHA-256，并与两条正式岗位行绑定",
+      "官方报名期限已按北京时间发布日期计第1个工作日的规则解析为2026-10-23",
+      "官方提供邮箱报名而非独立 HTTP 申请链接，学生端保留官方公告和岗位表链接，并显示公告中的邮箱报名方式"
     ]
   },
   "required_next_review": [

@@ -1,13 +1,13 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T09:02:01+08:00",
+  "validated_at": "2026-10-19T10:25:21+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha_before_metadata_commit": "18f77fbd0eae998fb9a10e758de652dc958aeac9",
-  "git_sha_at_validation": "18f77fbd0eae998fb9a10e758de652dc958aeac9",
+  "git_sha_before_metadata_commit": "f5d81791f434472de2d34334d65b9a80f2a9f37e",
+  "git_sha_at_validation": "f5d81791f434472de2d34334d65b9a80f2a9f37e",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1091,
+    "passed": 1092,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
@@ -29,17 +29,17 @@
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256_before_tests": "128aa6f3d365f063be467067fbe6fea7ba5b3f56473f4f887a86347e5d4160df",
-    "sha256_after_tests": "128aa6f3d365f063be467067fbe6fea7ba5b3f56473f4f887a86347e5d4160df",
+    "sha256_before_tests": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+    "sha256_after_tests": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
     "integrity_check": "ok",
-    "jobs": 3952,
+    "jobs": 3954,
     "candidate_leads": 8,
     "phase3_withdrawal_audits": 3947,
     "student_read_as_of_date": "2026-10-19",
-    "student_visible_total": 629,
+    "student_visible_total": 631,
     "student_visible_layer_counts": {
       "exact_match": 140,
-      "broad_geoscience_match": 5,
+      "broad_geoscience_match": 7,
       "incomplete_but_basic_match": 373,
       "source_unavailable": 111
     },
@@ -49,10 +49,10 @@
   "third_party": {
     "isolated_huatu_trial_candidate_leads": 11,
     "formal_database_private_candidate_leads": 8,
-    "formal_jobs_created": 5,
-    "formal_third_party_job_ids": [5432, 5433, 5434, 5435, 5436],
+    "formal_jobs_created": 7,
+    "formal_third_party_job_ids": [5432, 5433, 5434, 5435, 5436, 5437, 5438],
     "formal_database_unchanged": false,
-    "formal_database_change_note": "Historical local promotion created job 5432 and jobs 5433-5436; a later local Flask process using the formal path was stopped and recorded separately. This historical mutation is not part of the current test run.",
+    "formal_database_change_note": "Historical local promotions created jobs 5432-5438; a later local Flask process using the formal path was stopped and recorded separately. This historical mutation is not part of the current test run.",
     "formal_database_stable_during_current_tests": true,
     "cgs_attachment_trial": {
       "candidate_lead_ids": [3, 4, 5, 6],
@@ -78,7 +78,7 @@
       "report": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
     },
     "robots_gate_targeted_tests": "22 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py, tests/test_phase4_completion_audit.py)",
-    "source_disabled_visibility_regression": "included in full 1091-test run; disabled source remains student-visible without withdrawal",
+    "source_disabled_visibility_regression": "included in full 1092-test run; disabled source remains student-visible without withdrawal",
     "robots_or_permission_blocked_followups": 1,
     "huatu_discovery_scan": {
       "discovered_announcements": 65,
@@ -114,7 +114,7 @@
       "third_party_table_url": null,
       "third_party_discovery_url_is_student_visible": false
     },
-    "broad_layer_total": 5,
+    "broad_layer_total": 7,
     "homepage_job_table_link_label_present": false,
     "detail_job_id": 5433,
     "detail_job_table_link_label_present": true,

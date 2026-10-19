@@ -112,6 +112,50 @@ def no_deadline_expiry(
     return (local_date + timedelta(days=90)).isoformat()
 
 
+def resolve_working_day_deadline(
+    published_date: str | None,
+    working_days: int,
+    *,
+    non_working_dates: set[str] | frozenset[str] | None = None,
+    include_start: bool = True,
+) -> str | None:
+    """Resolve an official relative deadline on the Asia/Shanghai calendar.
+
+    This helper accepts an explicit holiday/non-working-day set. A weekday
+    alone is not enough to claim a Chinese recruitment deadline, so callers
+    must provide official calendar exceptions when the interval crosses a
+    statutory holiday or make-up workday. For short intervals that do not
+    cross any exception, an empty set is auditable and deterministic.
+    """
+
+    if working_days <= 0:
+        return None
+    raw = str(published_date or "").strip()
+    if not raw:
+        return None
+    try:
+        if "T" in raw or " " in raw:
+            parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=ASIA_SHANGHAI)
+            current = parsed.astimezone(ASIA_SHANGHAI).date()
+        else:
+            current = date.fromisoformat(raw[:10])
+    except (TypeError, ValueError):
+        return None
+
+    exceptions = {str(item)[:10] for item in (non_working_dates or set())}
+    counted = 0
+    if not include_start:
+        current += timedelta(days=1)
+    while counted < working_days:
+        if current.weekday() < 5 and current.isoformat() not in exceptions:
+            counted += 1
+        if counted < working_days:
+            current += timedelta(days=1)
+    return current.isoformat()
+
+
 def deadline_is_expired(deadline_date: str | None, no_deadline_expires_at: str | None, as_of: date) -> bool:
     """Apply only explicit deadline or the confirmed 90-day undated rule."""
 
@@ -239,6 +283,7 @@ __all__ = [
     "derive_publication_layer",
     "layer_for_legacy_status",
     "no_deadline_expiry",
+    "resolve_working_day_deadline",
     "normalize_publication_layer",
     "normalize_trust_grade",
     "source_failure_state",

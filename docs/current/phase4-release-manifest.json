@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-19T01:42:55Z",
+  "generated_at": "2026-10-19T02:47:09Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "5e63256fa9aa9556ee8d28f8cd5fe112066084b4",
-  "working_tree_dirty": false,
+  "git_sha": "f5d81791f434472de2d34334d65b9a80f2a9f37e",
+  "working_tree_dirty": true,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
   "dockerfile_sha256": {
@@ -14,7 +14,7 @@
   "release_env_sha256": "49f2c7be91ff3cfadb0cc0f88a255e3e7d3ac2a1194f1e719d0207a85b79175d",
   "config_sha256": {
     "discovery_sources": "2c7a5f5b1b6735f451e4306e929f23063db7bd07df3e41ddc24dfe08fd82001e",
-    "sources": "249cda48732868d427f2447a37c135524b979654e56a87a98f914df05a141ff2",
+    "sources": "4aa4dd6349055907d848aefff21ebf5caed6d663a512116d555acd87c2e7619d",
     "third_party_adapters": "2132d53195307a2b8710e651196adf0aa0cc7fe07081a6634407d60e75b49872",
     "organization_registry": "0e83da24ac0489b77064f6968568c6dde8f67eea7e847a4f2a8c493b65bdb35c",
     "three_oil_catalog": "a6d1979d99b5b027590acb07d4883910bca074c301ed8dc0e134bfdf57991394",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "d087067c90e35b7ad49bdffbfe0fddc268ddc90ab92ebe8add20fa5bb48b5876",
-    "phase4_document_consistency": "d087067c90e35b7ad49bdffbfe0fddc268ddc90ab92ebe8add20fa5bb48b5876",
+    "phase4_current_state_audit": "d84ff500fef6904a37317e4ced86ef1bef0026e2271d251d7b11c60fd3243fb6",
+    "phase4_document_consistency": "d84ff500fef6904a37317e4ced86ef1bef0026e2271d251d7b11c60fd3243fb6",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -41,36 +41,36 @@
     "phase4_cnpc_entry_recheck": "217753c1c99e2663308f27ce7a2cc9cc1606a63b73d6017cddf813f261bc0be1",
     "phase4_third_party_access_recheck": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d",
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
-    "phase4_third_party_funnel": "6739f32850b817fd51eaf3eeeb6c2bf73b2325bc172c5f0cfd4f5bf9bc21155a",
-    "phase4_local_web_recheck": "c4558f29ff36ea1ccf00709837e34cc3a40e5b20d459aaa40ceca1ba4fd6ec08",
-    "phase4_local_web_live_validation": "ce5ca5f99d6b8b1042411127069d64e51f44ff795bcf53a100022de5a56585ef",
+    "phase4_third_party_funnel": "f1bddb3d454dc042636c5267da119071c7288e48321dfc2b1398490174832e85",
+    "phase4_local_web_recheck": "1ce3aa772e20a7216ecf9bcc86f54c121ef1457fa896804f636d73a3aacb017f",
+    "phase4_local_web_live_validation": "fb033fe9e0e12cf702e5c716a23f98b19818b6d12de6aee23f6b4890bcdb4920",
     "phase4_huatu_table_discovery": "59f0496bc2696f0ecbc71a70210b208f4c3fe6cfd6791ca991bf5785dca7ce8d",
     "phase4_huatu_discovery_scan": "6084764bc34681e688a1bcfaa07851a8fb0c4fcb073680a308ffd219ea2fb277",
     "phase4_third_party_bingtuan_official_recovery": "d71105dbb62be53489cdedbaaa20c11e1c00d93a739bf4b9a1b7c9b6672f8634",
     "phase4_third_party_huatu_shanxi_geology_group": "81808418c668aeb800754e01982ef01905f56762edb5a45512858ce2e146c7b0",
-    "phase4_third_party_huatu_hbdk_geophysics": "f2ef342fc4c3a8f1cde1c0f0b439f333dfd5b10a52975560c1baa964d0f1adf3",
-    "phase4_third_party_hbdk_official_table": "f262411bc456d975df53c3062d7b36486c51439870029e63e228ac036af40853",
-    "phase4_third_party_hbdk_candidate_registration": "c08ec2945d0acd039d3fddbe566a38a37409b5fb572fda3ece31c248d1f54f10",
-    "phase4_main_record": "fa55b05503135c90218d87dbbb91a2841c9412910b161e15421c91e0ea287c4c",
-    "phase4_local_validation": "28cb8e99fa5037226319cd4399fac479be6750d9e81a346b262e5703297d7d4e",
+    "phase4_third_party_huatu_hbdk_geophysics": "70b9a84b6b9f7e856a87ed96b7362b79e1a3c5e7ab7e7a6109beabbde6c0c16c",
+    "phase4_third_party_hbdk_official_table": "49eac00085d1b2cac96d4046e9ba9cc39913fe643285b110d18ea207def6cfde",
+    "phase4_third_party_hbdk_candidate_registration": "da07a5893f136d88905135a88fa6b83606dff3d70731e14e3eb76a01d8e9d7ea",
+    "phase4_main_record": "afa7b617045661d13c023b531d222f6ed0884a3674d96476ed3caaa83f88762b",
+    "phase4_local_validation": "5ef45fffba9b99edd23ece6212ad776ef57c2dd4d7825b0044b0bfd4079342b7",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "42ac32b0b953e34f70793fa78aa8d1c2b2637cd72cdc974da4453b3c2a423807",
-    "phase4_completion_audit": "a4af8c36dc2d6515dd9b39d675927cb084b4c36c1ad44f061f4f371617bd110e",
-    "phase4_workspace_layout": "a80c9c5751d615ac651c186927040d7d6c78502cd3c0d7a8ad94694ebbdbab5e"
+    "phase4_completion_audit": "c2247cae5c4656b60e1e442d05e696fcc003221244fabd5aa71ac6e68d9da589",
+    "phase4_workspace_layout": "afd7218fbed58b70b6b895ff44779f91005bb976047cae1a68f7b4275945a02a"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "128aa6f3d365f063be467067fbe6fea7ba5b3f56473f4f887a86347e5d4160df",
+    "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
     "integrity_check": "ok",
-    "job_count": 3952,
+    "job_count": 3954,
     "status_counts": {
       "expired": 264,
-      "open": 3592,
+      "open": 3594,
       "superseded": 45,
       "withdrawn": 51
     },
     "publication_layer_counts": {
-      "broad_geoscience_match": 5,
+      "broad_geoscience_match": 7,
       "exact_match": 202,
       "incomplete_but_basic_match": 624,
       "not_public": 2955,
@@ -78,15 +78,15 @@
     },
     "student_read_as_of_date": "2026-10-19",
     "student_visible_layer_counts": {
-      "broad_geoscience_match": 5,
+      "broad_geoscience_match": 7,
       "exact_match": 140,
       "incomplete_but_basic_match": 373,
       "not_public": 0,
       "source_unavailable": 111
     },
-    "student_visible_total": 629,
+    "student_visible_total": 631,
     "candidate_lead_count": 8,
-    "formal_third_party_job_count": 5,
+    "formal_third_party_job_count": 7,
     "pre_third_party_candidate_backup": {
       "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
       "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a"
@@ -106,33 +106,38 @@
     "current_after_local_server_stop_backup": {
       "path": "backups/job_hub-phase4-current-after-local-server-stop-20261019.sqlite3",
       "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688"
+    },
+    "current_backup": {
+      "path": "backups/job_hub-phase4-current-20261019.sqlite3",
+      "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+      "matches_runtime_database": true
     }
   },
   "target_metrics": {
     "student_job_target": {
       "target": 500,
-      "actual": 629,
+      "actual": 631,
       "status": "met",
       "basis": "data/effective_job_target_plan.json",
       "note": "This is the overall student-visible target; it is separate from third-party expansion readiness."
     },
     "third_party_expansion": {
       "candidate_leads": 8,
-      "formal_jobs": 5,
+      "formal_jobs": 7,
       "status": "in_progress",
       "release_gate": "third_party_batch_expansion_incomplete"
     }
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-19T09:02:01+08:00",
+    "validated_at": "2026-10-19T10:25:21+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha_before_metadata_commit": "18f77fbd0eae998fb9a10e758de652dc958aeac9",
-    "git_sha_at_validation": "18f77fbd0eae998fb9a10e758de652dc958aeac9",
+    "git_sha_before_metadata_commit": "f5d81791f434472de2d34334d65b9a80f2a9f37e",
+    "git_sha_at_validation": "f5d81791f434472de2d34334d65b9a80f2a9f37e",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1091,
+      "passed": 1092,
       "skipped": 4,
       "failed": 0,
       "warnings": 0,
@@ -154,17 +159,17 @@
     },
     "database": {
       "path": "runtime/job_hub.sqlite3",
-      "sha256_before_tests": "128aa6f3d365f063be467067fbe6fea7ba5b3f56473f4f887a86347e5d4160df",
-      "sha256_after_tests": "128aa6f3d365f063be467067fbe6fea7ba5b3f56473f4f887a86347e5d4160df",
+      "sha256_before_tests": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+      "sha256_after_tests": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
       "integrity_check": "ok",
-      "jobs": 3952,
+      "jobs": 3954,
       "candidate_leads": 8,
       "phase3_withdrawal_audits": 3947,
       "student_read_as_of_date": "2026-10-19",
-      "student_visible_total": 629,
+      "student_visible_total": 631,
       "student_visible_layer_counts": {
         "exact_match": 140,
-        "broad_geoscience_match": 5,
+        "broad_geoscience_match": 7,
         "incomplete_but_basic_match": 373,
         "source_unavailable": 111
       },
@@ -174,16 +179,18 @@
     "third_party": {
       "isolated_huatu_trial_candidate_leads": 11,
       "formal_database_private_candidate_leads": 8,
-      "formal_jobs_created": 5,
+      "formal_jobs_created": 7,
       "formal_third_party_job_ids": [
         5432,
         5433,
         5434,
         5435,
-        5436
+        5436,
+        5437,
+        5438
       ],
       "formal_database_unchanged": false,
-      "formal_database_change_note": "Historical local promotion created job 5432 and jobs 5433-5436; a later local Flask process using the formal path was stopped and recorded separately. This historical mutation is not part of the current test run.",
+      "formal_database_change_note": "Historical local promotions created jobs 5432-5438; a later local Flask process using the formal path was stopped and recorded separately. This historical mutation is not part of the current test run.",
       "formal_database_stable_during_current_tests": true,
       "cgs_attachment_trial": {
         "candidate_lead_ids": [
@@ -222,7 +229,7 @@
         "report": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
       },
       "robots_gate_targeted_tests": "22 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py, tests/test_phase4_completion_audit.py)",
-      "source_disabled_visibility_regression": "included in full 1091-test run; disabled source remains student-visible without withdrawal",
+      "source_disabled_visibility_regression": "included in full 1092-test run; disabled source remains student-visible without withdrawal",
       "robots_or_permission_blocked_followups": 1,
       "huatu_discovery_scan": {
         "discovered_announcements": 65,
@@ -258,7 +265,7 @@
         "third_party_table_url": null,
         "third_party_discovery_url_is_student_visible": false
       },
-      "broad_layer_total": 5,
+      "broad_layer_total": 7,
       "homepage_job_table_link_label_present": false,
       "detail_job_id": 5433,
       "detail_job_table_link_label_present": true,
@@ -293,7 +300,7 @@
     "real_candidate_leads_in_database": 8,
     "private_candidate_evidence": "docs/current/phase4-third-party-candidate-2026-10-18.json",
     "official_attachment_trial": "docs/current/phase4-third-party-cgs-2026-10-18.json",
-    "formal_jobs_published": 5,
+    "formal_jobs_published": 7,
     "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
     "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
     "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
@@ -364,6 +371,7 @@
   "automation_status": "paused",
   "production_deployment": "not_performed",
   "release_blockers": [
+    "working_tree_contains_uncommitted_or_untracked_changes",
     "third_party_batch_expansion_incomplete",
     "three_oil_external_identity_evidence_pending",
     "three_oil_unit_entry_evidence_incomplete",

@@ -1,22 +1,22 @@
 {
-  "generated_at": "2026-10-19T01:42:50Z",
+  "generated_at": "2026-10-19T02:47:04Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "5e63256fa9aa9556ee8d28f8cd5fe112066084b4",
-  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
+  "git_sha": "f5d81791f434472de2d34334d65b9a80f2a9f37e",
+  "git_status_porcelain": "M README.md\n M data/sources.json\n M docs/current/PHASE4-2026-10-17.md\n M docs/current/README.md\n M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json\n M docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json\n M docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json\n M job_hub/db.py\n M job_hub/phase3_policy.py\n M job_hub/profiles.py\n M scripts/build_phase4_manifest.py\n M scripts/capture_phase4_hbdk_official_table.py\n M scripts/register_phase4_hbdk_candidates.py\n M tests/test_phase3_policy.py\n M tests/test_phase4_hbdk_candidates.py\n M tests/test_phase4_hbdk_evidence.py\n M tests/test_phase4_hbdk_official_table.py\n M tests/test_phase4_third_party_funnel.py\n?? scripts/publish_phase4_hbdk_trial.py",
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "128aa6f3d365f063be467067fbe6fea7ba5b3f56473f4f887a86347e5d4160df",
+    "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
     "integrity_check": "ok",
-    "job_count": 3952,
+    "job_count": 3954,
     "status_counts": {
       "expired": 264,
-      "open": 3592,
+      "open": 3594,
       "superseded": 45,
       "withdrawn": 51
     },
     "publication_layer_counts": {
-      "broad_geoscience_match": 5,
+      "broad_geoscience_match": 7,
       "exact_match": 202,
       "incomplete_but_basic_match": 624,
       "not_public": 2955,
@@ -24,16 +24,16 @@
     },
     "phase3_withdrawal_audit_count": 3947,
     "candidate_lead_count": 8,
-    "formal_third_party_job_count": 5,
+    "formal_third_party_job_count": 7,
     "student_read_as_of_date": "2026-10-19",
     "student_visible_layer_counts": {
-      "broad_geoscience_match": 5,
+      "broad_geoscience_match": 7,
       "exact_match": 140,
       "incomplete_but_basic_match": 373,
       "not_public": 0,
       "source_unavailable": 111
     },
-    "student_visible_total": 629
+    "student_visible_total": 631
   },
   "sources_and_organizations": {
     "registered_source_count": 12,
@@ -134,12 +134,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "fa55b05503135c90218d87dbbb91a2841c9412910b161e15421c91e0ea287c4c"
+        "sha256": "afa7b617045661d13c023b531d222f6ed0884a3674d96476ed3caaa83f88762b"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "28cb8e99fa5037226319cd4399fac479be6750d9e81a346b262e5703297d7d4e"
+        "sha256": "5ef45fffba9b99edd23ece6212ad776ef57c2dd4d7825b0044b0bfd4079342b7"
       }
     ],
     "metadata_documents": [
@@ -195,7 +195,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "28cb8e99fa5037226319cd4399fac479be6750d9e81a346b262e5703297d7d4e"
+      "sha256": "5ef45fffba9b99edd23ece6212ad776ef57c2dd4d7825b0044b0bfd4079342b7"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -239,15 +239,15 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "6739f32850b817fd51eaf3eeeb6c2bf73b2325bc172c5f0cfd4f5bf9bc21155a"
+      "sha256": "f1bddb3d454dc042636c5267da119071c7288e48321dfc2b1398490174832e85"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
-      "sha256": "c4558f29ff36ea1ccf00709837e34cc3a40e5b20d459aaa40ceca1ba4fd6ec08"
+      "sha256": "1ce3aa772e20a7216ecf9bcc86f54c121ef1457fa896804f636d73a3aacb017f"
     },
     "phase4_local_web_live_validation": {
       "path": "docs/current/phase4-local-web-live-validation-2026-10-19.json",
-      "sha256": "ce5ca5f99d6b8b1042411127069d64e51f44ff795bcf53a100022de5a56585ef"
+      "sha256": "fb033fe9e0e12cf702e5c716a23f98b19818b6d12de6aee23f6b4890bcdb4920"
     },
     "phase4_huatu_table_discovery": {
       "path": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
@@ -267,15 +267,15 @@
     },
     "phase4_third_party_huatu_hbdk_geophysics": {
       "path": "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json",
-      "sha256": "f2ef342fc4c3a8f1cde1c0f0b439f333dfd5b10a52975560c1baa964d0f1adf3"
+      "sha256": "70b9a84b6b9f7e856a87ed96b7362b79e1a3c5e7ab7e7a6109beabbde6c0c16c"
     },
     "phase4_third_party_hbdk_official_table": {
       "path": "docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json",
-      "sha256": "f262411bc456d975df53c3062d7b36486c51439870029e63e228ac036af40853"
+      "sha256": "49eac00085d1b2cac96d4046e9ba9cc39913fe643285b110d18ea207def6cfde"
     },
     "phase4_third_party_hbdk_candidate_registration": {
       "path": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json",
-      "sha256": "c08ec2945d0acd039d3fddbe566a38a37409b5fb572fda3ece31c248d1f54f10"
+      "sha256": "da07a5893f136d88905135a88fa6b83606dff3d70731e14e3eb76a01d8e9d7ea"
     },
     "phase4_local_db_write_incident": {
       "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",
@@ -287,7 +287,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "fa55b05503135c90218d87dbbb91a2841c9412910b161e15421c91e0ea287c4c"
+      "sha256": "afa7b617045661d13c023b531d222f6ed0884a3674d96476ed3caaa83f88762b"
     }
   },
   "code_inventory": [
@@ -428,8 +428,8 @@
     },
     {
       "path": "job_hub/db.py",
-      "line_count": 5532,
-      "sha256": "65964b03d5fe9ba15c51b12ad2b07596e496a4c6abae1535554a9f2333f6612b"
+      "line_count": 5552,
+      "sha256": "cce17c622110c3be71b9b15be8e581b992819b9390463a557b616f24ecf917dc"
     },
     {
       "path": "job_hub/discovery.py",
@@ -588,8 +588,8 @@
     },
     {
       "path": "job_hub/phase3_policy.py",
-      "line_count": 245,
-      "sha256": "1fb08cc824ec064a75c12ed837a59d1a4f6f9a08f93afa7823da27b62bcfdc8e"
+      "line_count": 290,
+      "sha256": "6e1cb0a872e10f1c4c985d59c9dfd198976d4b33babdc10cb1d7191f43b22ab7"
     },
     {
       "path": "job_hub/pipeline.py",
@@ -603,8 +603,8 @@
     },
     {
       "path": "job_hub/profiles.py",
-      "line_count": 1847,
-      "sha256": "4a1c0f2f881e241a6093f0ce77edae9a9490d1413d8c2dfdc2ef228fd6897d7a"
+      "line_count": 1848,
+      "sha256": "a0dbfa9903b361b71bfbc3ef0de457dffb70057ad55d80e8d26b330a83d4001e"
     },
     {
       "path": "job_hub/provincial_matrix_audit.py",
@@ -783,8 +783,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 384,
-      "sha256": "3021f5efe0a393328f5d77f9fccde9504e42075bbabdd198a9cc461e80f5c1b3"
+      "line_count": 390,
+      "sha256": "cd528f24c0e964b718586c2396008ea9bc76a7322e3b23eee7c1e0978006e701"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -803,8 +803,8 @@
     },
     {
       "path": "scripts/capture_phase4_hbdk_official_table.py",
-      "line_count": 136,
-      "sha256": "23633e072b8f94039b2e77af5fa0fdf349d40848baabc0235d122141915d9d7f"
+      "line_count": 141,
+      "sha256": "e528076d60626e540676c6d966c51a504c2de13e91c64014493309e36a106827"
     },
     {
       "path": "scripts/import_third_party_table.py",
@@ -842,6 +842,11 @@
       "sha256": "ea96fa43a77a9195cf3f4e29c0fc2c26536526f06926762ef7486d832ae5d455"
     },
     {
+      "path": "scripts/publish_phase4_hbdk_trial.py",
+      "line_count": 211,
+      "sha256": "deebc2ee7930c2957612d8c747694e37e3b42799cf8191006945aabfb4e63816"
+    },
+    {
       "path": "scripts/refresh_phase4_metadata.py",
       "line_count": 42,
       "sha256": "c539d5ccdcd57642dcbc2c68a9447ca27d1f972fcad2346b5767114907a27cbc"
@@ -853,8 +858,8 @@
     },
     {
       "path": "scripts/register_phase4_hbdk_candidates.py",
-      "line_count": 192,
-      "sha256": "5b8675f238d6a5a5d3cb5d328cc57a4cbc239c8d1a6bd7196ce6fc9f45cc868c"
+      "line_count": 198,
+      "sha256": "230139a59703d89a1735586a331423711dbbe146807db898f131b078450abf4d"
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
@@ -1248,8 +1253,8 @@
     },
     {
       "path": "tests/test_phase3_policy.py",
-      "line_count": 52,
-      "sha256": "2faf160845e4a8d574503d356bb9a42a2d1990fd503630890da4e5b58974f39d"
+      "line_count": 83,
+      "sha256": "feb1951688237bcc23ceeba6beb202fc9cded052380ff766b22bb012ca7ab54a"
     },
     {
       "path": "tests/test_phase4_cgs_trial.py",
@@ -1268,18 +1273,18 @@
     },
     {
       "path": "tests/test_phase4_hbdk_candidates.py",
-      "line_count": 38,
-      "sha256": "1795828f14961db8ec84c693826d7a4c2367e70290c3d11de7d30d02e41d5d89"
+      "line_count": 39,
+      "sha256": "a72fd0b0a2a7e8a4ac7e2aa5f9a2f00a36619575daa7e32d134825efbe804fee"
     },
     {
       "path": "tests/test_phase4_hbdk_evidence.py",
       "line_count": 30,
-      "sha256": "536e3e6d7577d486d56e96aa3e92fbbb08f8bf7c9196301ff3adf4be1aa6acb3"
+      "sha256": "9a887e0a02e41ba6bec14a2f650f0a25c21c08fe11707cb1df2a9ed9c382c1fb"
     },
     {
       "path": "tests/test_phase4_hbdk_official_table.py",
       "line_count": 35,
-      "sha256": "97908426ecd4147b17cec5b4dcd14146cac64431d74f8345f7e5d33477480563"
+      "sha256": "52c5088549d6c921e16d90accddf45596d095ff19428539f13dae634c1f66405"
     },
     {
       "path": "tests/test_phase4_manifest.py",
@@ -1294,7 +1299,7 @@
     {
       "path": "tests/test_phase4_third_party_funnel.py",
       "line_count": 13,
-      "sha256": "802d7cff838f01de9d9ebe6fe9497f5df21f772826dd1d6492330f3ee01928f9"
+      "sha256": "0734075619a2005bb9bb7758dbe6ddbaade26c0c07637c7844cc026ba1c2b063"
     },
     {
       "path": "tests/test_phase4_three_oil_entry_matrix.py",

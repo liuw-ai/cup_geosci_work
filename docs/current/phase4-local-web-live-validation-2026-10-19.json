@@ -1,14 +1,14 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-19T03:55:36+08:00",
+  "validated_at": "2026-10-19T10:24:01+08:00",
   "environment": "local",
   "base_url": "http://127.0.0.1:8097",
-  "server_pid": 36512,
+  "server_pid": 40904,
   "database_mode": "temporary_copy_of_runtime_database",
-  "formal_database_sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
+  "formal_database_sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
   "temporary_database": {
-    "path": "runtime/phase4-web-validation-20261019/job_hub.sqlite3",
-    "sha256_after_startup_and_checks": "34ef0280af172c58cf7404bf12deef2784c3fc53991cdcf1d8cb0dc2bbd3646a"
+    "path": "runtime/phase4-web-validation-current-20261019/job_hub.sqlite3",
+    "sha256_after_startup_and_checks": "51de7ffe69dac30cce56e55cfa491547f82790d2723afcb158d63ee0c6dd50b9"
   },
   "http_checks": {
     "/healthz": 200,
@@ -22,7 +22,7 @@
   },
   "layer_totals": {
     "exact_match": 140,
-    "broad_geoscience_match": 5,
+    "broad_geoscience_match": 7,
     "incomplete_but_basic_match": 373,
     "source_unavailable": 111
   },

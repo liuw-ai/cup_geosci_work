@@ -2,7 +2,7 @@
 
 面向中国石油大学（北京）地球科学学院及相邻专业学生的公开就业信息服务。网站面向手机和微信浏览器设计：学生无需登录即可查看当日就业日报、历史日报、全部在招岗位和每条岗位的官方原文链接。
 
-> **当前事实来源（2026-10-19，Phase 4 本地审计）**：请以 [docs/current/PHASE4-2026-10-17.md](docs/current/PHASE4-2026-10-17.md)、[docs/current/phase4-current-state-audit-2026-10-18.json](docs/current/phase4-current-state-audit-2026-10-18.json)、[docs/current/phase4-release-manifest.json](docs/current/phase4-release-manifest.json) 和当前只读数据库为准。Manifest 绑定最后一个干净的本地内容提交，服务器未部署，自动化保持暂停。当前岗位状态为 `open=3592`、`expired=264`、`superseded=45`、`withdrawn=51`；全库层级为 `exact=202`、`broad=5`、`incomplete=624`、`source_unavailable=166`，按北京时间 `2026-10-19` 的截止日期门禁，学生端实际读集为 `629` 条（`140/5/373/111`）。第三方数据库候选线索为 `6` 条，其中 `5` 条已绑定官方证据并创建正式岗位；三桶油 `64` 个正式目录单位的单位级招聘入口证据仍未逐项补齐。本文后续的 Phase 0 至 Phase 440 段落是历史路线记录，不能覆盖上述当前事实。
+> **当前事实来源（2026-10-19，Phase 4 本地审计）**：请以 [docs/current/PHASE4-2026-10-17.md](docs/current/PHASE4-2026-10-17.md)、[docs/current/phase4-current-state-audit-2026-10-18.json](docs/current/phase4-current-state-audit-2026-10-18.json)、[docs/current/phase4-release-manifest.json](docs/current/phase4-release-manifest.json) 和当前只读数据库为准。Manifest 绑定最后一个干净的本地内容提交，服务器未部署，自动化保持暂停。当前岗位状态为 `open=3594`、`expired=264`、`superseded=45`、`withdrawn=51`；全库层级为 `exact=202`、`broad=7`、`incomplete=624`、`source_unavailable=166`，按北京时间 `2026-10-19` 的截止日期门禁，学生端实际读集为 `631` 条（`exact=140`、`broad=7`、`incomplete=373`、`source_unavailable=111`）。第三方数据库候选线索为 `8` 条，其中 `7` 条已绑定官方证据并创建正式岗位；三桶油 `64` 个正式目录单位的单位级招聘入口证据仍未逐项补齐。本文后续的 Phase 0 至 Phase 440 段落是历史路线记录，不能覆盖上述当前事实。
 
 > **部署边界**：当前唯一生产 Compose 入口是 [deploy/compose.yaml](deploy/compose.yaml)。根目录 `docker-compose*.yml` 与 `Dockerfile*` 仅作为本地开发/兼容或历史输入保留，不能与 `deploy/compose.yaml` 叠加执行，也不能据此推断服务器已部署。
 

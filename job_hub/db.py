@@ -4781,6 +4781,25 @@ class Database:
         current = self.get_candidate_lead(lead_id)
         if current is None:
             return None
+        if current["verification_status"] == "published":
+            # Published leads are immutable except for a repair of the
+            # conversion audit marker. This keeps historical publication
+            # records auditable without allowing their evidence to drift.
+            if set(changes) != {"conversion_status"}:
+                unexpected = set(changes).difference({"conversion_status"})
+                raise ValueError(
+                    "Published leads only allow conversion_status repair"
+                    + (f": {', '.join(sorted(unexpected))}" if unexpected else "")
+                )
+            conversion_status = self._optional_text(changes.get("conversion_status"))
+            if conversion_status != "official_content_verified":
+                raise ValueError("Published leads require official_content_verified conversion status")
+            with self.transaction() as connection:
+                connection.execute(
+                    "UPDATE candidate_leads SET conversion_status = ?, updated_at = ? WHERE id = ?",
+                    (conversion_status, utc_now(), lead_id),
+                )
+            return self.get_candidate_lead(lead_id)
         editable = {
             "employer_hint",
             "location_hint",
@@ -5035,6 +5054,7 @@ class Database:
                 """
                 UPDATE candidate_leads
                 SET verification_status = 'published', published_job_id = ?,
+                    conversion_status = 'official_content_verified',
                     conversion_checked_at = COALESCE(conversion_checked_at, ?),
                     updated_at = ?
                 WHERE id = ?
