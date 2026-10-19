@@ -642,10 +642,10 @@ def classify_major_match(job: dict[str, Any]) -> dict[str, Any]:
     ``evaluate_student_publication`` remains the sole publication authority.
     This projection is intentionally additive: it lets the source funnel and
     coverage report distinguish exact names, public-sector broad rules,
-    adjacent geoscience wording, and unresolved evidence. A ``similar`` row
-    remains an internal review classification only; it is not part of the
-    formal student-facing vacancy corpus and is never relabelled as an exact
-    graduation-major match.
+    adjacent geoscience wording, and unresolved evidence. Adjacent wording
+    with explicit geoscience role context is projected into the broad layer;
+    wording without that context remains pending or out of scope. Neither
+    case is relabelled as an exact graduation-major match.
     """
 
     decision = evaluate_student_publication(job)
