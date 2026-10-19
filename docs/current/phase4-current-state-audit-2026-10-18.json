@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-18T23:54:47Z",
+  "generated_at": "2026-10-18T23:59:33Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "c4f3cf56df6bd71ece3856250fe7700b93212cab",
-  "git_status_porcelain": "M data/discovery_sources.json\n M data/third_party_table_adapters.json\n M tests/test_third_party_adapter_registry.py\n?? docs/current/phase4-third-party-huatu-state-owned-entry-2026-10-19.json",
+  "git_sha": "9c488981149f1767d060489fd4a2fa193e824e02",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688",
