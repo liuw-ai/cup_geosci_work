@@ -1,0 +1,42 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-20T04:11:54+08:00",
+  "verification_mode": "read_only_browser_dom",
+  "catalog_id": "cnpc-bgp",
+  "official_identity": {
+    "displayed_footer_name": "中国石油集团东方地球物理勘探有限责任公司",
+    "official_homepage_url": "https://www.bgp.com.cn/",
+    "identity_evidence": "官方英文站页脚显示单位全称、CNPC 版权和 ICP 备案信息。"
+  },
+  "entry": {
+    "human_resource_url": "https://www.bgp.com.cn/bgpen/HumanResourcePolicy/first_common2023hr.shtml",
+    "recruitment_url": "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml",
+    "entry_type": "official_unit_recruitment_page",
+    "entry_status": "unit_specific_entry_verified",
+    "observations": [
+      "官方 Human Resource 页面提供 Recruitment 导航链接。",
+      "Recruitment 页面以东方地球物理单位名义展示具体招聘内容，不是集团招聘平台转发页。",
+      "页面包含岗位名称、招聘人数、工作地点、岗位类型、岗位职责、专业要求和报名方式。"
+    ]
+  },
+  "observed_recruitment_record": {
+    "title": "Job Opening: Seismic Data Processing Geophysicist",
+    "job_title": "Seismic Data Processing Geophysicist (Experienced)",
+    "quantity": "One",
+    "work_location": "Saudi Aramco GDAD Office, Saudi Arabia",
+    "job_type": "Full-time, On-site Project Position",
+    "major_requirement": "Geophysics, Exploration Geophysics, Petroleum Geology or other related geoscience majors",
+    "application_method": "Send an updated English resume to saad.ra@bgp.com.cn",
+    "posted_date": "2026/6/27",
+    "official_application_url": null,
+    "student_publication": "not_created",
+    "note": "页面提供官方邮箱报名，没有独立 HTTP 投递地址；地点为沙特阿拉伯，不创建中国大陆学生岗位。"
+  },
+  "policy_checks": {
+    "group_portal_copied_as_unit_entry": false,
+    "third_party_source_used_as_application": false,
+    "captcha_or_login_bypass": false,
+    "student_job_created": false,
+    "server_deployment": false
+  }
+}
