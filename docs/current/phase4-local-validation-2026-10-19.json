@@ -7,7 +7,7 @@
   "git_sha_at_validation": "f798f8ce2bb6dde8edf0972d9d1fc8b87d92ed19",
   "tests": {
     "command": "pytest -q",
-    "passed": 1094,
+    "passed": 1095,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
