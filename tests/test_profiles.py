@@ -854,6 +854,30 @@ def test_government_position_without_row_location_stays_private() -> None:
     assert decision.label == "待补岗位地点"
 
 
+def test_normalized_enterprise_row_without_location_enters_incomplete_basic_layer() -> None:
+    decision = evaluate_student_publication(
+        job(
+            title="注册土木工程师（岩土）",
+            summary="勘查技术与工程、土木工程及相关专业；本科及以上。",
+            description="专业要求：勘查技术与工程、土木工程及相关专业。学历要求：本科及以上。",
+            major_tags=["勘查技术与工程"],
+            country_or_region=None,
+            location="",
+            field_evidence={
+                "evidence_scope": "official_attachment_row",
+                "岗位名称": "注册土木工程师（岩土）",
+                "专业要求": "勘查技术与工程、土木工程及相关专业",
+                "学历要求": "本科及以上",
+            },
+        )
+    )
+
+    assert decision.status == "pending_evidence"
+    assert decision.label == "官方信息不完整"
+    assert decision.major_match_mode == "incomplete_but_basic"
+    assert decision.matched_profile_ids
+
+
 def test_unrelated_government_position_without_location_is_not_pending_location() -> None:
     """Missing location must not hide a non-geoscience professional mismatch."""
     decision = evaluate_student_publication(

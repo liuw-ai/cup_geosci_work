@@ -252,6 +252,8 @@ def derive_publication_layer(
     if status == "source_unavailable":
         return "source_unavailable"
     if status in {"student_eligible"}:
+        if mode == "incomplete_but_basic":
+            return "incomplete_but_basic_match"
         if mode in {
             "public_named_or_code",
             "public_unrestricted_rule",

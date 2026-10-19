@@ -1722,7 +1722,9 @@ class Database:
             for term in (
                 "地质学", "地质工程", "地质资源与地质工程", "资源勘查工程",
                 "地质类", "地质学类", "地质工程类", "地质资源与地质工程类",
-                "地学类", "工学大类", "专业不限", "不限专业",
+                "地学类", "工学大类", "专业不限", "不限专业", "矿产地质",
+                "地质勘查", "勘查技术与工程", "矿产普查与勘探", "地球物理",
+                "地球化学", "物探", "化探", "工程地质", "水文地质", "生态地质",
             )
         )
 
@@ -3902,7 +3904,9 @@ class Database:
             "(jobs.publication_status IN ('student_eligible', 'unrestricted_eligible', 'source_unavailable') "
             "OR jobs.publication_layer IN ('exact_match', 'broad_geoscience_match', "
             "'incomplete_but_basic_match', 'source_unavailable'))",
-            "jobs.country_or_region IN ('中国大陆', '中国')",
+            "(jobs.country_or_region IN ('中国大陆', '中国') OR "
+            "((jobs.country_or_region IS NULL OR jobs.country_or_region = '') "
+            "AND jobs.publication_layer = 'incomplete_but_basic_match'))",
             "(jobs.publication_layer <> 'source_unavailable' OR jobs.last_official_verified_at IS NOT NULL)",
         ]
         values: list[Any] = []

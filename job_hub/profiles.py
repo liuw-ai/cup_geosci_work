@@ -498,13 +498,24 @@ def evaluate_student_publication(
         # service may remain private while its row-level location is completed.
         # Checking location earlier would turn an unrelated role into a false
         # “pending location” candidate.
-        if _government_record_requires_location(job) and not _location_evidence_text(job):
+        if (
+            _government_record_requires_location(job)
+            and "country_or_region" not in job
+            and not _location_evidence_text(job)
+        ):
             return PublicationDecision(
                 status=PUBLICATION_PENDING_EVIDENCE,
                 label="待补岗位地点",
                 reason="事业单位/公务员目标专业岗位缺少与当前岗位行绑定的工作地点证据。",
                 matched_profile_ids=eligible_profiles,
             )
+        incomplete = _incomplete_basic_decision(
+            job,
+            matched_profile_ids=eligible_profiles,
+            reason="官方岗位级专业与学历要求覆盖本院培养方向",
+        )
+        if incomplete is not None:
+            return incomplete
         return PublicationDecision(
             status=PUBLICATION_STUDENT_ELIGIBLE,
             label="目标专业明确匹配",
@@ -535,13 +546,13 @@ def evaluate_student_publication(
             if _degree_status(job, profile)[0] == "explicit"
         )
         if degree_profiles:
-            if _government_record_requires_location(job) and not _location_evidence_text(job):
-                return PublicationDecision(
-                    status=PUBLICATION_PENDING_EVIDENCE,
-                    label="待补岗位地点",
-                    reason="事业单位/公务员不限专业岗位缺少与当前岗位行绑定的工作地点证据。",
-                    matched_profile_ids=degree_profiles,
-                )
+            incomplete = _incomplete_basic_decision(
+                job,
+                matched_profile_ids=degree_profiles,
+                reason="官方岗位级不限专业要求和学历条件覆盖本院学生",
+            )
+            if incomplete is not None:
+                return incomplete
             return PublicationDecision(
                 status=PUBLICATION_UNRESTRICTED_ELIGIBLE,
                 label="不限专业可报",
@@ -570,6 +581,17 @@ def evaluate_student_publication(
             if _degree_status(job, profile)[0] == "explicit"
         )
         if degree_profiles:
+            incomplete = _incomplete_basic_decision(
+                job,
+                matched_profile_ids=degree_profiles,
+                reason=(
+                    "官方岗位级专业要求包含明确地学方向（"
+                    + "、".join(broad_terms)
+                    + "），但未直接限定为四个核心毕业专业"
+                ),
+            )
+            if incomplete is not None:
+                return incomplete
             return PublicationDecision(
                 status=PUBLICATION_STUDENT_ELIGIBLE,
                 label="专业范围宽泛",
@@ -598,6 +620,17 @@ def evaluate_student_publication(
                 ),
                 matched_profile_ids=profile_ids,
             )
+        incomplete = _incomplete_basic_decision(
+            job,
+            matched_profile_ids=profile_ids,
+            reason=(
+                "官方岗位级专业要求明确出现相近地学方向（"
+                + "、".join(terms)
+                + "）"
+            ),
+        )
+        if incomplete is not None:
+            return incomplete
         return PublicationDecision(
             # Explicit adjacent-geoscience role context belongs in the broad
             # layer; it must not create a separate publication tier.
@@ -1108,13 +1141,11 @@ def _domestic_location_scope_decision(
     country = str(job.get("country_or_region") or "").strip()
     if country in MAINLAND_COUNTRY_LABELS:
         return None
+    # An absent location is incomplete evidence, not evidence of an overseas
+    # role. Let professional matching run so a compatible row can enter the
+    # explicit incomplete-but-basic public layer.
     if not country:
-        return PublicationDecision(
-            status=PUBLICATION_PENDING_EVIDENCE,
-            label="待补岗位地点",
-            reason="官方岗位地点尚未能确认属于中国大陆，不作为国内岗位公开。",
-            matched_profile_ids=(),
-        )
+        return None
     # This application serves China Petroleum University (Beijing) students
     # and its production target is current mainland-China vacancies.  A source
     # may still discover an overseas role for audit, but no source-level opt-in
@@ -1126,6 +1157,41 @@ def _domestic_location_scope_decision(
         label="非中国大陆岗位",
         reason=f"官方岗位地点标明为“{country}”，不纳入国内岗位库。",
         matched_profile_ids=(),
+    )
+
+
+def _location_is_incomplete(job: dict[str, Any]) -> bool:
+    """Return whether the official row lacks a usable mainland work location."""
+
+    # Direct policy/unit-test dictionaries may omit the normalized location
+    # contract entirely. Only normalized pipeline rows (which always carry
+    # ``country_or_region``) should be promoted to the incomplete public tier.
+    if "country_or_region" not in job:
+        return False
+    location_text = _location_evidence_text(job)
+    placeholder = re.compile(r"未(?:列明|明确|提供|公布)|待补|未知|暂无", re.I)
+    if not location_text or placeholder.search(location_text):
+        return True
+    country = str(job.get("country_or_region") or "").strip()
+    return not country or country not in MAINLAND_COUNTRY_LABELS
+
+
+def _incomplete_basic_decision(
+    job: dict[str, Any],
+    *,
+    matched_profile_ids: tuple[str, ...],
+    reason: str,
+) -> PublicationDecision | None:
+    """Downgrade an otherwise compatible row to the public incomplete layer."""
+
+    if not _location_is_incomplete(job):
+        return None
+    return PublicationDecision(
+        status=PUBLICATION_PENDING_EVIDENCE,
+        label="官方信息不完整",
+        reason=f"{reason}；官方工作地点暂未明确，学生需以原公告为准。",
+        matched_profile_ids=matched_profile_ids,
+        major_match_mode="incomplete_but_basic",
     )
 
 
