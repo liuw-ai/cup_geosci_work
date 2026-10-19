@@ -3362,6 +3362,65 @@ class Database:
             )
             return True
 
+    def withdraw_official_source_jobs(
+        self,
+        source_id: str,
+        *,
+        reason: str,
+        evidence_url: str,
+    ) -> int:
+        """Withdraw open jobs only after an explicit official closure result."""
+        normalized_reason = str(reason or "").strip().lower()
+        if normalized_reason not in {"official_cancelled", "official_closed", "official_replaced"}:
+            raise ValueError("official source withdrawal requires an allowed lifecycle reason")
+        if not is_http_url(evidence_url):
+            raise ValueError("official source withdrawal requires an HTTP evidence URL")
+        now = utc_now()
+        with self.transaction() as connection:
+            rows = connection.execute(
+                """
+                SELECT id, title, external_id, source_url
+                FROM jobs
+                WHERE source_id = ? AND status = 'open'
+                """,
+                (source_id,),
+            ).fetchall()
+            if not rows:
+                return 0
+            connection.execute(
+                """
+                UPDATE jobs
+                SET status = 'withdrawn', withdrawal_reason = ?,
+                    withdrawal_evidence_url = ?, updated_at = ?
+                WHERE source_id = ? AND status = 'open'
+                """,
+                (normalized_reason, str(evidence_url).strip(), now, source_id),
+            )
+            connection.executemany(
+                """
+                INSERT INTO job_events (job_id, event_type, occurred_at, payload_json)
+                VALUES (?, 'withdrawn', ?, ?)
+                """,
+                [
+                    (
+                        int(row["id"]),
+                        now,
+                        json.dumps(
+                            {
+                                "title": row["title"],
+                                "external_id": row["external_id"],
+                                "reason": normalized_reason,
+                                "official_source_withdrawal": True,
+                                "withdrawal_evidence_url": str(evidence_url).strip(),
+                            },
+                            ensure_ascii=False,
+                        ),
+                    )
+                    for row in rows
+                ],
+            )
+            return len(rows)
+
     def refresh_published_artifact_job(
         self, candidate_id: int, job: dict[str, Any]
     ) -> str:

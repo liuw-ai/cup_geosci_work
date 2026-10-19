@@ -215,9 +215,13 @@ def revalidate_government_sources(
                     availability_match = _availability_match(config, str(outcome.get("text") or ""))
 
         if cancellations:
-            results.append(
-                _result(source_id, "withdrawn", checked_at, "; ".join(cancellations), fingerprints)
+            result = _result(
+                source_id, "withdrawn", checked_at, "; ".join(cancellations), fingerprints
             )
+            # Persist the exact official page that supplied cancellation
+            # evidence so the source result can be audited at job level.
+            result["withdrawal_evidence_url"] = cancellations[0].split(": ", 1)[0]
+            results.append(result)
         elif failures:
             results.append(
                 _result(

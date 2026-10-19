@@ -581,6 +581,19 @@ class DailyWorker:
                     result.get("availability_confirmation_detail") or ""
                 ),
             )
+            if status == "withdrawn":
+                evidence_url = str(result.get("withdrawal_evidence_url") or "").strip()
+                if evidence_url.startswith(("http://", "https://")):
+                    self.database.withdraw_official_source_jobs(
+                        str(result["source_id"]),
+                        reason="official_cancelled",
+                        evidence_url=evidence_url,
+                    )
+                else:
+                    LOGGER.error(
+                        "Official withdrawal for source %s had no auditable evidence URL",
+                        result.get("source_id"),
+                    )
             # Government-ledger sources are manual collectors, so the
             # generic student read gate cannot infer freshness from a crawl
             # run. Mirror a successful official revalidation into the common

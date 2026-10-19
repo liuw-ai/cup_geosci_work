@@ -299,7 +299,7 @@ def test_disabled_government_source_cannot_be_resurrected_by_reindex(tmp_path) -
     assert "来源当前已停用" in job["publication_basis"]["reason"]
 
 
-def test_disabled_government_source_is_withdrawn_during_worker_sync(tmp_path) -> None:
+def test_disabled_government_source_stays_open_during_worker_sync(tmp_path) -> None:
     record = {
         "id": "disabled-source-row",
         "source_id": "official-test-source",
@@ -348,6 +348,72 @@ def test_disabled_government_source_is_withdrawn_during_worker_sync(tmp_path) ->
     assert job is not None
     assert job["status"] == "open"
     assert job["publication_layer"] == "source_unavailable"
+
+
+def test_explicit_government_cancellation_withdraws_existing_jobs(tmp_path, monkeypatch) -> None:
+    record = {
+        "id": "cancelled-source-row",
+        "source_id": "official-test-source",
+        "position_type": "public_institution",
+        "province": "河南",
+        "position_code": "A-001",
+        "title": "地质工程技术岗",
+        "employer": "测试地质调查院",
+        "major_requirement": "地质工程",
+        "degree_requirement": "硕士研究生",
+        "location": "测试市",
+        "headcount": 1,
+        "deadline_date": "2099-12-31",
+        "deadline_policy": "fixed_date",
+        "official_notice_url": "https://example.gov.cn/notice.html",
+        "official_attachment_url": "https://example.gov.cn/table.xlsx",
+        "evidence_locator": "岗位表!2",
+        "record_status": "verified_open",
+        "match_status": "explicit_match",
+    }
+    registry_path = tmp_path / "government-positions.json"
+    registry_path.write_text(
+        json.dumps({"version": 1, "as_of": date.today().isoformat(), "records": [record]}),
+        encoding="utf-8",
+    )
+    settings = replace(
+        make_settings(tmp_path),
+        government_position_registry_path=registry_path,
+        government_position_max_age_hours=None,
+    )
+    source_record = source()
+    source_record["config"] = {
+        "government_evidence_recheck": True,
+        "allowed_hosts": ["example.gov.cn"],
+    }
+    write_registry(settings.source_registry_path, [source_record])
+    worker = DailyWorker(settings)
+    worker.pipeline.bootstrap_sources()
+    official_source = worker.database.get_source("official-test-source")
+    assert official_source is not None
+    job_id, _ = worker.database.save_job(
+        worker.pipeline.normalize_posting(position_record_to_posting(record), official_source)
+    )
+    monkeypatch.setattr(
+        "job_hub.worker.revalidate_government_sources",
+        lambda *_args, **_kwargs: [
+            {
+                "source_id": "official-test-source",
+                "status": "withdrawn",
+                "checked_at": "2026-10-10T00:00:00Z",
+                "detail": "official notice states cancellation",
+                "withdrawal_evidence_url": "https://example.gov.cn/notice.html",
+            }
+        ],
+    )
+
+    worker._revalidate_government_position_sources()
+
+    job = worker.database.find_job(job_id)
+    assert job is not None
+    assert job["status"] == "withdrawn"
+    assert job["withdrawal_reason"] == "official_cancelled"
+    assert job["withdrawal_evidence_url"] == "https://example.gov.cn/notice.html"
 
 
 def test_reindex_keeps_future_government_window_private(tmp_path) -> None:

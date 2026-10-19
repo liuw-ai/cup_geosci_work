@@ -467,6 +467,7 @@ def test_recheck_distinguishes_explicit_cancellation_from_source_failure(tmp_pat
 
     assert result["status"] == "withdrawn"
     assert "cancellation" in result["detail"]
+    assert result["withdrawal_evidence_url"] == "https://careers.example.edu.cn/notice/1"
 
 
 def test_manual_only_recheck_performs_zero_http_requests(tmp_path) -> None:
