@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T05:23:27Z",
+  "generated_at": "2026-10-19T05:27:23Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "b36656f154beaf2fb3e5d4a6882e0f95b19087d3",
-  "git_status_porcelain": "",
+  "git_sha": "3a750b39bab7fafe8e62957445dd2988b5c64718",
+  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -134,12 +134,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "78db3add8d42b797f70e7656786249a849cb0a43fe57ebb48bf64ea9761d1f07"
+        "sha256": "7928d17c6a6d05cb14594798a6a27570b09d4e604e3412b8056e6300b2535c76"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "419c4657ad52a7df6afa1aa7da58740581fc39e7c2e03e5d0aa041ed6987a650"
+        "sha256": "d341acef422811ded951cd8c799a7f4df27769b8a0b7fccb21af48be1ce29244"
       }
     ],
     "metadata_documents": [
@@ -195,7 +195,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "419c4657ad52a7df6afa1aa7da58740581fc39e7c2e03e5d0aa041ed6987a650"
+      "sha256": "d341acef422811ded951cd8c799a7f4df27769b8a0b7fccb21af48be1ce29244"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -287,7 +287,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "78db3add8d42b797f70e7656786249a849cb0a43fe57ebb48bf64ea9761d1f07"
+      "sha256": "7928d17c6a6d05cb14594798a6a27570b09d4e604e3412b8056e6300b2535c76"
     }
   },
   "code_inventory": [
