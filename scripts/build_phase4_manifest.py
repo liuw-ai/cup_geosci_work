@@ -30,6 +30,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-local-web-recheck-2026-10-19.json",
     ":!docs/current/phase4-local-web-live-validation-2026-10-19.json",
     ":!docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
+    ":!docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
     ":!docs/current/phase4-third-party-official-recovery-recheck-2026-10-19.json",
     ":!docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
     ":!docs/current/phase4-cnpc-bgp-entry-recheck-2026-10-19.json",
