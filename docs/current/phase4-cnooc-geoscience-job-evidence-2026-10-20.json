@@ -1,0 +1,68 @@
+{
+  "phase": "phase4",
+  "captured_at": "2026-10-20T00:00:00+08:00",
+  "evidence_type": "official_browser_read_only",
+  "source": {
+    "name": "中国海油招聘平台",
+    "url": "https://cnooc.zhaopin.com/job/index.html",
+    "page_sha256": "7fbd52862bec4c09d140bf1d2f6902e592f2c6a2578d41542a8074746f957b52",
+    "captured_html_bytes": 34274,
+    "robots_or_permission_bypass": false
+  },
+  "observed_units_on_official_portal": [
+    "中海石油（中国）有限公司天津分公司",
+    "中海石油（中国）有限公司深圳分公司",
+    "中海石油（中国）有限公司湛江分公司",
+    "中海石油（中国）有限公司海南分公司",
+    "中海石油（中国）有限公司上海分公司",
+    "中国海洋石油国际有限公司",
+    "中海油研究总院有限责任公司",
+    "中联煤层气有限责任公司",
+    "中海石油气电集团有限责任公司",
+    "中海石油炼化有限责任公司",
+    "中海石油化学股份有限公司",
+    "中海油田服务股份有限公司",
+    "海洋石油工程股份有限公司",
+    "中海油能源发展股份有限公司",
+    "中海油国际贸易有限责任公司",
+    "中海石油（中国）有限公司北京新能源分公司"
+  ],
+  "selected_unit_evidence": {
+    "unit": "中海石油（中国）有限公司天津分公司",
+    "selection_basis": "官方页面首个单位展示项与岗位卡片地点均为天津；页面没有提供可独立验证的单位 URL，因此不推断为独立招聘站。",
+    "job_cards_observed": 14,
+    "geoscience_jobs": [
+      {
+        "title": "勘探地质类岗位",
+        "location": "天津",
+        "degree": "硕士研究生及以上学历",
+        "major": "地质类，地质学类，资源勘查类，地质资源与地质工程类，矿产普查与勘探，矿物学、岩石学、矿床学，地质工程，海洋地质等相关专业",
+        "application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972466915?srccode=448002",
+        "application_host": "xiaoyuan.zhaopin.com"
+      },
+      {
+        "title": "开发地质类岗位",
+        "location": "天津",
+        "degree": "硕士研究生及以上学历",
+        "major": "地质类，地质学类，资源勘查类，地质资源与地质工程类，矿产普查与勘探，矿物学、岩石学、矿床学，地质工程，海洋地质等相关专业",
+        "application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972467015?srccode=448002",
+        "application_host": "xiaoyuan.zhaopin.com"
+      },
+      {
+        "title": "地球物理类岗位",
+        "location": "天津",
+        "degree": "硕士研究生及以上学历",
+        "major": "地球物理学类，地球探测与信息技术，地质资源与地质工程，地球物理学等相关专业",
+        "application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972467115?srccode=448002",
+        "application_host": "xiaoyuan.zhaopin.com"
+      }
+    ]
+  },
+  "publication_decision": {
+    "catalog_status": "official_display_roster_evidence_only",
+    "student_job_created": false,
+    "reason": "本次任务是组织入口核验；岗位是否进入正式岗位库仍需按岗位层级、发布日期/截止日期、地点和去重规则单独注册。官方投递 URL 已保留为后续岗位级证据。",
+    "independent_unit_entry_proven": false,
+    "third_party_url_used_as_application": false
+  }
+}

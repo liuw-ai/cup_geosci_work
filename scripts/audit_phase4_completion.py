@@ -90,6 +90,7 @@ def build_report() -> dict[str, Any]:
     cnpc_bgp_entry_recheck = _read("docs/current/phase4-cnpc-bgp-entry-recheck-2026-10-20.json")
     cnooc_energy_development_browser_recheck = _read("docs/current/phase4-cnooc-energy-development-browser-recheck-2026-10-20.json")
     cnooc_portal_unit_display_recheck = _read("docs/current/phase4-cnooc-portal-unit-display-recheck-2026-10-20.json")
+    cnooc_geoscience_job_evidence = _read("docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json")
     hbdk_official_table = _read("docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json")
     hbdk_registration = _read("docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
@@ -251,6 +252,12 @@ def build_report() -> dict[str, Any]:
                     "external_identity_evidence_review", {}
                 ),
                 "observed_display_roster": observed_roster.get("summary", {}),
+                "latest_cnooc_geoscience_job_evidence": {
+                    "source_url": cnooc_geoscience_job_evidence.get("source", {}).get("url"),
+                    "selected_unit": cnooc_geoscience_job_evidence.get("selected_unit_evidence", {}).get("unit"),
+                    "geoscience_job_count": len(cnooc_geoscience_job_evidence.get("selected_unit_evidence", {}).get("geoscience_jobs", [])),
+                    "independent_unit_entry_proven": cnooc_geoscience_job_evidence.get("publication_decision", {}).get("independent_unit_entry_proven"),
+                },
                 "latest_bgp_entry_recheck": {
                     "catalog_id": cnpc_bgp_entry_recheck.get("catalog_id"),
                     "entry_status": cnpc_bgp_entry_recheck.get("entry", {}).get("entry_status"),

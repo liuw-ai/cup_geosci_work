@@ -48,6 +48,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-workspace-layout-audit-2026-10-19.json",
     ":!docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
     ":!docs/current/phase4-third-party-nhri-browser-recheck-2026-10-20.json",
+    ":!docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json",
 )
 
 
@@ -286,6 +287,7 @@ def main() -> None:
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
     three_oil_observed_roster = ROOT / "docs" / "current" / "phase4-three-oil-observed-roster-2026-10-20.json"
+    cnooc_geoscience_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-geoscience-job-evidence-2026-10-20.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     report = {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -492,6 +494,10 @@ def main() -> None:
             "phase4_three_oil_observed_roster": {
                 "path": "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
                 "sha256": sha256(three_oil_observed_roster),
+            },
+            "phase4_cnooc_geoscience_job_evidence": {
+                "path": "docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json",
+                "sha256": sha256(cnooc_geoscience_job_evidence),
             },
             "phase4_main_record": {
                 "path": "docs/current/PHASE4-2026-10-17.md",
