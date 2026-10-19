@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T22:22:32Z",
+  "generated_at": "2026-10-19T23:13:11Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -14,7 +14,7 @@
   },
   "student_target": {
     "target": 500,
-    "actual": 631,
+    "actual": 700,
     "status": "met",
     "basis": "data/effective_job_target_plan.json",
     "note": "This is the overall student-visible target; it is separate from third-party expansion readiness."
@@ -237,10 +237,10 @@
         "docs/current/phase4-local-validation-2026-10-20.json"
       ],
       "facts": {
-        "passed": 1102,
+        "passed": 1103,
         "skipped": 4,
         "failed": 0,
-        "formal_database_stable": false
+        "formal_database_stable": true
       }
     },
     {
