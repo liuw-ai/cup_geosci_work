@@ -1,0 +1,25 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-20T04:18:25+08:00",
+  "catalog_id": "cnooc-energy-development",
+  "canonical_name": "中海油能源发展股份有限公司",
+  "verification_mode": "read_only_browser_navigation",
+  "official_homepage_url": "https://www.cnoocet.com/",
+  "browser_result": {
+    "status": "source_unavailable",
+    "error_class": "connection_timeout",
+    "visible_error": "www.cnoocet.com 响应超时",
+    "downloaded": false,
+    "robots_bypassed": false,
+    "login_or_captcha_bypassed": false
+  },
+  "entry_decision": {
+    "unit_specific_entry_url_created": false,
+    "group_portal_copied_as_unit_entry": false,
+    "recruitment_page_verified": false,
+    "student_job_created": false,
+    "database_changed": false,
+    "reason": "本次只能证明登记官网在当前浏览器环境暂不可用，不能据此判断单位没有招聘，也不能生成单位招聘入口。"
+  },
+  "relationship_to_existing_probe": "与 phase4-three-oil-homepage-probe-2026-10-19.json 中该单位的 TLS/证书异常结果相互印证；状态仍为 source_unavailable。"
+}

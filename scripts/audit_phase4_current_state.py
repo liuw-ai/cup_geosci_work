@@ -281,6 +281,7 @@ def main() -> None:
     huatu_cnpc_chuanqing = ROOT / "docs" / "current" / "phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json"
     nhri_browser_recheck = ROOT / "docs" / "current" / "phase4-third-party-nhri-browser-recheck-2026-10-20.json"
     cnpc_bgp_entry_recheck = ROOT / "docs" / "current" / "phase4-cnpc-bgp-entry-recheck-2026-10-20.json"
+    cnooc_energy_development_browser_recheck = ROOT / "docs" / "current" / "phase4-cnooc-energy-development-browser-recheck-2026-10-20.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
     three_oil_observed_roster = ROOT / "docs" / "current" / "phase4-three-oil-observed-roster-2026-10-20.json"
@@ -470,6 +471,10 @@ def main() -> None:
             "phase4_cnpc_bgp_entry_recheck_2026_10_20": {
                 "path": "docs/current/phase4-cnpc-bgp-entry-recheck-2026-10-20.json",
                 "sha256": sha256(cnpc_bgp_entry_recheck),
+            },
+            "phase4_cnooc_energy_development_browser_recheck": {
+                "path": "docs/current/phase4-cnooc-energy-development-browser-recheck-2026-10-20.json",
+                "sha256": sha256(cnooc_energy_development_browser_recheck),
             },
             "phase4_local_db_write_incident": {
                 "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",

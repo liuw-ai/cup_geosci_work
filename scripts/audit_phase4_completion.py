@@ -88,6 +88,7 @@ def build_report() -> dict[str, Any]:
     huatu_cnpc_chuanqing = _read("docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json")
     nhri_browser_recheck = _read("docs/current/phase4-third-party-nhri-browser-recheck-2026-10-20.json")
     cnpc_bgp_entry_recheck = _read("docs/current/phase4-cnpc-bgp-entry-recheck-2026-10-20.json")
+    cnooc_energy_development_browser_recheck = _read("docs/current/phase4-cnooc-energy-development-browser-recheck-2026-10-20.json")
     hbdk_official_table = _read("docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json")
     hbdk_registration = _read("docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
@@ -254,6 +255,8 @@ def build_report() -> dict[str, Any]:
                     "entry_status": cnpc_bgp_entry_recheck.get("entry", {}).get("entry_status"),
                     "recruitment_url": cnpc_bgp_entry_recheck.get("entry", {}).get("recruitment_url"),
                     "student_job_created": cnpc_bgp_entry_recheck.get("policy_checks", {}).get("student_job_created"),
+                    "cnooc_energy_development_browser_status": cnooc_energy_development_browser_recheck.get("browser_result", {}).get("status"),
+                    "cnooc_energy_development_entry_created": cnooc_energy_development_browser_recheck.get("entry_decision", {}).get("unit_specific_entry_url_created"),
                 },
             },
         },
