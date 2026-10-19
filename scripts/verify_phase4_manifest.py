@@ -58,6 +58,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_third_party_lead_recheck": "docs/current/phase4-third-party-lead-recheck-2026-10-19.json",
     "phase4_cnpc_entry_recheck": "docs/current/phase4-cnpc-entry-recheck-2026-10-19.json",
     "phase4_three_oil_unit_entry_recheck": "docs/current/phase4-three-oil-unit-entry-recheck-2026-10-19.json",
+    "phase4_sinopec_official_job_evidence": "docs/current/phase4-sinopec-official-job-evidence-2026-10-19.json",
     "phase4_third_party_access_recheck": "docs/current/phase4-third-party-access-recheck-2026-10-19.json",
     "phase4_local_repair": "docs/current/phase4-local-repair-2026-10-19.json",
     "phase4_third_party_funnel": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",

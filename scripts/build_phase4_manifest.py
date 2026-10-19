@@ -202,6 +202,7 @@ def main() -> None:
     cnpc_entry_recheck = ROOT / "docs" / "current" / "phase4-cnpc-entry-recheck-2026-10-19.json"
     cnpc_bgp_entry_recheck = ROOT / "docs" / "current" / "phase4-cnpc-bgp-entry-recheck-2026-10-19.json"
     three_oil_unit_entry_recheck = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-recheck-2026-10-19.json"
+    sinopec_official_job_evidence = ROOT / "docs" / "current" / "phase4-sinopec-official-job-evidence-2026-10-19.json"
     access_recheck = ROOT / "docs" / "current" / "phase4-third-party-access-recheck-2026-10-19.json"
     official_recovery_recheck = ROOT / "docs" / "current" / "phase4-third-party-official-recovery-recheck-2026-10-19.json"
     local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
@@ -287,6 +288,7 @@ def main() -> None:
             "phase4_cnpc_entry_recheck": sha256(cnpc_entry_recheck),
             "phase4_cnpc_bgp_entry_recheck": sha256(cnpc_bgp_entry_recheck),
             "phase4_three_oil_unit_entry_recheck": sha256(three_oil_unit_entry_recheck),
+            "phase4_sinopec_official_job_evidence": sha256(sinopec_official_job_evidence),
             "phase4_third_party_access_recheck": sha256(access_recheck),
             "phase4_third_party_official_recovery_recheck": sha256(official_recovery_recheck),
             "phase4_local_repair": sha256(local_repair),

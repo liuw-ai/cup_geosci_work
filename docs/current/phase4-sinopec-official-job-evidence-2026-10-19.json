@@ -1,0 +1,39 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-19T12:40:00+08:00",
+  "verification_mode": "read_only_browser_dom",
+  "group_id": "sinopec",
+  "display_name": "国际石油工程公司",
+  "candidate_registry_id": "sinopec-display-022-unit",
+  "official_source": {
+    "portal_url": "https://job.sinopec.com/",
+    "detail_url": "https://job.sinopec.com/#/school/recruitmentPositionsDetail?postId=C3145039-DE3A-445A-A4EB-AF2BDFCD23A0",
+    "portal_identity": "中国石化招聘网站",
+    "detail_page_is_official": true
+  },
+  "position": {
+    "title": "勘探地质岗",
+    "employer_displayed": "国际石油工程公司",
+    "degree_requirement": "硕士研究生",
+    "deadline": "2026-10-28 17:00:00",
+    "headcount": 3,
+    "location": "海外",
+    "major_requirement": "地质学、地质资源与地质工程、矿产普查与勘探、地球物理学、地质工程（测井方向）",
+    "official_detail_supports_application": true
+  },
+  "identity_boundary": {
+    "catalog_unit_id": null,
+    "candidate_registry_id": "sinopec-display-022-unit",
+    "legal_name_verified": false,
+    "reason": "官方招聘展示名不能直接等同法定单位名称；当前正式目录中相近的国际石油勘探开发单位不能与本展示名自动合并。",
+    "next_evidence_required": "中国石化官方公告、单位官网、工商登记或其他官方组织文件，证明展示名与法定单位的对应关系。"
+  },
+  "publication_decision": {
+    "formal_job_created": false,
+    "student_visible": false,
+    "official_application_url": null,
+    "official_table_url": null,
+    "third_party_source_used": false,
+    "policy": "先完成法定身份绑定，再判断专业层级和岗位发布；不因集团岗位详情页的展示名直接扩充正式目录。"
+  }
+}

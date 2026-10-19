@@ -10,6 +10,7 @@ FULL_CNOOC_EVIDENCE = ROOT / "docs" / "current" / "phase4-cnooc-unit-job-evidenc
 SINOPEC_PAGE_ROSTER = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
 COOEC_NEGATIVE_EVIDENCE = ROOT / "docs" / "current" / "phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json"
 UNIT_ENTRY_RECHECK = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-recheck-2026-10-19.json"
+SINOPEC_OFFICIAL_JOB_EVIDENCE = ROOT / "docs" / "current" / "phase4-sinopec-official-job-evidence-2026-10-19.json"
 
 
 def test_phase4_three_oil_entry_matrix_covers_every_formal_catalog_unit() -> None:
@@ -95,3 +96,13 @@ def test_phase4_sinopec_page_roster_is_complete_and_not_unit_entry_evidence() ->
     assert sum(item.get("record_type") == "non_unit_program" for item in records) == 1
     assert payload["verification"]["unit_specific_entry_verified_count"] == 0
     assert payload["verification"]["source_is_not_application_link"] is True
+
+
+def test_phase4_sinopec_display_job_keeps_legal_identity_gate() -> None:
+    payload = json.loads(SINOPEC_OFFICIAL_JOB_EVIDENCE.read_text(encoding="utf-8"))
+    assert payload["official_source"]["detail_page_is_official"] is True
+    assert payload["position"]["employer_displayed"] == "国际石油工程公司"
+    assert payload["position"]["deadline"] == "2026-10-28 17:00:00"
+    assert payload["identity_boundary"]["legal_name_verified"] is False
+    assert payload["publication_decision"]["formal_job_created"] is False
+    assert payload["publication_decision"]["student_visible"] is False
