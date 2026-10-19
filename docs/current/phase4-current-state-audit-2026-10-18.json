@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T12:56:32Z",
+  "generated_at": "2026-10-19T13:34:39Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "bf19f66178680c9976ac69995e36af0b78c7ee6e",
+  "git_sha": "90972a662f8a978dd101046867d0b99232b8be15",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -152,12 +152,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "7f17f0ddda5786c5ecce000bc40b076b38812ae5b7b4f52b1b328fe2f5e45463"
+        "sha256": "b035bb03f843a8fad07184cc07d7bdc62c9a2dfa01833eba7e32921a89cb90da"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "050705c3cc517c82825c1f88763976a8183aad1ad43cbbe43f8cebc64c1dbffb"
+        "sha256": "a4dcb49c5208cfc24c0b8568aa9e33fbc87e4ee1adb0366536badaa1987f8b3a"
       }
     ],
     "metadata_documents": [
@@ -213,7 +213,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "050705c3cc517c82825c1f88763976a8183aad1ad43cbbe43f8cebc64c1dbffb"
+      "sha256": "a4dcb49c5208cfc24c0b8568aa9e33fbc87e4ee1adb0366536badaa1987f8b3a"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -265,7 +265,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "2eccc438c595ddeedc4ee009bcb546575698b863b33f9b85fc208fb6cb23ad70"
+      "sha256": "c5cad3e70a98c20b204665654561d7edb8b8d6e8371c7680342a6247fa59dc78"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -313,7 +313,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "7f17f0ddda5786c5ecce000bc40b076b38812ae5b7b4f52b1b328fe2f5e45463"
+      "sha256": "b035bb03f843a8fad07184cc07d7bdc62c9a2dfa01833eba7e32921a89cb90da"
     }
   },
   "code_inventory": [
@@ -1299,8 +1299,8 @@
     },
     {
       "path": "tests/test_phase4_current_audit.py",
-      "line_count": 49,
-      "sha256": "b9cfe8496102ef11d5329d2eed2bb89b23d96465d11eb5be02cc372580488776"
+      "line_count": 68,
+      "sha256": "361aa556dfe148b2ca10fa6813c1fe1308745fb6544d2d2fd2486525a5d931e1"
     },
     {
       "path": "tests/test_phase4_hbdk_candidates.py",
