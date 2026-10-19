@@ -41,6 +41,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json",
     ":!docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
     ":!docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
+    ":!docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
 )
 
 
@@ -223,6 +224,7 @@ def main() -> None:
     huatu_hbdk_geophysics = ROOT / "docs" / "current" / "phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json"
     hbdk_official_table = ROOT / "docs" / "current" / "phase4-third-party-hbdk-official-table-2026-10-19.json"
     hbdk_registration = ROOT / "docs" / "current" / "phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
+    huatu_cnpc_chuanqing = ROOT / "docs" / "current" / "phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
     three_oil_observed_roster = ROOT / "docs" / "current" / "phase4-three-oil-observed-roster-2026-10-20.json"
@@ -312,6 +314,7 @@ def main() -> None:
             "phase4_third_party_huatu_hbdk_geophysics": sha256(huatu_hbdk_geophysics),
             "phase4_third_party_hbdk_official_table": sha256(hbdk_official_table),
             "phase4_third_party_hbdk_candidate_registration": sha256(hbdk_registration),
+            "phase4_third_party_huatu_cnpc_chuanqing": sha256(huatu_cnpc_chuanqing),
             "phase4_main_record": sha256(phase4_record),
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
             "phase4_local_db_write_incident": sha256(local_db_write_incident),
@@ -370,6 +373,7 @@ def main() -> None:
             "discovery_scan_report": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
             "hbdk_geophysics_visual_evidence": "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json",
             "hebei_water_geology_discovery": "docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json",
+            "cnpc_chuanqing_discovery_evidence": "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
         "three_oil_entry_evidence": {
