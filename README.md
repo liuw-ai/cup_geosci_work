@@ -355,14 +355,13 @@ SMTP_USE_SSL=true
 推荐在 Linux 服务器使用 Docker Compose。服务器需要能够访问公开招聘页面、拥有持久化磁盘，并通过 HTTPS 对学生开放网页。
 
 ~~~bash
-cp .env.example .env
-# 编辑 .env，至少设置 APP_SECRET_KEY、ADMIN_TOKEN、APP_BASE_URL 和邮件配置
-docker compose -f docker-compose.yml -f docker-compose.browser.yml config
-docker compose -f docker-compose.yml -f docker-compose.browser.yml up -d --build
-docker compose -f docker-compose.yml -f docker-compose.browser.yml logs -f worker
+# 当前 Phase 4 未批准服务器部署；仅在用户明确批准且 Release Manifest 通过后执行：
+docker compose -f deploy/compose.yaml config
+docker compose -f deploy/compose.yaml up -d --build
+docker compose -f deploy/compose.yaml logs -f worker
 ~~~
 
-生产启动必须同时加载 `docker-compose.yml` 和 `docker-compose.browser.yml`；后者包含中国石油、中国石化、中国海油、CUPB 就业网、国聘及其他动态官方入口的隔离浏览器 worker。只执行 `docker compose up` 会漏启这些服务，不能作为无人值守部署。Compose 默认只把 8080 绑定到服务器本机的 `127.0.0.1`，不直接暴露给公网。正式部署优先在 Nginx、Caddy 或学校现有网关上配置 HTTPS 反向代理到 `127.0.0.1:8080`。如果暂时没有域名，可在服务器 `.env` 中明确设置 `WEB_BIND_ADDRESS=0.0.0.0` 和已在云安全组放行的 `WEB_PORT=80`，通过 `http://服务器公网IP/` 临时访问；这只提供 HTTP，不等同于生产 HTTPS。`APP_BASE_URL` 必须填写学生实际访问的完整地址，否则邮件中的日报链接会不正确。`docker compose -f docker-compose.yml -f docker-compose.browser.yml ps` 应显示 web、worker 和所有启用的浏览器 worker；主 worker 和每个浏览器 worker 的健康检查都读取共享 SQLite 心跳。
+生产只认 `deploy/compose.yaml`，不再叠加根目录 `docker-compose*.yml` 或任何 `phase-*` overlay。该 Compose 使用项目根目录 `.env` 注入运行配置，默认把 8080 绑定到服务器本机 `127.0.0.1`；正式部署应由 Nginx、Caddy 或学校网关提供 HTTPS 反向代理。`APP_BASE_URL` 必须填写学生实际访问地址。部署前必须先通过本地测试、用户明确批准，并用 Release Manifest 绑定 Git、Compose、镜像、配置和数据库备份；当前阶段不得据此命令直接部署。
 
 若服务器位于中国大陆且网站向公众开放，通常需要准备已备案域名；若使用境外服务器，不需要 ICP 备案，但应评估中国大陆和微信内访问速度。网页可被微信直接打开，不要求学生安装飞书、腾讯文档或其他办公软件。
 
