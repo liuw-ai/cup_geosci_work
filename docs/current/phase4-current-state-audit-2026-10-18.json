@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T02:55:33Z",
+  "generated_at": "2026-10-19T03:03:18Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "dc01548d1460ee395fa89562274456c1e0030d3d",
+  "git_sha": "48c0674cc8d56f00952201d0751a11a667ae6cef",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -753,8 +753,8 @@
     },
     {
       "path": "scripts/audit_phase4_completion.py",
-      "line_count": 260,
-      "sha256": "f1064576a8a6557d08d1b9b270ff2bbd1c5701c5911143585468f3b21e59daab"
+      "line_count": 294,
+      "sha256": "19e9ed0963cb37a1bebd11b515f1eec4ebc3158da37f89d14e4cbbff85b70d77"
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
