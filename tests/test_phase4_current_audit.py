@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.audit_phase4_current_state import current_database_facts, document_consistency_facts
+from scripts.audit_phase4_current_state import (
+    GENERATED_METADATA_PATHS,
+    current_database_facts,
+    document_consistency_facts,
+)
 
 
 def test_phase4_current_audit_uses_read_only_database_facts() -> None:
@@ -37,3 +41,9 @@ def test_current_readme_does_not_duplicate_stale_database_totals() -> None:
     # literal here would become a second, conflicting source of truth.
     assert "正式数据库只读审计为 3948 条岗位" not in content
     assert "formal_third_party_job_count" not in content
+
+
+def test_current_audit_excludes_all_metadata_outputs_from_input_status() -> None:
+    assert ":!docs/current/phase4-completion-audit-2026-10-19.json" in GENERATED_METADATA_PATHS
+    assert ":!docs/current/phase4-workspace-layout-audit-2026-10-19.json" in GENERATED_METADATA_PATHS
+    assert ":!docs/current/phase4-three-oil-catalog-audit-2026-10-17.json" in GENERATED_METADATA_PATHS
