@@ -63,7 +63,7 @@
   },
   "publication_decision": {
     "status": "not_published",
-    "reason": "official_notice_recovered_but_row_level_table_evidence_and_http_application_url_missing",
+    "reason": "official_notice_recovered_but_row_level_table_evidence_unavailable",
     "candidate_lead_created": false,
     "formal_job_created": false,
     "student_visible": false,
@@ -73,14 +73,15 @@
     "third_party_discovery_url_internal_only": true,
     "official_notice_url_retained": true,
     "official_table_urls_retained": true,
-    "official_application_url_required_for_publication": true,
+    "official_application_url_required_for_publication": false,
+    "official_application_method_required_for_publication": true,
     "third_party_attachment_url_not_used": true
   },
   "next_evidence_required": [
     "Obtain the real official XLSX through a permitted browser download or an operator-provided original file with its official URL preserved.",
     "Hash and retain each official table before parsing.",
     "Parse and review every row for subsidiary, position, professional requirement, degree, location, and deadline.",
-    "Record an official HTTP application URL if one exists; an email address alone does not satisfy the student-facing application-link gate.",
+    "Record an official HTTP application URL when one exists; otherwise retain the official notice and its explicit email or on-site application method. Never invent an HTTP URL.",
     "Only then create private candidates and apply the existing professional and student-publication gates."
   ]
 }
