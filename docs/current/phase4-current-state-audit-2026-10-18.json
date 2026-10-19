@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T09:34:29Z",
+  "generated_at": "2026-10-19T10:25:09Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "a21f1964d25b923a0987b7853948620d591858cf",
+  "git_sha": "4f73ade5cae4eb4380382ef716bb536847d9e108",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -152,12 +152,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "3f1e1d1bd41b8fbee80abfccac343715e82bc2f26994856c17fda94be2a3fed8"
+        "sha256": "9d1d09f9e783e9ae8edba0bb9af8adb8e0c04a6b9736a36fb622bcb1e8ae4985"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "3322b22e2c991b0e56fe424946efd368fe905b2888a8455d216591f2be95c1c7"
+        "sha256": "1dbe5df2af616cdb33c6ccf5cb44d0f3180745595a55772365aa8ee99b539123"
       }
     ],
     "metadata_documents": [
@@ -213,7 +213,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "3322b22e2c991b0e56fe424946efd368fe905b2888a8455d216591f2be95c1c7"
+      "sha256": "1dbe5df2af616cdb33c6ccf5cb44d0f3180745595a55772365aa8ee99b539123"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -257,7 +257,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "7aebdaaee4f91dff7b194c4b698ba67557372d0a8cf8207666dcd75f12b54a27"
+      "sha256": "7cda852d87961669b838cd4000f8628e56755e1c24250d58d3264a3fd382f06d"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -305,7 +305,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "3f1e1d1bd41b8fbee80abfccac343715e82bc2f26994856c17fda94be2a3fed8"
+      "sha256": "9d1d09f9e783e9ae8edba0bb9af8adb8e0c04a6b9736a36fb622bcb1e8ae4985"
     }
   },
   "code_inventory": [
@@ -866,8 +866,8 @@
     },
     {
       "path": "scripts/refresh_phase4_metadata.py",
-      "line_count": 42,
-      "sha256": "c539d5ccdcd57642dcbc2c68a9447ca27d1f972fcad2346b5767114907a27cbc"
+      "line_count": 45,
+      "sha256": "d08b1b5314be162148927538ad84d71930323c014de194dd84f82f5fcb539ad2"
     },
     {
       "path": "scripts/register_phase4_cgs_trial.py",
@@ -1311,8 +1311,8 @@
     },
     {
       "path": "tests/test_phase4_metadata_refresh.py",
-      "line_count": 15,
-      "sha256": "099ffc025ea3f00f7c1c1843e95f19c90a86b16bd167bc1e29c95e917ebe2f9b"
+      "line_count": 16,
+      "sha256": "554eeb468dd0a2100b9432e7dfc54263a05f7db933c210e57b250d533bb8d68b"
     },
     {
       "path": "tests/test_phase4_third_party_funnel.py",
