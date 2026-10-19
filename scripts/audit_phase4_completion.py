@@ -281,7 +281,7 @@ def build_report() -> dict[str, Any]:
                 "passed": validation_tests.get("passed", 0),
                 "skipped": validation_tests.get("skipped", 0),
                 "failed": validation_tests.get("failed", 0),
-                "formal_database_stable": validation.get("database", {}).get(
+                "formal_database_stable": validation.get("tests", {}).get(
                     "formal_database_stable_during_tests", False
                 ),
             },

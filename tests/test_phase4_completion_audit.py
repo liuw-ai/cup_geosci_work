@@ -22,3 +22,7 @@ def test_phase4_completion_audit_is_requirement_scoped_and_not_complete() -> Non
     assert three_oil["facts"]["external_identity_evidence_review"]["pending_unit_count"] == 43
     assert statuses["isolated_local_regression"] == "pass"
     assert statuses["student_site_acceptance"] == "pass"
+    regression = next(
+        item for item in report["requirements"] if item["id"] == "isolated_local_regression"
+    )
+    assert regression["facts"]["formal_database_stable"] is True
