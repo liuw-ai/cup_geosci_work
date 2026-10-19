@@ -337,7 +337,7 @@
       "server_observation": "HTTP 200; public API campaign=105147 code=200 totalNum=350 totalPage=4; 地学关键词候选292；明确可报48，待详情证据214，专业不适合30。",
       "scan_conclusion": "scan_success_with_open_matches",
       "field_validation": "服务器浏览器首轮完成官方 API 4 页、350 条列表和 343 条候选详情；343/343 详情成功解析岗位级专业、学历、地点、截止日期、人数语义和 xiaoyuan.zhaopin.com 证据。通过地学院专业/学历门禁的 43 条已进入学生端；256 条保留待证据，44 条专业不适合。",
-      "next_action": "按 180 分钟浏览器周期和 30 小时捕获新鲜度每日复核；截止日清退，详情挑战或分页失败写入旁路复核，不解释为无岗位。"
+      "next_action": "按180分钟浏览器周期复核；30小时捕获新鲜度只用于来源健康告警，不影响岗位可见性或状态。截止日清退，详情挑战或分页失败写入旁路复核，不解释为无岗位。"
     },
     {
       "id": "pipechina-regional-units",
