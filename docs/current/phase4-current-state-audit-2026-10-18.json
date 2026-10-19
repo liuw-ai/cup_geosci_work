@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T06:10:10Z",
+  "generated_at": "2026-10-19T06:13:20Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "0508a5ba3fdbbf2059bfe1733ba87a7a504643f2",
-  "git_status_porcelain": "D docs/current/CODEBASE-2026-10-17.md\n D docs/current/HISTORY-MIGRATION-2026-10-17.json\n D docs/current/PHASE3-2026-10-17.md\n M docs/current/PHASE4-2026-10-17.md\n M docs/current/README.md\n D docs/current/RESET-2026-10-17.md\n D docs/current/phase3-audit-preview-2026-10-17.json\n D docs/current/phase3-backfill-result-2026-10-17.json\n D docs/current/phase3-release-manifest.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json\n M scripts/archive_history.ps1\n M scripts/audit_phase4_current_state.py\n M tests/test_phase4_current_audit.py",
+  "git_sha": "59253e586f8e321d21fb031c87588b8c1bb64f6e",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
