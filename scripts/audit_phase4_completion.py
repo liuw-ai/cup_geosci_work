@@ -57,6 +57,7 @@ def build_report() -> dict[str, Any]:
     huatu_shanxi = _read("docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json")
     huatu_hbdk = _read("docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
+    catalog_audit = _read("docs/current/phase4-three-oil-catalog-audit-2026-10-17.json")
     workspace_layout = _read("docs/current/phase4-workspace-layout-audit-2026-10-19.json")
     database = _database_facts()
     manifest_boundary_ok = (
@@ -165,6 +166,9 @@ def build_report() -> dict[str, Any]:
                 ),
                 "unit_specific_entry_status_counts": entry_summary.get(
                     "unit_specific_entry_status_counts", {}
+                ),
+                "external_identity_evidence_review": catalog_audit.get(
+                    "external_identity_evidence_review", {}
                 ),
             },
         },
