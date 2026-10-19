@@ -33,9 +33,15 @@
   "name_match_semantics": "name_exact_match and name_evidence_status only describe the normalized catalog-to-organization_registry mapping; they do not prove an external legal-registration or independently archived official-name review. This mapping does not prove that review.",
   "external_identity_evidence_review": {
     "status": "partial",
-    "verified_unit_count": 16,
-    "pending_unit_count": 48,
+    "verified_unit_count": 22,
+    "pending_unit_count": 42,
     "verified_unit_ids": [
+      "cnpc-daqing",
+      "sinopec-shengli",
+      "sinopec-jianghan",
+      "sinopec-petroleum-exploration-production-research",
+      "sinopec-petroleum-engineering-research",
+      "sinopec-engineering-construction",
       "cnooc-tianjin",
       "cnooc-shanghai",
       "cnooc-shenzhen",
@@ -3361,7 +3367,17 @@
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
       "external_identity_evidence": {
-        "status": "pending"
+        "status": "verified",
+        "basis": "official_job_detail_employer_record",
+        "evidence_scope": "official_job_detail_employer_name",
+        "source_ids": [
+          "cupb-career"
+        ],
+        "evidence_urls": [
+          "https://career.cup.edu.cn/campus/view/id/460397"
+        ],
+        "matched_job_count": 1,
+        "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
         {
@@ -4829,7 +4845,17 @@
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
       "external_identity_evidence": {
-        "status": "pending"
+        "status": "verified",
+        "basis": "official_job_detail_employer_record",
+        "evidence_scope": "official_job_detail_employer_name",
+        "source_ids": [
+          "sinopec-2027-geoscience-snapshot"
+        ],
+        "evidence_urls": [
+          "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75"
+        ],
+        "matched_job_count": 6,
+        "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
         {
@@ -4943,7 +4969,17 @@
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
       "external_identity_evidence": {
-        "status": "pending"
+        "status": "verified",
+        "basis": "official_job_detail_employer_record",
+        "evidence_scope": "official_job_detail_employer_name",
+        "source_ids": [
+          "sinopec-2027-geoscience-snapshot"
+        ],
+        "evidence_urls": [
+          "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=430F7075-EB7D-4DE6-909F-259CB35AD1D6"
+        ],
+        "matched_job_count": 3,
+        "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
         {
@@ -5302,7 +5338,17 @@
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
       "external_identity_evidence": {
-        "status": "pending"
+        "status": "verified",
+        "basis": "official_job_detail_employer_record",
+        "evidence_scope": "official_job_detail_employer_name",
+        "source_ids": [
+          "sinopec-2027-geoscience-snapshot"
+        ],
+        "evidence_urls": [
+          "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=F9EE43F1-CDCE-41F3-AA08-D435DAD614B8"
+        ],
+        "matched_job_count": 6,
+        "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
         {
@@ -5367,7 +5413,17 @@
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
       "external_identity_evidence": {
-        "status": "pending"
+        "status": "verified",
+        "basis": "official_job_detail_employer_record",
+        "evidence_scope": "official_job_detail_employer_name",
+        "source_ids": [
+          "sinopec-2027-geoscience-snapshot"
+        ],
+        "evidence_urls": [
+          "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=58789F72-2874-43D3-96A0-8A19DFE7524E"
+        ],
+        "matched_job_count": 1,
+        "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
         {
@@ -5579,7 +5635,17 @@
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
       "external_identity_evidence": {
-        "status": "pending"
+        "status": "verified",
+        "basis": "official_job_detail_employer_record",
+        "evidence_scope": "official_job_detail_employer_name",
+        "source_ids": [
+          "sinopec-2027-geoscience-snapshot"
+        ],
+        "evidence_urls": [
+          "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=252F8E1B-B9EF-45A5-9134-FEA9F65B7E7A"
+        ],
+        "matched_job_count": 2,
+        "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
         {

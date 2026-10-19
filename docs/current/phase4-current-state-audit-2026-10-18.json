@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T00:40:15Z",
+  "generated_at": "2026-10-19T00:47:04Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "fa5345b4ba5aafc5e08140fbb7d2b7b656de37b0",
+  "git_sha": "71b96e8f7e31ba94feddaf917c31a22458325376",
   "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-three-oil-catalog-audit-2026-10-17.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -134,12 +134,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "0f3ae2ac1479d41f8bd62a23d3ac847ee8d1e7189d6160524c8fe54fb84ec186"
+        "sha256": "600e8eb5ac389e7d3bab78658caa183ebf859d2a5e4a2805c243e8b55cb9c89d"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "f18d6d1b41d5c877f35cbd19e2d2245a16a96e2753dfecd4b70dee8350691014"
+        "sha256": "8171eeed69ad1514bb5f0c0c92226a86eccf43edb2aaa4c66ae25f8d77b70144"
       }
     ],
     "metadata_documents": [
@@ -159,7 +159,7 @@
   "evidence_documents": {
     "phase4_three_oil_catalog_audit": {
       "path": "docs/current/phase4-three-oil-catalog-audit-2026-10-17.json",
-      "sha256": "606a1524ad55c812c3adab3aabf95257773a6025d59db90f3c8f1a573d8e5879"
+      "sha256": "c953c469af204f6ae7eb91ec29e0eb3757eb90dac864162eb9825e9f053c3562"
     },
     "phase4_third_party_trial": {
       "path": "docs/current/phase4-third-party-trial-2026-10-18.json",
@@ -195,7 +195,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "f18d6d1b41d5c877f35cbd19e2d2245a16a96e2753dfecd4b70dee8350691014"
+      "sha256": "8171eeed69ad1514bb5f0c0c92226a86eccf43edb2aaa4c66ae25f8d77b70144"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -279,7 +279,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "0f3ae2ac1479d41f8bd62a23d3ac847ee8d1e7189d6160524c8fe54fb84ec186"
+      "sha256": "600e8eb5ac389e7d3bab78658caa183ebf859d2a5e4a2805c243e8b55cb9c89d"
     }
   },
   "code_inventory": [
@@ -710,8 +710,8 @@
     },
     {
       "path": "job_hub/three_oil_catalog.py",
-      "line_count": 973,
-      "sha256": "fe28d9c010819468dabc45029f53952693095991d89b27aa0c739dfbe15b83f0"
+      "line_count": 988,
+      "sha256": "29c6b03d596c4789485f708732bb6dd840874e63575da6e33f1187d1e8791fe1"
     },
     {
       "path": "job_hub/transport.py",
@@ -1445,8 +1445,8 @@
     },
     {
       "path": "tests/test_three_oil_catalog.py",
-      "line_count": 488,
-      "sha256": "f33413b696304cbe9b828a0cd6e2280b6d1a2349c080c99a5e7599a350760fb1"
+      "line_count": 510,
+      "sha256": "792d1e380e19ef18f200539c8fd495d37a9954fecd6514261ee8d6b2f94f0d12"
     },
     {
       "path": "tests/test_transport.py",
