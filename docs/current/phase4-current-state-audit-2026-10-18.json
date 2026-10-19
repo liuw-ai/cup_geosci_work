@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T14:59:08Z",
+  "generated_at": "2026-10-19T16:17:18Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "dda432956a2582cc306b482b8a77f6432717c11e",
+  "git_sha": "a2dc47e1e149a91cc77e112e6b4290001073bc7c",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -25,7 +25,7 @@
     "phase3_withdrawal_audit_count": 3947,
     "candidate_lead_count": 8,
     "formal_third_party_job_count": 7,
-    "student_read_as_of_date": "2026-10-19",
+    "student_read_as_of_date": "2026-10-20",
     "student_visible_layer_counts": {
       "broad_geoscience_match": 7,
       "exact_match": 140,
@@ -152,7 +152,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "c1d066d058597623058eea0cf031cce17571009bc1db0a3a83bebbe3b8e7482f"
+        "sha256": "33e84e5ae9febee38f388ea5be0e4c91ed34a37736ffbff6bfae25bc2c02274c"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -265,7 +265,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "cce8736b20f98ca36155760ade7c166fae3f78eb67e2425dbd127d3375595e21"
+      "sha256": "db1fe9c50cf0dfc02df5808c9327d085794c55a1d5f0963c3966b81ac83355ae"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -286,6 +286,10 @@
     "phase4_third_party_huatu_state_owned_entry": {
       "path": "docs/current/phase4-third-party-huatu-state-owned-entry-2026-10-19.json",
       "sha256": "de1b954cf85023f390671163dc8350d396936716026e60ace0979cd00aa49400"
+    },
+    "phase4_third_party_huatu_hebei_water_geology": {
+      "path": "docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json",
+      "sha256": "35378baf7c581b172061cd9a4b1bd0a12ac6c1fcfb5d5774027b8bf8f3713ed3"
     },
     "phase4_third_party_bingtuan_official_recovery": {
       "path": "docs/current/phase4-third-party-bingtuan-official-recovery-2026-10-19.json",
@@ -315,9 +319,13 @@
       "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
       "sha256": "8abeae2961123584e33e22102108cfad5ade5d0e94ff11255b52835b6f0313ad"
     },
+    "phase4_three_oil_observed_roster": {
+      "path": "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
+      "sha256": "aecf4e0083cf5fcbbee1c6af3446771611b2043e2bdecc60bab8f5463be52b9a"
+    },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "c1d066d058597623058eea0cf031cce17571009bc1db0a3a83bebbe3b8e7482f"
+      "sha256": "33e84e5ae9febee38f388ea5be0e4c91ed34a37736ffbff6bfae25bc2c02274c"
     }
   },
   "code_inventory": [
@@ -783,18 +791,18 @@
     },
     {
       "path": "scripts/audit_phase4_completion.py",
-      "line_count": 298,
-      "sha256": "08f2aa435c653549d4e8a2204163c7f21d8cbd640ccf7545c054b3dfdcebda4c"
+      "line_count": 304,
+      "sha256": "e1ef69af6bc1eb93bb6f45785dcb436f7cf61372ab482ae41d4802ff4b35047d"
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 481,
-      "sha256": "247ec8776d77a762125d7242152ca9e27c690e8d3ea88ed781eb08eb3ed4f85f"
+      "line_count": 493,
+      "sha256": "bf4c1faed67d2b48d9841740b1ee96899d13cb11279513cc57b3225ac96bc4e8"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
-      "line_count": 177,
-      "sha256": "7d40dc70404ec1d8495f88de8950d2580bf36b7093d28711c134baacc00bb58d"
+      "line_count": 195,
+      "sha256": "2e355ef49f914ed3759f955f5c8719973f2addeb13969f70534c415de17f097a"
     },
     {
       "path": "scripts/audit_phase4_workspace_layout.py",
@@ -813,8 +821,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 405,
-      "sha256": "9ee51536e71527c62d2a6134049bcca66c5c4aa63bb42a92ca8f34724cef383d"
+      "line_count": 412,
+      "sha256": "eecb03efeedb3a7580b713f1bdd381f42fad31c097ab138c1ab2139031f38940"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -830,6 +838,11 @@
       "path": "scripts/build_phase4_three_oil_entry_matrix.py",
       "line_count": 328,
       "sha256": "d988f7273edc3cb511552a35db21ff3aa771c30e705f9e2819f1089ef924001f"
+    },
+    {
+      "path": "scripts/build_phase4_three_oil_observed_roster.py",
+      "line_count": 114,
+      "sha256": "1b9ae1102d86feaaa125cca7dd022202a7e824c5d821861791b524dc58c7a3a3"
     },
     {
       "path": "scripts/capture_phase4_hbdk_official_table.py",
@@ -898,8 +911,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 240,
-      "sha256": "a5c68ddd1455c89bff3bc5a7fa1140eb985ececb1533a265ed06262cf37cf293"
+      "line_count": 243,
+      "sha256": "dc80bdef8824d3c8d9fa039a989e3428d17c1bca1d53e8efa7caddb4e0a529dd"
     },
     {
       "path": "tests/conftest.py",
@@ -1333,13 +1346,18 @@
     },
     {
       "path": "tests/test_phase4_third_party_funnel.py",
-      "line_count": 17,
-      "sha256": "84a9d11f8c7b01ff351b756dbe9f2f430c578d902ef69b9ae3989a1ee682de9b"
+      "line_count": 31,
+      "sha256": "4c5ee3c30b6c370fd2facf1430c64a00078a89441922b0a76c8965083698fd41"
     },
     {
       "path": "tests/test_phase4_three_oil_entry_matrix.py",
       "line_count": 108,
       "sha256": "0e491452d3d70eb61eb5c7ec65d62c68d2e7c8752eba7992e5e1d8bfe2e48e74"
+    },
+    {
+      "path": "tests/test_phase4_three_oil_observed_roster.py",
+      "line_count": 27,
+      "sha256": "aa74633d642ac8abbd012d21561c400a3eac9b3e6bb33c61d968ebbfc64fa80e"
     },
     {
       "path": "tests/test_phase4_workspace_layout.py",

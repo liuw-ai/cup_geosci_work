@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T14:59:12Z",
+  "generated_at": "2026-10-19T16:17:21Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -70,11 +70,13 @@
       "status": "blocked",
       "evidence": [
         "docs/current/phase4-third-party-access-recheck-2026-10-19.json",
-        "docs/current/phase4-third-party-blocked-batches-2026-10-18.json"
+        "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
+        "docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json"
       ],
       "facts": {
         "formal_jobs": 7,
-        "blocker": "remaining sources or table assets are inaccessible under current TLS/robots/browser policy"
+        "blocker": "remaining sources or table assets are inaccessible under current TLS/robots/browser policy",
+        "latest_discovery_boundary": "第三方发现页可达，但同批官方公告返回 404、用人单位站点 TLS 失败且没有逐行官方证据；不把 13 人转换为岗位。"
       }
     },
     {
@@ -122,7 +124,8 @@
       "status": "partial",
       "evidence": [
         "data/three_oil_organization_catalog.json",
-        "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json"
+        "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
+        "docs/current/phase4-three-oil-observed-roster-2026-10-20.json"
       ],
       "facts": {
         "formal_catalog_units": 64,
@@ -168,6 +171,17 @@
             "legal-registration record when the display name is abbreviated or ambiguous"
           ],
           "student_publication_effect": "none"
+        },
+        "observed_display_roster": {
+          "observed_candidate_count": 239,
+          "observed_candidate_count_by_group": {
+            "cnpc": 108,
+            "sinopec": 131
+          },
+          "formal_catalog_unit_count_excluded": 64,
+          "legal_identity_verified_count": 0,
+          "unit_specific_entry_verified_count": 0,
+          "formal_catalog_additions": 0
         }
       }
     },
