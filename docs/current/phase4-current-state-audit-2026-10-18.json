@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T00:05:35Z",
+  "generated_at": "2026-10-19T00:13:17Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "3cef40c4ffde70d0d87e652b3beaf44884e3eab7",
+  "git_sha": "18fadf4121cf900ec8e0eddd46d35c72097f8ba2",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -239,7 +239,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "63cad47552134814941571deccf2aa3c663e8d432e3999eafb2dd0b6da9f3f07"
+      "sha256": "07c70492a5dd871a24f0f94b27c15c3a631c8242d5da025b635f38d538815f6c"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",

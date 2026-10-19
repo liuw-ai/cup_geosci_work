@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T00:05:40Z",
+  "generated_at": "2026-10-19T00:13:22Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "3cef40c4ffde70d0d87e652b3beaf44884e3eab7",
+  "git_sha": "18fadf4121cf900ec8e0eddd46d35c72097f8ba2",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "65ab9af3e203de11f16e637643955ee0e428fed1a5d234be45837797717b81fa",
-    "phase4_document_consistency": "65ab9af3e203de11f16e637643955ee0e428fed1a5d234be45837797717b81fa",
+    "phase4_current_state_audit": "b02205b4e506d56df334a88629307833bef2e295fb96cc27316900d37e973b59",
+    "phase4_document_consistency": "b02205b4e506d56df334a88629307833bef2e295fb96cc27316900d37e973b59",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -41,7 +41,7 @@
     "phase4_cnpc_entry_recheck": "217753c1c99e2663308f27ce7a2cc9cc1606a63b73d6017cddf813f261bc0be1",
     "phase4_third_party_access_recheck": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d",
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
-    "phase4_third_party_funnel": "63cad47552134814941571deccf2aa3c663e8d432e3999eafb2dd0b6da9f3f07",
+    "phase4_third_party_funnel": "07c70492a5dd871a24f0f94b27c15c3a631c8242d5da025b635f38d538815f6c",
     "phase4_local_web_recheck": "c4558f29ff36ea1ccf00709837e34cc3a40e5b20d459aaa40ceca1ba4fd6ec08",
     "phase4_local_web_live_validation": "ce5ca5f99d6b8b1042411127069d64e51f44ff795bcf53a100022de5a56585ef",
     "phase4_huatu_table_discovery": "59f0496bc2696f0ecbc71a70210b208f4c3fe6cfd6791ca991bf5785dca7ce8d",
@@ -53,8 +53,8 @@
     "phase4_local_validation": "b9669297f45e893b34428bd10ca5189b8a727fad9a0db3e4b089b381e6c47e9b",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "42ac32b0b953e34f70793fa78aa8d1c2b2637cd72cdc974da4453b3c2a423807",
-    "phase4_completion_audit": "e0ab705ed05bcd3866d09f9c8f2e9f4b44a5c2617c610a15815571070250c276",
-    "phase4_workspace_layout": "0178e7f419e0b2754be0d7c17176a3dd3b76c90249e1f2163c783be4ca39ced5"
+    "phase4_completion_audit": "7a6fc00518f40e5c3d088d39b617bab588fa274ca6c88a0759df477b00a8038c",
+    "phase4_workspace_layout": "7e89adaa4de1c6c447ee5f947cfadbafd1ad35f3f0af65b9f1656335f976cbbf"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
