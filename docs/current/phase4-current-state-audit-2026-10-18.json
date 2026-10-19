@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T03:08:07Z",
+  "generated_at": "2026-10-19T04:23:57Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "75c055eedef1dcf9c5d9f6a2d1912dddd356b3f1",
-  "git_status_porcelain": "",
+  "git_sha": "bc61bed0a11cbd64893429070ee07c55f425f534",
+  "git_status_porcelain": "M docs/current/phase4-completion-audit-2026-10-19.json\n M docs/current/phase4-workspace-layout-audit-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -134,12 +134,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "d80e9b40148e5ade6874f85d4bfb476cfc1bd92d5d9113d5cb59fa91a0703869"
+        "sha256": "84140efe87d8c4a78725b795e30debda77cd39fa4ce6b4e6560839441ffa53c3"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
         "exists": true,
-        "sha256": "0d1835f6fa4c97c5a40ab97313063b1b8ef72bd7eb8e33e367f6034f1a733023"
+        "sha256": "2844fe26adcb313cd5ecb6e1376d8bbf9b01f3a3719693ec89a2924e778043d1"
       }
     ],
     "metadata_documents": [
@@ -195,7 +195,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "0d1835f6fa4c97c5a40ab97313063b1b8ef72bd7eb8e33e367f6034f1a733023"
+      "sha256": "2844fe26adcb313cd5ecb6e1376d8bbf9b01f3a3719693ec89a2924e778043d1"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -239,7 +239,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "f1bddb3d454dc042636c5267da119071c7288e48321dfc2b1398490174832e85"
+      "sha256": "884263c618a0992ecdfbd94bae351e4aeea8dbf22a47a4cdeb466af9ffb6f862"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -287,7 +287,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "d80e9b40148e5ade6874f85d4bfb476cfc1bd92d5d9113d5cb59fa91a0703869"
+      "sha256": "84140efe87d8c4a78725b795e30debda77cd39fa4ce6b4e6560839441ffa53c3"
     }
   },
   "code_inventory": [
@@ -498,8 +498,8 @@
     },
     {
       "path": "job_hub/government_positions.py",
-      "line_count": 1301,
-      "sha256": "f50a438d7f0ee4f38d53b123994d66a65f89e191f9302000f2f54e6fe9c40523"
+      "line_count": 1328,
+      "sha256": "9b0bd4b1ef9a7c35b0352767e8feb991a81f1cb941c1e5a6dafa3b1683f5600a"
     },
     {
       "path": "job_hub/government_revalidation.py",
@@ -1139,17 +1139,17 @@
     {
       "path": "tests/test_government_position_publish.py",
       "line_count": 567,
-      "sha256": "eeb59a337efe1afe150bd5d22aa2b2a3bde86e34467d86dd320b0c0b0ed44725"
+      "sha256": "a788f8c2592febfac7cd6c9d1e98d81aa10606361657211cb7d82ae62e40fe8d"
     },
     {
       "path": "tests/test_government_positions.py",
-      "line_count": 850,
-      "sha256": "946d56b2b07b697b48d85c834fe17f69f857ef0d5e31a91af0b7536401f5f195"
+      "line_count": 856,
+      "sha256": "63377c9e49fe8b1237ee6c94a6f5ddd1ebc7720e4c27dcb26eb2d7b17bfd8f5b"
     },
     {
       "path": "tests/test_government_revalidation.py",
       "line_count": 1155,
-      "sha256": "d8f0f558744c606557bec18430aaef1a3b386b8efd8c22a1164d926cb87f57d1"
+      "sha256": "42a7dfafd6241c34b7598a5f525446e2c14d6301c49308410ff293461fc240f3"
     },
     {
       "path": "tests/test_government_table_parser.py",
