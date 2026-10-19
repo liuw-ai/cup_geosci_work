@@ -194,7 +194,11 @@ def build_report() -> dict[str, Any]:
                 "candidate_leads_registered": hbdk_registration.get("candidate_leads", {}).get("count", 0),
                 "candidate_lead_ids": hbdk_registration.get("candidate_leads", {}).get("ids", []),
                 "student_visible": hbdk_publication["student_visible"] > 0,
-                "publication_status": hbdk_official_table.get("publication_decision", {}).get("status"),
+                "publication_status": (
+                    "published"
+                    if hbdk_publication["formal_jobs_created"] > 0
+                    else hbdk_official_table.get("publication_decision", {}).get("status")
+                ),
             },
         },
         {

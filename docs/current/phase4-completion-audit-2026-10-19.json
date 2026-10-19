@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T03:03:22Z",
+  "generated_at": "2026-10-19T03:08:06Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -114,7 +114,7 @@
           8
         ],
         "student_visible": true,
-        "publication_status": "official_content_verified_ready_for_local_review"
+        "publication_status": "published"
       }
     },
     {
