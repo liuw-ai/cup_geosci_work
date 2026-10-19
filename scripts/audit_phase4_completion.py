@@ -57,6 +57,7 @@ def build_report() -> dict[str, Any]:
     huatu_shanxi = _read("docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json")
     huatu_hbdk = _read("docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json")
     hbdk_official_table = _read("docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json")
+    hbdk_registration = _read("docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
     catalog_audit = _read("docs/current/phase4-three-oil-catalog-audit-2026-10-17.json")
     workspace_layout = _read("docs/current/phase4-workspace-layout-audit-2026-10-19.json")
@@ -156,6 +157,8 @@ def build_report() -> dict[str, Any]:
                 "deadline_policy": hbdk_official_table.get("official_deadline", {}).get("policy"),
                 "official_row_evidence": True,
                 "formal_jobs_created": 0,
+                "candidate_leads_registered": hbdk_registration.get("candidate_leads", {}).get("count", 0),
+                "candidate_lead_ids": hbdk_registration.get("candidate_leads", {}).get("ids", []),
                 "student_visible": False,
                 "publication_status": hbdk_official_table.get("publication_decision", {}).get("status"),
             },

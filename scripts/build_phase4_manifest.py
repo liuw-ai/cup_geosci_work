@@ -203,6 +203,7 @@ def main() -> None:
     huatu_shanxi_geology_group = ROOT / "docs" / "current" / "phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json"
     huatu_hbdk_geophysics = ROOT / "docs" / "current" / "phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json"
     hbdk_official_table = ROOT / "docs" / "current" / "phase4-third-party-hbdk-official-table-2026-10-19.json"
+    hbdk_registration = ROOT / "docs" / "current" / "phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
     completion_audit = ROOT / "docs" / "current" / "phase4-completion-audit-2026-10-19.json"
@@ -284,6 +285,7 @@ def main() -> None:
             "phase4_third_party_huatu_shanxi_geology_group": sha256(huatu_shanxi_geology_group),
             "phase4_third_party_huatu_hbdk_geophysics": sha256(huatu_hbdk_geophysics),
             "phase4_third_party_hbdk_official_table": sha256(hbdk_official_table),
+            "phase4_third_party_hbdk_candidate_registration": sha256(hbdk_registration),
             "phase4_main_record": sha256(phase4_record),
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
             "phase4_local_db_write_incident": sha256(local_db_write_incident),

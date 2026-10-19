@@ -1649,6 +1649,25 @@
     }
   },
   {
+    "id": "hbdk-official-recruitment",
+    "name": "河北省地球物理勘查有限公司官方招聘公告",
+    "publisher": "河北省地球物理勘查有限公司",
+    "homepage_url": "https://www.hbdkjt.cn/",
+    "source_type": "manual",
+    "category": "地质勘查与地球物理",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "allowed_hosts": ["www.hbdkjt.cn", "hbdkjt.cn"],
+      "allow_shared_source_url": true,
+      "publication_category": "地质勘查与地球物理",
+      "automation_status": "manual_official_recovery_verified",
+      "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/383.html",
+      "official_table_url": "https://docs.qq.com/doc/DTFFuZmpRQ1FxR3JU",
+      "note": "官方公告及官方岗位表已逐行读取；岗位表由官方公告链接至腾讯文档。报名期限为自发布之日起7个工作日，截止日期口径尚未完成日历确认，因此当前仅允许私有候选，不自动发布。"
+    }
+  },
+  {
     "id": "dingxi-party-recruitment",
     "name": "定西党建网人才引进公告与官方附件",
     "publisher": "中共定西市委组织部",

@@ -1,0 +1,36 @@
+{
+  "phase": "phase4",
+  "operation": "register_private_candidates",
+  "recorded_on": "2026-10-19",
+  "source": "hbdk-official-recruitment",
+  "evidence_report": "docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json",
+  "database_before": {
+    "backup_path": "backups/job_hub-pre-phase4-hbdk-candidates-20261019.sqlite3",
+    "sha256": "6e2770bf52f3def56a728d87c20bb0b50dd7c15badf28d0bb4775122770ac688"
+  },
+  "database_after": {
+    "path": "runtime/job_hub.sqlite3",
+    "sha256": "128aa6f3d365f063be467067fbe6fea7ba5b3f56473f4f887a86347e5d4160df",
+    "integrity_check": "ok"
+  },
+  "candidate_leads": {
+    "ids": [7, 8],
+    "count": 2,
+    "verification_status": "official_content_verified",
+    "conversion_status": "official_content_verified_not_student_published",
+    "published_job_ids": [],
+    "student_visible": false
+  },
+  "formal_jobs_created": 0,
+  "deadline_policy": "relative_working_days_unresolved",
+  "idempotence_check": {
+    "rerun_candidate_ids": [7, 8],
+    "duplicate_rows_created": false
+  },
+  "policy_checks": {
+    "third_party_url_as_application": false,
+    "official_notice_and_table_bound": true,
+    "robots_or_login_bypass": false,
+    "server_deployment": false
+  }
+}
