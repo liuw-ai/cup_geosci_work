@@ -1,6 +1,8 @@
 import sqlite3
 from datetime import datetime, timezone
 
+import pytest
+
 from job_hub.db import Database
 
 
@@ -32,6 +34,38 @@ def test_artifact_withdrawal_requires_a_bound_official_evidence_url(tmp_path):
     assert database.withdraw_published_artifact_job(
         1, reason="official_cancelled"
     ) is False
+
+
+def test_official_withdrawal_rejects_unregistered_evidence_host(tmp_path):
+    database = Database(tmp_path / "official-withdrawal-host-contract.sqlite3")
+    database.initialize()
+    database.upsert_source(
+        {
+            "id": "official-source",
+            "name": "官方测试来源",
+            "publisher": "测试单位",
+            "homepage_url": "https://official.example.cn/",
+            "source_type": "manual",
+            "category": "测试",
+            "source_tier": "A",
+            "enabled": True,
+            "config": {"allowed_hosts": ["jobs.official.example.cn"]},
+        }
+    )
+    with pytest.raises(ValueError, match="evidence host is not registered"):
+        database.withdraw_official_source_jobs(
+            "official-source",
+            reason="official_cancelled",
+            evidence_url="https://unrelated.example.net/cancelled.html",
+        )
+    assert (
+        database.withdraw_official_source_jobs(
+            "official-source",
+            reason="official_cancelled",
+            evidence_url="https://jobs.official.example.cn/cancelled.html",
+        )
+        == 0
+    )
 
 
 def test_third_party_table_contract_never_becomes_application_url(tmp_path):

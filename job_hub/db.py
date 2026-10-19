@@ -3299,6 +3299,59 @@ class Database:
             )
             return job_id, outcome, published
 
+    @staticmethod
+    def _official_evidence_url_allowed(
+        connection: sqlite3.Connection,
+        source_id: str,
+        evidence_url: str,
+        *,
+        reference_urls: tuple[str, ...] = (),
+    ) -> bool:
+        """Check that closure evidence belongs to the registered official source.
+
+        A HTTP URL by itself is not official evidence.  The source registry may
+        declare additional official hosts for attachments, detail pages, or
+        shared recruitment portals; candidate URLs are also accepted as
+        references because a closure notice can live beside the original page.
+        """
+
+        if not is_http_url(evidence_url):
+            return False
+        row = connection.execute(
+            "SELECT homepage_url, config_json FROM sources WHERE id = ?",
+            (source_id,),
+        ).fetchone()
+        if row is None:
+            return False
+        hosts: set[str] = set()
+
+        def add_host(value: object) -> None:
+            parsed = urlparse(str(value or "").strip())
+            host = (parsed.hostname or "").lower().rstrip(".")
+            if host:
+                hosts.add(host)
+
+        add_host(row["homepage_url"])
+        try:
+            config = json.loads(str(row["config_json"] or "{}"))
+        except (TypeError, ValueError):
+            config = {}
+        if isinstance(config, dict):
+            for key in ("allowed_hosts", "detail_allowed_hosts", "attachment_allowed_hosts"):
+                values = config.get(key)
+                if isinstance(values, (list, tuple, set, frozenset)):
+                    for value in values:
+                        host = str(value or "").strip().lower().rstrip(".")
+                        if host:
+                            hosts.add(host)
+        for reference in reference_urls:
+            add_host(reference)
+        evidence_host = (urlparse(evidence_url).hostname or "").lower().rstrip(".")
+        return bool(evidence_host) and any(
+            evidence_host == allowed or evidence_host.endswith(f".{allowed}")
+            for allowed in hosts
+        )
+
     def withdraw_published_artifact_job(
         self,
         candidate_id: int,
@@ -3323,7 +3376,8 @@ class Database:
         with self.transaction() as connection:
             row = connection.execute(
                 """
-                SELECT jobs.id, jobs.title, jobs.external_id, jobs.source_url
+                SELECT jobs.id, jobs.title, jobs.external_id, jobs.source_url,
+                       candidates.official_page_url, candidates.source_id
                 FROM artifact_job_candidates AS candidates
                 JOIN jobs ON jobs.id = candidates.published_job_id
                 WHERE candidates.id = ? AND candidates.review_status = 'published'
@@ -3334,6 +3388,17 @@ class Database:
                 (candidate_id,),
             ).fetchone()
             if row is None:
+                return False
+            if not self._official_evidence_url_allowed(
+                connection,
+                str(row["source_id"] or ""),
+                str(evidence_url).strip(),
+                reference_urls=(str(row["official_page_url"] or ""), str(row["source_url"] or "")),
+            ):
+                # A syntactically valid URL is not proof of official closure.
+                # Require the evidence host to match the candidate's official
+                # page, the registered source homepage, or an explicitly
+                # allowed official host.
                 return False
             connection.execute(
                 """UPDATE jobs SET status = 'withdrawn', withdrawal_reason = ?,
@@ -3502,6 +3567,14 @@ class Database:
             raise ValueError("official source withdrawal requires an HTTP evidence URL")
         now = utc_now()
         with self.transaction() as connection:
+            if not self._official_evidence_url_allowed(
+                connection,
+                source_id,
+                str(evidence_url).strip(),
+            ):
+                raise ValueError(
+                    "official source withdrawal evidence host is not registered for the source"
+                )
             rows = connection.execute(
                 """
                 SELECT id, title, external_id, source_url
