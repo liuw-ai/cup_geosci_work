@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19T04:24:02Z",
+  "generated_at": "2026-10-19T04:33:14Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "bc61bed0a11cbd64893429070ee07c55f425f534",
+  "git_sha": "980f17d96ff33fa88461f01c701ce7f836cc1199",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,8 +29,8 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "3a427c8dc08df3bb27d5b074ec7124a8041f19cab3f620478d66e37f67a54c79",
-    "phase4_document_consistency": "3a427c8dc08df3bb27d5b074ec7124a8041f19cab3f620478d66e37f67a54c79",
+    "phase4_current_state_audit": "61ea0691a8f88f3e7e5d171d72aa3e59c00a70f6a3519253a3d2d7e2a27f04bf",
+    "phase4_document_consistency": "61ea0691a8f88f3e7e5d171d72aa3e59c00a70f6a3519253a3d2d7e2a27f04bf",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
     "phase4_third_party_cgs": "25d7bb92e90ec8db8b7ccb347899e0e580ad8b1be5a9d8670dcd206809984913",
@@ -51,12 +51,12 @@
     "phase4_third_party_huatu_hbdk_geophysics": "70b9a84b6b9f7e856a87ed96b7362b79e1a3c5e7ab7e7a6109beabbde6c0c16c",
     "phase4_third_party_hbdk_official_table": "49eac00085d1b2cac96d4046e9ba9cc39913fe643285b110d18ea207def6cfde",
     "phase4_third_party_hbdk_candidate_registration": "da07a5893f136d88905135a88fa6b83606dff3d70731e14e3eb76a01d8e9d7ea",
-    "phase4_main_record": "84140efe87d8c4a78725b795e30debda77cd39fa4ce6b4e6560839441ffa53c3",
-    "phase4_local_validation": "2844fe26adcb313cd5ecb6e1376d8bbf9b01f3a3719693ec89a2924e778043d1",
+    "phase4_main_record": "41c63d91392ef543dfed31be811687347fa0551f1e057f6155f3bcd24344fd43",
+    "phase4_local_validation": "b8a7c5e1877371a1c7875c9ff65e16e75b61e9a6632397df0d49021216b3dcf2",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "42ac32b0b953e34f70793fa78aa8d1c2b2637cd72cdc974da4453b3c2a423807",
-    "phase4_completion_audit": "f2d746c9a98a34bf057c5e86da1af0158a4b61fca615b29d29a1dfb07fe9aee7",
-    "phase4_workspace_layout": "6efbfb5ec7362566043453110b03c7f4e2584f73084d650b55494c615997efe9"
+    "phase4_completion_audit": "d5e07c7f20540d03133ac1992a4c77795b80080de92c536133de2e5c1381ce91",
+    "phase4_workspace_layout": "85f7684f8eb481ca49be59f1730db6c1b2b9edf3579e80178246b585649cd572"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -137,7 +137,7 @@
     "git_sha_at_validation": "ed29671c6ff04d8960a580d1d3fd1f38938c308e",
     "tests": {
       "command": "python -m pytest -q",
-      "passed": 1092,
+      "passed": 1093,
       "skipped": 4,
       "failed": 0,
       "warnings": 0,
@@ -229,7 +229,7 @@
         "report": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
       },
       "robots_gate_targeted_tests": "22 passed (tests/test_phase4_manifest.py, tests/test_phase4_current_audit.py, tests/test_release_manifest.py, tests/test_browser_image_contract.py, tests/test_phase4_completion_audit.py)",
-      "source_disabled_visibility_regression": "included in full 1092-test run; disabled source remains student-visible without withdrawal",
+      "source_disabled_visibility_regression": "included in full 1093-test run; disabled source remains student-visible without withdrawal",
       "robots_or_permission_blocked_followups": 1,
       "huatu_discovery_scan": {
         "discovered_announcements": 65,
