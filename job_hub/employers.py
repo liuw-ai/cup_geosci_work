@@ -128,7 +128,8 @@ def official_job_link(job: dict[str, Any]) -> tuple[str, str]:
 PUBLICATION_STATUS_LABELS = {
     "student_eligible": "目标专业明确匹配",
     "unrestricted_eligible": "不限专业可报",
-    "similar_eligible": "相近专业机会（请以原公告为准）",
+    # Historical compatibility only; new rows use the broad publication layer.
+    "similar_eligible": "专业范围宽泛",
     "pending_evidence": "待补岗位级证据",
     "out_of_scope": "专业不匹配",
     "source_unavailable": "来源暂时不可用（保留历史官方证据）",

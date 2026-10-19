@@ -261,6 +261,15 @@ def derive_publication_layer(
         return "exact_match"
     if status == "unrestricted_eligible":
         return "broad_geoscience_match"
+    # Legacy rows with the old ``similar_major`` marker do not carry enough
+    # structured context to be promoted safely. Keep them private; newly
+    # evaluated rows use ``student_eligible`` plus ``broad_geoscience``.
+    if status == "similar_eligible":
+        return (
+            "broad_geoscience_match"
+            if mode == "broad_geoscience"
+            else "not_public"
+        )
     if status == "pending_evidence" and has_basic_major_evidence:
         return "incomplete_but_basic_match"
     return "not_public"

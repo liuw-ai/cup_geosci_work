@@ -1844,7 +1844,6 @@ class Database:
                 or decision.major_match_mode
                 not in {
                     "exact_four_names",
-                    "similar_major",
                     "broad_geoscience",
                     "public_unrestricted_rule",
                 }

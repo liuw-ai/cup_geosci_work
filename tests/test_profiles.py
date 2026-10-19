@@ -830,8 +830,9 @@ def test_adjacent_geophysical_direction_is_separate_from_exact_match() -> None:
         )
     )
 
-    assert decision.status == "similar_eligible"
-    assert decision.major_match_mode == "similar_major"
+    assert decision.status == "student_eligible"
+    assert decision.label == "专业范围宽泛"
+    assert decision.major_match_mode == "broad_geoscience"
 
 
 def test_government_position_without_row_location_stays_private() -> None:

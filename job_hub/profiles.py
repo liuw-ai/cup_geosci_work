@@ -31,6 +31,9 @@ DEGREE_RANK = {degree: index for index, degree in enumerate(DEGREE_ORDER)}
 # and only gate for what a Geoscience School student can see publicly.
 PUBLICATION_STUDENT_ELIGIBLE = "student_eligible"
 PUBLICATION_UNRESTRICTED_ELIGIBLE = "unrestricted_eligible"
+# Historical database rows may still contain this value. New decisions use
+# the four Phase 3 publication layers instead of creating a fifth
+# student-facing "similar" bucket.
 PUBLICATION_SIMILAR_ELIGIBLE = "similar_eligible"
 PUBLICATION_PENDING_EVIDENCE = "pending_evidence"
 PUBLICATION_OUT_OF_SCOPE = "out_of_scope"
@@ -596,8 +599,10 @@ def evaluate_student_publication(
                 matched_profile_ids=profile_ids,
             )
         return PublicationDecision(
-            status=PUBLICATION_SIMILAR_ELIGIBLE,
-            label="相近专业机会",
+            # Explicit adjacent-geoscience role context belongs in the broad
+            # layer; it must not create a separate publication tier.
+            status=PUBLICATION_STUDENT_ELIGIBLE,
+            label="专业范围宽泛",
             reason=(
                 "官方岗位级专业要求明确出现相近地学方向（"
                 + "、".join(terms)
@@ -605,7 +610,7 @@ def evaluate_student_publication(
             ),
             matched_profile_ids=profile_ids,
             public_scope=public_scope,
-            major_match_mode="similar_major",
+            major_match_mode="broad_geoscience",
         )
 
     if _has_ambiguous_related_major_requirement(qualification_text):
@@ -683,16 +688,16 @@ def classify_major_match(job: dict[str, Any]) -> dict[str, Any]:
         }
 
     related = _related_major_matches(job, qualification)
-    if related and decision.status == PUBLICATION_SIMILAR_ELIGIBLE:
+    if related and _has_geoscience_role_evidence(job):
         profile_ids = tuple(item["profile_id"] for item in related)
         terms = tuple(item["term"] for item in related)
         return {
-            "level": "similar",
-            "label": "\u76f8\u8fd1\u4e13\u4e1a",
+            "level": "broad",
+            "label": "专业范围宽泛",
             "reason": (
                 "\u5c97\u4f4d\u7ea7\u4e13\u4e1a\u8981\u6c42\u51fa\u73b0\u76f8\u8fd1\u5730\u5b66\u65b9\u5411\uff08"
                 + "、".join(terms)
-                + "\uff09\uff0c\u4f46\u672a\u51fa\u73b0\u56db\u4e2a\u6bd5\u4e1a\u4e13\u4e1a\u539f\u540d\uff1b\u4e0d\u80fd\u66ff\u4ee3\u7cbe\u786e\u5339\u914d\u3002"
+                + "\uff09\uff0c\u4e14\u5c97\u4f4d\u4e0a\u4e0b\u6587\u5c5e\u4e8e\u5730\u5b66\u65b9\u5411\uff1b\u672a\u51fa\u73b0\u56db\u4e2a\u6bd5\u4e1a\u4e13\u4e1a\u539f\u540d\uff0c\u4e0d\u80fd\u66ff\u4ee3\u7cbe\u786e\u5339\u914d\u3002"
             ),
             "matched_profile_ids": list(profile_ids),
             "matched_terms": list(terms),

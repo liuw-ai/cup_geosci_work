@@ -178,7 +178,7 @@ def audit_database(
             in PUBLIC_STUDENT_PUBLICATION_STATUSES
             and not _audit_uses_public_broad_rule(job)
             and job.get("publication_basis", {}).get("major_match_mode")
-            not in {"exact_four_names", "similar_major"}
+            not in {"exact_four_names", "broad_geoscience"}
         ):
             issues.append(
                 {
@@ -186,7 +186,7 @@ def audit_database(
                     "job_id": job_id,
                     "source_id": source_id,
                     "message": (
-                        "企业岗位缺少 exact_four_names 或 similar_major 专业门禁标记；"
+                        "企业岗位缺少 exact_four_names 或 broad_geoscience 专业门禁标记；"
                         "必须先重索引并重新核验岗位级专业证据。"
                     ),
                 }
