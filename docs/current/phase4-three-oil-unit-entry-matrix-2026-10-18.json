@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "phase4",
-  "generated_at": "2026-10-19T07:18:05Z",
+  "generated_at": "2026-10-19T11:35:57Z",
   "policy": "A shared group portal proves only the shared portal. It is not copied into a unit-specific URL.",
   "summary": {
     "formal_catalog_units": 64,
@@ -570,7 +570,7 @@
       "observed_job_summary_evidence_file": null,
       "observed_job_evidence_scope": null,
       "evidence_scope": "official_registry_recruitment_channel",
-      "verified_at": "2026-10-18",
+      "verified_at": "2026-10-19",
       "next_evidence_required": null
     },
     {

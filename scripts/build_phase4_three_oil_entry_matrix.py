@@ -19,6 +19,7 @@ REGISTRY = ROOT / "data" / "organization_registry.json"
 ENTRY_EVIDENCE = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"
 CNOOC_UNIT_EVIDENCE = ROOT / "docs" / "current" / "phase4-cnooc-unit-display-evidence-2026-10-19.json"
 NEGATIVE_ENTRY_EVIDENCE = ROOT / "docs" / "current" / "phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json"
+BGP_ENTRY_RECHECK = ROOT / "docs" / "current" / "phase4-cnpc-bgp-entry-recheck-2026-10-19.json"
 SINOPEC_PAGE_ROSTER = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
 OUTPUT = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
 
@@ -133,10 +134,12 @@ def main() -> None:
     evidence = json.loads(ENTRY_EVIDENCE.read_text(encoding="utf-8"))
     cnooc_unit_evidence = json.loads(CNOOC_UNIT_EVIDENCE.read_text(encoding="utf-8"))
     negative_entry_evidence = json.loads(NEGATIVE_ENTRY_EVIDENCE.read_text(encoding="utf-8"))
+    bgp_entry_recheck = json.loads(BGP_ENTRY_RECHECK.read_text(encoding="utf-8"))
     sinopec_roster = json.loads(SINOPEC_PAGE_ROSTER.read_text(encoding="utf-8"))
     negative_entry_by_catalog_id = {
         str(negative_entry_evidence.get("catalog_id") or "").strip(): negative_entry_evidence
     }
+    rechecked_unit_entry_ids = {str(bgp_entry_recheck.get("catalog_id") or "").strip()} - {""}
     cnooc_observations = {
         str(item.get("canonical_name") or "").strip(): item
         for item in cnooc_unit_evidence.get("units", [])
@@ -248,7 +251,7 @@ def main() -> None:
                     ),
                     "verified_at": (
                         "2026-10-19"
-                        if observed or unit_id in negative_entry_by_catalog_id
+                        if observed or unit_id in negative_entry_by_catalog_id or unit_id in rechecked_unit_entry_ids
                         else "2026-10-18"
                     ),
                     "next_evidence_required": (
