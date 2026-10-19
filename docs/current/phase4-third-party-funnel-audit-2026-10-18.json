@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T07:18:06Z",
+  "generated_at": "2026-10-19T09:24:49Z",
   "phase": "phase4",
   "database": {
     "path": "runtime\\job_hub.sqlite3",
@@ -16,6 +16,104 @@
     "published_leads": 7,
     "unresolved_or_pending_leads": 1,
     "failed_leads": 0,
+    "by_discovery_source": {
+      "chinaoilhr-discovery": {
+        "candidate_leads": 0,
+        "official_url_found": 0,
+        "official_content_verified": 0,
+        "published": 0,
+        "unresolved_or_pending": 0,
+        "failed": 0
+      },
+      "cnpcjob-discovery": {
+        "candidate_leads": 0,
+        "official_url_found": 0,
+        "official_content_verified": 0,
+        "published": 0,
+        "unresolved_or_pending": 0,
+        "failed": 0
+      },
+      "fenbi-discovery": {
+        "candidate_leads": 0,
+        "official_url_found": 0,
+        "official_content_verified": 0,
+        "published": 0,
+        "unresolved_or_pending": 0,
+        "failed": 0
+      },
+      "geotalent-discovery": {
+        "candidate_leads": 2,
+        "official_url_found": 1,
+        "official_content_verified": 1,
+        "published": 1,
+        "unresolved_or_pending": 1,
+        "failed": 0
+      },
+      "gongkaoleida-discovery": {
+        "candidate_leads": 0,
+        "official_url_found": 0,
+        "official_content_verified": 0,
+        "published": 0,
+        "unresolved_or_pending": 0,
+        "failed": 0
+      },
+      "gongkaozixun-discovery": {
+        "candidate_leads": 0,
+        "official_url_found": 0,
+        "official_content_verified": 0,
+        "published": 0,
+        "unresolved_or_pending": 0,
+        "failed": 0
+      },
+      "huatu-discovery": {
+        "candidate_leads": 6,
+        "official_url_found": 6,
+        "official_content_verified": 6,
+        "published": 6,
+        "unresolved_or_pending": 0,
+        "failed": 0
+      },
+      "iguopin-discovery": {
+        "candidate_leads": 0,
+        "official_url_found": 0,
+        "official_content_verified": 0,
+        "published": 0,
+        "unresolved_or_pending": 0,
+        "failed": 0
+      },
+      "mininghr-discovery": {
+        "candidate_leads": 0,
+        "official_url_found": 0,
+        "official_content_verified": 0,
+        "published": 0,
+        "unresolved_or_pending": 0,
+        "failed": 0
+      },
+      "offcn-discovery": {
+        "candidate_leads": 0,
+        "official_url_found": 0,
+        "official_content_verified": 0,
+        "published": 0,
+        "unresolved_or_pending": 0,
+        "failed": 0
+      },
+      "wechat-official-account-manual": {
+        "candidate_leads": 0,
+        "official_url_found": 0,
+        "official_content_verified": 0,
+        "published": 0,
+        "unresolved_or_pending": 0,
+        "failed": 0
+      },
+      "yingjiesheng-discovery": {
+        "candidate_leads": 0,
+        "official_url_found": 0,
+        "official_content_verified": 0,
+        "published": 0,
+        "unresolved_or_pending": 0,
+        "failed": 0
+      }
+    },
     "audit_status": "pass"
   },
   "issues": [],

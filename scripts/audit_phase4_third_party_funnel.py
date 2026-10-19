@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import sqlite3
+from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent
 DATABASE = ROOT / "runtime" / "job_hub.sqlite3"
 OUTPUT = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
+DISCOVERY_SOURCES = ROOT / "data" / "discovery_sources.json"
 PUBLICATION_LAYERS = {
     "exact_match",
     "broad_geoscience_match",
@@ -87,6 +89,49 @@ def audit_database(path: Path) -> dict[str, Any]:
 
     published_count = sum(1 for item in rows if item["verification_status"] == "published")
     unresolved_count = sum(1 for item in rows if item["verification_status"] != "published")
+    by_source: dict[str, dict[str, int]] = defaultdict(
+        lambda: {
+            "candidate_leads": 0,
+            "official_url_found": 0,
+            "official_content_verified": 0,
+            "published": 0,
+            "unresolved_or_pending": 0,
+            "failed": 0,
+        }
+    )
+    try:
+        registered = json.loads(DISCOVERY_SOURCES.read_text(encoding="utf-8"))
+        for source in registered.get("sources", []):
+            if isinstance(source, dict) and source.get("id"):
+                # Keep registered sources with no persisted lead visible as a
+                # measured zero rather than silently omitting them.
+                by_source.setdefault(str(source["id"]), {
+                    "candidate_leads": 0,
+                    "official_url_found": 0,
+                    "official_content_verified": 0,
+                    "published": 0,
+                    "unresolved_or_pending": 0,
+                    "failed": 0,
+                })
+    except (OSError, json.JSONDecodeError, AttributeError):
+        # The database audit remains useful when a static source registry is
+        # temporarily unavailable; persisted rows are still attributed below.
+        pass
+    for item in rows:
+        source_id = str(item.get("discovery_source_id") or "unattributed")
+        source = by_source[source_id]
+        source["candidate_leads"] += 1
+        status = str(item.get("verification_status") or "candidate")
+        if status in {"official_url_found", "official_content_verified", "published"}:
+            source["official_url_found"] += 1
+        if status in {"official_content_verified", "published"}:
+            source["official_content_verified"] += 1
+        if status == "published":
+            source["published"] += 1
+        else:
+            source["unresolved_or_pending"] += 1
+        if item.get("audit_status") == "fail":
+            source["failed"] += 1
     return {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "phase": "phase4",
@@ -105,6 +150,10 @@ def audit_database(path: Path) -> dict[str, Any]:
             "published_leads": published_count,
             "unresolved_or_pending_leads": unresolved_count,
             "failed_leads": len(issues),
+            "by_discovery_source": {
+                source_id: dict(values)
+                for source_id, values in sorted(by_source.items())
+            },
             "audit_status": "pass" if integrity == "ok" and not issues else "fail",
         },
         "issues": issues,

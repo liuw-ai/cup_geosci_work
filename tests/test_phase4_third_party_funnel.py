@@ -11,3 +11,7 @@ def test_current_third_party_funnel_has_no_published_evidence_gaps() -> None:
     assert report["summary"]["published_leads"] == 7
     assert report["summary"]["failed_leads"] == 0
     assert report["summary"]["audit_status"] == "pass"
+    assert report["summary"]["by_discovery_source"]["huatu-discovery"]["published"] == 6
+    assert report["summary"]["by_discovery_source"]["geotalent-discovery"]["published"] == 1
+    assert report["summary"]["by_discovery_source"]["offcn-discovery"]["candidate_leads"] == 0
+    assert report["summary"]["by_discovery_source"]["fenbi-discovery"]["candidate_leads"] == 0
