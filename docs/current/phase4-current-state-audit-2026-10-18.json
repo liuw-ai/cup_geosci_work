@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-19T07:57:01Z",
+  "generated_at": "2026-10-19T08:47:52Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "d278b8d513ee2dd6577913ef9e2577a44fcc3545",
+  "git_sha": "b36cbc384a610720533ee9baef92001f4b1c70b3",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -321,8 +321,8 @@
     },
     {
       "path": "job_hub/artifact_publication.py",
-      "line_count": 227,
-      "sha256": "e01cdd471e586c3487e5c7fa9163d18a25d340ab6585e9316f96fa4f7ba668e1"
+      "line_count": 240,
+      "sha256": "c31d8ab92a93a04539b8e708f0488f77c1e4d7951f46bf1953bbce755bb705f2"
     },
     {
       "path": "job_hub/attachments.py",
@@ -446,8 +446,8 @@
     },
     {
       "path": "job_hub/db.py",
-      "line_count": 5610,
-      "sha256": "2de0e2496b587cc0acb89ebb8cdc9d40a6f5ab0fa118a250a6ec19b671ceed62"
+      "line_count": 5736,
+      "sha256": "5356fa70d78d2e1cd11cab18603fdb53dcf2ef5a8202f9473e6c0f1dd4d7921f"
     },
     {
       "path": "job_hub/discovery.py",
@@ -1121,8 +1121,8 @@
     },
     {
       "path": "tests/test_government_artifact_auto_publication.py",
-      "line_count": 335,
-      "sha256": "dd5b2d4744ec5382d4b324224b25cf6edca34e2e19e6c354eb0da9f97bf178dd"
+      "line_count": 363,
+      "sha256": "320201ecddfa676661151c3377c93ecab4b28cfefc8b4684e03948efff1699e9"
     },
     {
       "path": "tests/test_government_artifact_verification.py",
