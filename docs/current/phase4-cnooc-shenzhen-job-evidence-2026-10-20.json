@@ -1,0 +1,60 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-20T07:15:00+08:00",
+  "source_id": "cnooc-career-browser",
+  "portal_url": "https://cnooc.zhaopin.com/job/index.html",
+  "portal_type": "official_group_recruitment_portal",
+  "selected_unit": {
+    "catalog_id": "cnooc-shenzhen",
+    "canonical_name": "中海石油（中国）有限公司深圳分公司",
+    "display_name_observed": true,
+    "selection_method": "official_portal_unit_tab"
+  },
+  "official_job_cards": {
+    "job_card_count": 20,
+    "application_url_count": 20,
+    "application_host": "xiaoyuan.zhaopin.com",
+    "all_cards_observed_in_dom": true
+  },
+  "geoscience_job_evidence": [
+    {
+      "title": "勘探地质助理工程师",
+      "location": "深圳",
+      "application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972459115?srccode=448002",
+      "degree_requirement": "硕士研究生及以上",
+      "major_text": "地质学类，地质工程，地质资源与地质工程，资源与环境，矿产普查与勘探，地球化学，地球物理学，古生物学与地层学，构造地质学，地球探测与信息技术等相关专业",
+      "duty_summary": "盆地/凹陷含油气系统综合分析、大地构造与成盆动力学、断裂系统和圈闭落实，以及沉积储层勘探开发技术支持。"
+    },
+    {
+      "title": "地球物理助理工程师",
+      "location": "深圳",
+      "application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972459215?srccode=448002",
+      "degree_requirement": "硕士研究生及以上",
+      "major_text": "地质资源与地质工程，地球物理学，地质工程，固体地球物理学，地球探测与信息技术，海洋地质，地质学，资源与环境等相关专业",
+      "duty_summary": "地震资料解释、目标钻前评价、随钻跟踪、钻后分析、地球物理解释和地震采集处理方案相关工作。"
+    },
+    {
+      "title": "开发地质助理工程师",
+      "location": "深圳",
+      "application_url": "https://xiaoyuan.zhaopin.com/job/CC258591510J40972459315?srccode=448002",
+      "degree_requirement": "硕士研究生及以上",
+      "major_text": "地质工程，地质学，地质资源与地质工程，资源与环境，矿产普查与勘探，构造地质学，海洋地质学，古生物学与地层学等相关专业",
+      "duty_summary": "油气田开发方案、综合调整方案、调整井地质研究和开发地质技术攻关。"
+    }
+  ],
+  "evidence_boundary": {
+    "unit_display_evidence": true,
+    "official_job_detail_evidence": true,
+    "official_application_links_observed": true,
+    "independent_unit_recruitment_portal_proven": false,
+    "student_jobs_created": 0,
+    "catalog_changed": false,
+    "interpretation": "官方集团平台按单位展示岗位并提供智联投递链接；该证据证明单位级岗位和投递链接，不证明深圳分公司拥有独立招聘网站。"
+  },
+  "policy_checks": {
+    "third_party_link_used_as_application": false,
+    "shared_portal_copied_as_independent_portal": false,
+    "robots_or_captcha_bypass": false,
+    "server_deployment": false
+  }
+}

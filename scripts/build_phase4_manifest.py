@@ -237,6 +237,7 @@ def main() -> None:
     huatu_cnpc_chuanqing = ROOT / "docs" / "current" / "phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json"
     cnpc_official_recheck = ROOT / "docs" / "current" / "phase4-cnpc-official-recheck-2026-10-20.json"
     sxdkj_official_recheck = ROOT / "docs" / "current" / "phase4-third-party-sxdkj-official-recheck-2026-10-20.json"
+    cnooc_shenzhen_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-shenzhen-job-evidence-2026-10-20.json"
     local_db_write_incident = ROOT / "docs" / "current" / "phase4-local-db-write-incident-2026-10-19.json"
     three_oil_homepage_probe = ROOT / "docs" / "current" / "phase4-three-oil-homepage-probe-2026-10-19.json"
     three_oil_observed_roster = ROOT / "docs" / "current" / "phase4-three-oil-observed-roster-2026-10-20.json"
@@ -340,6 +341,7 @@ def main() -> None:
             "phase4_third_party_huatu_cnpc_chuanqing": sha256(huatu_cnpc_chuanqing),
             "phase4_cnpc_official_recheck": sha256(cnpc_official_recheck),
             "phase4_third_party_sxdkj_official_recheck": sha256(sxdkj_official_recheck),
+            "phase4_cnooc_shenzhen_job_evidence": sha256(cnooc_shenzhen_job_evidence),
             "phase4_main_record": sha256(phase4_record),
             "phase4_local_validation": sha256(LOCAL_VALIDATION),
             "phase4_local_db_write_incident": sha256(local_db_write_incident),
