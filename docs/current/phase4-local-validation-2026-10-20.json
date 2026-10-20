@@ -1,18 +1,18 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-20T14:16:08+08:00",
+  "validated_at": "2026-10-20T17:56:00+08:00",
   "environment": "local",
   "server_deployment": false,
-  "git_sha": "3cb0ba9378f399a99b32b66fbb4f4e557b949980",
+  "git_sha": "729874c2bc28ad8c9f0ce120944493d548bc3ccc",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1107,
+    "passed": 1108,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
-    "database_path": "runtime/job_hub.sqlite3",
-    "database_sha256_before": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
-    "database_sha256_after": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+    "database_path": "pytest temporary APP_DATABASE_PATH per test",
+    "formal_database_sha256_before": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
+    "formal_database_sha256_after": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
     "formal_database_stable_during_tests": true
   },
   "local_web_read_only": {

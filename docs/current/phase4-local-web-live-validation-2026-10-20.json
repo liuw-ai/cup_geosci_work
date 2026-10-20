@@ -1,0 +1,50 @@
+{
+  "phase": "phase4",
+  "validated_at": "2026-10-20T17:55:15+08:00",
+  "environment": "local",
+  "base_url": "http://127.0.0.1:8098",
+  "server_deployment": false,
+  "database_mode": "temporary_copy_of_runtime_database",
+  "formal_database_sha256": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
+  "temporary_database": {
+    "path": "runtime/phase4-web-validation-20261020/job_hub.sqlite3",
+    "sha256_after_startup_and_checks": "28b6e5f11b434f6bc28d70a4e26492414b56ede297c060700a337947234516da"
+  },
+  "http_checks": {
+    "/healthz": 200,
+    "/": 200,
+    "/api/jobs?layer=exact_match": 200,
+    "/api/jobs?layer=broad_geoscience_match": 200,
+    "/api/jobs?layer=incomplete_but_basic_match": 200,
+    "/api/jobs?layer=source_unavailable": 200,
+    "/api/coverage": 200,
+    "/jobs/5433": 200
+  },
+  "layer_totals": {
+    "exact_match": 140,
+    "broad_geoscience_match": 7,
+    "incomplete_but_basic_match": 442,
+    "source_unavailable": 111,
+    "student_visible_total": 700
+  },
+  "performance_observation": {
+    "coverage_response_seconds_approx": 60,
+    "status": "slow_but_successful",
+    "release_blocking": false,
+    "note": "覆盖统计是重型聚合请求；岗位列表、四个层级接口和岗位详情均成功返回。"
+  },
+  "third_party_job_detail": {
+    "job_id": 5433,
+    "publication_layer": "broad_geoscience_match",
+    "layer_label_present": true,
+    "no_deadline_label_present": true,
+    "official_table_link_label_present": true,
+    "official_application_url": null,
+    "third_party_discovery_domain_exposed": false,
+    "official_table_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx"
+  },
+  "release_boundary": {
+    "automation_status": "paused",
+    "reason": "仅本地临时副本验收；未部署服务器。"
+  }
+}
