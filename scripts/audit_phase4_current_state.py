@@ -299,6 +299,8 @@ def main() -> None:
     huatu_hbdk_geophysics = ROOT / "docs" / "current" / "phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json"
     hbdk_official_table = ROOT / "docs" / "current" / "phase4-third-party-hbdk-official-table-2026-10-19.json"
     hbdk_registration = ROOT / "docs" / "current" / "phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
+    hbdk_water_evidence = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-official-evidence-2026-10-20.json"
+    hbdk_water_trial = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-trial-2026-10-21.json"
     huatu_cnpc_chuanqing = ROOT / "docs" / "current" / "phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json"
     nhri_browser_recheck = ROOT / "docs" / "current" / "phase4-third-party-nhri-browser-recheck-2026-10-20.json"
     cnpc_bgp_entry_recheck = ROOT / "docs" / "current" / "phase4-cnpc-bgp-entry-recheck-2026-10-20.json"
@@ -489,6 +491,14 @@ def main() -> None:
                 "path": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json",
                 "sha256": sha256(hbdk_registration),
             },
+            "phase4_third_party_hbdk_water_official_evidence": {
+                "path": "docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
+                "sha256": sha256(hbdk_water_evidence),
+            },
+            "phase4_third_party_hbdk_water_trial": {
+                "path": "docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
+                "sha256": sha256(hbdk_water_trial),
+            },
             "phase4_third_party_huatu_cnpc_chuanqing": {
                 "path": "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
                 "sha256": sha256(huatu_cnpc_chuanqing),
@@ -569,6 +579,7 @@ def main() -> None:
                 "A second Huatu announcement was recovered to the Nanjing Planning and Natural Resources Bureau official notice, table URL, and application URL; its deadline had passed and row-level table evidence was unavailable, so no candidate or formal job was created.",
                 "The Huatu Chuanqing high-level recruitment page yielded 12 row-level private candidates; it supplied a cnpc.com.cn application mailbox but no verifiable official notice, table, or application URL, so all 12 remain private pending official recovery.",
                 "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
+                "The HBDK water-team official notice 382.html was captured with both linked Tencent documents; two civil-construction rows were rejected by the major gate and the rock-soil row was published only in an isolated trial database, not the formal runtime database.",
                 "Historical snapshots remain archived and are not overwritten by current facts.",
             ],
         },
