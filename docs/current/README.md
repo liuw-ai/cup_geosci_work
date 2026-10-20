@@ -15,6 +15,7 @@ Phase 4 的逐项完成状态见 [phase4-completion-audit-2026-10-19.json](phase
 三桶油 64 个正式目录单位的逐项入口状态见 [phase4-three-oil-unit-entry-matrix-2026-10-18.json](phase4-three-oil-unit-entry-matrix-2026-10-18.json)。该矩阵明确区分集团共享入口、官方展示名单和单位独立入口，不把共享 URL 复制为下属单位 URL。组织登记账本另有 239 条官方展示名单候选，仍需法定名称和外部身份证据核验，不能当作已完成的正式目录。
 
 2026-10-20 复核补充了中国海油招聘平台的岗位级官方证据，见 [phase4-cnooc-geoscience-job-evidence-2026-10-20.json](phase4-cnooc-geoscience-job-evidence-2026-10-20.json)。该证据确认天津分公司页面展示 14 个岗位，其中 3 个地学岗位有官方智联投递链接；它只证明岗位级官方投递证据，不证明所有下属单位都有独立招聘入口，也未自动新增岗位记录。
+2026-10-20 对中国石油集团招聘平台、集团招聘入口和川庆钻探官网做了额外只读复核：平台和集团入口返回 HTTP 412，川庆钻探入口 TLS 握手失败；没有下载岗位、创建候选或改变目录结论。完整请求状态和边界见 `phase4-cnpc-official-recheck-2026-10-20.json`。
 
 每次本地迭代后，先执行只读 Manifest 校验，再执行测试：
 
