@@ -1,0 +1,51 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-20T07:05:00+08:00",
+  "discovery_source_id": "huatu-discovery",
+  "trust_grade": "B",
+  "discovery_page_url": "http://sx.huatu.com/shehui/kaoshi/gg/2026/1016/1281176.html",
+  "official_source": {
+    "organization": "山西地质集团有限公司",
+    "notice_url": "http://www.sxdkj.com/xwzx/ggtz/art/2026/art_0eb48434b15443fab6aad025c09d60a8.html",
+    "notice_title": "山西地质集团2026年度秋季校园招聘公告",
+    "notice_published_date": "2026-10-15",
+    "deadline_text": "线上自公告发布之日起至2026年10月29日24:00止；线下按照双选会时间报名。",
+    "official_table_urls": [
+      {
+        "label": "附件1：山西地质集团有限公司2026年秋季校园招聘需求表汇总表.xlsx",
+        "url": "http://www.sxdkj.com/api-gateway/jpaas-web-server/front/document/download?fileUrl=YW5UzzlvCwcM%2FNHHX%2FtT6NRwGCIRjP8Lpse%2BgyUPhqnslLpDNyzWDooE7sgGrk%2FPfCT5aB%2BjMB0LS3EHwFzQz9m2z%2FtMtj7f4v1kwt%2BknXodlaEYnjSXTn9%2F3xSewebiqHz1HGDxAQMXKdXNZbFX7KjD63ftwb6DhaDz7g3zTTs%3D&fileName=%E9%99%84%E4%BB%B61%EF%BC%9A%E5%B1%B1%E8%A5%BF%E5%9C%B0%E8%B4%A8%E9%9B%86%E5%9B%A2%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B82026%E5%B9%B4%E7%A7%8B%E5%AD%A3%E6%A0%A1%E5%9B%AD%E6%8B%9B%E8%81%98%E9%9C%80%E6%B1%82%E8%A1%A8%E6%B1%87%E6%80%BB%E8%A1%A8.xlsx"
+      },
+      {
+        "label": "附件2：山西地质集团2027年需求汇总表（用于2026年度秋季校园招聘）.xlsx",
+        "url": "http://www.sxdkj.com/api-gateway/jpaas-web-server/front/document/download?fileUrl=YW5UzzlvCwcM%2FNHHX%2FtT6NRwGCIRjP8Lpse%2BgyUPhqlzqdEQ1sc%2FDU7fwf5ZY74yS%2FEW2ttzOjw8G6Nfj45VAhmSJuXNPxENzoxb24vmKI8dlaEYnjSXTn9%2F3xSewebiqHz1HGDxAQMXKdXNZbFX7KjD63ftwb6DhaDz7g3zTTs%3D&fileName=%E9%99%84%E4%BB%B62%EF%BC%9A%E5%B1%B1%E8%A5%BF%E5%9C%B0%E8%B4%A8%E9%9B%86%E5%9B%A22027%E5%B9%B4%E9%9C%80%E6%B1%82%E6%B1%87%E6%80%BB%E8%A1%A8%EF%BC%88%E7%94%A8%E4%BA%8E2026%E5%B9%B4%E5%BA%A6%E7%A7%8B%E5%AD%A3%E6%A0%A1%E5%9B%AD%E6%8B%9B%E8%81%98%EF%BC%89.xlsx"
+      }
+    ],
+    "application_method": "官方公告要求按岗位、姓名和专业整理材料后发送至对应下属单位邮箱，或参加线下双选会。",
+    "contact_unit_count_observed": 26,
+    "contact_unit_evidence": "official_notice_contact_section"
+  },
+  "access_recheck": {
+    "notice_status": "readable",
+    "notice_content_type": "text/html",
+    "robots_url": "https://www.sxdkj.com/robots.txt",
+    "robots_status": "source_unavailable",
+    "robots_error_class": "ERR_CERT_AUTHORITY_INVALID",
+    "attachment_downloaded": false,
+    "attachment_sha256": null,
+    "row_level_evidence": false,
+    "reason": "官方公告可读，但 robots/TLS 无法核验；未下载或绕过附件访问限制。"
+  },
+  "publication_decision": {
+    "candidate_leads_created": 0,
+    "formal_jobs_created": 0,
+    "student_visible": false,
+    "reason": "公告只确认招聘范围和下属单位联系方式，岗位名称、专业、学历和岗位编号仍位于未取得的官方附件。"
+  },
+  "policy_checks": {
+    "third_party_link_as_application": false,
+    "official_notice_verified": true,
+    "official_table_row_evidence": false,
+    "robots_bypass": false,
+    "server_deployment": false
+  }
+}
