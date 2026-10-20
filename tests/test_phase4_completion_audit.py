@@ -25,7 +25,14 @@ def test_phase4_completion_audit_is_requirement_scoped_and_not_complete() -> Non
     regression = next(
         item for item in report["requirements"] if item["id"] == "isolated_local_regression"
     )
+    assert regression["facts"]["passed"] == 1116
+    assert regression["facts"]["skipped"] == 4
+    assert regression["facts"]["failed"] == 0
     assert regression["facts"]["formal_database_stable"] is True
+    site = next(item for item in report["requirements"] if item["id"] == "student_site_acceptance")
+    assert site["facts"]["healthz"] == 200
+    assert site["facts"]["home"] == 200
+    assert all(value == 200 for value in site["facts"]["layer_api_statuses"].values())
     live_cnooc = three_oil["facts"]["latest_cnooc_portal_live_recheck"]
     assert live_cnooc["observed_unit_count"] == 16
     assert live_cnooc["visible_job_card_count"] == 14

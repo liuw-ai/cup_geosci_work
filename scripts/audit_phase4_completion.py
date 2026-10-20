@@ -352,9 +352,13 @@ def build_report() -> dict[str, Any]:
             "status": "pass",
             "evidence": ["docs/current/phase4-local-web-live-validation-2026-10-21.json"],
             "facts": {
-                "healthz": web.get("healthz_status"),
-                "home": web.get("home_status"),
-                "layer_api_statuses": web.get("layer_api_statuses", {}),
+                "healthz": web.get("http_checks", {}).get("/healthz"),
+                "home": web.get("http_checks", {}).get("/"),
+                "layer_api_statuses": {
+                    key: value
+                    for key, value in web.get("http_checks", {}).items()
+                    if key.startswith("/api/jobs?layer=")
+                },
                 "database_mode": web.get("database_mode"),
             },
         },
