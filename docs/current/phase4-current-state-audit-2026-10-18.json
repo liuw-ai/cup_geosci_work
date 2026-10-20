@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T15:47:13Z",
+  "generated_at": "2026-10-20T16:01:00Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "94682906a7d067fc1ff17a50200d72d29db576b7",
-  "git_status_porcelain": "M docs/current/phase4-organization-reconciliation-2026-10-17.json",
+  "git_sha": "643fb6b6394ea180b884270259fc9ab5000f7ae3",
+  "git_status_porcelain": "M scripts/audit_phase4_workspace_layout.py\n M tests/test_phase4_workspace_layout.py",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
@@ -25,15 +25,15 @@
     "phase3_withdrawal_audit_count": 3947,
     "candidate_lead_count": 8,
     "formal_third_party_job_count": 7,
-    "student_read_as_of_date": "2026-10-20",
+    "student_read_as_of_date": "2026-10-21",
     "student_visible_layer_counts": {
       "broad_geoscience_match": 7,
       "exact_match": 140,
       "incomplete_but_basic_match": 442,
       "not_public": 0,
-      "source_unavailable": 111
+      "source_unavailable": 87
     },
-    "student_visible_total": 700
+    "student_visible_total": 676
   },
   "sources_and_organizations": {
     "registered_source_count": 12,
@@ -179,7 +179,7 @@
   "evidence_documents": {
     "phase4_three_oil_catalog_audit": {
       "path": "docs/current/phase4-three-oil-catalog-audit-2026-10-17.json",
-      "sha256": "90772c334fcb975f4f6d42a014b38fcb8d49eab19e0d6b66aab1db63a151f0f7"
+      "sha256": "fb3ffacef6e892655d1cb19a539b3c244ea2d2124b90a3df7bee05cd0304173c"
     },
     "phase4_third_party_trial": {
       "path": "docs/current/phase4-third-party-trial-2026-10-18.json",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "bbe161adf14852a603c06496785d095dfaf1ba0c00673d26161f87175b819d25"
+      "sha256": "09a84c65c483db59968180b7460b6151d2eb705b728ce65f61de915bc689f01a"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -860,8 +860,8 @@
     },
     {
       "path": "scripts/audit_phase4_workspace_layout.py",
-      "line_count": 123,
-      "sha256": "625788c1b086ce66e23e9b6db3d7dd15de374f741c87e019276ee456e2f6c6b9"
+      "line_count": 170,
+      "sha256": "6addc12c53d07f8849faba041a3252ff7b883aed6e0b47a2447ee6a82af66fa4"
     },
     {
       "path": "scripts/backfill_phase4_third_party_provenance.py",
@@ -1445,8 +1445,8 @@
     },
     {
       "path": "tests/test_phase4_workspace_layout.py",
-      "line_count": 62,
-      "sha256": "baf3c2fc272de75cd82223d96986752fa1cc12ff1b4c71aa648c52ab071a5a81"
+      "line_count": 81,
+      "sha256": "05c556223358cc4f24997d170d3a0ca5a7ed586bf35157f1817dcb050b0e4200"
     },
     {
       "path": "tests/test_pipeline.py",

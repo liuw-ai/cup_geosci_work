@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T15:47:17Z",
+  "generated_at": "2026-10-20T16:01:04Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -14,7 +14,7 @@
   },
   "student_target": {
     "target": 500,
-    "actual": 700,
+    "actual": 676,
     "status": "met",
     "basis": "data/effective_job_target_plan.json",
     "note": "This is the overall student-visible target; it is separate from third-party expansion readiness."

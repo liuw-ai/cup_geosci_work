@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-20T15:47:15Z",
+  "generated_at": "2026-10-20T16:01:02Z",
   "scope": "local_read_only_workspace_layout",
   "production_entrypoint": "deploy/compose.yaml",
   "canonical_paths": {
@@ -108,11 +108,391 @@
     }
   ],
   "current_docs_database_files": [],
+  "database_inventory": [
+    {
+      "path": "data/job_hub.sqlite3",
+      "bytes": 0,
+      "last_write_time": "2026-10-07T19:10:24Z",
+      "classification": "legacy_data_database_artifact",
+      "production_input": false
+    },
+    {
+      "path": "data/jobs.sqlite3",
+      "bytes": 0,
+      "last_write_time": "2026-10-08T12:54:02Z",
+      "classification": "legacy_data_database_artifact",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20260929T053600Z.sqlite3",
+      "bytes": 9576448,
+      "last_write_time": "2026-09-29T05:36:01Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T002806Z.sqlite3",
+      "bytes": 14749696,
+      "last_write_time": "2026-10-06T00:28:06Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T003043Z.sqlite3",
+      "bytes": 17686528,
+      "last_write_time": "2026-10-06T00:30:44Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T003446Z.sqlite3",
+      "bytes": 17707008,
+      "last_write_time": "2026-10-06T00:34:46Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T010548Z.sqlite3",
+      "bytes": 17719296,
+      "last_write_time": "2026-10-06T01:05:48Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T012410Z.sqlite3",
+      "bytes": 17887232,
+      "last_write_time": "2026-10-06T01:24:11Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T014324Z.sqlite3",
+      "bytes": 17887232,
+      "last_write_time": "2026-10-06T01:43:24Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T015627Z.sqlite3",
+      "bytes": 18092032,
+      "last_write_time": "2026-10-06T01:56:27Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T184508Z.sqlite3",
+      "bytes": 26021888,
+      "last_write_time": "2026-10-06T18:45:08Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T185434Z.sqlite3",
+      "bytes": 26578944,
+      "last_write_time": "2026-10-06T18:54:34Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T195329Z.sqlite3",
+      "bytes": 26611712,
+      "last_write_time": "2026-10-06T19:53:30Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T202422Z.sqlite3",
+      "bytes": 30220288,
+      "last_write_time": "2026-10-06T20:24:22Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T202826Z.sqlite3",
+      "bytes": 30220288,
+      "last_write_time": "2026-10-06T20:28:26Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T203117Z.sqlite3",
+      "bytes": 30220288,
+      "last_write_time": "2026-10-06T20:31:17Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T203549Z.sqlite3",
+      "bytes": 30220288,
+      "last_write_time": "2026-10-06T20:35:49Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T204739Z.sqlite3",
+      "bytes": 30220288,
+      "last_write_time": "2026-10-06T20:47:40Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T205428Z.sqlite3",
+      "bytes": 30220288,
+      "last_write_time": "2026-10-06T20:54:29Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T205942Z.sqlite3",
+      "bytes": 30220288,
+      "last_write_time": "2026-10-06T20:59:42Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T210247Z.sqlite3",
+      "bytes": 30224384,
+      "last_write_time": "2026-10-06T21:02:47Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T210701Z.sqlite3",
+      "bytes": 30248960,
+      "last_write_time": "2026-10-06T21:07:01Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T211933Z.sqlite3",
+      "bytes": 30248960,
+      "last_write_time": "2026-10-06T21:19:33Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261006T212944Z.sqlite3",
+      "bytes": 30248960,
+      "last_write_time": "2026-10-06T21:29:44Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T085404Z.sqlite3",
+      "bytes": 32047104,
+      "last_write_time": "2026-10-07T08:54:04Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T101936Z.sqlite3",
+      "bytes": 32067584,
+      "last_write_time": "2026-10-07T10:19:36Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T121755Z.sqlite3",
+      "bytes": 32088064,
+      "last_write_time": "2026-10-07T12:17:56Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T123457Z.sqlite3",
+      "bytes": 32088064,
+      "last_write_time": "2026-10-07T12:35:04Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T131509Z.sqlite3",
+      "bytes": 32088064,
+      "last_write_time": "2026-10-07T13:15:10Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T142547Z.sqlite3",
+      "bytes": 32088064,
+      "last_write_time": "2026-10-07T14:25:47Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T145505Z.sqlite3",
+      "bytes": 32088064,
+      "last_write_time": "2026-10-07T14:55:06Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T150156Z.sqlite3",
+      "bytes": 32116736,
+      "last_write_time": "2026-10-07T15:01:56Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T151024Z.sqlite3",
+      "bytes": 32116736,
+      "last_write_time": "2026-10-07T15:10:25Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T151851Z.sqlite3",
+      "bytes": 32120832,
+      "last_write_time": "2026-10-07T15:18:58Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T153519Z.sqlite3",
+      "bytes": 32129024,
+      "last_write_time": "2026-10-07T15:35:26Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261007T171800Z.sqlite3",
+      "bytes": 32047104,
+      "last_write_time": "2026-10-07T09:15:03Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261009T184220Z.sqlite3",
+      "bytes": 39100416,
+      "last_write_time": "2026-10-09T18:42:20Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261011T193914Z.sqlite3",
+      "bytes": 45912064,
+      "last_write_time": "2026-10-11T19:39:22Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-20261012T005327Z.sqlite3",
+      "bytes": 45912064,
+      "last_write_time": "2026-10-12T00:53:28Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-before-sinopec-activation-20261005-031222.sqlite3",
+      "bytes": 12861440,
+      "last_write_time": "2026-10-04T18:52:52Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/backups/job_hub-phase274-20261007-214051.sqlite3",
+      "bytes": 32088064,
+      "last_write_time": "2026-10-07T13:31:56Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
+      "path": "runtime/job_hub.sqlite3",
+      "bytes": 50130944,
+      "last_write_time": "2026-10-20T08:57:57Z",
+      "classification": "canonical_runtime_database",
+      "production_input": true
+    },
+    {
+      "path": "runtime/local-validation-20261020/job_hub.sqlite3",
+      "bytes": 50135040,
+      "last_write_time": "2026-10-20T12:35:28Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-hbdk-publish-test.sqlite3",
+      "bytes": 50130944,
+      "last_write_time": "2026-10-19T02:04:04Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-hbdk-test.sqlite3",
+      "bytes": 50114560,
+      "last_write_time": "2026-10-19T01:33:20Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-huatu-cnpc-isolated-v2.sqlite3",
+      "bytes": 50155520,
+      "last_write_time": "2026-10-19T18:49:05Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-huatu-cnpc-isolated.sqlite3",
+      "bytes": 50130944,
+      "last_write_time": "2026-10-19T18:44:20Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-local-validation-20261020.sqlite3",
+      "bytes": 50130944,
+      "last_write_time": "2026-10-20T09:31:54Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-web-validation/job_hub.sqlite3",
+      "bytes": 50110464,
+      "last_write_time": "2026-10-18T17:24:49Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-web-validation-20261019/job_hub.sqlite3",
+      "bytes": 50110464,
+      "last_write_time": "2026-10-18T19:55:41Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-web-validation-20261020/job_hub.sqlite3",
+      "bytes": 50135040,
+      "last_write_time": "2026-10-20T09:52:18Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-web-validation-current-20261019/job_hub.sqlite3",
+      "bytes": 50130944,
+      "last_write_time": "2026-10-19T02:23:33Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/third-party-validation/job_hub-huatu-trial.sqlite3",
+      "bytes": 50008064,
+      "last_write_time": "2026-10-18T06:55:18Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    }
+  ],
+  "legacy_data_database_artifacts": [
+    "data/job_hub.sqlite3",
+    "data/jobs.sqlite3"
+  ],
   "history_is_present": true,
   "policy": {
     "no_move_or_delete": true,
     "root_compatibility_files_are_not_production_inputs": true,
     "runtime_and_backups_are_not_source_code": true,
+    "only_runtime_job_hub_is_canonical_runtime_database": true,
+    "runtime_test_copies_must_not_be_used_as_production_inputs": true,
+    "legacy_data_database_artifacts_require_operator_cleanup_decision": true,
     "history_is_evidence_only": true
   },
   "status": "pass"

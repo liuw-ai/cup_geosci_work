@@ -50,6 +50,25 @@ def test_phase4_layout_marks_docs_database_as_review_required(tmp_path: Path) ->
     ]
 
 
+def test_phase4_layout_classifies_runtime_and_legacy_database_artifacts(tmp_path: Path) -> None:
+    (tmp_path / "runtime").mkdir(parents=True)
+    (tmp_path / "runtime" / "backups").mkdir()
+    (tmp_path / "data").mkdir()
+    (tmp_path / "runtime" / "job_hub.sqlite3").write_bytes(b"canonical")
+    (tmp_path / "runtime" / "phase4-test.sqlite3").write_bytes(b"test")
+    (tmp_path / "runtime" / "backups" / "old.sqlite3").write_bytes(b"backup")
+    (tmp_path / "data" / "jobs.sqlite3").write_bytes(b"legacy")
+
+    report = build_report(tmp_path)
+    by_path = {item["path"]: item for item in report["database_inventory"]}
+
+    assert by_path["runtime/job_hub.sqlite3"]["classification"] == "canonical_runtime_database"
+    assert by_path["runtime/job_hub.sqlite3"]["production_input"] is True
+    assert by_path["runtime/phase4-test.sqlite3"]["classification"] == "isolated_test_or_validation_copy"
+    assert by_path["runtime/backups/old.sqlite3"]["classification"] == "runtime_backup"
+    assert report["legacy_data_database_artifacts"] == ["data/jobs.sqlite3"]
+
+
 def test_browser_dockerfile_uses_versioned_public_ca_certificate() -> None:
     root = Path(__file__).resolve().parents[1]
     dockerfile = (root / "deploy" / "docker" / "Dockerfile.browser").read_text(
