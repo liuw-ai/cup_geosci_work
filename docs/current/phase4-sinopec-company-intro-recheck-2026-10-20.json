@@ -1,0 +1,45 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-20T09:30:00+08:00",
+  "verification_mode": "read_only_browser_dom",
+  "source": {
+    "url": "https://job.sinopec.com/#/school/companyIntroduction",
+    "portal_name": "中国石化招聘网站",
+    "page_title": "企业介绍",
+    "evidence_scope": "official_group_company_introduction"
+  },
+  "sections_observed": [
+    "油田企业",
+    "炼化企业",
+    "成品油销售企业",
+    "设计施工单位",
+    "科研单位",
+    "专业公司",
+    "中航油",
+    "优培计划"
+  ],
+  "observations": {
+    "official_display_name_count_including_non_unit_program": 132,
+    "non_unit_programs_excluded": ["优培计划"],
+    "official_unit_display_name_count": 131,
+    "full_name_examples": [
+      "重庆川维化工有限公司",
+      "中科（广东）炼化有限公司",
+      "中国航空油料有限责任公司",
+      "中国航油集团石油股份有限公司"
+    ],
+    "source_is_not_unit_specific_recruitment_entry": true
+  },
+  "promotion_policy": {
+    "catalog_changed": false,
+    "registry_changed": false,
+    "reason": "官方企业介绍页证明集团展示关系和展示名称，不单独证明法定登记名称或单位独立招聘入口；简称必须继续以单位官方公告或工商信息补证。",
+    "next_required_evidence": [
+      "单位官网或官方公告",
+      "工商登记或其他官方组织文件（简称有歧义时）",
+      "单位级招聘入口，或官方公告明确授权集团招聘入口"
+    ]
+  },
+  "student_publication_effect": "none",
+  "server_deployment": false
+}

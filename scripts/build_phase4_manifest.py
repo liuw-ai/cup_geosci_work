@@ -47,6 +47,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
     ":!docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json",
     ":!docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json",
+    ":!docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json",
 )
 
 
@@ -237,6 +238,7 @@ def main() -> None:
     three_oil_observed_roster = ROOT / "docs" / "current" / "phase4-three-oil-observed-roster-2026-10-20.json"
     cnooc_geoscience_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-geoscience-job-evidence-2026-10-20.json"
     three_oil_unit_entry_network_recheck = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-network-recheck-2026-10-20.json"
+    sinopec_company_intro_recheck = ROOT / "docs" / "current" / "phase4-sinopec-company-intro-recheck-2026-10-20.json"
     completion_audit = ROOT / "docs" / "current" / "phase4-completion-audit-2026-10-19.json"
     workspace_layout = ROOT / "docs" / "current" / "phase4-workspace-layout-audit-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
@@ -334,6 +336,7 @@ def main() -> None:
             "phase4_three_oil_observed_roster": sha256(three_oil_observed_roster),
             "phase4_cnooc_geoscience_job_evidence": sha256(cnooc_geoscience_job_evidence),
             "phase4_three_oil_unit_entry_network_recheck": sha256(three_oil_unit_entry_network_recheck),
+            "phase4_sinopec_company_intro_recheck": sha256(sinopec_company_intro_recheck),
             "phase4_completion_audit": sha256(completion_audit),
             "phase4_workspace_layout": sha256(workspace_layout),
         },

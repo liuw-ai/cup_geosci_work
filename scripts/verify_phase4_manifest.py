@@ -92,6 +92,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_third_party_huatu_cnpc_chuanqing": "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
     "phase4_cnooc_geoscience_job_evidence": "docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json",
     "phase4_three_oil_unit_entry_network_recheck": "docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json",
+    "phase4_sinopec_company_intro_recheck": "docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json",
 }
 
 

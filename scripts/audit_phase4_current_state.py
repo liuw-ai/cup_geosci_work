@@ -51,6 +51,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-nhri-browser-recheck-2026-10-20.json",
     ":!docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json",
     ":!docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json",
+    ":!docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json",
 )
 
 
@@ -253,6 +254,7 @@ def main() -> None:
     cnooc_full_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-unit-job-evidence-2026-10-19.json"
     cooec_negative_entry = ROOT / "docs" / "current" / "phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json"
     sinopec_page_roster = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
+    sinopec_company_intro_recheck = ROOT / "docs" / "current" / "phase4-sinopec-company-intro-recheck-2026-10-20.json"
     entry_matrix = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-matrix-2026-10-18.json"
     entry_matrix_payload = json.loads(entry_matrix.read_text(encoding="utf-8")) if entry_matrix.is_file() else {}
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
@@ -505,6 +507,10 @@ def main() -> None:
             "phase4_three_oil_unit_entry_network_recheck": {
                 "path": "docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json",
                 "sha256": sha256(three_oil_unit_entry_network_recheck),
+            },
+            "phase4_sinopec_company_intro_recheck": {
+                "path": "docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json",
+                "sha256": sha256(sinopec_company_intro_recheck),
             },
             "phase4_main_record": {
                 "path": "docs/current/PHASE4-2026-10-17.md",
