@@ -90,6 +90,7 @@ def build_report() -> dict[str, Any]:
     cnpc_bgp_entry_recheck = _read("docs/current/phase4-cnpc-bgp-entry-recheck-2026-10-20.json")
     cnooc_energy_development_browser_recheck = _read("docs/current/phase4-cnooc-energy-development-browser-recheck-2026-10-20.json")
     cnooc_portal_unit_display_recheck = _read("docs/current/phase4-cnooc-portal-unit-display-recheck-2026-10-20.json")
+    cnooc_portal_live_recheck = _read("docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json")
     cnooc_geoscience_job_evidence = _read("docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json")
     three_oil_unit_entry_network_recheck = _read("docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json")
     sinopec_company_intro_recheck = _read("docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json")
@@ -271,6 +272,17 @@ def build_report() -> dict[str, Any]:
                         "observed_unit_count": cnooc_portal_unit_display_recheck.get("observed_unit_count"),
                         "independent_portals_proven": cnooc_portal_unit_display_recheck.get("interpretation", {}).get("independent_unit_recruitment_portals_proven"),
                         "catalog_units_not_observed": cnooc_portal_unit_display_recheck.get("formal_catalog_units_not_observed_in_current_unit_tabs", []),
+                    },
+                    "latest_cnooc_portal_live_recheck": {
+                        "checked_at": cnooc_portal_live_recheck.get("checked_at"),
+                        "group_portal_url": cnooc_portal_live_recheck.get("source", {}).get("group_portal_url"),
+                        "observed_unit_count": len(cnooc_portal_live_recheck.get("observed_unit_display_names", [])),
+                        "selected_unit": cnooc_portal_live_recheck.get("selected_unit_evidence", {}).get("unit"),
+                        "visible_job_card_count": cnooc_portal_live_recheck.get("selected_unit_evidence", {}).get("visible_job_card_count", 0),
+                        "application_url_observed": cnooc_portal_live_recheck.get("selected_unit_evidence", {}).get("application_url_observed", False),
+                        "independent_unit_recruitment_portals_proven": cnooc_portal_live_recheck.get("policy", {}).get("independent_unit_recruitment_portals_proven", False),
+                        "catalog_changed": cnooc_portal_live_recheck.get("policy", {}).get("catalog_changed", False),
+                        "jobs_created": cnooc_portal_live_recheck.get("policy", {}).get("no_jobs_created") is False,
                     },
                     "latest_unit_entry_network_recheck": {
                         "checked": three_oil_unit_entry_network_recheck.get("summary", {}).get("checked", 0),

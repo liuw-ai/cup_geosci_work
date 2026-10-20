@@ -48,6 +48,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json",
     ":!docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json",
     ":!docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json",
+    ":!docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json",
 )
 
 
@@ -239,6 +240,7 @@ def main() -> None:
     cnooc_geoscience_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-geoscience-job-evidence-2026-10-20.json"
     three_oil_unit_entry_network_recheck = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-network-recheck-2026-10-20.json"
     sinopec_company_intro_recheck = ROOT / "docs" / "current" / "phase4-sinopec-company-intro-recheck-2026-10-20.json"
+    cnooc_portal_live_recheck = ROOT / "docs" / "current" / "phase4-cnooc-portal-live-recheck-2026-10-20.json"
     completion_audit = ROOT / "docs" / "current" / "phase4-completion-audit-2026-10-19.json"
     workspace_layout = ROOT / "docs" / "current" / "phase4-workspace-layout-audit-2026-10-19.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
@@ -337,6 +339,7 @@ def main() -> None:
             "phase4_cnooc_geoscience_job_evidence": sha256(cnooc_geoscience_job_evidence),
             "phase4_three_oil_unit_entry_network_recheck": sha256(three_oil_unit_entry_network_recheck),
             "phase4_sinopec_company_intro_recheck": sha256(sinopec_company_intro_recheck),
+            "phase4_cnooc_portal_live_recheck": sha256(cnooc_portal_live_recheck),
             "phase4_completion_audit": sha256(completion_audit),
             "phase4_workspace_layout": sha256(workspace_layout),
         },
@@ -404,6 +407,7 @@ def main() -> None:
             "cnooc_unit_job_evidence": "docs/current/phase4-cnooc-unit-job-evidence-2026-10-19.json",
             "cooec_negative_entry_evidence": "docs/current/phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json",
             "homepage_probe": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
+            "latest_cnooc_portal_live_recheck": "docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json",
             "cnooc_units_with_active_job_evidence": int(
                 json.loads(cnooc_unit_evidence.read_text(encoding="utf-8"))
                 .get("summary", {})

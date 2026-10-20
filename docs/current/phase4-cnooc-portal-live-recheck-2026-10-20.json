@@ -1,0 +1,48 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-20T10:10:00+08:00",
+  "verification_mode": "read_only_browser_dom",
+  "source": {
+    "group_portal_url": "https://cnooc.zhaopin.com/",
+    "job_index_url": "https://cnooc.zhaopin.com/job/index.html",
+    "official_application_host": "xiaoyuan.zhaopin.com"
+  },
+  "observed_unit_display_names": [
+    "中海石油（中国）有限公司天津分公司",
+    "中海石油（中国）有限公司深圳分公司",
+    "中海石油（中国）有限公司湛江分公司",
+    "中海石油（中国）有限公司海南分公司",
+    "中海石油（中国）有限公司上海分公司",
+    "中国海洋石油国际有限公司",
+    "中海油研究总院有限责任公司",
+    "中联煤层气有限责任公司",
+    "中海石油气电集团有限责任公司",
+    "中海石油炼化有限责任公司",
+    "中海石油化学股份有限公司",
+    "中海油田服务股份有限公司",
+    "海洋石油工程股份有限公司",
+    "中海油能源发展股份有限公司",
+    "中海油国际贸易有限责任公司",
+    "中海石油（中国）有限公司北京新能源分公司"
+  ],
+  "selected_unit_evidence": {
+    "unit": "中海石油（中国）有限公司天津分公司",
+    "visible_job_card_count": 14,
+    "visible_geoscience_titles": [
+      "勘探地质类岗位",
+      "开发地质类岗位",
+      "地球物理类岗位"
+    ],
+    "application_url_observed": true,
+    "application_url_host": "xiaoyuan.zhaopin.com"
+  },
+  "policy": {
+    "unit_display_count": 16,
+    "independent_unit_recruitment_portals_proven": false,
+    "shared_group_portal_is_not_unit_specific_entry": true,
+    "no_jobs_created": true,
+    "catalog_changed": false,
+    "interpretation": "本次复核证明中国海油集团官方招聘页当前按单位展示并提供官方投递卡；它不证明每个单位拥有独立招聘网站。"
+  },
+  "server_deployment": false
+}
