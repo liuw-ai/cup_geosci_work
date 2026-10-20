@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-20T08:20:00+08:00",
+  "generated_at": "2026-10-20T18:45:00+08:00",
   "status": "audited_with_legacy_documents",
   "current_sources_of_truth": [
     "docs/current/PHASE4-2026-10-17.md",
@@ -9,13 +9,21 @@
     "runtime/job_hub.sqlite3"
   ],
   "current_database_facts": {
-    "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+    "sha256": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
     "integrity_check": "ok",
     "job_count": 3954,
     "student_visible_total": 700,
     "candidate_leads": 8,
     "formal_third_party_jobs": 7,
-    "withdrawn": 51
+    "withdrawn": 51,
+    "historical_snapshot_hashes": [
+      {
+        "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+        "scope": "2026-10-19 local web and HBDK registration snapshots",
+        "classification": "historical_evidence_only",
+        "current_fact": false
+      }
+    ]
   },
   "legacy_or_mixed_documents": [
     {

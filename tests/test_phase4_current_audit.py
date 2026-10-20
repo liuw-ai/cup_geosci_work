@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 
 from scripts.audit_phase4_current_state import (
@@ -42,6 +43,21 @@ def test_current_readme_does_not_duplicate_stale_database_totals() -> None:
     # literal here would become a second, conflicting source of truth.
     assert "正式数据库只读审计为 3948 条岗位" not in content
     assert "formal_third_party_job_count" not in content
+
+
+def test_document_consistency_current_hash_matches_runtime_database() -> None:
+    report = json.loads(
+        Path("docs/current/phase4-document-consistency-2026-10-20.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    digest = hashlib.sha256(Path("runtime/job_hub.sqlite3").read_bytes()).hexdigest()
+
+    assert report["current_database_facts"]["sha256"] == digest
+    assert all(
+        item.get("current_fact") is False
+        for item in report["current_database_facts"].get("historical_snapshot_hashes", [])
+    )
 
 
 def test_current_phase4_record_matches_latest_local_validation_test_count() -> None:
