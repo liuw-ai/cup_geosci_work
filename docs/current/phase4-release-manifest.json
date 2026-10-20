@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T04:52:20Z",
+  "generated_at": "2026-10-20T05:24:29Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "fc24738accf3c6c1f95fe28d9e716c486468699c",
+  "git_sha": "e239e5b42f521a6ef9b807c47239aa9a066366a0",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -30,7 +30,7 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "f151f2a5c1eef2de8cd609f7f51a2458e6234859b04bd6a5d0eab703e40856d2",
+    "phase4_current_state_audit": "fe732d491007fcc885723f4c2b16f2887e3481e0730b0af57e88fecb5ebaf362",
     "phase4_document_consistency": "1c24439e43997a64898ba342ab3b4384742423f4639066b6ccd09bfcc0fd6748",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
@@ -46,7 +46,7 @@
     "phase4_third_party_access_recheck": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d",
     "phase4_third_party_official_recovery_recheck": "5467d6a16316293d4790ec17292ac8c2bc8fadb91ae9ce72cd3949b9f136ad8a",
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
-    "phase4_third_party_funnel": "4264eee6b8f52a733948dcc5c5eafbf700cee8df2b386edc557ea23554a18fda",
+    "phase4_third_party_funnel": "6ea3587e2ad95547312e9561711c5e68c9dd1acc445ed9ecf1d5516f8e14ea1b",
     "phase4_local_web_recheck": "1ce3aa772e20a7216ecf9bcc86f54c121ef1457fa896804f636d73a3aacb017f",
     "phase4_local_web_live_validation": "77be72a7464556aba378352644c45d014abd5263adeca2974aece52013cef6c4",
     "phase4_huatu_table_discovery": "007ba8d74b26bfbbea076077344476dc5aa083d6ce5a6bed3b1ff39efc48f2ca",
@@ -62,7 +62,7 @@
     "phase4_third_party_hbdk_candidate_registration": "da07a5893f136d88905135a88fa6b83606dff3d70731e14e3eb76a01d8e9d7ea",
     "phase4_third_party_huatu_cnpc_chuanqing": "10bf8f283ba174b573edfa0336a8b941320ad439462af4c7cc2ef7900f9d8fc0",
     "phase4_main_record": "aafc3d6224349f72d9e9a2258121cc4d1c64093bbbf53d520e98e8c310b1a14b",
-    "phase4_local_validation": "19dc5a845ea64761231c81c8dc691663b01176fa4d90e614de37b71608e76735",
+    "phase4_local_validation": "b3495e0d027eb01a5a16950d62a5963ee375d59d444a616a7afde25690f56704",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "9b64fc1629c04037e22f9d6a2b0bee74cb53807f714932ad212cf6d22c5a8e5f",
     "phase4_three_oil_observed_roster": "aecf4e0083cf5fcbbee1c6af3446771611b2043e2bdecc60bab8f5463be52b9a",
@@ -71,8 +71,8 @@
     "phase4_sinopec_company_intro_recheck": "542592987a17c1c86b9165f725f7f2b6c78bedcb4c574c2833d72eee20419585",
     "phase4_cnooc_portal_live_recheck": "6de1f90591e169dc25b79af57c4c63b99b579e6cb158ad6889ac879bde5e3fd4",
     "phase4_three_oil_official_homepage_entry_recheck": "55756e20e901b550344f90e846de525131f7e3243262755bb50463389967467e",
-    "phase4_completion_audit": "739d90133fa107420754a6d667d1e1cc21b2bfab59a68b1a98f9057ce26021a8",
-    "phase4_workspace_layout": "1e7735396114ede10b242f422f92f6c03de37ca92e388651367915582e3fd47c"
+    "phase4_completion_audit": "30470745585472651e80a89e6caaf8c1a9138821d844d8a57ca861caa1ab49ff",
+    "phase4_workspace_layout": "4da5ee6aa39f520aa9512ba942d3a8bb36c2b52eb9c28af2b8537d19f96cacd9"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -146,10 +146,10 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-20T12:25:46+08:00",
+    "validated_at": "2026-10-20T13:08:00+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha": "a0a9bf20ec9b2d95d65c8aba9b7bc80f84eb5866",
+    "git_sha": "e239e5b42f521a6ef9b807c47239aa9a066366a0",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1106,
