@@ -3,7 +3,7 @@
   "checked_at": "2026-10-20T09:30:00+08:00",
   "verification_mode": "read_only_browser_dom",
   "source": {
-    "url": "https://job.sinopec.com/#/school/companyIntroduction",
+    "url": "https://job.sinopec.com/#/school/enterpriseIntroduction",
     "portal_name": "中国石化招聘网站",
     "page_title": "企业介绍",
     "evidence_scope": "official_group_company_introduction"
