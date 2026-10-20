@@ -1,8 +1,8 @@
 {
   "version": 1,
   "phase": "phase4",
-  "generated_at": "2026-10-20T23:11:54.157838+08:00",
-  "observed_on": "2026-10-20",
+  "generated_at": "2026-10-21T00:17:28.040848+08:00",
+  "observed_on": "2026-10-21",
   "scope": "registered_three_oil_official_homepages_only",
   "policy": "只检查已登记官方主页的 robots、可达性和公开链接；不采集岗位、不下载附件、不创建来源或招聘入口，不把主页或主页中的招聘关键词自动升级为单位招聘入口。",
   "summary": {
@@ -18,7 +18,7 @@
   },
   "probe_run": {
     "version": 1,
-    "observed_on": "2026-10-20",
+    "observed_on": "2026-10-21",
     "environment": "local-read-only",
     "transport_mode": "environment",
     "proxy_environment_present": true,
@@ -94,8 +94,8 @@
         "discovered_links": [],
         "recruitment_links": [],
         "retries": 0,
-        "error_class": "tls_or_policy_block",
-        "error_detail": "HTTPSConnectionPool(host='cqdrilling.cnpc.com.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+        "error_class": "timeout",
+        "error_detail": "HTTPSConnectionPool(host='cqdrilling.cnpc.com.cn', port=443): Read timed out. (read timeout=5)",
         "text_excerpt": ""
       },
       {
@@ -154,8 +154,8 @@
         "discovered_links": [],
         "recruitment_links": [],
         "retries": 0,
-        "error_class": "tls_or_policy_block",
-        "error_detail": "HTTPSConnectionPool(host='jhof.sinopec.com', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+        "error_class": "timeout",
+        "error_detail": "HTTPSConnectionPool(host='jhof.sinopec.com', port=443): Read timed out. (read timeout=5)",
         "text_excerpt": ""
       },
       {
@@ -377,8 +377,8 @@
         "discovered_links": [],
         "recruitment_links": [],
         "retries": 0,
-        "error_class": "tls_or_policy_block",
-        "error_detail": "HTTPSConnectionPool(host='www.sinopec-oss.com', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+        "error_class": "timeout",
+        "error_detail": "HTTPSConnectionPool(host='www.sinopec-oss.com', port=443): Read timed out. (read timeout=5)",
         "text_excerpt": ""
       },
       {
@@ -516,8 +516,8 @@
       "http_status": null,
       "final_url": null,
       "recruitment_links": [],
-      "error_class": "tls_or_policy_block",
-      "error_detail": "HTTPSConnectionPool(host='cqdrilling.cnpc.com.cn', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "error_class": "timeout",
+      "error_detail": "HTTPSConnectionPool(host='cqdrilling.cnpc.com.cn', port=443): Read timed out. (read timeout=5)",
       "entry_evidence_status": "homepage_not_verified"
     },
     {
@@ -628,8 +628,8 @@
       "http_status": null,
       "final_url": null,
       "recruitment_links": [],
-      "error_class": "tls_or_policy_block",
-      "error_detail": "HTTPSConnectionPool(host='jhof.sinopec.com', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "error_class": "timeout",
+      "error_detail": "HTTPSConnectionPool(host='jhof.sinopec.com', port=443): Read timed out. (read timeout=5)",
       "entry_evidence_status": "homepage_not_verified"
     },
     {
@@ -644,8 +644,8 @@
       "http_status": null,
       "final_url": null,
       "recruitment_links": [],
-      "error_class": "tls_or_policy_block",
-      "error_detail": "HTTPSConnectionPool(host='www.sinopec-oss.com', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)')))",
+      "error_class": "timeout",
+      "error_detail": "HTTPSConnectionPool(host='www.sinopec-oss.com', port=443): Read timed out. (read timeout=5)",
       "entry_evidence_status": "homepage_not_verified"
     },
     {
