@@ -102,6 +102,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_sinopec_company_intro_recheck": "docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json",
     "phase4_cnooc_portal_live_recheck": "docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json",
     "phase4_three_oil_official_homepage_entry_recheck": "docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json",
+    "phase4_cnooc_api_unit_evidence": "docs/current/phase4-cnooc-api-unit-evidence-2026-10-20.json",
 }
 
 
