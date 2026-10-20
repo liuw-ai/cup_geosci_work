@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T02:36:26Z",
+  "generated_at": "2026-10-20T02:41:42Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "9a114910c8932a7984a68a972dea502324a526c4",
+  "git_sha": "297417094a3aa42b28eb9f739169f1692f43462d",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "3e10a0f2a3d0ba352f0e5572fd14ea85737502c513591164f6feeea2664cf896"
+      "sha256": "823965eeb889bda8886162aeda0544bee7fa7d190c9430683d829f50eef85355"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -830,7 +830,7 @@
     {
       "path": "scripts/audit_phase4_completion.py",
       "line_count": 377,
-      "sha256": "835762afea4eaed0909f9413eccc94c1eae51abb7f642184b62a99701672b21f"
+      "sha256": "b71a38cb598872d030c69adad953a275ddddd2999a99ed34ade15821fa51147a"
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
@@ -1354,13 +1354,13 @@
     },
     {
       "path": "tests/test_phase4_completion_audit.py",
-      "line_count": 28,
-      "sha256": "8a85801ce9ccffd72a1b1355e6cd47a5192e10da355790e9623ac68ca176bf89"
+      "line_count": 33,
+      "sha256": "a1309083a6fc4e976e779360e2048f3fbc75381287c40e5914ebda791bc50193"
     },
     {
       "path": "tests/test_phase4_current_audit.py",
-      "line_count": 68,
-      "sha256": "26e25c1cd82fd0cc6f94273b90dab2ce50f8d0fe3f1bd609823e7aaf62045a22"
+      "line_count": 69,
+      "sha256": "622a594eacacffeef4c4cbf7928bc85f9b8292cc2f0756974bc586045e4ff4ec"
     },
     {
       "path": "tests/test_phase4_hbdk_candidates.py",
@@ -1384,8 +1384,8 @@
     },
     {
       "path": "tests/test_phase4_manifest.py",
-      "line_count": 76,
-      "sha256": "c12c8c4d7b1359b6c58e0ed1471557d3a44545a81df0e3d58f79838037e28bc8"
+      "line_count": 87,
+      "sha256": "08ba12d8ae4511f799a9da2623a7661a8f527cc5a8d46a53ec27bb79395e8496"
     },
     {
       "path": "tests/test_phase4_metadata_refresh.py",

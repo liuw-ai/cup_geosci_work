@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T02:36:32Z",
+  "generated_at": "2026-10-20T02:41:48Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "9a114910c8932a7984a68a972dea502324a526c4",
+  "git_sha": "297417094a3aa42b28eb9f739169f1692f43462d",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -29,7 +29,7 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "50637ba71c9f34377a1273809c7b38292e7080ea9c5dee2d5088286c6f75a064",
+    "phase4_current_state_audit": "1f08474d2152c2c153fd8be0183cb59a4b6dfbcb835638f40e93ff6fcb4f6a6c",
     "phase4_document_consistency": "1c24439e43997a64898ba342ab3b4384742423f4639066b6ccd09bfcc0fd6748",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
@@ -45,7 +45,7 @@
     "phase4_third_party_access_recheck": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d",
     "phase4_third_party_official_recovery_recheck": "5467d6a16316293d4790ec17292ac8c2bc8fadb91ae9ce72cd3949b9f136ad8a",
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
-    "phase4_third_party_funnel": "3e10a0f2a3d0ba352f0e5572fd14ea85737502c513591164f6feeea2664cf896",
+    "phase4_third_party_funnel": "823965eeb889bda8886162aeda0544bee7fa7d190c9430683d829f50eef85355",
     "phase4_local_web_recheck": "1ce3aa772e20a7216ecf9bcc86f54c121ef1457fa896804f636d73a3aacb017f",
     "phase4_local_web_live_validation": "77be72a7464556aba378352644c45d014abd5263adeca2974aece52013cef6c4",
     "phase4_huatu_table_discovery": "007ba8d74b26bfbbea076077344476dc5aa083d6ce5a6bed3b1ff39efc48f2ca",
@@ -69,8 +69,8 @@
     "phase4_three_oil_unit_entry_network_recheck": "4c31a26fa1654cce37d801abc14cc03a3ba48b2f883a70de031c3a5e515ecc1a",
     "phase4_sinopec_company_intro_recheck": "542592987a17c1c86b9165f725f7f2b6c78bedcb4c574c2833d72eee20419585",
     "phase4_cnooc_portal_live_recheck": "6de1f90591e169dc25b79af57c4c63b99b579e6cb158ad6889ac879bde5e3fd4",
-    "phase4_completion_audit": "370eb16d346ec77112de995f02d41a49f7173070b73b56dfeb79eafe04b6e85a",
-    "phase4_workspace_layout": "345c4528bfdbf297c42b42795b22bf08946064dbd90f4a3eac607def263c1e82"
+    "phase4_completion_audit": "b62f11efaa152f2f20372fa1991fd3a2a7b54cceeec2196a213151017595c480",
+    "phase4_workspace_layout": "c69d2ddc6294bd9d9ed84f0e8a15880a99dbd950236fadde9415c826ea573b19"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
