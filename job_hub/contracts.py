@@ -117,6 +117,9 @@ ORGANIZATION_ROLES = frozenset(
         "mining_group",
         "university",
         "government_recruitment_system",
+        # Non-three-oil central/state-owned candidates are kept in the
+        # organization ledger without being folded into a three-oil tree.
+        "other_affiliate",
     }
 )
 ORGANIZATION_CHANNEL_TYPES = frozenset(

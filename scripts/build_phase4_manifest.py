@@ -248,6 +248,7 @@ def main() -> None:
     sinopec_company_intro_recheck = ROOT / "docs" / "current" / "phase4-sinopec-company-intro-recheck-2026-10-20.json"
     cnooc_portal_live_recheck = ROOT / "docs" / "current" / "phase4-cnooc-portal-live-recheck-2026-10-20.json"
     cnooc_api_unit_evidence = ROOT / "docs" / "current" / "phase4-cnooc-api-unit-evidence-2026-10-20.json"
+    sinopec_display_cross_group_audit = ROOT / "docs" / "current" / "phase4-sinopec-display-cross-group-audit-2026-10-20.json"
     three_oil_official_homepage_entry_recheck = ROOT / "docs" / "current" / "phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json"
     completion_audit = ROOT / "docs" / "current" / "phase4-completion-audit-2026-10-19.json"
     workspace_layout = ROOT / "docs" / "current" / "phase4-workspace-layout-audit-2026-10-19.json"
@@ -355,6 +356,7 @@ def main() -> None:
             "phase4_sinopec_company_intro_recheck": sha256(sinopec_company_intro_recheck),
             "phase4_cnooc_portal_live_recheck": sha256(cnooc_portal_live_recheck),
             "phase4_cnooc_api_unit_evidence": sha256(cnooc_api_unit_evidence),
+            "phase4_sinopec_display_cross_group_audit": sha256(sinopec_display_cross_group_audit),
             "phase4_three_oil_official_homepage_entry_recheck": sha256(three_oil_official_homepage_entry_recheck),
             "phase4_completion_audit": sha256(completion_audit),
             "phase4_workspace_layout": sha256(workspace_layout),

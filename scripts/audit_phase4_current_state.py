@@ -57,6 +57,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json",
     ":!docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json",
     ":!docs/current/phase4-cnooc-api-unit-evidence-2026-10-20.json",
+    ":!docs/current/phase4-sinopec-display-cross-group-audit-2026-10-20.json",
 )
 
 
@@ -301,6 +302,7 @@ def main() -> None:
     cnooc_geoscience_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-geoscience-job-evidence-2026-10-20.json"
     cnooc_shenzhen_job_evidence = ROOT / "docs" / "current" / "phase4-cnooc-shenzhen-job-evidence-2026-10-20.json"
     cnooc_api_unit_evidence = ROOT / "docs" / "current" / "phase4-cnooc-api-unit-evidence-2026-10-20.json"
+    sinopec_display_cross_group_audit = ROOT / "docs" / "current" / "phase4-sinopec-display-cross-group-audit-2026-10-20.json"
     three_oil_unit_entry_network_recheck = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-network-recheck-2026-10-20.json"
     phase4_record = ROOT / "docs" / "current" / "PHASE4-2026-10-17.md"
     report = {
@@ -528,6 +530,10 @@ def main() -> None:
             "phase4_cnooc_api_unit_evidence": {
                 "path": "docs/current/phase4-cnooc-api-unit-evidence-2026-10-20.json",
                 "sha256": sha256(cnooc_api_unit_evidence),
+            },
+            "phase4_sinopec_display_cross_group_audit": {
+                "path": "docs/current/phase4-sinopec-display-cross-group-audit-2026-10-20.json",
+                "sha256": sha256(sinopec_display_cross_group_audit),
             },
             "phase4_three_oil_unit_entry_network_recheck": {
                 "path": "docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json",

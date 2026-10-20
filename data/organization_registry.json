@@ -3,6 +3,36 @@
   "description": "中国石油大学（北京）地球科学学院就业信息站的组织与官方入口种子矩阵。official_confirmed 只表示官方主体和入口已登记，不表示当前可自动采集；只有 automation_ready 且绑定已注册来源的频道才可进入自动化审查。\nPhase 2 organization registration records official recruitment display names from the CNPC and Sinopec platform inventories. Candidate channels remain non-crawlable until legal identity and unit-scoped evidence are separately verified.",
   "organizations": [
     {
+      "id": "cnaf-group",
+      "canonical_name": "中国航空油料集团有限公司",
+      "parent_id": null,
+      "organization_role": "group",
+      "industry_path": "航空油料与综合能源",
+      "affiliation": "央国企候选（非三桶油）",
+      "aliases": [
+        "中国航油",
+        "中国航空油料集团"
+      ],
+      "official_domains": [
+        "cnaf.com"
+      ],
+      "channels": [
+        {
+          "id": "cnaf-group-official-identity",
+          "channel_type": "official_homepage",
+          "official_url": "https://www.cnaf.com/",
+          "backup_urls": [],
+          "source_id": null,
+          "verification_status": "official_confirmed",
+          "is_primary": true,
+          "evidence_note": "中国航空油料集团官方网站首页标题与独立域名确认集团主体名称；央企归属和下属单位关系仍需单独交叉核验。"
+        }
+      ],
+      "identity_status": "official_identity_confirmed",
+      "ownership_status": "pending_sasac_cross_check",
+      "notes": "该集团曾出现在中国石化招聘网站展示清单，但展示不构成中国石化组织关系证据。"
+    },
+    {
       "id": "cnpc-petrochina",
       "canonical_name": "中国石油天然气股份有限公司",
       "parent_id": "cnpc",
@@ -9521,16 +9551,14 @@
     {
       "id": "sinopec-display-121-unit",
       "canonical_name": "中国航空油料有限责任公司",
-      "parent_id": "sinopec",
-      "organization_role": "internal_technical_service",
-      "industry_path": "中国石化体系官方招聘展示单位",
-      "affiliation": "中国石化体系",
+      "parent_id": "cnaf-group",
+      "organization_role": "other_affiliate",
+      "industry_path": "航空油料与综合能源关联单位",
+      "affiliation": "中国航空油料集团体系（非三桶油）",
       "aliases": [
         "中国航空油料有限责任公司"
       ],
-      "official_domains": [
-        "sinopecgroup.com"
-      ],
+      "official_domains": ["cnaf.com"],
       "channels": [
         {
           "id": "sinopec-display-121-unit-channel-1",
@@ -9541,26 +9569,25 @@
           ],
           "verification_status": "candidate",
           "is_primary": true,
-          "evidence_note": "官方招聘平台展示单位；已登记但尚未完成该单位法定名称、组织层级或独立入口的逐项补证。此记录不绑定采集 source_id，不自动启用或发布岗位。"
+          "evidence_note": "中国石化招聘网站展示名；该展示不证明中国石化组织关系。中国航空油料集团官网身份已确认，子单位法定关系和招聘入口仍待单独补证。"
         }
       ],
       "official_display_name": "中国航空油料有限责任公司",
       "identity_status": "official_display_name_pending_legal_normalization",
-      "notes": "来源于官方招聘平台展示清单；canonical_name 当前保留页面展示名，不等同于已完成工商法定名称核验。Phase 2 仅登记，不启用采集、不改变岗位发布状态。"
+      "ownership_status": "pending_individual_official_or工商_evidence",
+      "notes": "原登记误挂在 Sinopec 父节点，已根据中国航空油料集团官网证据移至 cnaf-group；原始 Sinopec 展示页仅保留为发现证据。"
     },
     {
       "id": "sinopec-display-122-unit",
       "canonical_name": "中国航油集团石油股份有限公司",
-      "parent_id": "sinopec",
-      "organization_role": "internal_technical_service",
-      "industry_path": "中国石化体系官方招聘展示单位",
-      "affiliation": "中国石化体系",
+      "parent_id": "cnaf-group",
+      "organization_role": "other_affiliate",
+      "industry_path": "航空油料与综合能源关联单位",
+      "affiliation": "中国航空油料集团体系（非三桶油）",
       "aliases": [
         "中国航油集团石油股份有限公司"
       ],
-      "official_domains": [
-        "sinopecgroup.com"
-      ],
+      "official_domains": ["cnaf.com"],
       "channels": [
         {
           "id": "sinopec-display-122-unit-channel-1",
@@ -9571,26 +9598,25 @@
           ],
           "verification_status": "candidate",
           "is_primary": true,
-          "evidence_note": "官方招聘平台展示单位；已登记但尚未完成该单位法定名称、组织层级或独立入口的逐项补证。此记录不绑定采集 source_id，不自动启用或发布岗位。"
+          "evidence_note": "中国石化招聘网站展示名；该展示不证明中国石化组织关系。中国航空油料集团官网身份已确认，子单位法定关系和招聘入口仍待单独补证。"
         }
       ],
       "official_display_name": "中国航油集团石油股份有限公司",
       "identity_status": "official_display_name_pending_legal_normalization",
-      "notes": "来源于官方招聘平台展示清单；canonical_name 当前保留页面展示名，不等同于已完成工商法定名称核验。Phase 2 仅登记，不启用采集、不改变岗位发布状态。"
+      "ownership_status": "pending_individual_official_or工商_evidence",
+      "notes": "原登记误挂在 Sinopec 父节点，已根据中国航空油料集团官网证据移至 cnaf-group；原始 Sinopec 展示页仅保留为发现证据。"
     },
     {
       "id": "sinopec-display-123-unit",
       "canonical_name": "中国航油集团物流有限公司",
-      "parent_id": "sinopec",
-      "organization_role": "internal_technical_service",
-      "industry_path": "中国石化体系官方招聘展示单位",
-      "affiliation": "中国石化体系",
+      "parent_id": "cnaf-group",
+      "organization_role": "other_affiliate",
+      "industry_path": "航空油料与综合能源关联单位",
+      "affiliation": "中国航空油料集团体系（非三桶油）",
       "aliases": [
         "中国航油集团物流有限公司"
       ],
-      "official_domains": [
-        "sinopecgroup.com"
-      ],
+      "official_domains": ["cnaf.com"],
       "channels": [
         {
           "id": "sinopec-display-123-unit-channel-1",
@@ -9601,26 +9627,25 @@
           ],
           "verification_status": "candidate",
           "is_primary": true,
-          "evidence_note": "官方招聘平台展示单位；已登记但尚未完成该单位法定名称、组织层级或独立入口的逐项补证。此记录不绑定采集 source_id，不自动启用或发布岗位。"
+          "evidence_note": "中国石化招聘网站展示名；该展示不证明中国石化组织关系。中国航空油料集团官网身份已确认，子单位法定关系和招聘入口仍待单独补证。"
         }
       ],
       "official_display_name": "中国航油集团物流有限公司",
       "identity_status": "official_display_name_pending_legal_normalization",
-      "notes": "来源于官方招聘平台展示清单；canonical_name 当前保留页面展示名，不等同于已完成工商法定名称核验。Phase 2 仅登记，不启用采集、不改变岗位发布状态。"
+      "ownership_status": "pending_individual_official_or工商_evidence",
+      "notes": "原登记误挂在 Sinopec 父节点，已根据中国航空油料集团官网证据移至 cnaf-group；原始 Sinopec 展示页仅保留为发现证据。"
     },
     {
       "id": "sinopec-display-124-unit",
       "canonical_name": "中国航油集团国际控股有限公司",
-      "parent_id": "sinopec",
-      "organization_role": "internal_technical_service",
-      "industry_path": "中国石化体系官方招聘展示单位",
-      "affiliation": "中国石化体系",
+      "parent_id": "cnaf-group",
+      "organization_role": "other_affiliate",
+      "industry_path": "航空油料与综合能源关联单位",
+      "affiliation": "中国航空油料集团体系（非三桶油）",
       "aliases": [
         "中国航油集团国际控股有限公司"
       ],
-      "official_domains": [
-        "sinopecgroup.com"
-      ],
+      "official_domains": ["cnaf.com"],
       "channels": [
         {
           "id": "sinopec-display-124-unit-channel-1",
@@ -9631,26 +9656,25 @@
           ],
           "verification_status": "candidate",
           "is_primary": true,
-          "evidence_note": "官方招聘平台展示单位；已登记但尚未完成该单位法定名称、组织层级或独立入口的逐项补证。此记录不绑定采集 source_id，不自动启用或发布岗位。"
+          "evidence_note": "中国石化招聘网站展示名；该展示不证明中国石化组织关系。中国航空油料集团官网身份已确认，子单位法定关系和招聘入口仍待单独补证。"
         }
       ],
       "official_display_name": "中国航油集团国际控股有限公司",
       "identity_status": "official_display_name_pending_legal_normalization",
-      "notes": "来源于官方招聘平台展示清单；canonical_name 当前保留页面展示名，不等同于已完成工商法定名称核验。Phase 2 仅登记，不启用采集、不改变岗位发布状态。"
+      "ownership_status": "pending_individual_official_or工商_evidence",
+      "notes": "原登记误挂在 Sinopec 父节点，已根据中国航空油料集团官网证据移至 cnaf-group；原始 Sinopec 展示页仅保留为发现证据。"
     },
     {
       "id": "sinopec-display-125-unit",
       "canonical_name": "中国航油集团通用航空发展有限公司",
-      "parent_id": "sinopec",
-      "organization_role": "internal_technical_service",
-      "industry_path": "中国石化体系官方招聘展示单位",
-      "affiliation": "中国石化体系",
+      "parent_id": "cnaf-group",
+      "organization_role": "other_affiliate",
+      "industry_path": "航空油料与综合能源关联单位",
+      "affiliation": "中国航空油料集团体系（非三桶油）",
       "aliases": [
         "中国航油集团通用航空发展有限公司"
       ],
-      "official_domains": [
-        "sinopecgroup.com"
-      ],
+      "official_domains": ["cnaf.com"],
       "channels": [
         {
           "id": "sinopec-display-125-unit-channel-1",
@@ -9661,26 +9685,25 @@
           ],
           "verification_status": "candidate",
           "is_primary": true,
-          "evidence_note": "官方招聘平台展示单位；已登记但尚未完成该单位法定名称、组织层级或独立入口的逐项补证。此记录不绑定采集 source_id，不自动启用或发布岗位。"
+          "evidence_note": "中国石化招聘网站展示名；该展示不证明中国石化组织关系。中国航空油料集团官网身份已确认，子单位法定关系和招聘入口仍待单独补证。"
         }
       ],
       "official_display_name": "中国航油集团通用航空发展有限公司",
       "identity_status": "official_display_name_pending_legal_normalization",
-      "notes": "来源于官方招聘平台展示清单；canonical_name 当前保留页面展示名，不等同于已完成工商法定名称核验。Phase 2 仅登记，不启用采集、不改变岗位发布状态。"
+      "ownership_status": "pending_individual_official_or工商_evidence",
+      "notes": "原登记误挂在 Sinopec 父节点，已根据中国航空油料集团官网证据移至 cnaf-group；原始 Sinopec 展示页仅保留为发现证据。"
     },
     {
       "id": "sinopec-display-126-unit",
       "canonical_name": "北京中航油工程建设有限公司",
-      "parent_id": "sinopec",
-      "organization_role": "internal_technical_service",
-      "industry_path": "中国石化体系官方招聘展示单位",
-      "affiliation": "中国石化体系",
+      "parent_id": "cnaf-group",
+      "organization_role": "other_affiliate",
+      "industry_path": "航空油料与综合能源关联单位",
+      "affiliation": "中国航空油料集团体系（非三桶油）",
       "aliases": [
         "北京中航油工程建设有限公司"
       ],
-      "official_domains": [
-        "sinopecgroup.com"
-      ],
+      "official_domains": ["cnaf.com"],
       "channels": [
         {
           "id": "sinopec-display-126-unit-channel-1",
@@ -9691,26 +9714,25 @@
           ],
           "verification_status": "candidate",
           "is_primary": true,
-          "evidence_note": "官方招聘平台展示单位；已登记但尚未完成该单位法定名称、组织层级或独立入口的逐项补证。此记录不绑定采集 source_id，不自动启用或发布岗位。"
+          "evidence_note": "中国石化招聘网站展示名；该展示不证明中国石化组织关系。中国航空油料集团官网身份已确认，子单位法定关系和招聘入口仍待单独补证。"
         }
       ],
       "official_display_name": "北京中航油工程建设有限公司",
       "identity_status": "official_display_name_pending_legal_normalization",
-      "notes": "来源于官方招聘平台展示清单；canonical_name 当前保留页面展示名，不等同于已完成工商法定名称核验。Phase 2 仅登记，不启用采集、不改变岗位发布状态。"
+      "ownership_status": "pending_individual_official_or工商_evidence",
+      "notes": "原登记误挂在 Sinopec 父节点，已根据中国航空油料集团官网证据移至 cnaf-group；原始 Sinopec 展示页仅保留为发现证据。"
     },
     {
       "id": "sinopec-display-127-unit",
       "canonical_name": "中航油石化管道有限公司",
-      "parent_id": "sinopec",
-      "organization_role": "internal_technical_service",
-      "industry_path": "中国石化体系官方招聘展示单位",
-      "affiliation": "中国石化体系",
+      "parent_id": "cnaf-group",
+      "organization_role": "other_affiliate",
+      "industry_path": "航空油料与综合能源关联单位",
+      "affiliation": "中国航空油料集团体系（非三桶油）",
       "aliases": [
         "中航油石化管道有限公司"
       ],
-      "official_domains": [
-        "sinopecgroup.com"
-      ],
+      "official_domains": ["cnaf.com"],
       "channels": [
         {
           "id": "sinopec-display-127-unit-channel-1",
@@ -9721,26 +9743,25 @@
           ],
           "verification_status": "candidate",
           "is_primary": true,
-          "evidence_note": "官方招聘平台展示单位；已登记但尚未完成该单位法定名称、组织层级或独立入口的逐项补证。此记录不绑定采集 source_id，不自动启用或发布岗位。"
+          "evidence_note": "中国石化招聘网站展示名；该展示不证明中国石化组织关系。中国航空油料集团官网身份已确认，子单位法定关系和招聘入口仍待单独补证。"
         }
       ],
       "official_display_name": "中航油石化管道有限公司",
       "identity_status": "official_display_name_pending_legal_normalization",
-      "notes": "来源于官方招聘平台展示清单；canonical_name 当前保留页面展示名，不等同于已完成工商法定名称核验。Phase 2 仅登记，不启用采集、不改变岗位发布状态。"
+      "ownership_status": "pending_individual_official_or工商_evidence",
+      "notes": "原登记误挂在 Sinopec 父节点，已根据中国航空油料集团官网证据移至 cnaf-group；原始 Sinopec 展示页仅保留为发现证据。"
     },
     {
       "id": "sinopec-display-128-unit",
       "canonical_name": "深圳承远航空油料有限公司",
-      "parent_id": "sinopec",
-      "organization_role": "internal_technical_service",
-      "industry_path": "中国石化体系官方招聘展示单位",
-      "affiliation": "中国石化体系",
+      "parent_id": "cnaf-group",
+      "organization_role": "other_affiliate",
+      "industry_path": "航空油料与综合能源关联单位",
+      "affiliation": "中国航空油料集团体系（非三桶油）",
       "aliases": [
         "深圳承远航空油料有限公司"
       ],
-      "official_domains": [
-        "sinopecgroup.com"
-      ],
+      "official_domains": ["cnaf.com"],
       "channels": [
         {
           "id": "sinopec-display-128-unit-channel-1",
@@ -9751,26 +9772,25 @@
           ],
           "verification_status": "candidate",
           "is_primary": true,
-          "evidence_note": "官方招聘平台展示单位；已登记但尚未完成该单位法定名称、组织层级或独立入口的逐项补证。此记录不绑定采集 source_id，不自动启用或发布岗位。"
+          "evidence_note": "中国石化招聘网站展示名；该展示不证明中国石化组织关系。中国航空油料集团官网身份已确认，子单位法定关系和招聘入口仍待单独补证。"
         }
       ],
       "official_display_name": "深圳承远航空油料有限公司",
       "identity_status": "official_display_name_pending_legal_normalization",
-      "notes": "来源于官方招聘平台展示清单；canonical_name 当前保留页面展示名，不等同于已完成工商法定名称核验。Phase 2 仅登记，不启用采集、不改变岗位发布状态。"
+      "ownership_status": "pending_individual_official_or工商_evidence",
+      "notes": "原登记误挂在 Sinopec 父节点，已根据中国航空油料集团官网证据移至 cnaf-group；原始 Sinopec 展示页仅保留为发现证据。"
     },
     {
       "id": "sinopec-display-129-unit",
       "canonical_name": "中国航油集团资产发展有限公司",
-      "parent_id": "sinopec",
-      "organization_role": "internal_technical_service",
-      "industry_path": "中国石化体系官方招聘展示单位",
-      "affiliation": "中国石化体系",
+      "parent_id": "cnaf-group",
+      "organization_role": "other_affiliate",
+      "industry_path": "航空油料与综合能源关联单位",
+      "affiliation": "中国航空油料集团体系（非三桶油）",
       "aliases": [
         "中国航油集团资产发展有限公司"
       ],
-      "official_domains": [
-        "sinopecgroup.com"
-      ],
+      "official_domains": ["cnaf.com"],
       "channels": [
         {
           "id": "sinopec-display-129-unit-channel-1",
@@ -9781,26 +9801,25 @@
           ],
           "verification_status": "candidate",
           "is_primary": true,
-          "evidence_note": "官方招聘平台展示单位；已登记但尚未完成该单位法定名称、组织层级或独立入口的逐项补证。此记录不绑定采集 source_id，不自动启用或发布岗位。"
+          "evidence_note": "中国石化招聘网站展示名；该展示不证明中国石化组织关系。中国航空油料集团官网身份已确认，子单位法定关系和招聘入口仍待单独补证。"
         }
       ],
       "official_display_name": "中国航油集团资产发展有限公司",
       "identity_status": "official_display_name_pending_legal_normalization",
-      "notes": "来源于官方招聘平台展示清单；canonical_name 当前保留页面展示名，不等同于已完成工商法定名称核验。Phase 2 仅登记，不启用采集、不改变岗位发布状态。"
+      "ownership_status": "pending_individual_official_or工商_evidence",
+      "notes": "原登记误挂在 Sinopec 父节点，已根据中国航空油料集团官网证据移至 cnaf-group；原始 Sinopec 展示页仅保留为发现证据。"
     },
     {
       "id": "sinopec-display-130-unit",
       "canonical_name": "中国航油集团投资有限公司",
-      "parent_id": "sinopec",
-      "organization_role": "internal_technical_service",
-      "industry_path": "中国石化体系官方招聘展示单位",
-      "affiliation": "中国石化体系",
+      "parent_id": "cnaf-group",
+      "organization_role": "other_affiliate",
+      "industry_path": "航空油料与综合能源关联单位",
+      "affiliation": "中国航空油料集团体系（非三桶油）",
       "aliases": [
         "中国航油集团投资有限公司"
       ],
-      "official_domains": [
-        "sinopecgroup.com"
-      ],
+      "official_domains": ["cnaf.com"],
       "channels": [
         {
           "id": "sinopec-display-130-unit-channel-1",
@@ -9811,26 +9830,25 @@
           ],
           "verification_status": "candidate",
           "is_primary": true,
-          "evidence_note": "官方招聘平台展示单位；已登记但尚未完成该单位法定名称、组织层级或独立入口的逐项补证。此记录不绑定采集 source_id，不自动启用或发布岗位。"
+          "evidence_note": "中国石化招聘网站展示名；该展示不证明中国石化组织关系。中国航空油料集团官网身份已确认，子单位法定关系和招聘入口仍待单独补证。"
         }
       ],
       "official_display_name": "中国航油集团投资有限公司",
       "identity_status": "official_display_name_pending_legal_normalization",
-      "notes": "来源于官方招聘平台展示清单；canonical_name 当前保留页面展示名，不等同于已完成工商法定名称核验。Phase 2 仅登记，不启用采集、不改变岗位发布状态。"
+      "ownership_status": "pending_individual_official_or工商_evidence",
+      "notes": "原登记误挂在 Sinopec 父节点，已根据中国航空油料集团官网证据移至 cnaf-group；原始 Sinopec 展示页仅保留为发现证据。"
     },
     {
       "id": "sinopec-display-131-unit",
       "canonical_name": "中国航油集团海南有限公司",
-      "parent_id": "sinopec",
-      "organization_role": "internal_technical_service",
-      "industry_path": "中国石化体系官方招聘展示单位",
-      "affiliation": "中国石化体系",
+      "parent_id": "cnaf-group",
+      "organization_role": "other_affiliate",
+      "industry_path": "航空油料与综合能源关联单位",
+      "affiliation": "中国航空油料集团体系（非三桶油）",
       "aliases": [
         "中国航油集团海南有限公司"
       ],
-      "official_domains": [
-        "sinopecgroup.com"
-      ],
+      "official_domains": ["cnaf.com"],
       "channels": [
         {
           "id": "sinopec-display-131-unit-channel-1",
@@ -9841,12 +9859,13 @@
           ],
           "verification_status": "candidate",
           "is_primary": true,
-          "evidence_note": "官方招聘平台展示单位；已登记但尚未完成该单位法定名称、组织层级或独立入口的逐项补证。此记录不绑定采集 source_id，不自动启用或发布岗位。"
+          "evidence_note": "中国石化招聘网站展示名；该展示不证明中国石化组织关系。中国航空油料集团官网身份已确认，子单位法定关系和招聘入口仍待单独补证。"
         }
       ],
       "official_display_name": "中国航油集团海南有限公司",
       "identity_status": "official_display_name_pending_legal_normalization",
-      "notes": "来源于官方招聘平台展示清单；canonical_name 当前保留页面展示名，不等同于已完成工商法定名称核验。Phase 2 仅登记，不启用采集、不改变岗位发布状态。"
+      "ownership_status": "pending_individual_official_or工商_evidence",
+      "notes": "原登记误挂在 Sinopec 父节点，已根据中国航空油料集团官网证据移至 cnaf-group；原始 Sinopec 展示页仅保留为发现证据。"
     },
     {
       "id": "sinopec-display-extra-shengli-oilfield",

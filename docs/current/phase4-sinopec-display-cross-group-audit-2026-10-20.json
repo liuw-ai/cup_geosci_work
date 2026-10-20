@@ -1,0 +1,49 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-20T20:45:00+08:00",
+  "scope": "Sinopec official recruitment display roster cross-group identity audit",
+  "sinopec_display_source": {
+    "url": "https://job.sinopec.com/#/school/recruitmentPositions",
+    "evidence_file": "docs/current/phase4-sinopec-page-roster-2026-10-19.json",
+    "displayed_record_count": 132,
+    "interpretation": "The page proves display on the Sinopec recruitment portal only; it does not prove that every displayed name is a Sinopec group organization."
+  },
+  "external_group_identity": {
+    "canonical_name": "中国航空油料集团有限公司",
+    "official_identity_url": "https://www.cnaf.com/",
+    "http_status": 200,
+    "page_title": "中国航空油料集团有限公司",
+    "page_bytes": 16449,
+    "page_sha256": "bfbe17e20e5c1f86a4a03947fe52b1371953b36c2a3ff91e26fb50c6effbe47b",
+    "domain": "cnaf.com",
+    "identity_conclusion": "The official CAAF site identifies a separate group and domain. This is sufficient to stop treating the displayed names as Sinopec children; ownership classification and SASAC roster cross-check remain separate evidence tasks."
+  },
+  "misclassified_display_records": [
+    {"registry_id": "sinopec-display-121-unit", "display_name": "中国航空油料有限责任公司"},
+    {"registry_id": "sinopec-display-122-unit", "display_name": "中国航油集团石油股份有限公司"},
+    {"registry_id": "sinopec-display-123-unit", "display_name": "中国航油集团物流有限公司"},
+    {"registry_id": "sinopec-display-124-unit", "display_name": "中国航油集团国际控股有限公司"},
+    {"registry_id": "sinopec-display-125-unit", "display_name": "中国航油集团通用航空发展有限公司"},
+    {"registry_id": "sinopec-display-126-unit", "display_name": "北京中航油工程建设有限公司"},
+    {"registry_id": "sinopec-display-127-unit", "display_name": "中航油石化管道有限公司"},
+    {"registry_id": "sinopec-display-128-unit", "display_name": "深圳承远航空油料有限公司"},
+    {"registry_id": "sinopec-display-129-unit", "display_name": "中国航油集团资产发展有限公司"},
+    {"registry_id": "sinopec-display-130-unit", "display_name": "中国航油集团投资有限公司"},
+    {"registry_id": "sinopec-display-131-unit", "display_name": "中国航油集团海南有限公司"}
+  ],
+  "correction_policy": {
+    "new_parent_id": "cnaf-group",
+    "new_affiliation": "央国企候选（非三桶油）",
+    "display_source_retained": true,
+    "sinopec_formal_catalog_changed": false,
+    "student_jobs_created": false,
+    "recruitment_entries_enabled": false,
+    "legal_identity_of_each_subsidiary": "pending_individual_official_or工商 evidence",
+    "ownership_status": "pending independent SASAC/official roster cross-check"
+  },
+  "policy_checks": {
+    "third_party_url_used_as_application": false,
+    "shared_portal_promoted_to_independent_entry": false,
+    "server_deployment": false
+  }
+}
