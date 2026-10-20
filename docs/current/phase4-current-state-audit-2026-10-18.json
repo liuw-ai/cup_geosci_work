@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T14:08:28Z",
+  "generated_at": "2026-10-20T14:30:04Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "a684d674f16c5efe88c1afec658f276a85afaa1b",
+  "git_sha": "e9670113e9c9879bcbbc10b2f674ffdfc4a01358",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -154,12 +154,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "1011a922918150165e4a0b4d76c88d8bd59e5c17b6164a6da0c5b172c7799b1c"
+        "sha256": "4af1201ea70b2e8da2977ffe3c2dfed8582a68172c64e192006b875fab6f1c2b"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-20.json",
         "exists": true,
-        "sha256": "3f2f6962cf7b633d0c3d9742afd8151eb33c46e8b736abc59a08d941c6997c47"
+        "sha256": "ec325279c109e37409c8f46f0c58a63f6de46eb2f6642ec81a4f38d13d8876b3"
       }
     ],
     "metadata_documents": [
@@ -215,7 +215,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-20.json",
-      "sha256": "3f2f6962cf7b633d0c3d9742afd8151eb33c46e8b736abc59a08d941c6997c47"
+      "sha256": "ec325279c109e37409c8f46f0c58a63f6de46eb2f6642ec81a4f38d13d8876b3"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "385a902765ddd52b8fed4855c5ab8c694b61e4ca2a584b1452cf8250c5daa814"
+      "sha256": "3f3a547e0f6aca7e20ac406b3886402c0a49013902da07bf7334000a6bbf4ddb"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -379,7 +379,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "1011a922918150165e4a0b4d76c88d8bd59e5c17b6164a6da0c5b172c7799b1c"
+      "sha256": "4af1201ea70b2e8da2977ffe3c2dfed8582a68172c64e192006b875fab6f1c2b"
     }
   },
   "code_inventory": [
@@ -1350,8 +1350,8 @@
     },
     {
       "path": "tests/test_organizations.py",
-      "line_count": 228,
-      "sha256": "29857e8993219ead7d59f3cabc480e44e201fc120af2281e606674bdbb088df8"
+      "line_count": 241,
+      "sha256": "322cd876cae0c3920c2c0534b4536ad55807b9825d9d403a6005b76ce1b47759"
     },
     {
       "path": "tests/test_pending_evidence_audit.py",

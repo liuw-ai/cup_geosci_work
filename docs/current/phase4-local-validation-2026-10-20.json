@@ -6,7 +6,7 @@
   "git_sha": "4d5e6f9",
   "tests": {
     "command": "python -m pytest -q",
-    "passed": 1113,
+    "passed": 1114,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
