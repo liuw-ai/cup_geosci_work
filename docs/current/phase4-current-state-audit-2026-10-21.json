@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T21:12:48Z",
+  "generated_at": "2026-10-20T21:17:54Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "63ad15625ddb3374cb9ceeb4a54316351e4f0305",
+  "git_sha": "e5959e193daf7bfde30071fdd8ec9b67ade40e99",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -156,12 +156,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "a6aeea87b2de14c1d19408027b2d0161743ab2dc91dff2ff9de8cb13a96131e6"
+        "sha256": "3984b142abcc72f3301d2a08e6eb795cca07b77c0daccef023b379dee5de9fd8"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-21.json",
         "exists": true,
-        "sha256": "6095233de7658219139c9d421cda9d72e8e88e47b23795c5d44ccedb28d5e190"
+        "sha256": "900689526087021d5e0e9dd8cd7def58b2b4605f7419fbedaca71f151dd02afb"
       }
     ],
     "metadata_documents": [
@@ -217,7 +217,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-21.json",
-      "sha256": "6095233de7658219139c9d421cda9d72e8e88e47b23795c5d44ccedb28d5e190"
+      "sha256": "900689526087021d5e0e9dd8cd7def58b2b4605f7419fbedaca71f151dd02afb"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -269,7 +269,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "241164fa34cffaea756a071ae0476b9351805696e1d7debc71913fc7bb448624"
+      "sha256": "24cda68331ba09287c46c413e0511b18a6967c0a42bfbb551339b6902fef6d79"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -393,7 +393,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "a6aeea87b2de14c1d19408027b2d0161743ab2dc91dff2ff9de8cb13a96131e6"
+      "sha256": "3984b142abcc72f3301d2a08e6eb795cca07b77c0daccef023b379dee5de9fd8"
     }
   },
   "code_inventory": [
@@ -899,8 +899,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 495,
-      "sha256": "072aa813fa6ffb4c19f5dbf3c06a6de61c24690e8a6ddaaf793e54c1fef46098"
+      "line_count": 496,
+      "sha256": "9b7c0771853289dd2840093656283c44b346e649f4990fabe32caf1ea0cf279e"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
