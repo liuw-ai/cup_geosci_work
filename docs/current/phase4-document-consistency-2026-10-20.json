@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-21T00:30:00+08:00",
+  "generated_at": "2026-10-21T06:30:00+08:00",
   "status": "audited_with_legacy_documents",
   "current_sources_of_truth": [
     "docs/current/PHASE4-2026-10-17.md",
@@ -15,11 +15,11 @@
     "student_read_as_of_date": "2026-10-21",
     "student_visible_layer_counts": {
       "exact_match": 140,
-      "broad_geoscience_match": 8,
+      "broad_geoscience_match": 9,
       "incomplete_but_basic_match": 442,
       "source_unavailable": 87
     },
-    "student_visible_total": 677,
+    "student_visible_total": 678,
     "candidate_leads": 12,
     "formal_third_party_jobs": 8,
     "withdrawn": 51,
