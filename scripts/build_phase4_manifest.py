@@ -33,6 +33,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
     ":!docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
     ":!docs/current/phase4-third-party-channel-recheck-2026-10-20.json",
+    ":!docs/current/phase4-document-consistency-2026-10-20.json",
     ":!docs/current/phase4-third-party-official-recovery-recheck-2026-10-19.json",
     ":!docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
     ":!docs/current/phase4-cnpc-bgp-entry-recheck-2026-10-19.json",
@@ -220,6 +221,7 @@ def main() -> None:
     local_web_live_validation = ROOT / "docs" / "current" / "phase4-local-web-live-validation-2026-10-19.json"
     huatu_table_discovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-table-discovery-2026-10-19.json"
     third_party_channel_recheck = ROOT / "docs" / "current" / "phase4-third-party-channel-recheck-2026-10-20.json"
+    document_consistency = ROOT / "docs" / "current" / "phase4-document-consistency-2026-10-20.json"
     huatu_discovery_scan = ROOT / "docs" / "current" / "phase4-third-party-huatu-discovery-2026-10-19.json"
     huatu_state_owned_entry = ROOT / "docs" / "current" / "phase4-third-party-huatu-state-owned-entry-2026-10-19.json"
     huatu_hebei_water_geology = ROOT / "docs" / "current" / "phase4-third-party-huatu-hebei-water-geology-2026-10-19.json"
@@ -313,6 +315,7 @@ def main() -> None:
             "phase4_local_web_live_validation": sha256(local_web_live_validation),
             "phase4_huatu_table_discovery": sha256(huatu_table_discovery),
             "phase4_third_party_channel_recheck": sha256(third_party_channel_recheck),
+            "phase4_document_consistency_2026_10_20": sha256(document_consistency),
             "phase4_huatu_discovery_scan": sha256(huatu_discovery_scan),
             "phase4_third_party_huatu_state_owned_entry": sha256(huatu_state_owned_entry),
             "phase4_third_party_huatu_hebei_water_geology": sha256(huatu_hebei_water_geology),
@@ -379,6 +382,7 @@ def main() -> None:
             "funnel_audit": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
             "table_discovery_report": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
             "channel_recheck_report": "docs/current/phase4-third-party-channel-recheck-2026-10-20.json",
+            "document_consistency_report": "docs/current/phase4-document-consistency-2026-10-20.json",
             "discovery_scan_report": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
             "hbdk_geophysics_visual_evidence": "docs/current/phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json",
             "hebei_water_geology_discovery": "docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json",

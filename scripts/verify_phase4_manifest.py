@@ -73,6 +73,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_local_web_live_validation": "docs/current/phase4-local-web-live-validation-2026-10-19.json",
     "phase4_huatu_table_discovery": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
     "phase4_third_party_channel_recheck": "docs/current/phase4-third-party-channel-recheck-2026-10-20.json",
+    "phase4_document_consistency_2026_10_20": "docs/current/phase4-document-consistency-2026-10-20.json",
     "phase4_huatu_discovery_scan": "docs/current/phase4-third-party-huatu-discovery-2026-10-19.json",
     "phase4_third_party_bingtuan_official_recovery": "docs/current/phase4-third-party-bingtuan-official-recovery-2026-10-19.json",
     "phase4_third_party_huatu_shanxi_geology_group": "docs/current/phase4-third-party-huatu-shanxi-geology-group-2026-10-19.json",

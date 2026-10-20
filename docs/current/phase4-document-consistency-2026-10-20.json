@@ -1,0 +1,67 @@
+{
+  "phase": "phase4",
+  "generated_at": "2026-10-20T08:20:00+08:00",
+  "status": "audited_with_legacy_documents",
+  "current_sources_of_truth": [
+    "docs/current/PHASE4-2026-10-17.md",
+    "docs/current/phase4-current-state-audit-2026-10-18.json",
+    "docs/current/phase4-release-manifest.json",
+    "runtime/job_hub.sqlite3"
+  ],
+  "current_database_facts": {
+    "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+    "integrity_check": "ok",
+    "job_count": 3954,
+    "student_visible_total": 700,
+    "candidate_leads": 8,
+    "formal_third_party_jobs": 7,
+    "withdrawn": 51
+  },
+  "legacy_or_mixed_documents": [
+    {
+      "path": "docs/EXECUTION_PLAN.md",
+      "classification": "historical_execution_log",
+      "risk": "contains Phase 0-532 historical counts and paths that no longer describe the current database",
+      "release_input": false,
+      "action": "retain for history; do not use for current metrics"
+    },
+    {
+      "path": "docs/OPERATIONAL_MEASUREMENT.md",
+      "classification": "legacy_operational_contract",
+      "risk": "contains pre-Phase-3 freshness and publication wording",
+      "release_input": false,
+      "action": "retain for history; use Phase 4 policy and Manifest instead"
+    },
+    {
+      "path": "docs/RELEASE_BASELINE.md",
+      "classification": "historical_release_baseline",
+      "risk": "binds an older release identity and database snapshot",
+      "release_input": false,
+      "action": "retain for history; never use as deployment identity"
+    },
+    {
+      "path": "ARCHITECTURE.md",
+      "classification": "mixed_architecture_document",
+      "risk": "the current introduction is useful, but later historical sections still describe third-party discovery as private-only",
+      "release_input": false,
+      "action": "current facts are overridden by docs/current/PHASE4-2026-10-17.md and the Manifest"
+    },
+    {
+      "path": "DEPLOYMENT.md",
+      "classification": "mixed_deployment_document",
+      "risk": "legacy command examples use root Compose files and are not the Phase 4 production entrypoint",
+      "release_input": false,
+      "action": "do not execute legacy commands; production entrypoint is deploy/compose.yaml"
+    }
+  ],
+  "deployment_boundary": {
+    "canonical_compose": "deploy/compose.yaml",
+    "canonical_dockerfiles": [
+      "deploy/docker/Dockerfile.app",
+      "deploy/docker/Dockerfile.browser"
+    ],
+    "server_deployment": false,
+    "automation_status": "paused"
+  },
+  "policy": "No document is allowed to override the current database, current audit, or hash-bound Manifest. Historical files remain recoverable and are not deleted or used as production inputs."
+}

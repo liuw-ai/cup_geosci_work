@@ -1,5 +1,7 @@
 # 部署与手机访问
 
+> **Phase 4 当前边界（2026-10-20）**：本文下方仍保留部分历史部署命令，不能直接执行。当前唯一生产入口是 [`deploy/compose.yaml`](deploy/compose.yaml)，唯一正式 Dockerfile 是 `deploy/docker/Dockerfile.app` 和 `deploy/docker/Dockerfile.browser`。服务器尚未部署本地 Phase 4，自动化保持暂停；部署前必须通过当前 [Phase 4 Manifest](docs/current/phase4-release-manifest.json) 并取得用户明确批准。
+
 本文是地学就业信息站的生产部署说明。生产环境建议使用 Linux 服务器、Docker Compose、一个已解析到服务器的域名和 Caddy/Nginx HTTPS 反向代理。
 
 ## 1. 运行边界
