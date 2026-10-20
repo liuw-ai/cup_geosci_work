@@ -1,0 +1,120 @@
+{
+  "phase": "phase4",
+  "captured_at": "2026-10-20T10:30:00+08:00",
+  "evidence_scope": "official_notice_and_linked_attachments",
+  "source": {
+    "source_id": "hbdk-water-official-recruitment",
+    "trust_grade": "A",
+    "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/382.html",
+    "official_table_url": "https://docs.qq.com/doc/DTGVxbUdBVWFUT0tZ",
+    "official_registration_form_url": "https://docs.qq.com/doc/DTFNLc25iZE9RdHJV",
+    "employer": "河北水文四队地质勘查有限公司",
+    "group_context": "河北地矿集团有限公司二级子公司",
+    "robots_url": "https://www.hbdkjt.cn/robots.txt",
+    "robots_allowed": true
+  },
+  "captures": {
+    "official_notice": {
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "network_response_sha256": "20e7acd45b9be8c82a35baf1f99c2ac44aae45ee4eb197943414a6bc0c74c138",
+      "retained_path": "runtime/third-party-evidence/hbdk-water-2026-10-20/official-notice.html",
+      "retained_sha256": "b9f13de68b59d3a5c99df816eca0ddf6bedb338edcd66bcbcc75ddc8d2246978"
+    },
+    "official_position_table": {
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "retained_path": "runtime/third-party-evidence/hbdk-water-2026-10-20/tencent-1.html",
+      "retained_sha256": "595c52ebe4d577e3bb5a0b5fa263adb34d7f01faafb54b18edc027075498da08",
+      "network_response_sha256": "19d9ce437efb867438af18d10ff2fefe92a23cafd5fa4b1fd033bde689cb4bd2"
+    },
+    "official_registration_form": {
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "retained_path": "runtime/third-party-evidence/hbdk-water-2026-10-20/tencent-2.html",
+      "retained_sha256": "efb1b8fa306aee106dfd5b7729fa84aeb91311a9d5a087f335ff3a08e4b279cd",
+      "network_response_sha256": "3e523e4158b54b52e20f606748c5206c2d0efe12106c63a03cb8bd3d936cd263"
+    },
+    "screenshots": [
+      {
+        "kind": "official_notice_visible",
+        "path": "runtime/third-party-evidence/hbdk-water-2026-10-20/official-notice-visible.png",
+        "sha256": "ff86edd2f54c44b11465eb5ef926ee1b27a34b076e6305a1485514637113c633"
+      },
+      {
+        "kind": "official_position_table_visible",
+        "path": "runtime/third-party-evidence/hbdk-water-2026-10-20/official-position-table-visible.png",
+        "sha256": "b04caa3ea751653af2c7adbc89b09765390f503c4ee72c9f54b73844885bbedb"
+      }
+    ]
+  },
+  "notice_facts": {
+    "published_date": "2026-10-15",
+    "deadline_text": "自发布之日起30日内",
+    "resolved_deadline_date": "2026-11-14",
+    "deadline_policy": "asia_shanghai_calendar_days_after_publication",
+    "application_method": "现场报名或将报名表、简历、身份证、毕业证、学位证等材料发送至 sshdk@hbdkjt.cn，并按公告要求电话确认。",
+    "official_application_url": null,
+    "application_url_policy": "没有 HTTP 报名入口，不伪造链接；学生端仅提供官方公告和岗位表链接。"
+  },
+  "rows": [
+    {
+      "row_number": 1,
+      "department": "工程部",
+      "title": "一级建造师（水利）",
+      "headcount": 2,
+      "major_requirement": "土木工程、水利水电工程及相关专业",
+      "degree_requirement": "本科及以上",
+      "age_requirement": "25-40岁",
+      "work_experience": "有相关中级职称优先",
+      "official_row_locator": "附件1/第1行",
+      "student_layer_assessment": "not_public",
+      "major_match": "out_of_scope",
+      "reason": "岗位与专业要求明确指向水利建造、土木和水利水电工程，未出现四个核心专业或有地学上下文的兼容表达。"
+    },
+    {
+      "row_number": 2,
+      "department": "工程部",
+      "title": "一级建造师（市政）",
+      "headcount": 1,
+      "major_requirement": "土木工程及相关专业",
+      "degree_requirement": "本科及以上",
+      "age_requirement": "25-40岁",
+      "work_experience": "有相关中级职称优先",
+      "official_row_locator": "附件1/第2行",
+      "student_layer_assessment": "not_public",
+      "major_match": "out_of_scope",
+      "reason": "岗位与专业要求明确指向市政建造、土木工程，未出现四个核心专业或有地学上下文的兼容表达。"
+    },
+    {
+      "row_number": 3,
+      "department": "工程部",
+      "title": "注册土木工程师（岩土）",
+      "headcount": 2,
+      "major_requirement": "勘查技术与工程、土木工程、水利水电工程及相关专业",
+      "degree_requirement": "本科及以上",
+      "age_requirement": "25-40岁",
+      "work_experience": "有相关中级职称优先，有高级职称可相应放宽限制条件",
+      "official_row_locator": "附件1/第3行",
+      "student_layer_assessment": "broad_geoscience_match",
+      "major_match": "broad_geoscience",
+      "reason": "岗位名称明确为岩土方向，专业要求含勘查技术与工程；属于地学上下文中的宽泛匹配，不等于四个核心专业精确匹配。"
+    }
+  ],
+  "publication_decision": {
+    "official_content_verified": true,
+    "eligible_rows_for_isolated_trial": [3],
+    "rows_rejected_by_major_gate": [1, 2],
+    "formal_jobs_created_in_formal_database": 0,
+    "student_visible_in_formal_database": false,
+    "reason": "证据链完整，但本报告只登记官方证据和逐行门禁结果；正式岗位试投必须在隔离数据库执行并经测试确认。"
+  },
+  "policy_checks": {
+    "third_party_url_as_application": false,
+    "robots_or_login_bypass": false,
+    "screenshot_only_evidence_used_as_sole_source": false,
+    "official_notice_and_linked_table_bound": true,
+    "formal_database_written": false,
+    "server_deployment": false
+  }
+}

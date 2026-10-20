@@ -1668,6 +1668,30 @@
     }
   },
   {
+    "id": "hbdk-water-official-recruitment",
+    "name": "河北水文四队地质勘查有限公司官方招聘公告",
+    "publisher": "河北水文四队地质勘查有限公司",
+    "homepage_url": "https://www.hbdkjt.cn/",
+    "source_type": "manual",
+    "category": "水文地质与工程勘查",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "allowed_hosts": ["www.hbdkjt.cn", "hbdkjt.cn"],
+      "allow_shared_source_url": true,
+      "publication_category": "水文地质与工程勘查",
+      "automation_status": "manual_official_evidence_verified",
+      "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/382.html",
+      "official_table_url": "https://docs.qq.com/doc/DTGVxbUdBVWFUT0tZ",
+      "official_application_url": null,
+      "official_attachment_urls": [
+        "https://docs.qq.com/doc/DTGVxbUdBVWFUT0tZ",
+        "https://docs.qq.com/doc/DTFNLc25iZE9RdHJV"
+      ],
+      "note": "官方公告链接至腾讯文档附件1岗位表和附件2报名表；报名方式为现场或发送材料至 sshdk@hbdkjt.cn，未伪造 HTTP 报名链接。三行岗位须逐行按专业匹配后再决定是否发布。"
+    }
+  },
+  {
     "id": "dingxi-party-recruitment",
     "name": "定西党建网人才引进公告与官方附件",
     "publisher": "中共定西市委组织部",

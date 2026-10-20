@@ -1,0 +1,45 @@
+{
+  "phase": "phase4",
+  "operation": "isolated_candidate_registration_and_publication_trial",
+  "executed_at": "2026-10-20T18:37:49Z",
+  "formal_database": {
+    "path": "runtime/job_hub.sqlite3",
+    "sha256_before": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
+    "sha256_after": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
+    "written": false
+  },
+  "isolated_database": {
+    "path": "runtime/phase4-isolated-hbdk-water/job_hub.sqlite3",
+    "sha256": "ea972e696aa3b95c7a98597a507a32923d3536d818c89491abe107a31ee044db",
+    "integrity_check": "ok",
+    "base": "runtime/job_hub.sqlite3"
+  },
+  "evidence_report": "docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
+  "candidate_funnel": {
+    "candidate_count": 3,
+    "official_content_verified_count": 1,
+    "rejected_major_mismatch_rows": [1, 2],
+    "published_count_in_isolated_database": 1,
+    "published_job_id_in_isolated_database": 5439
+  },
+  "published_row": {
+    "row_number": 3,
+    "title": "注册土木工程师（岩土）",
+    "publication_status": "student_eligible",
+    "publication_layer": "broad_geoscience_match",
+    "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/382.html",
+    "official_table_url": "https://docs.qq.com/doc/DTGVxbUdBVWFUT0tZ",
+    "official_application_url": null,
+    "deadline_date": "2026-11-14",
+    "student_label": "专业范围宽泛"
+  },
+  "policy_checks": {
+    "third_party_url_as_application": false,
+    "official_evidence_bound": true,
+    "out_of_scope_rows_published": false,
+    "formal_database_written": false,
+    "server_deployment": false,
+    "robots_or_login_bypass": false
+  },
+  "audit_command": "python scripts/audit_phase4_third_party_funnel.py --database runtime/phase4-isolated-hbdk-water/job_hub.sqlite3 --output runtime/phase4-isolated-hbdk-water/funnel.json"
+}

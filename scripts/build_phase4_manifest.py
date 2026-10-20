@@ -52,6 +52,8 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json",
     ":!docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json",
     ":!docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json",
+    ":!docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
+    ":!docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
 )
 
 
@@ -238,6 +240,8 @@ def main() -> None:
     huatu_hbdk_geophysics = ROOT / "docs" / "current" / "phase4-third-party-huatu-hbdk-geophysics-2026-10-19.json"
     hbdk_official_table = ROOT / "docs" / "current" / "phase4-third-party-hbdk-official-table-2026-10-19.json"
     hbdk_registration = ROOT / "docs" / "current" / "phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
+    hbdk_water_evidence = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-official-evidence-2026-10-20.json"
+    hbdk_water_trial = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-trial-2026-10-21.json"
     huatu_cnpc_chuanqing = ROOT / "docs" / "current" / "phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json"
     cnpc_official_recheck = ROOT / "docs" / "current" / "phase4-cnpc-official-recheck-2026-10-20.json"
     sxdkj_official_recheck = ROOT / "docs" / "current" / "phase4-third-party-sxdkj-official-recheck-2026-10-20.json"
@@ -344,6 +348,8 @@ def main() -> None:
             "phase4_third_party_huatu_hbdk_geophysics": sha256(huatu_hbdk_geophysics),
             "phase4_third_party_hbdk_official_table": sha256(hbdk_official_table),
             "phase4_third_party_hbdk_candidate_registration": sha256(hbdk_registration),
+            "phase4_third_party_hbdk_water_official_evidence": sha256(hbdk_water_evidence),
+            "phase4_third_party_hbdk_water_trial": sha256(hbdk_water_trial),
             "phase4_third_party_huatu_cnpc_chuanqing": sha256(huatu_cnpc_chuanqing),
             "phase4_cnpc_official_recheck": sha256(cnpc_official_recheck),
             "phase4_third_party_sxdkj_official_recheck": sha256(sxdkj_official_recheck),
@@ -419,6 +425,8 @@ def main() -> None:
             "cnpc_chuanqing_candidate_rows": len(huatu_cnpc_chuanqing_payload.get("candidates", [])),
             "cnpc_chuanqing_official_recovery_status": huatu_cnpc_chuanqing_payload.get("official_recovery", {}).get("status"),
             "cnpc_chuanqing_formal_jobs_created": 0,
+            "hbdk_water_official_evidence": "docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
+            "hbdk_water_isolated_trial": "docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
         "three_oil_entry_evidence": {
