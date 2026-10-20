@@ -167,7 +167,9 @@ def main() -> None:
     pre_conversion_audit_backup = ROOT / "backups" / "job_hub-pre-phase4-conversion-audit-20261018.sqlite3"
     pre_local_repair_backup = ROOT / "backups" / "job_hub-pre-phase4-deadline-location-repair-20261019.sqlite3"
     current_after_local_server_stop_backup = ROOT / "backups" / "job_hub-phase4-current-after-local-server-stop-20261019.sqlite3"
-    current_backup = ROOT / "backups" / "job_hub-phase4-current-20261019.sqlite3"
+    # The current backup must be replaced whenever the local database schema or
+    # evidence changes; never silently compare runtime data with an older hash.
+    current_backup = ROOT / "backups" / "job_hub-phase4-current-20261020.sqlite3"
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
     database["pre_third_party_candidate_backup"] = {
         "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
@@ -190,7 +192,7 @@ def main() -> None:
         "sha256": sha256(current_after_local_server_stop_backup),
     }
     database["current_backup"] = {
-        "path": "backups/job_hub-phase4-current-20261019.sqlite3",
+        "path": "backups/job_hub-phase4-current-20261020.sqlite3",
         "sha256": sha256(current_backup),
         "matches_runtime_database": sha256(current_backup) == database["sha256"],
     }
