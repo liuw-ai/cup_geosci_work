@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T20:27:21Z",
+  "generated_at": "2026-10-20T20:41:20Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "3e7d0502333bf13edb85a1e9171963dae123ba73",
+  "git_sha": "9490d07d8ea5270c3f72deafed5ac490f55cebdb",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "291d77cf85044fc549f86d9cc3bab94df958b2c533a02665b8605f4419189206"
+      "sha256": "39e86d529489e47efa9744eb28cfa32abc7b74aa67218b45f7199e8a1af24465"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -374,8 +374,8 @@
       "sha256": "d4b1dff3555457a61262b2a0eb62ecb51addfffdf5079b104d75d67ecfd060ef"
     },
     "phase4_cnooc_api_unit_evidence": {
-      "path": "docs/current/phase4-cnooc-api-unit-evidence-2026-10-20.json",
-      "sha256": "e1dc7cad501b4d9327414ea0f8c7d86eefdbbb342b5ee42839d481b8bf8f1d15"
+      "path": "docs/current/phase4-cnooc-api-unit-evidence-2026-10-21.json",
+      "sha256": "1e78cbb5a519ca003789c6b8fadacd087bd0e8899145649326e275c8ba7dbb2b"
     },
     "phase4_sinopec_display_cross_group_audit": {
       "path": "docs/current/phase4-sinopec-display-cross-group-audit-2026-10-20.json",
@@ -867,8 +867,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 599,
-      "sha256": "6d990fe20c413bc98dec51c25ae3f2b39403882bad089dbaeff3421bf06be942"
+      "line_count": 600,
+      "sha256": "3c8339fb24932be385931e7ba84cae506e555ba281ebdda548f2d5e78ae3a95c"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -897,8 +897,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 481,
-      "sha256": "e47b0c78e2f5a43b476326d36ecfa3154b227094dac48713c00962a166ba7060"
+      "line_count": 483,
+      "sha256": "51ea08374efb2d0aecbf71fdcab5439caba7463e3d4a592ea999b9fab2a21e7e"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -927,8 +927,8 @@
     },
     {
       "path": "scripts/capture_phase4_cnooc_api_unit_evidence.py",
-      "line_count": 229,
-      "sha256": "cee32088d9bb88a110b349dd313ff242a978b4fa046c00e6f4125d7e01c4f1d6"
+      "line_count": 236,
+      "sha256": "e86678008f2d51bfd55ee09355b5f9683a0c35cf07c1a04637b9c053f1188cc5"
     },
     {
       "path": "scripts/capture_phase4_hbdk_official_table.py",
@@ -1012,8 +1012,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 276,
-      "sha256": "3f24ad714acca92dd12707f1612d456036e8ad2361b5c6aea52228a47358abda"
+      "line_count": 277,
+      "sha256": "4ba478679bb47aef253a2248c62fcde5a10b7fb2ec910e479a7dcdd06a52f031"
     },
     {
       "path": "tests/conftest.py",
