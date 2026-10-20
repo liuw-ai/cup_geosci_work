@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T18:08:45Z",
+  "generated_at": "2026-10-20T18:49:49Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "d8a706296425b111ffa31d421888286e264d87a5",
+  "git_sha": "9a22e2d55c3bc84d781389bf61366c82afdfa242",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -53,7 +53,7 @@
       "cnooc": 20
     },
     "three_oil_catalog_unit_count": 64,
-    "organization_registry_count": 332,
+    "organization_registry_count": 333,
     "official_confirmed_channel_count": 75
   },
   "three_oil_entry_matrix": {
@@ -312,6 +312,14 @@
     "phase4_third_party_hbdk_candidate_registration": {
       "path": "docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json",
       "sha256": "da07a5893f136d88905135a88fa6b83606dff3d70731e14e3eb76a01d8e9d7ea"
+    },
+    "phase4_third_party_hbdk_water_official_evidence": {
+      "path": "docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
+      "sha256": "b593b9a7c94fb5391b84d448ab6b7c6d3c4edeb9b6397bd915d9900dfd725599"
+    },
+    "phase4_third_party_hbdk_water_trial": {
+      "path": "docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
+      "sha256": "61a9cd3d795975e5c9a531cf33836e3dc6cc5ae207048bf0ed6a76ae844b5e60"
     },
     "phase4_third_party_huatu_cnpc_chuanqing": {
       "path": "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
@@ -850,8 +858,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 581,
-      "sha256": "9f845d70b587857504bae644c5c823a9ed681ea044d4706dc960b17491f5517a"
+      "line_count": 592,
+      "sha256": "d6638220ee22a64efa9cd5ffbec40cd5266c8c953edcbd3eba4b286d30d744a4"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -880,8 +888,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 464,
-      "sha256": "aa6738ab6e99fd676e96c4c39c085dc4a1514b3e69beb5036c573b8b15958dcb"
+      "line_count": 472,
+      "sha256": "06265636703db54fe64565e2b370a04d412028564daada74a4efc8269308fa7a"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -979,9 +987,14 @@
       "sha256": "230139a59703d89a1735586a331423711dbbe146807db898f131b078450abf4d"
     },
     {
+      "path": "scripts/trial_phase4_hbdk_water.py",
+      "line_count": 287,
+      "sha256": "c724a61aeefe7e2b0e6f11f7c1eeb045f3e6d15f961478461c4189a47753a9ef"
+    },
+    {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 267,
-      "sha256": "81c30d4474c9ffeb680b0fb1c0b18d28891472eaf95ff64d5ae0135e7536cbf7"
+      "line_count": 271,
+      "sha256": "07a09df7bc6843069b55f6433bf134de757aa2c9c4ee2fa2fdfdec542f67634f"
     },
     {
       "path": "tests/conftest.py",
@@ -1409,6 +1422,11 @@
       "sha256": "52c5088549d6c921e16d90accddf45596d095ff19428539f13dae634c1f66405"
     },
     {
+      "path": "tests/test_phase4_hbdk_water_trial.py",
+      "line_count": 30,
+      "sha256": "a3b6f5f3e84aa0adfe52f2d425124dc3d2bb136ae24fb41d307f47a3e4ce02d1"
+    },
+    {
       "path": "tests/test_phase4_huatu_cnpc_chuanqing.py",
       "line_count": 56,
       "sha256": "52ee3b0163c9861c9e2f21d51347a8639d77dcdc0752d4aa4fcc94a1f743af0a"
@@ -1659,6 +1677,7 @@
       "A second Huatu announcement was recovered to the Nanjing Planning and Natural Resources Bureau official notice, table URL, and application URL; its deadline had passed and row-level table evidence was unavailable, so no candidate or formal job was created.",
       "The Huatu Chuanqing high-level recruitment page yielded 12 row-level private candidates; it supplied a cnpc.com.cn application mailbox but no verifiable official notice, table, or application URL, so all 12 remain private pending official recovery.",
       "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
+      "The HBDK water-team official notice 382.html was captured with both linked Tencent documents; two civil-construction rows were rejected by the major gate and the rock-soil row was published only in an isolated trial database, not the formal runtime database.",
       "Historical snapshots remain archived and are not overwritten by current facts."
     ]
   }
