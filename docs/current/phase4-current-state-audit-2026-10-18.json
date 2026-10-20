@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T07:34:07Z",
+  "generated_at": "2026-10-20T08:03:37Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "5008150959d482fa1f1b1cf53afe80ca1d2a2768",
+  "git_sha": "4c53ce8fa96b38432bcf23fbb130a69d7e17b4d2",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "66829246d60fa71a8d21e388037eef2527f3bfcca7504f53e8a6477a2cc8d441"
+      "sha256": "45591020ef7303ecb67ca67b2c76d090919c79ac04b7d8d22015792e22b199ea"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -356,6 +356,10 @@
     "phase4_cnooc_geoscience_job_evidence": {
       "path": "docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json",
       "sha256": "2600afb33bad17ba4201e69dc7ecd25f30359b8d79b661a2b3595165eab99491"
+    },
+    "phase4_cnooc_shenzhen_job_evidence": {
+      "path": "docs/current/phase4-cnooc-shenzhen-job-evidence-2026-10-20.json",
+      "sha256": "d4b1dff3555457a61262b2a0eb62ecb51addfffdf5079b104d75d67ecfd060ef"
     },
     "phase4_three_oil_unit_entry_network_recheck": {
       "path": "docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json",
@@ -838,8 +842,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 552,
-      "sha256": "89057c7ea32138a60db21a288d6a4016cbf0de796432fafe18e3f8314be7eda1"
+      "line_count": 557,
+      "sha256": "2484ef3988002abe05af1d65847a77c29575c644341b9bd3c668e6e5d489bd6d"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
