@@ -95,6 +95,9 @@ def build_report() -> dict[str, Any]:
     cnooc_geoscience_job_evidence = _read("docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json")
     cnooc_shenzhen_job_evidence = _read("docs/current/phase4-cnooc-shenzhen-job-evidence-2026-10-20.json")
     three_oil_unit_entry_network_recheck = _read("docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json")
+    three_oil_homepage_probe = _read(
+        "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json"
+    )
     sinopec_company_intro_recheck = _read("docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json")
     hbdk_official_table = _read("docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json")
     hbdk_registration = _read("docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json")
@@ -318,6 +321,16 @@ def build_report() -> dict[str, Any]:
                     ),
                     "no_jobs_created": three_oil_official_homepage_entry_recheck.get("policy", {}).get("no_jobs_created"),
                     "catalog_changed": three_oil_official_homepage_entry_recheck.get("policy", {}).get("catalog_changed"),
+                },
+                "latest_registered_homepage_probe": {
+                    "registered_homepage_records": three_oil_homepage_probe.get("summary", {}).get("registered_homepage_records", 0),
+                    "unique_homepage_urls": three_oil_homepage_probe.get("summary", {}).get("unique_homepage_urls", 0),
+                    "accessible_html": three_oil_homepage_probe.get("summary", {}).get("classification_counts", {}).get("accessible_html", 0),
+                    "source_unavailable": three_oil_homepage_probe.get("summary", {}).get("classification_counts", {}).get("source_unavailable", 0),
+                    "units_with_recruitment_links": three_oil_homepage_probe.get("summary", {}).get("units_with_recruitment_links", 0),
+                    "jobs_collected": three_oil_homepage_probe.get("summary", {}).get("jobs_collected", 0),
+                    "formal_catalog_changed": three_oil_homepage_probe.get("summary", {}).get("formal_catalog_changed", False),
+                    "interpretation": "共享集团主页或集团公告导航不等于下属单位独立招聘入口；本次只记录入口健康，不创建岗位。",
                 },
             },
         },

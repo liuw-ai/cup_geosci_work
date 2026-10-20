@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T15:09:01Z",
+  "generated_at": "2026-10-20T15:19:53Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "3d2b4d4f71fad2f01eeffa99eb9cc893b21202ac",
-  "git_status_porcelain": "",
+  "git_sha": "e9e5f8467cbf4938f63e8facb126982d1f8ba01e",
+  "git_status_porcelain": "M docs/current/phase4-three-oil-homepage-probe-2026-10-19.json\n M scripts/audit_phase4_completion.py\n M tests/test_phase4_completion_audit.py",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "05a3dbd651e490b4b222a94521e99ef9d67ab52da1dded9d031f66bca506ce9e"
+      "sha256": "0e8394e84e077cba203fedecc8fe5da4c08e7b78519a9ddf230963ad82bb018f"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -347,7 +347,7 @@
     },
     "phase4_three_oil_homepage_probe": {
       "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
-      "sha256": "9b64fc1629c04037e22f9d6a2b0bee74cb53807f714932ad212cf6d22c5a8e5f"
+      "sha256": "0bb8101cc1172887360c9a1c11c26cd77301de0d2567474d39f03e8b970af964"
     },
     "phase4_three_oil_observed_roster": {
       "path": "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
@@ -845,8 +845,8 @@
     },
     {
       "path": "scripts/audit_phase4_completion.py",
-      "line_count": 398,
-      "sha256": "32b9d42479d2e729406afd6de65d309b353a282ffbcfd694693069ae3e0c159a"
+      "line_count": 411,
+      "sha256": "27ae1fb293ad60c9cd649cf12047fb2cc9eefc4b9d3ffc3fb46e321680460068"
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
@@ -1385,8 +1385,8 @@
     },
     {
       "path": "tests/test_phase4_completion_audit.py",
-      "line_count": 38,
-      "sha256": "f03a7641fb08fd09ec20e2499b4e7d1f6192aa8af1a1b8ea9bcec8d8874cd4ba"
+      "line_count": 44,
+      "sha256": "3e77459b994ab7596209be855844c4ed8b2547d9cf4d88fb7302705f650f30a1"
     },
     {
       "path": "tests/test_phase4_current_audit.py",

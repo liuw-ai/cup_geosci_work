@@ -36,3 +36,9 @@ def test_phase4_completion_audit_is_requirement_scoped_and_not_complete() -> Non
     assert homepage["recruitment_entries_proven"] == 0
     assert homepage["no_jobs_created"] is True
     assert homepage["catalog_changed"] is False
+    homepage_probe = three_oil["facts"]["latest_registered_homepage_probe"]
+    assert homepage_probe["registered_homepage_records"] == 20
+    assert homepage_probe["unique_homepage_urls"] == 17
+    assert homepage_probe["units_with_recruitment_links"] == 4
+    assert homepage_probe["jobs_collected"] == 0
+    assert homepage_probe["formal_catalog_changed"] is False

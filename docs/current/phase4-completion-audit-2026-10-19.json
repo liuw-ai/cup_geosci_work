@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T15:09:05Z",
+  "generated_at": "2026-10-20T15:19:57Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -266,6 +266,16 @@
           "recruitment_entries_proven": 0,
           "no_jobs_created": true,
           "catalog_changed": false
+        },
+        "latest_registered_homepage_probe": {
+          "registered_homepage_records": 20,
+          "unique_homepage_urls": 17,
+          "accessible_html": 4,
+          "source_unavailable": 16,
+          "units_with_recruitment_links": 4,
+          "jobs_collected": 0,
+          "formal_catalog_changed": false,
+          "interpretation": "共享集团主页或集团公告导航不等于下属单位独立招聘入口；本次只记录入口健康，不创建岗位。"
         }
       }
     },
@@ -302,15 +312,16 @@
     },
     {
       "id": "manifest_and_deployment_boundary",
-      "status": "pass",
+      "status": "fail",
       "evidence": [
         "docs/current/phase4-release-manifest.json"
       ],
       "facts": {
-        "manifest_boundary_fields_valid": true,
+        "manifest_boundary_fields_valid": false,
         "production_deployment": "not_performed",
         "automation_status": "paused",
         "release_blockers": [
+          "working_tree_contains_uncommitted_or_untracked_changes",
           "third_party_batch_expansion_incomplete",
           "three_oil_external_identity_evidence_pending",
           "three_oil_unit_entry_evidence_incomplete",
@@ -336,7 +347,8 @@
     "local_phase4_validation_not_approved_for_server",
     "third_party_batch_expansion_incomplete",
     "three_oil_external_identity_evidence_pending",
-    "three_oil_unit_entry_evidence_incomplete"
+    "three_oil_unit_entry_evidence_incomplete",
+    "working_tree_contains_uncommitted_or_untracked_changes"
   ],
   "policy": "A pass means the scoped evidence exists; blocked or partial items remain release blockers and cannot be inferred complete from tests alone."
 }

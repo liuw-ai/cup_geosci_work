@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-20T15:09:07Z",
+  "generated_at": "2026-10-20T15:19:59Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "3d2b4d4f71fad2f01eeffa99eb9cc893b21202ac",
-  "working_tree_dirty": false,
+  "git_sha": "e9e5f8467cbf4938f63e8facb126982d1f8ba01e",
+  "working_tree_dirty": true,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
   "dockerfile_sha256": {
@@ -30,7 +30,7 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "e2288454c1cc9b83db0674d432cb32780a82f0f877a0adbcf061260a44ab5b43",
+    "phase4_current_state_audit": "42a145c7813118d576559ea0a04b8381a4193ad4c670e185b6ce969000ce5c95",
     "phase4_document_consistency": "90f088aa8ece5957fb929e3a1dc6e9344436bde4d93e607d540fc21a719ca22e",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
@@ -46,7 +46,7 @@
     "phase4_third_party_access_recheck": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d",
     "phase4_third_party_official_recovery_recheck": "4c7e1bfbcdd94d7f2a24d8032388a57f4c586cc8294b5b0c1e2029721164f409",
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
-    "phase4_third_party_funnel": "05a3dbd651e490b4b222a94521e99ef9d67ab52da1dded9d031f66bca506ce9e",
+    "phase4_third_party_funnel": "0e8394e84e077cba203fedecc8fe5da4c08e7b78519a9ddf230963ad82bb018f",
     "phase4_local_web_recheck": "1ce3aa772e20a7216ecf9bcc86f54c121ef1457fa896804f636d73a3aacb017f",
     "phase4_local_web_live_validation": "0b36651d4c2ec9e3a39634f285bc61129a192f15a5dbd76d89f83793d4bb05a0",
     "phase4_huatu_table_discovery": "007ba8d74b26bfbbea076077344476dc5aa083d6ce5a6bed3b1ff39efc48f2ca",
@@ -67,7 +67,7 @@
     "phase4_main_record": "4af1201ea70b2e8da2977ffe3c2dfed8582a68172c64e192006b875fab6f1c2b",
     "phase4_local_validation": "9ba44b63fa37782a9a59f3dda0c918304b811940dfe3e16b0a138358f6caab34",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
-    "phase4_three_oil_homepage_probe": "9b64fc1629c04037e22f9d6a2b0bee74cb53807f714932ad212cf6d22c5a8e5f",
+    "phase4_three_oil_homepage_probe": "0bb8101cc1172887360c9a1c11c26cd77301de0d2567474d39f03e8b970af964",
     "phase4_three_oil_observed_roster": "aecf4e0083cf5fcbbee1c6af3446771611b2043e2bdecc60bab8f5463be52b9a",
     "phase4_cnooc_geoscience_job_evidence": "2600afb33bad17ba4201e69dc7ecd25f30359b8d79b661a2b3595165eab99491",
     "phase4_three_oil_unit_entry_network_recheck": "35d6c06bd4cec859c3faae458e8a98647db15cdbe372006acbdbaf94afc83f2e",
@@ -76,8 +76,8 @@
     "phase4_cnooc_api_unit_evidence": "e1dc7cad501b4d9327414ea0f8c7d86eefdbbb342b5ee42839d481b8bf8f1d15",
     "phase4_sinopec_display_cross_group_audit": "3a328ab63ea7f968193ab9589c8fb2062e62ce3cbe339282ad188ef3571c4622",
     "phase4_three_oil_official_homepage_entry_recheck": "55756e20e901b550344f90e846de525131f7e3243262755bb50463389967467e",
-    "phase4_completion_audit": "032e2a6d1b1a0d08a8acfc2493995dae8f599bcc0a1f34aa9a292a146ce22ff6",
-    "phase4_workspace_layout": "7dc7ac28974e601485da5693a0cebd3de472c834c6d54883536ff9bfc1e09321"
+    "phase4_completion_audit": "ea95db7db87ab0d393ffe083a6026fc107dd1bd47ad4ef9f09d75934f46faa04",
+    "phase4_workspace_layout": "559580d3c85b642e629bdabc898c44cae3725f53e405ff156fe1f522f9904b11"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -280,6 +280,7 @@
   "automation_status": "paused",
   "production_deployment": "not_performed",
   "release_blockers": [
+    "working_tree_contains_uncommitted_or_untracked_changes",
     "third_party_batch_expansion_incomplete",
     "three_oil_external_identity_evidence_pending",
     "three_oil_unit_entry_evidence_incomplete",
