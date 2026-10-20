@@ -93,6 +93,7 @@ def build_report() -> dict[str, Any]:
     cnooc_portal_live_recheck = _read("docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json")
     three_oil_official_homepage_entry_recheck = _read("docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json")
     cnooc_geoscience_job_evidence = _read("docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json")
+    cnooc_shenzhen_job_evidence = _read("docs/current/phase4-cnooc-shenzhen-job-evidence-2026-10-20.json")
     three_oil_unit_entry_network_recheck = _read("docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json")
     sinopec_company_intro_recheck = _read("docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json")
     hbdk_official_table = _read("docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json")
@@ -243,6 +244,7 @@ def build_report() -> dict[str, Any]:
                 "data/three_oil_organization_catalog.json",
                 "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
                 "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
+                "docs/current/phase4-cnooc-shenzhen-job-evidence-2026-10-20.json",
             ],
             "facts": {
                 "formal_catalog_units": entry_summary.get("formal_catalog_units", 0),
@@ -261,6 +263,14 @@ def build_report() -> dict[str, Any]:
                     "selected_unit": cnooc_geoscience_job_evidence.get("selected_unit_evidence", {}).get("unit"),
                     "geoscience_job_count": len(cnooc_geoscience_job_evidence.get("selected_unit_evidence", {}).get("geoscience_jobs", [])),
                     "independent_unit_entry_proven": cnooc_geoscience_job_evidence.get("publication_decision", {}).get("independent_unit_entry_proven"),
+                },
+                "latest_cnooc_shenzhen_job_evidence": {
+                    "selected_unit": cnooc_shenzhen_job_evidence.get("selected_unit", {}).get("canonical_name"),
+                    "job_card_count": cnooc_shenzhen_job_evidence.get("official_job_cards", {}).get("job_card_count", 0),
+                    "application_url_count": cnooc_shenzhen_job_evidence.get("official_job_cards", {}).get("application_url_count", 0),
+                    "geoscience_job_count": len(cnooc_shenzhen_job_evidence.get("geoscience_job_evidence", [])),
+                    "independent_unit_entry_proven": cnooc_shenzhen_job_evidence.get("evidence_boundary", {}).get("independent_unit_recruitment_portal_proven", False),
+                    "student_jobs_created": cnooc_shenzhen_job_evidence.get("evidence_boundary", {}).get("student_jobs_created", 0),
                 },
                 "latest_bgp_entry_recheck": {
                     "catalog_id": cnpc_bgp_entry_recheck.get("catalog_id"),
