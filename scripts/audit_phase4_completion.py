@@ -91,6 +91,7 @@ def build_report() -> dict[str, Any]:
     cnooc_energy_development_browser_recheck = _read("docs/current/phase4-cnooc-energy-development-browser-recheck-2026-10-20.json")
     cnooc_portal_unit_display_recheck = _read("docs/current/phase4-cnooc-portal-unit-display-recheck-2026-10-20.json")
     cnooc_geoscience_job_evidence = _read("docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json")
+    three_oil_unit_entry_network_recheck = _read("docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json")
     hbdk_official_table = _read("docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json")
     hbdk_registration = _read("docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
@@ -269,6 +270,13 @@ def build_report() -> dict[str, Any]:
                         "observed_unit_count": cnooc_portal_unit_display_recheck.get("observed_unit_count"),
                         "independent_portals_proven": cnooc_portal_unit_display_recheck.get("interpretation", {}).get("independent_unit_recruitment_portals_proven"),
                         "catalog_units_not_observed": cnooc_portal_unit_display_recheck.get("formal_catalog_units_not_observed_in_current_unit_tabs", []),
+                    },
+                    "latest_unit_entry_network_recheck": {
+                        "checked": three_oil_unit_entry_network_recheck.get("summary", {}).get("checked", 0),
+                        "http_success": three_oil_unit_entry_network_recheck.get("summary", {}).get("http_success", 0),
+                        "source_unavailable": three_oil_unit_entry_network_recheck.get("summary", {}).get("source_unavailable", 0),
+                        "catalog_changed": three_oil_unit_entry_network_recheck.get("summary", {}).get("catalog_changed", False),
+                        "interpretation": "网络失败只标记来源暂时不可用，不覆盖既有官方入口证据，也不创建或撤回岗位。",
                     },
                 },
             },
