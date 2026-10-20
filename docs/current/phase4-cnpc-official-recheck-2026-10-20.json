@@ -1,0 +1,55 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-20T06:44:04Z",
+  "verification_mode": "bounded_read_only_http_recheck",
+  "policy": "仅复核已登记的中国石油官方入口；不绕过 412、验证码、TLS 或网络限制，不采集岗位、不下载附件，不把网络失败解释为入口不存在。",
+  "user_agent": "CUPB-Geoscience-Job-Hub/phase4-readonly",
+  "entries": [
+    {
+      "catalog_id": "cnpc-campus",
+      "canonical_name": "中国石油招聘平台",
+      "url": "https://zhaopin.cnpc.com.cn/",
+      "status": "source_unavailable",
+      "http_status": 412,
+      "bytes": 3434,
+      "content_type": "text/html; charset=utf-8",
+      "interpretation": "官方入口返回 412，未读取岗位内容；既有官方入口登记保持有效。"
+    },
+    {
+      "catalog_id": "cnpc-corporate-recruitment",
+      "canonical_name": "中国石油天然气集团有限公司招聘入口",
+      "url": "https://www.cnpc.com.cn/cnpc/zp/",
+      "status": "source_unavailable",
+      "http_status": 412,
+      "bytes": 3446,
+      "content_type": "text/html; charset=utf-8",
+      "interpretation": "官方入口返回 412，未读取岗位内容；不据此判断没有岗位。"
+    },
+    {
+      "catalog_id": "cnpc-sichuan-changqing-drilling",
+      "canonical_name": "中国石油集团川庆钻探工程有限公司",
+      "url": "https://cqdrilling.cnpc.com.cn/",
+      "status": "source_unavailable",
+      "error_class": "SSLError",
+      "interpretation": "TLS 握手失败，未下载内容；不据此判断没有官方公告或岗位。"
+    },
+    {
+      "catalog_id": "cnpc-corporate-recruitment-2024",
+      "canonical_name": "中国石油天然气集团有限公司招聘入口",
+      "url": "https://www.cnpc.com.cn/cnpc/zp/2024/",
+      "status": "source_unavailable",
+      "http_status": 412,
+      "bytes": 3456,
+      "content_type": "text/html; charset=utf-8",
+      "interpretation": "官方入口返回 412，未读取岗位内容；不创建岗位或候选线索。"
+    }
+  ],
+  "summary": {
+    "checked": 4,
+    "http_success": 0,
+    "official_job_rows_created": 0,
+    "candidate_leads_created": 0,
+    "catalog_changed": false,
+    "server_deployment": false
+  }
+}

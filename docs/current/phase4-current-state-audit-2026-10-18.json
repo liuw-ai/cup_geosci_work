@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T06:20:54Z",
+  "generated_at": "2026-10-20T06:46:37Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "30b684925f8fc8123c16a62ff951f58846dea8ca",
-  "git_status_porcelain": "",
+  "git_sha": "b06213134de4455c866b435629e17474a2d546c5",
+  "git_status_porcelain": "M scripts/build_phase4_manifest.py\n M scripts/verify_phase4_manifest.py\n?? docs/current/phase4-cnpc-official-recheck-2026-10-20.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "8bf32db70607cacd67cb7a44a9e61441fb02eceb1932dbcd876028e2832727bf"
+      "sha256": "d6a2386ead699ca9529dbb15ceb2b932073864ae1f4d24b47b6afb7c53ee145e"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -863,8 +863,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 450,
-      "sha256": "e3da987d7e64cdf6a9fae82b4ec3d1cc6cef659669c413b999712921d85d42c2"
+      "line_count": 452,
+      "sha256": "58a8b215d855e46911c28e72cd3216b3c0c3435b378035d140d71ab66d194acf"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -958,8 +958,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 258,
-      "sha256": "4f059c0f96e28aa5c52d5621699de3ccbba0fdd0f28740792d0eac438261fa04"
+      "line_count": 259,
+      "sha256": "fc3529c43db3a525f5ae26134945bf57ccf319de705e9fd49ad0251674f46e9e"
     },
     {
       "path": "tests/conftest.py",
