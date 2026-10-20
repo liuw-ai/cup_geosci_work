@@ -449,12 +449,12 @@ def main() -> None:
             "latest_cnooc_api_unit_evidence": "docs/current/phase4-cnooc-api-unit-evidence-2026-10-21.json",
             "latest_official_homepage_entry_recheck": "docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json",
             "cnooc_units_with_active_job_evidence": int(
-                json.loads(cnooc_unit_evidence.read_text(encoding="utf-8"))
+                json.loads(cnooc_api_unit_evidence.read_text(encoding="utf-8"))
                 .get("summary", {})
                 .get("catalog_units_observed", 0)
             ),
             "cnooc_observed_job_cards": int(
-                json.loads(cnooc_unit_evidence.read_text(encoding="utf-8"))
+                json.loads(cnooc_api_unit_evidence.read_text(encoding="utf-8"))
                 .get("summary", {})
                 .get("official_job_card_count", 0)
             ),
