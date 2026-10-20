@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T22:59:53Z",
+  "generated_at": "2026-10-20T23:28:40Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "4dbe95c4ae3c8ac30f923647457e7cb89edc3dfb",
+  "git_sha": "7747483a68eeb03d42de824323a746983d162573",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -156,12 +156,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "a63872133783244a2ccf8ca22668ead00ea159928142c25a9887285969760165"
+        "sha256": "1588fda6a408ed17b5ce51a195aa4ae4b25632ed04d7044482370fe5de26f80f"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-21.json",
         "exists": true,
-        "sha256": "a26d5a68b5b79fe67c0a672286ce42ab46aabf7e59d4009021346a4dee41af23"
+        "sha256": "c50c1bc0618862b85346d394a755464dbcb4f360b655d6c2b495c210941af3c4"
       }
     ],
     "metadata_documents": [
@@ -217,7 +217,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-21.json",
-      "sha256": "a26d5a68b5b79fe67c0a672286ce42ab46aabf7e59d4009021346a4dee41af23"
+      "sha256": "c50c1bc0618862b85346d394a755464dbcb4f360b655d6c2b495c210941af3c4"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -269,7 +269,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "37caa00f63c90dfc37f57bb526ebb66b0936c1f341e28f75d98d451ed04b4b23"
+      "sha256": "6b09ab779db37b9b1d2a31f2723b2d6a1bfee15a6c459ac9942dbb234e60053b"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -397,7 +397,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "a63872133783244a2ccf8ca22668ead00ea159928142c25a9887285969760165"
+      "sha256": "1588fda6a408ed17b5ce51a195aa4ae4b25632ed04d7044482370fe5de26f80f"
     }
   },
   "code_inventory": [
@@ -538,8 +538,8 @@
     },
     {
       "path": "job_hub/db.py",
-      "line_count": 5826,
-      "sha256": "350169319884ad066fb51b53f7067d85cad0215a609940c1ef714f9c0120de64"
+      "line_count": 5823,
+      "sha256": "6ef900372e3985e51007b7560e662095c0015094b7e1c0e1ec7b99098940f699"
     },
     {
       "path": "job_hub/discovery.py",
@@ -698,8 +698,8 @@
     },
     {
       "path": "job_hub/phase3_policy.py",
-      "line_count": 301,
-      "sha256": "ca489645203762ed5b6db781607e36c1a1ff46b3682eb388732761a541e73b9a"
+      "line_count": 308,
+      "sha256": "47ed4e2e1bd06f35fb331df2e9b5db7e583b4015857cd68e9db3658bd65b5be6"
     },
     {
       "path": "job_hub/pipeline.py",
@@ -1413,8 +1413,8 @@
     },
     {
       "path": "tests/test_phase3_policy.py",
-      "line_count": 83,
-      "sha256": "feb1951688237bcc23ceeba6beb202fc9cded052380ff766b22bb012ca7ab54a"
+      "line_count": 90,
+      "sha256": "6014ff42572f354ae8b81bac77b2b990ef3bfdd2501f6ec4e6b9456c9c78d984"
     },
     {
       "path": "tests/test_phase4_cgs_trial.py",
@@ -1613,8 +1613,8 @@
     },
     {
       "path": "tests/test_source_freshness.py",
-      "line_count": 616,
-      "sha256": "7f1fff336644f22d3f0e4eee2fbf9bd1fa12476127f2d758c6da089789cbf6cc"
+      "line_count": 630,
+      "sha256": "a450df0c296f18c999c0736bd67a8e408cadb6661f54bc511dd5a6b8e0909eea"
     },
     {
       "path": "tests/test_source_funnel.py",
