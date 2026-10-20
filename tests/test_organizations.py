@@ -89,6 +89,17 @@ def test_real_organization_registry_is_loadable_and_keeps_industry_roles_separat
     )
 
 
+def test_organization_role_labels_use_neutral_user_facing_vocabulary() -> None:
+    registry = load_organization_registry()
+    rows = organization_matrix_rows(registry)
+    labels = {row["organization_role_label"] for row in rows}
+
+    assert "运营/资产单位" in labels
+    assert "集团技术与专业服务单位" in labels
+    assert "内部服务单位" not in labels
+    assert "法人雇主" not in labels
+
+
 def test_organization_contract_rejects_unknown_source_cycle_and_invalid_primary_state() -> None:
     root = _organization("root")
     with pytest.raises(ContractValidationError, match="unknown source_id"):

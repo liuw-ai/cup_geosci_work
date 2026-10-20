@@ -36,11 +36,13 @@ ORGANIZATION_ROLE_NORMALIZATION = {
 }
 ORGANIZATION_ROLE_LABELS = {
     "group": "集团",
-    "operating_company": "运营公司",
+    # These labels are the user-facing vocabulary. The stored role values
+    # remain backward-compatible identifiers used by the catalog importer.
+    "operating_company": "运营/资产单位",
     "regional_branch": "地区分公司",
     "research_institute": "研究院",
-    "internal_service_unit": "内部服务单位",
-    "external_service_provider": "外部服务商",
+    "internal_service_unit": "集团技术与专业服务单位",
+    "external_service_provider": "外部专业服务单位",
     "refining_company": "炼化单位",
     "sales_company": "销售单位",
     "financial_support_unit": "金融与支撑单位",
