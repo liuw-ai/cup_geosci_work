@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T02:03:35Z",
+  "generated_at": "2026-10-20T02:28:12Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "d1a61b5b6c05eb5e509877b1dbb18421b2fa5048",
+  "git_sha": "0127d1072de4adbda0cc32cc2e54ba704f0cea2b",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "f13128154a1f3ba42c1c8e8f5c111952c49851978739d356381a1ba3ad5ef117"
+      "sha256": "060c02407090d3f60f07cde0c4dc462e487f64dc241f506f6c9735f649001fa0"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -332,6 +332,10 @@
     "phase4_cnooc_portal_unit_display_recheck": {
       "path": "docs/current/phase4-cnooc-portal-unit-display-recheck-2026-10-20.json",
       "sha256": "ef30acba459f29887c8a8715a0bb3d4e91bd0602ab8f0ab4a6aef76b07831ad0"
+    },
+    "phase4_cnooc_portal_live_recheck": {
+      "path": "docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json",
+      "sha256": "6de1f90591e169dc25b79af57c4c63b99b579e6cb158ad6889ac879bde5e3fd4"
     },
     "phase4_local_db_write_incident": {
       "path": "docs/current/phase4-local-db-write-incident-2026-10-19.json",
@@ -825,13 +829,13 @@
     },
     {
       "path": "scripts/audit_phase4_completion.py",
-      "line_count": 365,
-      "sha256": "a684a41109210e6678ad8dd4d43a112940526f6eb12aad929d6f2bc28ec29f58"
+      "line_count": 377,
+      "sha256": "835762afea4eaed0909f9413eccc94c1eae51abb7f642184b62a99701672b21f"
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 540,
-      "sha256": "d10a84a73f1fc8a1bd6c3736c00d0c9c917afc3055a06f48505142646bcbc592"
+      "line_count": 546,
+      "sha256": "f9f8b374d955989a7290a1cbd6a45d630500f140fb1a35b8bca7ef79eaee5821"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -855,8 +859,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 439,
-      "sha256": "cda8e63a4f79b70d636b18bcc4353e29b54deddcd99eff62a2611c8223f422e2"
+      "line_count": 443,
+      "sha256": "fde6c6d31b9352bbae0259015fbdd20d43d45aa892c403d7b9e5219deb83a75e"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -950,8 +954,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 253,
-      "sha256": "473917377e9bef1bf6952dfc993e9c3b34e34673ac42d4031a59d6c1677916f6"
+      "line_count": 255,
+      "sha256": "2591b1dd010b23ee187e6706fd8f18dabd8aacfb198db5c4f11d2288acdf28b3"
     },
     {
       "path": "tests/conftest.py",

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T02:03:39Z",
+  "generated_at": "2026-10-20T02:28:15Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -226,6 +226,17 @@
               "中国海洋石油有限公司",
               "中国海洋石油集团有限公司"
             ]
+          },
+          "latest_cnooc_portal_live_recheck": {
+            "checked_at": "2026-10-20T10:10:00+08:00",
+            "group_portal_url": "https://cnooc.zhaopin.com/",
+            "observed_unit_count": 16,
+            "selected_unit": "中海石油（中国）有限公司天津分公司",
+            "visible_job_card_count": 14,
+            "application_url_observed": true,
+            "independent_unit_recruitment_portals_proven": false,
+            "catalog_changed": false,
+            "jobs_created": false
           },
           "latest_unit_entry_network_recheck": {
             "checked": 4,
