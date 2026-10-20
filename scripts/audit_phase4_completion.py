@@ -91,6 +91,7 @@ def build_report() -> dict[str, Any]:
     cnooc_energy_development_browser_recheck = _read("docs/current/phase4-cnooc-energy-development-browser-recheck-2026-10-20.json")
     cnooc_portal_unit_display_recheck = _read("docs/current/phase4-cnooc-portal-unit-display-recheck-2026-10-20.json")
     cnooc_portal_live_recheck = _read("docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json")
+    three_oil_official_homepage_entry_recheck = _read("docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json")
     cnooc_geoscience_job_evidence = _read("docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json")
     three_oil_unit_entry_network_recheck = _read("docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json")
     sinopec_company_intro_recheck = _read("docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json")
@@ -297,6 +298,16 @@ def build_report() -> dict[str, Any]:
                     "independent_unit_recruitment_portals_proven": cnooc_portal_live_recheck.get("policy", {}).get("independent_unit_recruitment_portals_proven", False),
                     "catalog_changed": cnooc_portal_live_recheck.get("policy", {}).get("catalog_changed", False),
                     "jobs_created": cnooc_portal_live_recheck.get("policy", {}).get("no_jobs_created") is False,
+                },
+                "latest_official_homepage_entry_recheck": {
+                    "observations": len(three_oil_official_homepage_entry_recheck.get("observations", [])),
+                    "recruitment_entries_proven": sum(
+                        1
+                        for item in three_oil_official_homepage_entry_recheck.get("observations", [])
+                        if item.get("recruitment_navigation_observed") or item.get("unit_specific_recruitment_link_observed")
+                    ),
+                    "no_jobs_created": three_oil_official_homepage_entry_recheck.get("policy", {}).get("no_jobs_created"),
+                    "catalog_changed": three_oil_official_homepage_entry_recheck.get("policy", {}).get("catalog_changed"),
                 },
             },
         },

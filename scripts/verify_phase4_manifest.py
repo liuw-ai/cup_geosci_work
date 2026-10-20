@@ -37,6 +37,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-official-recovery-recheck-2026-10-19.json",
     ":!docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
     ":!docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json",
+    ":!docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json",
 )
 
 # These reports are deliberately excluded from the source-tree dirty flag
@@ -95,6 +96,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_three_oil_unit_entry_network_recheck": "docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json",
     "phase4_sinopec_company_intro_recheck": "docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json",
     "phase4_cnooc_portal_live_recheck": "docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json",
+    "phase4_three_oil_official_homepage_entry_recheck": "docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json",
 }
 
 

@@ -1,0 +1,53 @@
+{
+  "phase": "phase4",
+  "checked_at": "2026-10-20T11:18:52+08:00",
+  "verification_mode": "read_only_browser_dom",
+  "policy": {
+    "official_homepage_identity_is_not_recruitment_entry": true,
+    "no_https_certificate_bypass": true,
+    "no_jobs_created": true,
+    "catalog_changed": false
+  },
+  "observations": [
+    {
+      "catalog_id": "sinopec-jianghan",
+      "canonical_name": "中国石化江汉油田",
+      "official_homepage_url": "http://jhof.sinopec.com/jhof/",
+      "page_title": "江汉油田 - 首页",
+      "identity_signal": "页面正文称江汉油田为中国石化驻鄂央企，并介绍油气勘探开发等业务。",
+      "recruitment_navigation_observed": false,
+      "recruitment_links_observed": [],
+      "entry_interpretation": "official_site_checked_no_unit_entry_found"
+    },
+    {
+      "catalog_id": "sinopec-shengli",
+      "canonical_name": "中国石化胜利油田",
+      "official_homepage_url": "http://slof.sinopec.com/slof/",
+      "page_title": "胜利油田 - 首页",
+      "identity_signal": "页面正文称胜利油田由中国石化胜利石油管理局有限公司和中国石化股份有限公司胜利油田分公司构成，并介绍油气勘探开发等业务。",
+      "recruitment_navigation_observed": false,
+      "recruitment_links_observed": [],
+      "entry_interpretation": "official_site_checked_no_unit_entry_found"
+    },
+    {
+      "catalog_id": "cnooc-engineering",
+      "canonical_name": "海洋石油工程股份有限公司",
+      "group_official_homepage_url": "https://www.cnooc.com.cn/",
+      "group_career_center_url": "https://www.cnooc.com.cn/zyzx/",
+      "page_title": "中国海油集团职业中心",
+      "career_links_observed": [
+        {
+          "label": "校园招聘",
+          "url": "https://cnooc.zhaopin.com/"
+        },
+        {
+          "label": "内部招聘",
+          "url": "https://job.cnooc.com.cn/indexnologin"
+        }
+      ],
+      "unit_specific_recruitment_link_observed": false,
+      "entry_interpretation": "group_portal_only; unit_specific_entry_not_proven"
+    }
+  ],
+  "release_boundary": "本证据仅更新入口核验账本，不把集团共享入口复制为单位入口，不生成学生岗位或申请链接。"
+}

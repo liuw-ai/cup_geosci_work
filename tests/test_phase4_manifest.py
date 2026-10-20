@@ -85,3 +85,6 @@ def test_phase4_manifest_binds_live_cnooc_portal_recheck() -> None:
     assert manifest["three_oil_entry_evidence"]["latest_cnooc_portal_live_recheck"] == (
         "docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json"
     )
+    assert manifest["three_oil_entry_evidence"]["latest_official_homepage_entry_recheck"] == (
+        "docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json"
+    )

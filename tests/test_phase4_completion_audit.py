@@ -31,3 +31,8 @@ def test_phase4_completion_audit_is_requirement_scoped_and_not_complete() -> Non
     assert live_cnooc["visible_job_card_count"] == 14
     assert live_cnooc["independent_unit_recruitment_portals_proven"] is False
     assert live_cnooc["jobs_created"] is False
+    homepage = three_oil["facts"]["latest_official_homepage_entry_recheck"]
+    assert homepage["observations"] == 3
+    assert homepage["recruitment_entries_proven"] == 0
+    assert homepage["no_jobs_created"] is True
+    assert homepage["catalog_changed"] is False
