@@ -57,6 +57,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
     ":!docs/current/phase4-third-party-huatu-official-recovery-2026-10-21.json",
     ":!docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
+    ":!docs/current/phase4-cnooc-api-unit-evidence-2026-10-21.json",
 )
 
 
@@ -258,7 +259,7 @@ def main() -> None:
     three_oil_unit_entry_network_recheck = ROOT / "docs" / "current" / "phase4-three-oil-unit-entry-network-recheck-2026-10-20.json"
     sinopec_company_intro_recheck = ROOT / "docs" / "current" / "phase4-sinopec-company-intro-recheck-2026-10-20.json"
     cnooc_portal_live_recheck = ROOT / "docs" / "current" / "phase4-cnooc-portal-live-recheck-2026-10-20.json"
-    cnooc_api_unit_evidence = ROOT / "docs" / "current" / "phase4-cnooc-api-unit-evidence-2026-10-20.json"
+    cnooc_api_unit_evidence = ROOT / "docs" / "current" / "phase4-cnooc-api-unit-evidence-2026-10-21.json"
     sinopec_display_cross_group_audit = ROOT / "docs" / "current" / "phase4-sinopec-display-cross-group-audit-2026-10-20.json"
     three_oil_official_homepage_entry_recheck = ROOT / "docs" / "current" / "phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json"
     completion_audit = ROOT / "docs" / "current" / "phase4-completion-audit-2026-10-19.json"
@@ -445,16 +446,17 @@ def main() -> None:
             "cooec_negative_entry_evidence": "docs/current/phase4-three-oil-cooec-entry-negative-evidence-2026-10-19.json",
             "homepage_probe": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
             "latest_cnooc_portal_live_recheck": "docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json",
+            "latest_cnooc_api_unit_evidence": "docs/current/phase4-cnooc-api-unit-evidence-2026-10-21.json",
             "latest_official_homepage_entry_recheck": "docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json",
             "cnooc_units_with_active_job_evidence": int(
                 json.loads(cnooc_unit_evidence.read_text(encoding="utf-8"))
                 .get("summary", {})
-                .get("units_with_official_application_urls", 0)
+                .get("catalog_units_observed", 0)
             ),
             "cnooc_observed_job_cards": int(
                 json.loads(cnooc_unit_evidence.read_text(encoding="utf-8"))
                 .get("summary", {})
-                .get("total_observed_job_cards", 0)
+                .get("official_job_card_count", 0)
             ),
             "independent_unit_recruitment_portals_proven": 0,
             "interpretation": "官方集团页按单位展示并提供岗位投递链接，不等于每个单位有独立招聘入口。",

@@ -47,6 +47,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
     ":!docs/current/phase4-third-party-huatu-official-recovery-2026-10-21.json",
     ":!docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
+    ":!docs/current/phase4-cnooc-api-unit-evidence-2026-10-21.json",
 )
 
 # These reports are deliberately excluded from the source-tree dirty flag
@@ -109,7 +110,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_sinopec_company_intro_recheck": "docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json",
     "phase4_cnooc_portal_live_recheck": "docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json",
     "phase4_three_oil_official_homepage_entry_recheck": "docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json",
-    "phase4_cnooc_api_unit_evidence": "docs/current/phase4-cnooc-api-unit-evidence-2026-10-20.json",
+    "phase4_cnooc_api_unit_evidence": "docs/current/phase4-cnooc-api-unit-evidence-2026-10-21.json",
     "phase4_sinopec_display_cross_group_audit": "docs/current/phase4-sinopec-display-cross-group-audit-2026-10-20.json",
     "phase4_third_party_hbdk_water_official_evidence": "docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
     "phase4_third_party_hbdk_water_trial": "docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",

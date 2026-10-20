@@ -118,6 +118,13 @@ def _load_catalog_names() -> dict[str, set[str]]:
 def capture(*, output: Path = DEFAULT_OUTPUT, retain_dir: Path = DEFAULT_RETAIN_DIR, page_size: int = 100) -> dict[str, Any]:
     """Fetch all public pages and write an auditable report without DB writes."""
 
+    output = output.resolve()
+    retain_dir = retain_dir.resolve()
+    try:
+        retain_dir.relative_to(ROOT)
+    except ValueError as exc:
+        raise ValueError("retain_dir must remain inside the project root") from exc
+
     _allowlisted_url(PLATFORM_URL, {"cnooc.zhaopin.com"}, "platform_url")
     _allowlisted_url(API_URL, API_HOSTS, "api_url")
     robots_cache: dict[str, Any] = {}
