@@ -26,3 +26,8 @@ def test_phase4_completion_audit_is_requirement_scoped_and_not_complete() -> Non
         item for item in report["requirements"] if item["id"] == "isolated_local_regression"
     )
     assert regression["facts"]["formal_database_stable"] is True
+    live_cnooc = three_oil["facts"]["latest_cnooc_portal_live_recheck"]
+    assert live_cnooc["observed_unit_count"] == 16
+    assert live_cnooc["visible_job_card_count"] == 14
+    assert live_cnooc["independent_unit_recruitment_portals_proven"] is False
+    assert live_cnooc["jobs_created"] is False

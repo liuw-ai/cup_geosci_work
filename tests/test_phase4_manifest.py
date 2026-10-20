@@ -74,3 +74,14 @@ def test_phase4_manifest_rejects_changed_bound_evidence_report(tmp_path: Path) -
 
     assert result["ok"] is False
     assert any("phase4_third_party_funnel" in item for item in result["errors"])
+
+
+def test_phase4_manifest_binds_live_cnooc_portal_recheck() -> None:
+    manifest = json.loads(
+        Path("docs/current/phase4-release-manifest.json").read_text(encoding="utf-8")
+    )
+
+    assert manifest["config_sha256"]["phase4_cnooc_portal_live_recheck"]
+    assert manifest["three_oil_entry_evidence"]["latest_cnooc_portal_live_recheck"] == (
+        "docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json"
+    )
