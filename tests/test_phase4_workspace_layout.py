@@ -10,6 +10,7 @@ def test_phase4_layout_requires_canonical_production_files(tmp_path: Path) -> No
         "deploy/compose.yaml",
         "deploy/docker/Dockerfile.app",
         "deploy/docker/Dockerfile.browser",
+        "deploy/certs/gsrsaovsslca2018.crt",
         "job_hub",
         "data",
         "tests",
@@ -47,3 +48,15 @@ def test_phase4_layout_marks_docs_database_as_review_required(tmp_path: Path) ->
     assert report["current_docs_database_files"] == [
         "docs/current/accidental.sqlite3"
     ]
+
+
+def test_browser_dockerfile_uses_versioned_public_ca_certificate() -> None:
+    root = Path(__file__).resolve().parents[1]
+    dockerfile = (root / "deploy" / "docker" / "Dockerfile.browser").read_text(
+        encoding="utf-8"
+    )
+    certificate = root / "deploy" / "certs" / "gsrsaovsslca2018.crt"
+
+    assert certificate.is_file()
+    assert "COPY deploy/certs/gsrsaovsslca2018.crt" in dockerfile
+    assert "COPY runtime/certs/gsrsaovsslca2018.crt" not in dockerfile

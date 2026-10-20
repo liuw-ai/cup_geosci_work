@@ -45,6 +45,7 @@ project/
 ├─ deploy/              唯一生产部署入口
 │  ├─ compose.yaml      唯一正式 Compose 文件
 │  ├─ docker/           Dockerfile 和镜像构建说明
+│  ├─ certs/            版本化的公开 CA 证书（仅在构建确有需要时）
 │  ├─ caddy/            反向代理配置（如启用）
 │  └─ env/              非敏感环境变量模板
 ├─ docs/
@@ -136,7 +137,7 @@ runtime/
 - 根目录 `official-attachments/`、`runtime-probe/` 和 `archive/` 已移动到 `history/`；
 - `.worktrees/` 及仓库外活动 worktree 保留原位，以免破坏 Git worktree 元数据；
 - `docs/current/` 曾出现 SQLite 备份文件，后续应移出到受控 `backups/`，但本轮不执行移动；
-- 正式生产 Compose 入口已经收敛为 `deploy/compose.yaml`；根目录 Compose/Dockerfile 仅作为本地开发兼容入口保留，不得用于生产发布。根目录兼容文件仍未删除，避免破坏旧测试和本地工具；它们不属于生产输入。
+- 正式生产 Compose 入口已经收敛为 `deploy/compose.yaml`；根目录 Compose/Dockerfile 仅作为本地开发兼容入口保留，不得用于生产发布。根目录兼容文件仍未删除，避免破坏旧测试和本地工具；它们不属于生产输入。浏览器镜像所需的公开 GlobalSign 中间证书已固定在 `deploy/certs/gsrsaovsslca2018.crt`，不再依赖被 `.gitignore` 忽略的 `runtime/certs/` 残留文件；其 SHA-256 应随 Dockerfile 一并由 Manifest 绑定。
 
 这些仍是结构治理事项，不代表已经形成可发布版本。历史移动记录及逐文件哈希见 [history/docs/HISTORY-MIGRATION-2026-10-17.json](../../history/docs/HISTORY-MIGRATION-2026-10-17.json)。
 

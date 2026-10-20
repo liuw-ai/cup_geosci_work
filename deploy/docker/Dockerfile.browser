@@ -17,7 +17,7 @@ ARG INSTALL_BROWSER_DEPS=1
 # job.sinopec.com's IPv4 endpoint currently omits its public GlobalSign
 # intermediate. Add the independently downloaded, pinned intermediate to the
 # normal system trust store; TLS verification remains enabled.
-COPY runtime/certs/gsrsaovsslca2018.crt /usr/local/share/ca-certificates/gsrsaovsslca2018.crt
+COPY deploy/certs/gsrsaovsslca2018.crt /usr/local/share/ca-certificates/gsrsaovsslca2018.crt
 RUN update-ca-certificates
 COPY requirements-browser.txt /tmp/requirements-browser.txt
 COPY --from=browser-deps /usr/local/lib/python3.11/site-packages/playwright /usr/local/lib/python3.11/site-packages/playwright

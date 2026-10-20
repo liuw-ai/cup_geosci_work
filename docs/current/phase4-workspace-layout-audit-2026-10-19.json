@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-20T03:38:27Z",
+  "generated_at": "2026-10-20T04:16:36Z",
   "scope": "local_read_only_workspace_layout",
   "production_entrypoint": "deploy/compose.yaml",
   "canonical_paths": {
@@ -13,6 +13,10 @@
       "is_file": true
     },
     "deploy/docker/Dockerfile.browser": {
+      "exists": true,
+      "is_file": true
+    },
+    "deploy/certs/gsrsaovsslca2018.crt": {
       "exists": true,
       "is_file": true
     },

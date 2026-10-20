@@ -287,6 +287,9 @@ def main() -> None:
             "third_party_adapters": sha256(ROOT / "data" / "third_party_table_adapters.json"),
             "organization_registry": sha256(ROOT / "data" / "organization_registry.json"),
             "three_oil_catalog": sha256(ROOT / "data" / "three_oil_organization_catalog.json"),
+            "browser_ca_certificate": sha256(
+                ROOT / "deploy" / "certs" / "gsrsaovsslca2018.crt"
+            ),
             "phase4_organization_reconciliation": sha256(
                 ROOT / "docs" / "current" / "phase4-organization-reconciliation-2026-10-17.json"
             ),

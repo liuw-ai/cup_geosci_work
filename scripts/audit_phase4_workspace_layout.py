@@ -61,6 +61,7 @@ def build_report(root: Path = ROOT) -> dict[str, Any]:
             "deploy/compose.yaml",
             "deploy/docker/Dockerfile.app",
             "deploy/docker/Dockerfile.browser",
+            "deploy/certs/gsrsaovsslca2018.crt",
             "job_hub",
             "data",
             "tests",
@@ -102,6 +103,7 @@ def build_report(root: Path = ROOT) -> dict[str, Any]:
             if canonical["deploy/compose.yaml"]["is_file"]
             and canonical["deploy/docker/Dockerfile.app"]["is_file"]
             and canonical["deploy/docker/Dockerfile.browser"]["is_file"]
+            and canonical["deploy/certs/gsrsaovsslca2018.crt"]["is_file"]
             and not current_sqlite
             else "review_required"
         ),

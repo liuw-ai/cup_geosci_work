@@ -190,6 +190,7 @@ def verify_manifest(path: Path = MANIFEST) -> dict[str, Any]:
         "config_sha256.third_party_adapters": ROOT / "data" / "third_party_table_adapters.json",
         "config_sha256.organization_registry": ROOT / "data" / "organization_registry.json",
         "config_sha256.three_oil_catalog": ROOT / "data" / "three_oil_organization_catalog.json",
+        "config_sha256.browser_ca_certificate": ROOT / "deploy" / "certs" / "gsrsaovsslca2018.crt",
         "dockerfile_sha256.app": ROOT / "deploy" / "docker" / "Dockerfile.app",
         "dockerfile_sha256.browser": ROOT / "deploy" / "docker" / "Dockerfile.browser",
     }
