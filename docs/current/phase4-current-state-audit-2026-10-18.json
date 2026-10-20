@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T04:16:35Z",
+  "generated_at": "2026-10-20T04:19:11Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "b7fc9b74dd7e1c896d7e80f91cfee37547c6d61f",
-  "git_status_porcelain": "M deploy/docker/Dockerfile.browser\n M docs/current/README.md\n M scripts/audit_phase4_workspace_layout.py\n M scripts/build_phase4_manifest.py\n M scripts/verify_phase4_manifest.py\n M tests/test_phase4_workspace_layout.py\n?? deploy/certs/",
+  "git_sha": "cbbd92e94cc6ea46265b93cc0733494dc52eae7d",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "99f3c95b27b5948087ed844de57f2f9222e594147c1c86b3fa2ef47395645b1d"
+      "sha256": "675a2dc26d0b8d573733b92d88bf8256a74f20a346bf55120afb0bb7042ca555"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
