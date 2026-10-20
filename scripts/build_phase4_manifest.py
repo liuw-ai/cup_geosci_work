@@ -295,7 +295,7 @@ def main() -> None:
             "phase4_sinopec_page_roster": sha256(sinopec_page_roster),
             "phase4_third_party_geoscience_followup": sha256(geoscience_followup),
             "phase4_current_state_audit": sha256(current_audit),
-            "phase4_document_consistency": sha256(current_audit),
+            "phase4_document_consistency": sha256(document_consistency),
             "phase4_third_party_candidate": sha256(manual_candidate),
             "phase4_third_party_hrinm": sha256(hrinm_trial),
             "phase4_third_party_cgs": sha256(cgs_trial),

@@ -55,7 +55,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_sinopec_page_roster": "docs/current/phase4-sinopec-page-roster-2026-10-19.json",
     "phase4_third_party_geoscience_followup": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
     "phase4_current_state_audit": "docs/current/phase4-current-state-audit-2026-10-18.json",
-    "phase4_document_consistency": "docs/current/phase4-current-state-audit-2026-10-18.json",
+    "phase4_document_consistency": "docs/current/phase4-document-consistency-2026-10-20.json",
     "phase4_third_party_candidate": "docs/current/phase4-third-party-candidate-2026-10-18.json",
     "phase4_third_party_hrinm": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
     "phase4_third_party_cgs": "docs/current/phase4-third-party-cgs-2026-10-18.json",
@@ -90,6 +90,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_third_party_huatu_hebei_water_geology": "docs/current/phase4-third-party-huatu-hebei-water-geology-2026-10-19.json",
     "phase4_three_oil_observed_roster": "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
     "phase4_third_party_huatu_cnpc_chuanqing": "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
+    "phase4_cnooc_geoscience_job_evidence": "docs/current/phase4-cnooc-geoscience-job-evidence-2026-10-20.json",
 }
 
 
