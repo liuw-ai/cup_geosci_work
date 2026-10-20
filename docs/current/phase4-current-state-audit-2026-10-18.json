@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T00:41:57Z",
+  "generated_at": "2026-10-20T00:44:03Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "ab9daa37309dd8a81926c5e2e20079fb2828a5ba",
-  "git_status_porcelain": "",
+  "git_sha": "6bca63fc9448be95aa6e51934fa675c6417d8081",
+  "git_status_porcelain": "M docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -207,7 +207,7 @@
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-      "sha256": "849c17d1d9c5837c8775b54c1ac59168ef16adbcf4f92c4c329828fec2b87025"
+      "sha256": "d6e3352eb814a8e475bf19357b138574c83207c0e33229056e3a86f3eff8f4d6"
     },
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "99160d98274560a0e48fe3dab726616da3153c07d678a99c36b991440741b2fe"
+      "sha256": "6670e2ad0ac623dec7468315dfe69d75e86298c89136bbfb9f78f9d50eca9297"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -339,7 +339,7 @@
     },
     "phase4_three_oil_homepage_probe": {
       "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
-      "sha256": "947f1ab9f3138fa743a10301b8b5fb8618ca66281d11a0f1cde7d344c2479ae2"
+      "sha256": "a4e000242079675b6f916575348b550f7d119dedee4103e97637807527b0d98d"
     },
     "phase4_three_oil_observed_roster": {
       "path": "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",

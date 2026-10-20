@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "phase4",
-  "generated_at": "2026-10-20T01:09:56.745694+08:00",
+  "generated_at": "2026-10-20T08:43:06.782482+08:00",
   "observed_on": "2026-10-20",
   "scope": "registered_three_oil_official_homepages_only",
   "policy": "只检查已登记官方主页的 robots、可达性和公开链接；不采集岗位、不下载附件、不创建来源或招聘入口，不把主页或主页中的招聘关键词自动升级为单位招聘入口。",
