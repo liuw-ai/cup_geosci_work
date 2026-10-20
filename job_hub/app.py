@@ -101,6 +101,45 @@ from job_hub.sources import RawPosting
 from job_hub.sinopec import load_sinopec_capture, sinopec_capture_summary
 
 
+_PRIVATE_JOB_API_FIELDS = {
+    "third_party_source_id",
+    "third_party_discovery_url",
+    "third_party_batch_id",
+    "third_party_discovery_sha256",
+    "third_party_table_url",
+    "table_sha256",
+    "table_sheet_name",
+    "table_row_number",
+}
+_PRIVATE_EVIDENCE_KEYS = {
+    "third_party_discovery_url",
+    "third_party_table_url",
+    "third_party_source_id",
+    "third_party_batch_id",
+    "third_party_discovery_sha256",
+    "第三方发现页",
+    "第三方表格链接",
+    "第三方来源",
+    "华图发现页",
+}
+
+
+def _student_api_job(job: dict[str, Any]) -> dict[str, Any]:
+    """Return the student API view without private discovery evidence."""
+
+    public = {
+        key: value for key, value in job.items() if key not in _PRIVATE_JOB_API_FIELDS
+    }
+    evidence = public.get("field_evidence")
+    if isinstance(evidence, dict):
+        public["field_evidence"] = {
+            key: value
+            for key, value in evidence.items()
+            if key not in _PRIVATE_EVIDENCE_KEYS
+        }
+    return public
+
+
 def create_app(settings: Settings | None = None) -> Flask:
     if settings is None:
         load_project_env()
@@ -679,7 +718,7 @@ def create_app(settings: Settings | None = None) -> Flask:
         )
         return jsonify(
             {
-                "items": records,
+                "items": [_student_api_job(record) for record in records],
                 "total": total,
                 "page": page,
                 "scope": scope or "current",

@@ -565,6 +565,13 @@ class Database:
             "source_unavailable_reason": "TEXT NOT NULL DEFAULT ''",
             "publication_layer": "TEXT NOT NULL DEFAULT 'not_public'",
             "publication_layer_before_unavailable": "TEXT",
+            # Internal provenance for jobs discovered through a third-party
+            # channel. These fields are deliberately separate from the
+            # student-facing official links and from the public table URL.
+            "third_party_source_id": "TEXT",
+            "third_party_discovery_url": "TEXT",
+            "third_party_batch_id": "TEXT",
+            "third_party_discovery_sha256": "TEXT",
             "third_party_table_url": "TEXT",
             "official_table_url": "TEXT",
             "official_notice_url": "TEXT",
@@ -1786,6 +1793,8 @@ class Database:
                 trust_grade = ?, source_availability_status = ?,
                 source_unavailable_reason = ?, publication_layer = ?,
                 publication_layer_before_unavailable = ?,
+                third_party_source_id = ?, third_party_discovery_url = ?,
+                third_party_batch_id = ?, third_party_discovery_sha256 = ?,
                 third_party_table_url = ?, official_table_url = ?,
                 official_notice_url = ?, official_application_url = ?,
                 table_sha256 = ?, table_sheet_name = ?, table_row_number = ?,
@@ -1800,6 +1809,10 @@ class Database:
                 reason,
                 layer,
                 job.get("publication_layer_before_unavailable"),
+                job.get("third_party_source_id"),
+                job.get("third_party_discovery_url"),
+                job.get("third_party_batch_id"),
+                job.get("third_party_discovery_sha256"),
                 job.get("third_party_table_url"),
                 job.get("official_table_url"),
                 job.get("official_notice_url", job.get("official_evidence_url")),

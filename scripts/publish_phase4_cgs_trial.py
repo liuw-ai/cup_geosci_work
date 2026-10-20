@@ -118,6 +118,10 @@ def promote(database_path: Path, evidence_path: Path) -> dict[str, object]:
         job.update(
             {
                 "trust_grade": "A",
+                "third_party_source_id": payload["discovery"]["source_id"],
+                "third_party_discovery_url": payload["discovery"]["discovery_page_url"],
+                "third_party_batch_id": "huatu-cgs-postdoc-2026-09-30",
+                "third_party_discovery_sha256": payload["discovery"]["discovery_page_sha256"],
                 "official_notice_url": str(payload["official_recovery"]["official_table_url"]),
                 "official_table_url": str(payload["official_recovery"]["official_table_url"]),
                 "official_application_url": None,

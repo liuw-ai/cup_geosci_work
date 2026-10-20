@@ -219,6 +219,42 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     search_payload = client.get("/api/jobs?q=地质资源与地质工程").get_json()
     assert search_payload["total"] == 1
     assert search_payload["items"][0]["title"] == "勘探技术岗位"
+    with database.transaction() as connection:
+        connection.execute(
+            """
+            UPDATE jobs
+            SET third_party_source_id = ?,
+                third_party_discovery_url = ?,
+                third_party_batch_id = ?,
+                third_party_discovery_sha256 = ?,
+                third_party_table_url = ?,
+                field_evidence_json = ?
+            WHERE id = ?
+            """,
+            (
+                "huatu-discovery",
+                "https://www.huatu.com/discovery/1",
+                "huatu-test-2026",
+                "a" * 64,
+                "https://www.huatu.com/table.xlsx",
+                json.dumps(
+                    {
+                        "专业范围": "地质资源与地质工程",
+                        "第三方发现页": "https://www.huatu.com/discovery/1",
+                        "官方岗位表链接": "https://official.example/table.xlsx",
+                    },
+                    ensure_ascii=False,
+                ),
+                job_id + 1,
+            ),
+        )
+    public_payload = client.get("/api/jobs?q=地质资源与地质工程").get_json()
+    public_item = public_payload["items"][0]
+    assert "third_party_discovery_url" not in public_item
+    assert "third_party_table_url" not in public_item
+    assert "third_party_source_id" not in public_item
+    assert "第三方发现页" not in public_item["field_evidence"]
+    assert public_item["official_table_url"] is None
     assert client.get("/api/coverage").status_code == 200
     assert client.get("/about").status_code == 200
     coverage_payload = client.get("/api/coverage").get_json()
