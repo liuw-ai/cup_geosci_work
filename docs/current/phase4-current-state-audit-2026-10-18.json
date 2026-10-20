@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T15:19:53Z",
+  "generated_at": "2026-10-20T15:33:39Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "e9e5f8467cbf4938f63e8facb126982d1f8ba01e",
-  "git_status_porcelain": "M docs/current/phase4-three-oil-homepage-probe-2026-10-19.json\n M scripts/audit_phase4_completion.py\n M tests/test_phase4_completion_audit.py",
+  "git_sha": "a07aae98133a27eb274002a3b1d3e5423b7690e4",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "0e8394e84e077cba203fedecc8fe5da4c08e7b78519a9ddf230963ad82bb018f"
+      "sha256": "e03a63183200a80eef9c42b4670dcd714eb78fb3ebfcb7e15e8b681dba667812"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
