@@ -30,6 +30,27 @@ def _is_http_url(value: Any) -> bool:
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
+def _same_discovery_domain(application_url: Any, discovery_url: Any) -> bool:
+    """Return whether an application URL remains on the discovery domain.
+
+    Third-party pages often link to an attachment on a sibling subdomain.
+    Comparing the complete URL is insufficient because that would allow a
+    different path or host such as ``u3.huatu.com`` to pass as an application
+    endpoint for a ``bj.huatu.com`` discovery page.
+    """
+    application_host = (urlparse(str(application_url or "").strip()).hostname or "").lower().rstrip(".")
+    discovery_host = (urlparse(str(discovery_url or "").strip()).hostname or "").lower().rstrip(".")
+    if not application_host or not discovery_host:
+        return False
+    if application_host == discovery_host:
+        return True
+    discovery_parts = discovery_host.split(".")
+    if len(discovery_parts) < 2:
+        return False
+    registrable_suffix = ".".join(discovery_parts[-2:])
+    return application_host == registrable_suffix or application_host.endswith(f".{registrable_suffix}")
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -97,7 +118,7 @@ def audit_database(path: Path) -> dict[str, Any]:
                 lead_issues.append("official_application_url_not_http")
             # A third-party URL is evidence only; it must never be copied to
             # the job's student-facing application field.
-            if application_url and item.get("lead_url") == application_url:
+            if application_url and _same_discovery_domain(application_url, item.get("lead_url")):
                 lead_issues.append("third_party_discovery_url_used_as_application")
         item["audit_status"] = "pass" if not lead_issues else "fail"
         item["issues"] = lead_issues
