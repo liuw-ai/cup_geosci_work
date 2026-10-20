@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T21:05:38Z",
+  "generated_at": "2026-10-20T21:12:48Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "be0adb70495a5bd4b6bdfbcdd616b18edf2de2ea",
+  "git_sha": "63ad15625ddb3374cb9ceeb4a54316351e4f0305",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -24,7 +24,9 @@
     },
     "phase3_withdrawal_audit_count": 3947,
     "candidate_lead_count": 11,
-    "formal_third_party_job_count": 8,
+    "formal_candidate_converted_job_count": 8,
+    "formal_discovery_attributed_job_count": 7,
+    "formal_third_party_job_count": 7,
     "student_read_as_of_date": "2026-10-21",
     "student_visible_layer_counts": {
       "broad_geoscience_match": 8,
@@ -267,7 +269,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "eb79b7f6bcce85c726a868aa74a9c2f31fb840104c9479e3b43f650ae5370458"
+      "sha256": "241164fa34cffaea756a071ae0476b9351805696e1d7debc71913fc7bb448624"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -867,8 +869,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 600,
-      "sha256": "3c8339fb24932be385931e7ba84cae506e555ba281ebdda548f2d5e78ae3a95c"
+      "line_count": 607,
+      "sha256": "d845c0b856704d47ebcaf65fedb53856e5d35d57dd478b82fc9e5c30089568b9"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -897,8 +899,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 483,
-      "sha256": "51ea08374efb2d0aecbf71fdcab5439caba7463e3d4a592ea999b9fab2a21e7e"
+      "line_count": 495,
+      "sha256": "072aa813fa6ffb4c19f5dbf3c06a6de61c24690e8a6ddaaf793e54c1fef46098"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -1012,8 +1014,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 277,
-      "sha256": "4ba478679bb47aef253a2248c62fcde5a10b7fb2ec910e479a7dcdd06a52f031"
+      "line_count": 293,
+      "sha256": "d07437cb2032769ad6c61b28acca082ccefd892654fddee81bc251d8e8a1b719"
     },
     {
       "path": "tests/conftest.py",
@@ -1457,8 +1459,8 @@
     },
     {
       "path": "tests/test_phase4_manifest.py",
-      "line_count": 90,
-      "sha256": "691c8862e6fb09fe88a7cd3b11b30c2e3cfcb1c6586f9efeb503465e8fe4613f"
+      "line_count": 93,
+      "sha256": "44c16450a14764a1938bad3bd738cee72a8eb63fa74ca0a949ad35d995d592a3"
     },
     {
       "path": "tests/test_phase4_metadata_refresh.py",

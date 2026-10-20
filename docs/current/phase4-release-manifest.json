@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T21:05:44Z",
+  "generated_at": "2026-10-20T21:12:54Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "be0adb70495a5bd4b6bdfbcdd616b18edf2de2ea",
+  "git_sha": "63ad15625ddb3374cb9ceeb4a54316351e4f0305",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -30,7 +30,7 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "b1ea86d572e58f71028823fe57e97398226ca9949d85b8beb5f5ba9c9bd6e667",
+    "phase4_current_state_audit": "6f5fa02da7f64aab6b805afc13438d09df7800e49722ee78b41684367fbcc2e8",
     "phase4_document_consistency": "7af1efc29e44a16890f1d9a6e5c439642b09a333aa375f542ff3d87c5bd13c38",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
@@ -46,7 +46,7 @@
     "phase4_third_party_access_recheck": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d",
     "phase4_third_party_official_recovery_recheck": "4f685b2fff73a958dbf42b40a5dfcddc6588a4a2618c4426c53058930d17252b",
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
-    "phase4_third_party_funnel": "eb79b7f6bcce85c726a868aa74a9c2f31fb840104c9479e3b43f650ae5370458",
+    "phase4_third_party_funnel": "241164fa34cffaea756a071ae0476b9351805696e1d7debc71913fc7bb448624",
     "phase4_local_web_recheck": "1ce3aa772e20a7216ecf9bcc86f54c121ef1457fa896804f636d73a3aacb017f",
     "phase4_local_web_live_validation": "b0e7ccd06e13983b2b33fb94e9b725b6976827e37eb4efcb38170f54a0246c92",
     "phase4_huatu_table_discovery": "007ba8d74b26bfbbea076077344476dc5aa083d6ce5a6bed3b1ff39efc48f2ca",
@@ -80,8 +80,8 @@
     "phase4_cnooc_api_unit_evidence": "1e78cbb5a519ca003789c6b8fadacd087bd0e8899145649326e275c8ba7dbb2b",
     "phase4_sinopec_display_cross_group_audit": "3a328ab63ea7f968193ab9589c8fb2062e62ce3cbe339282ad188ef3571c4622",
     "phase4_three_oil_official_homepage_entry_recheck": "55756e20e901b550344f90e846de525131f7e3243262755bb50463389967467e",
-    "phase4_completion_audit": "b4c944a5ff6721a5500c102af956871e33e73d080a5d1b35dc9593f75ae87477",
-    "phase4_workspace_layout": "8a0c20b2e046ef5322ea5e3526d4dfb45fad36c8b35ba7dd8a81d812090f3280"
+    "phase4_completion_audit": "811591eeebb0eb6c9f8d11195983ed90f8bf0d60bb675567730ac4833e974be7",
+    "phase4_workspace_layout": "998cd9273e2facdd02cb6be89d289c7b256eef13fc815b7b2135f1150745ee94"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -111,7 +111,9 @@
     },
     "student_visible_total": 677,
     "candidate_lead_count": 11,
-    "formal_third_party_job_count": 8,
+    "formal_candidate_converted_job_count": 8,
+    "formal_discovery_attributed_job_count": 7,
+    "formal_third_party_job_count": 7,
     "pre_third_party_candidate_backup": {
       "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
       "sha256": "5e7d5a183c4cd2cdab8e150e7efd17f0ffa029532298780a3c59109e5a57a35a"
@@ -148,7 +150,8 @@
     },
     "third_party_expansion": {
       "candidate_leads": 11,
-      "formal_jobs": 8,
+      "formal_jobs": 7,
+      "formal_candidate_converted_jobs": 8,
       "status": "in_progress",
       "release_gate": "third_party_batch_expansion_incomplete"
     }
@@ -214,7 +217,8 @@
     "real_candidate_leads_in_database": 11,
     "private_candidate_evidence": "docs/current/phase4-third-party-candidate-2026-10-18.json",
     "official_attachment_trial": "docs/current/phase4-third-party-cgs-2026-10-18.json",
-    "formal_jobs_published": 8,
+    "formal_jobs_published": 7,
+    "formal_candidate_converted_jobs": 8,
     "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
     "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
     "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",
