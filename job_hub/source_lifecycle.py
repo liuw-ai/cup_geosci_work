@@ -118,7 +118,10 @@ def lifecycle_report(
             "published": "本次扫描存在可发布匹配岗位",
             "stale": "启用状态失去新鲜运行证据",
             "background_capture": "学生端发布未启用，但后台正在等待或执行完整官方捕获",
-            "withdrawn": "来源已停用，历史记录仅供审计",
+            "withdrawn": (
+                "来源自动化已退役；这是来源级状态，不代表岗位撤回。"
+                "已有官方证据的岗位仍按岗位截止日期、专业不匹配或官方取消/关闭/替换规则处理。"
+            ),
             "access_limited": "访问策略、维护或 robots 阻断",
             "structure_changed": "页面结构或字段解析发生变化",
             "source_error": "运行失败或被中断",

@@ -561,7 +561,9 @@ class DailyWorker:
                 continue
             if status == "manual_confirmation_required":
                 # Preserve a prior verified timestamp. The ordinary freshness
-                # window still retires it until an administrator renews it.
+                # window is source-health telemetry only; it never retires or
+                # hides an already verified job. An administrator renewal is
+                # required only for the next evidence-health report.
                 counts[status] += 1
                 continue
             source = sources_by_id.get(str(result["source_id"])) or {}

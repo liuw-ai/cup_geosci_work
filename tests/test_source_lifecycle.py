@@ -62,6 +62,7 @@ def test_lifecycle_report_keeps_retired_sources_auditable() -> None:
         latest_runs_by_id={},
     )
     assert report["states"] == {"registered": 1, "withdrawn": 1}
+    assert "不代表岗位撤回" in report["state_definitions"]["withdrawn"]
 
 
 def test_lifecycle_keeps_background_capture_distinct_from_stale_source() -> None:
