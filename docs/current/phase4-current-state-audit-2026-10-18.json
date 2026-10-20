@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T05:24:23Z",
+  "generated_at": "2026-10-20T06:09:24Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "e239e5b42f521a6ef9b807c47239aa9a066366a0",
+  "git_sha": "3cb0ba9378f399a99b32b66fbb4f4e557b949980",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "6ea3587e2ad95547312e9561711c5e68c9dd1acc445ed9ecf1d5516f8e14ea1b"
+      "sha256": "4e3409c95fe1528dcd3cf5ee432efecd140df4ead70096d3560551de9eff4421"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -1583,8 +1583,8 @@
     },
     {
       "path": "tests/test_three_oil_catalog.py",
-      "line_count": 530,
-      "sha256": "b6a3adab909775a447e512fa6d0500ff5fbb2c777a783713088b78f299b7625d"
+      "line_count": 545,
+      "sha256": "7c7f2144c3117506642b062e00deaecf88ecba42d698ad9e6cb7c775a843556d"
     },
     {
       "path": "tests/test_transport.py",
