@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T00:44:03Z",
+  "generated_at": "2026-10-20T00:44:59Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "6bca63fc9448be95aa6e51934fa675c6417d8081",
-  "git_status_porcelain": "M docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
+  "git_sha": "2d30e99aac5cb93c2fde2f50c5105c7c15ef5883",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "6670e2ad0ac623dec7468315dfe69d75e86298c89136bbfb9f78f9d50eca9297"
+      "sha256": "08bbad9d35e80904f3d522a586e6b1942079eab62bf02c2733ce6d01fac80cd7"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
