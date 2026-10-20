@@ -20,6 +20,7 @@ MANIFEST = ROOT / "docs" / "current" / "phase4-release-manifest.json"
 DATABASE = ROOT / "runtime" / "job_hub.sqlite3"
 GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-current-state-audit-2026-10-18.json",
+    ":!docs/current/phase4-current-state-audit-2026-10-21.json",
     ":!docs/current/phase4-release-manifest.json",
     ":!docs/current/phase4-local-validation-2026-10-19.json",
     ":!docs/current/phase4-local-validation-2026-10-20.json",
@@ -45,6 +46,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
     ":!docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
     ":!docs/current/phase4-third-party-huatu-official-recovery-2026-10-21.json",
+    ":!docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
 )
 
 # These reports are deliberately excluded from the source-tree dirty flag
@@ -63,7 +65,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_sinopec_display_audit": "docs/current/phase4-sinopec-display-units-2026-10-18.json",
     "phase4_sinopec_page_roster": "docs/current/phase4-sinopec-page-roster-2026-10-19.json",
     "phase4_third_party_geoscience_followup": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
-    "phase4_current_state_audit": "docs/current/phase4-current-state-audit-2026-10-18.json",
+    "phase4_current_state_audit": "docs/current/phase4-current-state-audit-2026-10-21.json",
     "phase4_document_consistency": "docs/current/phase4-document-consistency-2026-10-20.json",
     "phase4_third_party_candidate": "docs/current/phase4-third-party-candidate-2026-10-18.json",
     "phase4_third_party_hrinm": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
@@ -111,6 +113,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_sinopec_display_cross_group_audit": "docs/current/phase4-sinopec-display-cross-group-audit-2026-10-20.json",
     "phase4_third_party_hbdk_water_official_evidence": "docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
     "phase4_third_party_hbdk_water_trial": "docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
+    "phase4_third_party_hbdk_water_promotion": "docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
     "phase4_third_party_huatu_official_recovery": "docs/current/phase4-third-party-huatu-official-recovery-2026-10-21.json",
 }
 

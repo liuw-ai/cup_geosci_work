@@ -4,24 +4,24 @@
   "status": "audited_with_legacy_documents",
   "current_sources_of_truth": [
     "docs/current/PHASE4-2026-10-17.md",
-    "docs/current/phase4-current-state-audit-2026-10-18.json",
+    "docs/current/phase4-current-state-audit-2026-10-21.json",
     "docs/current/phase4-release-manifest.json",
     "runtime/job_hub.sqlite3"
   ],
   "current_database_facts": {
-    "sha256": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
+    "sha256": "ae9fb39fd04d9ecd8f8449646cd11eeb0e96d31c36b1672c144fc29a85a5ba1e",
     "integrity_check": "ok",
-    "job_count": 3954,
+    "job_count": 3955,
     "student_read_as_of_date": "2026-10-21",
     "student_visible_layer_counts": {
       "exact_match": 140,
-      "broad_geoscience_match": 7,
+      "broad_geoscience_match": 8,
       "incomplete_but_basic_match": 442,
       "source_unavailable": 87
     },
-    "student_visible_total": 676,
-    "candidate_leads": 8,
-    "formal_third_party_jobs": 7,
+    "student_visible_total": 677,
+    "candidate_leads": 11,
+    "formal_third_party_jobs": 8,
     "withdrawn": 51,
     "historical_snapshot_hashes": [
       {

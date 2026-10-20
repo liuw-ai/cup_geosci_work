@@ -23,7 +23,7 @@ from job_hub.db import Database
 from job_hub.phase3_policy import PUBLICATION_LAYERS
 
 
-OUTPUT = ROOT / "docs" / "current" / "phase4-current-state-audit-2026-10-18.json"
+OUTPUT = ROOT / "docs" / "current" / "phase4-current-state-audit-2026-10-21.json"
 DATABASE = ROOT / "runtime" / "job_hub.sqlite3"
 
 # These are generated audit artifacts. They are deliberately excluded from
@@ -31,6 +31,7 @@ DATABASE = ROOT / "runtime" / "job_hub.sqlite3"
 # commit records the state of actual release inputs, not its own output.
 GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-current-state-audit-2026-10-18.json",
+    ":!docs/current/phase4-current-state-audit-2026-10-21.json",
     ":!docs/current/phase4-release-manifest.json",
     ":!docs/current/phase4-local-validation-2026-10-19.json",
     ":!docs/current/phase4-local-validation-2026-10-20.json",
@@ -61,6 +62,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json",
     ":!docs/current/phase4-cnooc-api-unit-evidence-2026-10-20.json",
     ":!docs/current/phase4-sinopec-display-cross-group-audit-2026-10-20.json",
+    ":!docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
 )
 
 
@@ -224,7 +226,7 @@ def document_consistency_facts() -> dict[str, object]:
         "docs/current/phase4-local-validation-2026-10-21.json",
     ]
     metadata_paths = [
-        "docs/current/phase4-current-state-audit-2026-10-18.json",
+        "docs/current/phase4-current-state-audit-2026-10-21.json",
         "docs/current/phase4-release-manifest.json",
     ]
     historical_checks: list[dict[str, object]] = []
@@ -301,6 +303,7 @@ def main() -> None:
     hbdk_registration = ROOT / "docs" / "current" / "phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
     hbdk_water_evidence = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-official-evidence-2026-10-20.json"
     hbdk_water_trial = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-trial-2026-10-21.json"
+    hbdk_water_promotion = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-promotion-2026-10-21.json"
     huatu_cnpc_chuanqing = ROOT / "docs" / "current" / "phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json"
     nhri_browser_recheck = ROOT / "docs" / "current" / "phase4-third-party-nhri-browser-recheck-2026-10-20.json"
     cnpc_bgp_entry_recheck = ROOT / "docs" / "current" / "phase4-cnpc-bgp-entry-recheck-2026-10-20.json"
@@ -499,6 +502,10 @@ def main() -> None:
                 "path": "docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
                 "sha256": sha256(hbdk_water_trial),
             },
+            "phase4_third_party_hbdk_water_promotion": {
+                "path": "docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
+                "sha256": sha256(hbdk_water_promotion),
+            },
             "phase4_third_party_huatu_cnpc_chuanqing": {
                 "path": "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
                 "sha256": sha256(huatu_cnpc_chuanqing),
@@ -579,7 +586,7 @@ def main() -> None:
                 "A second Huatu announcement was recovered to the Nanjing Planning and Natural Resources Bureau official notice, table URL, and application URL; its deadline had passed and row-level table evidence was unavailable, so no candidate or formal job was created.",
                 "The Huatu Chuanqing high-level recruitment page yielded 12 row-level private candidates; it supplied a cnpc.com.cn application mailbox but no verifiable official notice, table, or application URL, so all 12 remain private pending official recovery.",
                 "A third-party discovery page or inaccessible attachment is not a job-level official evidence record.",
-                "The HBDK water-team official notice 382.html was captured with both linked Tencent documents; two civil-construction rows were rejected by the major gate and the rock-soil row was published only in an isolated trial database, not the formal runtime database.",
+                "The HBDK water-team official notice 382.html was captured with both linked Tencent documents; two civil-construction rows were rejected by the major gate and the rock-soil row was promoted to the local formal database only after an isolated trial, backup, integrity check and funnel audit. No server deployment was performed.",
                 "Historical snapshots remain archived and are not overwritten by current facts.",
             ],
         },

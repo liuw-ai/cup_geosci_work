@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-20T19:34:31Z",
+  "generated_at": "2026-10-20T20:07:58Z",
   "scope": "local_read_only_workspace_layout",
   "production_entrypoint": "deploy/compose.yaml",
   "canonical_paths": {
@@ -398,8 +398,8 @@
     },
     {
       "path": "runtime/job_hub.sqlite3",
-      "bytes": 50130944,
-      "last_write_time": "2026-10-20T08:57:57Z",
+      "bytes": 50147328,
+      "last_write_time": "2026-10-20T19:45:36Z",
       "classification": "canonical_runtime_database",
       "production_input": true
     },
@@ -446,6 +446,13 @@
       "production_input": false
     },
     {
+      "path": "runtime/phase4-isolated-hbdk-water-run-20261021/job_hub.sqlite3",
+      "bytes": 50147328,
+      "last_write_time": "2026-10-20T19:45:36Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
       "path": "runtime/phase4-isolated-huatu-scan-20261021/job_hub.sqlite3",
       "bytes": 50515968,
       "last_write_time": "2026-10-20T19:03:29Z",
@@ -484,6 +491,13 @@
       "path": "runtime/phase4-web-validation-20261021/job_hub.sqlite3",
       "bytes": 50139136,
       "last_write_time": "2026-10-20T16:46:56Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-web-validation-20261021-hbdk/job_hub.sqlite3",
+      "bytes": 50155520,
+      "last_write_time": "2026-10-20T20:00:12Z",
       "classification": "isolated_test_or_validation_copy",
       "production_input": false
     },

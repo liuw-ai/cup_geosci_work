@@ -1,0 +1,55 @@
+{
+  "phase": "phase4",
+  "operation": "local_formal_promotion_after_isolated_trial",
+  "executed_at": "2026-10-21T03:45:36+08:00",
+  "scope": "local_only",
+  "server_deployment": false,
+  "automation_status": "paused",
+  "evidence_report": "docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
+  "trial_report": "docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
+  "database_transition": {
+    "formal_database": "runtime/job_hub.sqlite3",
+    "before_sha256": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
+    "after_sha256": "ae9fb39fd04d9ecd8f8449646cd11eeb0e96d31c36b1672c144fc29a85a5ba1e",
+    "rollback_backup": "backups/job_hub-pre-phase4-hbdk-water-20261021.sqlite3",
+    "rollback_backup_sha256": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
+    "integrity_check": "ok"
+  },
+  "funnel": {
+    "rows_evidenced": 3,
+    "candidate_leads_added": 3,
+    "official_content_verified": 1,
+    "rejected_major_mismatch": 2,
+    "formal_jobs_added": 1,
+    "published_job_id": 5439,
+    "student_visible_layer": "broad_geoscience_match",
+    "student_label": "专业范围宽泛",
+    "database_jobs_after": 3955,
+    "database_candidate_leads_after": 11,
+    "formal_third_party_jobs_after": 8
+  },
+  "published_row": {
+    "title": "注册土木工程师（岩土）",
+    "employer": "河北水文四队地质勘查有限公司",
+    "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/382.html",
+    "official_table_url": "https://docs.qq.com/doc/DTGVxbUdBVWFUT0tZ",
+    "official_application_url": null,
+    "application_method": "现场报名或将材料发送至 sshdk@hbdkjt.cn，并按公告要求电话确认",
+    "official_row_locator": "附件1/第3行",
+    "major_requirement": "勘查技术与工程、土木工程、水利水电工程及相关专业",
+    "degree_requirement": "本科及以上",
+    "location": "河北省沧州市新华区",
+    "deadline_date": "2026-11-14",
+    "trust_grade": "A"
+  },
+  "policy_checks": {
+    "official_notice_and_table_bound": true,
+    "third_party_url_used_as_application": false,
+    "out_of_scope_rows_published": false,
+    "freshness_used_for_withdrawal": false,
+    "formal_database_written": true,
+    "server_database_written": false,
+    "captcha_login_or_robots_bypass": false
+  },
+  "interpretation": "本记录只证明本地正式库已纳入一条经过隔离试投的官方证据岗位；它不把官方来源伪称为第三方贡献，也不解除第三方批量扩展和三桶油入口证据的发布阻塞。"
+}

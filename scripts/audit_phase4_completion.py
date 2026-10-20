@@ -101,6 +101,7 @@ def build_report() -> dict[str, Any]:
     sinopec_company_intro_recheck = _read("docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json")
     hbdk_official_table = _read("docs/current/phase4-third-party-hbdk-official-table-2026-10-19.json")
     hbdk_registration = _read("docs/current/phase4-third-party-hbdk-candidate-registration-2026-10-19.json")
+    hbdk_water_promotion = _read("docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json")
     entry_matrix = _read("docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json")
     catalog_audit = _read("docs/current/phase4-three-oil-catalog-audit-2026-10-17.json")
     observed_roster = _read("docs/current/phase4-three-oil-observed-roster-2026-10-20.json")
@@ -147,7 +148,7 @@ def build_report() -> dict[str, Any]:
         {
             "id": "phase3_historical_withdrawal_audit",
             "status": "pass",
-            "evidence": ["docs/current/phase4-current-state-audit-2026-10-18.json"],
+            "evidence": ["docs/current/phase4-current-state-audit-2026-10-21.json"],
             "facts": {"audited_rows": database["phase3_withdrawal_audits"]},
         },
         {
@@ -332,6 +333,22 @@ def build_report() -> dict[str, Any]:
                     "formal_catalog_changed": three_oil_homepage_probe.get("summary", {}).get("formal_catalog_changed", False),
                     "interpretation": "共享集团主页或集团公告导航不等于下属单位独立招聘入口；本次只记录入口健康，不创建岗位。",
                 },
+            },
+        },
+        {
+            "id": "third_party_hbdk_water_formal_promotion",
+            "status": "pass" if hbdk_water_promotion.get("policy_checks", {}).get("formal_database_written") else "fail",
+            "evidence": [
+                "docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
+                "docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
+                "docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
+            ],
+            "facts": {
+                "published_job_id": hbdk_water_promotion.get("funnel", {}).get("published_job_id"),
+                "formal_jobs_added": hbdk_water_promotion.get("funnel", {}).get("formal_jobs_added", 0),
+                "student_visible_layer": hbdk_water_promotion.get("funnel", {}).get("student_visible_layer"),
+                "rejected_major_mismatch": hbdk_water_promotion.get("funnel", {}).get("rejected_major_mismatch", 0),
+                "rollback_backup": hbdk_water_promotion.get("database_transition", {}).get("rollback_backup"),
             },
         },
         {

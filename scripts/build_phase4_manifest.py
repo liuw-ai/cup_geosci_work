@@ -25,6 +25,7 @@ LOCAL_VALIDATION = ROOT / "docs" / "current" / "phase4-local-validation-2026-10-
 # generated after the source commit and are committed as metadata afterward.
 GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-current-state-audit-2026-10-18.json",
+    ":!docs/current/phase4-current-state-audit-2026-10-21.json",
     ":!docs/current/phase4-release-manifest.json",
     ":!docs/current/phase4-local-validation-2026-10-19.json",
     ":!docs/current/phase4-local-validation-2026-10-20.json",
@@ -55,6 +56,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
     ":!docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
     ":!docs/current/phase4-third-party-huatu-official-recovery-2026-10-21.json",
+    ":!docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
 )
 
 
@@ -174,7 +176,7 @@ def main() -> None:
     current_after_local_server_stop_backup = ROOT / "backups" / "job_hub-phase4-current-after-local-server-stop-20261019.sqlite3"
     # The current backup must be replaced whenever the local database schema or
     # evidence changes; never silently compare runtime data with an older hash.
-    current_backup = ROOT / "backups" / "job_hub-phase4-current-20261020.sqlite3"
+    current_backup = ROOT / "backups" / "job_hub-phase4-current-20261021.sqlite3"
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
     database["pre_third_party_candidate_backup"] = {
         "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
@@ -212,7 +214,7 @@ def main() -> None:
     display_audit = ROOT / "docs" / "current" / "phase4-sinopec-display-units-2026-10-18.json"
     sinopec_page_roster = ROOT / "docs" / "current" / "phase4-sinopec-page-roster-2026-10-19.json"
     geoscience_followup = ROOT / "docs" / "current" / "phase4-third-party-geoscience-followup-2026-10-18.json"
-    current_audit = ROOT / "docs" / "current" / "phase4-current-state-audit-2026-10-18.json"
+    current_audit = ROOT / "docs" / "current" / "phase4-current-state-audit-2026-10-21.json"
     manual_candidate = ROOT / "docs" / "current" / "phase4-third-party-candidate-2026-10-18.json"
     hrinm_trial = ROOT / "docs" / "current" / "phase4-third-party-hrinm-2026-10-18.json"
     cgs_trial = ROOT / "docs" / "current" / "phase4-third-party-cgs-2026-10-18.json"
@@ -243,6 +245,7 @@ def main() -> None:
     hbdk_registration = ROOT / "docs" / "current" / "phase4-third-party-hbdk-candidate-registration-2026-10-19.json"
     hbdk_water_evidence = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-official-evidence-2026-10-20.json"
     hbdk_water_trial = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-trial-2026-10-21.json"
+    hbdk_water_promotion = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-promotion-2026-10-21.json"
     huatu_official_recovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-official-recovery-2026-10-21.json"
     huatu_cnpc_chuanqing = ROOT / "docs" / "current" / "phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json"
     cnpc_official_recheck = ROOT / "docs" / "current" / "phase4-cnpc-official-recheck-2026-10-20.json"
@@ -352,6 +355,7 @@ def main() -> None:
             "phase4_third_party_hbdk_candidate_registration": sha256(hbdk_registration),
             "phase4_third_party_hbdk_water_official_evidence": sha256(hbdk_water_evidence),
             "phase4_third_party_hbdk_water_trial": sha256(hbdk_water_trial),
+            "phase4_third_party_hbdk_water_promotion": sha256(hbdk_water_promotion),
             "phase4_third_party_huatu_official_recovery": sha256(huatu_official_recovery),
             "phase4_third_party_huatu_cnpc_chuanqing": sha256(huatu_cnpc_chuanqing),
             "phase4_cnpc_official_recheck": sha256(cnpc_official_recheck),
@@ -430,6 +434,7 @@ def main() -> None:
             "cnpc_chuanqing_formal_jobs_created": 0,
             "hbdk_water_official_evidence": "docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
             "hbdk_water_isolated_trial": "docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
+            "hbdk_water_promotion": "docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
             "huatu_official_recovery": "docs/current/phase4-third-party-huatu-official-recovery-2026-10-21.json",
         },
         "three_oil_organization_reconciliation": reconciliation["summary"],
@@ -456,7 +461,7 @@ def main() -> None:
         },
         "document_policy": {
             "historical_snapshots_are_evidence_only": True,
-            "current_facts_document": "docs/current/phase4-current-state-audit-2026-10-18.json",
+            "current_facts_document": "docs/current/phase4-current-state-audit-2026-10-21.json",
             "release_manifest_binds_source_commit": True,
             "manifest_commit_note": (
                 "git_sha is the clean source/config commit used to generate this metadata; "
