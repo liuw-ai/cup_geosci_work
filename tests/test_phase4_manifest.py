@@ -52,6 +52,9 @@ def test_phase4_manifest_distinguishes_overall_target_from_third_party_gate() ->
 
     facts = db_facts(Path("runtime/job_hub.sqlite3"))
     assert int(facts["student_visible_total"]) >= 500
+    assert facts["formal_candidate_converted_job_count"] == 8
+    assert facts["formal_discovery_attributed_job_count"] == 7
+    assert facts["formal_third_party_job_count"] == 7
 
 
 def test_phase4_manifest_recomputes_current_hashes_and_database_facts() -> None:

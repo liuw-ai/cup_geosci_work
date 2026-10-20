@@ -111,17 +111,22 @@ def db_facts(path: Path) -> dict[str, object]:
         statuses = dict(connection.execute("SELECT status, COUNT(*) FROM jobs GROUP BY status").fetchall())
         layers = dict(connection.execute("SELECT publication_layer, COUNT(*) FROM jobs GROUP BY publication_layer").fetchall())
         leads = int(connection.execute("SELECT COUNT(*) FROM candidate_leads").fetchone()[0])
-        formal_third_party_jobs = int(
+        formal_candidate_converted_jobs = int(
             connection.execute(
                 """
-                SELECT COUNT(*)
-                FROM jobs
-                WHERE id IN (
-                    SELECT published_job_id
-                    FROM candidate_leads
-                    WHERE verification_status = 'published'
-                      AND published_job_id IS NOT NULL
-                )
+                SELECT COUNT(*) FROM candidate_leads
+                WHERE verification_status = 'published'
+                  AND published_job_id IS NOT NULL
+                """
+            ).fetchone()[0]
+        )
+        formal_discovery_attributed_jobs = int(
+            connection.execute(
+                """
+                SELECT COUNT(*) FROM candidate_leads
+                WHERE verification_status = 'published'
+                  AND published_job_id IS NOT NULL
+                  AND COALESCE(discovery_source_id, '') <> COALESCE(official_source_id, '')
                 """
             ).fetchone()[0]
         )
@@ -150,7 +155,12 @@ def db_facts(path: Path) -> dict[str, object]:
         "student_visible_layer_counts": student_visible_counts,
         "student_visible_total": student_visible_total,
         "candidate_lead_count": leads,
-        "formal_third_party_job_count": formal_third_party_jobs,
+        "formal_candidate_converted_job_count": formal_candidate_converted_jobs,
+        "formal_discovery_attributed_job_count": formal_discovery_attributed_jobs,
+        # Kept as the strict third-party metric; the old name is part of the
+        # current Manifest contract and is now explicitly defined by the
+        # discovery-source attribution query above.
+        "formal_third_party_job_count": formal_discovery_attributed_jobs,
     }
 
 
@@ -393,6 +403,7 @@ def main() -> None:
             "third_party_expansion": {
                 "candidate_leads": database.get("candidate_lead_count", 0),
                 "formal_jobs": database.get("formal_third_party_job_count", 0),
+                "formal_candidate_converted_jobs": database.get("formal_candidate_converted_job_count", 0),
                 "status": "in_progress",
                 "release_gate": "third_party_batch_expansion_incomplete",
             },
@@ -414,6 +425,7 @@ def main() -> None:
             "private_candidate_evidence": "docs/current/phase4-third-party-candidate-2026-10-18.json",
             "official_attachment_trial": "docs/current/phase4-third-party-cgs-2026-10-18.json",
             "formal_jobs_published": database.get("formal_third_party_job_count", 0),
+            "formal_candidate_converted_jobs": database.get("formal_candidate_converted_job_count", 0),
             "trial_report": "docs/current/phase4-third-party-trial-2026-10-18.json",
             "formal_job_report": "docs/current/phase4-third-party-hrinm-2026-10-18.json",
             "blocked_batch_report": "docs/current/phase4-third-party-blocked-batches-2026-10-18.json",

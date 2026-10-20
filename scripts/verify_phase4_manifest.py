@@ -160,17 +160,22 @@ def _database_facts() -> dict[str, Any]:
             connection.execute("SELECT status, COUNT(*) FROM jobs GROUP BY status").fetchall()
         )
         candidate_leads = int(connection.execute("SELECT COUNT(*) FROM candidate_leads").fetchone()[0])
-        formal_third_party_jobs = int(
+        formal_candidate_converted_jobs = int(
             connection.execute(
                 """
-                SELECT COUNT(*)
-                FROM jobs
-                WHERE id IN (
-                    SELECT published_job_id
-                    FROM candidate_leads
-                    WHERE verification_status = 'published'
-                      AND published_job_id IS NOT NULL
-                )
+                SELECT COUNT(*) FROM candidate_leads
+                WHERE verification_status = 'published'
+                  AND published_job_id IS NOT NULL
+                """
+            ).fetchone()[0]
+        )
+        formal_discovery_attributed_jobs = int(
+            connection.execute(
+                """
+                SELECT COUNT(*) FROM candidate_leads
+                WHERE verification_status = 'published'
+                  AND published_job_id IS NOT NULL
+                  AND COALESCE(discovery_source_id, '') <> COALESCE(official_source_id, '')
                 """
             ).fetchone()[0]
         )
@@ -179,7 +184,9 @@ def _database_facts() -> dict[str, Any]:
         "job_count": job_count,
         "status_counts": status_counts,
         "candidate_lead_count": candidate_leads,
-        "formal_third_party_job_count": formal_third_party_jobs,
+        "formal_candidate_converted_job_count": formal_candidate_converted_jobs,
+        "formal_discovery_attributed_job_count": formal_discovery_attributed_jobs,
+        "formal_third_party_job_count": formal_discovery_attributed_jobs,
         "sha256": sha256(DATABASE),
     }
 
@@ -239,7 +246,16 @@ def verify_manifest(path: Path = MANIFEST) -> dict[str, Any]:
 
     database = _database_facts()
     recorded_database = manifest.get("database", {})
-    for key in ("sha256", "integrity_check", "job_count", "status_counts", "candidate_lead_count", "formal_third_party_job_count"):
+    for key in (
+        "sha256",
+        "integrity_check",
+        "job_count",
+        "status_counts",
+        "candidate_lead_count",
+        "formal_candidate_converted_job_count",
+        "formal_discovery_attributed_job_count",
+        "formal_third_party_job_count",
+    ):
         _record_error(errors, f"database.{key}", recorded_database.get(key), database.get(key))
 
     blockers = [str(item) for item in manifest.get("release_blockers", [])]

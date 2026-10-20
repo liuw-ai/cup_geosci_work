@@ -112,17 +112,22 @@ def current_database_facts() -> dict[str, object]:
             connection.execute("SELECT publication_layer, COUNT(*) FROM jobs GROUP BY publication_layer").fetchall()
         )
         lead_count = int(connection.execute("SELECT COUNT(*) FROM candidate_leads").fetchone()[0])
-        formal_third_party_jobs = int(
+        formal_candidate_converted_jobs = int(
             connection.execute(
                 """
-                SELECT COUNT(*)
-                FROM jobs
-                WHERE id IN (
-                    SELECT published_job_id
-                    FROM candidate_leads
-                    WHERE verification_status = 'published'
-                      AND published_job_id IS NOT NULL
-                )
+                SELECT COUNT(*) FROM candidate_leads
+                WHERE verification_status = 'published'
+                  AND published_job_id IS NOT NULL
+                """
+            ).fetchone()[0]
+        )
+        formal_discovery_attributed_jobs = int(
+            connection.execute(
+                """
+                SELECT COUNT(*) FROM candidate_leads
+                WHERE verification_status = 'published'
+                  AND published_job_id IS NOT NULL
+                  AND COALESCE(discovery_source_id, '') <> COALESCE(official_source_id, '')
                 """
             ).fetchone()[0]
         )
@@ -143,7 +148,9 @@ def current_database_facts() -> dict[str, object]:
         "publication_layer_counts": layer_counts,
         "phase3_withdrawal_audit_count": audit_count,
         "candidate_lead_count": lead_count,
-        "formal_third_party_job_count": formal_third_party_jobs,
+        "formal_candidate_converted_job_count": formal_candidate_converted_jobs,
+        "formal_discovery_attributed_job_count": formal_discovery_attributed_jobs,
+        "formal_third_party_job_count": formal_discovery_attributed_jobs,
         "student_read_as_of_date": as_of_date,
         "student_visible_layer_counts": visible_by_layer,
         "student_visible_total": visible_total,
