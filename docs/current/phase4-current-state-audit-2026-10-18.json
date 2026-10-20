@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T00:17:11Z",
+  "generated_at": "2026-10-20T00:36:47Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "d6c631ed616ff0df596b773e35be4652f5f994ab",
+  "git_sha": "72300f4c23b787baa049fa145ddc73b6778731df",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -154,7 +154,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "417282eb7ff69cffb2bb68111a8e3e6ea1ea01c2edfffbff5cafcf2bae537aca"
+        "sha256": "8afd900375e5382e575a5c2c0eba6654e18e76b0bf43995ecffa0e7662e2599c"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-19.json",
@@ -215,7 +215,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "4ca112640c09d532a7614cb17770d6a712cdba61c9f06bb9b2f22b0e7637f6ac"
+      "sha256": "0c3f85bb82280a7381b46ce87262436043ab5129d411d993446614f15cd2d1e2"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "a04193dc77730e06ef92cbf29fabde068eeadd165639cf2c79ad0a083be9e5aa"
+      "sha256": "a32ad7e5513718addef734813f79b531419ebb9357a3d3d687201e168b36d83a"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -351,7 +351,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "417282eb7ff69cffb2bb68111a8e3e6ea1ea01c2edfffbff5cafcf2bae537aca"
+      "sha256": "8afd900375e5382e575a5c2c0eba6654e18e76b0bf43995ecffa0e7662e2599c"
     }
   },
   "code_inventory": [
@@ -637,8 +637,8 @@
     },
     {
       "path": "job_hub/organizations.py",
-      "line_count": 450,
-      "sha256": "ee92cf23c8d6546649c0ab12ea9e8845826bf7f6a06dabf58dced373f57d3e8b"
+      "line_count": 452,
+      "sha256": "96d5a694d7eda1f4b817123ac00f5630818bd5a2e913940da5e411e3af7e1c2c"
     },
     {
       "path": "job_hub/pending_evidence_audit.py",
@@ -848,7 +848,7 @@
     {
       "path": "scripts/build_phase4_manifest.py",
       "line_count": 433,
-      "sha256": "10d19d56165ee879bcc14ecb93953b3080582997b553fab4555e807a4349e8f5"
+      "sha256": "07dcaf4b33c41165f2b2150f64838e73c070eff876495534235faa33f1727f7c"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -942,8 +942,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 250,
-      "sha256": "4964fb17391eec65dde818fc257c99c2e67cb73bfd22530d03cb36f05c3d2706"
+      "line_count": 251,
+      "sha256": "6110391f408c8c99453e874b6d68460b5036901936138ab26952493ca591e72e"
     },
     {
       "path": "tests/conftest.py",
@@ -1312,8 +1312,8 @@
     },
     {
       "path": "tests/test_organizations.py",
-      "line_count": 217,
-      "sha256": "e512d164772a3cbfb9faf801b8f16a004cd6c164d1bd91f3edc7e9c4c031f4e5"
+      "line_count": 228,
+      "sha256": "29857e8993219ead7d59f3cabc480e44e201fc120af2281e606674bdbb088df8"
     },
     {
       "path": "tests/test_pending_evidence_audit.py",
