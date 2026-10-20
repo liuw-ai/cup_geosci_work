@@ -8,11 +8,11 @@ def test_current_third_party_funnel_has_no_published_evidence_gaps() -> None:
     report = audit_database(DATABASE)
 
     assert report["database"]["integrity_check"] == "ok"
-    assert report["summary"]["candidate_leads"] == 11
-    assert report["summary"]["published_leads"] == 8
+    assert report["summary"]["candidate_leads"] == 12
+    assert report["summary"]["published_leads"] == 9
     assert report["summary"]["failed_leads"] == 0
     assert report["summary"]["audit_status"] == "pass"
-    assert report["summary"]["by_discovery_source"]["huatu-discovery"]["published"] == 6
+    assert report["summary"]["by_discovery_source"]["huatu-discovery"]["published"] == 7
     assert report["summary"]["by_discovery_source"]["geotalent-discovery"]["published"] == 1
     assert report["summary"]["by_discovery_source"]["offcn-discovery"]["candidate_leads"] == 0
     assert report["summary"]["by_discovery_source"]["fenbi-discovery"]["candidate_leads"] == 0
@@ -22,7 +22,7 @@ def test_published_leads_keep_discovery_provenance_without_using_it_as_applicati
     report = audit_database(DATABASE)
     published = [row for row in report["rows"] if row["verification_status"] == "published"]
 
-    assert len(published) == 8
+    assert len(published) == 9
     assert all(row["lead_url"].startswith(("http://", "https://")) for row in published)
     assert all(row["discovery_source_id"] for row in published)
     assert all(
