@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "phase4",
-  "generated_at": "2026-10-20T00:43:47Z",
+  "generated_at": "2026-10-20T04:37:36Z",
   "policy": "A shared group portal proves only the shared portal. It is not copied into a unit-specific URL.",
   "summary": {
     "formal_catalog_units": 64,
