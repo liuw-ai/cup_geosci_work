@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-20T08:03:35+08:00",
+  "generated_at": "2026-10-20T12:46:40+08:00",
   "environment": "local_read_only",
   "policy": "只读取已登记发现页并核验 robots；不绕过 robots、TLS、验证码、登录或浏览器权限，不下载附件，不生成候选，不写岗位数据库。访问失败是来源健康事实，不表示来源没有岗位。",
   "channels": [
@@ -64,6 +64,36 @@
     "candidate_rows_created": 0,
     "formal_jobs_created": 0,
     "robots_or_tls_bypass": false
+  },
+  "latest_network_recheck": {
+    "checked_at": "2026-10-20T12:46:40+08:00",
+    "user_agent": "CUPB-Geoscience-Job-Hub/phase4-readonly",
+    "policy": "先核验 HTTPS robots.txt；HTTPS 无法核验时仅记录 HTTP robots.txt 响应，不把 HTTP 502 或 TLS 失败当作来源没有岗位。",
+    "channels": [
+      {
+        "source_id": "offcn-discovery",
+        "https_robots": {"status": "tls_error", "error_class": "SSLError"},
+        "http_robots": {"status": 502, "bytes": 0, "redirect": null}
+      },
+      {
+        "source_id": "fenbi-discovery",
+        "https_robots": {"status": "tls_error", "error_class": "SSLError"},
+        "http_robots": {"status": 502, "bytes": 0, "redirect": null}
+      },
+      {
+        "source_id": "gongkaoleida-discovery",
+        "https_robots": {"status": "tls_error", "error_class": "SSLError"},
+        "http_robots": {"status": 502, "bytes": 0, "redirect": null}
+      },
+      {
+        "source_id": "gongkaozixun-discovery",
+        "https_robots": {"status": "tls_error", "error_class": "SSLError"},
+        "http_robots": {"status": 502, "bytes": 0, "redirect": null}
+      }
+    ],
+    "access_limited_sources": 4,
+    "downloaded_files": 0,
+    "candidate_rows_created": 0
   },
   "next_allowed_action": "在合法可访问环境或由操作员提供带原始来源 URL 的原始职位表后，重新执行下载、SHA-256 留存、逐行解析和官方回溯；在此之前保持 B 级来源登记但不新增岗位。"
 }
