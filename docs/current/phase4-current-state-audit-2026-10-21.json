@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T21:55:34Z",
+  "generated_at": "2026-10-20T22:02:06Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "336ff959ab74b4b66c6ea351e1c1ee8b0f5626ee",
-  "git_status_porcelain": "M data/sources.json\n M job_hub/profiles.py\n M scripts/audit_phase4_current_state.py\n M scripts/build_phase4_manifest.py\n M scripts/verify_phase4_manifest.py\n M tests/test_phase4_manifest.py\n M tests/test_profiles.py\n?? docs/current/phase4-third-party-gdzys-2026-10-21.json\n?? scripts/publish_phase4_gdzys_trial.py",
+  "git_sha": "421d6b32213c4fb46eb793a3db1f4559d54c844b",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "bf1540c6c192935d2d3b2b7df4fd28f897eee4e5c256971cb46b978218faf24a",
@@ -156,7 +156,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "3984b142abcc72f3301d2a08e6eb795cca07b77c0daccef023b379dee5de9fd8"
+        "sha256": "4c65177c3503af0bb7577f71967c791f73da07fb507bc08fb9c402a137728134"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-21.json",
@@ -269,7 +269,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "3cc904d522e4d6b8f02824ae4fc9b2106117412e98bf806a047ab25cecfe43b2"
+      "sha256": "840751c878a00692a83c95129de088eb6c143b34e9009f8c6b3704e37ce1b7aa"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -397,7 +397,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "3984b142abcc72f3301d2a08e6eb795cca07b77c0daccef023b379dee5de9fd8"
+      "sha256": "4c65177c3503af0bb7577f71967c791f73da07fb507bc08fb9c402a137728134"
     }
   },
   "code_inventory": [
@@ -1439,7 +1439,7 @@
     {
       "path": "tests/test_phase4_hbdk_candidates.py",
       "line_count": 39,
-      "sha256": "c8afd53ff9353a278e4498f958738917e835ced2bdc65ee38191fcfcbe5afeae"
+      "sha256": "fc80d0c692aa79b1ef81e11785897d55af2028b7df82dfcad9bb0631cadfce01"
     },
     {
       "path": "tests/test_phase4_hbdk_evidence.py",
@@ -1479,7 +1479,7 @@
     {
       "path": "tests/test_phase4_third_party_funnel.py",
       "line_count": 47,
-      "sha256": "a15809586b11817882d697ff8e5fe98438c94a4fd79f3606ca9736350f6e3bb9"
+      "sha256": "61bb0e3dc96898da258c044ce2e25b8eaf189980fd5a074676968d9e3bdc5c9e"
     },
     {
       "path": "tests/test_phase4_third_party_provenance.py",

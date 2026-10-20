@@ -5,28 +5,28 @@
   "server_deployment": false,
   "tests": {
     "command": "python -m pytest -q",
-      "passed": 1121,
+      "passed": 1122,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
     "database_path": "pytest temporary APP_DATABASE_PATH per test",
-    "formal_database_sha256_before": "ae9fb39fd04d9ecd8f8449646cd11eeb0e96d31c36b1672c144fc29a85a5ba1e",
-    "formal_database_sha256_after": "ae9fb39fd04d9ecd8f8449646cd11eeb0e96d31c36b1672c144fc29a85a5ba1e",
+    "formal_database_sha256_before": "bf1540c6c192935d2d3b2b7df4fd28f897eee4e5c256971cb46b978218faf24a",
+    "formal_database_sha256_after": "bf1540c6c192935d2d3b2b7df4fd28f897eee4e5c256971cb46b978218faf24a",
     "formal_database_stable_during_tests": true
   },
   "local_web_read_only": {
     "base_url": "http://127.0.0.1:8098",
     "database_mode": "temporary_copy_of_runtime_database",
-    "temporary_database": "runtime/phase4-web-validation-20261021-hbdk/job_hub.sqlite3",
-    "temporary_database_sha256": "4e0dc1014341cd5fde491b6dc5529d6e3eb33078afc83229042cd0c819c5e761",
+    "temporary_database": "runtime/phase4-web-validation-20261021-gdzys/job_hub.sqlite3",
+    "temporary_database_sha256": "bf1540c6c192935d2d3b2b7df4fd28f897eee4e5c256971cb46b978218faf24a",
     "temporary_database_integrity": "ok",
     "student_read_as_of_date": "2026-10-21",
     "layer_totals": {
       "exact_match": 140,
-      "broad_geoscience_match": 8,
+      "broad_geoscience_match": 9,
       "incomplete_but_basic_match": 442,
       "source_unavailable": 87,
-      "student_visible_total": 677
+      "student_visible_total": 678
     },
     "http_checks": {
       "/healthz": 200,
@@ -37,9 +37,19 @@
       "/api/jobs?layer=source_unavailable": 200,
       "/api/coverage": 200,
       "/jobs/5433": 200,
-      "/jobs/5439": 200
+      "/jobs/5439": 200,
+      "/jobs/5440": 200
     },
     "coverage_response": "200; four layers and current as_of counts returned",
+    "third_party_job_detail": {
+      "job_id": 5440,
+      "publication_layer": "broad_geoscience_match",
+      "layer_label_present": true,
+      "no_deadline_label_present": true,
+      "official_notice_link_present": true,
+      "email_application_method_present": true,
+      "third_party_discovery_domain_exposed": false
+    },
     "formal_database_written": false
   },
   "release_boundary": {

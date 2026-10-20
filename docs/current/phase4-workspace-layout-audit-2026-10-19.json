@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-20T21:55:36Z",
+  "generated_at": "2026-10-20T22:02:08Z",
   "scope": "local_read_only_workspace_layout",
   "production_entrypoint": "deploy/compose.yaml",
   "canonical_paths": {
