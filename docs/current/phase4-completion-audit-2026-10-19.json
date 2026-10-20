@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T03:05:14Z",
+  "generated_at": "2026-10-20T03:24:08Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -251,6 +251,12 @@
           "independent_unit_recruitment_portals_proven": false,
           "catalog_changed": false,
           "jobs_created": false
+        },
+        "latest_official_homepage_entry_recheck": {
+          "observations": 3,
+          "recruitment_entries_proven": 0,
+          "no_jobs_created": true,
+          "catalog_changed": false
         }
       }
     },
