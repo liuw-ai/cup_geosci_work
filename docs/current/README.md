@@ -4,7 +4,7 @@
 
 ## 当前事实来源（2026-10-20 本地复核）
 
-当前岗位和代码事实以 [phase4-current-state-audit-2026-10-18.json](phase4-current-state-audit-2026-10-18.json) 及最新 [Phase 4 Manifest](phase4-release-manifest.json) 为准；该审计在 2026-10-19 重新只读复核。Phase 3、RESET、CODEBASE 和更早的快照已移入 `history/docs/`，仅作为历史证据；其中的数量、哈希和测试结果不能覆盖当前审计。历史文件不删除、不作为生产输入，任何迁移或清理都必须保留原始哈希。
+当前岗位和代码事实以 [phase4-current-state-audit-2026-10-18.json](phase4-current-state-audit-2026-10-18.json) 及最新 [Phase 4 Manifest](phase4-release-manifest.json) 为准；该审计于 2026-10-20 重新只读复核。Phase 3、RESET、CODEBASE 和更早的快照已移入 `history/docs/`，仅作为历史证据；其中的数量、哈希和测试结果不能覆盖当前审计。历史文件不删除、不作为生产输入，任何迁移或清理都必须保留原始哈希。
 
 当前本地事实的边界以 [phase4-current-state-audit-2026-10-18.json](phase4-current-state-audit-2026-10-18.json) 和 [phase4-release-manifest.json](phase4-release-manifest.json) 的哈希绑定数据为准，不在本 README 重复维护易过期的岗位数量。当前已记录 8 条候选线索，其中 1 条已通过官方企业公告回溯并形成正式学生岗位，4 条华图发现已回溯至中国地质调查局官方附件并形成 4 条正式岗位，另有 2 条华图→河北省地球物理勘查有限公司候选已完成官方公告、岗位表和期限核验并形成 2 条正式岗位；服务器未部署，自动化保持暂停，第三方发现链接不作为学生申请链接。
 
