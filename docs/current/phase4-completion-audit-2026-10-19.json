@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T01:21:59Z",
+  "generated_at": "2026-10-20T01:46:15Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -233,6 +233,12 @@
             "source_unavailable": 4,
             "catalog_changed": false,
             "interpretation": "网络失败只标记来源暂时不可用，不覆盖既有官方入口证据，也不创建或撤回岗位。"
+          },
+          "latest_sinopec_company_intro_recheck": {
+            "official_unit_display_name_count": 131,
+            "catalog_changed": false,
+            "registry_changed": false,
+            "interpretation": "官方企业介绍页用于组织关系和展示名称补证；简称仍需法定身份和单位入口证据，不能直接升级目录。"
           }
         }
       }
