@@ -34,6 +34,21 @@ def test_three_oil_catalog_contains_the_three_groups_and_excludes_pipechina() ->
     assert all(unit["group_id"] in {"cnpc", "sinopec", "cnooc"} for unit in three_oil_units(catalog))
 
 
+def test_three_oil_catalog_declares_observed_roster_boundary_without_promoting_candidates() -> None:
+    catalog = load_three_oil_catalog()
+    boundary = catalog["coverage_boundary"]
+    roster = boundary["observed_display_roster"]
+
+    assert roster["evidence_file"] == (
+        "docs/current/phase4-three-oil-observed-roster-2026-10-20.json"
+    )
+    assert roster["candidate_count"] == 239
+    assert roster["candidate_count_by_group"] == {"cnpc": 108, "sinopec": 131, "cnooc": 0}
+    assert roster["status"] == "registered_as_display_candidates_only"
+    assert "不得加入 groups[].units" in roster["promotion_gate"]
+    assert boundary["role_dictionary"]["student_ui_exposure"] is False
+
+
 def test_three_oil_units_keep_group_and_operating_unit_separate() -> None:
     rows = {item["id"]: item for item in three_oil_units()}
 

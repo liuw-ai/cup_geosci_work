@@ -3,6 +3,36 @@
   "as_of": "2026-10-06",
   "scope": "三桶油体系中与地质、勘探开发、地球科学、油田技术服务和应届生招聘相关的组织范围目录",
   "authority_note": "本目录用于组织覆盖和来源扩展计划。group_roster_catalogued 只表示单位已纳入集团体系范围，不表示其招聘入口已经核验或可以自动采集；只有 organization_registry.json 中的 official_confirmed/automation_ready 频道才能进入来源运行链路。",
+  "coverage_boundary": {
+    "formal_catalog_definition": "groups[].units 只收录已经纳入本项目正式地学/勘探开发/油田技术服务覆盖范围的单位；正式目录不是三桶油全部法定子公司全集。",
+    "observed_display_roster": {
+      "evidence_file": "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
+      "organization_registry_file": "data/organization_registry.json",
+      "candidate_count": 239,
+      "candidate_count_by_group": {
+        "cnpc": 108,
+        "sinopec": 131,
+        "cnooc": 0
+      },
+      "status": "registered_as_display_candidates_only",
+      "promotion_gate": "必须补齐官方单位身份/法定名称证据，以及单位级招聘入口或官方授权共享入口；未通过前不得加入 groups[].units、不得创建采集源、不得生成学生端申请链接。"
+    },
+    "role_dictionary": {
+      "scope": "admin_and_audit_only",
+      "student_ui_exposure": false,
+      "group": "集团主体",
+      "operating_company": "油气勘探开发运营单位",
+      "regional_branch": "地区分公司或地区节点",
+      "research_institute": "研究院或技术研究机构",
+      "internal_service_unit": "集团体系内工程、技术、支撑或共享服务单位；不是甲乙方字段",
+      "external_service_provider": "集团外部承包/服务商；不是三桶油内部组织层级",
+      "refining_company": "炼化与化工运营单位",
+      "sales_company": "销售与营销运营单位",
+      "financial_support_unit": "金融、出版、物流等支撑单位",
+      "international_business_unit": "国际业务或境外运营单位",
+      "other_affiliate": "其他需要人工补证的关联单位"
+    }
+  },
   "exclusions": [
     {
       "id": "pipechina",
