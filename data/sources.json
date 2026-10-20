@@ -1722,5 +1722,24 @@
       "request_interval_seconds": 1.2,
       "note": "第一方公告明确事业单位（含带编入企）面向往届和2027年应届毕业生，报名窗口为2026-10-13 08:30至2026-10-27 18:00。附件1至3进入受控解析队列；附件4企业自主引才先保留为学生范围外，不能整批发布。岗位必须逐行核对单位、专业、学历、地点和学生资格。"
     }
+  },
+  {
+    "id": "gdzys-official-recruitment",
+    "name": "广东省科学院资源利用与稀土开发研究所官方招聘公告",
+    "publisher": "广东省科学院资源利用与稀土开发研究所",
+    "homepage_url": "http://www.gdzys.net/",
+    "source_type": "manual",
+    "category": "科研院所、矿产资源与地学拓展",
+    "source_tier": "A",
+    "enabled": true,
+    "config": {
+      "allowed_hosts": ["www.gdzys.net", "gdzys.net"],
+      "allow_shared_source_url": true,
+      "publication_category": "科研院所、矿产资源与地学拓展",
+      "automation_status": "manual_official_recovery_verified",
+      "official_notice_url": "http://www.gdzys.net/xxgk/zpgg/t72941.html",
+      "official_notice_published_at": "2026-10-16T00:00:00+08:00",
+      "note": "官方招聘栏目与华图发现页同标题同日期；公告明确研究领域、专业、硕士/博士条件、工作地点和邮箱报名方式。无独立 HTTP 报名页，不伪造 application_url；岗位按官方公告发布日期起90个北京时间自然日复核。"
+    }
   }
 ]

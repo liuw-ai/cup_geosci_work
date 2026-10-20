@@ -1,0 +1,74 @@
+{
+  "phase": "phase4",
+  "source_id": "huatu-discovery",
+  "official_source_id": "gdzys-official-recruitment",
+  "generated_at": "2026-10-21T05:40:00+08:00",
+  "purpose": "华图发现页回溯广东省科学院资源利用与稀土开发研究所官网招聘公告的逐行试点",
+  "policy": {
+    "third_party_page_is_not_application_source": true,
+    "official_notice_required_before_formal_job": true,
+    "official_application_url_may_be_null_when_email_method_is_explicit": true,
+    "no_deadline_policy": "official_publication_date_plus_90_calendar_days_asia_shanghai",
+    "formal_database_written": false
+  },
+  "capture": {
+    "directory": "runtime/third-party-evidence/gdzys-huatu-2026-10-21",
+    "discovery_page": "runtime/third-party-evidence/gdzys-huatu-2026-10-21/discovery-page.html",
+    "discovery_page_sha256": "F7BA331A6A3306DC300CF76D48C540048A9A11E1973CAB570F69089781171C8E",
+    "official_notice": "runtime/third-party-evidence/gdzys-huatu-2026-10-21/official-notice.html",
+    "official_notice_sha256": "91049B0D104E4D4E129D4A8AD0433D76A96E8B4AC3BA6C8F02282471866EA407",
+    "captured_at": "2026-10-21T05:36:42+08:00"
+  },
+  "discovery": {
+    "url": "https://gd.huatu.com/sydw/2026/1016/10711469.html",
+    "title": "广东省科学院资源利用与稀土开发研究所人才招聘公告",
+    "role": "B级发现证据；不作为学生端申请链接"
+  },
+  "official_recovery": {
+    "notice_url": "http://www.gdzys.net/xxgk/zpgg/t72941.html",
+    "homepage_url": "http://www.gdzys.net/",
+    "employer": "广东省科学院资源利用与稀土开发研究所",
+    "published_date": "2026-10-16",
+    "location": "广东省广州市天河区长兴路363号",
+    "application_method": "将个人简历和相关证明材料发送至 gdzyshr@163.com，邮件标题注明应聘人才类型、研究方向、本人姓名和毕业院校；无独立 HTTP 报名页面。",
+    "no_deadline_expires_at": "2027-01-14"
+  },
+  "rows": [
+    {
+      "row_number": 1,
+      "title": "矿产资源高效分离与综合利用",
+      "research_direction": "分离与综合利用工艺、绿色高效选矿药剂、新型低耗选矿设备、设备智能化",
+      "major_requirement": "矿物加工工程、化学工程、机械工程、机械设计及自动化、岩矿（矿物）学",
+      "degree_requirement": "优秀博士或相关专业硕士",
+      "student_layer_decision": "broad_geoscience_match",
+      "publication_decision": "专业要求同时包含岩矿（矿物）学，岗位研究领域为矿产资源；按专业范围宽泛层发布，不等同四个核心专业精确匹配。",
+      "accepted": true
+    },
+    {
+      "row_number": 2,
+      "title": "储能材料与储能技术",
+      "research_direction": "锂离子电池材料、固态锂电池技术、制氢储氢材料、永磁材料",
+      "major_requirement": "电化学、电气工程、电气自动化、材料物理与化学、材料加工工程",
+      "degree_requirement": "优秀博士或相关专业硕士",
+      "student_layer_decision": "out_of_scope",
+      "publication_decision": "官方专业要求明确集中于电气、材料和电化学，未包含地学兼容表达，拒绝进入本项目学生岗位。",
+      "accepted": false,
+      "rejection_reason": "out_of_scope"
+    }
+  ],
+  "funnel": {
+    "discovery_pages": 1,
+    "official_notices_recovered": 1,
+    "official_rows_reviewed": 2,
+    "private_candidate_leads_expected": 1,
+    "formal_jobs_expected": 1,
+    "student_visible_jobs_expected": 1,
+    "rejected_rows": 1
+  },
+  "student_link_policy": {
+    "official_notice_url": "http://www.gdzys.net/xxgk/zpgg/t72941.html",
+    "official_application_url": null,
+    "display_application_method": true,
+    "third_party_link_displayed": false
+  }
+}

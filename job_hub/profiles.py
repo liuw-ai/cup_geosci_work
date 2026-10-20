@@ -56,7 +56,7 @@ BROAD_GEOSCIENCE_TERMS = frozenset(
         "地球科学", "地质与矿产", "勘查技术与工程", "矿产普查与勘探",
         "矿产勘查", "资源勘查", "地球探测与信息技术", "地球信息科学与技术",
         "地球化学", "地球物理学", "地球物理", "固体地球物理学", "矿物学",
-        "岩石学", "矿床学", "构造地质学", "古生物学与地层学", "第四纪地质学",
+        "岩石学", "岩矿（矿物）学", "矿床学", "构造地质学", "古生物学与地层学", "第四纪地质学",
         "沉积学", "生态地质学", "海洋地质", "遥感地质", "石油地质", "油气地质",
         "工程地质", "水文地质", "环境地质", "地质灾害", "地热", "物探", "化探", "测井",
     }
@@ -261,6 +261,11 @@ FRESH_GRADUATE_EXEMPTION_PATTERNS = (
 JOB_LEVEL_EVIDENCE_SCOPES = frozenset(
     {
         "official_html_table_row",
+        # Some official recruitment notices expose a structured row in the
+        # notice HTML without a separate table/attachment parser.  The
+        # evidence report must bind the row title, major, and degree fields;
+        # this scope keeps that official notice-row contract explicit.
+        "official_notice_row",
         "official_attachment_row",
         "official_role_section",
         "official_detail_block",

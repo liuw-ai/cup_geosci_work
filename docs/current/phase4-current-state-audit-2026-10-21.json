@@ -1,41 +1,41 @@
 {
-  "generated_at": "2026-10-20T21:17:54Z",
+  "generated_at": "2026-10-20T21:55:34Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "e5959e193daf7bfde30071fdd8ec9b67ade40e99",
-  "git_status_porcelain": "",
+  "git_sha": "336ff959ab74b4b66c6ea351e1c1ee8b0f5626ee",
+  "git_status_porcelain": "M data/sources.json\n M job_hub/profiles.py\n M scripts/audit_phase4_current_state.py\n M scripts/build_phase4_manifest.py\n M scripts/verify_phase4_manifest.py\n M tests/test_phase4_manifest.py\n M tests/test_profiles.py\n?? docs/current/phase4-third-party-gdzys-2026-10-21.json\n?? scripts/publish_phase4_gdzys_trial.py",
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "ae9fb39fd04d9ecd8f8449646cd11eeb0e96d31c36b1672c144fc29a85a5ba1e",
+    "sha256": "bf1540c6c192935d2d3b2b7df4fd28f897eee4e5c256971cb46b978218faf24a",
     "integrity_check": "ok",
-    "job_count": 3955,
+    "job_count": 3956,
     "status_counts": {
       "expired": 264,
-      "open": 3595,
+      "open": 3596,
       "superseded": 45,
       "withdrawn": 51
     },
     "publication_layer_counts": {
-      "broad_geoscience_match": 8,
+      "broad_geoscience_match": 9,
       "exact_match": 202,
       "incomplete_but_basic_match": 624,
       "not_public": 2955,
       "source_unavailable": 166
     },
     "phase3_withdrawal_audit_count": 3947,
-    "candidate_lead_count": 11,
-    "formal_candidate_converted_job_count": 8,
-    "formal_discovery_attributed_job_count": 7,
-    "formal_third_party_job_count": 7,
+    "candidate_lead_count": 12,
+    "formal_candidate_converted_job_count": 9,
+    "formal_discovery_attributed_job_count": 8,
+    "formal_third_party_job_count": 8,
     "student_read_as_of_date": "2026-10-21",
     "student_visible_layer_counts": {
-      "broad_geoscience_match": 8,
+      "broad_geoscience_match": 9,
       "exact_match": 140,
       "incomplete_but_basic_match": 442,
       "not_public": 0,
       "source_unavailable": 87
     },
-    "student_visible_total": 677
+    "student_visible_total": 678
   },
   "sources_and_organizations": {
     "registered_source_count": 12,
@@ -269,7 +269,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "24cda68331ba09287c46c413e0511b18a6967c0a42bfbb551339b6902fef6d79"
+      "sha256": "3cc904d522e4d6b8f02824ae4fc9b2106117412e98bf806a047ab25cecfe43b2"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -326,6 +326,10 @@
     "phase4_third_party_hbdk_water_promotion": {
       "path": "docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
       "sha256": "107fc9daceeef2aff441f58ad97e866181c933a35e636138e9b67eced49bed67"
+    },
+    "phase4_third_party_gdzys": {
+      "path": "docs/current/phase4-third-party-gdzys-2026-10-21.json",
+      "sha256": "4cabe47be169d6ce40cd77286aad34da745f47e4ba151ec46d4a6c11d8ae6e39"
     },
     "phase4_third_party_huatu_cnpc_chuanqing": {
       "path": "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",
@@ -709,8 +713,8 @@
     },
     {
       "path": "job_hub/profiles.py",
-      "line_count": 1919,
-      "sha256": "637c31596945979211d9f6b27f83bdc287e49bb081b27ccaa92f13e0c807cf51"
+      "line_count": 1924,
+      "sha256": "fb0e6824739acdd3d5c90b03fde87e1fae2751e79aac9c461b78fd4d74be1142"
     },
     {
       "path": "job_hub/provincial_matrix_audit.py",
@@ -869,8 +873,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 607,
-      "sha256": "d845c0b856704d47ebcaf65fedb53856e5d35d57dd478b82fc9e5c30089568b9"
+      "line_count": 612,
+      "sha256": "333f46a8c5a18a099c9cc32af599495b59d73768232e24a17af2b9ad6c9a3ae8"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -899,8 +903,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 496,
-      "sha256": "9b7c0771853289dd2840093656283c44b346e649f4990fabe32caf1ea0cf279e"
+      "line_count": 500,
+      "sha256": "cf4c769b0cbb3ba754a0b1801742767276ef2d93a0b585dee22ffa0331f0944a"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -988,6 +992,11 @@
       "sha256": "954cd214afa698e5c08e982340d981c194c0e5901161bf70da3e43642b754fed"
     },
     {
+      "path": "scripts/publish_phase4_gdzys_trial.py",
+      "line_count": 231,
+      "sha256": "ff446f8dd957b0603c915e19e50f9b5919bba056722ebe0c63b82b518b9b0301"
+    },
+    {
       "path": "scripts/publish_phase4_hbdk_trial.py",
       "line_count": 215,
       "sha256": "504463894624eb5fc1b14093aaf95b203673309e092a0edc99ca0a21965b5cd0"
@@ -1014,8 +1023,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 293,
-      "sha256": "d07437cb2032769ad6c61b28acca082ccefd892654fddee81bc251d8e8a1b719"
+      "line_count": 295,
+      "sha256": "a9002934dd4704ec2e1ee54898f2a97fc0b72bae22e2653a1b2cd8ce2c1477b7"
     },
     {
       "path": "tests/conftest.py",
@@ -1420,7 +1429,7 @@
     {
       "path": "tests/test_phase4_completion_audit.py",
       "line_count": 51,
-      "sha256": "7056471dcdbab4025a58da19680aebc8cdf6e7ff552f5e3d5e69ce8809f98b96"
+      "sha256": "634ed73dcdbb44fa287fb8e86a2a8806c92f0614fe210c7024fe8c3e9d10b616"
     },
     {
       "path": "tests/test_phase4_current_audit.py",
@@ -1460,7 +1469,7 @@
     {
       "path": "tests/test_phase4_manifest.py",
       "line_count": 93,
-      "sha256": "44c16450a14764a1938bad3bd738cee72a8eb63fa74ca0a949ad35d995d592a3"
+      "sha256": "41cbdd812e31ba50b7dcdf044cef54f09a1279d1e1a09bf20667d747d3416955"
     },
     {
       "path": "tests/test_phase4_metadata_refresh.py",
@@ -1504,8 +1513,8 @@
     },
     {
       "path": "tests/test_profiles.py",
-      "line_count": 1246,
-      "sha256": "961cfdcafb902bf98ceb84c6b3f5aecb239d46105c0b4488615d5f92bfdf783c"
+      "line_count": 1271,
+      "sha256": "1f132318695ef3a4bd3c86a47bf81d8c9afa678624ac95ffe6917274c0e9df4f"
     },
     {
       "path": "tests/test_provincial_matrix_audit.py",

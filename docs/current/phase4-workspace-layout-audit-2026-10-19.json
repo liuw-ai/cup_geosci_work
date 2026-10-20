@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-20T21:17:55Z",
+  "generated_at": "2026-10-20T21:55:36Z",
   "scope": "local_read_only_workspace_layout",
   "production_entrypoint": "deploy/compose.yaml",
   "canonical_paths": {
@@ -398,8 +398,8 @@
     },
     {
       "path": "runtime/job_hub.sqlite3",
-      "bytes": 50147328,
-      "last_write_time": "2026-10-20T19:45:36Z",
+      "bytes": 50155520,
+      "last_write_time": "2026-10-20T21:51:52Z",
       "classification": "canonical_runtime_database",
       "production_input": true
     },
@@ -407,6 +407,27 @@
       "path": "runtime/local-validation-20261020/job_hub.sqlite3",
       "bytes": 50135040,
       "last_write_time": "2026-10-20T12:35:28Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-gdzys-trial-20261021/job_hub.sqlite3",
+      "bytes": 50155520,
+      "last_write_time": "2026-10-20T21:49:28Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-gdzys-trial-20261021-fresh/job_hub.sqlite3",
+      "bytes": 50155520,
+      "last_write_time": "2026-10-20T21:50:18Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-gdzys-trial.sqlite3",
+      "bytes": 50151424,
+      "last_write_time": "2026-10-20T21:41:27Z",
       "classification": "isolated_test_or_validation_copy",
       "production_input": false
     },

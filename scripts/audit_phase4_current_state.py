@@ -312,6 +312,7 @@ def main() -> None:
     hbdk_water_evidence = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-official-evidence-2026-10-20.json"
     hbdk_water_trial = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-trial-2026-10-21.json"
     hbdk_water_promotion = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-promotion-2026-10-21.json"
+    gdzys_trial = ROOT / "docs" / "current" / "phase4-third-party-gdzys-2026-10-21.json"
     huatu_cnpc_chuanqing = ROOT / "docs" / "current" / "phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json"
     nhri_browser_recheck = ROOT / "docs" / "current" / "phase4-third-party-nhri-browser-recheck-2026-10-20.json"
     cnpc_bgp_entry_recheck = ROOT / "docs" / "current" / "phase4-cnpc-bgp-entry-recheck-2026-10-20.json"
@@ -513,6 +514,10 @@ def main() -> None:
             "phase4_third_party_hbdk_water_promotion": {
                 "path": "docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
                 "sha256": sha256(hbdk_water_promotion),
+            },
+            "phase4_third_party_gdzys": {
+                "path": "docs/current/phase4-third-party-gdzys-2026-10-21.json",
+                "sha256": sha256(gdzys_trial),
             },
             "phase4_third_party_huatu_cnpc_chuanqing": {
                 "path": "docs/current/phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json",

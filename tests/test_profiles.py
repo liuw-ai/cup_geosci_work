@@ -103,6 +103,31 @@ def test_explicit_geophysics_is_a_visible_broad_geoscience_tier() -> None:
     assert result.is_public is True
 
 
+def test_parenthesized_rock_mineralogy_term_is_broad_not_exact() -> None:
+    result = evaluate_student_publication(
+        job(
+            title="矿产资源高效分离与综合利用",
+            description=(
+                "专业要求：矿物加工工程、化学工程、机械工程、"
+                "机械设计及自动化、岩矿（矿物）学。学历要求：优秀博士或相关专业硕士。"
+            ),
+            degree_levels=["硕士"],
+            major_tags=["岩矿（矿物）学"],
+            field_evidence={
+                "evidence_scope": "official_notice_row",
+                "岗位": "矿产资源高效分离与综合利用",
+                "研究方向": "分离与综合利用工艺、绿色高效选矿药剂",
+                "专业范围": "矿物加工工程、化学工程、机械工程、机械设计及自动化、岩矿（矿物）学",
+                "学历要求": "优秀博士或相关专业硕士",
+            },
+        )
+    )
+
+    assert result.status == "student_eligible"
+    assert result.major_match_mode == "broad_geoscience"
+    assert result.label == "专业范围宽泛"
+
+
 def test_browser_detail_scopes_pass_the_same_job_level_gate() -> None:
     """A complete browser capture must not be downgraded to pending evidence."""
     for scope in ("official_browser_capture_row", "official_cnpc_browser_job_row"):
