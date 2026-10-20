@@ -4,11 +4,11 @@
 
 ## 当前事实来源（2026-10-21 本地复核）
 
-当前岗位和代码事实以 [phase4-current-state-audit-2026-10-18.json](phase4-current-state-audit-2026-10-18.json) 及最新 [Phase 4 Manifest](phase4-release-manifest.json) 为准；当前统一的学生端读集日期为北京时间 `2026-10-21`，学生端可见岗位为 `676` 条（精确 `140`、宽泛 `7`、信息不完整 `442`、来源暂时不可用 `87`）。Phase 3、RESET、CODEBASE 和更早的快照已移入 `history/docs/`，仅作为历史证据；其中的数量、哈希和测试结果不能覆盖当前审计。历史文件不删除、不作为生产输入，任何迁移或清理都必须保留原始哈希。
+当前岗位和代码事实以 [phase4-current-state-audit-2026-10-21.json](phase4-current-state-audit-2026-10-21.json) 及最新 [Phase 4 Manifest](phase4-release-manifest.json) 为准；当前统一的学生端读集日期为北京时间 `2026-10-21`，学生端可见岗位为 `677` 条（精确 `140`、宽泛 `8`、信息不完整 `442`、来源暂时不可用 `87`）。Phase 3、RESET、CODEBASE 和更早的快照已移入 `history/docs/`，仅作为历史证据；其中的数量、哈希和测试结果不能覆盖当前审计。历史文件不删除、不作为生产输入，任何迁移或清理都必须保留原始哈希。
 
 `student_read_as_of_date` 是当前统计的唯一日期口径；10 月 20 日本地网页验收中的 `700` 条属于当日临时副本验收证据，不代表 10 月 21 日当前读集。任何后续统计必须同时记录 `as_of`、数据库 SHA-256 和 Manifest，禁止只复制岗位数量。
 
-当前本地事实的边界以 [phase4-current-state-audit-2026-10-18.json](phase4-current-state-audit-2026-10-18.json) 和 [phase4-release-manifest.json](phase4-release-manifest.json) 的哈希绑定数据为准，不在本 README 重复维护易过期的岗位数量。当前已记录 8 条候选线索，其中 1 条已通过官方企业公告回溯并形成正式学生岗位，4 条华图发现已回溯至中国地质调查局官方附件并形成 4 条正式岗位，另有 2 条华图→河北省地球物理勘查有限公司候选已完成官方公告、岗位表和期限核验并形成 2 条正式岗位；服务器未部署，自动化保持暂停，第三方发现链接不作为学生申请链接。
+当前本地事实的边界以 [phase4-current-state-audit-2026-10-21.json](phase4-current-state-audit-2026-10-21.json) 和 [phase4-release-manifest.json](phase4-release-manifest.json) 的哈希绑定数据为准，不在本 README 重复维护易过期的岗位数量。当前数据库记录 11 条候选线索，其中 8 条已完成官方证据核验并形成正式岗位；按发现来源拆分，7 条来自第三方发现页回溯（中国地质人才网 1 条、华图 6 条），另 1 条来自河北地矿集团官网官方岗位表试点。服务器未部署，自动化保持暂停，第三方发现链接不作为学生申请链接。
 
 另有一份隔离的华图→中国石油集团川庆钻探页面证据报告，逐行记录 12 条候选；该页面只有 `cnpc.com.cn` 邮箱，没有可核验的中国石油官方公告、岗位表或 HTTP 报名 URL，因此 12 条不计入数据库候选数量、不进入学生端，状态保持 `pending`。南京水利科学研究院的华图发现页已回溯到可读的官方公告和岗位表 URL，但附件下载受 robots/TLS/浏览器权限限制，只有公告级证据，未创建候选或正式岗位；详见 `phase4-third-party-nhri-browser-recheck-2026-10-20.json`。
 
