@@ -84,3 +84,4 @@ def test_current_audit_excludes_all_metadata_outputs_from_input_status() -> None
     assert ":!docs/current/phase4-three-oil-catalog-audit-2026-10-17.json" in GENERATED_METADATA_PATHS
     assert ":!docs/current/phase4-cnooc-portal-live-recheck-2026-10-20.json" in GENERATED_METADATA_PATHS
     assert ":!docs/current/phase4-three-oil-official-homepage-entry-recheck-2026-10-20.json" in GENERATED_METADATA_PATHS
+    assert ":!docs/current/PHASE4-2026-10-17.md" in GENERATED_METADATA_PATHS
