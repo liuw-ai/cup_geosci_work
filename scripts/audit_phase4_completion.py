@@ -337,7 +337,7 @@ def build_report() -> dict[str, Any]:
         {
             "id": "student_site_acceptance",
             "status": "pass",
-            "evidence": ["docs/current/phase4-local-web-live-validation-2026-10-19.json"],
+            "evidence": ["docs/current/phase4-local-web-live-validation-2026-10-20.json"],
             "facts": {
                 "healthz": web.get("healthz_status"),
                 "home": web.get("home_status"),

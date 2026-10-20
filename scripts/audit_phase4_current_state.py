@@ -35,7 +35,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-local-validation-2026-10-19.json",
     ":!docs/current/phase4-local-validation-2026-10-20.json",
     ":!docs/current/phase4-local-web-recheck-2026-10-19.json",
-    ":!docs/current/phase4-local-web-live-validation-2026-10-19.json",
+    ":!docs/current/phase4-local-web-live-validation-2026-10-20.json",
     ":!docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
     ":!docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
     ":!docs/current/phase4-third-party-official-recovery-recheck-2026-10-19.json",
@@ -207,7 +207,7 @@ def document_consistency_facts() -> dict[str, object]:
     # hashes are bound one way by the manifest.
     current_paths = [
         "docs/current/PHASE4-2026-10-17.md",
-        "docs/current/phase4-local-validation-2026-10-19.json",
+        "docs/current/phase4-local-validation-2026-10-20.json",
     ]
     metadata_paths = [
         "docs/current/phase4-current-state-audit-2026-10-18.json",
@@ -275,7 +275,7 @@ def main() -> None:
     local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
     third_party_funnel = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
     local_web_recheck = ROOT / "docs" / "current" / "phase4-local-web-recheck-2026-10-19.json"
-    local_web_live_validation = ROOT / "docs" / "current" / "phase4-local-web-live-validation-2026-10-19.json"
+    local_web_live_validation = ROOT / "docs" / "current" / "phase4-local-web-live-validation-2026-10-20.json"
     huatu_table_discovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-table-discovery-2026-10-19.json"
     huatu_discovery_scan = ROOT / "docs" / "current" / "phase4-third-party-huatu-discovery-2026-10-19.json"
     huatu_state_owned_entry = ROOT / "docs" / "current" / "phase4-third-party-huatu-state-owned-entry-2026-10-19.json"
@@ -374,7 +374,7 @@ def main() -> None:
                 "sha256": sha256(geoscience_followup),
             },
             "phase4_local_validation": {
-                "path": "docs/current/phase4-local-validation-2026-10-19.json",
+                "path": "docs/current/phase4-local-validation-2026-10-20.json",
                 "sha256": sha256(validation),
             },
             "phase4_third_party_candidate": {
@@ -434,7 +434,7 @@ def main() -> None:
                 "sha256": sha256(local_web_recheck),
             },
             "phase4_local_web_live_validation": {
-                "path": "docs/current/phase4-local-web-live-validation-2026-10-19.json",
+                "path": "docs/current/phase4-local-web-live-validation-2026-10-20.json",
                 "sha256": sha256(local_web_live_validation),
             },
             "phase4_huatu_table_discovery": {

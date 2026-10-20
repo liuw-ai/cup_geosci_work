@@ -29,7 +29,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-local-validation-2026-10-19.json",
     ":!docs/current/phase4-local-validation-2026-10-20.json",
     ":!docs/current/phase4-local-web-recheck-2026-10-19.json",
-    ":!docs/current/phase4-local-web-live-validation-2026-10-19.json",
+    ":!docs/current/phase4-local-web-live-validation-2026-10-20.json",
     ":!docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
     ":!docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
     ":!docs/current/phase4-third-party-channel-recheck-2026-10-20.json",
@@ -224,7 +224,7 @@ def main() -> None:
     local_repair = ROOT / "docs" / "current" / "phase4-local-repair-2026-10-19.json"
     third_party_funnel = ROOT / "docs" / "current" / "phase4-third-party-funnel-audit-2026-10-18.json"
     local_web_recheck = ROOT / "docs" / "current" / "phase4-local-web-recheck-2026-10-19.json"
-    local_web_live_validation = ROOT / "docs" / "current" / "phase4-local-web-live-validation-2026-10-19.json"
+    local_web_live_validation = ROOT / "docs" / "current" / "phase4-local-web-live-validation-2026-10-20.json"
     huatu_table_discovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-table-discovery-2026-10-19.json"
     third_party_channel_recheck = ROOT / "docs" / "current" / "phase4-third-party-channel-recheck-2026-10-20.json"
     document_consistency = ROOT / "docs" / "current" / "phase4-document-consistency-2026-10-20.json"
