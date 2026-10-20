@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T16:35:55Z",
+  "generated_at": "2026-10-20T16:55:47Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "4de170676ce8d045faa3abdb77b5c2e7dd40c34d",
+  "git_sha": "bf2c170a709a7aca9e6900783db4d0cfccc7dcf8",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -30,7 +30,7 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "b3d38aca0813814b940b300b3131ff69ccd1df967d4e9eaee9da64f349d88cdd",
+    "phase4_current_state_audit": "0a8cde70fea692829fc5f1476081cb6a35ff385bacec64103ef8431473123fef",
     "phase4_document_consistency": "78d2f8fdcc82b328cdabab94008315f30e4aa93adf784fd4234b8b3f0a592189",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
@@ -46,9 +46,9 @@
     "phase4_third_party_access_recheck": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d",
     "phase4_third_party_official_recovery_recheck": "4c7e1bfbcdd94d7f2a24d8032388a57f4c586cc8294b5b0c1e2029721164f409",
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
-    "phase4_third_party_funnel": "a57d4ce60de40ee09b3eb2cae75e5a6814b78a1beb24fc3c0abe91c0b40ff274",
+    "phase4_third_party_funnel": "2db1feae6efed59f3f8c951de88cb2820dfea2dec029a5b86ea026f887a78ce1",
     "phase4_local_web_recheck": "1ce3aa772e20a7216ecf9bcc86f54c121ef1457fa896804f636d73a3aacb017f",
-    "phase4_local_web_live_validation": "0b36651d4c2ec9e3a39634f285bc61129a192f15a5dbd76d89f83793d4bb05a0",
+    "phase4_local_web_live_validation": "5382692efc40205b72a5291270c7d910cc5b36ac1fbcaab57c8ee5773528e3c7",
     "phase4_huatu_table_discovery": "007ba8d74b26bfbbea076077344476dc5aa083d6ce5a6bed3b1ff39efc48f2ca",
     "phase4_third_party_channel_recheck": "6967fe941ae6af73d5cbd60498c6eb5f425ddb34a8a80a96cc5a02f82472190a",
     "phase4_document_consistency_2026_10_20": "78d2f8fdcc82b328cdabab94008315f30e4aa93adf784fd4234b8b3f0a592189",
@@ -64,8 +64,8 @@
     "phase4_cnpc_official_recheck": "e20b519f7788473b68430b5e9ebd40fb3bd527ccb8d2476fe6dba70b3b56ea22",
     "phase4_third_party_sxdkj_official_recheck": "4fdd55009ebd6375bed75ff3a51f8b740f9b4ce1e289583fbecacafbd1e03388",
     "phase4_cnooc_shenzhen_job_evidence": "d4b1dff3555457a61262b2a0eb62ecb51addfffdf5079b104d75d67ecfd060ef",
-    "phase4_main_record": "2f7c3d2a8d3a9700a56555e53f2e6c22a3c9548a0d290eb8857fb42cd2387120",
-    "phase4_local_validation": "e2697cfc8f75f21ac7a1b89bb4fdb44f09b7e76b1f242a4bb9379ccb6b41a888",
+    "phase4_main_record": "bc69214f9701020a2503d8d3ec763ca7b52d387b2556bda5bb7862db9acf88a3",
+    "phase4_local_validation": "6ef81ef2a1750d1e9649a1d85457e00c5d0450c16d9d3d2764a4e9d67de08970",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "5ca686d4728b657f4265974d4a1b161599bbdde5eee58edeac499215b2536438",
     "phase4_three_oil_observed_roster": "aecf4e0083cf5fcbbee1c6af3446771611b2043e2bdecc60bab8f5463be52b9a",
@@ -76,8 +76,8 @@
     "phase4_cnooc_api_unit_evidence": "e1dc7cad501b4d9327414ea0f8c7d86eefdbbb342b5ee42839d481b8bf8f1d15",
     "phase4_sinopec_display_cross_group_audit": "3a328ab63ea7f968193ab9589c8fb2062e62ce3cbe339282ad188ef3571c4622",
     "phase4_three_oil_official_homepage_entry_recheck": "55756e20e901b550344f90e846de525131f7e3243262755bb50463389967467e",
-    "phase4_completion_audit": "279147be6325958bb77039d0fe579f9654ec30f891a739ddf90bcc702cd500b5",
-    "phase4_workspace_layout": "8af47ec68592ae2e38f7d42ec9aea90575acd0038e70c806eab8a9445bcbc4ec"
+    "phase4_completion_audit": "f8bc67f5933740fd0f44a387cecdf5d09f6c44900774b73c680a0f242b114a4c",
+    "phase4_workspace_layout": "1634631265751f0f7270c5ea7e548646ac12fba69327750c8957ec9548603be7"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -151,10 +151,9 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-21T00:18:00+08:00",
+    "validated_at": "2026-10-21T00:47:30+08:00",
     "environment": "local",
     "server_deployment": false,
-    "git_sha": "b6e9d83",
     "tests": {
       "command": "python -m pytest -q",
       "passed": 1115,
@@ -169,21 +168,34 @@
     "local_web_read_only": {
       "base_url": "http://127.0.0.1:8098",
       "database_mode": "temporary_copy_of_runtime_database",
-      "healthz_status": 200,
-      "home_status": 200,
-      "layer_api_statuses": {
-        "exact_match": 200,
-        "broad_geoscience_match": 200,
-        "incomplete_but_basic_match": 200,
-        "source_unavailable": 200
+      "temporary_database": "runtime/phase4-web-validation-20261021/job_hub.sqlite3",
+      "temporary_database_sha256": "ec7bcc093a6e114e0411aa1ead4fef5c4ac76a8d5a9182a68f14445eb480beb",
+      "temporary_database_integrity": "ok",
+      "student_read_as_of_date": "2026-10-21",
+      "layer_totals": {
+        "exact_match": 140,
+        "broad_geoscience_match": 7,
+        "incomplete_but_basic_match": 442,
+        "source_unavailable": 87,
+        "student_visible_total": 676
       },
-      "coverage_status": 200,
-      "server_deployment": false
+      "http_checks": {
+        "/healthz": 200,
+        "/": 200,
+        "/api/jobs?layer=exact_match": 200,
+        "/api/jobs?layer=broad_geoscience_match": 200,
+        "/api/jobs?layer=incomplete_but_basic_match": 200,
+        "/api/jobs?layer=source_unavailable": 200,
+        "/api/coverage": 200,
+        "/jobs/5433": 200
+      },
+      "coverage_response": "200; four layers and current as_of counts returned",
+      "formal_database_written": false
     },
     "release_boundary": {
       "status": "not_publishable",
       "automation_status": "paused",
-      "reason": "local validation is evidence only; third-party expansion and three-oil entry evidence remain incomplete"
+      "reason": "isolated local evidence only; no server deployment or automation resume"
     }
   },
   "completion_audit": {

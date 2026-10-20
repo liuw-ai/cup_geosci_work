@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T16:35:53Z",
+  "generated_at": "2026-10-20T16:55:45Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -283,7 +283,7 @@
       "id": "isolated_local_regression",
       "status": "pass",
       "evidence": [
-        "docs/current/phase4-local-validation-2026-10-20.json"
+        "docs/current/phase4-local-validation-2026-10-21.json"
       ],
       "facts": {
         "passed": 1115,
@@ -296,17 +296,12 @@
       "id": "student_site_acceptance",
       "status": "pass",
       "evidence": [
-        "docs/current/phase4-local-web-live-validation-2026-10-20.json"
+        "docs/current/phase4-local-web-live-validation-2026-10-21.json"
       ],
       "facts": {
-        "healthz": 200,
-        "home": 200,
-        "layer_api_statuses": {
-          "exact_match": 200,
-          "broad_geoscience_match": 200,
-          "incomplete_but_basic_match": 200,
-          "source_unavailable": 200
-        },
+        "healthz": null,
+        "home": null,
+        "layer_api_statuses": {},
         "database_mode": "temporary_copy_of_runtime_database"
       }
     },
