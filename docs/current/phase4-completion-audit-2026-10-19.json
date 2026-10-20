@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T00:49:19Z",
+  "generated_at": "2026-10-20T01:10:15Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -226,6 +226,13 @@
               "中国海洋石油有限公司",
               "中国海洋石油集团有限公司"
             ]
+          },
+          "latest_unit_entry_network_recheck": {
+            "checked": 4,
+            "http_success": 0,
+            "source_unavailable": 4,
+            "catalog_changed": false,
+            "interpretation": "网络失败只标记来源暂时不可用，不覆盖既有官方入口证据，也不创建或撤回岗位。"
           }
         }
       }
