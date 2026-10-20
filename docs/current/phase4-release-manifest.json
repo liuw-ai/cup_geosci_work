@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T18:57:48Z",
+  "generated_at": "2026-10-20T19:29:14Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "5d587461703d0850f35b53fa56eea805fb209839",
+  "git_sha": "0d406d59508b6f86324c5f1cd8c3ffbc860b0c64",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -62,6 +62,7 @@
     "phase4_third_party_hbdk_candidate_registration": "da07a5893f136d88905135a88fa6b83606dff3d70731e14e3eb76a01d8e9d7ea",
     "phase4_third_party_hbdk_water_official_evidence": "b593b9a7c94fb5391b84d448ab6b7c6d3c4edeb9b6397bd915d9900dfd725599",
     "phase4_third_party_hbdk_water_trial": "61a9cd3d795975e5c9a531cf33836e3dc6cc5ae207048bf0ed6a76ae844b5e60",
+    "phase4_third_party_huatu_official_recovery": "2e3531741fcc321b1c3c56827a28e6155a210482b8660413415847ce92b8152a",
     "phase4_third_party_huatu_cnpc_chuanqing": "10bf8f283ba174b573edfa0336a8b941320ad439462af4c7cc2ef7900f9d8fc0",
     "phase4_cnpc_official_recheck": "e20b519f7788473b68430b5e9ebd40fb3bd527ccb8d2476fe6dba70b3b56ea22",
     "phase4_third_party_sxdkj_official_recheck": "4fdd55009ebd6375bed75ff3a51f8b740f9b4ce1e289583fbecacafbd1e03388",
@@ -232,7 +233,8 @@
     "cnpc_chuanqing_official_recovery_status": "pending",
     "cnpc_chuanqing_formal_jobs_created": 0,
     "hbdk_water_official_evidence": "docs/current/phase4-third-party-hbdk-water-official-evidence-2026-10-20.json",
-    "hbdk_water_isolated_trial": "docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json"
+    "hbdk_water_isolated_trial": "docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
+    "huatu_official_recovery": "docs/current/phase4-third-party-huatu-official-recovery-2026-10-21.json"
   },
   "three_oil_organization_reconciliation": {
     "catalog_group_count": 3,
