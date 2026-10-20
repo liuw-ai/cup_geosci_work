@@ -127,13 +127,17 @@
       {% if job.field_evidence.get("官方地质筛选入口") %}
         <a class="secondary-link" href="{{ job.field_evidence.get('官方地质筛选入口') }}" target="_blank" rel="noopener noreferrer">打开官方“地质”筛选结果</a>
       {% endif %}
-      {% if job.application_url and job.application_url != job.source_url and not official_pending %}
+      {% set official_application_url = job.official_application_url or job.application_url %}
+      {% if official_application_url and official_application_url != job.source_url and not official_pending %}
         {% if job.source_id != "cnpc-career" or job.field_evidence.get("官方详情状态") != "official_detail_api_degraded" %}
-          <a class="secondary-link" href="{{ job.application_url }}" target="_blank" rel="noopener noreferrer">打开报名入口</a>
+          <a class="secondary-link" href="{{ official_application_url }}" target="_blank" rel="noopener noreferrer">打开官方报名入口</a>
         {% endif %}
       {% endif %}
       {% if job.official_table_url %}
         <a class="secondary-link" href="{{ job.official_table_url }}" target="_blank" rel="noopener noreferrer">打开岗位表链接</a>
+      {% endif %}
+      {% if job.field_evidence.get("官方报名方式") and not official_pending %}
+        <p class="source-instruction"><strong>官方报名方式</strong>：{{ job.field_evidence.get("官方报名方式") }}</p>
       {% endif %}
       {% if job.field_evidence.get("官方详情编号") %}
         <dl class="source-meta">

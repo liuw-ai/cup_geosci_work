@@ -623,6 +623,50 @@ def test_cnpc_detail_page_discloses_degraded_official_detail_endpoint(tmp_path, 
     assert "官方详情编号" in body
 
 
+def test_non_cnpc_detail_page_does_not_use_cnpc_application_fallback(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    manual_source = source()
+    manual_source.update(
+        {
+            "id": "official-manual-import",
+            "source_type": "manual",
+            "enabled": True,
+            "config": {"allow_shared_source_url": True},
+        }
+    )
+    database.upsert_source(manual_source)
+    pipeline = JobPipeline(settings, database)
+    posting = RawPosting(
+        title="地质工程师",
+        employer="测试官方研究院",
+        source_url="https://official.example.gov.cn/notices/1",
+        application_url=None,
+        text="官方公告要求将材料发送至 hr@example.gov.cn。",
+        summary="官方公告岗位。",
+        published_date="2026-10-20",
+        deadline_date="2026-12-31",
+        location="北京",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "地质工程师",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+            "官方报名方式": "将材料发送至 hr@example.gov.cn",
+        },
+    )
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(posting, database.get_source("official-manual-import"))
+    )
+
+    body = app.test_client().get(f"/jobs/{job_id}").get_data(as_text=True)
+
+    assert "打开中国石油官方招聘入口" not in body
+    assert "官方报名方式" in body
+    assert "hr@example.gov.cn" in body
+
+
 def test_cnpc_matrix_is_admin_only_and_binds_snapshot_rows(tmp_path) -> None:
     settings = make_settings(tmp_path)
     app = create_app(settings)
