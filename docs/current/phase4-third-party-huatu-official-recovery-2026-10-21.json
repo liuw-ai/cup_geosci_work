@@ -1,0 +1,111 @@
+{
+  "phase": "phase4",
+  "source_id": "huatu-discovery",
+  "generated_at": "2026-10-21T03:22:00+08:00",
+  "purpose": "华图七条地学相关线索的逐页原始证据与官方来源回溯",
+  "policy": {
+    "third_party_page_is_not_application_source": true,
+    "official_url_required_before_formal_job": true,
+    "row_level_major_degree_location_deadline_required": true,
+    "formal_database_written": false
+  },
+  "capture": {
+    "directory": "runtime/third-party-evidence/huatu-scan-2026-10-21",
+    "raw_page_count": 7,
+    "raw_page_http_200_count": 7,
+    "analysis_report": "runtime/third-party-evidence/huatu-scan-2026-10-21/page-analysis.json",
+    "capture_report": "runtime/third-party-evidence/huatu-scan-2026-10-21/capture-report.json"
+  },
+  "rows": [
+    {
+      "page_file": "page-01.html",
+      "title": "2026年福建泉州工程职业技术学院第二批公开招聘工作人员34人公告",
+      "huatu_url": "https://sydw.huatu.com/2026/1020/2875586.html",
+      "official_source_url": null,
+      "official_application_url": "http://ksbm.hxrc.com/",
+      "official_table_url": null,
+      "evidence_status": "third_party_only_official_notice_unresolved",
+      "decision": "private_only",
+      "reason": "华图正文提供报名平台和第三方附件，但未提供可验证的官方公告 URL；附件不是官方原始证据，不能逐行核验。"
+    },
+    {
+      "page_file": "page-02.html",
+      "title": "水利部长江水利委员会所属事业单位2027年度公开招聘工作人员70人公告（第一批）",
+      "huatu_url": "https://sydw.huatu.com/2026/1020/2875548.html",
+      "official_source_url": null,
+      "official_application_url": null,
+      "official_table_url": null,
+      "evidence_status": "third_party_only_official_notice_unresolved",
+      "decision": "private_only",
+      "reason": "正文只保留原文标题和华图附件，没有可回溯的官方公告或官方岗位表 URL。"
+    },
+    {
+      "page_file": "page-03.html",
+      "title": "2026河北省衡水市生态环境局枣强县分局公开招聘工作人员16名公告",
+      "huatu_url": "http://www.huatu.com/2026/0803/2869813.html",
+      "official_source_url": "https://mp.weixin.qq.com/s/lZEe-ptHyAtlSdViGXPTAQ",
+      "official_application_url": null,
+      "official_table_url": null,
+      "evidence_status": "official_account_identity_pending",
+      "decision": "private_only",
+      "reason": "华图标注了微信公众号原文链接，但当前未完成账号主体认证和逐行岗位证据复核；公众号链接暂不等于正式岗位证据。"
+    },
+    {
+      "page_file": "page-04.html",
+      "title": "2026贵州省水利投资（集团）有限责任公司第一批次招聘20人公告",
+      "huatu_url": "https://www.sydw8.com/2026/0811/540392.html",
+      "official_source_url": "https://www.gzssltzinc.com/detail/3a22eeaa-5a08-3c1e-31ae-4e5ac55db446?pid=3a0e96ee-384b-8244-c0cd-06a57d655a43&subid=3a0e9712-4d6f-9280-8bcd-f6fccf70cdf8&isNei=true",
+      "official_application_url": "https://bm.bjpass.com/front/site/gzrcrq",
+      "official_table_url": "https://www.gzssltzinc.com/Files/upload/2026-08-07/f1361b05-8927-42a0-b2c6-653a5fa6f552/01.%E9%99%84%E4%BB%B61%EF%BC%9A%E7%9C%81%E6%B0%B4%E6%8A%95%E9%9B%86%E5%9B%A22026%E5%B9%B4%E7%AC%AC%E4%B8%80%E6%89%B9%E6%AC%A1%E5%85%AC%E5%BC%80%E6%8B%9B%E8%81%98%E5%B2%97%E4%BD%8D%E8%A1%A8%EF%BC%88%E5%90%88%E5%90%8C%E5%88%B6%E6%AD%A3%E5%BC%8F%E5%91%98%E5%B7%A5%E2%80%94%E9%AB%98%E6%A0%A1%E6%AF%95%E4%B8%9A%E7%94%9F%EF%BC%89.xlsx",
+      "evidence_status": "official_notice_visible_table_download_blocked",
+      "decision": "private_only",
+      "reason": "官方公告和报名平台可见，岗位专业明细仅在官方附件；当前浏览器拒绝附件下载，未取得逐行专业、学历、地点和截止日期证据。"
+    },
+    {
+      "page_file": "page-05.html",
+      "title": "2026年新疆红星建设工程（集团）有限公司面向社会招聘20人",
+      "huatu_url": "https://www.sydw8.com/2026/0811/540390.html",
+      "official_source_url": "https://www.btnsss.gov.cn/gk/fdzdgknr/rsxx/qpxx/120307.htm",
+      "official_application_url": null,
+      "official_table_url": "https://www.btnsss.gov.cn/wcm.files/upload/CMS13s/202608/2026080708350277510.xls",
+      "evidence_status": "official_notice_visible_table_download_blocked",
+      "decision": "private_only",
+      "reason": "兵团政府公告确认主体、发布日期和报名邮箱，但岗位专业明细仅在官方附件；无法逐行核验时不能创建正式岗位。"
+    },
+    {
+      "page_file": "page-06.html",
+      "title": "2026年国华能源投资有限公司社会招聘公告（19人）",
+      "huatu_url": "https://www.sydw8.com/2026/0811/540389.html",
+      "official_source_url": "https://zhaopin.chnenergy.com.cn/annc/showgg?id=5022e26b-c72d-4365-a2aa-99e2fab0664e",
+      "official_application_url": "https://zhaopin.chnenergy.com.cn/annc/showggStationList?id=5022e26b-c72d-4365-a2aa-99e2fab0664e",
+      "official_table_url": "https://zhaopin.chnenergy.com.cn/annc/showggStationList?id=5022e26b-c72d-4365-a2aa-99e2fab0664e",
+      "evidence_status": "official_notice_and_live_job_list_verified",
+      "official_job_search": {
+        "query": "地质",
+        "result": "未检索到相关岗位",
+        "verified_in_browser": true
+      },
+      "decision": "no_geoscience_row_published",
+      "reason": "官方公告和职位列表可见；官方职位检索“地质”返回 0 条，因此没有可进入本项目专业门禁的地学岗位。"
+    },
+    {
+      "page_file": "page-07.html",
+      "title": "2026江苏恒泰新能源有限公司高纺区供热中心招聘劳务派遣人员10人公告",
+      "huatu_url": "https://www.sydw8.com/2026/0729/540211.html",
+      "official_source_url": "http://www.sheyanghr.com/syhr/zpgk/20260727/001_37d58534-5188-4a69-8fe4-2823927128c6.htm",
+      "official_application_url": null,
+      "official_table_url": "http://admin.sheyang.gov.cn/syfjnew//eWebEditor/uploadfile/20260727162355808.xlsx",
+      "evidence_status": "official_notice_visible_explicit_non_geoscience_roles",
+      "explicit_roles": ["锅炉运行", "化水运行", "电气运行"],
+      "decision": "rejected_out_of_scope",
+      "reason": "官方公告明确列出岗位名称，均为锅炉、化水或电气运行；这些岗位与地学目标不匹配，且不得用第三方附件替换官方逐行证据。"
+    }
+  ],
+  "outcome": {
+    "formal_jobs_created": 0,
+    "formal_database_sha256_unchanged": true,
+    "candidate_leads_created": 0,
+    "isolated_database_used": false,
+    "next_action": "继续从可访问的官方职位表中寻找有逐行地学专业证据的批次；不可访问附件保持 private_only。"
+  }
+}
