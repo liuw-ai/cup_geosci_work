@@ -153,6 +153,13 @@ def source_facts() -> dict[str, object]:
     catalog = json.loads((ROOT / "data" / "three_oil_organization_catalog.json").read_text(encoding="utf-8"))
     registry = json.loads((ROOT / "data" / "organization_registry.json").read_text(encoding="utf-8"))
     organizations = registry.get("organizations", [])
+    oil_affiliations = {"中国石油体系", "中国石化体系", "中国海油体系"}
+    oil_organizations = [
+        organization
+        for organization in organizations
+        if str(organization.get("affiliation") or "").strip() in oil_affiliations
+        or str(organization.get("id") or "").strip().startswith(("cnpc", "sinopec", "cnooc"))
+    ]
     group_counts = {group["id"]: len(group.get("units", [])) for group in catalog.get("groups", [])}
     return {
         "registered_source_count": len(sources),
@@ -172,7 +179,7 @@ def source_facts() -> dict[str, object]:
         "organization_registry_count": len(organizations),
         "official_confirmed_channel_count": sum(
             1
-            for organization in organizations
+            for organization in oil_organizations
             for channel in organization.get("channels", [])
             if channel.get("verification_status") == "official_confirmed"
         ),
