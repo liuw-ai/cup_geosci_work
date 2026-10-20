@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-20T18:08:47Z",
+  "generated_at": "2026-10-20T19:34:31Z",
   "scope": "local_read_only_workspace_layout",
   "production_entrypoint": "deploy/compose.yaml",
   "canonical_paths": {
@@ -435,6 +435,20 @@
       "path": "runtime/phase4-huatu-cnpc-isolated.sqlite3",
       "bytes": 50130944,
       "last_write_time": "2026-10-19T18:44:20Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-isolated-hbdk-water/job_hub.sqlite3",
+      "bytes": 50147328,
+      "last_write_time": "2026-10-20T18:36:36Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-isolated-huatu-scan-20261021/job_hub.sqlite3",
+      "bytes": 50515968,
+      "last_write_time": "2026-10-20T19:03:29Z",
       "classification": "isolated_test_or_validation_copy",
       "production_input": false
     },
