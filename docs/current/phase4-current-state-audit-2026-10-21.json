@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T23:28:40Z",
+  "generated_at": "2026-10-20T23:30:56Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "7747483a68eeb03d42de824323a746983d162573",
+  "git_sha": "420862cdebd4090003efd16ec47e1987d2248055",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -269,7 +269,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "6b09ab779db37b9b1d2a31f2723b2d6a1bfee15a6c459ac9942dbb234e60053b"
+      "sha256": "2bde00057bc17e791bc09fc7aed05e7967c7afdabe54da6a773ec298172f9559"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -365,7 +365,7 @@
     },
     "phase4_three_oil_homepage_probe": {
       "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
-      "sha256": "c74f506a749e1df0ee271d8ecafd7c61a6b8fb642cf0a1e3a3e79861bb233c14"
+      "sha256": "be2272e9f919129cf894b4d58440cfce487d6b382b3210f0afbf2c17f1b62bfe"
     },
     "phase4_three_oil_observed_roster": {
       "path": "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
