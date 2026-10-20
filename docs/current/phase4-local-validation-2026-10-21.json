@@ -1,0 +1,49 @@
+{
+  "phase": "phase4",
+  "validated_at": "2026-10-21T00:47:30+08:00",
+  "environment": "local",
+  "server_deployment": false,
+  "tests": {
+    "command": "python -m pytest -q",
+    "passed": 1115,
+    "skipped": 4,
+    "failed": 0,
+    "warnings": 0,
+    "database_path": "pytest temporary APP_DATABASE_PATH per test",
+    "formal_database_sha256_before": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
+    "formal_database_sha256_after": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
+    "formal_database_stable_during_tests": true
+  },
+  "local_web_read_only": {
+    "base_url": "http://127.0.0.1:8098",
+    "database_mode": "temporary_copy_of_runtime_database",
+    "temporary_database": "runtime/phase4-web-validation-20261021/job_hub.sqlite3",
+    "temporary_database_sha256": "ec7bcc093a6e114e0411aa1ead4fef5c4ac76a8d5a9182a68f14445eb480beb",
+    "temporary_database_integrity": "ok",
+    "student_read_as_of_date": "2026-10-21",
+    "layer_totals": {
+      "exact_match": 140,
+      "broad_geoscience_match": 7,
+      "incomplete_but_basic_match": 442,
+      "source_unavailable": 87,
+      "student_visible_total": 676
+    },
+    "http_checks": {
+      "/healthz": 200,
+      "/": 200,
+      "/api/jobs?layer=exact_match": 200,
+      "/api/jobs?layer=broad_geoscience_match": 200,
+      "/api/jobs?layer=incomplete_but_basic_match": 200,
+      "/api/jobs?layer=source_unavailable": 200,
+      "/api/coverage": 200,
+      "/jobs/5433": 200
+    },
+    "coverage_response": "200; four layers and current as_of counts returned",
+    "formal_database_written": false
+  },
+  "release_boundary": {
+    "status": "not_publishable",
+    "automation_status": "paused",
+    "reason": "isolated local evidence only; no server deployment or automation resume"
+  }
+}

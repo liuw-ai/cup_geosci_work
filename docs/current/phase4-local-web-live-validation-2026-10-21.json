@@ -1,0 +1,45 @@
+{
+  "phase": "phase4",
+  "validated_at": "2026-10-21T00:47:30+08:00",
+  "environment": "local",
+  "base_url": "http://127.0.0.1:8098",
+  "server_deployment": false,
+  "database_mode": "temporary_copy_of_runtime_database",
+  "temporary_database": "runtime/phase4-web-validation-20261021/job_hub.sqlite3",
+  "temporary_database_sha256": "ec7bcc093a6e114e0411aa1ead4fef5c4ac76a8d5a9182a68f14445eb480beb",
+  "formal_database_sha256": "281f27cf943a194606d1e597ac748232a8bca6902a9d65a0ad788d81e7a7e667",
+  "student_read_as_of_date": "2026-10-21",
+  "http_checks": {
+    "/healthz": 200,
+    "/": 200,
+    "/api/jobs?layer=exact_match": 200,
+    "/api/jobs?layer=broad_geoscience_match": 200,
+    "/api/jobs?layer=incomplete_but_basic_match": 200,
+    "/api/jobs?layer=source_unavailable": 200,
+    "/api/coverage": 200,
+    "/jobs/5433": 200
+  },
+  "layer_totals": {
+    "exact_match": 140,
+    "broad_geoscience_match": 7,
+    "incomplete_but_basic_match": 442,
+    "source_unavailable": 87,
+    "student_visible_total": 676
+  },
+  "third_party_job_detail": {
+    "job_id": 5433,
+    "publication_layer": "broad_geoscience_match",
+    "layer_label_present": true,
+    "no_deadline_label_present": true,
+    "official_table_link_label_present": true,
+    "third_party_discovery_domain_exposed": false
+  },
+  "performance_observation": {
+    "coverage_response": "200; slower than list endpoints but completed within 90 seconds",
+    "release_blocking": false
+  },
+  "release_boundary": {
+    "automation_status": "paused",
+    "reason": "temporary database copy only; process stopped after checks"
+  }
+}

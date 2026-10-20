@@ -62,7 +62,7 @@ def test_document_consistency_current_hash_matches_runtime_database() -> None:
 
 def test_current_phase4_record_matches_latest_local_validation_test_count() -> None:
     validation = json.loads(
-        Path("docs/current/phase4-local-validation-2026-10-20.json").read_text(
+        Path("docs/current/phase4-local-validation-2026-10-21.json").read_text(
             encoding="utf-8"
         )
     )
