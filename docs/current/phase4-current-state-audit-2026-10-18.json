@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T06:46:37Z",
+  "generated_at": "2026-10-20T06:49:13Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "b06213134de4455c866b435629e17474a2d546c5",
-  "git_status_porcelain": "M scripts/build_phase4_manifest.py\n M scripts/verify_phase4_manifest.py\n?? docs/current/phase4-cnpc-official-recheck-2026-10-20.json",
+  "git_sha": "cab14519ef1371ce99a27bf6b9dd7033ba3ef8fc",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "d6a2386ead699ca9529dbb15ceb2b932073864ae1f4d24b47b6afb7c53ee145e"
+      "sha256": "c65c5ae6217f1a26d480ce51db2386948c112ca27f21bcea1865a90434a95ed9"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
