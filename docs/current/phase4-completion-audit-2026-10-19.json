@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T07:28:53Z",
+  "generated_at": "2026-10-20T07:34:11Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -146,7 +146,8 @@
       "evidence": [
         "data/three_oil_organization_catalog.json",
         "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-        "docs/current/phase4-three-oil-observed-roster-2026-10-20.json"
+        "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
+        "docs/current/phase4-cnooc-shenzhen-job-evidence-2026-10-20.json"
       ],
       "facts": {
         "formal_catalog_units": 64,
@@ -209,6 +210,14 @@
           "selected_unit": "中海石油（中国）有限公司天津分公司",
           "geoscience_job_count": 3,
           "independent_unit_entry_proven": false
+        },
+        "latest_cnooc_shenzhen_job_evidence": {
+          "selected_unit": "中海石油（中国）有限公司深圳分公司",
+          "job_card_count": 20,
+          "application_url_count": 20,
+          "geoscience_job_count": 3,
+          "independent_unit_entry_proven": false,
+          "student_jobs_created": 0
         },
         "latest_bgp_entry_recheck": {
           "catalog_id": "cnpc-bgp",
