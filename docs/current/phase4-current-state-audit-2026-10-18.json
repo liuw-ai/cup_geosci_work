@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T17:48:34Z",
+  "generated_at": "2026-10-20T17:55:42Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "e644301723bff93d1bfef52ff574044dcdf88dfd",
+  "git_sha": "dd502e47a2b1f2f4746daf59f6899120fb6d9523",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "5bcb5d4634c25b26a3206a54885be2eddb970567bb945208d71b639887ddebd9"
+      "sha256": "8e661eebd1a5fc1b68f42bae798e79f32636d0bcb6249928c1a76de44e3ddcf2"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -855,8 +855,8 @@
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
-      "line_count": 195,
-      "sha256": "2e355ef49f914ed3759f955f5c8719973f2addeb13969f70534c415de17f097a"
+      "line_count": 216,
+      "sha256": "37ce813096e7f562b33e0b34c6e7f239e3014b6c607cdcace9c9ea36be4cdb38"
     },
     {
       "path": "scripts/audit_phase4_workspace_layout.py",
@@ -1425,8 +1425,8 @@
     },
     {
       "path": "tests/test_phase4_third_party_funnel.py",
-      "line_count": 31,
-      "sha256": "4c5ee3c30b6c370fd2facf1430c64a00078a89441922b0a76c8965083698fd41"
+      "line_count": 47,
+      "sha256": "f26f04a5f6eb8b7283867d5e1d804a5b484e4356d44b3ff4eea0dee8b90b7abd"
     },
     {
       "path": "tests/test_phase4_third_party_provenance.py",
