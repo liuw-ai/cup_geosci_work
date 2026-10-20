@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-20T23:30:58Z",
+  "generated_at": "2026-10-20T23:37:31Z",
   "scope": "local_read_only_workspace_layout",
   "production_entrypoint": "deploy/compose.yaml",
   "canonical_paths": {
@@ -518,7 +518,7 @@
     {
       "path": "runtime/phase4-web-validation-20261021-gdzys/job_hub.sqlite3",
       "bytes": 50163712,
-      "last_write_time": "2026-10-20T22:08:00Z",
+      "last_write_time": "2026-10-20T23:34:48Z",
       "classification": "isolated_test_or_validation_copy",
       "production_input": false
     },
