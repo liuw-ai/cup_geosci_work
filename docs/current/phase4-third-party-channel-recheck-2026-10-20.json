@@ -1,0 +1,69 @@
+{
+  "phase": "phase4",
+  "generated_at": "2026-10-20T08:03:35+08:00",
+  "environment": "local_read_only",
+  "policy": "只读取已登记发现页并核验 robots；不绕过 robots、TLS、验证码、登录或浏览器权限，不下载附件，不生成候选，不写岗位数据库。访问失败是来源健康事实，不表示来源没有岗位。",
+  "channels": [
+    {
+      "source_id": "offcn-discovery",
+      "status": "access_limited",
+      "robots_status": "unavailable",
+      "page_fetch": "not_attempted",
+      "reason": "TLS handshake failure while verifying robots.txt",
+      "downloaded": false,
+      "candidate_rows_created": 0
+    },
+    {
+      "source_id": "fenbi-discovery",
+      "status": "access_limited",
+      "robots_status": "unavailable",
+      "page_fetch": "not_attempted",
+      "reason": "TLS handshake failure while verifying robots.txt",
+      "downloaded": false,
+      "candidate_rows_created": 0
+    },
+    {
+      "source_id": "gongkaoleida-discovery",
+      "status": "access_limited",
+      "robots_status": "unavailable",
+      "page_fetch": "not_attempted",
+      "reason": "TLS handshake failure while verifying robots.txt",
+      "downloaded": false,
+      "candidate_rows_created": 0
+    },
+    {
+      "source_id": "gongkaozixun-discovery",
+      "status": "access_limited",
+      "robots_status": "unavailable",
+      "page_fetch": "not_attempted",
+      "reason": "TLS handshake failure while verifying robots.txt",
+      "downloaded": false,
+      "candidate_rows_created": 0
+    },
+    {
+      "source_id": "huatu-discovery",
+      "status": "scanned",
+      "robots_status": 200,
+      "pages_scanned": 7,
+      "table_links_discovered": 6,
+      "table_robots_status": 200,
+      "table_robots_allowed": false,
+      "page_fetch": "completed",
+      "reason": "discovery pages were readable; every discovered u3.huatu.com attachment was disallowed by robots.txt",
+      "downloaded": false,
+      "candidate_rows_created": 0,
+      "formal_jobs_created": 0,
+      "evidence_report": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json"
+    }
+  ],
+  "summary": {
+    "registered_batch_sources": 5,
+    "access_limited_sources": 4,
+    "scanned_sources": 1,
+    "downloaded_files": 0,
+    "candidate_rows_created": 0,
+    "formal_jobs_created": 0,
+    "robots_or_tls_bypass": false
+  },
+  "next_allowed_action": "在合法可访问环境或由操作员提供带原始来源 URL 的原始职位表后，重新执行下载、SHA-256 留存、逐行解析和官方回溯；在此之前保持 B 级来源登记但不新增岗位。"
+}
