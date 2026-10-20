@@ -80,6 +80,12 @@ WITHDRAWAL_REASONS = frozenset(
 )
 
 
+def current_asia_shanghai_date() -> str:
+    """Return today's date using the student-facing Beijing-time policy."""
+
+    return datetime.now(ASIA_SHANGHAI).date().isoformat()
+
+
 def normalize_trust_grade(value: Any, default: str = "D") -> str:
     grade = str(value or "").strip().upper()
     return grade if grade in TRUST_GRADES else default
@@ -279,6 +285,7 @@ def derive_publication_layer(
 
 __all__ = [
     "ASIA_SHANGHAI",
+    "current_asia_shanghai_date",
     "PHASE3_BASELINE",
     "PHASE3_NAME",
     "PUBLICATION_LAYERS",

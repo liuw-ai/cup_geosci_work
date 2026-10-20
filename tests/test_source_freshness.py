@@ -81,6 +81,20 @@ def test_successful_live_sync_records_capture_timestamp_for_default_contract(tmp
     assert database.list_jobs(page_size=None)[1] == 1
 
 
+def test_default_public_read_uses_beijing_date_not_sqlite_utc(monkeypatch, tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+
+    monkeypatch.setattr(
+        "job_hub.db.current_asia_shanghai_date",
+        lambda: "2099-01-02",
+    )
+    _cte, values = database._student_visible_jobs_cte()
+
+    assert values == ["2099-01-02", "2099-01-02"]
+
+
 def test_repeated_live_sync_refreshes_capture_timestamp(tmp_path) -> None:
     settings = replace(make_settings(tmp_path), default_source_max_age_hours=72)
     live_source = {**source(), "source_type": "html_notice"}

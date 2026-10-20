@@ -1,6 +1,8 @@
-from datetime import date
+from datetime import date, datetime
 
 from job_hub.phase3_policy import (
+    ASIA_SHANGHAI,
+    current_asia_shanghai_date,
     derive_publication_layer,
     deadline_is_expired,
     no_deadline_expiry,
@@ -16,6 +18,11 @@ def test_no_deadline_uses_asia_shanghai_calendar_days():
     assert no_deadline_expiry(None, "2026-10-16T00:30:00Z") == "2027-01-14"
     assert deadline_is_expired(None, "2027-01-14", date(2027, 1, 14)) is False
     assert deadline_is_expired(None, "2027-01-14", date(2027, 1, 15)) is True
+
+
+def test_default_student_date_is_beijing_calendar_date():
+    expected = datetime.now(ASIA_SHANGHAI).date().isoformat()
+    assert current_asia_shanghai_date() == expected
 
 
 def test_relative_deadline_counts_asia_shanghai_weekdays_and_explicit_exceptions():

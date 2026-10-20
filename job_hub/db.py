@@ -30,6 +30,7 @@ from job_hub.phase3_policy import (
     SOURCE_AVAILABILITY_STATES,
     SOURCE_UNAVAILABLE_REASONS,
     WITHDRAWAL_REASONS,
+    current_asia_shanghai_date,
     derive_publication_layer,
     no_deadline_expiry,
     normalize_publication_layer,
@@ -3922,20 +3923,16 @@ class Database:
             "AND jobs.publication_layer = 'incomplete_but_basic_match'))",
             "(jobs.publication_layer <> 'source_unavailable' OR jobs.last_official_verified_at IS NOT NULL)",
         ]
+        # The public API's default read must use the same Asia/Shanghai
+        # natural-day policy as explicit historical reads. SQLite's
+        # date('now') is UTC and can be one calendar day behind Beijing time.
+        effective_as_of_date = as_of_date or current_asia_shanghai_date()
+        freshness_sql, freshness_values = self._public_freshness_filter(
+            effective_as_of_date
+        )
+        clauses.append(freshness_sql)
         values: list[Any] = []
-        if as_of_date is not None:
-            freshness_sql, freshness_values = self._public_freshness_filter(
-                as_of_date
-            )
-            clauses.append(freshness_sql)
-            values.extend(freshness_values)
-        else:
-            clauses.append(
-                "(jobs.deadline_date >= date('now') OR "
-                "(jobs.deadline_date IS NULL OR jobs.deadline_date = '') AND "
-                "(jobs.no_deadline_expires_at IS NULL OR jobs.no_deadline_expires_at = '' "
-                "OR jobs.no_deadline_expires_at >= date('now')) )"
-            )
+        values.extend(freshness_values)
         where = " AND ".join(clauses)
         return (
             """
