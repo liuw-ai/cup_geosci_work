@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "checked_at": "2026-10-20T11:35:23+08:00",
+  "checked_at": "2026-10-20T12:52:10+08:00",
   "verification_mode": "bounded_read_only_browser_and_http_recheck",
   "policy": "仅复核已登记的单位级官方入口；不采集岗位、不下载附件、不创建来源或岗位，不把网络失败解释为入口不存在。",
   "entries": [
@@ -66,5 +66,28 @@
     "catalog_changed": false,
     "jobs_created": 0,
     "server_deployment": false
+  },
+  "additional_registered_domain_recheck": {
+    "checked_at": "2026-10-20T12:52:10+08:00",
+    "user_agent": "CUPB-Geoscience-Job-Hub/phase4-readonly",
+    "policy": "先核验 robots.txt；robots/TLS/代理失败只标记来源暂时不可用，不创建或撤回入口。",
+    "entries": [
+      {"catalog_id": "cnpc-riped", "url": "https://rip.ed.cnpc.com.cn/", "status": "source_unavailable", "error_class": "SSLError"},
+      {"catalog_id": "cnpc-changqing", "url": "https://cqyt.cnpc.com.cn/", "status": "source_unavailable", "error_class": "SSLError"},
+      {"catalog_id": "cnpc-logging", "url": "https://cpl.cnpc.com.cn/", "status": "source_unavailable", "error_class": "SSLError"},
+      {"catalog_id": "cnpc-sichuan-changqing-drilling", "url": "https://cqdrilling.cnpc.com.cn/", "status": "source_unavailable", "error_class": "SSLError"},
+      {"catalog_id": "cnpc-greatwall-drilling", "url": "https://gwdrilling.cnpc.com.cn/", "status": "source_unavailable", "error_class": "SSLError"},
+      {"catalog_id": "cnpc-western-drilling", "url": "https://xbzk.cnpc.com.cn/", "status": "source_unavailable", "error_class": "SSLError"},
+      {"catalog_id": "sinopec-pepris", "url": "https://pepris.sinopec.com/", "status": "source_unavailable", "error_class": "SSLError"},
+      {"catalog_id": "sinopec-shengli", "url": "https://slof.sinopec.com/", "status": "source_unavailable", "error_class": "SSLError"},
+      {"catalog_id": "sinopec-jianghan", "url": "https://jhof.sinopec.com/", "status": "source_unavailable", "error_class": "SSLError"},
+      {"catalog_id": "sinopec-oilfield-service", "url": "https://www.sinopec-oss.com/", "status": "source_unavailable", "error_class": "SSLError"},
+      {"catalog_id": "cosl", "url": "https://www.cosl.com.cn/", "status": "source_unavailable", "error_class": "ProxyError"},
+      {"catalog_id": "cnooc-energy-development", "url": "https://www.cnoocet.com/", "status": "source_unavailable", "error_class": "SSLCertVerificationError"}
+    ],
+    "checked": 12,
+    "http_success": 0,
+    "recruitment_entries_proven": 0,
+    "catalog_changed": false
   }
 }
