@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T12:31:40Z",
+  "generated_at": "2026-10-20T12:40:06Z",
   "phase": "phase4",
   "status": "local_audit_in_progress",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "242b14f0453650c62d742dc1fc314848fc821c97",
+  "git_sha": "5bafd8a65da1a44b54ca53bc2ddcac5b1c80f119",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
   "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
@@ -30,7 +30,7 @@
     "phase4_sinopec_display_audit": "f2aaa3b847ba73daeaefb2c5338588a6218ea2f64469f7f11d4c93c4bc2f6091",
     "phase4_sinopec_page_roster": "805910f3490ff0e3b3c40dffdf0e9bc5abfafd7f9838472b77e3bdb9c3ca32cd",
     "phase4_third_party_geoscience_followup": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1",
-    "phase4_current_state_audit": "f913107c26868cf952c1803af659ed36f7f5f686b38d0610e6d08e8b6ef60e3e",
+    "phase4_current_state_audit": "00feb1368e80d2ddf2d51cbcc7051d9046b7bbb133bc0f2dfe4a477fd823a4cf",
     "phase4_document_consistency": "90f088aa8ece5957fb929e3a1dc6e9344436bde4d93e607d540fc21a719ca22e",
     "phase4_third_party_candidate": "e39880bc2dcc59aade681f0af8226bf4dfe538e177be285510b667daf99ba5cc",
     "phase4_third_party_hrinm": "f8cc0c4ef76ce06c88ad6d34fe91eb9c6ed578270a3ecc3b60a22c4e4c06f878",
@@ -46,7 +46,7 @@
     "phase4_third_party_access_recheck": "cb01f60f22b037fd44ea524e8a2aa33efe6988c37179bffd1f4ceafca5516f9d",
     "phase4_third_party_official_recovery_recheck": "5467d6a16316293d4790ec17292ac8c2bc8fadb91ae9ce72cd3949b9f136ad8a",
     "phase4_local_repair": "b67339e2308b9e2b6c938f2039ac070d67438120c447131a39da53481f1b20cb",
-    "phase4_third_party_funnel": "2ed8841d1bb57fd1cb9fd6e5f75b67d5f23e992a63792e301a119c06f822bdbb",
+    "phase4_third_party_funnel": "5d58ce067cb98cc7a72c3781edd89efb3998ac547ba3aae223b8b6c36c222d86",
     "phase4_local_web_recheck": "1ce3aa772e20a7216ecf9bcc86f54c121ef1457fa896804f636d73a3aacb017f",
     "phase4_local_web_live_validation": "0b36651d4c2ec9e3a39634f285bc61129a192f15a5dbd76d89f83793d4bb05a0",
     "phase4_huatu_table_discovery": "007ba8d74b26bfbbea076077344476dc5aa083d6ce5a6bed3b1ff39efc48f2ca",
@@ -65,7 +65,7 @@
     "phase4_third_party_sxdkj_official_recheck": "4fdd55009ebd6375bed75ff3a51f8b740f9b4ce1e289583fbecacafbd1e03388",
     "phase4_cnooc_shenzhen_job_evidence": "d4b1dff3555457a61262b2a0eb62ecb51addfffdf5079b104d75d67ecfd060ef",
     "phase4_main_record": "1011a922918150165e4a0b4d76c88d8bd59e5c17b6164a6da0c5b172c7799b1c",
-    "phase4_local_validation": "13ce4e7e42839732f068e013e24ae29104499d17da50bd8059ad221b555bb178",
+    "phase4_local_validation": "3f2f6962cf7b633d0c3d9742afd8151eb33c46e8b736abc59a08d941c6997c47",
     "phase4_local_db_write_incident": "d6e3ad3b6a1bdc22c8e0478eccf1d52c54c37e1cbc60698b179e2e67ecb34935",
     "phase4_three_oil_homepage_probe": "9b64fc1629c04037e22f9d6a2b0bee74cb53807f714932ad212cf6d22c5a8e5f",
     "phase4_three_oil_observed_roster": "aecf4e0083cf5fcbbee1c6af3446771611b2043e2bdecc60bab8f5463be52b9a",
@@ -75,8 +75,8 @@
     "phase4_cnooc_portal_live_recheck": "6de1f90591e169dc25b79af57c4c63b99b579e6cb158ad6889ac879bde5e3fd4",
     "phase4_cnooc_api_unit_evidence": "e1dc7cad501b4d9327414ea0f8c7d86eefdbbb342b5ee42839d481b8bf8f1d15",
     "phase4_three_oil_official_homepage_entry_recheck": "55756e20e901b550344f90e846de525131f7e3243262755bb50463389967467e",
-    "phase4_completion_audit": "572c452393bfb8989f6086d3366682b537b04a4372d447a1ef10472b3f0e8c8a",
-    "phase4_workspace_layout": "b0c9d23720043b953e342fbe80e33c80bbde33acd9cfc83e16448cc45bb21c6a"
+    "phase4_completion_audit": "d688904914c52acd39714f08e843609c5aac72a3d38163d76ec49d2152793e01",
+    "phase4_workspace_layout": "3c1c98bcfb61ade2ef5cf20dc4af25d489d13b3f8011da0c344276939f5d746a"
   },
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -150,7 +150,7 @@
   },
   "local_validation": {
     "phase": "phase4",
-    "validated_at": "2026-10-20T20:31:00+08:00",
+    "validated_at": "2026-10-20T20:36:05+08:00",
     "environment": "local",
     "server_deployment": false,
     "git_sha": "4d5e6f9",
