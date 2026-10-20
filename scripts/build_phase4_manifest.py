@@ -199,7 +199,7 @@ def main() -> None:
         "sha256": sha256(current_after_local_server_stop_backup),
     }
     database["current_backup"] = {
-        "path": "backups/job_hub-phase4-current-20261020.sqlite3",
+        "path": "backups/job_hub-phase4-current-20261021.sqlite3",
         "sha256": sha256(current_backup),
         "matches_runtime_database": sha256(current_backup) == database["sha256"],
     }
