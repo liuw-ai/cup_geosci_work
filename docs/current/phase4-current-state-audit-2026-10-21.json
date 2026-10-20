@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T20:49:02Z",
+  "generated_at": "2026-10-20T21:05:38Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "311ea02940881178a78ec1f9fe6d3f77c3f450e7",
+  "git_sha": "be0adb70495a5bd4b6bdfbcdd616b18edf2de2ea",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "61fa05d963446199f93b9c40461c0e8eef408b50b519a369b6e8ca7d4cb4447d"
+      "sha256": "eb79b7f6bcce85c726a868aa74a9c2f31fb840104c9479e3b43f650ae5370458"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -1022,8 +1022,8 @@
     },
     {
       "path": "tests/test_app.py",
-      "line_count": 846,
-      "sha256": "1214136d7632fe15d8daaed121b32e17bd8c301d7e7411f4f6a3a7c929eac9a7"
+      "line_count": 890,
+      "sha256": "e75df1eec5d6160b78d4da7573324b7eef0e65c0ffc74f96a51b5538517e7bec"
     },
     {
       "path": "tests/test_attachment_batch.py",
