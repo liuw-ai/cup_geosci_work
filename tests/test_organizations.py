@@ -100,6 +100,19 @@ def test_organization_role_labels_use_neutral_user_facing_vocabulary() -> None:
     assert "法人雇主" not in labels
 
 
+def test_cnaf_display_candidates_are_separate_from_sinopec_tree() -> None:
+    registry = load_organization_registry()
+    cnaf = get_organization("cnaf-group", registry)
+    assert cnaf is not None
+    assert cnaf["organization_role"] == "group"
+    assert cnaf["affiliation"] == "央国企候选（非三桶油）"
+    candidate_ids = {f"sinopec-display-{index}-unit" for index in range(121, 132)}
+    candidates = [row for row in registry["organizations"] if row.get("id") in candidate_ids]
+    assert len(candidates) == 11
+    assert all(row["parent_id"] == "cnaf-group" for row in candidates)
+    assert all(row["affiliation"] != "中国石化体系" for row in candidates)
+
+
 def test_organization_contract_rejects_unknown_source_cycle_and_invalid_primary_state() -> None:
     root = _organization("root")
     with pytest.raises(ContractValidationError, match="unknown source_id"):

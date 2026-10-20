@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T13:23:15Z",
+  "generated_at": "2026-10-20T14:14:22Z",
   "purpose": "Phase 4 read-only reconciliation; non-catalog records are not production inputs.",
   "external_evidence_policy": "Do not promote a display or registry name without an official group page, legal-registration record, or official recruitment evidence.",
   "summary": {
@@ -2707,226 +2707,6 @@
       },
       "channel_ids": [
         "sinopec-display-120-unit-channel-1"
-      ],
-      "official_urls": [
-        "https://job.sinopec.com/"
-      ],
-      "evidence_required": true
-    },
-    {
-      "id": "sinopec-display-121-unit",
-      "canonical_name": "中国航空油料有限责任公司",
-      "parent_id": "sinopec",
-      "parent_name": null,
-      "affiliation": "中国石化体系",
-      "organization_role_legacy": "internal_technical_service",
-      "scope_status": "display_candidate_unverified",
-      "channel_count": 1,
-      "channel_verification_statuses": {
-        "candidate": 1
-      },
-      "channel_ids": [
-        "sinopec-display-121-unit-channel-1"
-      ],
-      "official_urls": [
-        "https://job.sinopec.com/"
-      ],
-      "evidence_required": true
-    },
-    {
-      "id": "sinopec-display-122-unit",
-      "canonical_name": "中国航油集团石油股份有限公司",
-      "parent_id": "sinopec",
-      "parent_name": null,
-      "affiliation": "中国石化体系",
-      "organization_role_legacy": "internal_technical_service",
-      "scope_status": "display_candidate_unverified",
-      "channel_count": 1,
-      "channel_verification_statuses": {
-        "candidate": 1
-      },
-      "channel_ids": [
-        "sinopec-display-122-unit-channel-1"
-      ],
-      "official_urls": [
-        "https://job.sinopec.com/"
-      ],
-      "evidence_required": true
-    },
-    {
-      "id": "sinopec-display-123-unit",
-      "canonical_name": "中国航油集团物流有限公司",
-      "parent_id": "sinopec",
-      "parent_name": null,
-      "affiliation": "中国石化体系",
-      "organization_role_legacy": "internal_technical_service",
-      "scope_status": "display_candidate_unverified",
-      "channel_count": 1,
-      "channel_verification_statuses": {
-        "candidate": 1
-      },
-      "channel_ids": [
-        "sinopec-display-123-unit-channel-1"
-      ],
-      "official_urls": [
-        "https://job.sinopec.com/"
-      ],
-      "evidence_required": true
-    },
-    {
-      "id": "sinopec-display-124-unit",
-      "canonical_name": "中国航油集团国际控股有限公司",
-      "parent_id": "sinopec",
-      "parent_name": null,
-      "affiliation": "中国石化体系",
-      "organization_role_legacy": "internal_technical_service",
-      "scope_status": "display_candidate_unverified",
-      "channel_count": 1,
-      "channel_verification_statuses": {
-        "candidate": 1
-      },
-      "channel_ids": [
-        "sinopec-display-124-unit-channel-1"
-      ],
-      "official_urls": [
-        "https://job.sinopec.com/"
-      ],
-      "evidence_required": true
-    },
-    {
-      "id": "sinopec-display-125-unit",
-      "canonical_name": "中国航油集团通用航空发展有限公司",
-      "parent_id": "sinopec",
-      "parent_name": null,
-      "affiliation": "中国石化体系",
-      "organization_role_legacy": "internal_technical_service",
-      "scope_status": "display_candidate_unverified",
-      "channel_count": 1,
-      "channel_verification_statuses": {
-        "candidate": 1
-      },
-      "channel_ids": [
-        "sinopec-display-125-unit-channel-1"
-      ],
-      "official_urls": [
-        "https://job.sinopec.com/"
-      ],
-      "evidence_required": true
-    },
-    {
-      "id": "sinopec-display-126-unit",
-      "canonical_name": "北京中航油工程建设有限公司",
-      "parent_id": "sinopec",
-      "parent_name": null,
-      "affiliation": "中国石化体系",
-      "organization_role_legacy": "internal_technical_service",
-      "scope_status": "display_candidate_unverified",
-      "channel_count": 1,
-      "channel_verification_statuses": {
-        "candidate": 1
-      },
-      "channel_ids": [
-        "sinopec-display-126-unit-channel-1"
-      ],
-      "official_urls": [
-        "https://job.sinopec.com/"
-      ],
-      "evidence_required": true
-    },
-    {
-      "id": "sinopec-display-127-unit",
-      "canonical_name": "中航油石化管道有限公司",
-      "parent_id": "sinopec",
-      "parent_name": null,
-      "affiliation": "中国石化体系",
-      "organization_role_legacy": "internal_technical_service",
-      "scope_status": "display_candidate_unverified",
-      "channel_count": 1,
-      "channel_verification_statuses": {
-        "candidate": 1
-      },
-      "channel_ids": [
-        "sinopec-display-127-unit-channel-1"
-      ],
-      "official_urls": [
-        "https://job.sinopec.com/"
-      ],
-      "evidence_required": true
-    },
-    {
-      "id": "sinopec-display-128-unit",
-      "canonical_name": "深圳承远航空油料有限公司",
-      "parent_id": "sinopec",
-      "parent_name": null,
-      "affiliation": "中国石化体系",
-      "organization_role_legacy": "internal_technical_service",
-      "scope_status": "display_candidate_unverified",
-      "channel_count": 1,
-      "channel_verification_statuses": {
-        "candidate": 1
-      },
-      "channel_ids": [
-        "sinopec-display-128-unit-channel-1"
-      ],
-      "official_urls": [
-        "https://job.sinopec.com/"
-      ],
-      "evidence_required": true
-    },
-    {
-      "id": "sinopec-display-129-unit",
-      "canonical_name": "中国航油集团资产发展有限公司",
-      "parent_id": "sinopec",
-      "parent_name": null,
-      "affiliation": "中国石化体系",
-      "organization_role_legacy": "internal_technical_service",
-      "scope_status": "display_candidate_unverified",
-      "channel_count": 1,
-      "channel_verification_statuses": {
-        "candidate": 1
-      },
-      "channel_ids": [
-        "sinopec-display-129-unit-channel-1"
-      ],
-      "official_urls": [
-        "https://job.sinopec.com/"
-      ],
-      "evidence_required": true
-    },
-    {
-      "id": "sinopec-display-130-unit",
-      "canonical_name": "中国航油集团投资有限公司",
-      "parent_id": "sinopec",
-      "parent_name": null,
-      "affiliation": "中国石化体系",
-      "organization_role_legacy": "internal_technical_service",
-      "scope_status": "display_candidate_unverified",
-      "channel_count": 1,
-      "channel_verification_statuses": {
-        "candidate": 1
-      },
-      "channel_ids": [
-        "sinopec-display-130-unit-channel-1"
-      ],
-      "official_urls": [
-        "https://job.sinopec.com/"
-      ],
-      "evidence_required": true
-    },
-    {
-      "id": "sinopec-display-131-unit",
-      "canonical_name": "中国航油集团海南有限公司",
-      "parent_id": "sinopec",
-      "parent_name": null,
-      "affiliation": "中国石化体系",
-      "organization_role_legacy": "internal_technical_service",
-      "scope_status": "display_candidate_unverified",
-      "channel_count": 1,
-      "channel_verification_statuses": {
-        "candidate": 1
-      },
-      "channel_ids": [
-        "sinopec-display-131-unit-channel-1"
       ],
       "official_urls": [
         "https://job.sinopec.com/"
@@ -6128,6 +5908,226 @@
         "https://zhaopin.cnpc.com.cn/"
       ],
       "evidence_required": false
+    },
+    {
+      "id": "sinopec-display-121-unit",
+      "canonical_name": "中国航空油料有限责任公司",
+      "parent_id": "cnaf-group",
+      "parent_name": null,
+      "affiliation": "中国航空油料集团体系（非三桶油）",
+      "organization_role_legacy": "other_affiliate",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-121-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-122-unit",
+      "canonical_name": "中国航油集团石油股份有限公司",
+      "parent_id": "cnaf-group",
+      "parent_name": null,
+      "affiliation": "中国航空油料集团体系（非三桶油）",
+      "organization_role_legacy": "other_affiliate",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-122-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-123-unit",
+      "canonical_name": "中国航油集团物流有限公司",
+      "parent_id": "cnaf-group",
+      "parent_name": null,
+      "affiliation": "中国航空油料集团体系（非三桶油）",
+      "organization_role_legacy": "other_affiliate",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-123-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-124-unit",
+      "canonical_name": "中国航油集团国际控股有限公司",
+      "parent_id": "cnaf-group",
+      "parent_name": null,
+      "affiliation": "中国航空油料集团体系（非三桶油）",
+      "organization_role_legacy": "other_affiliate",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-124-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-125-unit",
+      "canonical_name": "中国航油集团通用航空发展有限公司",
+      "parent_id": "cnaf-group",
+      "parent_name": null,
+      "affiliation": "中国航空油料集团体系（非三桶油）",
+      "organization_role_legacy": "other_affiliate",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-125-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-126-unit",
+      "canonical_name": "北京中航油工程建设有限公司",
+      "parent_id": "cnaf-group",
+      "parent_name": null,
+      "affiliation": "中国航空油料集团体系（非三桶油）",
+      "organization_role_legacy": "other_affiliate",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-126-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-127-unit",
+      "canonical_name": "中航油石化管道有限公司",
+      "parent_id": "cnaf-group",
+      "parent_name": null,
+      "affiliation": "中国航空油料集团体系（非三桶油）",
+      "organization_role_legacy": "other_affiliate",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-127-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-128-unit",
+      "canonical_name": "深圳承远航空油料有限公司",
+      "parent_id": "cnaf-group",
+      "parent_name": null,
+      "affiliation": "中国航空油料集团体系（非三桶油）",
+      "organization_role_legacy": "other_affiliate",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-128-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-129-unit",
+      "canonical_name": "中国航油集团资产发展有限公司",
+      "parent_id": "cnaf-group",
+      "parent_name": null,
+      "affiliation": "中国航空油料集团体系（非三桶油）",
+      "organization_role_legacy": "other_affiliate",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-129-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-130-unit",
+      "canonical_name": "中国航油集团投资有限公司",
+      "parent_id": "cnaf-group",
+      "parent_name": null,
+      "affiliation": "中国航空油料集团体系（非三桶油）",
+      "organization_role_legacy": "other_affiliate",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-130-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
+    },
+    {
+      "id": "sinopec-display-131-unit",
+      "canonical_name": "中国航油集团海南有限公司",
+      "parent_id": "cnaf-group",
+      "parent_name": null,
+      "affiliation": "中国航空油料集团体系（非三桶油）",
+      "organization_role_legacy": "other_affiliate",
+      "scope_status": "display_candidate_unverified",
+      "channel_count": 1,
+      "channel_verification_statuses": {
+        "candidate": 1
+      },
+      "channel_ids": [
+        "sinopec-display-131-unit-channel-1"
+      ],
+      "official_urls": [
+        "https://job.sinopec.com/"
+      ],
+      "evidence_required": true
     }
   ]
 }
