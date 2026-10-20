@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T04:28:26Z",
+  "generated_at": "2026-10-20T04:40:11Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "ffc14aef3c0b85f1fbb7b04054397d4ca71b0e32",
+  "git_sha": "e0a8a80279a10a6874d42ffc72b68d164828cc9a",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -207,7 +207,7 @@
     },
     "phase4_three_oil_unit_entry_matrix": {
       "path": "docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",
-      "sha256": "d6e3352eb814a8e475bf19357b138574c83207c0e33229056e3a86f3eff8f4d6"
+      "sha256": "17b510317733f3d0193822e8e021e78a58f869eef8c7229f0b4c728162dfb645"
     },
     "phase4_third_party_geoscience_followup": {
       "path": "docs/current/phase4-third-party-geoscience-followup-2026-10-18.json",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "ce54109d1b937a9f0966654fc081a1ce7322565fe1a1f26750625f8906c169f4"
+      "sha256": "b2a7c7d82616ba47921d98bc402815a204b9ec3d2818ee60e7c00ec652e77e52"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -347,7 +347,7 @@
     },
     "phase4_three_oil_homepage_probe": {
       "path": "docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
-      "sha256": "a4e000242079675b6f916575348b550f7d119dedee4103e97637807527b0d98d"
+      "sha256": "9b64fc1629c04037e22f9d6a2b0bee74cb53807f714932ad212cf6d22c5a8e5f"
     },
     "phase4_three_oil_observed_roster": {
       "path": "docs/current/phase4-three-oil-observed-roster-2026-10-20.json",
