@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T04:48:55Z",
+  "generated_at": "2026-10-20T04:52:14Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "894de37c241d3a57f40b73d5b57bb8aab3bca891",
+  "git_sha": "fc24738accf3c6c1f95fe28d9e716c486468699c",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -267,7 +267,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "cb48a942a591f86eb355e36054c767087eb6919e19c453624755ecee910aae54"
+      "sha256": "4264eee6b8f52a733948dcc5c5eafbf700cee8df2b386edc557ea23554a18fda"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -359,7 +359,7 @@
     },
     "phase4_three_oil_unit_entry_network_recheck": {
       "path": "docs/current/phase4-three-oil-unit-entry-network-recheck-2026-10-20.json",
-      "sha256": "92b989a57f90da5dd754e6b1f224762a8cdc4e886e3fb02dc263d8f80cfaf889"
+      "sha256": "35d6c06bd4cec859c3faae458e8a98647db15cdbe372006acbdbaf94afc83f2e"
     },
     "phase4_sinopec_company_intro_recheck": {
       "path": "docs/current/phase4-sinopec-company-intro-recheck-2026-10-20.json",
