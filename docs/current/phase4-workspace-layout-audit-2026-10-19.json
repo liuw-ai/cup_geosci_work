@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-20T22:02:08Z",
+  "generated_at": "2026-10-20T22:11:05Z",
   "scope": "local_read_only_workspace_layout",
   "production_entrypoint": "deploy/compose.yaml",
   "canonical_paths": {
@@ -512,6 +512,13 @@
       "path": "runtime/phase4-web-validation-20261021/job_hub.sqlite3",
       "bytes": 50139136,
       "last_write_time": "2026-10-20T16:46:56Z",
+      "classification": "isolated_test_or_validation_copy",
+      "production_input": false
+    },
+    {
+      "path": "runtime/phase4-web-validation-20261021-gdzys/job_hub.sqlite3",
+      "bytes": 50163712,
+      "last_write_time": "2026-10-20T22:08:00Z",
       "classification": "isolated_test_or_validation_copy",
       "production_input": false
     },
