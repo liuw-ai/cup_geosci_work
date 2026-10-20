@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T09:15:36Z",
+  "generated_at": "2026-10-20T10:04:12Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "19a8af9fc474f6241a4dd668fb7c055ebe18d1c2",
+  "git_sha": "a1ad47f2a120509e9affb3d0c23cb9febcec3c4a",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -154,12 +154,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "189c31888a6e8f34465f5cb876a8836c9f7a1482041f1e3483a61a568024ab5a"
+        "sha256": "332dbeae94033828a113d51b51b0236158568e180c4d6c0da47407cb7c6f892e"
       },
       {
-        "path": "docs/current/phase4-local-validation-2026-10-19.json",
+        "path": "docs/current/phase4-local-validation-2026-10-20.json",
         "exists": true,
-        "sha256": "40bed7b90905fa03d0840c20cca0c64bde8e3ea8bc5f38e90f9699fd36163ffd"
+        "sha256": "75c1dbf3f72622f72069fc7e6037995d66f934a5b08c093189837be8d3937dd3"
       }
     ],
     "metadata_documents": [
@@ -214,8 +214,8 @@
       "sha256": "7c6be6b9993ee1f01ce5406abb1586b8c8104fed3a67174d317cf1dbd6af03e1"
     },
     "phase4_local_validation": {
-      "path": "docs/current/phase4-local-validation-2026-10-19.json",
-      "sha256": "d301e0528001dd86e8fe6da3ec5ef9f5a378730b50f919631f021067f16d1387"
+      "path": "docs/current/phase4-local-validation-2026-10-20.json",
+      "sha256": "75c1dbf3f72622f72069fc7e6037995d66f934a5b08c093189837be8d3937dd3"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -267,15 +267,15 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "09aa4667ea2b4cc4793657abef213c7d9d21f57c59195cf6d37babe27870800c"
+      "sha256": "92bb4154277b478518bad46a2f3f37404ce93fcc88e6fc045ea42283d645b682"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
       "sha256": "1ce3aa772e20a7216ecf9bcc86f54c121ef1457fa896804f636d73a3aacb017f"
     },
     "phase4_local_web_live_validation": {
-      "path": "docs/current/phase4-local-web-live-validation-2026-10-19.json",
-      "sha256": "77be72a7464556aba378352644c45d014abd5263adeca2974aece52013cef6c4"
+      "path": "docs/current/phase4-local-web-live-validation-2026-10-20.json",
+      "sha256": "0b36651d4c2ec9e3a39634f285bc61129a192f15a5dbd76d89f83793d4bb05a0"
     },
     "phase4_huatu_table_discovery": {
       "path": "docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
@@ -371,7 +371,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "189c31888a6e8f34465f5cb876a8836c9f7a1482041f1e3483a61a568024ab5a"
+      "sha256": "332dbeae94033828a113d51b51b0236158568e180c4d6c0da47407cb7c6f892e"
     }
   },
   "code_inventory": [
@@ -838,12 +838,12 @@
     {
       "path": "scripts/audit_phase4_completion.py",
       "line_count": 398,
-      "sha256": "e19040de6ada9c7cdf2a0f1633bb0cbc6405830e03a4cc3dc765e134badac809"
+      "sha256": "32b9d42479d2e729406afd6de65d309b353a282ffbcfd694693069ae3e0c159a"
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
       "line_count": 557,
-      "sha256": "2484ef3988002abe05af1d65847a77c29575c644341b9bd3c668e6e5d489bd6d"
+      "sha256": "f566c66e5f963715a37a9205f3ad7474d90a9bd5c19ac63733f02210e76c3cb5"
     },
     {
       "path": "scripts/audit_phase4_third_party_funnel.py",
@@ -872,8 +872,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 456,
-      "sha256": "cac4a7b1263481ebb9a2d1de547bee17ddce3d6056abf804fe3987081d1f4f1d"
+      "line_count": 458,
+      "sha256": "0f6a80783a24abad6729f5d50e957a669d4e7dcf9757e1cf09c57fd3d98589b0"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -968,7 +968,7 @@
     {
       "path": "scripts/verify_phase4_manifest.py",
       "line_count": 261,
-      "sha256": "128baf2a47bb5bf338680a320903b7a12b6943d89537baae3f19eb051a73afc3"
+      "sha256": "e113f75fdf9ae5ab86dab0dae3f3e4df48df85d85c348d68f206c45cdc81e85e"
     },
     {
       "path": "tests/conftest.py",

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T09:15:40Z",
+  "generated_at": "2026-10-20T10:04:16Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -276,7 +276,7 @@
         "docs/current/phase4-local-validation-2026-10-20.json"
       ],
       "facts": {
-        "passed": 1107,
+        "passed": 1108,
         "skipped": 4,
         "failed": 0,
         "formal_database_stable": true
@@ -286,7 +286,7 @@
       "id": "student_site_acceptance",
       "status": "pass",
       "evidence": [
-        "docs/current/phase4-local-web-live-validation-2026-10-19.json"
+        "docs/current/phase4-local-web-live-validation-2026-10-20.json"
       ],
       "facts": {
         "healthz": 200,
