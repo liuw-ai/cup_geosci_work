@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-21T04:21:07Z",
+  "generated_at": "2026-10-21T06:30:35Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "87d2d9c21657f51910f367a597e4f682ce4b1dce",
-  "git_status_porcelain": "M docs/current/README.md\n?? docs/current/PHASE5-2026-10-21.md",
+  "git_sha": "cdd79599260b3545a8649119b2cce5e98161c965",
+  "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
     "sha256": "bf1540c6c192935d2d3b2b7df4fd28f897eee4e5c256971cb46b978218faf24a",
@@ -156,12 +156,12 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "3b60095926eb3c7082f8c88d2961a793ed0a3edd6c0a38748cd4b9f1ef68a888"
+        "sha256": "28c3ac8774969838c8711e44f9cbac1ca94b84df8e6e0630176401af677da8dc"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-21.json",
         "exists": true,
-        "sha256": "848842f45c6d5f7fe89c4efc6f827aea42ab7c7e4a52ee82193a2ec3a5ee8c39"
+        "sha256": "56bb06f6f77a0f8cbf3439388a06b529bd5fa6ab311a53afa4c1268ea0ff447d"
       }
     ],
     "metadata_documents": [
@@ -217,7 +217,7 @@
     },
     "phase4_local_validation": {
       "path": "docs/current/phase4-local-validation-2026-10-21.json",
-      "sha256": "848842f45c6d5f7fe89c4efc6f827aea42ab7c7e4a52ee82193a2ec3a5ee8c39"
+      "sha256": "56bb06f6f77a0f8cbf3439388a06b529bd5fa6ab311a53afa4c1268ea0ff447d"
     },
     "phase4_third_party_candidate": {
       "path": "docs/current/phase4-third-party-candidate-2026-10-18.json",
@@ -269,7 +269,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "83998320284e9a3891b65849affed396f79b239fa13d61ca6b2345ce46f61ee4"
+      "sha256": "e7e7c8809473cb3099d15278e74df1148292c11d8f5096a4ec92b27bb3768ee3"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -397,7 +397,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "3b60095926eb3c7082f8c88d2961a793ed0a3edd6c0a38748cd4b9f1ef68a888"
+      "sha256": "28c3ac8774969838c8711e44f9cbac1ca94b84df8e6e0630176401af677da8dc"
     }
   },
   "code_inventory": [
@@ -538,8 +538,8 @@
     },
     {
       "path": "job_hub/db.py",
-      "line_count": 5823,
-      "sha256": "6ef900372e3985e51007b7560e662095c0015094b7e1c0e1ec7b99098940f699"
+      "line_count": 5836,
+      "sha256": "2c05b544628039c0cdfb9299107fe5d8854203693a7a650b7488b98d3c75d2d2"
     },
     {
       "path": "job_hub/discovery.py",
@@ -913,8 +913,8 @@
     },
     {
       "path": "scripts/build_phase4_manifest.py",
-      "line_count": 507,
-      "sha256": "e3d0cb7b5b513500d873f6ffcf5ca361b1a58c80ad49ece667da48ca68a18a6c"
+      "line_count": 547,
+      "sha256": "011dc34e1046e54355f74b01896e34d45b16cb388242ce3cd5d9e38a366e644c"
     },
     {
       "path": "scripts/build_phase4_organization_reconciliation.py",
@@ -1033,8 +1033,8 @@
     },
     {
       "path": "scripts/verify_phase4_manifest.py",
-      "line_count": 299,
-      "sha256": "6dbd93938864eaa73ec275ac55883e458aee42ecd31fc249905685a491d994dc"
+      "line_count": 343,
+      "sha256": "9a7aa55be6327d67da48647d6195c7c797df2ba52a994b3c8785dd194a7a37d9"
     },
     {
       "path": "tests/conftest.py",
@@ -1043,8 +1043,8 @@
     },
     {
       "path": "tests/test_app.py",
-      "line_count": 890,
-      "sha256": "e75df1eec5d6160b78d4da7573324b7eef0e65c0ffc74f96a51b5538517e7bec"
+      "line_count": 905,
+      "sha256": "65aedf47a5c009a7cc22ad8c37b135401a62f12ca929287c0a99c8b8bf21ca96"
     },
     {
       "path": "tests/test_attachment_batch.py",
@@ -1478,8 +1478,8 @@
     },
     {
       "path": "tests/test_phase4_manifest.py",
-      "line_count": 93,
-      "sha256": "41cbdd812e31ba50b7dcdf044cef54f09a1279d1e1a09bf20667d747d3416955"
+      "line_count": 107,
+      "sha256": "203e26fef784ebdf5fbd88a201fb0c33d1a01d5538683fd2f7f258e693a37f4c"
     },
     {
       "path": "tests/test_phase4_metadata_refresh.py",
@@ -1578,8 +1578,8 @@
     },
     {
       "path": "tests/test_reports.py",
-      "line_count": 184,
-      "sha256": "6e0d3942a5b95178c7fc0448ee7ef6604e4cd0d4ed2a2a2af1ab293b53ca52a9"
+      "line_count": 235,
+      "sha256": "865416f8360fc54561b63dda0ff0dcdb7ca60a4869cc1f125f76a817bdbb7456"
     },
     {
       "path": "tests/test_run_ledger.py",

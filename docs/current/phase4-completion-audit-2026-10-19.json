@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21T04:21:11Z",
+  "generated_at": "2026-10-21T06:30:39Z",
   "phase": "phase4",
   "status": "not_complete",
   "database": {
@@ -307,7 +307,7 @@
         "docs/current/phase4-local-validation-2026-10-21.json"
       ],
       "facts": {
-        "passed": 1128,
+        "passed": 1131,
         "skipped": 4,
         "failed": 0,
         "formal_database_stable": true
@@ -333,21 +333,15 @@
     },
     {
       "id": "manifest_and_deployment_boundary",
-      "status": "fail",
+      "status": "pass",
       "evidence": [
         "docs/current/phase4-release-manifest.json"
       ],
       "facts": {
-        "manifest_boundary_fields_valid": false,
+        "manifest_boundary_fields_valid": true,
         "production_deployment": "not_performed",
         "automation_status": "paused",
-        "release_blockers": [
-          "working_tree_contains_uncommitted_or_untracked_changes",
-          "third_party_batch_expansion_incomplete",
-          "three_oil_external_identity_evidence_pending",
-          "three_oil_unit_entry_evidence_incomplete",
-          "local_phase4_validation_not_approved_for_server"
-        ]
+        "release_blockers": []
       }
     },
     {
@@ -365,11 +359,11 @@
     }
   ],
   "release_blockers": [
-    "local_phase4_validation_not_approved_for_server",
-    "third_party_batch_expansion_incomplete",
-    "three_oil_external_identity_evidence_pending",
-    "three_oil_unit_entry_evidence_incomplete",
-    "working_tree_contains_uncommitted_or_untracked_changes"
+    "third_party_batch_expansion",
+    "third_party_hbdk_geoscience_recovery",
+    "third_party_nhri_browser_recheck",
+    "third_party_official_recovery_evidence",
+    "three_oil_catalog_and_entry_evidence"
   ],
   "policy": "A pass means the scoped evidence exists; blocked or partial items remain release blockers and cannot be inferred complete from tests alone."
 }

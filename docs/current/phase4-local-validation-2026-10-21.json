@@ -1,11 +1,11 @@
 {
   "phase": "phase4",
-  "validated_at": "2026-10-21T09:42:03+08:00",
+  "validated_at": "2026-10-21T14:29:09+08:00",
   "environment": "local",
   "server_deployment": false,
   "tests": {
     "command": "python -m pytest -q",
-      "passed": 1128,
+      "passed": 1131,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
@@ -53,8 +53,8 @@
     "formal_database_written": false
   },
   "release_boundary": {
-    "status": "not_publishable",
+    "status": "approved_pending_server_access",
     "automation_status": "paused",
-    "reason": "isolated local evidence only; no server deployment or automation resume"
+    "reason": "用户已批准 Phase 4 部署；等待有效服务器访问。应用内 worker 将随服务启动，外部 Codex 自动化仍保持暂停。"
   }
 }
