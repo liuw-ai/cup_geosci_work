@@ -1,0 +1,68 @@
+{
+  "phase": "phase4",
+  "release": "phase4-20261021-r1",
+  "deployment_status": "deployed_and_verified",
+  "deployed_at_utc": "2026-10-21T18:49:36Z",
+  "server": "ubuntu@81.70.62.174",
+  "release_root": "/opt/job-hub/releases/phase4-20261021-r1",
+  "active_release_pointer": "/opt/job-hub/current",
+  "source": {
+    "git_sha": "399e759bb75a88dfec0d28f1a9fbc0ce21b0fba8",
+    "source_archive_sha256": "1eb0162193f402ecdbd7f9ced64349aa0bfefedde536dfc22ff2248f8e3bd631",
+    "compose_sha256": "6384a7d5455403a0ecd1499853097c6c8eade988d71af9ba9ccdbafca6dd3ec1"
+  },
+  "images": {
+    "application": {
+      "reference": "cupb-geoscience-job-hub:phase4-20261021-r1",
+      "image_id": "sha256:1b100b089ebc8136254601580ff24f8189f11e6454dfc73fe230eac891e6f27e"
+    },
+    "browser": {
+      "reference": "cupb-geoscience-job-hub-browser:phase4-20261021-r1",
+      "image_id": "sha256:a2cd2e11f53f79f050d240f498f30155845c8129ca345065f174e773263889c3"
+    },
+    "browser_dependencies": {
+      "reference": "cupb-geoscience-job-hub-browser:deps-phase4-20261021-r1",
+      "image_id": "sha256:07d616dcbe52b6338ea2bddeb1f780e43ce83764af499b2c640d9063c1cc6303"
+    },
+    "headless_shell": {
+      "reference": "chromedp/headless-shell@sha256:2d349b544a1ea6b5b5fd7c0fe99215ff662339c57407ee2e8c0a11af93516b04"
+    }
+  },
+  "database": {
+    "volume": "cupb-geoscience-job-hub_job_hub_data",
+    "backup_path": "/var/lib/job-hub/backups/job_hub-20261021T184936Z.sqlite3",
+    "backup_sha256": "b3a78c7cf39f02f025b53f0d480970e8725c810c71276600b1a80901918e9996",
+    "backup_integrity": "ok",
+    "backup_valid": true,
+    "audit": {
+      "total_jobs": 5346,
+      "open_jobs": 269,
+      "current_public_jobs": 212,
+      "registered_sources": 97,
+      "enabled_sources": 48,
+      "issues": []
+    }
+  },
+  "verification": {
+    "web_health_local": 200,
+    "caddy_ip_health": 200,
+    "public_ip_home": 200,
+    "sample_job_id": 5277,
+    "public_ip_sample_job": 200,
+    "worker_health": "ok",
+    "browser_workers": "all_7_healthy_after_start_period",
+    "caddy_container": "healthy",
+    "old_images_retained_for_rollback": true
+  },
+  "domain": {
+    "hostname": "jobs.cupdky.cn",
+    "dns_status": "not_resolving_at_deployment_time",
+    "https_status": "not_verifiable_until_dns_is_registered",
+    "temporary_ip_url": "http://81.70.62.174"
+  },
+  "notes": [
+    "The worker restarted once during concurrent schema initialization because an already-present column was attempted again; it subsequently became healthy and passed worker-health.",
+    "No database volume, old image, old release, or historical artifact was deleted.",
+    "The release manifest shipped in the source package remains a pre-deployment snapshot; this receipt records the actual server deployment state."
+  ]
+}
