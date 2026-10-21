@@ -1,0 +1,52 @@
+{
+  "phase": "phase4",
+  "generated_at": "2026-10-21T00:02:44Z",
+  "status": "historical_capture_retained_current_access_blocked",
+  "policy": {
+    "network_recheck_is_read_only": true,
+    "robots_denial_is_not_source_absence": true,
+    "third_party_table_is_candidate_evidence_only": true,
+    "official_evidence_required_before_publication": true
+  },
+  "source": {
+    "source_id": "huatu-discovery",
+    "source_grade": "B",
+    "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875151.html",
+    "third_party_table_url": "https://u3.huatu.com/uploads/soft/261016/df.xlsx"
+  },
+  "historical_capture": {
+    "captured_at": "2026-10-18T06:55:17Z",
+    "http_status": 200,
+    "bytes": 11544,
+    "expected_sha256": "02248460f53feb0936349cc411a537410a961539b12f3e80968b1f2b43d9a2c5",
+    "actual_sha256": "02248460f53feb0936349cc411a537410a961539b12f3e80968b1f2b43d9a2c5",
+    "sha256_matches": true,
+    "retained_path": "runtime/third-party-captures/huatu/2026-10-16-gansu-cmxy/huatu-attachment-1-02248460f53feb09.xlsx",
+    "file_exists": true,
+    "parsed_input_rows": 12
+  },
+  "historical_funnel": {
+    "input_rows": 12,
+    "accepted_rows": 11,
+    "rejected_rows": 1,
+    "isolated_candidate_leads": 11,
+    "official_recovery_bound": 11,
+    "formal_jobs_created": 0,
+    "student_visible_changes": 0,
+    "professional_screening": "rejected_for_current_geoscience_scope"
+  },
+  "current_network_recheck": {
+    "discovery_page_url": "https://sydw.huatu.com/2026/1016/2875151.html",
+    "robots_url": "https://u3.huatu.com/robots.txt",
+    "robots_status": 200,
+    "robots_allowed": false,
+    "download_decision": "blocked_before_download",
+    "downloaded": false,
+    "reason": "当前 robots.txt 禁止附件抓取；仅使用已留存文件完成本地审计，不重复下载。"
+  },
+  "publication_boundary": {
+    "formal_database_written": false,
+    "third_party_link_as_application": false,
+    "robots_bypass": false
+  }
+}

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from scripts.audit_phase4_completion import build_report
 
 
@@ -25,9 +28,14 @@ def test_phase4_completion_audit_is_requirement_scoped_and_not_complete() -> Non
     regression = next(
         item for item in report["requirements"] if item["id"] == "isolated_local_regression"
     )
-    assert regression["facts"]["passed"] == 1122
-    assert regression["facts"]["skipped"] == 4
-    assert regression["facts"]["failed"] == 0
+    validation = json.loads(
+        Path("docs/current/phase4-local-validation-2026-10-21.json").read_text(
+            encoding="utf-8"
+        )
+    )["tests"]
+    assert regression["facts"]["passed"] == validation["passed"]
+    assert regression["facts"]["skipped"] == validation["skipped"]
+    assert regression["facts"]["failed"] == validation["failed"]
     assert regression["facts"]["formal_database_stable"] is True
     site = next(item for item in report["requirements"] if item["id"] == "student_site_acceptance")
     assert site["facts"]["healthz"] == 200

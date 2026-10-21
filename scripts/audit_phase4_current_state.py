@@ -43,6 +43,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-document-consistency-2026-10-20.json",
     ":!docs/current/PHASE4-2026-10-17.md",
     ":!docs/current/phase4-third-party-huatu-table-discovery-2026-10-19.json",
+    ":!docs/current/phase4-third-party-table-trial-reconciliation-2026-10-21.json",
     ":!docs/current/phase4-third-party-official-recovery-recheck-2026-10-19.json",
     ":!docs/current/phase4-three-oil-homepage-probe-2026-10-19.json",
     ":!docs/current/phase4-three-oil-unit-entry-matrix-2026-10-18.json",

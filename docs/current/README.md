@@ -10,6 +10,8 @@
 
 当前本地事实的边界以 [phase4-current-state-audit-2026-10-21.json](phase4-current-state-audit-2026-10-21.json) 和 [phase4-release-manifest.json](phase4-release-manifest.json) 的哈希绑定数据为准，不在本 README 重复维护易过期的岗位数量。当前数据库记录 12 条候选线索，其中 9 条已完成官方证据核验并形成正式岗位；其中 8 条正式岗位可严格归因于第三方发现或批量试点，另 1 条为官方岗位表试点。服务器未部署，自动化保持暂停，第三方发现链接不作为学生申请链接。
 
+华图甘肃职位表试点的历史文件、解析行数、SHA-256 和当前 robots 复核已由 [phase4-third-party-table-trial-reconciliation-2026-10-21.json](phase4-third-party-table-trial-reconciliation-2026-10-21.json) 绑定。该报告明确区分“历史文件可本地审计”和“当前附件域名禁止再次下载”；11 条地学范围外行未发布，不能把这次试点写成已产生正式岗位。
+
 另有一份隔离的华图→中国石油集团川庆钻探页面证据报告，逐行记录 12 条候选；该页面只有 `cnpc.com.cn` 邮箱，没有可核验的中国石油官方公告、岗位表或 HTTP 报名 URL，因此 12 条不计入数据库候选数量、不进入学生端，状态保持 `pending`。南京水利科学研究院的华图发现页已回溯到可读的官方公告和岗位表 URL，但附件下载受 robots/TLS/浏览器权限限制，只有公告级证据，未创建候选或正式岗位；详见 `phase4-third-party-nhri-browser-recheck-2026-10-20.json`。
 
 Phase 4 的逐项完成状态见 [phase4-completion-audit-2026-10-19.json](phase4-completion-audit-2026-10-19.json)，目录和 Docker 边界见 [phase4-workspace-layout-audit-2026-10-19.json](phase4-workspace-layout-audit-2026-10-19.json)。审计为 `not_complete` 时，阻断项仍然有效，不能仅因测试通过而发布。

@@ -27,6 +27,7 @@ def main() -> int:
     # completion report, and finally rebuild the manifest with that report's
     # final hash so the two documents do not retain stale dirty-state facts.
     for script in (
+        "audit_phase4_third_party_table_trial.py",
         # The funnel report is manifest-bound and must be refreshed before
         # the current-state report hashes the evidence set.
         "audit_phase4_third_party_funnel.py",
