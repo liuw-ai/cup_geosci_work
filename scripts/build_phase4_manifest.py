@@ -531,7 +531,11 @@ def main() -> None:
         "automation_status": "paused",
         "production_deployment": "not_performed",
         "server_deployment_approval": "user_confirmed_2026-10-21",
-        "deployment_execution_status": "pending_valid_server_access",
+        "deployment_execution_status": "pending_server_access_and_immutable_images",
+        "deployment_prerequisites": [
+            "valid_server_access",
+            "immutable_application_and_browser_image_references",
+        ],
         "deferred_scope": [
             "third_party_batch_expansion",
             "three_oil_external_identity_evidence",

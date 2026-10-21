@@ -225,8 +225,17 @@ def verify_manifest(path: Path = MANIFEST) -> dict[str, Any]:
     _record_error(
         errors,
         "deployment_execution_status",
-        "pending_valid_server_access",
+        "pending_server_access_and_immutable_images",
         manifest.get("deployment_execution_status"),
+    )
+    _record_error(
+        errors,
+        "deployment_prerequisites",
+        [
+            "valid_server_access",
+            "immutable_application_and_browser_image_references",
+        ],
+        manifest.get("deployment_prerequisites"),
     )
     _record_error(errors, "automation_status", "paused", manifest.get("automation_status"))
     if not _git_revision_exists(str(manifest.get("git_sha") or "")):

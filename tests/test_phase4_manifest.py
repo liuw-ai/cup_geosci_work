@@ -77,6 +77,12 @@ def test_phase4_manifest_recomputes_current_hashes_and_database_facts() -> None:
     assert result["production_deployment"] == "not_performed"
     assert result["automation_status"] == "paused"
     assert result["release_blockers"] == []
+    manifest = json.loads(
+        Path("docs/current/phase4-release-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["deployment_execution_status"] == (
+        "pending_server_access_and_immutable_images"
+    )
 
 
 def test_phase4_manifest_rejects_changed_bound_evidence_report(tmp_path: Path) -> None:
