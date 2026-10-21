@@ -168,6 +168,39 @@ def db_facts(path: Path) -> dict[str, object]:
     }
 
 
+def release_backup_facts(path: Path, runtime_facts: dict[str, object]) -> dict[str, object]:
+    """Bind a verified online SQLite snapshot without assuming byte identity.
+
+    SQLite's online backup API may compact pages, so the backup SHA-256 need
+    not equal the source database file SHA-256.  Record both hashes and verify
+    logical integrity plus row count instead of treating that normal binary
+    difference as a failed release backup.
+    """
+
+    if not path.is_file():
+        return {
+            "path": str(path.relative_to(ROOT)).replace("\\", "/"),
+            "exists": False,
+            "sha256": None,
+            "integrity_check": "missing",
+            "job_count": None,
+            "matches_runtime_job_count": False,
+            "runtime_database_sha256": runtime_facts.get("sha256"),
+        }
+    with sqlite3.connect(f"file:{path.resolve().as_posix()}?mode=ro", uri=True) as connection:
+        integrity = str(connection.execute("PRAGMA integrity_check").fetchone()[0])
+        job_count = int(connection.execute("SELECT COUNT(*) FROM jobs").fetchone()[0])
+    return {
+        "path": str(path.relative_to(ROOT)).replace("\\", "/"),
+        "exists": True,
+        "sha256": sha256(path),
+        "integrity_check": integrity,
+        "job_count": job_count,
+        "matches_runtime_job_count": job_count == runtime_facts.get("job_count"),
+        "runtime_database_sha256": runtime_facts.get("sha256"),
+    }
+
+
 def local_validation_facts(path: Path = LOCAL_VALIDATION) -> dict[str, object] | None:
     """Load the last isolated validation record without inventing test facts."""
     if not path.is_file():
@@ -193,6 +226,13 @@ def main() -> None:
     # evidence changes; never silently compare runtime data with an older hash.
     current_backup = ROOT / "backups" / "job_hub-phase4-current-20261021.sqlite3"
     database = db_facts(ROOT / "runtime" / "job_hub.sqlite3")
+    runtime_backup_dir = ROOT / "runtime" / "backups"
+    release_backup_candidates = sorted(
+        runtime_backup_dir.glob("job_hub-*.sqlite3"),
+        key=lambda item: item.stat().st_mtime,
+        reverse=True,
+    )
+    release_backup = release_backup_candidates[0] if release_backup_candidates else runtime_backup_dir / "missing.sqlite3"
     database["pre_third_party_candidate_backup"] = {
         "path": "backups/job_hub-pre-phase4-third-party-candidate-20261018.sqlite3",
         "sha256": sha256(pre_candidate_backup),
@@ -218,6 +258,7 @@ def main() -> None:
         "sha256": sha256(current_backup),
         "matches_runtime_database": sha256(current_backup) == database["sha256"],
     }
+    database["release_backup"] = release_backup_facts(release_backup, database)
     validation = local_validation_facts()
     trial_report = ROOT / "docs" / "current" / "phase4-third-party-trial-2026-10-18.json"
     entry_evidence = ROOT / "docs" / "current" / "phase4-three-oil-entry-evidence-2026-10-18.json"

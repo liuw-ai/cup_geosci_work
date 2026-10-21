@@ -282,6 +282,38 @@ def verify_manifest(path: Path = MANIFEST) -> dict[str, Any]:
     ):
         _record_error(errors, f"database.{key}", recorded_database.get(key), database.get(key))
 
+    release_backup = recorded_database.get("release_backup")
+    if not isinstance(release_backup, dict):
+        errors.append("database.release_backup: missing manifest backup facts")
+    else:
+        backup_path = ROOT / str(release_backup.get("path") or "")
+        if not backup_path.is_file():
+            errors.append("database.release_backup.path: backup file is missing")
+        else:
+            with sqlite3.connect(
+                f"file:{backup_path.resolve().as_posix()}?mode=ro", uri=True
+            ) as connection:
+                integrity = str(connection.execute("PRAGMA integrity_check").fetchone()[0])
+                job_count = int(connection.execute("SELECT COUNT(*) FROM jobs").fetchone()[0])
+            _record_error(
+                errors,
+                "database.release_backup.sha256",
+                release_backup.get("sha256"),
+                sha256(backup_path),
+            )
+            _record_error(
+                errors,
+                "database.release_backup.integrity_check",
+                "ok",
+                integrity,
+            )
+            _record_error(
+                errors,
+                "database.release_backup.job_count",
+                database.get("job_count"),
+                job_count,
+            )
+
     blockers = [str(item) for item in manifest.get("release_blockers", []) if str(item).strip()]
     if blockers:
         errors.append("release_blockers must be empty for the approved Phase 4 package")

@@ -47,6 +47,19 @@ def test_phase4_manifest_database_facts_separate_full_layer_counts_from_student_
     assert facts["student_visible_total"] <= sum(facts["publication_layer_counts"].values())
 
 
+def test_phase4_manifest_records_a_verified_online_release_backup() -> None:
+    result = verify_manifest()
+
+    assert result["ok"] is True, result["errors"]
+    manifest = json.loads(
+        Path("docs/current/phase4-release-manifest.json").read_text(encoding="utf-8")
+    )
+    backup = manifest["database"]["release_backup"]
+    assert backup["exists"] is True
+    assert backup["integrity_check"] == "ok"
+    assert backup["matches_runtime_job_count"] is True
+
+
 def test_phase4_manifest_distinguishes_overall_target_from_third_party_gate() -> None:
     from scripts.build_phase4_manifest import db_facts
 
