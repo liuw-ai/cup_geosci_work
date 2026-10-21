@@ -51,14 +51,14 @@ def test_public_header_uses_the_geoscience_brand_mark(tmp_path) -> None:
     client = app.test_client()
 
     response = client.get("/")
-    asset = client.get("/static/brand-mark.svg")
+    asset = client.get("/static/college-geosciences-seal.png")
 
     assert response.status_code == 200
-    assert b'/static/brand-mark.svg' in response.data
+    assert b'/static/college-geosciences-seal.png' in response.data
     assert b">GEO<" not in response.data
     assert asset.status_code == 200
-    assert asset.mimetype == "image/svg+xml"
-    assert "\u5730\u5b66\u5c31\u4e1a\u4fe1\u606f\u7ad9\u6807\u5fd7" in asset.get_data(as_text=True)
+    assert asset.mimetype == "image/png"
+    assert len(asset.data) > 100_000
 
 
 def test_readiness_endpoint_separates_liveness_from_publication_gate(tmp_path) -> None:

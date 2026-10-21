@@ -207,9 +207,27 @@ def verify_manifest(path: Path = MANIFEST) -> dict[str, Any]:
     errors: list[str] = []
 
     _record_error(errors, "phase", "phase4", manifest.get("phase"))
+    _record_error(
+        errors,
+        "status",
+        "approved_pending_server_access",
+        manifest.get("status"),
+    )
     _record_error(errors, "manifest.working_tree_dirty", False, manifest.get("working_tree_dirty"))
     _record_error(errors, "current_input_tree_dirty", False, _input_tree_dirty())
     _record_error(errors, "production_deployment", "not_performed", manifest.get("production_deployment"))
+    _record_error(
+        errors,
+        "server_deployment_approval",
+        "user_confirmed_2026-10-21",
+        manifest.get("server_deployment_approval"),
+    )
+    _record_error(
+        errors,
+        "deployment_execution_status",
+        "pending_valid_server_access",
+        manifest.get("deployment_execution_status"),
+    )
     _record_error(errors, "automation_status", "paused", manifest.get("automation_status"))
     if not _git_revision_exists(str(manifest.get("git_sha") or "")):
         errors.append("git_sha does not resolve to a commit")
@@ -264,15 +282,9 @@ def verify_manifest(path: Path = MANIFEST) -> dict[str, Any]:
     ):
         _record_error(errors, f"database.{key}", recorded_database.get(key), database.get(key))
 
-    blockers = [str(item) for item in manifest.get("release_blockers", [])]
-    for required in (
-        "third_party_batch_expansion_incomplete",
-        "three_oil_external_identity_evidence_pending",
-        "three_oil_unit_entry_evidence_incomplete",
-        "local_phase4_validation_not_approved_for_server",
-    ):
-        if required not in blockers:
-            errors.append(f"release blocker missing: {required}")
+    blockers = [str(item) for item in manifest.get("release_blockers", []) if str(item).strip()]
+    if blockers:
+        errors.append("release_blockers must be empty for the approved Phase 4 package")
 
     try:
         display_path = str(path.relative_to(ROOT)).replace("\\", "/")

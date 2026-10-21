@@ -182,3 +182,54 @@ def test_expired_jobs_leave_public_views_and_are_counted_once_per_day(tmp_path) 
 
     refreshed = build_daily_report(database, settings, today)
     assert refreshed["stats"]["expired"] == 1
+
+
+def test_undated_jobs_expire_after_the_beijing_90_day_window(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(source())
+    pipeline = JobPipeline(settings, database)
+    today = local_today(settings)
+    published_date = (today - timedelta(days=90)).isoformat()
+    posting = RawPosting(
+        title="无截止日期地质工程师招聘",
+        employer="测试能源集团",
+        source_url="https://careers.example.edu.cn/jobs/undated-expiry",
+        application_url=None,
+        text="面向地质工程硕士毕业生的官方招聘。",
+        summary="官方未公布截止日期的测试岗位。",
+        published_date=published_date,
+        deadline_date=None,
+        location="北京",
+        field_evidence={
+            "evidence_scope": "official_html_table_row",
+            "岗位": "无截止日期地质工程师招聘",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+        },
+    )
+    normalized = pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+    job_id, _ = database.save_job(normalized)
+
+    with database.connect() as connection:
+        job = connection.execute(
+            "SELECT no_deadline_expires_at FROM jobs WHERE id = ?", (job_id,)
+        ).fetchone()
+    assert job is not None
+    assert job["no_deadline_expires_at"] == today.isoformat()
+    assert database.expire_jobs_before(today.isoformat()) == 0
+    assert database.expire_jobs_before((today + timedelta(days=1)).isoformat()) == 1
+
+    with database.connect() as connection:
+        expired = connection.execute(
+            "SELECT status FROM jobs WHERE id = ?", (job_id,)
+        ).fetchone()
+    assert expired is not None
+    assert expired["status"] == "expired"
+    with database.connect() as connection:
+        event = connection.execute(
+            "SELECT payload_json FROM job_events WHERE job_id = ? ORDER BY id DESC LIMIT 1",
+            (job_id,),
+        ).fetchone()
+    assert "official_publication_or_first_evidence_plus_90_days" in event["payload_json"]

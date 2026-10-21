@@ -5458,13 +5458,20 @@ class Database:
         with self.transaction() as connection:
             rows = connection.execute(
                 """
-                SELECT id, title, deadline_date
+                SELECT id, title, deadline_date, no_deadline_expires_at
                 FROM jobs
                 WHERE status = 'open'
-                  AND deadline_date IS NOT NULL
-                  AND deadline_date < ?
+                  AND (
+                      (deadline_date IS NOT NULL AND deadline_date <> ''
+                       AND deadline_date < ?)
+                      OR
+                      ((deadline_date IS NULL OR deadline_date = '')
+                       AND no_deadline_expires_at IS NOT NULL
+                       AND no_deadline_expires_at <> ''
+                       AND no_deadline_expires_at < ?)
+                  )
                 """,
-                (today,),
+                (today, today),
             ).fetchall()
             if not rows:
                 return 0
@@ -5489,6 +5496,12 @@ class Database:
                             {
                                 "title": row["title"],
                                 "deadline_date": row["deadline_date"],
+                                "no_deadline_expires_at": row["no_deadline_expires_at"],
+                                "expiry_basis": (
+                                    "official_deadline"
+                                    if row["deadline_date"]
+                                    else "official_publication_or_first_evidence_plus_90_days"
+                                ),
                             },
                             ensure_ascii=False,
                         ),

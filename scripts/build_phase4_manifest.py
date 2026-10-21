@@ -295,18 +295,10 @@ def main() -> None:
         )
     else:
         release_blockers.append("local_validation_report_missing")
-    for blocker in (
-        "third_party_batch_expansion_incomplete",
-        "three_oil_external_identity_evidence_pending",
-        "three_oil_unit_entry_evidence_incomplete",
-        "local_phase4_validation_not_approved_for_server",
-    ):
-        if blocker not in release_blockers:
-            release_blockers.append(blocker)
     manifest = {
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "phase": "phase4",
-        "status": "local_audit_in_progress",
+        "status": "approved_pending_server_access",
         "logical_baseline": "phase532-logical-phase1",
         "git_sha": git_sha(),
         "working_tree_dirty": working_tree_dirty,
@@ -415,7 +407,7 @@ def main() -> None:
                 "formal_jobs": database.get("formal_third_party_job_count", 0),
                 "formal_candidate_converted_jobs": database.get("formal_candidate_converted_job_count", 0),
                 "status": "in_progress",
-                "release_gate": "third_party_batch_expansion_incomplete",
+                "release_gate": "deferred_to_phase5",
             },
         },
         "local_validation": validation,
@@ -497,6 +489,13 @@ def main() -> None:
         "automation_model": "gpt-5.6-terra",
         "automation_status": "paused",
         "production_deployment": "not_performed",
+        "server_deployment_approval": "user_confirmed_2026-10-21",
+        "deployment_execution_status": "pending_valid_server_access",
+        "deferred_scope": [
+            "third_party_batch_expansion",
+            "three_oil_external_identity_evidence",
+            "three_oil_unit_specific_recruitment_entry_evidence",
+        ],
         "release_blockers": release_blockers,
     }
     OUTPUT.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
