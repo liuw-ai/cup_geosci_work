@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-10-21T06:52:20Z",
+  "generated_at": "2026-10-21T12:50:01Z",
   "phase": "phase4",
   "status": "approved_pending_server_access",
   "logical_baseline": "phase532-logical-phase1",
-  "git_sha": "22338fb2258ce2efc868741bdda2c8acf7da5f0d",
+  "git_sha": "de84f43d0af1a3a06394771a4fa4ac37a2b4288b",
   "working_tree_dirty": false,
   "compose_path": "deploy/compose.yaml",
-  "compose_sha256": "252e9dac3eeecc217e511840a86ed3f17e2ad94e796680dac124225a38e28fc0",
+  "compose_sha256": "6384a7d5455403a0ecd1499853097c6c8eade988d71af9ba9ccdbafca6dd3ec1",
   "dockerfile_sha256": {
     "app": "bd862732498ff1a59d555ffddf1dfe0de22f733b0ef6a0027aba548384606e1c",
     "browser": "9685793d12ddd10827019fd015d6e5c21c53b789cf13fb92724dbf2d075947be"
