@@ -48,6 +48,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
     ":!docs/current/phase4-third-party-huatu-official-recovery-2026-10-21.json",
     ":!docs/current/phase4-third-party-gdzys-2026-10-21.json",
+    ":!docs/current/phase4-third-party-formal-job-audit-2026-10-21.json",
     ":!docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
     ":!docs/current/phase4-cnooc-api-unit-evidence-2026-10-21.json",
 )
@@ -120,6 +121,7 @@ MANIFEST_BOUND_REPORTS = {
     "phase4_third_party_hbdk_water_promotion": "docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
     "phase4_third_party_huatu_official_recovery": "docs/current/phase4-third-party-huatu-official-recovery-2026-10-21.json",
     "phase4_third_party_gdzys": "docs/current/phase4-third-party-gdzys-2026-10-21.json",
+    "phase4_third_party_formal_job_audit": "docs/current/phase4-third-party-formal-job-audit-2026-10-21.json",
 }
 
 

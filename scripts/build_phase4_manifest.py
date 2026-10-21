@@ -59,6 +59,7 @@ GENERATED_METADATA_PATHS = (
     ":!docs/current/phase4-third-party-hbdk-water-trial-2026-10-21.json",
     ":!docs/current/phase4-third-party-huatu-official-recovery-2026-10-21.json",
     ":!docs/current/phase4-third-party-gdzys-2026-10-21.json",
+    ":!docs/current/phase4-third-party-formal-job-audit-2026-10-21.json",
     ":!docs/current/phase4-third-party-hbdk-water-promotion-2026-10-21.json",
     ":!docs/current/phase4-cnooc-api-unit-evidence-2026-10-21.json",
 )
@@ -263,6 +264,7 @@ def main() -> None:
     hbdk_water_promotion = ROOT / "docs" / "current" / "phase4-third-party-hbdk-water-promotion-2026-10-21.json"
     huatu_official_recovery = ROOT / "docs" / "current" / "phase4-third-party-huatu-official-recovery-2026-10-21.json"
     gdzys_trial = ROOT / "docs" / "current" / "phase4-third-party-gdzys-2026-10-21.json"
+    third_party_formal_job_audit = ROOT / "docs" / "current" / "phase4-third-party-formal-job-audit-2026-10-21.json"
     huatu_cnpc_chuanqing = ROOT / "docs" / "current" / "phase4-third-party-huatu-cnpc-chuanqing-2026-10-20.json"
     cnpc_official_recheck = ROOT / "docs" / "current" / "phase4-cnpc-official-recheck-2026-10-20.json"
     sxdkj_official_recheck = ROOT / "docs" / "current" / "phase4-third-party-sxdkj-official-recheck-2026-10-20.json"
@@ -375,6 +377,7 @@ def main() -> None:
             "phase4_third_party_hbdk_water_promotion": sha256(hbdk_water_promotion),
             "phase4_third_party_huatu_official_recovery": sha256(huatu_official_recovery),
             "phase4_third_party_gdzys": sha256(gdzys_trial),
+            "phase4_third_party_formal_job_audit": sha256(third_party_formal_job_audit),
             "phase4_third_party_huatu_cnpc_chuanqing": sha256(huatu_cnpc_chuanqing),
             "phase4_cnpc_official_recheck": sha256(cnpc_official_recheck),
             "phase4_third_party_sxdkj_official_recheck": sha256(sxdkj_official_recheck),

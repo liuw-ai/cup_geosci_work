@@ -1,0 +1,236 @@
+{
+  "phase": "phase4",
+  "generated_at": "2026-10-21T02:13:19Z",
+  "status": "pass",
+  "policy": {
+    "read_only": true,
+    "third_party_links_are_internal_evidence": true,
+    "official_evidence_required_before_publication": true,
+    "official_application_url_may_be_null_when_notice_defines_email_or_on_site_method": true
+  },
+  "database": {
+    "path": "runtime/job_hub.sqlite3",
+    "formal_third_party_job_count": 8
+  },
+  "source_counts": {
+    "geotalent-discovery": 1,
+    "huatu-discovery": 7
+  },
+  "jobs": [
+    {
+      "id": 5432,
+      "title": "地质研发岗",
+      "employer": "湖南有色金属研究院有限责任公司",
+      "status": "open",
+      "publication_layer": "exact_match",
+      "third_party_source_id": "geotalent-discovery",
+      "third_party_discovery_url": "https://geo.36hjob.com/Article-QoNvp.html",
+      "third_party_batch_id": null,
+      "third_party_discovery_sha256": null,
+      "third_party_table_url": null,
+      "official_notice_url": "https://www.hrinm.cn/xwxq/35.html",
+      "official_table_url": null,
+      "official_application_url": null,
+      "application_url": null,
+      "deadline_date": null,
+      "no_deadline_expires_at": "2027-01-09",
+      "last_official_verified_at": "2026-10-18T10:05:21Z",
+      "official_evidence": {
+        "official_notice_url": "https://www.hrinm.cn/xwxq/35.html"
+      },
+      "checks": {
+        "official_evidence_bound": true,
+        "third_party_url_not_application": true
+      }
+    },
+    {
+      "id": 5433,
+      "title": "金属矿床成矿作用与战略性矿产勘查评价综合研究",
+      "employer": "中国地质调查局自然资源综合调查指挥中心",
+      "status": "open",
+      "publication_layer": "broad_geoscience_match",
+      "third_party_source_id": "huatu-discovery",
+      "third_party_discovery_url": "http://bj.huatu.com/2026/0930/1253526.html",
+      "third_party_batch_id": "huatu-cgs-postdoc-2026-09-30",
+      "third_party_discovery_sha256": "48F2EBEB47B14331889790909EFF5E27CB01AF7EDB62DE62DD3C3DC2A3023B68",
+      "third_party_table_url": null,
+      "official_notice_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+      "official_table_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+      "official_application_url": null,
+      "application_url": null,
+      "deadline_date": null,
+      "no_deadline_expires_at": "2026-12-29",
+      "last_official_verified_at": "2026-10-18T15:00:00+08:00",
+      "official_evidence": {
+        "official_notice_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+        "official_table_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx"
+      },
+      "checks": {
+        "official_evidence_bound": true,
+        "third_party_url_not_application": true
+      }
+    },
+    {
+      "id": 5434,
+      "title": "战略性矿产区块优选调查评价与多源数据融合应用研究",
+      "employer": "中国地质调查局自然资源综合调查指挥中心",
+      "status": "open",
+      "publication_layer": "broad_geoscience_match",
+      "third_party_source_id": "huatu-discovery",
+      "third_party_discovery_url": "http://bj.huatu.com/2026/0930/1253526.html",
+      "third_party_batch_id": "huatu-cgs-postdoc-2026-09-30",
+      "third_party_discovery_sha256": "48F2EBEB47B14331889790909EFF5E27CB01AF7EDB62DE62DD3C3DC2A3023B68",
+      "third_party_table_url": null,
+      "official_notice_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+      "official_table_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+      "official_application_url": null,
+      "application_url": null,
+      "deadline_date": null,
+      "no_deadline_expires_at": "2026-12-29",
+      "last_official_verified_at": "2026-10-18T15:00:00+08:00",
+      "official_evidence": {
+        "official_notice_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+        "official_table_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx"
+      },
+      "checks": {
+        "official_evidence_bound": true,
+        "third_party_url_not_application": true
+      }
+    },
+    {
+      "id": 5435,
+      "title": "地质大数据关键技术研究",
+      "employer": "中国地质调查局自然资源综合调查指挥中心",
+      "status": "open",
+      "publication_layer": "broad_geoscience_match",
+      "third_party_source_id": "huatu-discovery",
+      "third_party_discovery_url": "http://bj.huatu.com/2026/0930/1253526.html",
+      "third_party_batch_id": "huatu-cgs-postdoc-2026-09-30",
+      "third_party_discovery_sha256": "48F2EBEB47B14331889790909EFF5E27CB01AF7EDB62DE62DD3C3DC2A3023B68",
+      "third_party_table_url": null,
+      "official_notice_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+      "official_table_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+      "official_application_url": null,
+      "application_url": null,
+      "deadline_date": null,
+      "no_deadline_expires_at": "2026-12-29",
+      "last_official_verified_at": "2026-10-18T15:00:00+08:00",
+      "official_evidence": {
+        "official_notice_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+        "official_table_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx"
+      },
+      "checks": {
+        "official_evidence_bound": true,
+        "third_party_url_not_application": true
+      }
+    },
+    {
+      "id": 5436,
+      "title": "自然资源多元数据挖掘与综合分析",
+      "employer": "中国地质调查局自然资源综合调查指挥中心",
+      "status": "open",
+      "publication_layer": "broad_geoscience_match",
+      "third_party_source_id": "huatu-discovery",
+      "third_party_discovery_url": "http://bj.huatu.com/2026/0930/1253526.html",
+      "third_party_batch_id": "huatu-cgs-postdoc-2026-09-30",
+      "third_party_discovery_sha256": "48F2EBEB47B14331889790909EFF5E27CB01AF7EDB62DE62DD3C3DC2A3023B68",
+      "third_party_table_url": null,
+      "official_notice_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+      "official_table_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+      "official_application_url": null,
+      "application_url": null,
+      "deadline_date": null,
+      "no_deadline_expires_at": "2026-12-29",
+      "last_official_verified_at": "2026-10-18T15:00:00+08:00",
+      "official_evidence": {
+        "official_notice_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx",
+        "official_table_url": "http://www.zhzx.cgs.gov.cn/xxfw02/zpxx/202609/W020260930378737395649.docx"
+      },
+      "checks": {
+        "official_evidence_bound": true,
+        "third_party_url_not_application": true
+      }
+    },
+    {
+      "id": 5437,
+      "title": "技术员",
+      "employer": "河北省地球物理勘查有限公司",
+      "status": "open",
+      "publication_layer": "broad_geoscience_match",
+      "third_party_source_id": "huatu-discovery",
+      "third_party_discovery_url": "https://he.huatu.com/2026/1015/1714501.html",
+      "third_party_batch_id": "huatu-hbdk-2026-10-15",
+      "third_party_discovery_sha256": null,
+      "third_party_table_url": null,
+      "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/383.html",
+      "official_table_url": "https://docs.qq.com/doc/DTFFuZmpRQ1FxR3JU",
+      "official_application_url": null,
+      "application_url": null,
+      "deadline_date": "2026-10-23",
+      "no_deadline_expires_at": null,
+      "last_official_verified_at": "2026-10-19T01:12:35Z",
+      "official_evidence": {
+        "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/383.html",
+        "official_table_url": "https://docs.qq.com/doc/DTFFuZmpRQ1FxR3JU"
+      },
+      "checks": {
+        "official_evidence_bound": true,
+        "third_party_url_not_application": true
+      }
+    },
+    {
+      "id": 5438,
+      "title": "部长副职",
+      "employer": "河北省地球物理勘查有限公司",
+      "status": "open",
+      "publication_layer": "broad_geoscience_match",
+      "third_party_source_id": "huatu-discovery",
+      "third_party_discovery_url": "https://he.huatu.com/2026/1015/1714501.html",
+      "third_party_batch_id": "huatu-hbdk-2026-10-15",
+      "third_party_discovery_sha256": null,
+      "third_party_table_url": null,
+      "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/383.html",
+      "official_table_url": "https://docs.qq.com/doc/DTFFuZmpRQ1FxR3JU",
+      "official_application_url": null,
+      "application_url": null,
+      "deadline_date": "2026-10-23",
+      "no_deadline_expires_at": null,
+      "last_official_verified_at": "2026-10-19T01:12:35Z",
+      "official_evidence": {
+        "official_notice_url": "https://www.hbdkjt.cn/xxgk_1/383.html",
+        "official_table_url": "https://docs.qq.com/doc/DTFFuZmpRQ1FxR3JU"
+      },
+      "checks": {
+        "official_evidence_bound": true,
+        "third_party_url_not_application": true
+      }
+    },
+    {
+      "id": 5440,
+      "title": "矿产资源高效分离与综合利用",
+      "employer": "广东省科学院资源利用与稀土开发研究所",
+      "status": "open",
+      "publication_layer": "broad_geoscience_match",
+      "third_party_source_id": "huatu-discovery",
+      "third_party_discovery_url": "https://gd.huatu.com/sydw/2026/1016/10711469.html",
+      "third_party_batch_id": "huatu-gdzys-2026-10-16",
+      "third_party_discovery_sha256": "F7BA331A6A3306DC300CF76D48C540048A9A11E1973CAB570F69089781171C8E",
+      "third_party_table_url": null,
+      "official_notice_url": "http://www.gdzys.net/xxgk/zpgg/t72941.html",
+      "official_table_url": null,
+      "official_application_url": null,
+      "application_url": null,
+      "deadline_date": null,
+      "no_deadline_expires_at": "2027-01-14",
+      "last_official_verified_at": "2026-10-21T05:36:42+08:00",
+      "official_evidence": {
+        "official_notice_url": "http://www.gdzys.net/xxgk/zpgg/t72941.html"
+      },
+      "checks": {
+        "official_evidence_bound": true,
+        "third_party_url_not_application": true
+      }
+    }
+  ],
+  "violations": []
+}
