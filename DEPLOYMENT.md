@@ -1,6 +1,6 @@
 # 部署与手机访问
 
-> **Phase 4 当前边界（2026-10-20）**：本文下方仍保留部分历史部署命令，不能直接执行。当前唯一生产入口是 [`deploy/compose.yaml`](deploy/compose.yaml)，唯一正式 Dockerfile 是 `deploy/docker/Dockerfile.app` 和 `deploy/docker/Dockerfile.browser`。服务器尚未部署本地 Phase 4，自动化保持暂停；部署前必须通过当前 [Phase 4 Manifest](docs/current/phase4-release-manifest.json) 并取得用户明确批准。
+> **Phase 4 当前边界（2026-10-21）**：旧的多 Compose/overlay 命令仅作为历史记录，不能直接执行。当前唯一生产入口是 [`deploy/compose.yaml`](deploy/compose.yaml)，包含 Web、Worker、浏览器 Worker 和 headless-shell；唯一正式 Dockerfile 是 `deploy/docker/Dockerfile.app` 和 `deploy/docker/Dockerfile.browser`。服务器尚未部署本地 Phase 4，自动化保持暂停；部署前必须通过当前 [Phase 4 Manifest](docs/current/phase4-release-manifest.json) 并取得用户明确批准。
 
 本文是地学就业信息站的生产部署说明。生产环境建议使用 Linux 服务器、Docker Compose、一个已解析到服务器的域名和 Caddy/Nginx HTTPS 反向代理。
 
@@ -56,11 +56,11 @@ python scripts/prepare_release_env.py \
 先做静态校验，再启动服务：
 
 ```bash
-docker compose --env-file .release.env -f docker-compose.yml -f docker-compose.browser.yml config
-docker compose --env-file .release.env -f docker-compose.yml -f docker-compose.browser.yml run --rm web python -m job_hub.cli release-check
-docker compose --env-file .release.env -f docker-compose.yml -f docker-compose.browser.yml up -d
-docker compose --env-file .release.env -f docker-compose.yml -f docker-compose.browser.yml ps
-docker compose --env-file .release.env -f docker-compose.yml -f docker-compose.browser.yml logs --tail=100 worker
+docker compose --env-file .release.env -f deploy/compose.yaml config
+docker compose --env-file .release.env -f deploy/compose.yaml run --rm web python -m job_hub.cli release-check
+docker compose --env-file .release.env -f deploy/compose.yaml up -d --no-build
+docker compose --env-file .release.env -f deploy/compose.yaml ps
+docker compose --env-file .release.env -f deploy/compose.yaml logs --tail=100 worker
 ```
 
 `production-readiness` 还会检查所有启用非手工来源的捕获新鲜度。输出中的
@@ -92,7 +92,7 @@ worker 还会每 `DOMESTIC_ENTRY_HEALTH_INTERVAL_MINUTES` 分钟（默认 360）
 上线前建议在服务器执行一次国家能源入口的只读直连诊断，并把结果保存到运行目录：
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.browser.yml run --rm \
+docker compose -f deploy/compose.yaml run --rm \
   -e HTTP_TRANSPORT_MODE=direct web \
   python -m job_hub.cli national-entry-probe \
   --transport direct --environment production-server \
@@ -104,27 +104,27 @@ docker compose -f docker-compose.yml -f docker-compose.browser.yml run --rm \
 Compose 启动时 worker 会自动注册来源并执行同步。需要手动初始化或排查时，可在共享卷中执行：
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.browser.yml run --rm web python -m job_hub.cli init
-docker compose -f docker-compose.yml -f docker-compose.browser.yml run --rm web python -m job_hub.cli audit
-docker compose -f docker-compose.yml -f docker-compose.browser.yml exec worker python -m job_hub.cli worker-health --max-age 180
+docker compose -f deploy/compose.yaml run --rm web python -m job_hub.cli init
+docker compose -f deploy/compose.yaml run --rm web python -m job_hub.cli audit
+docker compose -f deploy/compose.yaml exec worker python -m job_hub.cli worker-health --max-age 180
 ```
 
 ## 3. HTTPS 反向代理
 
-生产部署使用 `docker-compose.public.yml` 中的 Caddy。应用端口只对服务器本机开放，公网流量由 Caddy 终止 TLS 后转发到 Web 容器。示例配置见 [`deploy/Caddyfile.example`](deploy/Caddyfile.example)。
+生产部署继续使用现有独立 Caddy 项目。应用端口只对服务器本机开放，公网流量由 Caddy 终止 TLS 后转发到共享 Docker 网络中的 `web:8080`。示例配置见 [`deploy/Caddyfile.example`](deploy/Caddyfile.example)。切换 Phase 4 时不重建 Caddy，只切换共享网络中的 Web 服务。
 
 本项目固定使用 `jobs.cupdky.cn`。先确认 `cupdky.cn` 已注册且已在域名服务商或 DNS 托管商处启用权威 DNS；若 `nslookup cupdky.cn` 本身返回 `NXDOMAIN`，仅添加 `jobs` 记录不会生效。根域可解析后，创建 `A` 记录：`jobs` -> `81.70.62.174`（TTL 设为 `600` 或服务商的 `Auto`）。确认 `nslookup jobs.cupdky.cn` 返回该地址后，在服务器执行：
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.browser.yml up -d --build web worker
-docker compose -f docker-compose.public.yml up -d
-docker compose -f docker-compose.public.yml logs --tail=100 caddy
+docker compose --env-file .release.env -f deploy/compose.yaml up -d --no-build
+docker compose -f /opt/cup_geosci_work_phase442/docker-compose.public.yml up -d
+docker compose -f /opt/cup_geosci_work_phase442/docker-compose.public.yml logs --tail=100 caddy
 ```
 
 部署后先运行只读域名预检：
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web python -m job_hub.cli domain-check \
+docker compose --env-file .release.env -f deploy/compose.yaml exec web python -m job_hub.cli domain-check \
   --hostname jobs.cupdky.cn --expected-ip 81.70.62.174
 ```
 
@@ -152,9 +152,9 @@ docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web pyth
 curl -fsS http://127.0.0.1:8080/healthz
 curl -I https://jobs.example.edu.cn/healthz
 nslookup jobs.cupdky.cn
-docker compose -f docker-compose.public.yml ps
-docker compose -f docker-compose.yml -f docker-compose.browser.yml ps
-docker compose -f docker-compose.yml -f docker-compose.browser.yml logs --tail=100 web worker
+docker compose -f /opt/cup_geosci_work_phase442/docker-compose.public.yml ps
+docker compose --env-file .release.env -f deploy/compose.yaml ps
+docker compose --env-file .release.env -f deploy/compose.yaml logs --tail=100 web worker
 ```
 
 第一条失败说明容器或 Gunicorn 没有正常工作；本机 Web 成功而域名失败，说明是 DNS、Caddy 或防火墙链路问题；DNS 返回 NXDOMAIN 时必须先到域名服务商添加记录，代码和服务器无法替代 DNS 所有权操作。
@@ -175,9 +175,9 @@ worker 会按 `SOURCE_SYNC_INTERVAL_MINUTES` 周期刷新来源，并在每次�
 首次上线、调整来源配置或更新解析器后，应先在服务器上建立一份可追溯的质量基线：
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web python -m job_hub.cli audit
-docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web python -m job_hub.cli coverage --record --output /var/lib/job-hub/coverage.json
-docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web python -m job_hub.cli simulate-cohort --output /var/lib/job-hub/cohort-coverage.json
+docker compose --env-file .release.env -f deploy/compose.yaml exec web python -m job_hub.cli audit
+docker compose --env-file .release.env -f deploy/compose.yaml exec web python -m job_hub.cli coverage --record --output /var/lib/job-hub/coverage.json
+docker compose --env-file .release.env -f deploy/compose.yaml exec web python -m job_hub.cli simulate-cohort --output /var/lib/job-hub/cohort-coverage.json
 ```
 
 `audit` 必须通过，才允许冻结日报。`coverage --record` 将本日省级来源状态、字段完整率、来源集中度和 100 人匿名画像匹配结果写入 SQLite；同日可被后续成功同步替换，页面趋势只与前一个不同日期比较。来源异常、尚未扫描或五类省级官方入口未全部核验时，零岗位只表示当前无法判断，不能对外写成“当地没有招聘”。
@@ -187,13 +187,13 @@ docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web pyth
 更新代码前先备份数据库卷。最简单的做法是在服务器上停止写入后导出 SQLite：
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.browser.yml exec web python -c "from job_hub.config import Settings; print(Settings.from_env().database_path)"
-docker compose -f docker-compose.yml -f docker-compose.browser.yml stop worker
-docker compose -f docker-compose.yml -f docker-compose.browser.yml cp web:/var/lib/job-hub/job_hub.sqlite3 ./backup/job_hub-$(date +%F).sqlite3
-docker compose -f docker-compose.yml -f docker-compose.browser.yml up -d worker
+docker compose --env-file .release.env -f deploy/compose.yaml exec web python -c "from job_hub.config import Settings; print(Settings.from_env().database_path)"
+docker compose --env-file .release.env -f deploy/compose.yaml stop worker
+docker compose --env-file .release.env -f deploy/compose.yaml cp web:/var/lib/job-hub/job_hub.sqlite3 ./backup/job_hub-$(date +%F).sqlite3
+docker compose --env-file .release.env -f deploy/compose.yaml up -d worker
 ```
 
-更新后依次运行 `docker compose -f docker-compose.yml -f docker-compose.browser.yml config`、同一组文件的 `up -d --build`、`audit` 和 `worker-health`。不要把 `.env`、数据库、SMTP 授权码或运行时日志提交到 Git。
+更新后依次运行 `docker compose --env-file .release.env -f deploy/compose.yaml config`、同一文件的 `up -d --no-build`、`audit` 和 `worker-health`。不要把 `.env`、数据库、SMTP 授权码或运行时日志提交到 Git。
 
 ## 8. 数据质量边界
 
