@@ -234,6 +234,27 @@ def test_cross_group_official_source_does_not_certify_three_oil_identity() -> No
     assert item["external_identity_evidence"]["status"] == "pending"
 
 
+def test_official_bgp_source_certifies_cnpc_identity() -> None:
+    report = build_three_oil_catalog_audit(
+        load_three_oil_catalog(),
+        organization_registry=load_organization_registry(),
+        job_records=[
+            {
+                "employer": "中国石油集团东方地球物理勘探有限责任公司",
+                "source_id": "cnpc-bgp-recruitment",
+                "official_evidence_url": "https://www.bgp.com.cn/bgpen/Recruitment/first_common2023hr.shtml#opening-1",
+                "field_evidence": {
+                    "evidence_scope": "official_html_job_detail",
+                    "用人单位": "中国石油集团东方地球物理勘探有限责任公司",
+                },
+            }
+        ],
+    )
+    item = next(row for row in report["items"] if row["catalog_id"] == "cnpc-bgp")
+    assert item["external_identity_evidence"]["status"] == "verified"
+    assert item["external_identity_evidence"]["source_ids"] == ["cnpc-bgp-recruitment"]
+
+
 def test_three_oil_catalog_audit_cli_does_not_write_database(monkeypatch, tmp_path) -> None:
     database_path = tmp_path / "job_hub.sqlite3"
     Database(database_path).initialize()

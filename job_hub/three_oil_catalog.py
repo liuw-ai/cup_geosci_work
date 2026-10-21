@@ -36,6 +36,7 @@ OFFICIAL_THREE_OIL_IDENTITY_SOURCE_IDS = frozenset(
     {
         "cnpc-career",
         "cnpc-career-browser",
+        "cnpc-bgp-recruitment",
         "cnpc-logging-campus",
         "sinopec-career",
         "sinopec-2027-geoscience-snapshot",
@@ -51,6 +52,7 @@ OFFICIAL_THREE_OIL_IDENTITY_SOURCE_IDS = frozenset(
 OFFICIAL_THREE_OIL_SOURCE_GROUPS = {
     "cnpc-career": "cnpc",
     "cnpc-career-browser": "cnpc",
+    "cnpc-bgp-recruitment": "cnpc",
     "cnpc-logging-campus": "cnpc",
     "sinopec-career": "sinopec",
     "sinopec-2027-geoscience-snapshot": "sinopec",

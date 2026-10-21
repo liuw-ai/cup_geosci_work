@@ -21,8 +21,8 @@ def test_phase4_completion_audit_is_requirement_scoped_and_not_complete() -> Non
         for item in report["requirements"]
         if item["id"] == "three_oil_catalog_and_entry_evidence"
     )
-    assert three_oil["facts"]["external_identity_evidence_review"]["verified_unit_count"] == 24
-    assert three_oil["facts"]["external_identity_evidence_review"]["pending_unit_count"] == 40
+    assert three_oil["facts"]["external_identity_evidence_review"]["verified_unit_count"] == 25
+    assert three_oil["facts"]["external_identity_evidence_review"]["pending_unit_count"] == 39
     assert statuses["isolated_local_regression"] == "pass"
     assert statuses["student_site_acceptance"] == "pass"
     regression = next(
