@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-21T01:12:31Z",
+  "generated_at": "2026-10-21T01:37:08Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "9fb5c3c62f00f9316326c9fb970d6965ef933d62",
+  "git_sha": "c6812034ac582f7799bfa79f7b20696a5de0e025",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
@@ -156,7 +156,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "a536518cb37102eee4b360677448e35f998dc2aad2bda0935efd3b16e8bd3232"
+        "sha256": "6d8612883fc1a3cad7fa1d87cff6de067ea0d48b26e9d52def4324acb39e08fd"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-21.json",
@@ -181,7 +181,7 @@
   "evidence_documents": {
     "phase4_three_oil_catalog_audit": {
       "path": "docs/current/phase4-three-oil-catalog-audit-2026-10-17.json",
-      "sha256": "abdf5b88c7fb85b740b151ce5db7f63b999c196703b3a83d7781a79d93b14c57"
+      "sha256": "b87756751e406f5588db3e970309da65dea0c4f31863b0535edb6660613ab5c2"
     },
     "phase4_third_party_trial": {
       "path": "docs/current/phase4-third-party-trial-2026-10-18.json",
@@ -269,7 +269,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "c74245958c1548fd9c0bb6b6345fcdfe5e97d9d8455a0800fde2630a67ea8103"
+      "sha256": "3e636cd73d1e887675ddb649a901932c18cd981fdbb5b7fe915c8e0119be6350"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -397,7 +397,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "a536518cb37102eee4b360677448e35f998dc2aad2bda0935efd3b16e8bd3232"
+      "sha256": "6d8612883fc1a3cad7fa1d87cff6de067ea0d48b26e9d52def4324acb39e08fd"
     }
   },
   "code_inventory": [
@@ -828,8 +828,8 @@
     },
     {
       "path": "job_hub/three_oil_catalog.py",
-      "line_count": 1021,
-      "sha256": "d493210ec284a286f1ab0af484c78d0b159a9d31a87820d195ddf8f2d4654c6a"
+      "line_count": 1023,
+      "sha256": "f36df99d21773f137e8915c56b17135462d1fbe52fd9a1fad5fb328970b621ba"
     },
     {
       "path": "job_hub/transport.py",
@@ -1434,7 +1434,7 @@
     {
       "path": "tests/test_phase4_completion_audit.py",
       "line_count": 59,
-      "sha256": "8b9bb4053427ba4dd50acb498951b410731d2015eb56f3e4d6666c8ada9cde0c"
+      "sha256": "4c8cd4b5ada991d94f4419f76f1b1b4169cbb7b1083eace9101dec2cf690d141"
     },
     {
       "path": "tests/test_phase4_current_audit.py",
@@ -1678,8 +1678,8 @@
     },
     {
       "path": "tests/test_three_oil_catalog.py",
-      "line_count": 569,
-      "sha256": "bf0bb249458d0d3a15610320a48406d739a6f561c444259c2e5956b6a9532b20"
+      "line_count": 590,
+      "sha256": "5eb6ee7310c1a08d678a14a3d160535a71412d504cdae4e7285991ec4d9ae382"
     },
     {
       "path": "tests/test_transport.py",
