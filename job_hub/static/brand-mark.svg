@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <title>地学就业信息站标志</title>
+  <rect x="3" y="3" width="58" height="58" rx="9" fill="#0F5860"/>
+  <circle cx="32" cy="33" r="18" stroke="#DDEDEA" stroke-width="2"/>
+  <path d="M18 36C22.5 32.7 27.2 31 32 31C37.7 31 42.5 33 46 36" stroke="#F4F8F6" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M17 42C21.5 38.8 26.6 37.2 32 37.2C37.7 37.2 42.7 39 47 42" stroke="#B7D4CB" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M19.5 47.5C23.3 45 27.5 43.8 32 43.8C36.8 43.8 41 45 44.5 47.5" stroke="#C68939" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 14L38.5 27.5L32 25L25.5 27.5L32 14Z" fill="#E9B45D"/>
+  <circle cx="32" cy="29.2" r="2.8" fill="#F4F8F6"/>
+</svg>

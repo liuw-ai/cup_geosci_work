@@ -46,6 +46,21 @@ def test_version_and_health_report_release_identity(tmp_path) -> None:
     }
 
 
+def test_public_header_uses_the_geoscience_brand_mark(tmp_path) -> None:
+    app = create_app(make_settings(tmp_path))
+    client = app.test_client()
+
+    response = client.get("/")
+    asset = client.get("/static/brand-mark.svg")
+
+    assert response.status_code == 200
+    assert b'/static/brand-mark.svg' in response.data
+    assert b">GEO<" not in response.data
+    assert asset.status_code == 200
+    assert asset.mimetype == "image/svg+xml"
+    assert "\u5730\u5b66\u5c31\u4e1a\u4fe1\u606f\u7ad9\u6807\u5fd7" in asset.get_data(as_text=True)
+
+
 def test_readiness_endpoint_separates_liveness_from_publication_gate(tmp_path) -> None:
     app = create_app(make_settings(tmp_path))
     client = app.test_client()

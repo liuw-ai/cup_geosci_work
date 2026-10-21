@@ -139,17 +139,18 @@ small {
 }
 
 .brand-mark {
-  display: inline-grid;
+  display: inline-flex;
   width: 46px;
   height: 46px;
   flex: 0 0 46px;
-  place-items: center;
-  color: #fff;
-  background: var(--teal);
-  border-radius: var(--radius);
-  font-family: Georgia, serif;
-  font-size: 15px;
-  font-weight: 700;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .brand strong,
