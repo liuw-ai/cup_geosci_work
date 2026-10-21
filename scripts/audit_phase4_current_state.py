@@ -24,6 +24,9 @@ from job_hub.phase3_policy import PUBLICATION_LAYERS
 
 
 OUTPUT = ROOT / "docs" / "current" / "phase4-current-state-audit-2026-10-21.json"
+DOCUMENT_CONSISTENCY_OUTPUT = (
+    ROOT / "docs" / "current" / "phase4-document-consistency-2026-10-20.json"
+)
 DATABASE = ROOT / "runtime" / "job_hub.sqlite3"
 
 # These are generated audit artifacts. They are deliberately excluded from
@@ -271,6 +274,98 @@ def document_consistency_facts() -> dict[str, object]:
         "metadata_documents": metadata_checks,
         "historical_documents_are_publish_inputs": False,
     }
+
+
+def write_document_consistency_report(database: dict[str, object]) -> None:
+    """Refresh the standalone report bound by the Phase 4 Manifest.
+
+    The current-state audit and this compact report describe the same live
+    database.  Writing them together prevents a lifecycle cleanup from
+    leaving an old database SHA in the document-consistency artifact.
+    """
+
+    report = {
+        "phase": "phase4",
+        "generated_at": datetime.now(ZoneInfo("Asia/Shanghai")).replace(
+            microsecond=0
+        ).isoformat(),
+        "status": "audited_with_legacy_documents",
+        "current_sources_of_truth": [
+            "docs/current/PHASE4-2026-10-17.md",
+            "docs/current/phase4-current-state-audit-2026-10-21.json",
+            "docs/current/phase4-release-manifest.json",
+            "runtime/job_hub.sqlite3",
+        ],
+        "current_database_facts": {
+            "sha256": database["sha256"],
+            "integrity_check": database["integrity_check"],
+            "job_count": database["job_count"],
+            "student_read_as_of_date": database["student_read_as_of_date"],
+            "student_visible_layer_counts": database["student_visible_layer_counts"],
+            "student_visible_total": database["student_visible_total"],
+            "candidate_leads": database["candidate_lead_count"],
+            "formal_third_party_jobs": database["formal_third_party_job_count"],
+            "withdrawn": database["status_counts"].get("withdrawn", 0),
+            "historical_snapshot_hashes": [
+                {
+                    "sha256": "143d376ce73e0beb144b1ba64046a90e34158e3922d85c30d3087a0eef7f1c49",
+                    "scope": "2026-10-19 local web and HBDK registration snapshots",
+                    "classification": "historical_evidence_only",
+                    "current_fact": False,
+                }
+            ],
+        },
+        "legacy_or_mixed_documents": [
+            {
+                "path": "docs/EXECUTION_PLAN.md",
+                "classification": "historical_execution_log",
+                "risk": "contains Phase 0-532 historical counts and paths that no longer describe the current database",
+                "release_input": False,
+                "action": "retain for history; do not use for current metrics",
+            },
+            {
+                "path": "docs/OPERATIONAL_MEASUREMENT.md",
+                "classification": "legacy_operational_contract",
+                "risk": "contains pre-Phase-3 freshness and publication wording",
+                "release_input": False,
+                "action": "retain for history; use Phase 4 policy and Manifest instead",
+            },
+            {
+                "path": "docs/RELEASE_BASELINE.md",
+                "classification": "historical_release_baseline",
+                "risk": "binds an older release identity and database snapshot",
+                "release_input": False,
+                "action": "retain for history; never use as deployment identity",
+            },
+            {
+                "path": "ARCHITECTURE.md",
+                "classification": "mixed_architecture_document",
+                "risk": "later historical sections still describe third-party discovery as private-only",
+                "release_input": False,
+                "action": "current facts are overridden by docs/current/PHASE4-2026-10-17.md and the Manifest",
+            },
+            {
+                "path": "DEPLOYMENT.md",
+                "classification": "mixed_deployment_document",
+                "risk": "legacy command examples use root Compose files and are not the Phase 4 production entrypoint",
+                "release_input": False,
+                "action": "do not execute legacy commands; production entrypoint is deploy/compose.yaml",
+            },
+        ],
+        "deployment_boundary": {
+            "canonical_compose": "deploy/compose.yaml",
+            "canonical_dockerfiles": [
+                "deploy/docker/Dockerfile.app",
+                "deploy/docker/Dockerfile.browser",
+            ],
+            "server_deployment": False,
+            "automation_status": "paused",
+        },
+        "policy": "No document is allowed to override the current database, current audit, or hash-bound Manifest. Historical files remain recoverable and are not deleted or used as production inputs.",
+    }
+    DOCUMENT_CONSISTENCY_OUTPUT.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def main() -> None:
@@ -606,6 +701,7 @@ def main() -> None:
         },
     }
     OUTPUT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_document_consistency_report(report["database"])
     print(OUTPUT)
 
 
