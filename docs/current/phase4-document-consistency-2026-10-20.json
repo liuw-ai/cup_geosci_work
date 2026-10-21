@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-21T06:30:00+08:00",
+  "generated_at": "2026-10-21T14:42:56+08:00",
   "status": "audited_with_legacy_documents",
   "current_sources_of_truth": [
     "docs/current/PHASE4-2026-10-17.md",
@@ -9,14 +9,15 @@
     "runtime/job_hub.sqlite3"
   ],
   "current_database_facts": {
-    "sha256": "bf1540c6c192935d2d3b2b7df4fd28f897eee4e5c256971cb46b978218faf24a",
+    "sha256": "ce34484ce4288738b11def00d0374ee33579a9aa4c9662bea3a9bc3b92946895",
     "integrity_check": "ok",
     "job_count": 3956,
     "student_read_as_of_date": "2026-10-21",
     "student_visible_layer_counts": {
-      "exact_match": 140,
       "broad_geoscience_match": 9,
+      "exact_match": 140,
       "incomplete_but_basic_match": 442,
+      "not_public": 0,
       "source_unavailable": 87
     },
     "student_visible_total": 678,
@@ -57,7 +58,7 @@
     {
       "path": "ARCHITECTURE.md",
       "classification": "mixed_architecture_document",
-      "risk": "the current introduction is useful, but later historical sections still describe third-party discovery as private-only",
+      "risk": "later historical sections still describe third-party discovery as private-only",
       "release_input": false,
       "action": "current facts are overridden by docs/current/PHASE4-2026-10-17.md and the Manifest"
     },

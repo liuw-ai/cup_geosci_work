@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-21T06:30:37Z",
+  "generated_at": "2026-10-21T06:42:56Z",
   "scope": "local_read_only_workspace_layout",
   "production_entrypoint": "deploy/compose.yaml",
   "canonical_paths": {
@@ -390,6 +390,13 @@
       "production_input": false
     },
     {
+      "path": "runtime/backups/job_hub-20261021T063531Z.sqlite3",
+      "bytes": 50167808,
+      "last_write_time": "2026-10-21T06:35:31Z",
+      "classification": "runtime_backup",
+      "production_input": false
+    },
+    {
       "path": "runtime/backups/job_hub-before-sinopec-activation-20261005-031222.sqlite3",
       "bytes": 12861440,
       "last_write_time": "2026-10-04T18:52:52Z",
@@ -405,8 +412,8 @@
     },
     {
       "path": "runtime/job_hub.sqlite3",
-      "bytes": 50155520,
-      "last_write_time": "2026-10-20T21:51:52Z",
+      "bytes": 50167808,
+      "last_write_time": "2026-10-21T06:35:49Z",
       "classification": "canonical_runtime_database",
       "production_input": true
     },

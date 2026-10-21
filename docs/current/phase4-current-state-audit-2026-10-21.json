@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-10-21T06:30:35Z",
+  "generated_at": "2026-10-21T06:42:55Z",
   "phase": "phase4",
   "scope": "local_read_only_current_state",
-  "git_sha": "cdd79599260b3545a8649119b2cce5e98161c965",
+  "git_sha": "6c83f9e430adc8f06903c06ac31e656f42465641",
   "git_status_porcelain": "",
   "database": {
     "path": "runtime/job_hub.sqlite3",
-    "sha256": "bf1540c6c192935d2d3b2b7df4fd28f897eee4e5c256971cb46b978218faf24a",
+    "sha256": "ce34484ce4288738b11def00d0374ee33579a9aa4c9662bea3a9bc3b92946895",
     "integrity_check": "ok",
     "job_count": 3956,
     "status_counts": {
-      "expired": 264,
-      "open": 3596,
+      "expired": 310,
+      "open": 3550,
       "superseded": 45,
       "withdrawn": 51
     },
@@ -156,7 +156,7 @@
       {
         "path": "docs/current/PHASE4-2026-10-17.md",
         "exists": true,
-        "sha256": "28c3ac8774969838c8711e44f9cbac1ca94b84df8e6e0630176401af677da8dc"
+        "sha256": "1b82c058b9fdb2ffb2f028a34c9a73c775b123ac2fdd1a9eb06e39a373e6ac47"
       },
       {
         "path": "docs/current/phase4-local-validation-2026-10-21.json",
@@ -269,7 +269,7 @@
     },
     "phase4_third_party_funnel": {
       "path": "docs/current/phase4-third-party-funnel-audit-2026-10-18.json",
-      "sha256": "e7e7c8809473cb3099d15278e74df1148292c11d8f5096a4ec92b27bb3768ee3"
+      "sha256": "744c112d7954cb3b2205d7009e1167051ecb2e4d32fcf62425db104d708a526c"
     },
     "phase4_local_web_recheck": {
       "path": "docs/current/phase4-local-web-recheck-2026-10-19.json",
@@ -397,7 +397,7 @@
     },
     "phase4_main_record": {
       "path": "docs/current/PHASE4-2026-10-17.md",
-      "sha256": "28c3ac8774969838c8711e44f9cbac1ca94b84df8e6e0630176401af677da8dc"
+      "sha256": "1b82c058b9fdb2ffb2f028a34c9a73c775b123ac2fdd1a9eb06e39a373e6ac47"
     }
   },
   "code_inventory": [
@@ -873,8 +873,8 @@
     },
     {
       "path": "scripts/audit_phase4_current_state.py",
-      "line_count": 613,
-      "sha256": "6eaa9af13dc819cde9dba8cad4de4d0e2545151df28fdf57ace7de6b01995ef8"
+      "line_count": 709,
+      "sha256": "9778fd1759678571462657794282a6dfd76dd2019e29ff4fc1cdd04acf498073"
     },
     {
       "path": "scripts/audit_phase4_third_party_formal_jobs.py",
