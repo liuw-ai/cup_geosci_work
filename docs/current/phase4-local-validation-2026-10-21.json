@@ -5,7 +5,7 @@
   "server_deployment": false,
   "tests": {
     "command": "python -m pytest -q",
-      "passed": 1127,
+      "passed": 1128,
     "skipped": 4,
     "failed": 0,
     "warnings": 0,
