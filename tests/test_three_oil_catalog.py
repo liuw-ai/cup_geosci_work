@@ -210,6 +210,30 @@ def test_third_party_employer_page_does_not_become_three_oil_identity_evidence()
     assert item["external_identity_evidence"]["status"] == "pending"
 
 
+def test_cross_group_official_source_does_not_certify_three_oil_identity() -> None:
+    """A mismatched source owner must not certify an otherwise matching name."""
+    report = build_three_oil_catalog_audit(
+        load_three_oil_catalog(),
+        organization_registry=load_organization_registry(),
+        job_records=[
+            {
+                "employer": "中国石油集团经济技术研究院",
+                "source_id": "sinopec-2027-geoscience-snapshot",
+                "official_evidence_url": "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=wrong-group",
+                "field_evidence": {
+                    "evidence_scope": "official_html_job_detail",
+                    "用人单位": "中国石油集团经济技术研究院",
+                },
+            }
+        ],
+    )
+    item = next(
+        row for row in report["items"] if row["catalog_id"] == "cnpc-economic-research"
+    )
+    assert item["job_detail_employer_binding_status"] == "verified"
+    assert item["external_identity_evidence"]["status"] == "pending"
+
+
 def test_three_oil_catalog_audit_cli_does_not_write_database(monkeypatch, tmp_path) -> None:
     database_path = tmp_path / "job_hub.sqlite3"
     Database(database_path).initialize()

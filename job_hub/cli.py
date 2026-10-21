@@ -1653,9 +1653,14 @@ def main() -> None:
         # out of services(), whose writable initialization can migrate the
         # shared SQLite file even when the command itself performs no writes.
         readonly_database = Database(settings.database_path, read_only=True)
+        # Identity evidence is not a student-visibility question.  Include
+        # retained historical/expired rows so an official detail record can
+        # still verify the employer name; the catalog audit itself never
+        # changes the row's lifecycle or publication state.
         jobs, _ = readonly_database.list_jobs(
             page_size=None,
-            as_of_date=coverage_snapshot_date(settings),
+            only_open=False,
+            student_visible=False,
         )
         result = build_three_oil_catalog_audit(
             job_records=jobs,

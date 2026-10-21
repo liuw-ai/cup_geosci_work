@@ -24,8 +24,8 @@
       "pipechina"
     ]
   },
-  "registry_organization_count": 332,
-  "registered_source_count": 95,
+  "registry_organization_count": 333,
+  "registered_source_count": 97,
   "mapped_unit_count": 64,
   "missing_registry_unit_count": 0,
   "name_unverified_unit_count": 0,
@@ -33,13 +33,16 @@
   "name_match_semantics": "name_exact_match and name_evidence_status only describe the normalized catalog-to-organization_registry mapping; they do not prove an external legal-registration or independently archived official-name review. This mapping does not prove that review.",
   "external_identity_evidence_review": {
     "status": "partial",
-    "verified_unit_count": 21,
-    "pending_unit_count": 43,
+    "verified_unit_count": 24,
+    "pending_unit_count": 40,
     "verified_unit_ids": [
+      "cnpc-daqing",
       "sinopec-shengli",
       "sinopec-jianghan",
       "sinopec-petroleum-exploration-production-research",
       "sinopec-petroleum-engineering-research",
+      "sinopec-international-exploration",
+      "sinopec-petroleum-machinery",
       "sinopec-engineering-construction",
       "cnooc-tianjin",
       "cnooc-shanghai",
@@ -80,8 +83,8 @@
       "unit_scoped_recruitment_entry_count": 1,
       "shared_recruitment_entry_count": 17,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_unit_count": 15,
-      "job_detail_employer_binding_count": 107,
+      "job_detail_employer_binding_unit_count": 16,
+      "job_detail_employer_binding_count": 353,
       "automation_ready_enabled_count": 0
     },
     "cnpc": {
@@ -93,8 +96,8 @@
       "unit_scoped_recruitment_entry_count": 1,
       "shared_recruitment_entry_count": 27,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_unit_count": 1,
-      "job_detail_employer_binding_count": 1,
+      "job_detail_employer_binding_unit_count": 4,
+      "job_detail_employer_binding_count": 47,
       "automation_ready_enabled_count": 1
     },
     "sinopec": {
@@ -106,8 +109,8 @@
       "unit_scoped_recruitment_entry_count": 1,
       "shared_recruitment_entry_count": 16,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_unit_count": 5,
-      "job_detail_employer_binding_count": 18,
+      "job_detail_employer_binding_unit_count": 7,
+      "job_detail_employer_binding_count": 95,
       "automation_ready_enabled_count": 0
     }
   },
@@ -3236,8 +3239,8 @@
   },
   "job_detail_binding_summary": {
     "provided": true,
-    "verified_unit_count": 21,
-    "matched_job_count": 126,
+    "verified_unit_count": 27,
+    "matched_job_count": 495,
     "scope_note": "该指标只证明岗位行的用人单位归属，不等于单位拥有独立招聘网站；共享集团平台仍需保留 shared_group_entry 标记。"
   },
   "items": [
@@ -3366,7 +3369,18 @@
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
       "external_identity_evidence": {
-        "status": "pending"
+        "status": "verified",
+        "basis": "official_job_detail_employer_record",
+        "evidence_scope": "official_job_detail_employer_name",
+        "source_ids": [
+          "cnpc-career"
+        ],
+        "evidence_urls": [
+          "https://career.cup.edu.cn/campus/view/id/460397",
+          "https://zhaopin.cnpc.com.cn/web/recruitInfoshow.html?id=8b8b6c9ea05aee4d01a08013d5ef0061"
+        ],
+        "matched_job_count": 3,
+        "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
         {
@@ -3390,9 +3404,10 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 1,
+      "job_detail_employer_binding_count": 3,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
+        "cnpc-career",
         "cupb-career"
       ],
       "fallback_entry_coverage": {
@@ -4137,9 +4152,13 @@
       "unit_scoped_recruitment_entry_count": 1,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 0,
-      "job_detail_employer_binding_status": "not_provided",
-      "job_detail_employer_binding_source_ids": [],
+      "job_detail_employer_binding_count": 14,
+      "job_detail_employer_binding_status": "verified",
+      "job_detail_employer_binding_source_ids": [
+        "cnpc-bgp-recruitment",
+        "cupb-career",
+        "cupb-career-browser-20261007"
+      ],
       "fallback_entry_coverage": {
         "unit_homepage": true,
         "official_announcement": true,
@@ -4389,9 +4408,12 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 0,
-      "job_detail_employer_binding_status": "not_provided",
-      "job_detail_employer_binding_source_ids": [],
+      "job_detail_employer_binding_count": 3,
+      "job_detail_employer_binding_status": "verified",
+      "job_detail_employer_binding_source_ids": [
+        "cupb-career",
+        "cupb-career-browser-20261007"
+      ],
       "fallback_entry_coverage": {
         "unit_homepage": false,
         "official_announcement": false,
@@ -4550,9 +4572,13 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 0,
-      "job_detail_employer_binding_status": "not_provided",
-      "job_detail_employer_binding_source_ids": [],
+      "job_detail_employer_binding_count": 27,
+      "job_detail_employer_binding_status": "verified",
+      "job_detail_employer_binding_source_ids": [
+        "cupb-career",
+        "cupb-career-browser-20261007",
+        "sinopec-2027-geoscience-snapshot"
+      ],
       "fallback_entry_coverage": {
         "unit_homepage": false,
         "official_announcement": false,
@@ -4843,7 +4869,7 @@
         "evidence_urls": [
           "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=BDA2ACEB-9C93-41B9-BFCB-887C71FB4C75"
         ],
-        "matched_job_count": 6,
+        "matched_job_count": 15,
         "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
@@ -4882,7 +4908,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 6,
+      "job_detail_employer_binding_count": 15,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "sinopec-2027-geoscience-snapshot"
@@ -4967,7 +4993,7 @@
         "evidence_urls": [
           "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=430F7075-EB7D-4DE6-909F-259CB35AD1D6"
         ],
-        "matched_job_count": 3,
+        "matched_job_count": 11,
         "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
@@ -5006,7 +5032,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 3,
+      "job_detail_employer_binding_count": 11,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "sinopec-2027-geoscience-snapshot"
@@ -5331,12 +5357,14 @@
         "basis": "official_job_detail_employer_record",
         "evidence_scope": "official_job_detail_employer_name",
         "source_ids": [
-          "sinopec-2027-geoscience-snapshot"
+          "sinopec-2027-geoscience-snapshot",
+          "sinopec-pepris-recruitment"
         ],
         "evidence_urls": [
+          "http://pepris.sinopec.com/pepris/careers/rwzl/2026/6/I1519026538069098496.shtml",
           "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=F9EE43F1-CDCE-41F3-AA08-D435DAD614B8"
         ],
-        "matched_job_count": 6,
+        "matched_job_count": 28,
         "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
@@ -5375,10 +5403,11 @@
       "unit_scoped_recruitment_entry_count": 1,
       "shared_recruitment_entry_count": 0,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 6,
+      "job_detail_employer_binding_count": 28,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
-        "sinopec-2027-geoscience-snapshot"
+        "sinopec-2027-geoscience-snapshot",
+        "sinopec-pepris-recruitment"
       ],
       "fallback_entry_coverage": {
         "unit_homepage": true,
@@ -5411,7 +5440,7 @@
         "evidence_urls": [
           "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=58789F72-2874-43D3-96A0-8A19DFE7524E"
         ],
-        "matched_job_count": 1,
+        "matched_job_count": 10,
         "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
@@ -5436,7 +5465,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 1,
+      "job_detail_employer_binding_count": 10,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "sinopec-2027-geoscience-snapshot"
@@ -5526,7 +5555,17 @@
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
       "external_identity_evidence": {
-        "status": "pending"
+        "status": "verified",
+        "basis": "official_job_detail_employer_record",
+        "evidence_scope": "official_job_detail_employer_name",
+        "source_ids": [
+          "sinopec-2027-geoscience-snapshot"
+        ],
+        "evidence_urls": [
+          "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=52A3CE39-F9D8-4309-B48E-F55580E8E11C"
+        ],
+        "matched_job_count": 4,
+        "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
         {
@@ -5550,9 +5589,11 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 0,
-      "job_detail_employer_binding_status": "not_provided",
-      "job_detail_employer_binding_source_ids": [],
+      "job_detail_employer_binding_count": 4,
+      "job_detail_employer_binding_status": "verified",
+      "job_detail_employer_binding_source_ids": [
+        "sinopec-2027-geoscience-snapshot"
+      ],
       "fallback_entry_coverage": {
         "unit_homepage": false,
         "official_announcement": false,
@@ -5575,7 +5616,17 @@
       "name_exact_match": true,
       "name_evidence_status": "organization_registry_exact_match",
       "external_identity_evidence": {
-        "status": "pending"
+        "status": "verified",
+        "basis": "official_job_detail_employer_record",
+        "evidence_scope": "official_job_detail_employer_name",
+        "source_ids": [
+          "sinopec-2027-geoscience-snapshot"
+        ],
+        "evidence_urls": [
+          "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=CD879394-A84B-4971-84E9-C971F56A7802"
+        ],
+        "matched_job_count": 15,
+        "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
         {
@@ -5599,9 +5650,11 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 0,
-      "job_detail_employer_binding_status": "not_provided",
-      "job_detail_employer_binding_source_ids": [],
+      "job_detail_employer_binding_count": 15,
+      "job_detail_employer_binding_status": "verified",
+      "job_detail_employer_binding_source_ids": [
+        "sinopec-2027-geoscience-snapshot"
+      ],
       "fallback_entry_coverage": {
         "unit_homepage": false,
         "official_announcement": false,
@@ -5633,7 +5686,7 @@
         "evidence_urls": [
           "https://job.sinopec.com/#/school/recruitEnterpriseDetail?deptId=252F8E1B-B9EF-45A5-9134-FEA9F65B7E7A"
         ],
-        "matched_job_count": 2,
+        "matched_job_count": 12,
         "independent_unit_recruitment_portal_proven": false
       },
       "channels": [
@@ -5658,7 +5711,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 2,
+      "job_detail_employer_binding_count": 12,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "sinopec-2027-geoscience-snapshot"
@@ -5884,7 +5937,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 0,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 4,
+      "job_detail_employer_binding_count": 14,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -5949,7 +6002,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 0,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 8,
+      "job_detail_employer_binding_count": 13,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -6014,7 +6067,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 10,
+      "job_detail_employer_binding_count": 20,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -6079,7 +6132,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 4,
+      "job_detail_employer_binding_count": 12,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -6144,7 +6197,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 0,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 12,
+      "job_detail_employer_binding_count": 20,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -6258,7 +6311,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 5,
+      "job_detail_employer_binding_count": 16,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -6352,10 +6405,11 @@
       "unit_scoped_recruitment_entry_count": 1,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 5,
+      "job_detail_employer_binding_count": 20,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
-        "cnooc-career-browser"
+        "cnooc-career-browser",
+        "iguopin-general-geoscience-browser"
       ],
       "fallback_entry_coverage": {
         "unit_homepage": true,
@@ -6417,9 +6471,11 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 1,
+      "job_detail_employer_binding_count": 25,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
+        "cnooc-career-browser",
+        "iguopin-general-geoscience-browser",
         "sinopec-2027-geoscience-snapshot"
       ],
       "fallback_entry_coverage": {
@@ -6496,7 +6552,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 24,
+      "job_detail_employer_binding_count": 47,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -6561,7 +6617,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 1,
+      "job_detail_employer_binding_count": 2,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -6626,7 +6682,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 1,
+      "job_detail_employer_binding_count": 5,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -6691,7 +6747,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 11,
+      "job_detail_employer_binding_count": 42,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -6756,7 +6812,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 9,
+      "job_detail_employer_binding_count": 46,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -6821,7 +6877,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 4,
+      "job_detail_employer_binding_count": 52,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"
@@ -6886,9 +6942,11 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 0,
-      "job_detail_employer_binding_status": "not_provided",
-      "job_detail_employer_binding_source_ids": [],
+      "job_detail_employer_binding_count": 3,
+      "job_detail_employer_binding_status": "verified",
+      "job_detail_employer_binding_source_ids": [
+        "cnooc-career-browser"
+      ],
       "fallback_entry_coverage": {
         "unit_homepage": false,
         "official_announcement": false,
@@ -6949,7 +7007,7 @@
       "unit_scoped_recruitment_entry_count": 0,
       "shared_recruitment_entry_count": 1,
       "unbound_recruitment_entry_count": 0,
-      "job_detail_employer_binding_count": 8,
+      "job_detail_employer_binding_count": 16,
       "job_detail_employer_binding_status": "verified",
       "job_detail_employer_binding_source_ids": [
         "cnooc-career-browser"

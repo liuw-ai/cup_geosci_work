@@ -44,6 +44,20 @@ OFFICIAL_THREE_OIL_IDENTITY_SOURCE_IDS = frozenset(
         "cosl-career",
     }
 )
+# Keep source ownership separate from the source allow-list.  An official
+# detail row naming a three-oil unit is only identity evidence when the source
+# itself belongs to the same group; otherwise a stale or cross-group parser
+# record could incorrectly certify the unit.
+OFFICIAL_THREE_OIL_SOURCE_GROUPS = {
+    "cnpc-career": "cnpc",
+    "cnpc-career-browser": "cnpc",
+    "cnpc-logging-campus": "cnpc",
+    "sinopec-career": "sinopec",
+    "sinopec-2027-geoscience-snapshot": "sinopec",
+    "sinopec-pepris-recruitment": "sinopec",
+    "cnooc-career-browser": "cnooc",
+    "cosl-career": "cnooc",
+}
 FALLBACK_CHANNEL_REQUIREMENTS = (
     {
         "channel_type": "official_announcement",
@@ -506,6 +520,7 @@ def build_three_oil_catalog_audit(
             source_id
             for source_id in job_binding.get("source_ids", [])
             if source_id in OFFICIAL_THREE_OIL_IDENTITY_SOURCE_IDS
+            and OFFICIAL_THREE_OIL_SOURCE_GROUPS.get(source_id) == unit["group_id"]
         ]
         if (
             str(identity_evidence.get("status") or "") != "verified"
