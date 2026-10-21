@@ -10,9 +10,9 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> None:
-    app_dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
-    dockerfile = (ROOT / "Dockerfile.browser").read_text(encoding="utf-8")
-    compose = (ROOT / "docker-compose.browser.yml").read_text(encoding="utf-8")
+    app_dockerfile = (ROOT / "deploy" / "docker" / "Dockerfile.app").read_text(encoding="utf-8")
+    dockerfile = (ROOT / "deploy" / "docker" / "Dockerfile.browser").read_text(encoding="utf-8")
+    compose = (ROOT / "deploy" / "compose.yaml").read_text(encoding="utf-8")
 
     assert "ARG RUNTIME_IMAGE=cupb-geoscience-job-hub:latest" in dockerfile
     assert "ARG BROWSER_DEPS_IMAGE=cupb-geoscience-job-hub-browser:bd61c09-general" in dockerfile
@@ -31,7 +31,7 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     assert "overlay" not in compose.lower()
     assert "pip install --no-cache-dir" in dockerfile
     # The shared build anchor keeps the Dockerfile declaration in one place.
-    assert compose.count("dockerfile: Dockerfile.browser") == 1
+    assert compose.count("dockerfile: deploy/docker/Dockerfile.browser") == 1
     assert "BROWSER_DEPS_IMAGE: ${BROWSER_DEPS_IMAGE:-cupb-geoscience-job-hub-browser:bd61c09-general}" in compose
     assert "cnooc-browser:" in compose
     assert "BROWSER_WORKER_KIND: cnooc" in compose
@@ -44,7 +44,8 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     assert "IGUOPIN_BROWSER_SOURCE_ID: iguopin-general-geoscience-browser" in compose
     assert "IGUOPIN_BROWSER_CDP_URL: http://iguopin-general-headless-shell:9222" in compose
     assert compose.count("build: *browser-build") == 8
-    assert compose.count("JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest") == 8
+    # Eight browser services plus the release-environment default.
+    assert compose.count("JOB_HUB_BROWSER_IMAGE:-cupb-geoscience-job-hub-browser:latest") == 9
     assert "cupb-browser:" in compose
     assert "BROWSER_WORKER_KIND: cupb" in compose
     assert "CUPB_BROWSER_CDP_URL: http://cupb-headless-shell:9222" in compose
@@ -59,7 +60,9 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     assert compose.count("CDP_URL: http://pipechina-headless-shell:9222") == 1
     assert compose.count("CDP_URL: http://chinalco-headless-shell:9222") == 1
     assert compose.count("CDP_URL: http://iguopin-general-headless-shell:9222") == 1
-    assert "ports:" not in compose
+    assert "external: true" in compose
+    assert "name: cupb-geoscience-job-hub_default" in compose
+    assert "name: cupb-geoscience-job-hub_job_hub_data" in compose
     # The browser service must not fall back to installing packages in the
     # ordinary application container or depend on a writable wheel cache.
     assert "wheels-linux" not in compose
