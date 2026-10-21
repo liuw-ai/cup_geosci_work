@@ -1,6 +1,6 @@
 {
   "phase": "phase4",
-  "generated_at": "2026-10-21T00:06:30Z",
+  "generated_at": "2026-10-21T00:13:55Z",
   "status": "historical_capture_retained_current_access_blocked",
   "policy": {
     "network_recheck_is_read_only": true,
