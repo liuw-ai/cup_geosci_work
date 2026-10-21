@@ -17,6 +17,9 @@ OUTPUT = ROOT / "docs" / "current" / "phase4-third-party-formal-job-audit-2026-1
 def build_report(database_path: Path = DATABASE) -> dict[str, Any]:
     """Return a deterministic, read-only formal third-party job audit."""
 
+    database_updated_at = datetime.fromtimestamp(
+        database_path.stat().st_mtime, tz=timezone.utc
+    ).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     uri = f"file:{database_path.resolve().as_posix()}?mode=ro"
     with sqlite3.connect(uri, uri=True) as connection:
         connection.row_factory = sqlite3.Row
@@ -75,7 +78,8 @@ def build_report(database_path: Path = DATABASE) -> dict[str, Any]:
 
     return {
         "phase": "phase4",
-        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "generated_at": database_updated_at,
+        "generated_from_database_mtime": True,
         "status": "pass" if not violations else "fail",
         "policy": {
             "read_only": True,
