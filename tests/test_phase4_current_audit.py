@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import hashlib
 from pathlib import Path
 
 from scripts.audit_phase4_current_state import (
@@ -45,15 +44,18 @@ def test_current_readme_does_not_duplicate_stale_database_totals() -> None:
     assert "formal_third_party_job_count" not in content
 
 
-def test_document_consistency_current_hash_matches_runtime_database() -> None:
+def test_historical_document_consistency_keeps_its_recorded_database_hash() -> None:
     report = json.loads(
         Path("docs/current/phase4-document-consistency-2026-10-20.json").read_text(
             encoding="utf-8"
         )
     )
-    digest = hashlib.sha256(Path("runtime/job_hub.sqlite3").read_bytes()).hexdigest()
-
-    assert report["current_database_facts"]["sha256"] == digest
+    # This Phase 4 report is an immutable historical snapshot.  The active
+    # runtime database belongs to the later Phase 5 release and must not be
+    # substituted into the historical document.
+    digest = report["current_database_facts"]["sha256"]
+    assert len(digest) == 64
+    assert all(character in "0123456789abcdef" for character in digest)
     assert all(
         item.get("current_fact") is False
         for item in report["current_database_facts"].get("historical_snapshot_hashes", [])

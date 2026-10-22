@@ -62,7 +62,9 @@ def test_browser_worker_has_a_dedicated_image_with_build_time_playwright() -> No
     assert compose.count("CDP_URL: http://iguopin-general-headless-shell:9222") == 1
     assert "external: true" in compose
     assert "name: cupb-geoscience-job-hub_default" in compose
-    assert "name: cupb-geoscience-job-hub_job_hub_data" in compose
+    # Release data is deliberately parameterized so each immutable release
+    # can bind its own isolated volume without changing this Compose contract.
+    assert "name: ${JOB_HUB_DATA_VOLUME:-cupb-geoscience-job-hub_job_hub_data}" in compose
     # The browser service must not fall back to installing packages in the
     # ordinary application container or depend on a writable wheel cache.
     assert "wheels-linux" not in compose
