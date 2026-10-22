@@ -1,0 +1,36 @@
+{
+  "release_id": "phase5-20261022-r2",
+  "deployed_at_utc": "2026-10-22T05:10:00Z",
+  "validated_at_utc": "2026-10-22T05:23:26Z",
+  "release_manifest": {
+    "path": "docs/current/phase5-release-manifest.json",
+    "sha256": "d7279acfc73b5ca4a27d78355f162c2dd3469c5f62c7a408a729d7751d6547eb"
+  },
+  "server": {
+    "host": "81.70.62.174",
+    "release_root": "/opt/job-hub/releases/phase5-20261022-r2",
+    "data_volume": "job-hub-phase5-20261022-r2-data",
+    "public_ip_status": 200,
+    "domain": "jobs.cupdky.cn",
+    "domain_dns_status": "unresolved"
+  },
+  "verification": {
+    "healthz": 200,
+    "audit_ok": true,
+    "jobs": 3956,
+    "student_visible": 678,
+    "candidate_leads": 12,
+    "database_backup": {
+      "path": "/var/lib/job-hub/backups/job_hub-20261022T051232Z.sqlite3",
+      "sha256": "1e9515d908e6ec015aa8b556ff03db7d9289954e7cae73dbaa2ec624691494c5",
+      "integrity": "ok"
+    }
+  },
+  "service_state": {
+    "web": "running_healthy",
+    "worker": "stopped_and_persistently_marked_paused",
+    "browser_collectors": "stopped",
+    "reason": "Preserve the approved local baseline until a future phase explicitly authorizes automated collection."
+  },
+  "rollback": "All legacy volumes, images, releases, and database backups are retained. No volume, image, or historical backup was deleted."
+}

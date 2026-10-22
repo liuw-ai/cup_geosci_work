@@ -1,0 +1,126 @@
+{
+  "phase": "phase5",
+  "release_id": "phase5-20261022-r2",
+  "recorded_at_utc": "2026-10-22T05:23:26Z",
+  "release_status": "deployed_baseline_frozen",
+  "logical_baseline": "phase532-logical-phase1",
+  "source_git_sha": "c07de7e2396fe7e84c725ee0822b31b0f9f21299",
+  "source_archive": {
+    "file": "phase5-20261022-r2-source.tar.gz",
+    "sha256": "fe2ef5a2fd0bda71a2ca4b4ef73bf60b6d83e252668bcf2d5632f0894a5b4cdd"
+  },
+  "release_root": "/opt/job-hub/releases/phase5-20261022-r2",
+  "deployment": {
+    "compose_path": "app/deploy/compose.yaml",
+    "compose_sha256": "9a130d37d8dc90878570cf7c6daf5b5e84e34a8a894d0d7dc3d3488648ab0173",
+    "release_env_sha256": "ce5ba08cdcc05d3194c6d904abd604148856152ae72493e6bd890318695b1b70",
+    "data_volume": "job-hub-phase5-20261022-r2-data",
+    "legacy_data_volume": "cupb-geoscience-job-hub_job_hub_data",
+    "legacy_data_volume_policy": "preserved_for_rollback_only"
+  },
+  "images": {
+    "application": "cupb-geoscience-job-hub:phase5-20261022-r1@sha256:870af43b59dd4fdd547bace77c828d3a0d6bb7701d49046adcce6daed71e263c",
+    "worker": "cupb-geoscience-job-hub:phase5-20261022-r1@sha256:870af43b59dd4fdd547bace77c828d3a0d6bb7701d49046adcce6daed71e263c",
+    "browser": "cupb-geoscience-job-hub-browser:phase5-20261022-r1@sha256:cd97dbec5dcb446326e5b9ea0366ad183535ab085e92116a3ae69cac98c0946d",
+    "browser_dependencies": "cupb-geoscience-job-hub-browser@sha256:07d616dcbe52b6338ea2bddeb1f780e43ce83764af499b2c640d9063c1cc6303",
+    "headless_shell": "chromedp/headless-shell@sha256:2d349b544a1ea6b5b5fd7c0fe99215ff662339c57407ee2e8c0a11af93516b04"
+  },
+  "policy": {
+    "version": "phase3-lifecycle-and-publication-contract",
+    "automation_model": "gpt-5.6-terra",
+    "automation_status": "paused",
+    "worker_status": "paused",
+    "reason": "A newly deployed baseline must not diverge through automatic collection before an explicitly approved follow-up phase."
+  },
+  "database": {
+    "baseline_file": "database/job_hub.sqlite3",
+    "baseline_sha256": "ce34484ce4288738b11def00d0374ee33579a9aa4c9662bea3a9bc3b92946895",
+    "baseline_integrity": "ok",
+    "operational_volume_path": "/var/lib/docker/volumes/job-hub-phase5-20261022-r2-data/_data/job_hub.sqlite3",
+    "operational_file_hash_policy": "The live SQLite file SHA-256 is not a release identity because WAL/checkpoint and runtime metadata writes can change it. The immutable baseline SHA, verified backup SHA, and business-field fingerprints are the binding audit values.",
+    "schema": {
+      "contract": "phase3-additive-schema",
+      "sqlite_user_version": 0,
+      "table_count": 21,
+      "schema_sha256": "c90e41cf4bc3f635b357c7f576415cd4da6a1a69463acf598135213de056d5af"
+    },
+    "initial_counts": {
+      "jobs": 3956,
+      "student_visible": 678,
+      "candidate_leads": 12,
+      "withdrawn": 51
+    },
+    "operational_counts_on_2026_10_22": {
+      "jobs": 3956,
+      "student_visible": 678,
+      "candidate_leads": 12,
+      "status": {
+        "open": 3547,
+        "expired": 313,
+        "superseded": 45,
+        "withdrawn": 51
+      }
+    },
+    "expected_startup_delta": "Three rows with official deadline 2026-10-21 were marked expired on 2026-10-22. Source updated_at values and service heartbeat metadata were also refreshed; no job, lead, or source business fields diverged from the local Phase 5 baseline."
+  },
+  "baseline_equivalence": {
+    "checked_at_utc": "2026-10-22T05:22:00Z",
+    "jobs_business_sha256": "a4e695b37206002b75290f4d557d91e2257cffae5fffeeb05d8232c33bff86c0",
+    "candidate_leads_business_sha256": "e66f759da0fb956e73459bd9ad14dd4a302852d35a8c2aa039d41bd5ca052232",
+    "sources_business_sha256": "78d90c63638945b9db1d04fe69feed7910de05f1fa27f5d69acdabee83674bfe",
+    "comparison_rule": "Business fingerprints exclude runtime timestamps and audit-event timestamps. Local and server values matched exactly."
+  },
+  "configuration_sha256": {
+    "discovery_sources": "2c7a5f5b1b6735f451e4306e929f23063db7bd07df3e41ddc24dfe08fd82001e",
+    "organization_registry": "ae5b585ca27e9af853aec0dc157d6952dd8d2dd0a170646f8ffe7419744d1447",
+    "three_oil_organization_catalog": "3ca08cd9c7fc4e247bf1ca49ea3d40fa44d01fa0fa525b985563e3684571dfad",
+    "third_party_table_adapters": "2132d53195307a2b8710e651196adf0aa0cc7fe07081a6634407d60e75b49872",
+    "government_position_registry": "011da3f8853cb415522e66f1563985d5593fd2f2c94649ec048f0f1b6de5b989",
+    "government_artifact_manifest": "ca20070596e14b5509e4ff3ec745ad69ff68847bee26d354c76c52bef4c53acb"
+  },
+  "rollback": {
+    "pre_phase5_server_backup": {
+      "path": "/var/lib/job-hub/backups/job_hub-20261022T041259Z.sqlite3",
+      "sha256": "0c690484a160e1b242a93de53d626e071c65e24130eec358fe88b58a49c521f8",
+      "integrity": "ok"
+    },
+    "pre_phase5_live_copy": {
+      "path": "/opt/job-hub/releases/phase5-20261022-r1/rollback/server-pre-phase5-live.sqlite3",
+      "sha256": "871db9bec2ecece52aad33ffa9eb0eaf9b7bf943bb6b3f0623bc90ee45ade751"
+    },
+    "post_sync_before_baseline_restore": {
+      "path": "/opt/job-hub/releases/phase5-20261022-r1/rollback/phase5-postsync-before-baseline-restore.sqlite3",
+      "sha256": "2b121cdb38a2d209ccce55f6e0b1c38e2a4580e372a20e6af6ceb87b740c814c",
+      "integrity": "ok"
+    },
+    "phase5_first_backup": {
+      "path": "/var/lib/job-hub/backups/job_hub-20261022T051232Z.sqlite3",
+      "sha256": "1e9515d908e6ec015aa8b556ff03db7d9289954e7cae73dbaa2ec624691494c5",
+      "integrity": "ok"
+    }
+  },
+  "validation": {
+    "audit": "passed: 3956 jobs, 678 current public jobs, zero issues",
+    "web_health": "200",
+    "public_ip": "http://81.70.62.174/ returns 200",
+    "api_endpoints": [
+      "/",
+      "/healthz",
+      "/version",
+      "/api/coverage",
+      "/api/jobs?layer=exact_match",
+      "/api/jobs?layer=broad_geoscience_match",
+      "/api/jobs?layer=incomplete_but_basic_match",
+      "/api/jobs?layer=source_unavailable"
+    ],
+    "dns": {
+      "hostname": "jobs.cupdky.cn",
+      "status": "not_resolved",
+      "required_record": "A jobs.cupdky.cn -> 81.70.62.174"
+    }
+  },
+  "root_cause_and_fix": {
+    "r1_root_cause": "The new image used the legacy external runtime volume, then Worker and browser collectors started immediately. Old database/runtime artifacts and new code were therefore mixed, and the production database diverged from the locally tested Phase 4 baseline.",
+    "r2_fix": "A fresh named volume contains only the audited local baseline database. Compose receives that volume explicitly through JOB_HUB_DATA_VOLUME. The old volume and every rollback database remain untouched. Worker and browser collectors are stopped and the persisted worker heartbeat records the deployment freeze."
+  }
+}
