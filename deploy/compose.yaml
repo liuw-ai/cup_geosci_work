@@ -384,7 +384,10 @@ services:
 volumes:
   job_hub_data:
     external: true
-    name: cupb-geoscience-job-hub_job_hub_data
+    # Every release must set JOB_HUB_DATA_VOLUME explicitly in .release.env.
+    # The fallback preserves access to pre-Phase-5 deployments for rollback
+    # only; it must never be used for a new release baseline.
+    name: ${JOB_HUB_DATA_VOLUME:-cupb-geoscience-job-hub_job_hub_data}
 
 networks:
   default:

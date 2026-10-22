@@ -9,6 +9,9 @@
 - `web` 只提供公开浏览页、只读 API 和受保护的管理员接口。
 - `worker` 负责来源同步、数据审计、20:00 日报冻结和邮件通知。
 - SQLite 数据库位于 Docker named volume `job_hub_data`，不要放在 NFS、SMB 或会产生锁语义差异的网络盘上。
+- 每个正式 release 必须在 release 的 `.release.env` 中显式设置唯一的
+  `JOB_HUB_DATA_VOLUME`。新 release 只能向这个新卷迁入经核验的数据库
+  基线；不得复用上一版本的运行卷。旧卷只保留作回滚和审计。
 - 采集器只读取白名单中的官方公开页面，并遵守 robots.txt；不绕过登录、验证码或反爬限制。
 
 ## 2. 首次部署
