@@ -1,7 +1,9 @@
 <article class="job-card">
   <div class="job-card-topline">
     <span class="category-label">{{ job.category_label or job.category|category_label }}</span>
-    <span class="relevance publication-{{ job.publication_layer or job.publication_status }}">{{ job.publication_layer_label or job.publication_status_label }}</span>
+    {% if job.source_availability_status not in ['source_unavailable', 'degraded', 'stale_pending_review'] and (job.publication_layer or job.publication_status) not in ['source_unavailable'] %}
+      <span class="relevance publication-{{ job.publication_layer or job.publication_status }}">{{ job.publication_layer_label or job.publication_status_label }}</span>
+    {% endif %}
   </div>
   <h3><a href="{{ url_for('job_detail', job_id=job.id, scope='official_pending') if official_pending else url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
   <p class="employer">{{ job.canonical_employer_name or job.employer }}</p>
@@ -30,9 +32,6 @@
       <strong>{{ job.profile_match.label }}</strong>
       <span>{{ job.profile_match.reason }}</span>
     </div>
-  {% endif %}
-  {% if job.source_availability_status in ['source_unavailable', 'degraded', 'stale_pending_review'] %}
-    <p class="notice-warning">来源状态：{{ job.source_availability_status_label or '来源暂时不可用' }}；已保留历史官方证据，请以原始链接为准。</p>
   {% endif %}
   <dl class="job-meta">
     <div>

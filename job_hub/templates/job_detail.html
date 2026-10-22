@@ -12,7 +12,9 @@
       {% endif %}
       <div class="detail-topline">
         <span class="category-label">{{ job.category_label or job.category|category_label }}</span>
-        <span class="relevance publication-{{ job.publication_layer or job.publication_status }}">{{ job.publication_layer_label or job.publication_status_label }}</span>
+        {% if job.source_availability_status not in ['source_unavailable', 'degraded', 'stale_pending_review'] and (job.publication_layer or job.publication_status) not in ['source_unavailable'] %}
+          <span class="relevance publication-{{ job.publication_layer or job.publication_status }}">{{ job.publication_layer_label or job.publication_status_label }}</span>
+        {% endif %}
       </div>
       <h1>{{ job.title }}</h1>
       <p class="employer large-employer">{{ job.canonical_employer_name or job.employer }}</p>
@@ -30,7 +32,7 @@
         <p class="muted">{{ '、'.join(job.pending_missing_fields) if job.pending_missing_fields else '岗位级专业、学历、地点或截止日期证据' }}</p>
       {% endif %}
       {% if job.source_availability_status in ['source_unavailable', 'degraded', 'stale_pending_review'] %}
-        <div class="notice-warning"><strong>来源暂时不可用</strong>：{{ job.source_unavailable_reason or '当前官方入口暂时无法访问或完成核验' }}。该状态不等于岗位已取消，岗位是否仍可申请请以保留的官方链接和最新公告为准。</div>
+        <div class="notice-warning">岗位是否仍可申请，请以保留的官方链接和最新公告为准。</div>
       {% endif %}
       <h2>岗位信息</h2>
       <dl class="detail-grid">
@@ -48,7 +50,9 @@
         <div><dt>发布时间</dt><dd>{{ job.published_date|cn_date }}</dd></div>
         <div><dt>报名截止</dt><dd class="deadline">{{ job.deadline_date|cn_date if job.deadline_date else "官方未公布截止日期" }}</dd></div>
         <div><dt>信息来源</dt><dd>{{ job.source_name }}（{{ job.source_tier }} 级）</dd></div>
-        <div><dt>学生端层级</dt><dd>{{ job.publication_layer_label or job.publication_status_label }}</dd></div>
+        {% if job.source_availability_status not in ['source_unavailable', 'degraded', 'stale_pending_review'] and (job.publication_layer or job.publication_status) not in ['source_unavailable'] %}
+          <div><dt>学生端层级</dt><dd>{{ job.publication_layer_label or job.publication_status_label }}</dd></div>
+        {% endif %}
       </dl>
       {% if job.major_tags %}
         <h2>专业线索{% if job.qualification_evidence_status != "explicit" %}（需核验）{% endif %}</h2>
@@ -94,9 +98,6 @@
           {% if job.field_evidence.get("table_row") %}
             <div><dt>证据位置</dt><dd>官方职位表第 {{ job.field_evidence.get("table_row") }} 行</dd></div>
           {% endif %}
-          {% if job.field_evidence.get("官方详情状态") %}
-            <div><dt>官方详情状态</dt><dd>详情接口当前异常，已保留官方快照证据</dd></div>
-          {% endif %}
         </dl>
       {% endif %}
       {% if job.profile_match and not official_pending %}
@@ -114,7 +115,6 @@
       <h2>{% if official_pending %}先核对官方原文{% else %}以原始公告为准{% endif %}</h2>
       <p>{% if official_pending %}该记录只用于官方来源补证，不代表当前可投递资格。请先核对岗位级专业、学历、地点和截止日期。{% else %}本页仅整理公开信息。请在投递前核对资格条件、报名入口、截止时间和单位通知。{% endif %}</p>
       {% if job.source_id == "cnpc-career" and job.field_evidence.get("官方详情状态") == "official_detail_api_degraded" %}
-        <p class="muted">中国石油详情接口当前返回空字段。下方岗位信息来自已核验的官方岗位快照；请先打开官方招聘入口，在官网内重新核对岗位编号和报名条件。</p>
           <a class="action-link full-width" href="{{ job.application_url or 'https://zhaopin.cnpc.com.cn/web/recruitInfolist.html' }}" target="_blank" rel="noopener noreferrer">打开中国石油官方招聘入口</a>
         {% if job.official_link_url %}
           <a class="secondary-link" href="{{ job.official_link_url }}" target="_blank" rel="noopener noreferrer">{{ job.official_link_label or '尝试打开岗位详情页' }}</a>

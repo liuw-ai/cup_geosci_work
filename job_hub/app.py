@@ -121,6 +121,7 @@ _PRIVATE_EVIDENCE_KEYS = {
     "第三方表格链接",
     "第三方来源",
     "华图发现页",
+    "官方详情状态",
 }
 
 
@@ -130,6 +131,31 @@ def _student_api_job(job: dict[str, Any]) -> dict[str, Any]:
     public = {
         key: value for key, value in job.items() if key not in _PRIVATE_JOB_API_FIELDS
     }
+    source_health_state = public.get("source_availability_status")
+    # Source-health and recovery reasons are operational audit data.  Keep
+    # them in the database and admin views, but do not expose them through the
+    # student-facing API.  A source-unavailable layer remains eligible under
+    # the lifecycle policy; its public record should look like a normal job
+    # and rely on the retained official links for application verification.
+    for key in (
+        "source_availability_status",
+        "source_availability_status_label",
+        "source_unavailable_reason",
+    ):
+        public.pop(key, None)
+    if source_health_state in {
+        "source_unavailable",
+        "degraded",
+        "stale_pending_review",
+    } or public.get("publication_layer") == "source_unavailable":
+        for key in (
+            "publication_layer",
+            "publication_layer_label",
+            "publication_status_label",
+        ):
+            public.pop(key, None)
+    if public.get("publication_status") == "source_unavailable":
+        public.pop("publication_status", None)
     evidence = public.get("field_evidence")
     if isinstance(evidence, dict):
         public["field_evidence"] = {

@@ -320,6 +320,75 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     assert response.get_json()["outcome"] == "created"
 
 
+def test_student_pages_hide_source_health_state_but_keep_official_links(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    database.upsert_source(source())
+    pipeline = app.extensions["pipeline"]
+    posting = RawPosting(
+        title="来源暂不可达的地质岗位",
+        employer="测试能源集团",
+        source_url="https://careers.example.edu.cn/jobs/source-health",
+        application_url="https://careers.example.edu.cn/apply/source-health",
+        text="官方招聘，面向地质工程硕士。",
+        summary="官方岗位。",
+        published_date="2026-10-01",
+        deadline_date="2026-12-31",
+        location="北京",
+        field_evidence={
+            "岗位": "来源暂不可达的地质岗位",
+            "专业范围": "地质工程",
+            "学历要求": "硕士",
+            "工作地点": "北京",
+        },
+    )
+    job_id, _ = database.save_job(
+        pipeline.normalize_posting(posting, database.get_source("official-test-source"))
+    )
+    with database.transaction() as connection:
+        connection.execute(
+            """
+            UPDATE jobs
+            SET publication_status = 'source_unavailable',
+                publication_layer = 'source_unavailable',
+                source_availability_status = 'source_unavailable',
+                source_unavailable_reason = 'source_disabled',
+                official_notice_url = ?,
+                official_application_url = ?,
+                official_table_url = ?,
+                last_official_verified_at = ?
+            WHERE id = ?
+            """,
+            (
+                posting.source_url,
+                posting.application_url,
+                "https://careers.example.edu.cn/jobs/source-health/table.xlsx",
+                "2026-10-20T00:00:00Z",
+                job_id,
+            ),
+        )
+
+    client = app.test_client()
+    card_page = client.get("/jobs").get_data(as_text=True)
+    detail_page = client.get(f"/jobs/{job_id}").get_data(as_text=True)
+
+    for page in (card_page, detail_page):
+        assert "来源暂时不可用" not in page
+        assert "source_disabled" not in page
+    assert "岗位是否仍可申请，请以保留的官方链接和最新公告为准。" in detail_page
+    assert posting.source_url in detail_page
+    assert posting.application_url in detail_page
+    assert "https://careers.example.edu.cn/jobs/source-health/table.xlsx" in detail_page
+    assert "来源暂时不可用" not in client.get("/about").get_data(as_text=True)
+    public_item = client.get("/api/jobs").get_json()["items"][0]
+    assert "source_availability_status" not in public_item
+    assert "source_unavailable_reason" not in public_item
+    assert "publication_layer" not in public_item
+    assert "publication_status" not in public_item
+    assert "官方详情状态" not in public_item.get("field_evidence", {})
+
+
 def test_public_api_layer_filter_is_forwarded_without_profile(tmp_path) -> None:
     settings = make_settings(tmp_path)
     app = create_app(settings)
@@ -609,7 +678,7 @@ def test_sinopec_capture_admin_endpoint_is_private_and_reports_complete_manifest
     assert payload["summary"]["complete_manifest"] is True
 
 
-def test_cnpc_detail_page_discloses_degraded_official_detail_endpoint(tmp_path, monkeypatch) -> None:
+def test_cnpc_detail_page_keeps_official_fallback_without_internal_endpoint_state(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(app_module, "local_today", lambda _settings: date(2026, 10, 10))
     settings = make_settings(tmp_path)
     app = create_app(settings)
@@ -633,7 +702,7 @@ def test_cnpc_detail_page_discloses_degraded_official_detail_endpoint(tmp_path, 
 
     assert response.status_code == 200
     body = response.get_data(as_text=True)
-    assert "中国石油详情接口当前返回空字段" in body
+    assert "中国石油详情接口当前返回空字段" not in body
     assert "打开中国石油官方招聘入口" in body
     assert "官方详情编号" in body
 
