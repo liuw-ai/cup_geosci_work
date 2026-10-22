@@ -1,0 +1,64 @@
+{% extends "admin_base.html" %}
+
+{% block title %}审核候选 #{{ lead.id }}{% endblock %}
+
+{% block content %}
+  {% set metadata = lead.metadata if lead.metadata is mapping else {} %}
+  {% set evidence = metadata.field_evidence if metadata.field_evidence is mapping else {} %}
+  <header class="admin-page-heading">
+    <div><p class="admin-kicker">候选 #{{ lead.id }} · {{ lead.lead_provider }}</p><h1>{{ lead.title }}</h1><p>{{ lead.employer_hint or '单位待补' }}{% if lead.location_hint %} · {{ lead.location_hint }}{% endif %}</p></div>
+    <a href="{{ url_for('admin_leads') }}">返回候选列表</a>
+  </header>
+
+  <div class="admin-review-layout">
+    <form class="admin-review-form" method="post" action="{{ url_for('admin_lead_detail', lead_id=lead.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <section class="admin-section">
+        <div class="admin-section-heading"><div><p class="admin-kicker">官方证据</p><h2>来源与申请入口</h2></div></div>
+        <div class="admin-form-grid">
+          <label class="admin-wide">官方公告或岗位详情 URL<input type="url" name="official_url" value="{{ lead.official_url or '' }}" placeholder="https://"></label>
+          <label>官方来源<select name="official_source_id"><option value="">未绑定</option>{% for source in sources %}<option value="{{ source.id }}" {% if lead.official_source_id == source.id %}selected{% endif %}>{{ source.name }} ({{ source.id }})</option>{% endfor %}</select></label>
+          <label>官方岗位表 URL<input type="url" name="official_table_url" value="{{ lead.official_table_url or '' }}" placeholder="https://"></label>
+          <label class="admin-wide">官方报名 URL<input type="url" name="official_application_url" value="{{ lead.official_application_url or '' }}" placeholder="仅填写官方报名系统或公告指定入口"></label>
+          <label class="admin-checkbox"><input type="checkbox" name="manual_domain_approved" value="yes" {% if lead.official_domain_status == 'manual_review_approved' %}checked{% endif %}> 我已人工确认该官方域名，审核说明中已记录依据</label>
+        </div>
+        <p class="admin-note">当前域名状态：{{ domain_labels.get(lead.official_domain_status, lead.official_domain_status) }}。第三方页面与表格只保留在私有证据中，不能填写为官方报名 URL。</p>
+      </section>
+
+      <section class="admin-section">
+        <div class="admin-section-heading"><div><p class="admin-kicker">岗位字段</p><h2>逐项核验记录</h2></div></div>
+        <div class="admin-form-grid">
+          <label>用人单位<input name="employer_hint" value="{{ lead.employer_hint or '' }}"></label>
+          <label>工作地点<input name="location_hint" value="{{ lead.location_hint or '' }}"></label>
+          <label>省份<input name="province_hint" value="{{ lead.province_hint or '' }}"></label>
+          <label>公告发布日期<input type="date" name="published_date" value="{{ lead.published_date or '' }}"></label>
+          <label class="admin-wide">岗位说明<textarea name="metadata_description" rows="4">{{ metadata.description or '' }}</textarea></label>
+          <label>官方工作地点证据<input name="metadata_location" value="{{ metadata.location or '' }}"></label>
+          <label>官方截止日期<input type="date" name="metadata_deadline_date" value="{{ metadata.deadline_date or '' }}"></label>
+          <label class="admin-wide">专业要求证据<input name="evidence_major" value="{{ evidence['专业要求'] or evidence['专业范围'] or '' }}"></label>
+          <label class="admin-wide">学历要求证据<input name="evidence_degree" value="{{ evidence['学历要求'] or evidence['学历'] or '' }}"></label>
+          <label>岗位代码<input name="evidence_position_code" value="{{ evidence['岗位代码'] or evidence.position_code or '' }}"></label>
+          <label>匹配补充文本<input name="metadata_match_text" value="{{ metadata.match_text or '' }}"></label>
+          <label class="admin-wide">资格条件原文<input name="metadata_qualification_text" value="{{ metadata.qualification_text or '' }}"></label>
+        </div>
+      </section>
+
+      <section class="admin-section">
+        <div class="admin-section-heading"><div><p class="admin-kicker">审核决定</p><h2>状态流转</h2></div></div>
+        <div class="admin-form-grid">
+          <label>下一审核状态<select name="verification_status">{% for status, label in status_options %}<option value="{{ status }}" {% if lead.verification_status == status %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+          <label>来源等级<select name="trust_grade">{% for grade in ['A', 'B', 'C', 'D'] %}<option value="{{ grade }}" {% if lead.trust_grade == grade %}selected{% endif %}>{{ grade }} 级</option>{% endfor %}</select></label>
+          <label>审核人<input name="reviewed_by" value="{{ metadata.last_reviewed_by or '' }}" required></label>
+          <label class="admin-wide">审核说明<textarea name="verification_note" rows="4" required>{{ lead.verification_note or '' }}</textarea></label>
+        </div>
+        <div class="admin-form-actions"><button name="action" value="save" type="submit">保存审核记录</button>{% if lead.verification_status == 'official_content_verified' %}<button name="action" value="publish" type="submit" class="admin-publish">通过发布门禁并创建岗位</button>{% endif %}</div>
+      </section>
+    </form>
+
+    <aside class="admin-evidence-sidebar">
+      <section class="admin-section"><p class="admin-kicker">发现线索</p><h2>私有来源</h2><a href="{{ lead.lead_url }}" target="_blank" rel="noopener noreferrer">打开第三方发现页</a>{% if lead.third_party_table_url %}<a href="{{ lead.third_party_table_url }}" target="_blank" rel="noopener noreferrer">打开第三方岗位表</a>{% endif %}<p class="admin-note">这些链接不会展示在学生端，也不能用于报名。</p></section>
+      <section class="admin-section"><p class="admin-kicker">来源提及</p><h2>{{ mentions|length }} 条</h2>{% for mention in mentions %}<p class="admin-event"><strong>{{ mention.discovery_source_id or '未归属' }}</strong><br><a href="{{ mention.lead_url }}" target="_blank" rel="noopener noreferrer">{{ mention.lead_url }}</a><br><small>{{ mention.captured_at }}</small></p>{% else %}<p class="admin-empty">无额外提及。</p>{% endfor %}</section>
+      <section class="admin-section"><p class="admin-kicker">审核历史</p><h2>{{ events|length }} 项</h2>{% for event in events %}<p class="admin-event"><strong>{{ event.event_type }}</strong><br>{{ event.from_status or '—' }} → {{ event.to_status or '—' }}{% if event.note %}<br>{{ event.note }}{% endif %}{% if event.payload.reviewed_by %}<br><small>审核人：{{ event.payload.reviewed_by }}</small>{% endif %}<br><small>{{ event.occurred_at }}</small></p>{% else %}<p class="admin-empty">尚无审核事件。</p>{% endfor %}</section>
+    </aside>
+  </div>
+{% endblock %}

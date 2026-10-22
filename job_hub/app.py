@@ -1,12 +1,23 @@
 from __future__ import annotations
 
 import hmac
+import secrets
 from datetime import date, datetime, timezone
 from functools import wraps
 from typing import Any, Callable
 from zoneinfo import ZoneInfo
 
-from flask import Flask, abort, jsonify, render_template, request, url_for
+from flask import (
+    Flask,
+    abort,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 
 from job_hub.audit import audit_database
 from job_hub.attachments import (
@@ -16,6 +27,8 @@ from job_hub.attachments import (
 )
 from job_hub.config import PROJECT_ROOT, Settings, load_project_env
 from job_hub.contracts import (
+    CANDIDATE_LEAD_STATUSES,
+    CANDIDATE_LEAD_TRANSITIONS,
     NATIONAL_RUNTIME_STATUSES,
     ORGANIZATION_ROLES,
     SOURCE_VALIDATION_STAGES,
@@ -52,6 +65,10 @@ from job_hub.organizations import (
 from job_hub.three_oil_catalog import (
     build_phase4_external_identity_evidence,
     build_three_oil_catalog_audit,
+)
+from job_hub.three_oil_entry_evidence import (
+    load_three_oil_entry_evidence,
+    three_oil_entry_evidence_summary,
 )
 from job_hub.national_sources import (
     load_national_source_matrix,
@@ -125,6 +142,32 @@ _PRIVATE_EVIDENCE_KEYS = {
 }
 
 
+ADMIN_LEAD_STATUS_LABELS = {
+    "candidate": "待回溯官方来源",
+    "official_url_found": "已找到官方原文",
+    "need_review": "待人工审核",
+    "official_content_verified": "官方内容已核验",
+    "published": "已发布",
+    "rejected": "已驳回",
+    "expired": "候选已过期",
+}
+ADMIN_DOMAIN_STATUS_LABELS = {
+    "unverified": "未核验",
+    "registered_source_match": "匹配已登记官方来源",
+    "manual_review_approved": "人工批准官方域名",
+    "source_domain_mismatch": "与登记官方来源不匹配",
+    "manual_review_required": "需要人工确认",
+}
+ADMIN_THREE_OIL_ENTRY_STATUS_LABELS = {
+    "unit_specific_entry_verified": "单位独立入口已核验",
+    "group_portal_unit_display_observed": "集团入口已观察到单位展示",
+    "group_portal_registered": "集团共享入口已登记",
+    "official_site_checked_no_unit_entry_found": "已查官方站，未找到独立入口",
+    "group_portal_not_revalidated": "集团入口待复核",
+    "source_unavailable": "官方来源暂时不可用",
+}
+
+
 def _student_api_job(job: dict[str, Any]) -> dict[str, Any]:
     """Return the student API view without private discovery evidence."""
 
@@ -178,6 +221,14 @@ def create_app(settings: Settings | None = None) -> Flask:
 
     app = Flask(__name__)
     app.config["SECRET_KEY"] = settings.secret_key
+    # The administrator workbench is deliberately separate from the public
+    # student UI. Keep its browser session resistant to script access and
+    # cross-site form submission while allowing local HTTP acceptance tests.
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=settings.base_url.startswith("https://"),
+    )
     app.json.ensure_ascii = False
     app.extensions["settings"] = settings
     app.extensions["database"] = database
@@ -663,6 +714,30 @@ def create_app(settings: Settings | None = None) -> Flask:
         backup = DatabaseBackupManager(settings).latest_status(
             max_age_seconds=max(1, settings.backup_min_interval_minutes) * 60
         )
+        persisted_worker = database.get_service_heartbeat("worker")
+        # A copied review database can legitimately contain the last heartbeat
+        # from a prior Worker process. Do not present that historical row as a
+        # currently running collector when this runtime explicitly disables
+        # automation. The old timestamp is retained as diagnostic context only.
+        if not settings.worker_automation_enabled:
+            worker = {
+                "service_name": "worker",
+                "status": "paused",
+                "automation_enabled": False,
+                "detail": "Worker automation is disabled by current configuration.",
+                "last_persisted_heartbeat_at": (
+                    persisted_worker or {}
+                ).get("updated_at"),
+            }
+        elif persisted_worker is None:
+            worker = {
+                "service_name": "worker",
+                "status": "unknown",
+                "automation_enabled": True,
+                "detail": "No worker heartbeat has been recorded.",
+            }
+        else:
+            worker = {**persisted_worker, "automation_enabled": True}
         return jsonify(
             {
                 "status": "ok",
@@ -673,7 +748,7 @@ def create_app(settings: Settings | None = None) -> Flask:
                 "latest_report": (
                     database.latest_daily_report() or {}
                 ).get("report_date"),
-                "worker": database.get_service_heartbeat("worker"),
+                "worker": worker,
                 "backup": backup_health_payload(backup),
             }
         )
@@ -776,6 +851,371 @@ def create_app(settings: Settings | None = None) -> Flask:
             return view(*args, **kwargs)
 
         return wrapped
+
+    def admin_csrf_token() -> str:
+        """Return the per-session token required by browser-admin forms."""
+        token = session.get("admin_csrf_token")
+        if not isinstance(token, str) or not token:
+            token = secrets.token_urlsafe(32)
+            session["admin_csrf_token"] = token
+        return token
+
+    def _safe_admin_next(value: str | None) -> str:
+        """Accept only local workbench destinations after a login."""
+        candidate = str(value or "").strip()
+        return candidate if candidate.startswith("/") and not candidate.startswith("//") else url_for("admin_dashboard")
+
+    def require_admin_session(view: Callable[..., Any]) -> Callable[..., Any]:
+        """Protect HTML workbench routes without changing API-token behavior."""
+
+        @wraps(view)
+        def wrapped(*args: Any, **kwargs: Any) -> Any:
+            if session.get("admin_authenticated") is not True:
+                return redirect(
+                    url_for("admin_login", next=_safe_admin_next(request.full_path))
+                )
+            return view(*args, **kwargs)
+
+        return wrapped
+
+    def require_admin_form(view: Callable[..., Any]) -> Callable[..., Any]:
+        """Require an authenticated session and a matching form CSRF token."""
+
+        @wraps(view)
+        @require_admin_session
+        def wrapped(*args: Any, **kwargs: Any) -> Any:
+            supplied = str(request.form.get("csrf_token") or "")
+            if not hmac.compare_digest(supplied, admin_csrf_token()):
+                abort(400)
+            return view(*args, **kwargs)
+
+        return wrapped
+
+    @app.after_request
+    def prevent_private_admin_caching(response: Any) -> Any:
+        """Do not allow browsers or intermediaries to retain private evidence."""
+        if request.path == "/admin" or request.path.startswith(("/admin/", "/api/admin/")):
+            response.headers["Cache-Control"] = "no-store, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+        return response
+
+    def _admin_sources() -> list[dict[str, Any]]:
+        return sorted(database.list_sources(), key=lambda item: (str(item["name"]), str(item["id"])))
+
+    def _lead_status_options(lead: dict[str, Any]) -> list[tuple[str, str]]:
+        current = str(lead.get("verification_status") or "candidate")
+        allowed = CANDIDATE_LEAD_TRANSITIONS.get(current, frozenset({current}))
+        return [
+            (status, ADMIN_LEAD_STATUS_LABELS.get(status, status))
+            for status in sorted(allowed, key=lambda item: (item != current, item))
+            if status != "published"
+        ]
+
+    def _lead_form_changes(lead: dict[str, Any]) -> dict[str, Any]:
+        """Translate a reviewed HTML form into the existing lead contract.
+
+        This keeps all non-editable batch/provenance keys intact.  The form
+        changes only the evidence fields an operator can actually verify.
+        """
+
+        metadata = dict(lead.get("metadata") or {})
+        for key in (
+            "employer",
+            "description",
+            "summary",
+            "location",
+            "deadline_date",
+            "match_text",
+            "qualification_text",
+        ):
+            value = str(request.form.get(f"metadata_{key}") or "").strip()
+            if value:
+                metadata[key] = value
+            else:
+                metadata.pop(key, None)
+
+        field_evidence = metadata.get("field_evidence")
+        if not isinstance(field_evidence, dict):
+            field_evidence = {}
+        else:
+            field_evidence = dict(field_evidence)
+        for field_name, form_name in (
+            ("专业要求", "evidence_major"),
+            ("学历要求", "evidence_degree"),
+            ("岗位代码", "evidence_position_code"),
+        ):
+            value = str(request.form.get(form_name) or "").strip()
+            if value:
+                field_evidence[field_name] = value
+            else:
+                field_evidence.pop(field_name, None)
+        metadata["field_evidence"] = field_evidence
+
+        changes: dict[str, Any] = {
+            "employer_hint": str(request.form.get("employer_hint") or "").strip(),
+            "location_hint": str(request.form.get("location_hint") or "").strip(),
+            "province_hint": str(request.form.get("province_hint") or "").strip(),
+            "published_date": str(request.form.get("published_date") or "").strip(),
+            "official_url": str(request.form.get("official_url") or "").strip(),
+            "official_table_url": str(request.form.get("official_table_url") or "").strip(),
+            "official_application_url": str(
+                request.form.get("official_application_url") or ""
+            ).strip(),
+            "official_source_id": str(request.form.get("official_source_id") or "").strip(),
+            "verification_status": str(
+                request.form.get("verification_status") or lead["verification_status"]
+            ).strip(),
+            "verification_note": str(request.form.get("verification_note") or "").strip(),
+            "trust_grade": str(request.form.get("trust_grade") or "").strip(),
+            "reviewed_by": str(request.form.get("reviewed_by") or "").strip(),
+            "metadata": metadata,
+        }
+        # A registered source assessment is automatic. Only an explicit
+        # human override is ever sent through the manual-approval pathway.
+        if request.form.get("manual_domain_approved") == "yes":
+            changes["official_domain_status"] = "manual_review_approved"
+        return changes
+
+    def _publish_candidate_lead(lead_id: int) -> tuple[dict[str, Any], int]:
+        """Publish one verified lead through the same gate for UI and API."""
+        lead = database.get_candidate_lead(lead_id)
+        if lead is None:
+            return {"error": "Candidate lead was not found."}, 404
+        if lead["verification_status"] != "official_content_verified":
+            return {"error": "Only official-content-verified leads can be published."}, 409
+        if not is_http_url(str(lead.get("official_url") or "")):
+            return {"error": "Lead has no valid official_url."}, 409
+        if lead.get("official_domain_status") not in {
+            "registered_source_match",
+            "manual_review_approved",
+        }:
+            return {
+                "error": (
+                    "Lead needs a registered-source match or explicit "
+                    "manual-domain approval."
+                )
+            }, 409
+        metadata = lead.get("metadata", {})
+        employer = str(metadata.get("employer") or lead.get("employer_hint") or "").strip()
+        if not employer:
+            return {"error": "Verified lead needs an employer before publication."}, 409
+        source = database.get_source(
+            str(
+                metadata.get("source_id")
+                or lead.get("official_source_id")
+                or "official-manual-import"
+            )
+        )
+        if source is None:
+            return {"error": "Configured source_id is not registered."}, 409
+        field_evidence = metadata.get("field_evidence")
+        if not isinstance(field_evidence, dict):
+            field_evidence = {}
+        else:
+            field_evidence = dict(field_evidence)
+        # This action is available only after an administrator verified the
+        # official original. Record that provenance so manual and automated
+        # sources pass through the same student-publication gate.
+        if field_evidence:
+            field_evidence.setdefault(
+                "evidence_scope", "admin_verified_official_record"
+            )
+            field_evidence.setdefault(
+                "岗位", str(metadata.get("title") or lead["title"]).strip()
+            )
+        raw = RawPosting(
+            title=str(metadata.get("title") or lead["title"]).strip(),
+            employer=employer,
+            source_url=str(lead["official_url"]).strip(),
+            application_url=str(
+                lead.get("official_application_url")
+                or metadata.get("application_url")
+                or ""
+            ).strip()
+            or None,
+            text=str(metadata.get("description") or lead["title"]).strip(),
+            summary=str(metadata.get("summary") or "").strip(),
+            published_date=str(
+                metadata.get("published_date") or lead.get("published_date") or ""
+            ).strip()
+            or None,
+            deadline_date=str(metadata.get("deadline_date") or "").strip() or None,
+            location=str(metadata.get("location") or lead.get("location_hint") or "").strip()
+            or None,
+            external_id=f"verified-lead-{lead_id}",
+            official_evidence_url=str(lead["official_url"]).strip(),
+            match_text=str(metadata.get("match_text") or "").strip() or None,
+            qualification_text=(
+                str(metadata.get("qualification_text") or "").strip() or None
+            ),
+            field_evidence=field_evidence or None,
+        )
+        job_id, outcome = database.save_job(pipeline.normalize_posting(raw, source))
+        try:
+            published = database.mark_candidate_lead_published(lead_id, job_id)
+        except ValueError as error:
+            return {"error": str(error)}, 409
+        return {"job_id": job_id, "outcome": outcome, "lead": published}, 201
+
+    @app.route("/admin/login", methods=["GET", "POST"])
+    def admin_login() -> Any:
+        next_url = _safe_admin_next(request.values.get("next"))
+        if request.method == "POST":
+            supplied_csrf = str(request.form.get("csrf_token") or "")
+            supplied_token = str(request.form.get("admin_token") or "")
+            if (
+                not hmac.compare_digest(supplied_csrf, admin_csrf_token())
+                or not settings.admin_token
+                or not hmac.compare_digest(supplied_token, settings.admin_token)
+            ):
+                return render_template(
+                    "admin_login.html",
+                    csrf_token=admin_csrf_token(),
+                    next_url=next_url,
+                    error="登录凭据无效。",
+                ), 403
+            session.clear()
+            session["admin_authenticated"] = True
+            session["admin_csrf_token"] = secrets.token_urlsafe(32)
+            return redirect(next_url)
+        if session.get("admin_authenticated") is True:
+            return redirect(next_url)
+        return render_template(
+            "admin_login.html",
+            csrf_token=admin_csrf_token(),
+            next_url=next_url,
+            error=None,
+        )
+
+    @app.post("/admin/logout")
+    @require_admin_form
+    def admin_logout() -> Any:
+        session.clear()
+        return redirect(url_for("admin_login"))
+
+    @app.get("/admin")
+    @require_admin_session
+    def admin_dashboard() -> str:
+        leads = database.list_candidate_leads(limit=5000)
+        statuses = {
+            status: sum(1 for lead in leads if lead["verification_status"] == status)
+            for status in ADMIN_LEAD_STATUS_LABELS
+        }
+        registry = load_discovery_source_registry()
+        jobs, _ = database.list_jobs(
+            page_size=None, as_of_date=local_today(settings).isoformat()
+        )
+        return render_template(
+            "admin_dashboard.html",
+            csrf_token=admin_csrf_token(),
+            lead_statuses=statuses,
+            lead_status_labels=ADMIN_LEAD_STATUS_LABELS,
+            discovery=discovery_funnel(leads, registry, jobs=jobs),
+            third_party_batches=database.list_third_party_batches(limit=20),
+            artifact_statuses=database.list_source_artifact_status_counts(),
+            three_oil_entry=three_oil_entry_evidence_summary(
+                load_three_oil_entry_evidence()
+            ),
+            three_oil=build_three_oil_catalog_audit(
+                organization_registry=load_organization_registry(),
+                source_records=database.list_sources(),
+                job_records=jobs,
+                external_identity_evidence=build_phase4_external_identity_evidence(),
+            ),
+        )
+
+    @app.get("/admin/leads")
+    @require_admin_session
+    def admin_leads() -> str:
+        selected_status = request.args.get("status", "").strip() or None
+        selected_source = request.args.get("discovery_source_id", "").strip() or None
+        selected_province = request.args.get("province", "").strip() or None
+        return render_template(
+            "admin_leads.html",
+            csrf_token=admin_csrf_token(),
+            leads=database.list_candidate_leads(
+                selected_status,
+                discovery_source_id=selected_source,
+                province=selected_province,
+                limit=5000,
+            ),
+            statuses=ADMIN_LEAD_STATUS_LABELS,
+            discovery_sources=load_discovery_source_registry()["sources"],
+            selected={
+                "status": selected_status or "",
+                "discovery_source_id": selected_source or "",
+                "province": selected_province or "",
+            },
+        )
+
+    @app.get("/admin/three-oil-entries")
+    @require_admin_session
+    def admin_three_oil_entries() -> str:
+        """Render the read-only unit-by-unit entrance-evidence ledger.
+
+        This page is intentionally a review surface, not a source-registration
+        or crawler control panel. Updating an entry requires a separately
+        reviewed data change with its official evidence retained on disk.
+        """
+
+        payload = load_three_oil_entry_evidence()
+        selected_group = request.args.get("group_id", "").strip()
+        selected_status = request.args.get("status", "").strip()
+        rows = list(payload["units"])
+        if selected_group:
+            rows = [item for item in rows if item["group_id"] == selected_group]
+        if selected_status:
+            rows = [
+                item
+                for item in rows
+                if item["unit_specific_entry_status"] == selected_status
+            ]
+        return render_template(
+            "admin_three_oil_entries.html",
+            csrf_token=admin_csrf_token(),
+            entries=rows,
+            summary=three_oil_entry_evidence_summary(payload),
+            status_labels=ADMIN_THREE_OIL_ENTRY_STATUS_LABELS,
+            selected={"group_id": selected_group, "status": selected_status},
+            source_matrix=payload.get("source_matrix", {}),
+        )
+
+    @app.route("/admin/leads/<int:lead_id>", methods=["GET", "POST"])
+    @require_admin_session
+    def admin_lead_detail(lead_id: int) -> Any:
+        lead = database.get_candidate_lead(lead_id)
+        if lead is None:
+            abort(404)
+        if request.method == "POST":
+            supplied_csrf = str(request.form.get("csrf_token") or "")
+            if not hmac.compare_digest(supplied_csrf, admin_csrf_token()):
+                abort(400)
+            action = str(request.form.get("action") or "save")
+            try:
+                if action == "save":
+                    database.update_candidate_lead(lead_id, _lead_form_changes(lead))
+                    flash("审核记录已保存。", "success")
+                elif action == "publish":
+                    result, status_code = _publish_candidate_lead(lead_id)
+                    if status_code != 201:
+                        flash(str(result["error"]), "error")
+                    else:
+                        flash(f"已按官方证据创建岗位 #{result['job_id']}。", "success")
+                else:
+                    abort(400)
+            except ValueError as error:
+                flash(str(error), "error")
+            return redirect(url_for("admin_lead_detail", lead_id=lead_id))
+        return render_template(
+            "admin_lead_detail.html",
+            csrf_token=admin_csrf_token(),
+            lead=lead,
+            status_options=_lead_status_options(lead),
+            domain_labels=ADMIN_DOMAIN_STATUS_LABELS,
+            sources=_admin_sources(),
+            events=database.list_candidate_lead_events(lead_id),
+            mentions=database.list_candidate_lead_mentions(lead_id),
+        )
 
     @app.get("/api/admin/source-funnel")
     @require_admin
@@ -929,6 +1369,19 @@ def create_app(settings: Settings | None = None) -> Flask:
                 job_records=jobs,
                 external_identity_evidence=build_phase4_external_identity_evidence(),
             )
+        )
+
+    @app.get("/api/admin/three-oil-entry-evidence")
+    @require_admin
+    def three_oil_entry_evidence_api() -> Any:
+        """Expose the distinct unit-entry evidence ledger to administrators."""
+        payload = load_three_oil_entry_evidence()
+        return jsonify(
+            {
+                "summary": three_oil_entry_evidence_summary(payload),
+                "items": payload["units"],
+                "source_matrix": payload.get("source_matrix", {}),
+            }
         )
 
     @app.get("/api/admin/national-source-matrix")
@@ -1278,6 +1731,17 @@ def create_app(settings: Settings | None = None) -> Flask:
             return jsonify({"error": str(error)}), 400
         return jsonify(lead), 201
 
+    @app.get("/api/admin/third-party-batches")
+    @require_admin
+    def third_party_batches_api() -> Any:
+        """Expose retained B-level table captures only to token-authenticated admins."""
+        source_id = request.args.get("source_id", "").strip() or None
+        return jsonify(
+            {
+                "items": database.list_third_party_batches(source_id=source_id, limit=1000),
+            }
+        )
+
     @app.get("/api/admin/discovery-sources")
     @require_admin
     def discovery_sources_api() -> Any:
@@ -1330,88 +1794,8 @@ def create_app(settings: Settings | None = None) -> Flask:
     @app.post("/api/admin/leads/<int:lead_id>/publish")
     @require_admin
     def publish_candidate_lead_api(lead_id: int) -> Any:
-        lead = database.get_candidate_lead(lead_id)
-        if lead is None:
-            abort(404)
-        if lead["verification_status"] != "official_content_verified":
-            return jsonify(
-                {"error": "Only official-content-verified leads can be published."}
-            ), 409
-        if not is_http_url(str(lead.get("official_url") or "")):
-            return jsonify({"error": "Lead has no valid official_url."}), 409
-        if lead.get("official_domain_status") not in {
-            "registered_source_match",
-            "manual_review_approved",
-        }:
-            return jsonify(
-                {
-                    "error": (
-                        "Lead needs a registered-source match or explicit "
-                        "manual-domain approval."
-                    )
-                }
-            ), 409
-        metadata = lead.get("metadata", {})
-        employer = str(metadata.get("employer") or lead.get("employer_hint") or "").strip()
-        if not employer:
-            return jsonify({"error": "Verified lead needs an employer before publication."}), 409
-        source = database.get_source(
-            str(
-                metadata.get("source_id")
-                or lead.get("official_source_id")
-                or "official-manual-import"
-            )
-        )
-        if source is None:
-            return jsonify({"error": "Configured source_id is not registered."}), 409
-        field_evidence = metadata.get("field_evidence")
-        if not isinstance(field_evidence, dict):
-            field_evidence = {}
-        else:
-            field_evidence = dict(field_evidence)
-        # This route is available only after an administrator verified the
-        # official original. Record that provenance so manual and automated
-        # sources pass through the same student-publication gate.
-        if field_evidence:
-            field_evidence.setdefault(
-                "evidence_scope", "admin_verified_official_record"
-            )
-            field_evidence.setdefault(
-                "岗位", str(metadata.get("title") or lead["title"]).strip()
-            )
-        raw = RawPosting(
-            title=str(metadata.get("title") or lead["title"]).strip(),
-            employer=employer,
-            source_url=str(lead["official_url"]).strip(),
-            application_url=str(
-                lead.get("official_application_url")
-                or metadata.get("application_url")
-                or ""
-            ).strip()
-            or None,
-            text=str(metadata.get("description") or lead["title"]).strip(),
-            summary=str(metadata.get("summary") or "").strip(),
-            published_date=str(
-                metadata.get("published_date") or lead.get("published_date") or ""
-            ).strip()
-            or None,
-            deadline_date=str(metadata.get("deadline_date") or "").strip() or None,
-            location=str(metadata.get("location") or lead.get("location_hint") or "").strip()
-            or None,
-            external_id=f"verified-lead-{lead_id}",
-            official_evidence_url=str(lead["official_url"]).strip(),
-            match_text=str(metadata.get("match_text") or "").strip() or None,
-            qualification_text=(
-                str(metadata.get("qualification_text") or "").strip() or None
-            ),
-            field_evidence=field_evidence or None,
-        )
-        job_id, outcome = database.save_job(pipeline.normalize_posting(raw, source))
-        try:
-            published = database.mark_candidate_lead_published(lead_id, job_id)
-        except ValueError as error:
-            return jsonify({"error": str(error)}), 409
-        return jsonify({"job_id": job_id, "outcome": outcome, "lead": published}), 201
+        payload, status_code = _publish_candidate_lead(lead_id)
+        return jsonify(payload), status_code
 
     @app.route("/api/admin/artifacts", methods=["GET", "POST"])
     @require_admin

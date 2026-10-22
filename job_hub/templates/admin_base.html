@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <title>{% block title %}管理员审核台{% endblock %} | {{ site_name }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='brand-mark.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+  </head>
+  <body class="admin-body">
+    <header class="admin-header">
+      <div class="admin-shell admin-header-inner">
+        <a class="admin-brand" href="{{ url_for('admin_dashboard') }}">
+          <img src="{{ url_for('static', filename='college-geosciences-seal.png') }}" width="38" height="38" alt="">
+          <span><strong>就业信息审核台</strong><small>{{ site_name }}</small></span>
+        </a>
+        <nav class="admin-nav" aria-label="审核台导航">
+          <a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint == 'admin_dashboard' %}aria-current="page"{% endif %}>概览</a>
+          <a href="{{ url_for('admin_leads') }}" {% if request.endpoint in ['admin_leads', 'admin_lead_detail'] %}aria-current="page"{% endif %}>第三方候选</a>
+          <a href="{{ url_for('admin_three_oil_entries') }}" {% if request.endpoint == 'admin_three_oil_entries' %}aria-current="page"{% endif %}>三桶油入口</a>
+          <a href="{{ url_for('home') }}">学生端</a>
+          <form method="post" action="{{ url_for('admin_logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit">退出</button>
+          </form>
+        </nav>
+      </div>
+    </header>
+    <main class="admin-shell admin-main">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <section class="admin-messages" aria-live="polite">
+            {% for category, message in messages %}
+              <p class="admin-message admin-message-{{ category }}">{{ message }}</p>
+            {% endfor %}
+          </section>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

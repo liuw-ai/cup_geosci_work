@@ -605,6 +605,19 @@ def resolve_official_url_candidates(
     return resolved
 
 
+def _registered_recovery_candidates(
+    candidates: list[dict[str, str]],
+) -> list[dict[str, str]]:
+    """Return only candidates bound to an already registered official source."""
+
+    return [
+        item
+        for item in candidates
+        if item.get("domain_status") == "registered_source_match"
+        and str(item.get("official_source_id") or "").strip()
+    ]
+
+
 def recover_persisted_official_url_candidates(
     database: Any,
     *,
@@ -673,14 +686,15 @@ def recover_persisted_official_url_candidates(
             if isinstance(recovery, dict):
                 resolved = resolve_official_url_candidates(recovery, records)
                 current_url = str(row.get("official_url") or "").strip()
-                current_matches = [item for item in resolved if item["url"] == current_url]
-                if current_matches and not any(
+                registered = _registered_recovery_candidates(resolved)
+                current_matches = [item for item in registered if item["url"] == current_url]
+                if not any(
                     item["candidate_quality"] == "job_detail_or_notice"
                     for item in current_matches
                 ):
                     winner = next(
                         (
-                            item for item in resolved
+                            item for item in registered
                             if item["candidate_quality"] == "job_detail_or_notice"
                         ),
                         None,
@@ -699,9 +713,7 @@ def recover_persisted_official_url_candidates(
                                 "official_domain_status": (
                                     winner["domain_status"] if winner else "unverified"
                                 ),
-                                "verification_status": (
-                                    "official_url_found" if winner else "need_review"
-                                ),
+                                "verification_status": "official_url_found" if winner else "candidate",
                                 "verification_note": (
                                     "原官方 URL 候选实际为报名/考试材料，已按附件标签重新分类；"
                                     "替代岗位表仍须独立核验官方内容与当前性。"
@@ -756,7 +768,21 @@ def recover_persisted_official_url_candidates(
                 ),
             )
             continue
-        counts["resolved"] += len(resolved)
+        registered = _registered_recovery_candidates(resolved)
+        if not registered:
+            counts["unresolved"] += 1
+            next_recovery = dict(recovery)
+            next_recovery["resolved_official_url_candidates"] = resolved
+            record_resolution(
+                row,
+                metadata,
+                next_recovery,
+                status="deferred",
+                reason="unregistered_official_candidate",
+                resolved_count=len(resolved),
+            )
+            continue
+        counts["resolved"] += len(registered)
         if str(row.get("official_url") or "").strip():
             counts["already_resolved"] += 1
             record_resolution(
@@ -765,10 +791,10 @@ def recover_persisted_official_url_candidates(
                 recovery,
                 status="already_resolved",
                 reason="already_has_official_url",
-                resolved_count=len(resolved),
+                resolved_count=len(registered),
             )
             continue
-        if resolved[0].get("candidate_quality") != "job_detail_or_notice":
+        if registered[0].get("candidate_quality") != "job_detail_or_notice":
             counts["deferred_generic_homepage"] += 1
             next_recovery = dict(recovery)
             next_recovery["resolved_official_url_candidates"] = resolved
@@ -782,13 +808,13 @@ def recover_persisted_official_url_candidates(
                 status="deferred",
                 reason=(
                     "non_vacancy_entry_only"
-                    if resolved[0].get("candidate_quality") == "non_vacancy_entry"
+                    if registered[0].get("candidate_quality") == "non_vacancy_entry"
                     else "generic_homepage_only"
                 ),
-                resolved_count=len(resolved),
+                resolved_count=len(registered),
             )
             continue
-        winner = resolved[0]
+        winner = registered[0]
         next_recovery = dict(recovery)
         next_recovery["resolved_official_url_candidates"] = resolved
         next_recovery["recovery_replayed_at"] = datetime.now(ZoneInfo("Asia/Shanghai")).isoformat()
@@ -812,7 +838,7 @@ def recover_persisted_official_url_candidates(
                             "recovery_resolution": {
                                 "status": "resolved",
                                 "reason": "job_level_candidate",
-                                "resolved_count": len(resolved),
+                                "resolved_count": len(registered),
                                 "recorded_at": datetime.now(
                                     ZoneInfo("Asia/Shanghai")
                                 ).isoformat(),

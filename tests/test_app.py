@@ -77,6 +77,21 @@ def test_readiness_endpoint_separates_liveness_from_publication_gate(tmp_path) -
     assert readiness.headers["Cache-Control"] == "no-store"
 
 
+def test_healthz_prefers_paused_configuration_over_a_stale_worker_heartbeat(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    app = create_app(settings)
+    app.extensions["database"].record_service_heartbeat(
+        "worker", "running", "historical worker run"
+    )
+
+    worker = app.test_client().get("/healthz").get_json()["worker"]
+
+    assert worker["status"] == "paused"
+    assert worker["automation_enabled"] is False
+    assert worker["last_persisted_heartbeat_at"]
+    assert "historical worker run" not in worker["detail"]
+
+
 def test_readiness_endpoint_returns_200_only_for_internal_ready_report(
     tmp_path, monkeypatch
 ) -> None:

@@ -1,0 +1,66 @@
+{% extends "admin_base.html" %}
+
+{% block title %}三桶油入口证据{% endblock %}
+
+{% block content %}
+  <header class="admin-page-heading">
+    <div>
+      <p class="admin-kicker">正式目录 {{ summary.unit_count }} 个单位，已登记 {{ summary.unit_owned_identity_page_count }} 个单位身份页</p>
+      <h1>三桶油单位入口证据</h1>
+      <p>该台账只记录已保留的官方身份、集团入口、岗位展示和单位独立入口证据。集团共享平台不等同于下属单位独立招聘系统。</p>
+    </div>
+  </header>
+
+  <form class="admin-filters admin-entry-filters" method="get">
+    <label>集团
+      <select name="group_id">
+        <option value="">全部集团</option>
+        <option value="cnpc" {% if selected.group_id == 'cnpc' %}selected{% endif %}>中国石油</option>
+        <option value="sinopec" {% if selected.group_id == 'sinopec' %}selected{% endif %}>中国石化</option>
+        <option value="cnooc" {% if selected.group_id == 'cnooc' %}selected{% endif %}>中国海油</option>
+      </select>
+    </label>
+    <label>入口证据状态
+      <select name="status">
+        <option value="">全部状态</option>
+        {% for status, label in status_labels.items() %}
+          <option value="{{ status }}" {% if selected.status == status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">筛选</button>
+    <a href="{{ url_for('admin_three_oil_entries') }}">清除筛选</a>
+  </form>
+
+  <p class="admin-result-count">显示 {{ entries|length }} 个单位。源矩阵：{{ source_matrix.path or '未登记' }}{% if source_matrix.sha256 %}，SHA-256 {{ source_matrix.sha256 }}{% endif %}</p>
+
+  <section class="admin-section">
+    <div class="admin-table-wrap">
+      <table class="admin-entry-table">
+        <thead>
+          <tr><th>集团</th><th>正式名称</th><th>证据状态</th><th>集团入口</th><th>单位独立入口</th><th>官方身份/岗位证据</th><th>最近核验</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          {% for entry in entries %}
+            <tr>
+              <td>{{ {'cnpc': '中国石油', 'sinopec': '中国石化', 'cnooc': '中国海油'}[entry.group_id] }}</td>
+              <td><strong>{{ entry.canonical_name }}</strong><small>{{ entry.catalog_id }}</small></td>
+              <td><span class="admin-status">{{ status_labels[entry.unit_specific_entry_status] }}</span></td>
+              <td><a href="{{ entry.group_entry_url }}" rel="noreferrer" target="_blank">官方集团入口</a></td>
+              <td>{% if entry.unit_specific_entry_url %}<a href="{{ entry.unit_specific_entry_url }}" rel="noreferrer" target="_blank">单位独立入口</a>{% else %}<span class="admin-muted">未核验到</span>{% endif %}</td>
+              <td>
+                {% if entry.official_identity_url %}<a href="{{ entry.official_identity_url }}" rel="noreferrer" target="_blank">单位身份页</a>{% endif %}
+                {% if entry.observed_official_application_url %}<a href="{{ entry.observed_official_application_url }}" rel="noreferrer" target="_blank">观察到的官方申请页</a>{% endif %}
+                {% if not entry.official_identity_url and not entry.observed_official_application_url %}<span class="admin-muted">待补充</span>{% endif %}
+              </td>
+              <td>{% if entry.checked_at %}{{ entry.checked_at }}{% else %}<span class="admin-muted">未登记</span>{% endif %}</td>
+              <td>{{ entry.notes or '—' }}{% for path in entry.evidence_files %}<small>{{ path }}</small>{% endfor %}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="8" class="admin-empty">没有匹配的正式目录单位。</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

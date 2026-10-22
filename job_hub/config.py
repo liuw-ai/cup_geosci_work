@@ -145,6 +145,10 @@ class Settings:
     # Retry failed cycles promptly instead of waiting for the full source
     # interval; the worker keeps a degraded heartbeat until recovery.
     worker_failure_retry_seconds: int = 60
+    # Collection and lifecycle mutations must be explicitly enabled for each
+    # reviewed release. A running worker in a local review or fresh deploy is
+    # otherwise an observability-only paused process.
+    worker_automation_enabled: bool = False
     # Official-identity expansion candidates are not registered collectors.
     # Check their public entries separately so a newly reachable portal is
     # recorded for adapter work without treating it as a job source.
@@ -283,6 +287,7 @@ class Settings:
             worker_failure_retry_seconds=max(
                 5, _env_int("WORKER_FAILURE_RETRY_SECONDS", 60)
             ),
+            worker_automation_enabled=_env_bool("WORKER_AUTOMATION_ENABLED", False),
             domestic_entry_health_interval_minutes=max(
                 30, _env_int("DOMESTIC_ENTRY_HEALTH_INTERVAL_MINUTES", 360)
             ),

@@ -25,9 +25,13 @@ from job_hub.discovery import (
 )
 from job_hub.discovery_scan import (
     DiscoveryAccessLimited,
+    DiscoveryScanner,
     DiscoveryScanItem,
     _host_allowed,
+    _matches_url_patterns,
+    _optional_text_patterns,
     _response_text,
+    _url_patterns,
     extract_discovery_evidence,
     enrich_persisted_candidate_leads,
     run_discovery_scan,
@@ -166,6 +170,67 @@ def test_discovery_scan_allows_only_registered_first_party_subdomains() -> None:
     assert _host_allowed("https://www.huatu.com/2026/0901/2872149.html", allowed)
     assert not _host_allowed("https://v.huatu.com/htzx/course.shtml?category=1", allowed)
     assert not _host_allowed("https://example.com/jobs/1", allowed)
+
+
+def test_discovery_lead_url_patterns_exclude_navigation_before_private_lead_creation() -> None:
+    patterns = _url_patterns(
+        [r"^https://(?:www\.)?offcn\.com/gqzp/20\d{2}/\d{4}/\d+\.html$"]
+    )
+    assert _matches_url_patterns(
+        "https://www.offcn.com/gqzp/2026/1022/258360.html", patterns
+    )
+    assert not _matches_url_patterns("https://www.offcn.com/gqzp/", patterns)
+    assert not _matches_url_patterns(
+        "https://www.offcn.com/gqzp/shiyou/", patterns
+    )
+
+
+def test_discovery_lead_url_patterns_reject_invalid_configuration() -> None:
+    with pytest.raises(ValueError, match="invalid lead_url_patterns"):
+        _url_patterns(["["])
+
+
+def test_discovery_program_relevance_patterns_are_optional_and_validated() -> None:
+    assert _optional_text_patterns(None, field="program_relevance_patterns") == ()
+    assert _optional_text_patterns(["地质", "石油"], field="program_relevance_patterns") == (
+        "地质",
+        "石油",
+    )
+    with pytest.raises(ValueError, match="invalid program_relevance_patterns"):
+        _optional_text_patterns(["["], field="program_relevance_patterns")
+
+
+def test_discovery_announcement_title_filter_excludes_portal_and_faq_pages(tmp_path) -> None:
+    scanner = DiscoveryScanner(make_settings(tmp_path))
+    source = {"id": "offcn-discovery", "name": "中公教育招聘公告汇总"}
+    base_url = "https://www.offcn.com/gqzp/"
+    article_patterns = _url_patterns(
+        [r"^https://(?:www\.)?offcn\.com/gqzp/20\d{2}/\d{4}/\d+\.html$"]
+    )
+    announcement_patterns = _optional_text_patterns(
+        ["招聘公告", "招录公告", "公开招聘", "招聘简章", r"(?:20\d{2}年|20\d{2}届).*校园招聘"],
+        field="announcement_title_patterns",
+    )
+    body = """
+    <a href="/gqzp/2026/1022/258317.html">2027中国石油化工集团有限公司校园招聘公告</a>
+    <a href="/gqzp/2026/0909/255014.html">中国石油招聘官网入口</a>
+    <a href="/gqzp/2026/1009/257219.html">2027中国海洋石油秋季校园招聘常见问题</a>
+    """
+
+    leads = scanner._html_leads(
+        source,
+        base_url,
+        body,
+        ("招聘", "校园", "校招", "石油"),
+        ("常见问题", "官网", "入口", "平台", "网站", "查看", "下载", "流程"),
+        20,
+        {"www.offcn.com", "offcn.com"},
+        article_patterns,
+        ("石油",),
+        announcement_patterns,
+    )
+
+    assert [lead["title"] for lead in leads] == ["2027中国石油化工集团有限公司校园招聘公告"]
 
 
 def test_discovery_evidence_extracts_attribution_and_attachments_without_promotion() -> None:
@@ -322,11 +387,15 @@ def test_discovery_enrichment_stays_private_and_does_not_publish(tmp_path) -> No
     assert result["scope"] == "private_discovery_only"
     assert result["created_lead_count"] == 1
     saved = database.list_candidate_leads(limit=10)[0]
-    assert saved["verification_status"] == "official_url_found"
-    assert saved["official_domain_status"] == "manual_review_required"
+    assert saved["verification_status"] == "candidate"
+    assert saved["official_domain_status"] == "unverified"
     assert saved["official_source_id"] is None
+    assert saved["official_url"] is None
     assert saved["published_job_id"] is None
     assert saved["metadata"]["official_recovery"]["status"] == "fetched"
+    assert result["official_url_replay"]["resolution_reasons"] == {
+        "unregistered_official_candidate": 1
+    }
     _, public_count = database.list_jobs(only_open=True, student_visible=True, page_size=None)
     assert public_count == 0
 
@@ -372,6 +441,65 @@ def test_discovery_enrichment_failure_is_private_unavailable_evidence(tmp_path) 
     assert saved["verification_status"] == "candidate"
     assert saved["metadata"]["official_recovery"]["status"] == "unavailable"
     assert "detail unavailable" in saved["metadata"]["official_recovery"]["detail"]
+
+
+def test_discovery_retry_never_overwrites_phase6_manual_capture(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    lead = database.create_candidate_lead(
+        {
+            "lead_provider": "中公教育招聘公告汇总",
+            "discovery_source_id": "offcn-discovery",
+            "lead_url": "https://www.offcn.com/gqzp/2026/1022/258317.html",
+            "title": "中国石化校园招聘公告",
+            "official_url": "https://job.sinopec.com/#/school/groupNoticeDetail?id=notice",
+            "metadata": {
+                "phase6_discovery_capture": {"version": 1},
+                "official_recovery": {"status": "fetched", "source": "manual"},
+            },
+        }
+    )
+    source_record = {
+        "id": "offcn-discovery",
+        "name": "中公教育招聘公告汇总",
+        "homepage_url": "https://www.offcn.com/",
+        "access_mode": "public_page",
+        "status": "checked",
+        "scan_config": {"allowed_hosts": ["www.offcn.com"], "detail_fetch_limit": 1},
+        "publication_policy": "batch_candidate_allowed",
+    }
+
+    class Scanner:
+        def scan_source(self, source):
+            return DiscoveryScanItem(
+                source["id"],
+                "scanned",
+                1,
+                (
+                    {
+                        "lead_provider": source["name"],
+                        "discovery_source_id": source["id"],
+                        "lead_url": lead["lead_url"],
+                        "title": lead["title"],
+                    },
+                ),
+                "ok",
+            )
+
+        def enrich_lead(self, lead, *, allowed_hosts):
+            raise AssertionError("manual Phase 6 capture must not be retried")
+
+    result = run_discovery_scan(
+        settings,
+        database,
+        registry={"sources": [source_record]},
+        scanner=Scanner(),
+    )
+    saved = database.get_candidate_lead(lead["id"])
+    assert result["created_lead_count"] == 0
+    assert saved["metadata"]["official_recovery"]["status"] == "fetched"
+    assert saved["metadata"]["official_recovery"]["source"] == "manual"
 
 
 def test_lead_url_normalization_and_domain_assessment() -> None:
@@ -440,6 +568,46 @@ def test_third_party_recovery_keeps_unregistered_government_url_as_private_candi
             "candidate_kind": "official_page",
         }
     ]
+
+
+def test_persisted_recovery_demotes_an_unregistered_official_url_stage(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    lead = database.create_candidate_lead(
+        {
+            "lead_provider": "行业平台",
+            "lead_url": "https://clue.example/jobs/unregistered-source",
+            "title": "地质工程招聘公告",
+            "metadata": {
+                "official_recovery": {
+                    "official_link_candidates": [
+                        {
+                            "url": "https://www.example.gov.cn/notice/1",
+                            "label": "官方公告",
+                        }
+                    ]
+                }
+            },
+        }
+    )
+    database.update_candidate_lead(
+        int(lead["id"]),
+        {
+            "official_url": "https://www.example.gov.cn/notice/1",
+            "official_domain_status": "manual_review_required",
+            "verification_status": "official_url_found",
+        },
+    )
+
+    result = recover_persisted_official_url_candidates(database)
+    saved = database.get_candidate_lead(int(lead["id"]))
+
+    assert result["updated"] == 1
+    assert result["errors"] == 0
+    assert saved["verification_status"] == "candidate"
+    assert saved["official_url"] is None
+    assert saved["official_domain_status"] == "unverified"
 
 
 def test_third_party_recovery_orders_job_detail_before_generic_homepage() -> None:
@@ -584,6 +752,15 @@ def test_persisted_recovery_keeps_generic_homepage_private(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
     database.initialize()
+    registered = source()
+    registered.update(
+        {
+            "id": "registered-generic-homepage",
+            "homepage_url": "https://jobs.example.gov.cn/",
+            "config": {"allowed_hosts": ["example.gov.cn"]},
+        }
+    )
+    database.upsert_source(registered)
     lead = database.create_candidate_lead(
         {
             "lead_provider": "行业平台",
@@ -617,6 +794,15 @@ def test_persisted_recovery_keeps_application_home_private(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
     database.initialize()
+    registered = source()
+    registered.update(
+        {
+            "id": "registered-application-homepage",
+            "homepage_url": "https://bm.scs.gov.cn/",
+            "config": {"allowed_hosts": ["scs.gov.cn"]},
+        }
+    )
+    database.upsert_source(registered)
     lead = database.create_candidate_lead(
         {
             "lead_provider": "行业平台",

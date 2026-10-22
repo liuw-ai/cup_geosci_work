@@ -1,0 +1,32 @@
+{% extends "admin_base.html" %}
+
+{% block title %}第三方候选{% endblock %}
+
+{% block content %}
+  <header class="admin-page-heading">
+    <div><p class="admin-kicker">私有队列</p><h1>第三方候选</h1><p>此列表不对学生端开放。第三方页面仅用于发现与回溯，不能作为报名入口。</p></div>
+  </header>
+  <form class="admin-filters" method="get" action="{{ url_for('admin_leads') }}">
+    <label>审核状态<select name="status"><option value="">全部状态</option>{% for key, label in statuses.items() %}<option value="{{ key }}" {% if selected.status == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+    <label>发现渠道<select name="discovery_source_id"><option value="">全部渠道</option>{% for source in discovery_sources %}<option value="{{ source.id }}" {% if selected.discovery_source_id == source.id %}selected{% endif %}>{{ source.name }}</option>{% endfor %}</select></label>
+    <label>省份<input name="province" value="{{ selected.province }}" placeholder="如：山东"></label>
+    <button type="submit">筛选</button>
+    <a href="{{ url_for('admin_leads') }}">清除</a>
+  </form>
+  <p class="admin-result-count">共 {{ leads|length }} 条候选记录。</p>
+  {% if leads %}
+    <div class="admin-table-wrap"><table class="admin-lead-table"><thead><tr><th>岗位线索</th><th>发现渠道</th><th>官方证据</th><th>审核状态</th><th>更新时间</th></tr></thead>
+      <tbody>{% for lead in leads %}
+        <tr>
+          <td><a class="admin-row-title" href="{{ url_for('admin_lead_detail', lead_id=lead.id) }}">{{ lead.title }}</a><small>{{ lead.employer_hint or '单位待补' }}{% if lead.location_hint %} · {{ lead.location_hint }}{% endif %}</small></td>
+          <td>{{ lead.lead_provider }}<small>{{ lead.discovery_source_id or '未归属' }}</small></td>
+          <td>{% if lead.official_url %}<span class="admin-status admin-status-ok">已绑定</span>{% else %}<span class="admin-status">未绑定</span>{% endif %}<small>{{ lead.official_source_id or '无官方来源' }}</small></td>
+          <td><span class="admin-status">{{ statuses.get(lead.verification_status, lead.verification_status) }}</span><small>{{ lead.trust_grade }} 级</small></td>
+          <td>{{ lead.updated_at }}</td>
+        </tr>
+      {% endfor %}</tbody>
+    </table></div>
+  {% else %}
+    <p class="admin-empty">当前筛选条件下没有候选记录。</p>
+  {% endif %}
+{% endblock %}

@@ -276,6 +276,11 @@ CANDIDATE_LEAD_TRANSITIONS = {
     ),
     "official_url_found": frozenset(
         {
+            # A later replay can prove that a previously stored URL is not
+            # bound to a registered official source. Demoting this private
+            # review state preserves the lead and its evidence without
+            # letting an obsolete URL remain in the official-URL funnel.
+            "candidate",
             "official_url_found",
             "official_content_verified",
             "need_review",

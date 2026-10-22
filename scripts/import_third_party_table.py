@@ -13,6 +13,7 @@ from job_hub.db import Database
 from job_hub.third_party_tables import (
     fetch_and_normalize_third_party_table,
     ingest_third_party_table_file,
+    persist_third_party_table_candidates,
 )
 
 
@@ -77,9 +78,13 @@ def main() -> None:
             )
         database = Database(resolved_db)
         database.initialize()
-        for candidate in payload.get("candidates", []):
-            database.create_candidate_lead(candidate)
-            inserted += 1
+        persisted = persist_third_party_table_candidates(database, payload)
+        inserted = int(persisted["linked_candidate_count"])
+        payload["batch_ledger"] = {
+            "batch_id": persisted["batch"]["batch_id"],
+            "status": persisted["batch"]["status"],
+            "linked_candidate_count": inserted,
+        }
     payload["persisted_candidate_count"] = inserted
     payload["publication_gate"] = "official_content_verified_required"
     print(json.dumps(payload, ensure_ascii=False, indent=2))

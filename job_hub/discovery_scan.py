@@ -156,6 +156,26 @@ class DiscoveryScanner:
         exclude = _exclude_patterns(
             config.get("exclude_patterns", source.get("exclude_patterns"))
         )
+        try:
+            lead_url_patterns = _url_patterns(
+                config.get("lead_url_patterns", source.get("lead_url_patterns"))
+            )
+            program_relevance_patterns = _optional_text_patterns(
+                config.get(
+                    "program_relevance_patterns",
+                    source.get("program_relevance_patterns"),
+                ),
+                field="program_relevance_patterns",
+            )
+            announcement_title_patterns = _optional_text_patterns(
+                config.get(
+                    "announcement_title_patterns",
+                    source.get("announcement_title_patterns"),
+                ),
+                field="announcement_title_patterns",
+            )
+        except ValueError as error:
+            return DiscoveryScanItem(source_id, "configuration_error", 0, (), str(error))
         root_host = (urlparse(str(source["homepage_url"])).hostname or "").lower().rstrip(".")
         configured_hosts = config.get("allowed_hosts") or source.get("allowed_hosts") or []
         if not isinstance(configured_hosts, list):
@@ -201,7 +221,18 @@ class DiscoveryScanner:
                 if mode == "rss" or "xml" in content_type or body.lstrip().startswith("<?xml"):
                     page_leads = self._rss_leads(source, normalized, body, include, exclude, max_links, scan_hosts)
                 else:
-                    page_leads = self._html_leads(source, normalized, body, include, exclude, max_links, scan_hosts)
+                    page_leads = self._html_leads(
+                        source,
+                        normalized,
+                        body,
+                        include,
+                        exclude,
+                        max_links,
+                        scan_hosts,
+                        lead_url_patterns,
+                        program_relevance_patterns,
+                        announcement_title_patterns,
+                    )
                 for lead in page_leads:
                     if lead["lead_url"] not in {item["lead_url"] for item in leads}:
                         leads.append(lead)
@@ -281,6 +312,9 @@ class DiscoveryScanner:
         exclude: tuple[str, ...],
         max_links: int,
         scan_hosts: set[str],
+        lead_url_patterns: tuple[re.Pattern[str], ...],
+        program_relevance_patterns: tuple[str, ...],
+        announcement_title_patterns: tuple[str, ...],
     ) -> list[dict[str, Any]]:
         soup = BeautifulSoup(body[:1_000_000], "html.parser")
         leads: list[dict[str, Any]] = []
@@ -290,10 +324,30 @@ class DiscoveryScanner:
                 continue
             if url.rstrip("/") == base_url.rstrip("/"):
                 continue
+            # An aggregator index often includes navigation, courses, category
+            # pages, and notices side by side. When a source declares its
+            # article URL grammar, admit only those bounded notice paths before
+            # creating any private lead. This is discovery hygiene, not a
+            # publication decision.
+            if lead_url_patterns and not _matches_url_patterns(url, lead_url_patterns):
+                continue
             label = re.sub(r"\s+", " ", f"{anchor.get_text(' ', strip=True)} {url}").strip()
+            title = re.sub(r"\s+", " ", anchor.get_text(" ", strip=True)).strip() or url
+            # This is deliberately a private intake filter only. It narrows
+            # a large education-platform index to likely geoscience-relevant
+            # notices; it never determines whether a position actually meets
+            # the four core majors or can be published.
+            if program_relevance_patterns and not _matches(label, program_relevance_patterns):
+                continue
+            # Some aggregators publish SEO pages that merely repeat a group
+            # recruitment portal URL.  They can mention a target industry but
+            # do not contain a vacancy notice or a position table.  A source
+            # may therefore require notice-shaped titles before a private
+            # lead is created. This remains an intake control only.
+            if announcement_title_patterns and not _matches(title, announcement_title_patterns):
+                continue
             if not _matches(label, include) or _matches(label, exclude):
                 continue
-            title = re.sub(r"\s+", " ", anchor.get_text(" ", strip=True)).strip() or url
             if discovery_link_quality_reason(url, title):
                 continue
             leads.append(self._lead(source, url, title, base_url))
@@ -401,12 +455,17 @@ def run_discovery_scan(
             if saved_id is not None and int(saved_id) not in existing_ids:
                 created += 1
                 existing_ids.add(int(saved_id))
+            saved_metadata = saved.get("metadata") if isinstance(saved.get("metadata"), dict) else {}
             if (
                 saved_id is not None
                 and enriched < enrichment_limit
                 and str(saved.get("verification_status") or "candidate")
                 in {"candidate", "need_review"}
                 and allowed_hosts
+                # A Phase 6 manual notice capture preserves article and robots
+                # bytes plus a reviewed official recovery. Generic discovery
+                # retries must not overwrite that durable evidence.
+                and not _has_phase6_discovery_capture(saved_metadata)
             ):
                 try:
                     recovery = active_scanner.enrich_lead(
@@ -414,9 +473,12 @@ def run_discovery_scan(
                         allowed_hosts=allowed_hosts,
                     )
                     metadata = dict(saved.get("metadata") or {})
-                    # Convert only clearly official or registered first-party
-                    # links. This creates a private official-URL candidate; it
-                    # does not verify page contents or publish.
+                    # Keep every plausible government, university, or official
+                    # company URL as private recovery evidence. Only a URL that
+                    # matches an already registered first-party source may
+                    # advance to the private ``official_url_found`` state.
+                    # An unregistered .gov.cn/.edu.cn URL can be useful for an
+                    # auditor, but it is not sufficient source evidence.
                     resolved_candidates = resolve_official_url_candidates(
                         recovery,
                         database.list_sources(enabled_only=False),
@@ -426,10 +488,17 @@ def run_discovery_scan(
                         recovery["resolved_official_url_candidates"] = resolved_candidates
                     metadata["official_recovery"] = recovery
                     changes: dict[str, Any] = {"metadata": metadata}
-                    if resolved_candidates and resolved_candidates[0].get(
-                        "candidate_quality"
-                    ) == "job_detail_or_notice":
-                        winner = resolved_candidates[0]
+                    winner = next(
+                        (
+                            item
+                            for item in resolved_candidates
+                            if item.get("candidate_quality") == "job_detail_or_notice"
+                            and item.get("domain_status") == "registered_source_match"
+                            and item.get("official_source_id")
+                        ),
+                        None,
+                    )
+                    if winner:
                         changes.update(
                             {
                                 "official_url": winner["url"],
@@ -447,13 +516,20 @@ def run_discovery_scan(
                     enriched += 1
                 except (DiscoveryAccessLimited, DiscoveryScanError, requests.RequestException, ValueError) as error:
                     # A detail article is optional evidence.  Keep the lead
-                    # private and preserve the reason for the next run.
+                    # private and preserve the reason for the next run. A
+                    # transient failure must never replace a previously
+                    # successful recovery record.
                     metadata = dict(saved.get("metadata") or {})
-                    metadata["official_recovery"] = {
+                    attempt = {
                         "status": "unavailable",
                         "checked_url": str(lead.get("lead_url") or ""),
+                        "checked_at": datetime.now(ZoneInfo("Asia/Shanghai")).isoformat(),
                         "detail": str(error)[:400],
                     }
+                    if _has_successful_official_recovery(metadata):
+                        metadata["official_recovery_last_attempt"] = attempt
+                    else:
+                        metadata["official_recovery"] = attempt
                     database.update_candidate_lead(int(saved_id), {"metadata": metadata})
         rows.append(result.as_dict(created_leads=created, enriched_leads=enriched))
     retry_recovery = enrich_persisted_candidate_leads(
@@ -526,6 +602,9 @@ def enrich_persisted_candidate_leads(
             counts["skipped"] += 1
             continue
         metadata = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
+        if _has_phase6_discovery_capture(metadata):
+            counts["skipped"] += 1
+            continue
         prior = metadata.get("official_recovery") if isinstance(metadata, dict) else None
         checked_at = prior.get("checked_at") if isinstance(prior, dict) else None
         if checked_at:
@@ -552,12 +631,17 @@ def enrich_persisted_candidate_leads(
             next_metadata = dict(metadata)
             next_metadata["official_recovery"] = recovery
             changes: dict[str, Any] = {"metadata": next_metadata}
-            if (
-                resolved
-                and resolved[0].get("candidate_quality") == "job_detail_or_notice"
-                and not str(row.get("official_url") or "").strip()
-            ):
-                winner = resolved[0]
+            winner = next(
+                (
+                    item
+                    for item in resolved
+                    if item.get("candidate_quality") == "job_detail_or_notice"
+                    and item.get("domain_status") == "registered_source_match"
+                    and item.get("official_source_id")
+                ),
+                None,
+            )
+            if winner and not str(row.get("official_url") or "").strip():
                 changes.update(
                     {
                         "official_url": winner["url"],
@@ -572,12 +656,16 @@ def enrich_persisted_candidate_leads(
             counts["enriched"] += 1
         except (DiscoveryAccessLimited, DiscoveryScanError, requests.RequestException, ValueError) as error:
             next_metadata = dict(metadata)
-            next_metadata["official_recovery"] = {
+            attempt = {
                 "status": "unavailable",
                 "checked_url": str(row.get("lead_url") or ""),
                 "checked_at": now.isoformat(),
                 "detail": str(error)[:400],
             }
+            if _has_successful_official_recovery(next_metadata):
+                next_metadata["official_recovery_last_attempt"] = attempt
+            else:
+                next_metadata["official_recovery"] = attempt
             database.update_candidate_lead(int(row["id"]), {"metadata": next_metadata})
             counts["unavailable"] += 1
     return counts
@@ -732,6 +820,15 @@ def _bounded_int(value: Any, minimum: int, maximum: int) -> int:
     return max(minimum, min(maximum, number))
 
 
+def _has_phase6_discovery_capture(metadata: dict[str, Any]) -> bool:
+    return isinstance(metadata.get("phase6_discovery_capture"), dict)
+
+
+def _has_successful_official_recovery(metadata: dict[str, Any]) -> bool:
+    recovery = metadata.get("official_recovery")
+    return isinstance(recovery, dict) and str(recovery.get("status") or "") == "fetched"
+
+
 def _include_patterns(value: Any) -> tuple[str, ...]:
     if value is None:
         return DiscoveryScanner.DEFAULT_INCLUDE_PATTERNS
@@ -750,6 +847,53 @@ def _exclude_patterns(value: Any) -> tuple[str, ...]:
     if not isinstance(value, list):
         return ()
     return tuple(str(item).strip() for item in value if str(item).strip())
+
+
+def _url_patterns(value: Any) -> tuple[re.Pattern[str], ...]:
+    """Compile an optional source-owned allowlist for discovery article URLs.
+
+    A pattern is intentionally opt-in. Existing channels without a stable
+    notice-path grammar keep their current behavior, while a channel such as
+    Zhonggong can exclude its navigation and course links before a private
+    candidate is created.
+    """
+
+    if value is None:
+        return ()
+    if not isinstance(value, list):
+        raise ValueError("lead_url_patterns must be a list of regular expressions")
+    compiled: list[re.Pattern[str]] = []
+    for raw in value:
+        pattern = str(raw).strip()
+        if not pattern:
+            continue
+        try:
+            compiled.append(re.compile(pattern, re.IGNORECASE))
+        except re.error as error:
+            raise ValueError(f"invalid lead_url_patterns expression: {pattern}") from error
+    return tuple(compiled)
+
+
+def _optional_text_patterns(value: Any, *, field: str) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if not isinstance(value, list):
+        raise ValueError(f"{field} must be a list of regular expressions")
+    patterns: list[str] = []
+    for raw in value:
+        pattern = str(raw).strip()
+        if not pattern:
+            continue
+        try:
+            re.compile(pattern, re.IGNORECASE)
+        except re.error as error:
+            raise ValueError(f"invalid {field} expression: {pattern}") from error
+        patterns.append(pattern)
+    return tuple(patterns)
+
+
+def _matches_url_patterns(url: str, patterns: tuple[re.Pattern[str], ...]) -> bool:
+    return any(pattern.search(url) is not None for pattern in patterns)
 
 
 def _matches(text: str, patterns: tuple[str, ...]) -> bool:

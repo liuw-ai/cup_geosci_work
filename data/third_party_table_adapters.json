@@ -5,7 +5,7 @@
     {
       "source_id": "offcn-discovery",
       "allowed_hosts": ["www.offcn.com", "offcn.com"],
-      "scan_urls": ["https://www.offcn.com/"],
+      "scan_urls": ["https://www.offcn.com/gqzp/"],
       "table_link_patterns": ["职位表", "岗位表", "下载", "xls", "xlsx", "pdf"],
       "official_url_required": true,
       "manual_review_required": true

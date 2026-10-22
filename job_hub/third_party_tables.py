@@ -1,4 +1,4 @@
-"""Third-party position-table contracts for Phase 3.
+"""Third-party position-table contracts for Phase 6.
 
 The adapters in this module normalize B-level tables into the existing
 government-table candidate shape.  They never publish a row and never treat
@@ -29,7 +29,7 @@ BATCH_CANDIDATE_SOURCES = frozenset(
     {"offcn-discovery", "fenbi-discovery", "huatu-discovery", "gongkaoleida-discovery", "gongkaozixun-discovery"}
 )
 ADAPTER_CONFIG_PATH = Path(__file__).resolve().parent.parent / "data" / "third_party_table_adapters.json"
-THIRD_PARTY_TABLE_USER_AGENT = "job-hub-phase4-table-review/1.0"
+THIRD_PARTY_TABLE_USER_AGENT = "job-hub-phase6-table-review/1.0"
 
 
 class ThirdPartyTableAccessLimited(ValueError):
@@ -137,6 +137,7 @@ def normalize_third_party_table(
     third_party_table_url: str,
     official_notice_url: str = "",
     official_table_url: str = "",
+    official_application_url: str = "",
     batch_id: str,
     position_type: str,
     province: str,
@@ -170,8 +171,11 @@ def normalize_third_party_table(
         "third_party_table_url": third_party_table_url,
         "official_notice_url": official_notice_url or None,
         "official_table_url": official_table_url or None,
+        "official_application_url": official_application_url or None,
         "publication_status": "candidate_only",
-        "application_url": None,
+        # This is evidence supplied for later review.  It is deliberately
+        # never copied from the third-party table URL.
+        "application_url": official_application_url or None,
     }
     parsed["publication_gate"] = (
         "official_notice_or_table_required_before_student_publication"
@@ -308,7 +312,7 @@ def _normalize_table_bytes(
     normalized_suffix = suffix.lower()
     if normalized_suffix not in _TABLE_SUFFIXES:
         normalized_suffix = mimetypes.guess_extension(content_type) or ".bin"
-    with tempfile.TemporaryDirectory(prefix="phase4-third-party-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="phase6-third-party-") as temp_dir:
         path = Path(temp_dir) / f"table{normalized_suffix}"
         path.write_bytes(body)
         loaded = load_position_table_with_report(path)
@@ -318,6 +322,7 @@ def _normalize_table_bytes(
         third_party_table_url=third_party_table_url,
         official_notice_url=official_notice_url,
         official_table_url=official_table_url,
+        official_application_url=official_application_url,
         batch_id=batch_id,
         position_type=position_type,
         province=province,
@@ -420,6 +425,110 @@ def table_candidates(
             }
         )
     return candidates
+
+
+def third_party_batch_record(payload: dict[str, Any]) -> dict[str, Any]:
+    """Build the normalized ledger record for one retained table capture.
+
+    This only converts an already captured/parsed payload into durable audit
+    metadata. It performs no network access and does not change publication
+    status for any candidate row.
+    """
+
+    batch = payload.get("batch") if isinstance(payload.get("batch"), dict) else {}
+    download = payload.get("download") if isinstance(payload.get("download"), dict) else {}
+    metrics = payload.get("metrics") if isinstance(payload.get("metrics"), dict) else {}
+    batch_id = str(batch.get("id") or download.get("batch_id") or "").strip()
+    source_id = str(batch.get("source_id") or download.get("source_id") or "").strip()
+    table_url = str(download.get("table_url") or "").strip()
+    if not batch_id or not source_id or not table_url:
+        raise ValueError("third-party payload lacks batch identity or table provenance")
+    robots_evidence = {
+        key: download.get(key)
+        for key in (
+            "robots_url",
+            "robots_status",
+            "robots_allowed",
+            "robots_checked_at",
+            "robots_detail",
+        )
+        if key in download
+    }
+    accepted_rows = int(metrics.get("accepted_rows") or len(payload.get("candidates") or []))
+    input_rows = int(metrics.get("input_rows") or accepted_rows)
+    rejected_rows = int(metrics.get("rejected_rows") or 0)
+    return {
+        "batch_id": batch_id,
+        "discovery_source_id": source_id,
+        "discovery_page_url": download.get("discovery_page_url") or None,
+        "third_party_table_url": table_url,
+        "capture_mode": str(download.get("capture_mode") or "").strip(),
+        "captured_at": str(download.get("captured_at") or "").strip(),
+        "media_type": str(download.get("content_type") or ""),
+        "byte_count": int(download.get("bytes") or 0),
+        "content_sha256": str(download.get("sha256") or "").strip(),
+        "retained_path": download.get("retained_path") or None,
+        "robots_evidence": robots_evidence,
+        # Parsed row count means raw position rows supplied to the row
+        # normalizer. Candidate row count is the subset passing required-field
+        # and province checks; the difference remains explicit in notes.
+        "parsed_row_count": input_rows,
+        "candidate_row_count": len(payload.get("candidates") or []),
+        "official_notice_url": batch.get("official_notice_url") or None,
+        "official_table_url": batch.get("official_attachment_url") or None,
+        "official_application_url": (
+            (payload.get("provenance") or {}).get("official_application_url")
+            or None
+        ),
+        "status": "parsed",
+        "notes": (
+            f"accepted_rows={accepted_rows}; rejected_rows={rejected_rows}; "
+            "third-party evidence only; row-level official verification required."
+        ),
+    }
+
+
+def persist_third_party_table_candidates(database: Any, payload: dict[str, Any]) -> dict[str, Any]:
+    """Store one audited batch and link its rows to private candidates.
+
+    The supplied database is expected to be an explicitly selected isolated
+    database. This helper creates no public jobs and never calls a publication
+    action. Dedupe happens at candidate-lead level while the join ledger keeps
+    every batch/row linkage for audit.
+    """
+
+    batch = third_party_batch_record(payload)
+    stored_batch = database.upsert_third_party_batch(batch)
+    links: list[dict[str, Any]] = []
+    for candidate in payload.get("candidates", []):
+        if not isinstance(candidate, dict):
+            continue
+        lead = database.create_candidate_lead(candidate)
+        metadata = candidate.get("metadata")
+        if not isinstance(metadata, dict):
+            metadata = {}
+        links.append(
+            database.link_third_party_batch_candidate(
+                str(stored_batch["batch_id"]),
+                int(lead["id"]),
+                row_locator=str(metadata.get("locator") or ""),
+                position_code=str(metadata.get("position_code") or ""),
+                metadata={
+                    "major": str(metadata.get("major") or ""),
+                    "degree": str(metadata.get("degree") or ""),
+                    "headcount": metadata.get("headcount"),
+                },
+            )
+        )
+    stored_batch = database.upsert_third_party_batch(
+        {**batch, "status": "imported", "candidate_row_count": len(links)}
+    )
+    return {
+        "batch": stored_batch,
+        "linked_candidate_count": len(links),
+        "links": links,
+        "publication_gate": "official_content_verified_required",
+    }
 
 
 def fetch_and_normalize_third_party_table(
@@ -535,4 +644,6 @@ __all__ = [
     "discover_table_links",
     "load_table_adapters",
     "table_candidates",
+    "third_party_batch_record",
+    "persist_third_party_table_candidates",
 ]

@@ -1,0 +1,74 @@
+{
+  "phase": "phase6",
+  "review_id": "phase6-local-review-2026-10-23-r3",
+  "generated_at": "2026-10-22T19:12:55.899296Z",
+  "release_status": "local_review_only_not_publishable",
+  "production_deployment": "not_performed",
+  "deployment_authorization": "not_requested_and_not_granted",
+  "git": {
+    "baseline_sha": "bde03d9",
+    "head_sha": "bde03d9aff1687f598b34d01f1378add030a1db2",
+    "working_tree_dirty": true,
+    "working_tree_entry_count": 41
+  },
+  "review_workspace": {
+    "path": "runtime/phase6/review-2026-10-23-r3",
+    "formal_database": "runtime/job_hub.sqlite3",
+    "formal_database_write_policy": "not_a_phase6_write_target",
+    "worker_automation_default": false,
+    "worker_execution": "not_started_for_live_sync_or_collection"
+  },
+  "bound_artifacts_sha256": {
+    "phase6_document": "9fd2209ee04bb44a426c16642bd937ff9af8954fd46dd96b23376935fda6b145",
+    "documentation_index": "77e5a76808dc77486d598ab6bac82cbe9ce7b8127916a8270c4cbdcbba2d8e49",
+    "project_readme": "17fd4e0c1f1464528749bb36c68739ce1c9c5fee6ad0b91c130ed31c91965e24",
+    "architecture_document": "752151a1a6c0cd4c8c5b9e94dc36329f5b59fdb5c834621e5341a38220270d6f",
+    "deployment_document": "c3b3c79d12680d8b55801816fa68b647e3449da10cdf41025d9bb7ca4786ef72",
+    "review_report": "73e249c4f5ebf6971cea8ba5cd26d2682b19ccf14417fcecdf3023cf42b48665",
+    "isolation_manifest": "b3ff872bee8f9262c23607bc5beb6f60d552a6ea819dd636376a196972ba0623",
+    "third_party_adapters": "2dbc68605209c73af523f9908bf80ef3cd5c3fccebb5c199096a794ce4920e9b",
+    "discovery_sources": "28844a0ced4b5fc276ef5a50ea2929cacdbd507b1da38d0f9eafc7ece2d88119",
+    "organization_registry": "ae5b585ca27e9af853aec0dc157d6952dd8d2dd0a170646f8ffe7419744d1447",
+    "three_oil_catalog": "3ca08cd9c7fc4e247bf1ca49ea3d40fa44d01fa0fa525b985563e3684571dfad",
+    "three_oil_entry_evidence": "f733c8c3878396525d7e6be9893867a4d78be7a5f6af54853ad9b4ed9f2e60d7",
+    "environment_example": "22285fed1ec76476345d2d67aa6041835ab3f64690c92d8377a6588f7189a38f",
+    "application": "be5e28d806854167b2a0d12b7026a08871bb59c48c0ff6c306d3641e34b5becf",
+    "database_contract": "5216726416d12259d66db6086ce810011f06a267c0eb1599a2b8d5dd6b48000b",
+    "third_party_batch_service": "da102cded56365e3b65ef100dab27dc0b98d3d56fc5347458d0389adac523eb2",
+    "third_party_notice_capture": "26d5d3c52e130caa1bd3799916a25e6d3e2a05d4e16cd8f771dc120e6fb8db6b",
+    "three_oil_entry_service": "a6ef800ca623d8715c0ff426191707b0c1e941cbf0ba17fddff627774c4b773b",
+    "worker": "4a08581639be2bbcf9bce3f88934673d126ccd35a51290a03f5b0b7bbb90c583",
+    "admin_dashboard_template": "862e85318bad994ecce8b24a93484618189e186b9c1f31f6989cfd0ba681c41d",
+    "admin_leads_template": "7826f3e9654ae4d3492c4f2e486e6a9ba2f1ccbad7c1869e66b6a1b77b572bc3",
+    "admin_three_oil_entries_template": "e8f23c606df4faabc79c0b2dea74bf1617ed8c12b4470252bd87cc75da12a145",
+    "admin_stylesheet": "6b18ccf3f7d9663afba9b5a9118c9aad2a7c6616481186a5b70b8f835eabae25",
+    "manifest_builder": "c1259b57b113e41bbb27572cccbd9bbccd412b4836fd2dfcd24af4b1f7bc3793"
+  },
+  "validation": {
+    "test_command": ".venv\\Scripts\\python.exe -m pytest -q",
+    "test_result": "1162 passed, 4 skipped in 82.94s",
+    "test_scope": "full_suite_with_temporary_test_databases",
+    "review_database_integrity": "ok",
+    "formal_database_sha256": "2b7d075209ed900bc4c56e5e14508379f50f4556a496fa39083c8bb21dbcd43b",
+    "local_web_acceptance": {
+      "url": "http://127.0.0.1:8102",
+      "result": "passed",
+      "checks": [
+        "student jobs page showed 677 official jobs and no administrator navigation",
+        "student jobs page did not expose Huatu provider data from the isolated batch",
+        "administrator route redirected unauthenticated visitors to the token-protected login page",
+        "authenticated dashboard, candidate queue, and three-oil ledger rendering are covered by the full local integration suite",
+        "isolated Huatu batch displayed 12 parsed rows, 11 candidate links, and 0 batch-published links",
+        "isolated candidate queue included the Zhonggong-to-Sinopec private group-notice recovery without student-side disclosure"
+      ]
+    }
+  },
+  "release_blockers": [
+    "project_owner_local_review_required",
+    "working_tree_contains_uncommitted_phase6_changes",
+    "no_new_in_scope_geoscience_position_table_with_row_level_official_evidence",
+    "61_of_64_formal_three_oil_units_lack_verified_independent_recruitment_entry",
+    "worker_automation_was_only_code_and_isolated_lifecycle_tested",
+    "production_deployment_not_performed"
+  ]
+}

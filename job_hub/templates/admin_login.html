@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <title>管理员登录 | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+  </head>
+  <body class="admin-login-body">
+    <main class="admin-login-panel">
+      <img src="{{ url_for('static', filename='college-geosciences-seal.png') }}" width="54" height="54" alt="">
+      <p class="admin-kicker">私有审核入口</p>
+      <h1>就业信息审核台</h1>
+      <p>候选线索、官方证据和发布操作仅限项目管理员。</p>
+      {% if error %}<p class="admin-message admin-message-error" role="alert">{{ error }}</p>{% endif %}
+      <form method="post" class="admin-login-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="next" value="{{ next_url }}">
+        <label for="admin_token">管理员令牌</label>
+        <input id="admin_token" name="admin_token" type="password" required autocomplete="current-password" autofocus>
+        <button type="submit">登录审核台</button>
+      </form>
+    </main>
+  </body>
+</html>

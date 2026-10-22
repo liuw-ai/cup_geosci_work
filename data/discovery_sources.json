@@ -7,15 +7,93 @@
       "name": "中公教育招聘公告汇总",
       "source_type": "aggregator",
       "homepage_url": "https://www.offcn.com/",
-      "access_mode": "manual",
-      "status": "access_limited",
+      "access_mode": "public_page",
+      "status": "checked",
       "scope": "公务员、事业单位和地方公开招聘线索",
       "publication_policy": "batch_candidate_allowed",
       "trust_grade": "B",
       "batch_candidate_allowed": true,
       "official_domain_allowlist": [],
-      "last_checked_on": "2026-10-19",
-      "notes": "2026-10-19 本机只读探测仍受 TLS 和浏览器保存权限限制；不把中公页面作为学生端原文，也不据此判断没有岗位。"
+      "last_checked_on": "2026-10-23",
+      "scan_config": {
+        "scan_urls": [
+          "https://www.offcn.com/gqzp/"
+        ],
+        "allowed_hosts": [
+          "www.offcn.com",
+          "offcn.com"
+        ],
+        "max_pages": 1,
+        "max_links": 80,
+        "detail_fetch_limit": 12,
+        "lead_url_patterns": [
+          "^https://(?:www\\.)?offcn\\.com/gqzp/20\\d{2}/\\d{4}/\\d+\\.html$"
+        ],
+        "program_relevance_patterns": [
+          "地质",
+          "地学",
+          "地球物理",
+          "自然资源",
+          "勘探",
+          "石油",
+          "石化",
+          "海洋",
+          "矿产",
+          "地勘",
+          "测绘",
+          "地理信息",
+          "遥感",
+          "GIS"
+        ],
+      "announcement_title_patterns": [
+        "招聘公告",
+        "招录公告",
+        "公开招聘",
+        "招聘简章",
+        "(?:20\\d{2}年|20\\d{2}届).*校园招聘"
+      ],
+        "include_patterns": [
+          "招聘",
+          "招录",
+          "校园",
+          "校招",
+          "社会招聘",
+          "事业单位",
+          "公务员",
+          "地质",
+          "自然资源",
+          "勘探",
+          "石油",
+          "海洋"
+        ],
+        "exclude_patterns": [
+          "登录",
+          "注册",
+          "课程",
+          "题库",
+          "直播",
+          "培训",
+          "广告",
+          "成绩",
+          "准考证",
+          "笔试通知",
+          "面试通知",
+          "资格审查",
+          "资格复审",
+          "体检",
+          "拟录用",
+        "录用公示",
+        "常见问题",
+        "官网",
+        "入口",
+        "平台",
+        "网站",
+        "查看",
+        "下载",
+        "流程"
+        ]
+      },
+      "notes": "2026-10-23 只读复核 https://www.offcn.com/robots.txt：仅 /offcn 被 User-agent:* 禁止，国企招聘栏目 /gqzp/ 和已抽样公告路径允许访问。扫描只接受声明的公告 URL 结构，排除导航、课程和招聘流程通知，并以地学相关主题词缩小私有线索范围；主题词不是专业资格证据。职位表需另行满足 robots、文件留存、SHA-256、逐行官方 URL 回溯与人工核验，第三方页面不得作为学生端原文或申请链接。"
     },
     {
       "id": "huatu-discovery",

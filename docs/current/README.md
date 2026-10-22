@@ -1,48 +1,19 @@
 # 当前项目目录与 Docker 文件规范
 
-当前 Phase 4 已冻结；后续新增岗位、单位证据和策略变更统一进入 [PHASE5-2026-10-21.md](PHASE5-2026-10-21.md)。Phase 4 的冻结边界见 [PHASE4-2026-10-17.md](PHASE4-2026-10-17.md) 末尾；本轮服务器操作如发生，只能标记为 `phase4-preview`，不等于最终发布批准。
+Phase 4 和 Phase 5 已冻结为历史记录。当前开发基线是本地审阅中的 [Phase 6 记录](PHASE6-2026-10-23.md)，未经项目负责人审阅和明确批准，不得部署、启用 Worker 或把审阅库候选合并到正式数据库。
 
 本文件定义新项目应采用的目录边界和 Docker 文件保存方式。历史产物已在本地移动到 `history/`，未删除、不覆盖，也不作为新生产输入。
 
-## 当前事实来源（2026-10-21 本地复核）
+## 当前事实来源（Phase 6 本地审阅）
 
-当前岗位和代码事实以 [phase4-current-state-audit-2026-10-21.json](phase4-current-state-audit-2026-10-21.json) 及最新 [Phase 4 Manifest](phase4-release-manifest.json) 为准；当前统一的学生端读集日期为北京时间 `2026-10-21`，学生端可见岗位为 `678` 条（精确 `140`、宽泛 `9`、信息不完整 `442`、来源暂时不可用 `87`）。Phase 3、RESET、CODEBASE 和更早的快照已移入 `history/docs/`，仅作为历史证据；其中的数量、哈希和测试结果不能覆盖当前审计。历史文件不删除、不作为生产输入，任何迁移或清理都必须保留原始哈希。
+当前唯一事实入口是 [Phase 6 本地审阅 Manifest](phase6-local-review-manifest.json) 和其引用的 [隔离审阅报告](../../runtime/phase6/review-2026-10-23-r3/phase6-review-report.json)。它们绑定正式本地数据库、隔离审阅数据库、配置、核心代码和测试记录的 SHA-256。
 
-`student_read_as_of_date` 是当前统计的唯一日期口径；10 月 20 日本地网页验收中的 `700` 条属于当日临时副本验收证据，不代表 10 月 21 日当前读集。任何后续统计必须同时记录 `as_of`、数据库 SHA-256 和 Manifest，禁止只复制岗位数量。
+- 正式本地数据库为 `runtime/job_hub.sqlite3`，当前 SHA-256 为 `2b7d075209ed900bc4c56e5e14508379f50f4556a496fa39083c8bb21dbcd43b`，完整性为 `ok`；含 `3,956` 条岗位，学生端可见 `677` 条。
+- Phase 6 审阅副本位于 `runtime/phase6/review-2026-10-23-r3/`。其中有 `37` 条私有候选和一份华图职位表批次；该批次解析 `12` 行、关联 `11` 条候选，因不属于地学范围，学生端新增岗位为 `0`。
+- 三桶油目录为 `64` 个正式单位；已核验 `3` 个单位独立招聘入口，余下 `61` 个仍需单位自有官方公告、招聘页、ATS 或授权入口证据。共享集团门户不等同于下属单位独立入口。
+- Worker 自动化默认关闭。当前 Phase 6 仅允许隔离库验证；服务器、正式本地数据库和学生端读集都不是本阶段写入目标。
 
-当前本地事实的边界以 [phase4-current-state-audit-2026-10-21.json](phase4-current-state-audit-2026-10-21.json) 和 [phase4-release-manifest.json](phase4-release-manifest.json) 的哈希绑定数据为准，不在本 README 重复维护易过期的岗位数量。当前数据库记录 12 条候选线索，其中 9 条已完成官方证据核验并形成正式岗位；其中 8 条正式岗位可严格归因于第三方发现或批量试点，另 1 条为官方岗位表试点。服务器未部署，自动化保持暂停，第三方发现链接不作为学生申请链接。
-
-华图甘肃职位表试点的历史文件、解析行数、SHA-256 和当前 robots 复核已由 [phase4-third-party-table-trial-reconciliation-2026-10-21.json](phase4-third-party-table-trial-reconciliation-2026-10-21.json) 绑定。该报告明确区分“历史文件可本地审计”和“当前附件域名禁止再次下载”；11 条地学范围外行未发布，不能把这次试点写成已产生正式岗位。
-
-另有一份隔离的华图→中国石油集团川庆钻探页面证据报告，逐行记录 12 条候选；该页面只有 `cnpc.com.cn` 邮箱，没有可核验的中国石油官方公告、岗位表或 HTTP 报名 URL，因此 12 条不计入数据库候选数量、不进入学生端，状态保持 `pending`。南京水利科学研究院的华图发现页已回溯到可读的官方公告和岗位表 URL，但附件下载受 robots/TLS/浏览器权限限制，只有公告级证据，未创建候选或正式岗位；详见 `phase4-third-party-nhri-browser-recheck-2026-10-20.json`。
-
-Phase 4 的逐项完成状态见 [phase4-completion-audit-2026-10-19.json](phase4-completion-audit-2026-10-19.json)，目录和 Docker 边界见 [phase4-workspace-layout-audit-2026-10-19.json](phase4-workspace-layout-audit-2026-10-19.json)。审计为 `not_complete` 时，阻断项仍然有效，不能仅因测试通过而发布。
-
-三桶油 64 个正式目录单位的逐项入口状态见 [phase4-three-oil-unit-entry-matrix-2026-10-18.json](phase4-three-oil-unit-entry-matrix-2026-10-18.json)。该矩阵明确区分集团共享入口、官方展示名单和单位独立入口，不把共享 URL 复制为下属单位 URL。组织登记账本另有 239 条官方展示名单候选，仍需法定名称和外部身份证据核验，不能当作已完成的正式目录。
-
-2026-10-21 通过官方公开 API 重跑中国海油招聘平台全量快照，见 [phase4-cnooc-api-unit-evidence-2026-10-21.json](phase4-cnooc-api-unit-evidence-2026-10-21.json)。本次保存 4 页原始响应，共 350 张岗位卡、16 个正式目录单位和 343 个地学候选，全部与目录名称匹配；该证据只证明集团共享平台按单位展示并提供官方投递链接，不证明下属单位拥有独立招聘入口，也未自动新增岗位记录。10 月 20 日的天津/深圳岗位复核继续作为历史补充证据。
-2026-10-20 对中国石油集团招聘平台、集团招聘入口和川庆钻探官网做了额外只读复核：平台和集团入口返回 HTTP 412，川庆钻探入口 TLS 握手失败；没有下载岗位、创建候选或改变目录结论。完整请求状态和边界见 `phase4-cnpc-official-recheck-2026-10-20.json`。
-2026-10-20 对华图发现的山西地质集团秋季校园招聘公告进行官方页面复核：公告确认 26 个下属单位联系方式、报名截止日期和两份官方岗位表链接，但官方附件 robots/TLS 无法核验，未下载、未解析岗位行、未创建候选或正式岗位。完整边界见 `phase4-third-party-sxdkj-official-recheck-2026-10-20.json`。
-2026-10-20 对中国海油官方集团招聘平台的深圳分公司标签进行岗位级复核：页面展示 20 个岗位，其中勘探地质、地球物理和开发地质 3 个岗位具有官方智联投递链接及岗位要求；这补强单位级共享平台证据，但不证明深圳分公司拥有独立招聘网站，也未自动新增正式岗位。完整证据见 `phase4-cnooc-shenzhen-job-evidence-2026-10-20.json`。
-
-每次本地迭代后，先执行只读 Manifest 校验，再执行测试：
-
-```powershell
-$env:PYTHONPATH = (Get-Location).Path
-python scripts/verify_phase4_manifest.py
-python -m pytest -q
-```
-
-如果重新生成了任一 Phase 4 审计报告，必须按依赖顺序刷新全部元数据，避免报告哈希与 Manifest 脱节：
-
-```powershell
-$env:PYTHONPATH = (Get-Location).Path
-python scripts/refresh_phase4_metadata.py
-```
-
-该脚本只生成当前审计文件并执行只读校验，不修改岗位数据库、服务器或自动化状态。
-
-`verify_phase4_manifest.py` 会重新计算生产 Compose、Dockerfile、配置和运行数据库的 SHA-256，检查 SQLite 完整性、Manifest 统计、源提交存在性，以及“未部署/自动化暂停/发布阻塞项”边界。校验失败时不得生成部署批准。
+旧 Phase 4/5 文档、报告和数量仅作审计历史，不得覆盖上述 Manifest 或数据库事实。每次后续本地迭代都必须重新运行完整测试、复核 SQLite 完整性和数据库 SHA-256，并刷新 Phase 6 审阅报告与 Manifest；没有项目负责人明确批准，不得进行部署或数据合并。
 
 ## 1. 目标目录
 

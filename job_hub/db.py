@@ -429,6 +429,55 @@ ON candidate_lead_mentions(lead_id, captured_at DESC);
 CREATE INDEX IF NOT EXISTS idx_candidate_lead_mentions_source
 ON candidate_lead_mentions(discovery_source_id, captured_at DESC);
 
+-- A third-party position table is evidence for discovery, not a source of
+-- student-visible vacancies. Keep each capture as a first-class, immutable
+-- audit unit rather than duplicating its hash and retention path in every
+-- candidate JSON blob.
+CREATE TABLE IF NOT EXISTS third_party_batches (
+    batch_id TEXT PRIMARY KEY,
+    discovery_source_id TEXT NOT NULL,
+    discovery_page_url TEXT,
+    third_party_table_url TEXT NOT NULL,
+    capture_mode TEXT NOT NULL,
+    captured_at TEXT NOT NULL,
+    media_type TEXT NOT NULL DEFAULT '',
+    byte_count INTEGER NOT NULL DEFAULT 0,
+    content_sha256 TEXT NOT NULL,
+    retained_path TEXT,
+    robots_evidence_json TEXT NOT NULL DEFAULT '{}',
+    parsed_row_count INTEGER NOT NULL DEFAULT 0,
+    candidate_row_count INTEGER NOT NULL DEFAULT 0,
+    official_notice_url TEXT,
+    official_table_url TEXT,
+    official_application_url TEXT,
+    status TEXT NOT NULL DEFAULT 'parsed',
+    notes TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_third_party_batches_source
+ON third_party_batches(discovery_source_id, captured_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_third_party_batches_status
+ON third_party_batches(status, updated_at DESC);
+
+-- Candidate leads are deduplicated across discovery channels. This join table
+-- retains every batch/row that led to a candidate without asserting that a
+-- third-party table is an official source or an application endpoint.
+CREATE TABLE IF NOT EXISTS third_party_batch_candidates (
+    batch_id TEXT NOT NULL REFERENCES third_party_batches(batch_id) ON DELETE CASCADE,
+    lead_id INTEGER NOT NULL REFERENCES candidate_leads(id) ON DELETE CASCADE,
+    row_locator TEXT NOT NULL DEFAULT '',
+    position_code TEXT NOT NULL DEFAULT '',
+    metadata_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (batch_id, lead_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_third_party_batch_candidates_lead
+ON third_party_batch_candidates(lead_id, batch_id);
+
     -- Phase 3 keeps a separate, immutable decision record for historical
     -- withdrawals.  This prevents a legacy "not seen in one scan" event from
     -- being silently treated as valid current withdrawal evidence.
@@ -4756,6 +4805,244 @@ class Database:
             cursor = connection.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
             return bool(cursor.rowcount)
 
+    def upsert_third_party_batch(self, batch: dict[str, Any]) -> dict[str, Any]:
+        """Persist one retained third-party table capture for private audit.
+
+        The table can create review-only candidates, but this ledger never
+        establishes an official source, application URL, or publication right.
+        A reused batch id may update parse totals only when its source, URL and
+        SHA-256 match the originally retained capture.
+        """
+
+        required = (
+            "batch_id",
+            "discovery_source_id",
+            "third_party_table_url",
+            "capture_mode",
+            "captured_at",
+            "content_sha256",
+        )
+        missing = [field for field in required if not str(batch.get(field) or "").strip()]
+        if missing:
+            raise ValueError(f"Third-party batch is missing: {', '.join(missing)}")
+        batch_id = str(batch["batch_id"]).strip()
+        source_id = str(batch["discovery_source_id"]).strip()
+        table_url = str(batch["third_party_table_url"]).strip()
+        if not is_http_url(table_url):
+            raise ValueError("Third-party batch third_party_table_url must be an HTTP(S) URL")
+        discovery_page_url = self._optional_text(batch.get("discovery_page_url"))
+        if discovery_page_url and not is_http_url(discovery_page_url):
+            raise ValueError("Third-party batch discovery_page_url must be an HTTP(S) URL")
+        official_urls: dict[str, str | None] = {}
+        for field in (
+            "official_notice_url",
+            "official_table_url",
+            "official_application_url",
+        ):
+            value = self._optional_text(batch.get(field))
+            if value and not is_http_url(value):
+                raise ValueError(f"Third-party batch {field} must be an HTTP(S) URL")
+            official_urls[field] = value
+        content_sha256 = str(batch["content_sha256"]).strip().lower()
+        if not re.fullmatch(r"[a-f0-9]{64}", content_sha256):
+            raise ValueError("Third-party batch content_sha256 must be a SHA-256 hex digest")
+        capture_mode = str(batch["capture_mode"]).strip()
+        if capture_mode not in {"network_download", "operator_provided_file"}:
+            raise ValueError("Unsupported third-party batch capture_mode")
+        status = str(batch.get("status") or "parsed").strip()
+        if status not in {"captured", "parsed", "imported", "access_limited", "rejected"}:
+            raise ValueError("Unsupported third-party batch status")
+        try:
+            byte_count = int(batch.get("byte_count") or 0)
+            parsed_row_count = int(batch.get("parsed_row_count") or 0)
+            candidate_row_count = int(batch.get("candidate_row_count") or 0)
+        except (TypeError, ValueError) as error:
+            raise ValueError("Third-party batch counts must be integers") from error
+        if min(byte_count, parsed_row_count, candidate_row_count) < 0:
+            raise ValueError("Third-party batch counts cannot be negative")
+        robots_evidence = batch.get("robots_evidence") or {}
+        if not isinstance(robots_evidence, dict):
+            raise ValueError("Third-party batch robots_evidence must be an object")
+        now = utc_now()
+        normalized = {
+            "batch_id": batch_id,
+            "discovery_source_id": source_id,
+            "discovery_page_url": discovery_page_url,
+            "third_party_table_url": table_url,
+            "capture_mode": capture_mode,
+            "captured_at": str(batch["captured_at"]).strip(),
+            "media_type": self._optional_text(batch.get("media_type")) or "",
+            "byte_count": byte_count,
+            "content_sha256": content_sha256,
+            "retained_path": self._optional_text(batch.get("retained_path")),
+            "robots_evidence_json": json.dumps(robots_evidence, ensure_ascii=False),
+            "parsed_row_count": parsed_row_count,
+            "candidate_row_count": candidate_row_count,
+            "official_notice_url": official_urls["official_notice_url"],
+            "official_table_url": official_urls["official_table_url"],
+            "official_application_url": official_urls["official_application_url"],
+            "status": status,
+            "notes": self._optional_text(batch.get("notes")) or "",
+            "updated_at": now,
+        }
+        with self.transaction() as connection:
+            existing = connection.execute(
+                "SELECT * FROM third_party_batches WHERE batch_id = ?", (batch_id,)
+            ).fetchone()
+            if existing is not None:
+                for field in (
+                    "discovery_source_id",
+                    "third_party_table_url",
+                    "capture_mode",
+                    "content_sha256",
+                ):
+                    if str(existing[field] or "") != str(normalized[field] or ""):
+                        raise ValueError(
+                            "Third-party batch id is already bound to different capture evidence"
+                        )
+                connection.execute(
+                    """
+                    UPDATE third_party_batches
+                    SET discovery_page_url = ?, captured_at = ?, media_type = ?,
+                        byte_count = ?, retained_path = ?, robots_evidence_json = ?,
+                        parsed_row_count = ?, candidate_row_count = ?,
+                        official_notice_url = ?, official_table_url = ?,
+                        official_application_url = ?, status = ?, notes = ?, updated_at = ?
+                    WHERE batch_id = ?
+                    """,
+                    (
+                        normalized["discovery_page_url"], normalized["captured_at"],
+                        normalized["media_type"], normalized["byte_count"],
+                        normalized["retained_path"], normalized["robots_evidence_json"],
+                        normalized["parsed_row_count"], normalized["candidate_row_count"],
+                        normalized["official_notice_url"], normalized["official_table_url"],
+                        normalized["official_application_url"], normalized["status"],
+                        normalized["notes"], normalized["updated_at"], batch_id,
+                    ),
+                )
+            else:
+                connection.execute(
+                    """
+                    INSERT INTO third_party_batches (
+                        batch_id, discovery_source_id, discovery_page_url,
+                        third_party_table_url, capture_mode, captured_at, media_type,
+                        byte_count, content_sha256, retained_path, robots_evidence_json,
+                        parsed_row_count, candidate_row_count, official_notice_url,
+                        official_table_url, official_application_url, status, notes,
+                        created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        normalized["batch_id"], normalized["discovery_source_id"],
+                        normalized["discovery_page_url"], normalized["third_party_table_url"],
+                        normalized["capture_mode"], normalized["captured_at"],
+                        normalized["media_type"], normalized["byte_count"],
+                        normalized["content_sha256"], normalized["retained_path"],
+                        normalized["robots_evidence_json"], normalized["parsed_row_count"],
+                        normalized["candidate_row_count"], normalized["official_notice_url"],
+                        normalized["official_table_url"], normalized["official_application_url"],
+                        normalized["status"], normalized["notes"], now, now,
+                    ),
+                )
+            row = connection.execute(
+                "SELECT * FROM third_party_batches WHERE batch_id = ?", (batch_id,)
+            ).fetchone()
+        if row is None:  # pragma: no cover - transaction guarantees row presence
+            raise RuntimeError("Third-party batch could not be persisted")
+        return self._third_party_batch_row(row)
+
+    def get_third_party_batch(self, batch_id: str) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT * FROM third_party_batches WHERE batch_id = ?", (batch_id,)
+            ).fetchone()
+        return self._third_party_batch_row(row) if row else None
+
+    def list_third_party_batches(
+        self, *, source_id: str | None = None, limit: int = 100
+    ) -> list[dict[str, Any]]:
+        # Keep batch-level publication accounting separate from the global
+        # candidate funnel. A historical published lead must not make a newly
+        # imported batch look as though it produced a student-visible job.
+        query = """
+            SELECT batches.*, COUNT(links.lead_id) AS candidate_links,
+                   COALESCE(SUM(CASE WHEN leads.published_job_id IS NOT NULL THEN 1 ELSE 0 END), 0)
+                       AS published_links
+            FROM third_party_batches AS batches
+            LEFT JOIN third_party_batch_candidates AS links
+                ON links.batch_id = batches.batch_id
+            LEFT JOIN candidate_leads AS leads ON leads.id = links.lead_id
+        """
+        values: list[Any] = []
+        if source_id:
+            query += " WHERE batches.discovery_source_id = ?"
+            values.append(source_id)
+        query += " GROUP BY batches.batch_id ORDER BY batches.captured_at DESC, batches.batch_id DESC LIMIT ?"
+        values.append(max(1, min(limit, 1000)))
+        with self.connect() as connection:
+            rows = connection.execute(query, values).fetchall()
+        return [self._third_party_batch_row(row) for row in rows]
+
+    def link_third_party_batch_candidate(
+        self,
+        batch_id: str,
+        lead_id: int,
+        *,
+        row_locator: str = "",
+        position_code: str = "",
+        metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Link an already-private candidate to an audited table batch."""
+
+        if not self.get_third_party_batch(batch_id):
+            raise ValueError("Unknown third-party batch_id")
+        if not self.get_candidate_lead(lead_id):
+            raise ValueError("Unknown candidate lead_id")
+        if metadata is not None and not isinstance(metadata, dict):
+            raise ValueError("Third-party batch candidate metadata must be an object")
+        now = utc_now()
+        with self.transaction() as connection:
+            connection.execute(
+                """
+                INSERT INTO third_party_batch_candidates (
+                    batch_id, lead_id, row_locator, position_code, metadata_json, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(batch_id, lead_id) DO UPDATE SET
+                    row_locator = excluded.row_locator,
+                    position_code = excluded.position_code,
+                    metadata_json = excluded.metadata_json
+                """,
+                (
+                    batch_id, lead_id, str(row_locator or "").strip(),
+                    str(position_code or "").strip(),
+                    json.dumps(metadata or {}, ensure_ascii=False), now,
+                ),
+            )
+            row = connection.execute(
+                """
+                SELECT * FROM third_party_batch_candidates
+                WHERE batch_id = ? AND lead_id = ?
+                """,
+                (batch_id, lead_id),
+            ).fetchone()
+        if row is None:  # pragma: no cover - transaction guarantees row presence
+            raise RuntimeError("Third-party batch candidate link could not be persisted")
+        return self._third_party_batch_candidate_row(row)
+
+    def list_third_party_batch_candidates(self, batch_id: str) -> list[dict[str, Any]]:
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT links.*, leads.title, leads.verification_status, leads.published_job_id
+                FROM third_party_batch_candidates AS links
+                JOIN candidate_leads AS leads ON leads.id = links.lead_id
+                WHERE links.batch_id = ?
+                ORDER BY links.row_locator, links.lead_id
+                """,
+                (batch_id,),
+            ).fetchall()
+        return [self._third_party_batch_candidate_row(row) for row in rows]
+
     def create_candidate_lead(self, lead: dict[str, Any]) -> dict[str, Any]:
         """Store a third-party discovery clue outside the public jobs table."""
         required = ("lead_provider", "lead_url", "title")
@@ -4788,6 +5075,12 @@ class Database:
         )
         if official_application_url and not is_http_url(official_application_url):
             raise ValueError("Candidate lead official_application_url must be an HTTP(S) URL")
+        official_table_url = self._optional_text(lead.get("official_table_url"))
+        if official_table_url and not is_http_url(official_table_url):
+            raise ValueError("Candidate lead official_table_url must be an HTTP(S) URL")
+        third_party_table_url = self._optional_text(lead.get("third_party_table_url"))
+        if third_party_table_url and not is_http_url(third_party_table_url):
+            raise ValueError("Candidate lead third_party_table_url must be an HTTP(S) URL")
         with self.transaction() as connection:
             existing = connection.execute(
                 "SELECT * FROM candidate_leads WHERE lead_fingerprint = ? "
@@ -4837,8 +5130,8 @@ class Database:
                     assessment["status"] if official_url else "unverified",
                     now if official_url else None,
                     normalize_trust_grade(lead.get("trust_grade"), default="D"),
-                    self._optional_text(lead.get("official_table_url")),
-                    self._optional_text(lead.get("third_party_table_url")),
+                    official_table_url,
+                    third_party_table_url,
                     official_application_url,
                     self._optional_text(lead.get("verification_note")) or "",
                     json.dumps(metadata, ensure_ascii=False),
@@ -5087,6 +5380,10 @@ class Database:
             "official_table_url",
             "third_party_table_url",
             "conversion_status",
+            # The reviewer identity is retained in metadata and in the
+            # immutable event payload.  It is intentionally optional for
+            # API/automation callers that predate the Phase 6 workbench.
+            "reviewed_by",
         }
         unexpected = set(changes).difference(editable)
         if unexpected:
@@ -5107,6 +5404,16 @@ class Database:
         )
         if official_application_url and not is_http_url(official_application_url):
             raise ValueError("Candidate lead official_application_url must be an HTTP(S) URL")
+        official_table_url = self._optional_text(
+            changes.get("official_table_url", current.get("official_table_url"))
+        )
+        if official_table_url and not is_http_url(official_table_url):
+            raise ValueError("Candidate lead official_table_url must be an HTTP(S) URL")
+        third_party_table_url = self._optional_text(
+            changes.get("third_party_table_url", current.get("third_party_table_url"))
+        )
+        if third_party_table_url and not is_http_url(third_party_table_url):
+            raise ValueError("Candidate lead third_party_table_url must be an HTTP(S) URL")
         verification_note = self._optional_text(
             changes.get("verification_note", current.get("verification_note"))
         ) or ""
@@ -5128,6 +5435,10 @@ class Database:
         metadata = changes.get("metadata", current.get("metadata", {}))
         if not isinstance(metadata, dict):
             raise ValueError("Candidate lead metadata must be an object")
+        metadata = dict(metadata)
+        reviewed_by = self._optional_text(changes.get("reviewed_by"))
+        if reviewed_by:
+            metadata["last_reviewed_by"] = reviewed_by
         requested_conversion_status = self._optional_text(
             changes.get("conversion_status")
         )
@@ -5242,8 +5553,8 @@ class Database:
                     domain_status,
                     checked_at,
                     normalize_trust_grade(changes.get("trust_grade", current.get("trust_grade")), default="D"),
-                    self._optional_text(changes.get("official_table_url", current.get("official_table_url"))),
-                    self._optional_text(changes.get("third_party_table_url", current.get("third_party_table_url"))),
+                    official_table_url,
+                    third_party_table_url,
                     official_application_url,
                     conversion_status,
                     conversion_checked_at,
@@ -5262,7 +5573,18 @@ class Database:
                     from_status=current["verification_status"],
                     to_status=next_status,
                     note=verification_note,
-                    payload={},
+                    payload={"reviewed_by": reviewed_by} if reviewed_by else {},
+                    occurred_at=fields["updated_at"],
+                )
+            elif reviewed_by:
+                self._record_candidate_lead_event(
+                    connection,
+                    lead_id,
+                    event_type="review_updated",
+                    from_status=current["verification_status"],
+                    to_status=next_status,
+                    note=verification_note,
+                    payload={"reviewed_by": reviewed_by},
                     occurred_at=fields["updated_at"],
                 )
             row = connection.execute(
@@ -5777,6 +6099,18 @@ class Database:
         item = dict(row)
         item["enabled"] = bool(item["enabled"])
         item["config"] = json.loads(item.pop("config_json"))
+        return item
+
+    @staticmethod
+    def _third_party_batch_row(row: sqlite3.Row) -> dict[str, Any]:
+        item = dict(row)
+        item["robots_evidence"] = json.loads(item.pop("robots_evidence_json") or "{}")
+        return item
+
+    @staticmethod
+    def _third_party_batch_candidate_row(row: sqlite3.Row) -> dict[str, Any]:
+        item = dict(row)
+        item["metadata"] = json.loads(item.pop("metadata_json") or "{}")
         return item
 
     @staticmethod

@@ -1,0 +1,75 @@
+{% extends "admin_base.html" %}
+
+{% block title %}审核概览{% endblock %}
+
+{% block content %}
+  <header class="admin-page-heading">
+    <div>
+      <p class="admin-kicker">Phase 6 本地审核</p>
+      <h1>审核概览</h1>
+      <p>第三方发现只产生私有候选。只有绑定岗位级官方证据且通过发布门禁，才能形成学生端岗位。</p>
+    </div>
+    <a class="admin-primary-link" href="{{ url_for('admin_leads', status='candidate') }}">处理待回溯候选</a>
+  </header>
+
+  <section class="admin-stat-grid" aria-label="候选线索状态">
+    {% for status, count in lead_statuses.items() %}
+      <a class="admin-stat" href="{{ url_for('admin_leads', status=status) }}">
+        <span>{{ lead_status_labels[status] }}</span>
+        <strong>{{ count }}</strong>
+      </a>
+    {% endfor %}
+  </section>
+
+  <section class="admin-section">
+    <div class="admin-section-heading">
+      <div><p class="admin-kicker">发现渠道漏斗</p><h2>第三方候选转化</h2></div>
+      <a href="{{ url_for('admin_leads') }}">查看全部候选</a>
+    </div>
+    <dl class="admin-metric-list">
+      <div><dt>私有候选总数</dt><dd>{{ discovery.lead_total }}</dd></div>
+      <div><dt>已归属发现渠道</dt><dd>{{ discovery.attributed_leads }}</dd></div>
+      <div><dt>找到官方原文</dt><dd>{{ discovery.status_counts.official_url_found }}</dd></div>
+      <div><dt>完成官方内容核验</dt><dd>{{ discovery.status_counts.official_content_verified }}</dd></div>
+      <div><dt>已形成正式岗位</dt><dd>{{ discovery.status_counts.published }}</dd></div>
+    </dl>
+  </section>
+
+  <section class="admin-section">
+    <div class="admin-section-heading"><div><p class="admin-kicker">批次证据台账</p><h2>已保留职位表</h2></div></div>
+    {% if third_party_batches %}
+      <div class="admin-table-wrap"><table><thead><tr><th>批次</th><th>渠道</th><th>捕获方式</th><th>行数</th><th>本批次已发布</th><th>SHA-256</th><th>状态</th></tr></thead>
+        <tbody>{% for batch in third_party_batches %}<tr><td>{{ batch.batch_id }}<small>{{ batch.captured_at }}</small></td><td>{{ batch.discovery_source_id }}</td><td>{{ batch.capture_mode }}</td><td>解析 {{ batch.parsed_row_count }}<small>候选 {{ batch.candidate_row_count }}</small></td><td>{{ batch.published_links | default(0) }}</td><td><code>{{ batch.content_sha256 }}</code></td><td><span class="admin-status">{{ batch.status }}</span></td></tr>{% endfor %}</tbody>
+      </table></div>
+    {% else %}
+      <p class="admin-empty">尚无可审计的第三方职位表批次。访问受限或未保存原始文件时，不应创建批次或候选岗位。</p>
+    {% endif %}
+  </section>
+
+  <section class="admin-section">
+    <div class="admin-section-heading">
+      <div><p class="admin-kicker">三桶油目录</p><h2>单位入口证据</h2></div>
+      <a href="{{ url_for('admin_three_oil_entries') }}">逐单位查看</a>
+    </div>
+    <dl class="admin-metric-list">
+      <div><dt>正式目录单位</dt><dd>{{ three_oil_entry.unit_count }}</dd></div>
+      <div><dt>单位身份页已登记</dt><dd>{{ three_oil_entry.unit_owned_identity_page_count }}</dd></div>
+      <div><dt>单位独立入口已核验</dt><dd>{{ three_oil_entry.unit_specific_entry_verified_count }}</dd></div>
+      <div><dt>集团平台单位展示</dt><dd>{{ three_oil_entry.status_counts.group_portal_unit_display_observed }}</dd></div>
+      <div><dt>共享集团入口已登记</dt><dd>{{ three_oil_entry.status_counts.group_portal_registered }}</dd></div>
+      <div><dt>待补入口证据</dt><dd>{{ three_oil_entry.incomplete_entry_evidence_count }}</dd></div>
+    </dl>
+    <p class="admin-note">集团共享入口仅表示集团平台存在；它不等同于下属单位拥有独立招聘入口。每项入口证据仍需逐单位核验。</p>
+  </section>
+
+  <section class="admin-section">
+    <div class="admin-section-heading"><div><p class="admin-kicker">官方附件</p><h2>附件处理概览</h2></div></div>
+    {% if artifact_statuses %}
+      <div class="admin-table-wrap"><table><thead><tr><th>官方来源</th><th>附件总数</th><th>已解析</th><th>失败或跳过</th></tr></thead>
+        <tbody>{% for row in artifact_statuses %}<tr><td>{{ row.source_id }}</td><td>{{ row.total_count }}</td><td>{{ row.extracted_count }}</td><td>{{ row.failed_count }}</td></tr>{% endfor %}</tbody>
+      </table></div>
+    {% else %}
+      <p class="admin-empty">尚无已登记的官方附件处理记录。</p>
+    {% endif %}
+  </section>
+{% endblock %}

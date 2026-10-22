@@ -1,6 +1,6 @@
 # 架构与质量边界
 
-> **当前事实边界（2026-10-20）**：本文包含历史阶段说明，不能覆盖当前数据库和发布规则。当前事实以 `docs/current/PHASE4-2026-10-17.md`、`docs/current/phase4-current-state-audit-2026-10-18.json`、`docs/current/phase4-release-manifest.json` 和只读数据库为准。第三方 B 级渠道允许进入私有候选漏斗，但必须绑定官方证据后才可公开；当前唯一生产 Compose 是 `deploy/compose.yaml`，服务器未部署。
+> **当前事实边界（2026-10-23）**：本文包含历史架构说明，不能覆盖当前数据库和发布规则。当前事实以 `docs/current/PHASE6-2026-10-23.md`、`docs/current/phase6-local-review-manifest.json`、其隔离审阅报告和只读数据库为准。B 级第三方渠道只能进入私有候选漏斗，只有岗位级官方内容证据才能公开；Worker 自动化保持关闭，Phase 6 未部署。
 
 面向后续分阶段迭代的项目契约、来源准入规范、验收指标和当前运行库基线，见 [docs/phase-0/README.md](docs/phase-0/README.md)。这些材料是当前架构说明的补充，不代表其中所有后续能力已经实现。
 

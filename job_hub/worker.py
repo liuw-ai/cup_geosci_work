@@ -74,6 +74,16 @@ class DailyWorker:
         self._last_error_detail: str | None = None
 
     def run_forever(self) -> None:
+        if not self.settings.worker_automation_enabled:
+            # Do not make a new or local release mutate recruitment data just
+            # because the worker service happens to be running. Enabling this
+            # flag is a separately reviewed release decision.
+            detail = "automatic collection disabled by release configuration"
+            self._heartbeat("paused", detail)
+            while not self.stop_event.is_set():
+                self.stop_event.wait(30)
+            self._heartbeat("stopped", "worker received a stop signal")
+            return
         self.pipeline.bootstrap_sources()
         recovered = self.database.recover_stale_crawl_runs(
             self.settings.crawl_run_stale_seconds

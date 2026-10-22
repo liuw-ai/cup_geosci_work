@@ -2,7 +2,7 @@
 
 面向中国石油大学（北京）地球科学学院及相邻专业学生的公开就业信息服务。网站面向手机和微信浏览器设计：学生无需登录即可查看当日就业日报、历史日报、全部在招岗位和每条岗位的官方原文链接。
 
-> **当前事实来源（2026-10-21，Phase 4 本地审计）**：请以 [docs/current/phase4-current-state-audit-2026-10-21.json](docs/current/phase4-current-state-audit-2026-10-21.json)、[docs/current/phase4-release-manifest.json](docs/current/phase4-release-manifest.json) 和当前只读数据库为准。Manifest 绑定最后一个干净的本地内容提交，服务器未部署，自动化保持暂停。当前岗位状态为 `open=3596`、`expired=264`、`superseded=45`、`withdrawn=51`；全库层级为 `exact=202`、`broad=9`、`incomplete=624`、`source_unavailable=166`，按北京时间 `2026-10-21` 的截止日期门禁，学生端实际读集为 `678` 条（`exact=140`、`broad=9`、`incomplete=442`、`source_unavailable=87`）。数据库有 `12` 条候选线索，其中 `9` 条已绑定官方证据并创建正式岗位，严格按发现来源归因的第三方正式岗位为 `8` 条；三桶油 `64` 个正式目录单位的单位级招聘入口证据仍未逐项补齐。本文后续的 Phase 0 至 Phase 440 段落是历史路线记录，不能覆盖上述当前事实。
+> **当前事实来源（2026-10-23，Phase 6 本地审阅）**：以 [docs/current/phase6-local-review-manifest.json](docs/current/phase6-local-review-manifest.json)、[docs/current/PHASE6-2026-10-23.md](docs/current/PHASE6-2026-10-23.md) 和只读的 `runtime/job_hub.sqlite3` 为准。正式库 SHA-256 为 `2b7d075209ed900bc4c56e5e14508379f50f4556a496fa39083c8bb21dbcd43b`，完整性为 `ok`，包含 `3,956` 条岗位、学生端可见 `677` 条。Phase 6 所有候选导入均在隔离审阅库进行；Worker 自动化未启用，未经项目负责人明确批准不得部署或合并数据。本文其余阶段内容均为历史路线记录，不能覆盖该入口。
 
 > **部署边界**：当前唯一生产 Compose 入口是 [deploy/compose.yaml](deploy/compose.yaml)。根目录 `docker-compose*.yml` 与 `Dockerfile*` 仅作为本地开发/兼容或历史输入保留，不能与 `deploy/compose.yaml` 叠加执行，也不能据此推断服务器已部署。
 
@@ -12,7 +12,7 @@
 
 ## 历史阶段记录
 
-以下内容仅用于回溯过去的设计和验收，不是当前生产配置、岗位统计或发布依据。需要核对当前事实时，只使用上面的 Phase 4 审计、Manifest 和只读数据库。
+以下内容仅用于回溯过去的设计和验收，不是当前生产配置、岗位统计或发布依据。需要核对当前事实时，只使用上面的 Phase 6 Manifest、审阅报告和只读数据库。
 
 Phase 83 将 31 省矩阵中已定位、但尚未启用的官方候选入口接入可重复的服务器只读探测：先核验 `robots.txt` 和正式栏目可访问性，再决定哪些入口值得逐条定位当前公告和职位表。探测不采集岗位、不启用来源，也不把访问失败写成“无岗位”。详见 [docs/phase-83/README.md](docs/phase-83/README.md)。
 
