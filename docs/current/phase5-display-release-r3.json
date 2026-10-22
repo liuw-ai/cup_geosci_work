@@ -1,0 +1,88 @@
+{
+  "phase": "phase5",
+  "release_id": "phase5-20261022-r3",
+  "released_at_utc": "2026-10-22T11:04:00Z",
+  "verified_at_utc": "2026-10-22T11:05:25Z",
+  "release_status": "deployed",
+  "scope": "student-facing source-health display and public API redaction only",
+  "source": {
+    "git_sha": "f1a40371c53e729526e3c8edc38c3e99b493ae45",
+    "archive": "phase5-20261022-r3-source.tar.gz",
+    "archive_sha256": "e2a5db99ed1cc483adfcdc5838beedd61a0a3511e5de2afbb0aaad0225bc86bc"
+  },
+  "deployment": {
+    "server": "81.70.62.174",
+    "release_root": "/opt/job-hub/releases/phase5-20261022-r3",
+    "compose_path": "app/deploy/compose.yaml",
+    "compose_sha256": "9a130d37d8dc90878570cf7c6daf5b5e84e34a8a894d0d7dc3d3488648ab0173",
+    "release_env_sha256": "a2e0a0078c5ceb103ead3b19409fcbb7cc3c7f924d1a466647d42de70d0ab938",
+    "data_volume": "job-hub-phase5-20261022-r2-data",
+    "database_policy": "Reused the audited Phase 5 isolated volume. No database import, migration, source sync, browser capture, or business-field update was performed."
+  },
+  "images": {
+    "web": "cupb-geoscience-job-hub@sha256:827fc2cb2ee292f1cb62c63afcf0e5958cb13e3962e41470c3ff043dd68067fd",
+    "browser_retained_not_started": "cupb-geoscience-job-hub-browser@sha256:cd97dbec5dcb446326e5b9ea0366ad183535ab085e92116a3ae69cac98c0946d",
+    "browser_dependencies_retained_not_started": "cupb-geoscience-job-hub-browser@sha256:07d616dcbe52b6338ea2bddeb1f780e43ce83764af499b2c640d9063c1cc6303",
+    "headless_shell_retained_not_started": "chromedp/headless-shell@sha256:2d349b544a1ea6b5b5fd7c0fe99215ff662339c57407ee2e8c0a11af93516b04"
+  },
+  "rollback": {
+    "pre_release_database_backup": {
+      "path": "/var/lib/job-hub/backups/job_hub-20261022T104440Z.sqlite3",
+      "sha256": "880b4c54562e5d778af6a005dc5f4d337f54e7f05574768d5f1a69ad4ce0da6a",
+      "integrity": "ok"
+    },
+    "release_copy": {
+      "path": "/opt/job-hub/releases/phase5-20261022-r3/rollback/pre-r3-database.sqlite3",
+      "sha256": "880b4c54562e5d778af6a005dc5f4d337f54e7f05574768d5f1a69ad4ce0da6a"
+    },
+    "previous_web_image": "cupb-geoscience-job-hub@sha256:870af43b59dd4fdd547bace77c828d3a0d6bb7701d49046adcce6daed71e263c"
+  },
+  "student_display_contract": {
+    "hidden": [
+      "source_unavailable",
+      "degraded",
+      "stale_pending_review",
+      "source_unavailable_reason",
+      "source_availability_status",
+      "official_detail_api_degraded"
+    ],
+    "retained": [
+      "official notice link",
+      "official application link",
+      "official position-table link",
+      "岗位是否仍可申请，请以保留的官方链接和最新公告为准。"
+    ]
+  },
+  "validation": {
+    "targeted_local_tests": "39 passed",
+    "server_healthz": 200,
+    "server_public_ip_healthz": 200,
+    "server_public_ip_detail_page": 200,
+    "server_student_page_source_state_leak": false,
+    "server_student_page_official_link_notice": true,
+    "server_student_api_source_state_leak": false,
+    "server_student_api_official_link_present": true,
+    "database_audit": {
+      "ok": true,
+      "jobs": 3956,
+      "current_public_jobs": 678,
+      "issues": []
+    },
+    "worker": "paused",
+    "browser_collectors": "not_started",
+    "domain": {
+      "hostname": "jobs.cupdky.cn",
+      "status": "not_resolved",
+      "temporary_public_url": "http://81.70.62.174/"
+    }
+  },
+  "known_non_feature_test_debt": {
+    "full_suite_result_before_release": "1128 passed, 4 skipped, 4 failed",
+    "failures": [
+      "tests/test_browser_image_contract.py: legacy volume-name expectation",
+      "tests/test_phase4_current_audit.py: historical runtime database hash",
+      "tests/test_phase4_manifest.py: historical Phase 4 manifest facts"
+    ],
+    "impact": "These historical Phase 4 artifact-contract failures do not exercise this student-display change; the targeted regression suite and production checks passed."
+  }
+}
