@@ -1,0 +1,63 @@
+{
+  "released_at_utc": "2026-10-23T16:50:37Z",
+  "release": {
+    "id": "phase7-20261024-r4",
+    "git_sha": "1f3a3b8b7d30e193107b16c8d6b86c81969057fd",
+    "application_image": "cupb-geoscience-job-hub@sha256:f562ca9f4cf586c95d9e7bea86f87b1b0a24ccb318d69121e725fba6c8531644",
+    "browser_image": "cupb-geoscience-job-hub-browser@sha256:f92a09da403e2509f0e12c17b01ae08285ba54707bb7e58047eaa82e2f8b0191",
+    "browser_deps_image": "cupb-geoscience-job-hub-browser@sha256:07d616dcbe52b6338ea2bddeb1f780e43ce83764af499b2c640d9063c1cc6303",
+    "headless_shell_image": "chromedp/headless-shell@sha256:2d349b544a1ea6b5b5fd7c0fe99215ff662339c57407ee2e8c0a11af93516b04"
+  },
+  "source_archive": {
+    "path": "/opt/job-hub/releases/phase7-20261024-r4/phase7-20261024-r4-source.tar.gz",
+    "sha256": "b9ccf8a3c565a7312652de79b52c8532fbce5bc4ddbace446ea038cb3bafb329"
+  },
+  "server": {
+    "host": "81.70.62.174",
+    "release_root": "/opt/job-hub/releases/phase7-20261024-r4",
+    "current_symlink_target": "/opt/job-hub/releases/phase7-20261024-r4/app",
+    "previous_release_root": "/opt/job-hub/releases/phase7-20261023-r3",
+    "data_volume": "job-hub-phase7-20261023-r2-data"
+  },
+  "rollback_backup": {
+    "path": "/var/lib/job-hub/backups/job_hub-20261023T165037Z.sqlite3",
+    "sha256": "56626852c0664a47effa6e3e91e558ea7dd3be08b307478a7718288ab5a4fa60",
+    "integrity": "ok",
+    "required_tables_present": true
+  },
+  "validation": {
+    "local_regression": "1167 passed, 4 skipped",
+    "release_check": "passed",
+    "web_health": "healthy",
+    "worker_health": "healthy",
+    "database_audit": {
+      "ok": true,
+      "checked_jobs": 4494,
+      "current_public_jobs": 749,
+      "issues": []
+    },
+    "external_https": {
+      "hostname": "cupgeojob.com",
+      "tcp_443": "reachable",
+      "healthz_http_status": 200,
+      "admin_login_http_status": 200,
+      "anonymous_admin_status": 302
+    }
+  },
+  "production_readiness": {
+    "ready": false,
+    "passed": [
+      "release identity and pinned images",
+      "database audit",
+      "fresh verified backup",
+      "coverage snapshot and daily report continuity",
+      "DNS and external HTTPS"
+    ],
+    "remaining_gates": [
+      "browser workers complete their staggered startup heartbeats",
+      "fresh successful captures for enabled sources",
+      "government registry freshness and attachment evidence",
+      "administrator bootstrap-password rotation"
+    ]
+  }
+}

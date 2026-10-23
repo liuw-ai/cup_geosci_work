@@ -1,0 +1,62 @@
+{
+  "validated_at_utc": "2026-10-23T12:20:34Z",
+  "release": {
+    "version": "phase7-20261023-r3",
+    "git_sha": "0e6991380901df9d6e27fd9a56f61979ede0243c",
+    "image_sha": "sha256:a1f1bc00f4240e98ab027731eb01d92e35a67fe6ff72487e568fdfb788222d0a",
+    "server_time": "2026-10-23T20:20:34+08:00",
+    "running_services": "web, worker and all enabled browser workers healthy"
+  },
+  "daily_cycle": {
+    "report_date": "2026-10-23",
+    "delivery_status": "skipped",
+    "mail_enabled": false,
+    "delivery_note": "Mailer is deliberately disabled because MAIL_ENABLED=false; no email delivery was attempted.",
+    "coverage_snapshot_present": true,
+    "worker_heartbeat": "running",
+    "worker_heartbeat_updated_at": "2026-10-23T12:20:08Z"
+  },
+  "backup": {
+    "path": "/var/lib/job-hub/backups/job_hub-20261023T070223Z.sqlite3",
+    "integrity": "ok",
+    "required_tables_present": true,
+    "fresh": true
+  },
+  "public_endpoint": {
+    "hostname": "cupgeojob.com",
+    "resolved_addresses": ["81.70.62.174"],
+    "dns_status": "ok",
+    "https_status": "unavailable",
+    "detail": "External TCP 443 and the production readiness HTTPS probe still time out."
+  },
+  "production_readiness": {
+    "internal_ready": false,
+    "public_ready": false,
+    "audit_ok": true,
+    "browser_workers_ok": true,
+    "source_freshness_ok": false,
+    "government_positions_ok": false,
+    "backup_ok": true,
+    "continuous_validation_ok": true,
+    "remaining_gates": [
+      "cloud firewall inbound TCP 443 from 0.0.0.0/0",
+      "fresh successful captures for enabled sources",
+      "government registry freshness and attachment evidence",
+      "administrator bootstrap-password rotation"
+    ]
+  },
+  "observations": {
+    "source_failures": [
+      "cmgb-iguopin-browser",
+      "chinalco-iguopin-browser",
+      "iguopin-general-geoscience-browser"
+    ],
+    "government_registry_as_of": "2026-09-27",
+    "government_registry_age_hours": 624,
+    "government_registry_max_age_hours": 48,
+    "government_attachment_blocked_records": 57,
+    "cloud_firewall_observed_rules": ["TCP 22 allow", "TCP 80 allow", "ICMP allow"],
+    "cloud_firewall_missing_rule": "TCP 443 allow from 0.0.0.0/0",
+    "deployment_symlink_note": "/opt/job-hub/current still points to phase4-20261021-r1; running containers are explicitly from phase7-20261023-r3."
+  }
+}
