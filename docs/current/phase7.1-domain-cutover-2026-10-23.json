@@ -1,0 +1,43 @@
+{
+  "release_id": "phase7-20261023-r3",
+  "cutover_at_utc": "2026-10-23T09:04:00Z",
+  "status": "domain_cutover_complete_external_443_blocked",
+  "domain": {
+    "primary": "cupgeojob.com",
+    "www": "www.cupgeojob.com",
+    "expected_ip": "81.70.62.174",
+    "dns": "resolved",
+    "app_base_url": "https://cupgeojob.com"
+  },
+  "server": {
+    "host": "81.70.62.174",
+    "release_root": "/opt/job-hub/releases/phase7-20261023-r3",
+    "caddy_config": "/opt/cup_geosci_work_phase442/deploy/Caddyfile.example",
+    "caddy_backup": "/opt/cup_geosci_work_phase442/deploy/Caddyfile.example.bak-20261023T085916Z",
+    "secret_env_backup": "/opt/cup_geosci_work/.env.bak-20261023T085916Z",
+    "data_volume": "job-hub-phase7-20261023-r2-data"
+  },
+  "https": {
+    "certificate_authority": "Let's Encrypt",
+    "primary_certificate_subject": "CN=cupgeojob.com",
+    "primary_certificate_not_after": "2027-01-21T08:04:10Z",
+    "server_loopback_health": 200,
+    "external_health": "blocked_or_timed_out_on_tcp_443",
+    "http_redirect": "308 to https://cupgeojob.com"
+  },
+  "application": {
+    "version": "phase7-20261023-r3",
+    "git_sha": "0e6991380901df9d6e27fd9a56f61979ede0243c",
+    "image_sha": "sha256:a1f1bc00f4240e98ab027731eb01d92e35a67fe6ff72487e568fdfb788222d0a",
+    "release_check": "passed",
+    "database_audit": "passed",
+    "secure_admin_cookie": "verified on server loopback HTTPS"
+  },
+  "remaining_actions": [
+    "Allow inbound TCP 443 in the cloud provider security group/public firewall.",
+    "Verify https://cupgeojob.com/healthz from an external network.",
+    "Rotate the administrator bootstrap password before public administrator use.",
+    "Resolve source freshness and government registry gates.",
+    "Complete and record a new 20:00 daily report cycle."
+  ]
+}
