@@ -1,0 +1,62 @@
+{
+  "release_id": "phase7-20261023-r3",
+  "status": "deployed_and_automation_enabled",
+  "deployed_at_utc": "2026-10-23T07:05:00Z",
+  "validated_at_utc": "2026-10-23T07:08:00Z",
+  "source": {
+    "git_sha": "0e6991380901df9d6e27fd9a56f61979ede0243c",
+    "archive": "phase7-20261023-r3-source.tar.gz",
+    "archive_sha256": "adca352499edcf7ea0a38c4bd38d9d09d782ec056fa4704f6b3febb04edde979"
+  },
+  "server": {
+    "host": "81.70.62.174",
+    "release_root": "/opt/job-hub/releases/phase7-20261023-r3",
+    "data_volume": "job-hub-phase7-20261023-r2-data",
+    "previous_release_root": "/opt/job-hub/releases/phase7-20261023-r2",
+    "rollback_backup": "/var/lib/job-hub/backups/job_hub-20261023T070223Z.sqlite3",
+    "rollback_backup_sha256": "d869487dbb7993296e8c3955272a3b9149e26d44580ddb576531e75f6c5c0ea2"
+  },
+  "release_identity": {
+    "application_image": "cupb-geoscience-job-hub@sha256:a1f1bc00f4240e98ab027731eb01d92e35a67fe6ff72487e568fdfb788222d0a",
+    "browser_image": "cupb-geoscience-job-hub-browser@sha256:e99d5ee3d801c5c8ec9f67ab07ce07042f6676bcd630a623c2263c69a945ae05",
+    "headless_shell_image": "chromedp/headless-shell@sha256:2d349b544a1ea6b5b5fd7c0fe99215ff662339c57407ee2e8c0a11af93516b04",
+    "compose_sha256": "9a130d37d8dc90878570cf7c6daf5b5e84e34a8a894d0d7dc3d3488648ab0173",
+    "dockerfile_app_sha256": "4deabfa73abb407ee0d22d9129a4f64c49ca953ac792817bc447cf0ddc0a456c",
+    "release_env_sha256": "93b8144b0a0f903bae588fe5d88d847c8ed48dad5aef96f290fb062224141b"
+  },
+  "security": {
+    "browser_admin_authentication": "username + Werkzeug password hash + HttpOnly/SameSite session + CSRF",
+    "bootstrap_username": "admin",
+    "machine_api_authentication": "ADMIN_TOKEN only",
+    "secret_policy": "Passwords, hashes, API tokens and SMTP credentials remain only in the server secret environment file."
+  },
+  "automation": {
+    "enabled": true,
+    "daily_publish_time": "20:00 Asia/Shanghai",
+    "failure_policy": "backup or synchronization failure blocks daily publication; source, robots, network and page failures retain existing jobs.",
+    "worker_validation": "healthy heartbeat after r3 restart; stale Halliburton run recovered as interrupted before cutover"
+  },
+  "privacy_analytics": {
+    "stored_data": "daily HMAC visitor/session digests and daily aggregates only",
+    "not_stored": ["raw IP address", "full user-agent", "URL-level browsing history", "student identity"],
+    "excluded_traffic": ["admin sessions", "API, static and health routes", "recognizable robots"],
+    "validated": ["admin dashboard rendered analytics", "anonymous analytics API returned 403", "machine token analytics API returned 200"]
+  },
+  "validation": {
+    "local_full_regression": "1167 passed, 4 skipped",
+    "healthz": 200,
+    "version": 200,
+    "admin_login": "302 success redirect followed by authenticated dashboard 200",
+    "anonymous_admin_analytics_api": 403,
+    "machine_admin_analytics_api": 200,
+    "database_backup": "integrity ok; required tables present",
+    "database_audit_before_cutover": "ok after stale crawl recovery",
+    "public_home": 200,
+    "public_preview_cache": "enabled for sanitized report preview with bounded 120-second process-local TTL"
+  },
+  "residual_operations": [
+    "The formal hostname jobs.cupdky.cn is still not DNS-resolved; current public endpoint remains HTTP on http://81.70.62.174/ until an A record points to 81.70.62.174.",
+    "Several dynamic official sources can be unavailable because upstream robots or capture snapshots are unavailable. Failures are retained in the source ledger and do not withdraw existing jobs.",
+    "HTTPS remains a deployment follow-up after DNS is configured; do not send administrator credentials over the current HTTP endpoint."
+  ]
+}
