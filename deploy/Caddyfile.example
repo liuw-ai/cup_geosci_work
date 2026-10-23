@@ -16,13 +16,17 @@
 }
 
 # Formal public hostname. Keep APP_BASE_URL identical to this hostname.
-jobs.cupdky.cn {
+cupgeojob.com {
     import job_hub_proxy
+}
+
+www.cupgeojob.com {
+    redir https://cupgeojob.com{uri} 308
 }
 
 # Temporary diagnostic endpoint before the formal domain resolves. Never proxy
 # the application over plaintext: redirect every IP request to the formal
 # HTTPS hostname so administrator credentials cannot be submitted over HTTP.
 http://81.70.62.174 {
-    redir https://jobs.cupdky.cn{uri} 308
+    redir https://cupgeojob.com{uri} 308
 }

@@ -30,7 +30,7 @@ ADMIN_TOKEN=另一条长随机字符串
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD_HASH=由 Werkzeug generate_password_hash 生成的哈希
 ADMIN_ROLE=admin
-APP_BASE_URL=https://jobs.cupdky.cn
+APP_BASE_URL=https://cupgeojob.com
 MAIL_ENABLED=true
 SMTP_HOST=smtp.example.com
 SMTP_PORT=465
@@ -135,7 +135,7 @@ docker compose -f deploy/compose.yaml exec worker python -m job_hub.cli worker-h
 
 生产部署继续使用现有独立 Caddy 项目。应用端口只对服务器本机开放，公网流量由 Caddy 终止 TLS 后转发到共享 Docker 网络中的 `web:8080`。示例配置见 [`deploy/Caddyfile.example`](deploy/Caddyfile.example)。正式域名生效前，IP 入口只允许 308 重定向到正式 HTTPS 主机，不再把应用内容或管理员登录表单通过明文 HTTP 代理出去。切换 release 时不重建 Caddy，只切换共享网络中的 Web 服务。
 
-本项目固定使用 `jobs.cupdky.cn`。先确认 `cupdky.cn` 已注册且已在域名服务商或 DNS 托管商处启用权威 DNS；若 `nslookup cupdky.cn` 本身返回 `NXDOMAIN`，仅添加 `jobs` 记录不会生效。根域可解析后，创建 `A` 记录：`jobs` -> `81.70.62.174`（TTL 设为 `600` 或服务商的 `Auto`）。确认 `nslookup jobs.cupdky.cn` 返回该地址后，在服务器执行：
+本项目正式使用 `cupgeojob.com`，`www.cupgeojob.com` 会重定向到裸域。先确认域名已注册且在域名服务商或 DNS 托管商处启用权威 DNS；创建 `A` 记录：`@` -> `81.70.62.174`，并可创建 `www` -> `81.70.62.174`（TTL 设为 `600` 或服务商的 `Auto`）。确认 `nslookup cupgeojob.com` 返回该地址后，在服务器执行：
 
 ```bash
 docker compose --env-file .release.env -f deploy/compose.yaml up -d --no-build
@@ -147,15 +147,15 @@ docker compose -f /opt/cup_geosci_work_phase442/docker-compose.public.yml logs -
 
 ```bash
 docker compose --env-file .release.env -f deploy/compose.yaml exec web python -m job_hub.cli domain-check \
-  --hostname jobs.cupdky.cn --expected-ip 81.70.62.174
+  --hostname cupgeojob.com --expected-ip 81.70.62.174
 ```
 
-该命令的退出码只有在 DNS 已解析到目标地址且 `https://jobs.cupdky.cn/healthz`
+该命令的退出码只有在 DNS 已解析到目标地址且 `https://cupgeojob.com/healthz`
 返回成功时才为 0。`nxdomain` 表示域名服务商还没有创建记录，`wrong_target`
 表示 A 记录指向了其他地址，`tls_error` 表示证书尚未签发或证书链错误；这些状态
 都与应用进程和招聘来源采集无关。
 
-防火墙只需要对外开放 80 和 443；不要把 SQLite、管理员接口或 8080 直接暴露到公网。DNS 生效后 Caddy 会自动申请和续期公开证书，微信浏览器可以直接打开标准 HTTPS 链接。DNS 未生效时 Caddy 会保持重试，不能用 IP 地址申请 `jobs.cupdky.cn` 的证书。
+防火墙只需要对外开放 80 和 443；不要把 SQLite、管理员接口或 8080 直接暴露到公网。DNS 生效后 Caddy 会自动申请和续期公开证书，微信浏览器可以直接打开标准 HTTPS 链接。DNS 未生效时 Caddy 会保持重试，不能用 IP 地址申请 `cupgeojob.com` 的证书。
 
 若使用 Nginx，等价的核心配置是 `proxy_pass http://127.0.0.1:8080;`，并保留原始 `Host`、`X-Forwarded-Proto` 和 `X-Real-IP` 请求头。
 
@@ -173,7 +173,7 @@ docker compose --env-file .release.env -f deploy/compose.yaml exec web python -m
 ```bash
 curl -fsS http://127.0.0.1:8080/healthz
 curl -I https://jobs.example.edu.cn/healthz
-nslookup jobs.cupdky.cn
+nslookup cupgeojob.com
 docker compose -f /opt/cup_geosci_work_phase442/docker-compose.public.yml ps
 docker compose --env-file .release.env -f deploy/compose.yaml ps
 docker compose --env-file .release.env -f deploy/compose.yaml logs --tail=100 web worker

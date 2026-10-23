@@ -326,7 +326,7 @@ docker compose -f docker-compose.yml -f docker-compose.browser.yml exec -T web \
   python -m job_hub.cli production-readiness
 docker compose -f docker-compose.yml -f docker-compose.browser.yml exec -T web \
   python -m job_hub.cli production-readiness \
-  --domain-hostname jobs.cupdky.cn --expected-ip 81.70.62.174 --require-public
+  --domain-hostname cupgeojob.com --expected-ip 81.70.62.174 --require-public
 ~~~
 
 恢复数据库是维护操作，不可在 Web 或 Worker 仍在写入时执行。完整步骤见
@@ -361,7 +361,7 @@ docker compose -f deploy/compose.yaml up -d --build
 docker compose -f deploy/compose.yaml logs -f worker
 ~~~
 
-生产只认 `deploy/compose.yaml`，不再叠加根目录 `docker-compose*.yml` 或任何 `phase-*` overlay。该 Compose 使用项目根目录 `.env` 注入运行配置，默认把 8080 绑定到服务器本机 `127.0.0.1`；正式部署应由 Nginx、Caddy 或学校网关提供 HTTPS 反向代理。`APP_BASE_URL` 必须填写学生实际访问地址。部署前必须先通过本地测试、用户明确批准，并用 Release Manifest 绑定 Git、Compose、镜像、配置和数据库备份；当前阶段不得据此命令直接部署。
+生产只认 `deploy/compose.yaml`，不再叠加根目录 `docker-compose*.yml` 或任何 `phase-*` overlay。该 Compose 使用项目根目录 `.env` 注入运行配置，默认把 8080 绑定到服务器本机 `127.0.0.1`；正式部署应由 Caddy 或学校网关提供 HTTPS 反向代理，正式入口为 `https://cupgeojob.com`。`APP_BASE_URL` 必须填写学生实际访问地址。部署前必须先通过本地测试、用户明确批准，并用 Release Manifest 绑定 Git、Compose、镜像、配置和数据库备份。
 
 若服务器位于中国大陆且网站向公众开放，通常需要准备已备案域名；若使用境外服务器，不需要 ICP 备案，但应评估中国大陆和微信内访问速度。网页可被微信直接打开，不要求学生安装飞书、腾讯文档或其他办公软件。
 

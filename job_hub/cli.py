@@ -282,8 +282,8 @@ def main() -> None:
     )
     domain_parser.add_argument(
         "--hostname",
-        default="jobs.cupdky.cn",
-        help="生产域名（默认 jobs.cupdky.cn）",
+        default="cupgeojob.com",
+        help="生产域名（默认 cupgeojob.com）",
     )
     domain_parser.add_argument(
         "--expected-ip",
