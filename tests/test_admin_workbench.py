@@ -12,14 +12,19 @@ def _csrf_token(client: FlaskClient) -> str:
         return str(browser_session["admin_csrf_token"])
 
 
-def _login(client: FlaskClient, token: str = "test-admin-token") -> None:
+def _login(
+    client: FlaskClient,
+    username: str = "admin",
+    password: str = "test-admin-password",
+) -> None:
     response = client.get("/admin/login?next=/admin")
     assert response.status_code == 200
     response = client.post(
         "/admin/login",
         data={
             "csrf_token": _csrf_token(client),
-            "admin_token": token,
+            "username": username,
+            "password": password,
             "next": "/admin",
         },
         follow_redirects=False,
@@ -51,12 +56,13 @@ def test_admin_workbench_requires_session_and_prevents_cache(tmp_path) -> None:
         "/admin/login",
         data={
             "csrf_token": _csrf_token(client),
-            "admin_token": "wrong-token",
+            "username": "admin",
+            "password": "wrong-password",
             "next": "/admin",
         },
     )
     assert invalid.status_code == 403
-    assert "登录凭据无效" in invalid.get_data(as_text=True)
+    assert "用户名或密码错误" in invalid.get_data(as_text=True)
     assert client.get("/admin", follow_redirects=False).status_code == 302
 
     _login(client)

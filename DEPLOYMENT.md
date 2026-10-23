@@ -27,6 +27,9 @@ cp .env.example .env
 ```dotenv
 APP_SECRET_KEY=使用密码管理器生成的长随机字符串
 ADMIN_TOKEN=另一条长随机字符串
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD_HASH=由 Werkzeug generate_password_hash 生成的哈希
+ADMIN_ROLE=admin
 APP_BASE_URL=https://jobs.cupdky.cn
 MAIL_ENABLED=true
 SMTP_HOST=smtp.example.com
@@ -37,6 +40,14 @@ SMTP_FROM=jobs@example.com
 SMTP_TO=管理员邮箱@example.com
 SMTP_USE_SSL=true
 HTTP_TRANSPORT_MODE=direct
+WORKER_AUTOMATION_ENABLED=true
+```
+
+网页登录使用 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD_HASH`，不再使用 `ADMIN_TOKEN`。
+`ADMIN_TOKEN` 只用于受保护的机器 API。生成密码哈希示例：
+
+```bash
+python -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('change-me'))"
 ```
 
 生产发布不能修改基础 `.env` 中的开发默认值，也不能用可覆盖的镜像标签。镜像推送完成并取得各自的 `@sha256:...` 内容摘要后，生成不含密码或 SMTP 信息的独立发布清单：

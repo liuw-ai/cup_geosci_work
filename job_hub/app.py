@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import hmac
+import hashlib
+import re
 import secrets
 from datetime import date, datetime, timezone
 from functools import wraps
@@ -11,6 +13,7 @@ from flask import (
     Flask,
     abort,
     flash,
+    g,
     jsonify,
     redirect,
     render_template,
@@ -18,6 +21,7 @@ from flask import (
     session,
     url_for,
 )
+from werkzeug.security import check_password_hash
 
 from job_hub.audit import audit_database
 from job_hub.attachments import (
@@ -70,6 +74,21 @@ from job_hub.three_oil_entry_evidence import (
     load_three_oil_entry_evidence,
     three_oil_entry_evidence_summary,
 )
+
+
+ADMIN_ROLE_PERMISSIONS: dict[str, frozenset[str]] = {
+    "admin": frozenset({"*"}),
+    "reviewer": frozenset(
+        {"dashboard.view", "analytics.view", "leads.view", "leads.edit", "leads.publish"}
+    ),
+    "analyst": frozenset({"dashboard.view", "analytics.view", "leads.view"}),
+}
+ANALYTICS_BOT_PATTERN = re.compile(
+    r"bot|spider|crawler|slurp|bingpreview|headless|curl|wget|python-requests|scrapy|facebookexternalhit|bytespider",
+    re.IGNORECASE,
+)
+ANALYTICS_VISITOR_COOKIE = "jh_analytics_vid"
+ANALYTICS_SESSION_COOKIE = "jh_analytics_sid"
 from job_hub.national_sources import (
     load_national_source_matrix,
     national_source_matrix_rows,
@@ -168,6 +187,34 @@ ADMIN_THREE_OIL_ENTRY_STATUS_LABELS = {
 }
 
 
+def _admin_permissions(role: str | None) -> frozenset[str]:
+    return ADMIN_ROLE_PERMISSIONS.get(str(role or ""), frozenset())
+
+
+def _analytics_request_allowed() -> bool:
+    """Count only public HTML navigations, never admin/API/assets/bots."""
+
+    if session.get("admin_user_id") is not None:
+        return False
+    if request.method not in {"GET", "HEAD"}:
+        return False
+    path = request.path or "/"
+    if path.startswith(("/admin", "/api", "/static")):
+        return False
+    if path in {"/healthz", "/version", "/favicon.ico", "/robots.txt"}:
+        return False
+    user_agent = request.headers.get("User-Agent", "")
+    if ANALYTICS_BOT_PATTERN.search(user_agent):
+        return False
+    accept = request.headers.get("Accept", "")
+    return not accept or "text/html" in accept or "*/*" in accept
+
+
+def _analytics_digest(settings: Settings, day: str, purpose: str, value: str) -> str:
+    message = f"{purpose}:{day}:{value}".encode("utf-8")
+    return hmac.new(settings.secret_key.encode("utf-8"), message, hashlib.sha256).hexdigest()
+
+
 def _student_api_job(job: dict[str, Any]) -> dict[str, Any]:
     """Return the student API view without private discovery evidence."""
 
@@ -228,12 +275,89 @@ def create_app(settings: Settings | None = None) -> Flask:
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
         SESSION_COOKIE_SECURE=settings.base_url.startswith("https://"),
+        PERMANENT_SESSION_LIFETIME=8 * 60 * 60,
+        SESSION_REFRESH_EACH_REQUEST=True,
     )
     app.json.ensure_ascii = False
     app.extensions["settings"] = settings
     app.extensions["database"] = database
     app.extensions["pipeline"] = pipeline
     app.extensions["attachment_processor"] = OfficialAttachmentProcessor(settings, database)
+
+    # The deployment environment supplies a password hash. Local review
+    # instances may omit it, in which case the login stays unavailable rather
+    # than silently falling back to the machine API token.
+    if settings.admin_password_hash:
+        database.upsert_admin_user(
+            settings.admin_username,
+            settings.admin_password_hash,
+            settings.admin_role,
+        )
+
+    def current_admin_user() -> dict[str, Any] | None:
+        user_id = session.get("admin_user_id")
+        if not isinstance(user_id, int):
+            return None
+        user = database.get_admin_user(user_id)
+        if not user or not bool(user.get("enabled")):
+            return None
+        return user
+
+    def admin_can(permission: str) -> bool:
+        user = current_admin_user()
+        permissions = _admin_permissions(user.get("role") if user else None)
+        return "*" in permissions or permission in permissions
+
+    @app.before_request
+    def collect_public_analytics() -> None:
+        if not _analytics_request_allowed():
+            return
+        day = local_today(settings).isoformat()
+        visitor_cookie = request.cookies.get(ANALYTICS_VISITOR_COOKIE, "").strip()
+        session_cookie = request.cookies.get(ANALYTICS_SESSION_COOKIE, "").strip()
+        if not visitor_cookie:
+            visitor_cookie = secrets.token_urlsafe(24)
+        if not session_cookie:
+            session_cookie = secrets.token_urlsafe(24)
+        g.analytics_pending = {
+            "day": day,
+            "visitor_key": _analytics_digest(settings, day, "visitor", visitor_cookie),
+            "session_key": _analytics_digest(settings, day, "session", session_cookie),
+            "visitor_cookie": visitor_cookie,
+            "session_cookie": session_cookie,
+            "set_visitor_cookie": not bool(request.cookies.get(ANALYTICS_VISITOR_COOKIE)),
+            "set_session_cookie": not bool(request.cookies.get(ANALYTICS_SESSION_COOKIE)),
+        }
+
+    @app.after_request
+    def set_analytics_cookie(response: Any) -> Any:
+        pending = getattr(g, "analytics_pending", None)
+        if pending and response.status_code < 400 and response.mimetype == "text/html":
+            database.record_page_view(
+                day=pending["day"],
+                visitor_key=pending["visitor_key"],
+                session_key=pending["session_key"],
+            )
+        if pending and response.status_code < 400 and response.mimetype == "text/html":
+            if pending["set_visitor_cookie"]:
+                response.set_cookie(
+                    ANALYTICS_VISITOR_COOKIE,
+                    pending["visitor_cookie"],
+                    max_age=max(86_400, settings.analytics_cookie_max_age_seconds),
+                    httponly=True,
+                    secure=settings.base_url.startswith("https://"),
+                    samesite="Lax",
+                )
+            if pending["set_session_cookie"]:
+                response.set_cookie(
+                    ANALYTICS_SESSION_COOKIE,
+                    pending["session_cookie"],
+                    max_age=settings.analytics_cookie_max_age_seconds,
+                    httponly=True,
+                    secure=settings.base_url.startswith("https://"),
+                    samesite="Lax",
+                )
+        return response
 
     @app.context_processor
     def inject_globals() -> dict[str, Any]:
@@ -243,6 +367,8 @@ def create_app(settings: Settings | None = None) -> Flask:
             "category_order": CATEGORY_ORDER,
             "category_descriptions": CATEGORY_DESCRIPTIONS,
             "category_display_names": CATEGORY_DISPLAY_NAMES,
+            "admin_user": current_admin_user(),
+            "admin_can": admin_can,
             "degree_order": DEGREE_ORDER,
             "provinces": PROVINCES,
             "student_profiles": list_student_profiles(),
@@ -865,31 +991,49 @@ def create_app(settings: Settings | None = None) -> Flask:
         candidate = str(value or "").strip()
         return candidate if candidate.startswith("/") and not candidate.startswith("//") else url_for("admin_dashboard")
 
-    def require_admin_session(view: Callable[..., Any]) -> Callable[..., Any]:
-        """Protect HTML workbench routes without changing API-token behavior."""
+    def require_admin_session(
+        view: Callable[..., Any] | None = None,
+        *,
+        permission: str = "dashboard.view",
+    ) -> Callable[..., Any]:
+        """Protect HTML workbench routes with role-aware permissions."""
 
-        @wraps(view)
-        def wrapped(*args: Any, **kwargs: Any) -> Any:
-            if session.get("admin_authenticated") is not True:
-                return redirect(
-                    url_for("admin_login", next=_safe_admin_next(request.full_path))
-                )
-            return view(*args, **kwargs)
+        def decorator(target: Callable[..., Any]) -> Callable[..., Any]:
+            @wraps(target)
+            def wrapped(*args: Any, **kwargs: Any) -> Any:
+                user = current_admin_user()
+                if user is None:
+                    session.clear()
+                    return redirect(
+                        url_for("admin_login", next=_safe_admin_next(request.full_path))
+                    )
+                if permission and not admin_can(permission):
+                    abort(403)
+                return target(*args, **kwargs)
 
-        return wrapped
+            return wrapped
 
-    def require_admin_form(view: Callable[..., Any]) -> Callable[..., Any]:
-        """Require an authenticated session and a matching form CSRF token."""
+        return decorator(view) if view is not None else decorator
 
-        @wraps(view)
-        @require_admin_session
-        def wrapped(*args: Any, **kwargs: Any) -> Any:
-            supplied = str(request.form.get("csrf_token") or "")
-            if not hmac.compare_digest(supplied, admin_csrf_token()):
-                abort(400)
-            return view(*args, **kwargs)
+    def require_admin_form(
+        view: Callable[..., Any] | None = None,
+        *,
+        permission: str = "dashboard.view",
+    ) -> Callable[..., Any]:
+        """Require an authenticated role and a matching form CSRF token."""
 
-        return wrapped
+        def decorator(target: Callable[..., Any]) -> Callable[..., Any]:
+            @wraps(target)
+            @require_admin_session(permission=permission)
+            def wrapped(*args: Any, **kwargs: Any) -> Any:
+                supplied = str(request.form.get("csrf_token") or "")
+                if not hmac.compare_digest(supplied, admin_csrf_token()):
+                    abort(400)
+                return target(*args, **kwargs)
+
+            return wrapped
+
+        return decorator(view) if view is not None else decorator
 
     @app.after_request
     def prevent_private_admin_caching(response: Any) -> Any:
@@ -1062,23 +1206,36 @@ def create_app(settings: Settings | None = None) -> Flask:
         next_url = _safe_admin_next(request.values.get("next"))
         if request.method == "POST":
             supplied_csrf = str(request.form.get("csrf_token") or "")
-            supplied_token = str(request.form.get("admin_token") or "")
-            if (
-                not hmac.compare_digest(supplied_csrf, admin_csrf_token())
-                or not settings.admin_token
-                or not hmac.compare_digest(supplied_token, settings.admin_token)
-            ):
+            username = str(request.form.get("username") or "").strip()
+            password = str(request.form.get("password") or "")
+            user = database.get_admin_user_by_username(username)
+            valid = bool(
+                hmac.compare_digest(supplied_csrf, admin_csrf_token())
+                and settings.admin_password_hash
+                and user
+                and bool(user.get("enabled"))
+                and check_password_hash(str(user.get("password_hash") or ""), password)
+            )
+            if not valid:
                 return render_template(
                     "admin_login.html",
                     csrf_token=admin_csrf_token(),
                     next_url=next_url,
-                    error="登录凭据无效。",
+                    error=(
+                        "管理员账户尚未配置。"
+                        if not settings.admin_password_hash
+                        else "用户名或密码错误。"
+                    ),
                 ), 403
             session.clear()
-            session["admin_authenticated"] = True
+            session.permanent = True
+            session["admin_user_id"] = int(user["id"])
+            session["admin_username"] = str(user["username"])
+            session["admin_role"] = str(user["role"])
             session["admin_csrf_token"] = secrets.token_urlsafe(32)
+            database.mark_admin_login(int(user["id"]))
             return redirect(next_url)
-        if session.get("admin_authenticated") is True:
+        if current_admin_user() is not None:
             return redirect(next_url)
         return render_template(
             "admin_login.html",
@@ -1110,6 +1267,13 @@ def create_app(settings: Settings | None = None) -> Flask:
             csrf_token=admin_csrf_token(),
             lead_statuses=statuses,
             lead_status_labels=ADMIN_LEAD_STATUS_LABELS,
+            analytics=database.analytics_summary(
+                end_day=local_today(settings).isoformat(), days=30
+            ),
+            worker_heartbeat=database.get_service_heartbeat("worker"),
+            worker_runs=database.recent_worker_runs(run_kind="daily_cycle", limit=8),
+            recent_failures=database.recent_crawl_failures(limit=8),
+            recent_events=database.recent_candidate_lead_events(limit=8),
             discovery=discovery_funnel(leads, registry, jobs=jobs),
             third_party_batches=database.list_third_party_batches(limit=20),
             artifact_statuses=database.list_source_artifact_status_counts(),
@@ -1125,7 +1289,7 @@ def create_app(settings: Settings | None = None) -> Flask:
         )
 
     @app.get("/admin/leads")
-    @require_admin_session
+    @require_admin_session(permission="leads.view")
     def admin_leads() -> str:
         selected_status = request.args.get("status", "").strip() or None
         selected_source = request.args.get("discovery_source_id", "").strip() or None
@@ -1181,16 +1345,20 @@ def create_app(settings: Settings | None = None) -> Flask:
         )
 
     @app.route("/admin/leads/<int:lead_id>", methods=["GET", "POST"])
-    @require_admin_session
+    @require_admin_session(permission="leads.view")
     def admin_lead_detail(lead_id: int) -> Any:
         lead = database.get_candidate_lead(lead_id)
         if lead is None:
             abort(404)
         if request.method == "POST":
+            if not admin_can("leads.edit"):
+                abort(403)
             supplied_csrf = str(request.form.get("csrf_token") or "")
             if not hmac.compare_digest(supplied_csrf, admin_csrf_token()):
                 abort(400)
             action = str(request.form.get("action") or "save")
+            if action == "publish" and not admin_can("leads.publish"):
+                abort(403)
             try:
                 if action == "save":
                     database.update_candidate_lead(lead_id, _lead_form_changes(lead))
@@ -1215,6 +1383,8 @@ def create_app(settings: Settings | None = None) -> Flask:
             sources=_admin_sources(),
             events=database.list_candidate_lead_events(lead_id),
             mentions=database.list_candidate_lead_mentions(lead_id),
+            can_edit=admin_can("leads.edit"),
+            can_publish=admin_can("leads.publish"),
         )
 
     @app.get("/api/admin/source-funnel")
@@ -1291,6 +1461,16 @@ def create_app(settings: Settings | None = None) -> Flask:
                     for row in source_report["rows"]
                 ],
             }
+        )
+
+    @app.get("/api/admin/analytics")
+    @require_admin
+    def analytics_api() -> Any:
+        days = request.args.get("days", 30, type=int)
+        return jsonify(
+            database.analytics_summary(
+                end_day=local_today(settings).isoformat(), days=days
+            )
         )
 
     @app.get("/api/admin/source-fallback-audit")

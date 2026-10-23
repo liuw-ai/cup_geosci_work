@@ -4,6 +4,7 @@ import json
 from dataclasses import replace
 from pathlib import Path
 import pytest
+from werkzeug.security import generate_password_hash
 
 from job_hub.config import Settings
 
@@ -48,6 +49,9 @@ def make_settings(tmp_path: Path) -> Settings:
         max_source_items=10,
         request_timeout_seconds=5,
         admin_token="test-admin-token",
+        admin_username="admin",
+        admin_password_hash=generate_password_hash("test-admin-password"),
+        admin_role="admin",
         mail_enabled=False,
         smtp_host="",
         smtp_port=465,

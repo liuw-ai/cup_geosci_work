@@ -5,9 +5,9 @@
 {% block content %}
   <header class="admin-page-heading">
     <div>
-      <p class="admin-kicker">Phase 6 本地审核</p>
+      <p class="admin-kicker">受控运行管理</p>
       <h1>审核概览</h1>
-      <p>第三方发现只产生私有候选。只有绑定岗位级官方证据且通过发布门禁，才能形成学生端岗位。</p>
+      <p>候选、来源、访问趋势和自动更新状态集中在这里。只有绑定岗位级官方证据且通过发布门禁，才能形成学生端岗位。</p>
     </div>
     <a class="admin-primary-link" href="{{ url_for('admin_leads', status='candidate') }}">处理待回溯候选</a>
   </header>
@@ -19,6 +19,47 @@
         <strong>{{ count }}</strong>
       </a>
     {% endfor %}
+  </section>
+
+  <section class="admin-section">
+    <div class="admin-section-heading">
+      <div><p class="admin-kicker">网站访问</p><h2>隐私保护访问统计</h2></div>
+      <span class="admin-muted">近 {{ analytics.period.days }} 天</span>
+    </div>
+    <dl class="admin-metric-list admin-metric-list-four">
+      <div><dt>总访问次数</dt><dd>{{ analytics.totals.visits }}</dd></div>
+      <div><dt>独立访客</dt><dd>{{ analytics.totals.unique_visitors }}</dd></div>
+      <div><dt>页面访问量</dt><dd>{{ analytics.totals.page_views }}</dd></div>
+      <div><dt>统计结束日期</dt><dd class="admin-date-value">{{ analytics.period.end }}</dd></div>
+    </dl>
+    <div class="admin-table-wrap admin-trend-wrap">
+      <table><thead><tr><th>日期</th><th>访问次数</th><th>独立访客</th><th>页面访问</th></tr></thead>
+        <tbody>{% for row in analytics.trend|reverse %}<tr><td>{{ row.day }}</td><td>{{ row.visits }}</td><td>{{ row.unique_visitors }}</td><td>{{ row.page_views }}</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    <p class="admin-note">统计仅保留按日匿名摘要，不保存原始 IP；管理员、接口、静态资源和识别出的机器人流量已排除。</p>
+  </section>
+
+  <section class="admin-section">
+    <div class="admin-section-heading"><div><p class="admin-kicker">自动更新</p><h2>运行状态与失败保护</h2></div></div>
+    <dl class="admin-metric-list admin-metric-list-four">
+      <div><dt>Worker 状态</dt><dd class="admin-text-value">{{ (worker_heartbeat.status if worker_heartbeat else '未记录') }}</dd></div>
+      <div><dt>最近心跳</dt><dd class="admin-date-value">{{ (worker_heartbeat.updated_at if worker_heartbeat else '—') }}</dd></div>
+      <div><dt>最近日报周期</dt><dd class="admin-text-value">{{ worker_runs[0].status if worker_runs else '未运行' }}</dd></div>
+      <div><dt>待处理失败源</dt><dd>{{ recent_failures|length }}</dd></div>
+    </dl>
+    {% if worker_runs %}
+      <div class="admin-table-wrap"><table><thead><tr><th>周期</th><th>状态</th><th>开始时间</th><th>结束时间</th><th>说明</th></tr></thead>
+        <tbody>{% for run in worker_runs %}<tr><td>{{ run.run_key }}</td><td><span class="admin-status {% if run.status == 'succeeded' %}admin-status-ok{% endif %}">{{ run.status }}</span></td><td>{{ run.started_at }}</td><td>{{ run.finished_at or '运行中' }}</td><td>{{ run.detail }}</td></tr>{% endfor %}</tbody>
+      </table></div>
+    {% else %}<p class="admin-empty">尚无自动更新周期记录。启用 Worker 后，每日周期会在此留下可追溯记录。</p>{% endif %}
+  </section>
+
+  <section class="admin-section">
+    <div class="admin-section-heading"><div><p class="admin-kicker">审核事件</p><h2>最近审核动作</h2></div></div>
+    {% if recent_events %}<div class="admin-table-wrap"><table><thead><tr><th>岗位线索</th><th>事件</th><th>状态变化</th><th>审核人</th><th>时间</th></tr></thead>
+      <tbody>{% for event in recent_events %}<tr><td>{{ event.title }}</td><td>{{ event.event_type }}</td><td>{{ event.from_status or '—' }} → {{ event.to_status or '—' }}</td><td>{{ event.payload.reviewed_by or '—' }}</td><td>{{ event.occurred_at }}</td></tr>{% endfor %}</tbody></table></div>
+    {% else %}<p class="admin-empty">尚无审核事件。</p>{% endif %}
   </section>
 
   <section class="admin-section">

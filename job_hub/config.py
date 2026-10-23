@@ -95,6 +95,13 @@ class Settings:
     smtp_from: str
     smtp_to: tuple[str, ...]
     smtp_use_ssl: bool
+    # Browser-admin authentication is backed by a database user and a
+    # Werkzeug password hash.  ``admin_token`` remains the machine API secret.
+    admin_username: str = "admin"
+    admin_password_hash: str = ""
+    admin_role: str = "admin"
+    analytics_cookie_max_age_seconds: int = 1800
+    analytics_retention_days: int = 400
     crawl_run_stale_seconds: int = 1800
     artifact_storage_dir: Path | None = None
     government_artifact_manifest_path: Path | None = None
@@ -213,6 +220,15 @@ class Settings:
             smtp_from=os.getenv("SMTP_FROM", ""),
             smtp_to=recipients,
             smtp_use_ssl=_env_bool("SMTP_USE_SSL", True),
+            admin_username=os.getenv("ADMIN_USERNAME", "admin").strip(),
+            admin_password_hash=os.getenv("ADMIN_PASSWORD_HASH", "").strip(),
+            admin_role=os.getenv("ADMIN_ROLE", "admin").strip().lower(),
+            analytics_cookie_max_age_seconds=max(
+                300, _env_int("ANALYTICS_COOKIE_MAX_AGE_SECONDS", 1800)
+            ),
+            analytics_retention_days=max(
+                30, min(4000, _env_int("ANALYTICS_RETENTION_DAYS", 400))
+            ),
             crawl_run_stale_seconds=_env_int("CRAWL_RUN_STALE_SECONDS", 1800),
             artifact_storage_dir=Path(
                 os.getenv("ATTACHMENT_STORAGE_DIR", data_dir / "official-attachments")

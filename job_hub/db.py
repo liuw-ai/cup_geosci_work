@@ -258,6 +258,63 @@ CREATE TABLE IF NOT EXISTS service_heartbeats (
     updated_at TEXT NOT NULL
 );
 
+-- Browser-admin identities are separate from the machine API token.  Passwords
+-- are stored only as Werkzeug-compatible password hashes; the application
+-- never persists or logs a plaintext password.
+CREATE TABLE IF NOT EXISTS admin_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'reviewer',
+    enabled INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    last_login_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_users_enabled
+ON admin_users(enabled, username);
+
+-- Privacy-preserving traffic counters.  Only daily HMAC digests are retained
+-- in the two uniqueness tables; raw IP addresses and user-agent strings never
+-- enter the database.
+CREATE TABLE IF NOT EXISTS analytics_daily (
+    day TEXT PRIMARY KEY,
+    visits INTEGER NOT NULL DEFAULT 0,
+    unique_visitors INTEGER NOT NULL DEFAULT 0,
+    page_views INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS analytics_visitor_days (
+    day TEXT NOT NULL,
+    visitor_key TEXT NOT NULL,
+    first_seen_at TEXT NOT NULL,
+    PRIMARY KEY(day, visitor_key)
+);
+
+CREATE TABLE IF NOT EXISTS analytics_session_days (
+    day TEXT NOT NULL,
+    session_key TEXT NOT NULL,
+    first_seen_at TEXT NOT NULL,
+    PRIMARY KEY(day, session_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_analytics_daily_day
+ON analytics_daily(day DESC);
+
+CREATE TABLE IF NOT EXISTS worker_runs (
+    run_key TEXT PRIMARY KEY,
+    run_kind TEXT NOT NULL,
+    status TEXT NOT NULL,
+    started_at TEXT NOT NULL,
+    finished_at TEXT,
+    detail TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_worker_runs_kind_started
+ON worker_runs(run_kind, started_at DESC);
+
 CREATE TABLE IF NOT EXISTS daily_reports (
     report_date TEXT PRIMARY KEY,
     published_at TEXT NOT NULL,
@@ -4638,6 +4695,269 @@ class Database:
                 (service_name,),
             ).fetchone()
         return dict(row) if row else None
+
+    def upsert_admin_user(
+        self,
+        username: str,
+        password_hash: str,
+        role: str = "reviewer",
+    ) -> dict[str, Any]:
+        """Synchronize the configured bootstrap administrator without plaintext."""
+
+        username = str(username or "").strip()
+        password_hash = str(password_hash or "").strip()
+        role = str(role or "reviewer").strip().lower()
+        if not username or len(username) > 120:
+            raise ValueError("Administrator username is required.")
+        if not password_hash:
+            raise ValueError("Administrator password hash is required.")
+        if role not in {"admin", "reviewer", "analyst"}:
+            raise ValueError("Unknown administrator role.")
+        now = utc_now()
+        with self.transaction() as connection:
+            connection.execute(
+                """
+                INSERT INTO admin_users (username, password_hash, role, enabled, created_at, updated_at)
+                VALUES (?, ?, ?, 1, ?, ?)
+                ON CONFLICT(username) DO UPDATE SET
+                    password_hash=excluded.password_hash,
+                    role=excluded.role,
+                    enabled=1,
+                    updated_at=excluded.updated_at
+                """,
+                (username, password_hash, role, now, now),
+            )
+            row = connection.execute(
+                """
+                SELECT id, username, password_hash, role, enabled,
+                       created_at, updated_at, last_login_at
+                FROM admin_users WHERE username = ?
+                """,
+                (username,),
+            ).fetchone()
+        if row is None:  # pragma: no cover - protected by the transaction above
+            raise RuntimeError("Administrator bootstrap failed.")
+        return dict(row)
+
+    def get_admin_user_by_username(self, username: str) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute(
+                """
+                SELECT id, username, password_hash, role, enabled,
+                       created_at, updated_at, last_login_at
+                FROM admin_users WHERE username = ?
+                """,
+                (str(username or "").strip(),),
+            ).fetchone()
+        return dict(row) if row else None
+
+    def get_admin_user(self, user_id: int) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute(
+                """
+                SELECT id, username, password_hash, role, enabled,
+                       created_at, updated_at, last_login_at
+                FROM admin_users WHERE id = ?
+                """,
+                (int(user_id),),
+            ).fetchone()
+        return dict(row) if row else None
+
+    def mark_admin_login(self, user_id: int) -> None:
+        with self.transaction() as connection:
+            connection.execute(
+                "UPDATE admin_users SET last_login_at = ?, updated_at = ? WHERE id = ?",
+                (utc_now(), utc_now(), int(user_id)),
+            )
+
+    def record_page_view(
+        self,
+        *,
+        day: str,
+        visitor_key: str,
+        session_key: str,
+    ) -> None:
+        """Record one eligible page view using only daily pseudonymous keys."""
+
+        day = str(day)
+        visitor_key = str(visitor_key)
+        session_key = str(session_key)
+        now = utc_now()
+        with self.transaction() as connection:
+            visitor_inserted = connection.execute(
+                """
+                INSERT OR IGNORE INTO analytics_visitor_days (day, visitor_key, first_seen_at)
+                VALUES (?, ?, ?)
+                """,
+                (day, visitor_key, now),
+            ).rowcount
+            session_inserted = connection.execute(
+                """
+                INSERT OR IGNORE INTO analytics_session_days (day, session_key, first_seen_at)
+                VALUES (?, ?, ?)
+                """,
+                (day, session_key, now),
+            ).rowcount
+            connection.execute(
+                """
+                INSERT INTO analytics_daily (day, visits, unique_visitors, page_views, updated_at)
+                VALUES (?, ?, ?, 1, ?)
+                ON CONFLICT(day) DO UPDATE SET
+                    visits = visits + excluded.visits,
+                    unique_visitors = unique_visitors + excluded.unique_visitors,
+                    page_views = page_views + 1,
+                    updated_at = excluded.updated_at
+                """,
+                (day, int(bool(session_inserted)), int(bool(visitor_inserted)), now),
+            )
+
+    def analytics_summary(self, *, end_day: str, days: int = 30) -> dict[str, Any]:
+        """Return zero-filled daily traffic metrics for the private dashboard."""
+
+        days = max(1, min(int(days), 400))
+        end = date.fromisoformat(str(end_day))
+        start = end - timedelta(days=days - 1)
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT day, visits, unique_visitors, page_views
+                FROM analytics_daily
+                WHERE day >= ? AND day <= ?
+                ORDER BY day ASC
+                """,
+                (start.isoformat(), end.isoformat()),
+            ).fetchall()
+            distinct = connection.execute(
+                """
+                SELECT
+                    (SELECT COUNT(DISTINCT visitor_key) FROM analytics_visitor_days WHERE day >= ? AND day <= ?) AS unique_visitors,
+                    (SELECT COUNT(DISTINCT session_key) FROM analytics_session_days WHERE day >= ? AND day <= ?) AS visits
+                """,
+                (start.isoformat(), end.isoformat(), start.isoformat(), end.isoformat()),
+            ).fetchone()
+        by_day = {str(row["day"]): dict(row) for row in rows}
+        trend: list[dict[str, Any]] = []
+        cursor = start
+        while cursor <= end:
+            day = cursor.isoformat()
+            row = by_day.get(
+                day,
+                {"day": day, "visits": 0, "unique_visitors": 0, "page_views": 0},
+            )
+            trend.append(
+                {
+                    "day": day,
+                    "visits": int(row.get("visits", 0)),
+                    "unique_visitors": int(row.get("unique_visitors", 0)),
+                    "page_views": int(row.get("page_views", 0)),
+                }
+            )
+            cursor += timedelta(days=1)
+        return {
+            "period": {"start": start.isoformat(), "end": end.isoformat(), "days": days},
+            "totals": {
+                "visits": int(distinct["visits"] if distinct else 0),
+                "unique_visitors": int(distinct["unique_visitors"] if distinct else 0),
+                "page_views": sum(item["page_views"] for item in trend),
+            },
+            "trend": trend,
+        }
+
+    def prune_analytics(self, *, before_day: str) -> int:
+        """Remove old anonymous digests and aggregates beyond the retention window."""
+
+        with self.transaction() as connection:
+            deleted = 0
+            for table in (
+                "analytics_daily",
+                "analytics_visitor_days",
+                "analytics_session_days",
+            ):
+                deleted += int(
+                    connection.execute(
+                        f"DELETE FROM {table} WHERE day < ?", (str(before_day),)
+                    ).rowcount
+                )
+        return deleted
+
+    def claim_worker_run(self, run_key: str, run_kind: str) -> bool:
+        """Claim an idempotent worker run key, refusing duplicate active work."""
+
+        now = utc_now()
+        with self.transaction() as connection:
+            row = connection.execute(
+                "SELECT status FROM worker_runs WHERE run_key = ?",
+                (str(run_key),),
+            ).fetchone()
+            if row is not None and str(row["status"]) in {"running", "succeeded"}:
+                return False
+            connection.execute(
+                """
+                INSERT INTO worker_runs (run_key, run_kind, status, started_at, finished_at, detail)
+                VALUES (?, ?, 'running', ?, NULL, '')
+                ON CONFLICT(run_key) DO UPDATE SET
+                    run_kind=excluded.run_kind,
+                    status='running',
+                    started_at=excluded.started_at,
+                    finished_at=NULL,
+                    detail=''
+                """,
+                (str(run_key), str(run_kind), now),
+            )
+        return True
+
+    def finish_worker_run(self, run_key: str, status: str, detail: str = "") -> None:
+        if status not in {"succeeded", "failed"}:
+            raise ValueError("Worker run status must be succeeded or failed.")
+        with self.transaction() as connection:
+            connection.execute(
+                """
+                UPDATE worker_runs
+                SET status = ?, finished_at = ?, detail = ?
+                WHERE run_key = ?
+                """,
+                (status, utc_now(), str(detail)[:500], str(run_key)),
+            )
+
+    def recent_worker_runs(self, *, run_kind: str | None = None, limit: int = 10) -> list[dict[str, Any]]:
+        clauses: list[str] = []
+        values: list[Any] = []
+        if run_kind:
+            clauses.append("run_kind = ?")
+            values.append(str(run_kind))
+        where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
+        values.append(max(1, min(int(limit), 100)))
+        with self.connect() as connection:
+            rows = connection.execute(
+                f"""
+                SELECT run_key, run_kind, status, started_at, finished_at, detail
+                FROM worker_runs {where}
+                ORDER BY started_at DESC LIMIT ?
+                """,
+                values,
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def recent_candidate_lead_events(self, limit: int = 12) -> list[dict[str, Any]]:
+        with self.connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT events.id, events.lead_id, events.event_type,
+                       events.from_status, events.to_status, events.note,
+                       events.payload_json, events.occurred_at, leads.title
+                FROM candidate_lead_events AS events
+                JOIN candidate_leads AS leads ON leads.id = events.lead_id
+                ORDER BY events.occurred_at DESC, events.id DESC
+                LIMIT ?
+                """,
+                (max(1, min(int(limit), 100)),),
+            ).fetchall()
+        items: list[dict[str, Any]] = []
+        for row in rows:
+            item = dict(row)
+            item["payload"] = json.loads(item.pop("payload_json") or "{}")
+            items.append(item)
+        return items
 
     def count_jobs_for_source(self, source_id: str) -> int:
         with self.connect() as connection:

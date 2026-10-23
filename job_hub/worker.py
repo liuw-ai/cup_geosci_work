@@ -5,7 +5,7 @@ import json
 import signal
 import time
 from dataclasses import replace
-from datetime import datetime, time as clock_time
+from datetime import datetime, time as clock_time, timedelta
 from threading import Event
 from zoneinfo import ZoneInfo
 
@@ -133,7 +133,7 @@ class DailyWorker:
         LOGGER.info("Stopping employment information worker.")
         self.stop_event.set()
 
-    def _sync_with_alert(self) -> None:
+    def _sync_with_alert(self) -> bool:
         LOGGER.info("Starting source synchronization.")
         self._heartbeat("syncing")
         try:
@@ -147,7 +147,7 @@ class DailyWorker:
             LOGGER.exception("Required database backup failed before synchronization")
             self._heartbeat("degraded", "database backup failed before source synchronization")
             self._send_failure_safely("数据库备份失败，已暂停本轮同步", str(error))
-            return
+            return False
         if backup is not None:
             LOGGER.info(
                 "Verified pre-sync database backup created: %s (%s bytes)",
@@ -185,6 +185,11 @@ class DailyWorker:
             ):
                 government_auto_publication["reindex"] = self.pipeline.reindex_jobs()
             self._record_attachment_run_metrics()
+            retention_start = (
+                datetime.now(self.timezone).date()
+                - timedelta(days=max(30, self.settings.analytics_retention_days))
+            ).isoformat()
+            self.database.prune_analytics(before_day=retention_start)
             expired_candidates = self.database.expire_stale_artifact_candidates(
                 as_of=datetime.now(self.timezone).date().isoformat()
             )
@@ -249,12 +254,14 @@ class DailyWorker:
                 )
             self._heartbeat("running", "source synchronization completed")
             self._last_error_detail = None
+            return True
         except Exception as error:
             self._schedule_sync_retry()
             self._last_error_detail = "source synchronization failed"
             LOGGER.exception("Source synchronization failed")
             self._heartbeat("degraded", "source synchronization failed")
             self._send_failure_safely("官方来源同步失败", str(error))
+            return False
 
     def _refresh_government_evidence(self) -> tuple[dict[str, int], dict[str, int]]:
         """Recheck governed evidence and reconcile only the reviewed ledger."""
@@ -973,9 +980,14 @@ class DailyWorker:
 
     def _publish_with_alert(self, report_date: str) -> None:
         LOGGER.info("Publishing daily report for %s.", report_date)
+        run_key = f"daily-cycle:{report_date}"
+        if not self.database.claim_worker_run(run_key, "daily_cycle"):
+            LOGGER.info("Daily cycle %s was already claimed or completed.", report_date)
+            return
         self._heartbeat("publishing", f"publishing {report_date}")
         try:
-            self._sync_with_alert()
+            if not self._sync_with_alert():
+                raise RuntimeError("20:00 日报周期的来源同步未完成，已阻断日报发布")
             # A source process can be interrupted after opening a crawl run
             # and before recording its result.  Startup recovery handles the
             # normal restart path, but a long-lived worker may reach the
@@ -1007,6 +1019,11 @@ class DailyWorker:
             delivery_status = self.mailer.send_daily_report(report)
             self.database.update_delivery_status(report_date, delivery_status)
             LOGGER.info("Daily report published with delivery status: %s", delivery_status)
+            self.database.finish_worker_run(
+                run_key,
+                "succeeded",
+                f"report={report_date}; delivery={delivery_status}",
+            )
             self._heartbeat("running", f"published {report_date}")
         except Exception as error:
             LOGGER.exception("Daily report publishing failed")
@@ -1014,6 +1031,7 @@ class DailyWorker:
                 self.database.update_delivery_status(report_date, "failed", str(error))
             except Exception:
                 LOGGER.exception("Could not record daily report failure status")
+            self.database.finish_worker_run(run_key, "failed", str(error))
             self._heartbeat("degraded", f"publish failed for {report_date}")
             self._send_failure_safely("就业日报发布或邮件发送失败", str(error))
 

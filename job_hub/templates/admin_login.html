@@ -17,8 +17,10 @@
       <form method="post" class="admin-login-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <input type="hidden" name="next" value="{{ next_url }}">
-        <label for="admin_token">管理员令牌</label>
-        <input id="admin_token" name="admin_token" type="password" required autocomplete="current-password" autofocus>
+        <label for="username">管理员账号</label>
+        <input id="username" name="username" type="text" required autocomplete="username" autofocus>
+        <label for="password">管理员密码</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password">
         <button type="submit">登录审核台</button>
       </form>
     </main>

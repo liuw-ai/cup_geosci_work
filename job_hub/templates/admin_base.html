@@ -20,6 +20,7 @@
           <a href="{{ url_for('admin_leads') }}" {% if request.endpoint in ['admin_leads', 'admin_lead_detail'] %}aria-current="page"{% endif %}>第三方候选</a>
           <a href="{{ url_for('admin_three_oil_entries') }}" {% if request.endpoint == 'admin_three_oil_entries' %}aria-current="page"{% endif %}>三桶油入口</a>
           <a href="{{ url_for('home') }}">学生端</a>
+          {% if admin_user %}<span class="admin-user-label">{{ admin_user.username }} · {{ admin_user.role }}</span>{% endif %}
           <form method="post" action="{{ url_for('admin_logout') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <button type="submit">退出</button>

@@ -30,6 +30,7 @@
           <a href="{{ url_for('jobs') }}" {% if request.endpoint in ['jobs', 'job_detail'] %}aria-current="page"{% endif %}>全部岗位</a>
           <a href="{{ url_for('landscape') }}" {% if request.endpoint == 'landscape' %}aria-current="page"{% endif %}>就业单位图谱</a>
           <a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}aria-current="page"{% endif %}>来源说明</a>
+          <a class="admin-entry-link" href="{{ url_for('admin_login') }}">管理员入口</a>
         </nav>
       </div>
     </header>
