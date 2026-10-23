@@ -1,0 +1,80 @@
+{
+  "release_id": "phase7-20261023-r1",
+  "status": "deployed_and_automation_enabled",
+  "deployed_at_utc": "2026-10-23T06:05:43Z",
+  "validated_at_utc": "2026-10-23T06:09:02Z",
+  "source": {
+    "git_sha": "87dc26d8c6bc7a08d04b9b6390d723dd61b4a4ef",
+    "archive": "phase7-20261023-r1-source.tar.gz",
+    "archive_sha256": "3b6199cfb406dc4a117bb12f04d105511af15b874f9069745b5f462ff7a319b5"
+  },
+  "server": {
+    "host": "81.70.62.174",
+    "release_root": "/opt/job-hub/releases/phase7-20261023-r1",
+    "data_volume": "job-hub-phase7-20261023-r1-data",
+    "previous_release_root": "/opt/job-hub/releases/phase5-20261022-r3",
+    "previous_data_volume": "job-hub-phase5-20261022-r2-data"
+  },
+  "release_identity": {
+    "application_image": "cupb-geoscience-job-hub@sha256:7ca2131eff72949bd961f3a8eecad88d019a4aef47b94c71e98328506c2de07c",
+    "release_env_sha256": "1cda000480a440df398f5705c9ebb5aa45f8e3a8c3d569f9104ef283e39ae2e2",
+    "compose_sha256": "9a130d37d8dc90878570cf7c6daf5b5e84e34a8a894d0d7dc3d3488648ab0173",
+    "built_at_utc": "2026-10-23T06:01:42Z"
+  },
+  "security": {
+    "browser_admin_authentication": "username + Werkzeug password hash + HttpOnly/SameSite session + CSRF",
+    "bootstrap_username": "admin",
+    "machine_api_authentication": "ADMIN_TOKEN only",
+    "secret_policy": "Passwords, hashes, API tokens and SMTP credentials are kept only in the server secret environment file and are not included in this receipt."
+  },
+  "automation": {
+    "enabled": true,
+    "daily_publish_time": "20:00 Asia/Shanghai",
+    "worker_initial_state": "syncing",
+    "worker_progress_at_validation": "23/46: ningxia-geology-bureau",
+    "failure_policy": "backup or synchronization failure blocks daily publication; source, robots, network and page failures retain existing jobs."
+  },
+  "privacy_analytics": {
+    "stored_data": "daily HMAC visitor/session digests and daily aggregates only",
+    "not_stored": [
+      "raw IP address",
+      "full user-agent",
+      "URL-level browsing history",
+      "student identity"
+    ],
+    "excluded_traffic": [
+      "admin sessions",
+      "API, static and health routes",
+      "recognizable robots"
+    ]
+  },
+  "rollback": {
+    "pre_deployment_backup": {
+      "path": "/var/lib/job-hub/backups/job_hub-20261023T060319Z.sqlite3",
+      "sha256": "66d2ed5affaf0973ced35d1864b590a08bbb81327912ebd659673ff09ea7864d",
+      "integrity": "ok",
+      "valid": true
+    },
+    "previous_release_and_volume": "Retained without modification for controlled rollback.",
+    "secret_environment_backup": "/opt/cup_geosci_work/.env.phase7-20261023-r1.bak"
+  },
+  "validation": {
+    "local_full_regression": "1166 passed, 4 skipped",
+    "web_healthz": 200,
+    "public_ip_home": 200,
+    "admin_login": "302 success redirect followed by authenticated dashboard 200",
+    "anonymous_admin_analytics_api": 403,
+    "admin_dashboard": "contains traffic analytics and automated-run ledger",
+    "worker_health": "ok; heartbeat age 2 seconds",
+    "database_audit": {
+      "ok": true,
+      "jobs": 3956,
+      "current_public_jobs": 677,
+      "issues": []
+    }
+  },
+  "residual_operations": [
+    "The formal hostname jobs.cupdky.cn is still not DNS-resolved; the current public endpoint remains HTTP on the server IP until the A record is configured.",
+    "One upstream CAS source emits non-standard HTTP headers. The worker records that source-level issue and continues; it does not withdraw existing jobs."
+  ]
+}
