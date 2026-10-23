@@ -473,8 +473,10 @@ def test_reindex_keeps_future_government_window_private(tmp_path) -> None:
     job = database.find_job(job_id)
     assert job is not None
     assert job["publication_status"] == "pending_evidence"
+    assert job["publication_layer"] == "not_public"
     assert "尚未开始" in job["publication_basis"]["reason"]
     assert "2099-01-01T08:00:00+08:00" in job["publication_basis"]["reason"]
+    assert database.list_jobs(page_size=None, student_visible=True)[1] == 0
 
 
 def test_reindex_keeps_current_attachment_candidate_public(tmp_path) -> None:

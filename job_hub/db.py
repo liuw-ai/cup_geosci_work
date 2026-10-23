@@ -4223,6 +4223,7 @@ class Database:
         status: str,
         publication_status: str,
         publication_basis: dict[str, Any],
+        publication_layer: str | None = None,
     ) -> bool:
         """Refresh rule-derived fields without changing the official job record.
 
@@ -4236,7 +4237,7 @@ class Database:
                 """
                 SELECT category, degree_levels_json, major_tags_json,
                        relevance_score, relevance_band, status,
-                       publication_status, publication_basis_json
+                       publication_status, publication_basis_json, publication_layer
                 FROM jobs
                 WHERE id = ?
                 """,
@@ -4244,6 +4245,11 @@ class Database:
             ).fetchone()
             if current is None:
                 return False
+            next_publication_layer = (
+                normalize_publication_layer(publication_layer)
+                if publication_layer is not None
+                else str(current["publication_layer"])
+            )
             derived = {
                 "category": category,
                 "degree_levels_json": degrees_json,
@@ -4255,6 +4261,7 @@ class Database:
                 "publication_basis_json": json.dumps(
                     publication_basis, ensure_ascii=False
                 ),
+                "publication_layer": next_publication_layer,
             }
             if all(current[key] == value for key, value in derived.items()):
                 return False
@@ -4263,7 +4270,8 @@ class Database:
                 UPDATE jobs
                 SET category = ?, degree_levels_json = ?, major_tags_json = ?,
                     relevance_score = ?, relevance_band = ?, status = ?,
-                    publication_status = ?, publication_basis_json = ?
+                    publication_status = ?, publication_basis_json = ?,
+                    publication_layer = ?
                 WHERE id = ?
                 """,
                 (
@@ -4275,6 +4283,7 @@ class Database:
                     status,
                     publication_status,
                     derived["publication_basis_json"],
+                    next_publication_layer,
                     job_id,
                 ),
             )

@@ -1339,12 +1339,20 @@ class JobPipeline:
                     ),
                     matched_profile_ids=(),
                 )
+            publication_layer: str | None = None
             government_publication = self._government_reindex_publication(
                 job,
                 government_context,
             )
             if government_publication is not None:
                 publication = government_publication
+                # A current government-table gate is authoritative.  Its
+                # pending decision must also remove a previously public layer;
+                # otherwise the public read path can expose a row whose
+                # government lifecycle is no longer confirmed.  Disabled
+                # sources retain their separate source-unavailable layer.
+                if source is not None and bool(source.get("enabled")):
+                    publication_layer = "not_public"
             # Reindexing must never reopen a row from a retired/disabled
             # source.  Source lifecycle transitions own visibility; taxonomy
             # maintenance may refresh derived fields but cannot bypass that
@@ -1366,6 +1374,7 @@ class JobPipeline:
                 status=status,
                 publication_status=publication.status,
                 publication_basis=publication.as_dict(),
+                publication_layer=publication_layer,
             )
             normalized = self.database.update_job_normalization(
                 int(job["id"]),
