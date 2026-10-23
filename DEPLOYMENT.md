@@ -1,6 +1,6 @@
 # 部署与手机访问
 
-> **Phase 6 当前边界（2026-10-23）**：旧的多 Compose/overlay 命令仅作为历史记录，不能直接执行。当前唯一生产入口仍是 [`deploy/compose.yaml`](deploy/compose.yaml)。Phase 6 仅在本地隔离审阅中推进，Worker 自动化保持暂停；在通过 [Phase 6 本地审阅 Manifest](docs/current/phase6-local-review-manifest.json)、完成项目负责人页面审核并取得明确批准前，不得部署、重启服务器服务或合并候选数据。
+> **Phase 7.1 当前边界（2026-10-23）**：旧的多 Compose/overlay 命令仅作为历史记录，不能直接执行。当前唯一生产入口仍是 [`deploy/compose.yaml`](deploy/compose.yaml)。Phase 7 的管理员认证、隐私统计和 Worker 自动化已完成代码与回归验收；正式公网长期运行仍必须通过 DNS、HTTPS、来源新鲜度、政府台账、日报和备份门禁。任何门禁未通过时，不得把 IP 临时入口当作正式服务，也不得绕过门禁发布旧快照。
 
 本文是地学就业信息站的生产部署说明。生产环境建议使用 Linux 服务器、Docker Compose、一个已解析到服务器的域名和 Caddy/Nginx HTTPS 反向代理。
 
@@ -65,7 +65,15 @@ python scripts/prepare_release_env.py \
 
 `HTTP_TRANSPORT_MODE` 默认是 `environment`，会遵循服务器进程环境中的代理变量。只有服务器具备组织允许的稳定直连公网出口时才设置为 `direct`；它的作用是避免把本机/容器代理握手失败误判为“无岗位”，不是绕过目标站点的 403、412、验证码或 robots 规则。两种模式都保留 TLS 证书校验。
 
-`APP_BASE_URL` 必须是学生在微信中实际打开的 HTTPS 地址；不能填写 `127.0.0.1`、`localhost` 或服务器内网地址，否则日报邮件中的链接会指向错误位置。
+`APP_BASE_URL` 必须是学生在微信中实际打开的 HTTPS 地址；不能填写 `127.0.0.1`、`localhost`、服务器内网地址或 IP HTTP 地址，否则日报邮件中的链接会指向错误位置，且管理员会话无法安全工作。
+
+管理员初始密码只用于首次登录，不能写入 Git、发布清单或聊天记录。正式域名和 HTTPS 验证通过后，必须在服务器 secret 环境文件中生成新的 Werkzeug 哈希并重启 `web`，同时使旧密码失效：
+
+```bash
+python -c "from werkzeug.security import generate_password_hash; print(generate_password_hash(input('New admin password: ')))"
+```
+
+密码轮换后应删除终端历史中的明文输入，并重新验证管理员登录、注销、CSRF 和角色权限。当前 IP HTTP 入口不接受管理员登录。
 
 先做静态校验，再启动服务：
 
@@ -125,7 +133,7 @@ docker compose -f deploy/compose.yaml exec worker python -m job_hub.cli worker-h
 
 ## 3. HTTPS 反向代理
 
-生产部署继续使用现有独立 Caddy 项目。应用端口只对服务器本机开放，公网流量由 Caddy 终止 TLS 后转发到共享 Docker 网络中的 `web:8080`。示例配置见 [`deploy/Caddyfile.example`](deploy/Caddyfile.example)。切换 Phase 4 时不重建 Caddy，只切换共享网络中的 Web 服务。
+生产部署继续使用现有独立 Caddy 项目。应用端口只对服务器本机开放，公网流量由 Caddy 终止 TLS 后转发到共享 Docker 网络中的 `web:8080`。示例配置见 [`deploy/Caddyfile.example`](deploy/Caddyfile.example)。正式域名生效前，IP 入口只允许 308 重定向到正式 HTTPS 主机，不再把应用内容或管理员登录表单通过明文 HTTP 代理出去。切换 release 时不重建 Caddy，只切换共享网络中的 Web 服务。
 
 本项目固定使用 `jobs.cupdky.cn`。先确认 `cupdky.cn` 已注册且已在域名服务商或 DNS 托管商处启用权威 DNS；若 `nslookup cupdky.cn` 本身返回 `NXDOMAIN`，仅添加 `jobs` 记录不会生效。根域可解析后，创建 `A` 记录：`jobs` -> `81.70.62.174`（TTL 设为 `600` 或服务商的 `Auto`）。确认 `nslookup jobs.cupdky.cn` 返回该地址后，在服务器执行：
 
