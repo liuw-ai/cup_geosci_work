@@ -14,8 +14,8 @@
 | 管理员工作台 | 通过 | 审核队列、来源漏斗、三桶油入口证据、审核事件和访问统计均在登录及权限检查后提供，并设置 `Cache-Control: no-store`。 |
 | 自动更新 | 通过 | Worker 常驻运行，按来源周期同步；20:00 执行同步、过期清理、审计、日报冻结与通知；失败重试和备份失败阻断已实现。 |
 | 数据安全边界 | 通过 | 当前 release 使用固定镜像摘要；数据库审计 `4438` 条记录、`749` 条当前公开岗位、`issues=[]`；最近备份完整性通过。 |
-| Caddy 反向代理 | 代码已修正 | 正式域名代理到共享网络 `web:8080`；IP HTTP 入口改为 308 重定向到正式 HTTPS，不再代理明文管理员登录。服务器 Caddy 更新需随下一次部署执行。 |
-| DNS | 已解析，待 HTTPS | `cupgeojob.com` 和 `www.cupgeojob.com` 已解析到 `81.70.62.174`；服务器 Caddy 尚未切换到新域名。 |
+| Caddy 反向代理 | 已部署，公网未通 | 正式域名已代理到共享网络 `web:8080`；IP HTTP 和 `www` 均为 308 重定向到主 HTTPS 域名，不再代理明文管理员登录。 |
+| DNS | 已解析 | `cupgeojob.com` 和 `www.cupgeojob.com` 已解析到 `81.70.62.174`。 |
 | HTTPS | 服务器本机通过，公网待放行 | Caddy 已切换并成功签发 Let’s Encrypt 证书（`cupgeojob.com`、`www.cupgeojob.com`）；服务器本机 SNI `/healthz` 返回 200，外部网络访问 443 仍超时，需检查云平台安全组/公网入站策略。 |
 | 来源新鲜度 | 未通过，需真实捕获 | 当前门禁报告包含 1 个无成功捕获证据来源和 8 个过期来源。不能修改 `max_age_hours` 或用 Worker 心跳冒充捕获。 |
 | 政府职位台账 | 未通过，需真实复核 | 台账 `as_of=2026-09-27`，年龄约 624 小时，配置上限 48 小时；必须成功复核或按失败保留待审，不能解释为无岗位。 |
@@ -25,8 +25,8 @@
 ## 服务器实况
 
 - Web 仅监听 `127.0.0.1:8080`，Caddy 监听 80/443；应用和 Worker 容器健康。
-- Caddy 使用共享 Docker 网络中的 `web:8080`，代码已切换正式站点为 `cupgeojob.com`，`www` 重定向到裸域。
-- 下一次服务器切换必须设置 `APP_BASE_URL=https://cupgeojob.com`，届时会启用 Secure Cookie。
+- Caddy 使用共享 Docker 网络中的 `web:8080`，服务器已切换正式站点为 `cupgeojob.com`，`www` 重定向到裸域。
+- 服务器已设置 `APP_BASE_URL=https://cupgeojob.com`，管理员会话已验证使用 Secure Cookie。
 - `/healthz` 在服务器本机 HTTPS SNI 下返回 200，`/readinessz` 当前返回未就绪；这两个结果含义不同，不能用存活替代生产就绪。公网 443 尚未从外部网络验证通过。
 - `/opt/job-hub/current` 仍是历史 phase4 符号链接；当前容器由 `/opt/job-hub/releases/phase7-20261023-r3/app/deploy/compose.yaml` 及对应 release env 管理。后续更新必须使用 release 专属路径，不要执行旧符号链接下的 Compose。
 

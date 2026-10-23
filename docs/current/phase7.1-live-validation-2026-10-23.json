@@ -1,0 +1,68 @@
+{
+  "validated_at_utc": "2026-10-23T10:03:00Z",
+  "release": {
+    "id": "phase7-20261023-r3",
+    "git_sha": "0e6991380901df9d6e27fd9a56f61979ede0243c",
+    "application_image": "cupb-geoscience-job-hub@sha256:a1f1bc00f4240e98ab027731eb01d92e35a67fe6ff72487e568fdfb788222d0a"
+  },
+  "domain": {
+    "primary": "cupgeojob.com",
+    "www": "www.cupgeojob.com",
+    "resolved_ip": "81.70.62.174",
+    "certificate": {
+      "subject": "CN=cupgeojob.com",
+      "issuer": "Let's Encrypt YE2",
+      "not_after_utc": "2027-01-21T08:04:10Z"
+    },
+    "server_loopback_https_health": 200,
+    "www_redirect": "308 to https://cupgeojob.com",
+    "external_tcp_443": "blocked",
+    "external_blocker": "The server listens on 443 and UFW allows it, so the remaining public ingress control is the cloud security group or public firewall."
+  },
+  "admin_security": {
+    "login_page": 200,
+    "anonymous_admin_redirect": 302,
+    "anonymous_analytics_api": 403,
+    "session_attributes": ["Secure", "HttpOnly", "SameSite=Lax"],
+    "private_cache_control": "no-store, max-age=0"
+  },
+  "automation": {
+    "worker_automation_enabled": true,
+    "worker_heartbeat": "running",
+    "server_timezone": "Asia/Shanghai",
+    "daily_publish_time": "20:00",
+    "daily_cycle_at_validation": "not_due_yet",
+    "backup_integrity": "ok"
+  },
+  "source_egress": {
+    "server_transport_mode": "direct",
+    "affected_sources": [
+      "cmgb-iguopin-browser",
+      "chinalco-iguopin-browser",
+      "iguopin-general-geoscience-browser"
+    ],
+    "observation": "The server timed out reaching the official robots.txt endpoints; the same endpoints returned HTTP 200 from the development network. No capture freshness evidence was fabricated and existing jobs were retained.",
+    "required_resolution": "Restore a policy-compliant server egress path to the official sources, then allow the browser workers to complete fresh captures."
+  },
+  "production_readiness": {
+    "status": "not_ready",
+    "remaining_gates": [
+      "external HTTPS on TCP 443",
+      "fresh capture evidence for enabled sources",
+      "government registry freshness and attachment evidence",
+      "a completed new 20:00 daily report cycle",
+      "administrator bootstrap-password rotation"
+    ]
+  },
+  "local_validation": {
+    "phase7_targeted_regression": "78 passed",
+    "scope": [
+      "privacy analytics",
+      "administrator workbench",
+      "worker run ledger",
+      "backup and readiness gates",
+      "browser worker liveness",
+      "source freshness"
+    ]
+  }
+}
