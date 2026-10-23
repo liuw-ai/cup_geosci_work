@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterable, Iterator
 from urllib.parse import urlparse
 
 from job_hub.contracts import (
@@ -4110,6 +4110,45 @@ class Database:
         return self.find_job(
             job_id, student_visible=True, as_of_date=as_of_date
         )
+
+    def find_public_jobs(
+        self,
+        job_ids: Iterable[int],
+        *,
+        as_of_date: str | None = None,
+    ) -> dict[int, dict[str, Any]]:
+        """Return currently public jobs by id using one visibility query.
+
+        Historical daily reports commonly contain many cards.  Checking every
+        card through :meth:`find_public_job` repeats the same ranked public
+        CTE once per row, which makes a safe display filter unnecessarily
+        expensive.  The returned mapping contains only ids that remain safe
+        to show under the canonical student visibility policy.
+        """
+
+        normalized_ids = sorted(
+            {
+                int(job_id)
+                for job_id in job_ids
+                if isinstance(job_id, int) and not isinstance(job_id, bool)
+            }
+        )
+        if not normalized_ids:
+            return {}
+        cte, values = self._student_visible_jobs_cte(as_of_date=as_of_date)
+        placeholders = ", ".join("?" for _ in normalized_ids)
+        with self.connect() as connection:
+            rows = connection.execute(
+                cte
+                + f"""
+                SELECT jobs.*
+                FROM student_visible_ranked AS jobs
+                WHERE jobs._official_detail_rank = 1
+                  AND jobs.id IN ({placeholders})
+                """,
+                [*values, *normalized_ids],
+            ).fetchall()
+        return {int(row["id"]): self._job_row(row) for row in rows}
 
     def list_official_pending_jobs(
         self,

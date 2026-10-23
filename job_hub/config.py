@@ -102,6 +102,11 @@ class Settings:
     admin_role: str = "admin"
     analytics_cookie_max_age_seconds: int = 1800
     analytics_retention_days: int = 400
+    # Rendering a pre-20:00 report preview can require a substantial
+    # visibility reconciliation. Cache only the already-sanitized public
+    # result for a short, bounded interval so ordinary student traffic never
+    # repeats that work for every request.
+    public_report_cache_seconds: int = 120
     crawl_run_stale_seconds: int = 1800
     artifact_storage_dir: Path | None = None
     government_artifact_manifest_path: Path | None = None
@@ -228,6 +233,9 @@ class Settings:
             ),
             analytics_retention_days=max(
                 30, min(4000, _env_int("ANALYTICS_RETENTION_DAYS", 400))
+            ),
+            public_report_cache_seconds=max(
+                0, min(900, _env_int("PUBLIC_REPORT_CACHE_SECONDS", 120))
             ),
             crawl_run_stale_seconds=_env_int("CRAWL_RUN_STALE_SECONDS", 1800),
             artifact_storage_dir=Path(

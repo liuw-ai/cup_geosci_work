@@ -4,6 +4,8 @@ import hmac
 import hashlib
 import re
 import secrets
+from threading import Lock
+from time import monotonic
 from datetime import date, datetime, timezone
 from functools import wraps
 from typing import Any, Callable
@@ -294,6 +296,13 @@ def create_app(settings: Settings | None = None) -> Flask:
             settings.admin_role,
         )
 
+    # Cache only data that has already passed the canonical student-facing
+    # visibility filter.  This is process-local by design: a failed process
+    # cannot leak a cache entry across restarts, and a bounded expiry makes
+    # later corrections visible without a deployment.
+    public_report_cache: dict[str, tuple[float, dict[str, Any], bool]] = {}
+    public_report_cache_lock = Lock()
+
     def current_admin_user() -> dict[str, Any] | None:
         user_id = session.get("admin_user_id")
         if not isinstance(user_id, int):
@@ -442,16 +451,26 @@ def create_app(settings: Settings | None = None) -> Flask:
         """
         displayed = dict(report)
         business_date = local_today(settings).isoformat()
+        report_items = {
+            key: list(report.get(key, []))
+            for key in ("new_jobs", "updated_jobs", "deadline_jobs")
+        }
+        visible_by_id = database.find_public_jobs(
+            (
+                int(item["id"])
+                for items in report_items.values()
+                for item in items
+                if isinstance(item, dict) and isinstance(item.get("id"), int)
+            ),
+            as_of_date=business_date,
+        )
         for key in ("new_jobs", "updated_jobs", "deadline_jobs"):
             displayed[key] = [
-                job
-                for item in report.get(key, [])
-                if (
-                    job := database.find_public_job(
-                        int(item["id"]), as_of_date=business_date
-                    )
-                )
-                is not None
+                visible_by_id[int(item["id"])]
+                for item in report_items[key]
+                if isinstance(item, dict)
+                and isinstance(item.get("id"), int)
+                and int(item["id"]) in visible_by_id
             ]
         stats = dict(report.get("stats", {}))
         stats.update(
@@ -467,15 +486,37 @@ def create_app(settings: Settings | None = None) -> Flask:
 
     def active_report() -> tuple[dict[str, Any], bool]:
         report = database.latest_daily_report()
+        today = local_today(settings).isoformat()
         # A frozen report is immutable, but the homepage must not keep showing
         # yesterday's date when today's 20:00 publication has not happened yet.
         # Build an explicit preview for the local calendar day and keep the
         # older snapshot available through /daily/latest and its dated URL.
-        if report is not None and str(report.get("report_date")) == local_today(settings).isoformat():
-            return report_for_display(report), False
-        return report_for_display(
-            build_daily_report(database, settings, local_today(settings))
-        ), True
+        is_preview = report is None or str(report.get("report_date")) != today
+        cache_key = f"{today}:{'preview' if is_preview else 'frozen'}"
+        cached = public_report_cache.get(cache_key)
+        if cached is not None and cached[0] > monotonic():
+            return cached[1], cached[2]
+
+        # Coalesce simultaneous first requests. Without this, each Gunicorn
+        # thread can start the same expensive preview reconciliation.
+        with public_report_cache_lock:
+            cached = public_report_cache.get(cache_key)
+            if cached is not None and cached[0] > monotonic():
+                return cached[1], cached[2]
+            source_report = (
+                build_daily_report(database, settings, local_today(settings))
+                if is_preview
+                else report
+            )
+            displayed = report_for_display(source_report)
+            if settings.public_report_cache_seconds > 0:
+                public_report_cache.clear()
+                public_report_cache[cache_key] = (
+                    monotonic() + settings.public_report_cache_seconds,
+                    displayed,
+                    is_preview,
+                )
+            return displayed, is_preview
 
     def requested_profile() -> StudentProfile | None:
         profile_id = request.args.get("profile", "").strip()

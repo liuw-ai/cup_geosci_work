@@ -129,6 +129,30 @@ def test_home_uses_today_preview_when_latest_frozen_report_is_stale(
     assert "今天的正式日报将在 20:00 固化发布" in body
 
 
+def test_home_reuses_short_lived_sanitized_report_cache(tmp_path, monkeypatch) -> None:
+    settings = replace(make_settings(tmp_path), public_report_cache_seconds=120)
+    app = create_app(settings)
+    database = app.extensions["database"]
+    database.upsert_source(source())
+    monkeypatch.setattr(app_module, "local_today", lambda _settings: date(2026, 9, 23))
+    publish_daily_report(database, settings, date(2026, 9, 18))
+
+    calls = 0
+    original = app_module.build_daily_report
+
+    def counted_report(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(app_module, "build_daily_report", counted_report)
+    client = app.test_client()
+
+    assert client.get("/").status_code == 200
+    assert client.get("/").status_code == 200
+    assert calls == 1
+
+
 def test_manual_only_government_positions_stay_off_public_upcoming_page_until_confirmed(
     tmp_path, monkeypatch
 ) -> None:
