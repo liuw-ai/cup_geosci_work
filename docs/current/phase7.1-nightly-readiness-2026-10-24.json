@@ -1,0 +1,52 @@
+{
+  "validated_at_utc": "2026-10-24T12:17:46Z",
+  "release": {
+    "id": "phase7-20261024-r4",
+    "git_sha": "1f3a3b8b7d30e193107b16c8d6b86c81969057fd",
+    "application_image_sha256": "f562ca9f4cf586c95d9e7bea86f87b1b0a24ccb318d69121e725fba6c8531644"
+  },
+  "daily_cycle": {
+    "report_date": "2026-10-24",
+    "published_at_utc": "2026-10-24T12:16:53Z",
+    "delivery_status": "skipped",
+    "delivery_note": "Email delivery is disabled in the production configuration.",
+    "worker_run_status": "succeeded",
+    "worker_run_started_at_utc": "2026-10-24T12:00:33Z",
+    "worker_run_finished_at_utc": "2026-10-24T12:16:53Z",
+    "worker_heartbeat_status": "running",
+    "coverage_snapshot_present": true
+  },
+  "backup": {
+    "path": "/var/lib/job-hub/backups/job_hub-20261024T052020Z.sqlite3",
+    "fresh": true,
+    "integrity": "ok",
+    "required_tables_present": true
+  },
+  "production_readiness": {
+    "ready": false,
+    "internal_ready": false,
+    "public_ready": false,
+    "database_audit_ok": true,
+    "checked_jobs": 4496,
+    "current_public_jobs": 749,
+    "worker_ok": true,
+    "browser_workers_ok": true,
+    "source_freshness_ok": false,
+    "government_positions_ok": false,
+    "government_registry_age_hours": 648,
+    "government_attachment_blocked_records": 57
+  },
+  "public_endpoint": {
+    "hostname": "cupgeojob.com",
+    "dns_status": "ok",
+    "server_side_https_probe": "ok",
+    "external_direct_https_probe": "TLS connection reset before HTTP response",
+    "mobile_cellular_probe": "User reported that the site could not be opened."
+  },
+  "remaining_actions": [
+    "Verify domain filing status and ask Tencent Cloud to diagnose the public TLS reset if it persists.",
+    "Restore compliant fresh captures for enabled official sources.",
+    "Refresh and verify the government registry and attachment evidence.",
+    "Rotate the administrator bootstrap password before formal administrator use."
+  ]
+}
