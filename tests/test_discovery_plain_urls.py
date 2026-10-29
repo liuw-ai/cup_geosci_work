@@ -69,3 +69,21 @@ def test_discovery_evidence_decodes_json_escaped_and_percent_encoded_urls() -> N
     urls = {item["url"] for item in evidence["official_link_candidates"]}
     assert "https://zhaopin.cnpc.com.cn/web/recruitInfoshow.html?id=43" in urls
     assert "https://job.sinopec.com/jobs/44" in urls
+
+
+def test_discovery_evidence_unwraps_known_transparent_redirect_wrapper() -> None:
+    body = (
+        '<a href="https://link.wtturl.cn/?target=https%3A%2F%2Fjob.sinopec.com%2Fjobs%2F45">'
+        "官网岗位详情</a>"
+    )
+
+    evidence = extract_discovery_evidence(
+        body,
+        "https://www.offcn.com/gqzp/2026/1022/258317.html",
+        allowed_hosts={"www.offcn.com"},
+        official_hosts={"job.sinopec.com"},
+    )
+
+    assert [item["url"] for item in evidence["official_link_candidates"]] == [
+        "https://job.sinopec.com/jobs/45"
+    ]

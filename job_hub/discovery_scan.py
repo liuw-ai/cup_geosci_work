@@ -14,7 +14,7 @@ import warnings
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Iterable
-from urllib.parse import unquote, urljoin, urlparse
+from urllib.parse import parse_qs, unquote, urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 from xml.etree import ElementTree
 from zoneinfo import ZoneInfo
@@ -713,6 +713,31 @@ def extract_discovery_evidence(
         for host in (official_hosts or set())
         if str(host).strip()
     }
+    # Some aggregators wrap an official destination in a transparent tracking
+    # URL. Unwrap only known wrappers and only their URL-valued query fields;
+    # the resulting URL still passes the registered-host gate below.
+    redirect_wrapper_hosts = {"link.wtturl.cn"}
+    redirect_query_keys = ("target", "url", "redirect", "redirect_url", "dest", "destination", "to")
+
+    def unwrap_redirect_wrapper(value: str) -> str:
+        current = value
+        for _ in range(2):
+            parsed = urlparse(current)
+            host = (parsed.hostname or "").lower().rstrip(".")
+            if host not in redirect_wrapper_hosts:
+                break
+            query = parse_qs(parsed.query, keep_blank_values=False)
+            destination = next(
+                (query[key][0] for key in redirect_query_keys if query.get(key)),
+                "",
+            )
+            if not destination:
+                break
+            current = normalize_recovered_url(
+                unquote(html.unescape(destination).replace("\\/", "/"))
+            )
+        return current
+
     def consider_link(href: str, label: str) -> None:
         """Record one private recovery link after the same host checks."""
         # Reposts frequently HTML-escape query separators or JSON-escape
@@ -721,6 +746,7 @@ def extract_discovery_evidence(
         href = normalize_recovered_url(
             unquote(html.unescape(str(href or "").strip()).replace("\\/", "/"))
         )
+        href = unwrap_redirect_wrapper(href)
         # Official notices often print a bare institutional domain in prose
         # (for example ``www.example.edu.cn``) instead of turning it into an
         # anchor. It is safe to promote only bare hosts that are already in the
