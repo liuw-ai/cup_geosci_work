@@ -46,6 +46,21 @@ PUBLIC_STUDENT_PUBLICATION_STATUSES = frozenset(
     }
 )
 
+# Extended opportunities are still official, current, domestic vacancies, but
+# they are not presented as campus eligibility guarantees.  The mode names are
+# persisted in ``publication_basis`` so revalidation and the write gate can
+# distinguish them from the four-major core corpus.
+EXTENDED_PUBLICATION_MODES = frozenset(
+    {
+        "social_exact_four_names",
+        "social_broad_geoscience",
+        "social_incomplete_but_basic",
+        "social_unrestricted_rule",
+        "extended_unrestricted_rule",
+        "extended_role_context_pending",
+    }
+)
+
 # Explicit geoscience disciplines may be shown in a separate broad tier. They
 # never masquerade as one of the four exact graduation majors, and a term alone
 # is not enough: the official row must also have geoscience role context.
@@ -364,7 +379,7 @@ class PublicationDecision:
         return payload
 
 
-# These seven profiles mirror the programs specified for CUPB Geoscience School.
+# These eight profiles mirror the supported CUPB Geoscience School programs.
 # The aliases only make an announcement easier to recognize; they never create a
 # claim that a student is eligible when the original notice says otherwise.
 def _profile(profile_id: str, degree: str, major: str) -> StudentProfile:
@@ -386,6 +401,7 @@ def _profile(profile_id: str, degree: str, major: str) -> StudentProfile:
 
 STUDENT_PROFILES = (
     _profile("undergraduate-resource-exploration", "本科", "资源勘查工程"),
+    _profile("undergraduate-geology", "本科", "地质学"),
     _profile("master-geology", "硕士", "地质学"),
     _profile("master-geological-engineering", "硕士", "地质工程"),
     _profile("master-geological-resources-engineering", "硕士", "地质资源与地质工程"),
@@ -409,6 +425,46 @@ def evaluate_student_publication(
     job: dict[str, Any],
     *,
     allow_non_domestic: bool = False,
+    include_extended_opportunities: bool = False,
+) -> PublicationDecision:
+    """Evaluate a row and optionally expose clearly labelled expansion opportunities."""
+
+    decision = _evaluate_student_publication(
+        job,
+        allow_non_domestic=allow_non_domestic,
+        include_extended_opportunities=include_extended_opportunities,
+    )
+    if not include_extended_opportunities or not decision.is_public:
+        return decision
+
+    if _is_social_recruitment(job):
+        mode_map = {
+            "exact_four_names": "social_exact_four_names",
+            "broad_geoscience": "social_broad_geoscience",
+            "incomplete_but_basic": "social_incomplete_but_basic",
+            "public_unrestricted_rule": "social_unrestricted_rule",
+        }
+        return PublicationDecision(
+            status=decision.status,
+            label="社会招聘拓展机会",
+            reason=(
+                decision.reason
+                + "；该岗位属于社会招聘，不等同校园/应届资格，学生需自行确认报名条件。"
+            ),
+            matched_profile_ids=decision.matched_profile_ids,
+            public_scope=decision.public_scope,
+            major_match_mode=mode_map.get(
+                decision.major_match_mode, decision.major_match_mode
+            ),
+        )
+    return decision
+
+
+def _evaluate_student_publication(
+    job: dict[str, Any],
+    *,
+    allow_non_domestic: bool = False,
+    include_extended_opportunities: bool = False,
 ) -> PublicationDecision:
     """Decide whether an official job belongs in the public student corpus.
 
@@ -418,7 +474,10 @@ def evaluate_student_publication(
     ``unrestricted major`` statement, together with an official degree field
     that covers at least one supported student profile.
     """
-    scope_exclusion = _student_program_scope_exclusion(job)
+    scope_exclusion = _student_program_scope_exclusion(
+        job,
+        allow_extended_opportunities=include_extended_opportunities,
+    )
     if scope_exclusion is not None:
         label, reason = scope_exclusion
         return PublicationDecision(
@@ -438,33 +497,65 @@ def evaluate_student_publication(
 
     qualification_text = _qualification_text(job)
     degree_text = _degree_evidence_text(job)
-    if not qualification_text or not degree_text:
-        missing = "专业要求" if not qualification_text else "学历要求"
+    if not qualification_text:
+        if (
+            include_extended_opportunities
+            and _has_geoscience_role_evidence(job)
+        ):
+            location_scope = _domestic_location_scope_decision(
+                job,
+                allow_non_domestic=allow_non_domestic,
+            )
+            if location_scope is not None:
+                return location_scope
+            if student_blocking_work_experience_requirement(job):
+                return PublicationDecision(
+                    status=PUBLICATION_OUT_OF_SCOPE,
+                    label="需工作经验",
+                    reason="官方岗位级条件明确要求工作经验，不作为在校毕业生岗位发布。",
+                    matched_profile_ids=(),
+                )
+            return _incomplete_basic_decision(
+                job,
+                matched_profile_ids=(),
+                reason=(
+                    "官方岗位标题或职责明确体现地学工作方向，但官方记录未单列岗位级专业要求"
+                ),
+                degree_incomplete=True,
+                force_warning=True,
+                major_match_mode="extended_role_context_pending",
+            ) or PublicationDecision(
+                status=PUBLICATION_PENDING_EVIDENCE,
+                label="待补岗位级证据",
+                reason="官方记录未提供岗位级专业要求。",
+                matched_profile_ids=(),
+            )
         return PublicationDecision(
             status=PUBLICATION_PENDING_EVIDENCE,
             label="待补岗位级证据",
-            reason=f"官方岗位行未提供可核验的{missing}字段。",
+            reason="官方岗位行未提供可核验的专业要求字段。",
             matched_profile_ids=(),
         )
-    if not extract_degree_levels(degree_text):
+    # A missing or non-standard education field is an explicit warning, not a
+    # reason to hide an otherwise relevant official vacancy.  Postdoctoral
+    # appointments remain a separate role type and stay private here.
+    if re.search(r"博士后|postdoctoral|post-doc", degree_text, re.IGNORECASE):
         return PublicationDecision(
             status=PUBLICATION_PENDING_EVIDENCE,
-            label="待补岗位级证据",
-            reason="官方岗位行未提供可识别的学历层次。",
+            label="岗位类型需核验",
+            reason="官方岗位属于博士后/博士后研究人员类型，不能按普通学生学历门槛直接展示。",
             matched_profile_ids=(),
         )
+    degree_levels = extract_degree_levels(degree_text)
+    degree_incomplete = (not degree_text) or not degree_levels
 
     evidence = job.get("field_evidence")
+    split_location_mismatch = False
     if isinstance(evidence, dict) and evidence.get("地点拆分基准岗位"):
         variant = clean_text(str(evidence.get("官方工作地点") or ""))
         displayed = clean_text(str(job.get("location") or ""))
         if variant and displayed and variant != displayed:
-            return PublicationDecision(
-                status=PUBLICATION_PENDING_EVIDENCE,
-                label="待核拆分地点",
-                reason="岗位已按官方地点拆分，但展示地点与该地点变体不一致。",
-                matched_profile_ids=(),
-            )
+            split_location_mismatch = True
 
     location_scope = _domestic_location_scope_decision(
         job,
@@ -473,12 +564,8 @@ def evaluate_student_publication(
     if location_scope is not None:
         return location_scope
 
-    public_scope = (
-        "international"
-        if str(job.get("country_or_region") or "").strip()
-        not in MAINLAND_COUNTRY_LABELS
-        else "domestic"
-    )
+    country = str(job.get("country_or_region") or "").strip()
+    public_scope = "international" if country and country not in MAINLAND_COUNTRY_LABELS else "domestic"
 
     required_experience = student_blocking_work_experience_requirement(job)
     if required_experience:
@@ -498,26 +585,12 @@ def evaluate_student_publication(
         if _profile_is_explicitly_eligible(job, profile, qualification_text)
     )
     if eligible_profiles:
-        # Government notices are often announcement-level pages with several
-        # institutions and rows. Only a role already proven to match this
-        # service may remain private while its row-level location is completed.
-        # Checking location earlier would turn an unrelated role into a false
-        # “pending location” candidate.
-        if (
-            _government_record_requires_location(job)
-            and "country_or_region" not in job
-            and not _location_evidence_text(job)
-        ):
-            return PublicationDecision(
-                status=PUBLICATION_PENDING_EVIDENCE,
-                label="待补岗位地点",
-                reason="事业单位/公务员目标专业岗位缺少与当前岗位行绑定的工作地点证据。",
-                matched_profile_ids=eligible_profiles,
-            )
         incomplete = _incomplete_basic_decision(
             job,
             matched_profile_ids=eligible_profiles,
             reason="官方岗位级专业与学历要求覆盖本院培养方向",
+            degree_incomplete=degree_incomplete,
+            split_location_mismatch=split_location_mismatch,
         )
         if incomplete is not None:
             return incomplete
@@ -535,7 +608,11 @@ def evaluate_student_publication(
         )
 
     if _is_unrestricted_major(qualification_text):
-        if not _unrestricted_major_is_allowed_for_public_role(job):
+        extended_unrestricted = (
+            include_extended_opportunities
+            and not _unrestricted_major_is_allowed_for_public_role(job)
+        )
+        if not _unrestricted_major_is_allowed_for_public_role(job) and not extended_unrestricted:
             return PublicationDecision(
                 status=PUBLICATION_OUT_OF_SCOPE,
                 label="非公共岗位不限专业",
@@ -548,23 +625,34 @@ def evaluate_student_publication(
         degree_profiles = tuple(
             profile.id
             for profile in STUDENT_PROFILES
-            if _degree_status(job, profile)[0] == "explicit"
+            if _degree_status(job, profile)[0] in {"explicit", "unspecified"}
         )
         if degree_profiles:
             incomplete = _incomplete_basic_decision(
                 job,
                 matched_profile_ids=degree_profiles,
                 reason="官方岗位级不限专业要求和学历条件覆盖本院学生",
+                degree_incomplete=degree_incomplete,
+                split_location_mismatch=split_location_mismatch,
             )
             if incomplete is not None:
                 return incomplete
             return PublicationDecision(
                 status=PUBLICATION_UNRESTRICTED_ELIGIBLE,
-                label="不限专业可报",
-                reason="官方岗位级专业要求明确为不限专业，学历条件覆盖本院学生。",
+                label=("不限专业拓展机会" if extended_unrestricted else "不限专业可报"),
+                reason=(
+                    "官方岗位级专业要求明确为不限专业，学生可将其作为拓展机会，"
+                    "最终以原公告资格审查为准。"
+                    if extended_unrestricted
+                    else "官方岗位级专业要求明确为不限专业，学历条件覆盖本院学生。"
+                ),
                 matched_profile_ids=degree_profiles,
                 public_scope=public_scope,
-                major_match_mode="public_unrestricted_rule",
+                major_match_mode=(
+                    "extended_unrestricted_rule"
+                    if extended_unrestricted
+                    else "public_unrestricted_rule"
+                ),
             )
 
     if _is_explicit_non_target_petroleum_engineering_requirement(qualification_text):
@@ -583,7 +671,7 @@ def evaluate_student_publication(
         degree_profiles = tuple(
             profile.id
             for profile in STUDENT_PROFILES
-            if _degree_status(job, profile)[0] == "explicit"
+            if _degree_status(job, profile)[0] in {"explicit", "unspecified"}
         )
         if degree_profiles:
             incomplete = _incomplete_basic_decision(
@@ -594,6 +682,8 @@ def evaluate_student_publication(
                     + "、".join(broad_terms)
                     + "），但未直接限定为四个核心毕业专业"
                 ),
+                degree_incomplete=degree_incomplete,
+                split_location_mismatch=split_location_mismatch,
             )
             if incomplete is not None:
                 return incomplete
@@ -633,6 +723,8 @@ def evaluate_student_publication(
                 + "、".join(terms)
                 + "）"
             ),
+            degree_incomplete=degree_incomplete,
+            split_location_mismatch=split_location_mismatch,
         )
         if incomplete is not None:
             return incomplete
@@ -659,12 +751,42 @@ def evaluate_student_publication(
                 reason="官方岗位级专业要求未覆盖本院目标专业或明确相近地学方向。",
                 matched_profile_ids=(),
             )
+        if include_extended_opportunities and _has_geoscience_role_evidence(job):
+            incomplete = _incomplete_basic_decision(
+                job,
+                matched_profile_ids=(),
+                reason=(
+                    "官方岗位明确属于地学方向，但专业要求使用相关专业等非标准表述"
+                ),
+                degree_incomplete=degree_incomplete,
+                force_warning=True,
+                major_match_mode="extended_role_context_pending",
+            )
+            if incomplete is not None:
+                return incomplete
         return PublicationDecision(
             status=PUBLICATION_PENDING_EVIDENCE,
             label="待补岗位级证据",
             reason="官方岗位行仅说明相关专业，未直接列出本院目标专业。",
             matched_profile_ids=(),
         )
+
+    # Extended mode may expose a clearly geoscience job whose official row
+    # contains a broad or non-standard major phrase but no supported major
+    # name. It remains visibly incomplete and never claims a four-major match.
+    if include_extended_opportunities and _has_geoscience_role_evidence(job):
+        incomplete = _incomplete_basic_decision(
+            job,
+            matched_profile_ids=(),
+            reason=(
+                "官方岗位标题或职责明确体现地学方向，但专业字段未直接列出本院四个核心专业"
+            ),
+            degree_incomplete=degree_incomplete,
+            force_warning=True,
+            major_match_mode="extended_role_context_pending",
+        )
+        if incomplete is not None:
+            return incomplete
 
     return PublicationDecision(
         status=PUBLICATION_OUT_OF_SCOPE,
@@ -875,8 +997,12 @@ def _has_geoscience_requirement_marker(qualification_text: str) -> bool:
 
 
 _GEOSCIENCE_ROLE_MARKERS = (
-    "地质", "地勘", "地学", "地球物理", "地球化学", "矿产", "矿床", "岩矿鉴定", "找矿", "勘查", "勘探", "物探", "化探",
+    "地质", "地勘", "地学", "地球物理", "地球化学", "矿产", "矿床", "岩矿鉴定", "找矿", "勘查", "勘察", "钻探", "勘探", "物探", "化探",
     "测井", "岩石物理", "矿物", "岩石", "地震", "储层", "岩土", "地灾", "地热", "沉积", "水工环",
+    # Mine-water prevention is a concrete hydrogeology/geological-hazard
+    # function. It is narrower than generic mining or energy wording and lets
+    # rows with a geoscience qualification enter the existing broad layer.
+    "防治水",
     "自然资源", "生态地质",
     "geolog", "geophys", "geoscience", "seismic", "subsurface", "well logging",
 )
@@ -972,6 +1098,8 @@ _ROLE_SCOPE_FIELD_KEYS = frozenset(
 
 def _student_program_scope_exclusion(
     job: dict[str, Any],
+    *,
+    allow_extended_opportunities: bool = False,
 ) -> tuple[str, str] | None:
     """Reject role types outside the confirmed student-facing service scope.
 
@@ -1041,15 +1169,20 @@ def _student_program_scope_exclusion(
     # ``职位性质``/``招聘类型`` field and omit it from the free-form
     # description.  Treat the explicit social-hire marker as a scope veto,
     # while preserving the agreed postdoctoral exception.
-    if role_type and re.search(
+    if (
+        role_type
+        and re.search(
         r"(?:社会招聘|社会招录|社会招|社招|成熟人才招聘|"
         r"experienced\s+(?:professional|hire|hiring)|experienced\s+professionals?)",
         role_type,
         re.IGNORECASE,
-    ) and not _is_explicit_postdoctoral_vacancy(
+        )
+        and not allow_extended_opportunities
+        and not _is_explicit_postdoctoral_vacancy(
         title=title,
         field_evidence=field_evidence,
         description=description,
+        )
     ):
         return (
             "社会招聘岗位",
@@ -1077,10 +1210,14 @@ def _student_program_scope_exclusion(
         description,
         re.IGNORECASE,
     )
-    if social_phrase and not _is_explicit_postdoctoral_vacancy(
+    if (
+        social_phrase
+        and not allow_extended_opportunities
+        and not _is_explicit_postdoctoral_vacancy(
         title=title,
         field_evidence=field_evidence,
         description=description,
+        )
     ):
         return (
             "社会招聘岗位",
@@ -1088,6 +1225,42 @@ def _student_program_scope_exclusion(
         )
 
     return None
+
+
+def _is_social_recruitment(job: dict[str, Any]) -> bool:
+    """Return whether the official row explicitly identifies a social hire."""
+
+    evidence = job.get("field_evidence")
+    role_values: list[str] = []
+    if isinstance(evidence, dict):
+        role_keys = {item.casefold() for item in _ROLE_SCOPE_FIELD_KEYS}
+        for key, value in evidence.items():
+            if key == "fields" and isinstance(value, dict):
+                role_values.extend(
+                    str(nested or "")
+                    for nested_key, nested in value.items()
+                    if str(nested_key).casefold() in role_keys
+                )
+            elif str(key).casefold() in role_keys:
+                role_values.append(str(value or ""))
+    text = clean_text(
+        " ".join(
+            [
+                str(job.get("title") or ""),
+                str(job.get("summary") or ""),
+                str(job.get("description") or ""),
+                *role_values,
+            ]
+        )
+    ).casefold()
+    return bool(
+        re.search(
+            r"(?:社会招聘|社会招录|社会招|社招|成熟人才招聘|"
+            r"experienced\s+(?:professional|hire|hiring)|experienced\s+professionals?)",
+            text,
+            re.IGNORECASE,
+        )
+    )
 
 
 def _is_explicit_postdoctoral_vacancy(
@@ -1186,17 +1359,36 @@ def _incomplete_basic_decision(
     *,
     matched_profile_ids: tuple[str, ...],
     reason: str,
+    degree_incomplete: bool = False,
+    split_location_mismatch: bool = False,
+    force_warning: bool = False,
+    major_match_mode: str = "incomplete_but_basic",
 ) -> PublicationDecision | None:
-    """Downgrade an otherwise compatible row to the public incomplete layer."""
+    """Expose a compatible official row with explicit missing-field warnings.
 
-    if not _location_is_incomplete(job):
+    The row must already have a bound official job-level major requirement.
+    Missing education or location does not erase that opportunity; it changes
+    the label and reason so the student knows exactly what must be checked in
+    the original announcement.
+    """
+
+    warnings: list[str] = []
+    if degree_incomplete:
+        warnings.append("官方未注明可识别的学历门槛")
+    if _location_is_incomplete(job):
+        warnings.append("官方未明确工作地点")
+    if split_location_mismatch:
+        warnings.append("岗位地点拆分记录与当前展示地点存在差异")
+    if force_warning:
+        warnings.insert(0, "官方未提供岗位级专业要求")
+    if not warnings:
         return None
     return PublicationDecision(
-        status=PUBLICATION_PENDING_EVIDENCE,
+        status=PUBLICATION_STUDENT_ELIGIBLE,
         label="官方信息不完整",
-        reason=f"{reason}；官方工作地点暂未明确，学生需以原公告为准。",
+        reason=f"{reason}；" + "；".join(warnings) + "，学生需以原公告为准。",
         matched_profile_ids=matched_profile_ids,
-        major_match_mode="incomplete_but_basic",
+        major_match_mode=major_match_mode,
     )
 
 
@@ -1215,10 +1407,26 @@ def evaluate_profile_match(
         allow_non_domestic=allow_non_domestic,
     )
     if (
-        publication.status == PUBLICATION_STUDENT_ELIGIBLE
+        publication.status in {PUBLICATION_STUDENT_ELIGIBLE, PUBLICATION_UNRESTRICTED_ELIGIBLE}
         and profile.id in publication.matched_profile_ids
     ):
         term = _matched_profile_term(profile, _qualification_text(job))
+        if publication.major_match_mode == "incomplete_but_basic":
+            major_status, major_reason = _major_status(job, profile)
+            degree_status, degree_reason = _degree_status(job, profile)
+            return ProfileMatch(
+                level="review",
+                label="官方信息不完整，需核验",
+                reason=f"{major_reason or ('专业范围包含“' + term + '”')}；{degree_reason}；{publication.reason}",
+                priority=1,
+            )
+        if publication.status == PUBLICATION_UNRESTRICTED_ELIGIBLE:
+            return ProfileMatch(
+                level="explicit",
+                label="不限专业可报",
+                reason=publication.reason,
+                priority=2,
+            )
         return ProfileMatch(
             level="explicit",
             label="明确匹配",
@@ -1529,6 +1737,11 @@ def _profile_is_explicitly_eligible(
         _english_major_requirement_is_explicit(job, term)
         for term in profile.english_exact_major_terms
     )
+    # An omitted or non-standard education field is an information warning,
+    # not proof that a matching student is ineligible.  Only an explicit
+    # degree floor that excludes this profile blocks the profile.  The final
+    # decision is placed in the incomplete-information layer when the degree
+    # cannot be confirmed.
     return (
         has_major
         or has_official_code
@@ -1536,7 +1749,7 @@ def _profile_is_explicitly_eligible(
         or has_category
         or has_discipline_category
         or has_english_major
-    ) and _degree_status(job, profile)[0] == "explicit"
+    ) and _degree_status(job, profile)[0] in {"explicit", "unspecified"}
 
 
 def _matched_profile_term(profile: StudentProfile, qualification_text: str) -> str:
@@ -1679,7 +1892,7 @@ def _contains_exact_major_term(qualification_text: str, term: str) -> bool:
         # All supported enterprise terms are Chinese names. Reject a match
         # when an adjacent Chinese character forms a longer discipline or job
         # title; permit only connectors routinely used in official
-        # requirement fields (专业、及、或、等、相关 and punctuation).
+        # requirement fields (专业、及、或、和、与、等、相关 and punctuation).
         if (
             start > 0
             and "\u4e00" <= lowered[start - 1] <= "\u9fff"
@@ -1693,6 +1906,8 @@ def _contains_exact_major_term(qualification_text: str, term: str) -> bool:
                     "专业",
                     "及",
                     "或",
+                    "和",
+                    "与",
                     "等",
                     "相关",
                     "毕业",

@@ -9,6 +9,7 @@ and keeps the dynamic source separate for later atomic replacement.
 from __future__ import annotations
 
 from collections import Counter
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +26,7 @@ def activate_sinopec_snapshot(
     *,
     source_id: str = "sinopec-2027-geoscience-snapshot",
     snapshot_path: Path | str | None = None,
+    as_of_date: date | str | None = None,
 ) -> dict[str, Any]:
     """Import a verified Sinopec snapshot without enabling live collection.
 
@@ -71,16 +73,23 @@ def activate_sinopec_snapshot(
     collector = OfficialSourceCollector(settings)
     postings = collector._collect_sinopec_spa_rows(reader_source)
     pipeline = JobPipeline(settings, database, collector=collector)
+    effective_date = pipeline._effective_business_date(as_of_date)
     outcomes = Counter()
     publication = Counter()
     for posting in postings:
-        normalized = pipeline.normalize_posting(posting, reader_source)
+        normalized = pipeline.normalize_posting(
+            posting,
+            reader_source,
+            as_of_date=effective_date,
+        )
         # Preserve the manual source identity in the database while retaining
         # the dynamic replacement source in the registry metadata.
         normalized["source_id"] = source_id
         normalized["source_name"] = source["name"]
         normalized["fingerprint"] = pipeline.normalize_posting(
-            posting, {**reader_source, "id": source_id}
+            posting,
+            {**reader_source, "id": source_id},
+            as_of_date=effective_date,
         )["fingerprint"]
         _, outcome = database.save_job(normalized)
         outcomes[outcome] += 1
@@ -97,12 +106,16 @@ def activate_sinopec_snapshot(
             evidence_kind="declared_snapshot",
         )
 
-    public_rows, public_count = database.list_jobs(page_size=None)
+    public_rows, public_count = database.list_jobs(
+        page_size=None,
+        as_of_date=effective_date.isoformat(),
+    )
     visible_rows = [row for row in public_rows if row.get("source_id") == source_id]
     return {
         "source_id": source_id,
         "snapshot_path": configured_path,
         "captured_at": config.get("snapshot_captured_at"),
+        "as_of_date": effective_date.isoformat(),
         "captured_rows": len(postings),
         "publication_status": dict(publication),
         "visible_rows": len(visible_rows),

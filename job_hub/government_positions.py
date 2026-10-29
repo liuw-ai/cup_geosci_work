@@ -176,10 +176,15 @@ def validate_position_record(value: Any, *, context: str = "position") -> dict[s
         "position_code",
         "title",
         "major_requirement",
-        "degree_requirement",
         "evidence_locator",
     ):
         normalized[field] = _text(normalized[field], f"{context}.{field}")
+    # Degree and location are optional official fields.  Retain an empty
+    # value rather than rejecting a real, row-bound position; the shared
+    # publication gate marks the resulting student record as incomplete.
+    normalized["degree_requirement"] = str(
+        normalized.get("degree_requirement") or ""
+    ).strip()
     normalized["location"] = str(normalized.get("location") or "").strip()
     normalized["location_evidence_policy"] = str(
         normalized.get("location_evidence_policy") or "row_exact"
@@ -249,10 +254,6 @@ def validate_position_record(value: Any, *, context: str = "position") -> dict[s
     normalized["official_attachment_url"] = _url(
         normalized["official_attachment_url"], f"{context}.official_attachment_url"
     )
-    if not normalized["location"] and normalized["record_status"] == "verified_open":
-        raise GovernmentPositionContractError(
-            f"{context}.location is required before a row can be verified_open"
-        )
     if normalized["record_status"] == "verified_open" and normalized["match_status"] == "out_of_scope":
         raise GovernmentPositionContractError(
             f"{context} cannot be verified_open while marked out_of_scope"

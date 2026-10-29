@@ -62,6 +62,7 @@ from job_hub.employers import (
     load_employment_landscape,
 )
 from job_hub.locations import PROVINCES
+from job_hub.lead_publication import publish_verified_candidate_lead
 from job_hub.matching import CATEGORY_DESCRIPTIONS, CATEGORY_ORDER, DEGREE_ORDER
 from job_hub.organizations import (
     load_organization_registry,
@@ -114,6 +115,11 @@ from job_hub.profiles import (
     list_student_profiles,
 )
 from job_hub.source_targets import REQUIRED_ROLES
+from job_hub.student_discovery import (
+    DISCOVERY_SCOPE,
+    build_student_discovery_jobs,
+    discovery_missing_fields,
+)
 from job_hub.source_validation import (
     load_source_validation_registry,
     source_validation_matrix_rows,
@@ -600,6 +606,51 @@ def create_app(settings: Settings | None = None) -> Flask:
                 as_of_date=business_date,
             )
             return [annotate_official_pending_job(job) for job in records], total
+        if scope == DISCOVERY_SCOPE:
+            # Discovery is a separate read projection. It may include official
+            # rows whose qualification/degree/location evidence is incomplete,
+            # but it never mutates publication state or the strict current set.
+            candidates, _ = database.list_jobs(
+                category=None,
+                degree=None,
+                province=None,
+                relevance_band=None,
+                q=None,
+                page_size=None,
+                only_open=False,
+                student_visible=False,
+                as_of_date=business_date,
+            )
+            records, _counts = build_student_discovery_jobs(
+                candidates,
+                as_of_date=business_date,
+                category=category,
+                degree=degree,
+                province=province,
+                relevance_band=relevance_band,
+                query=query,
+                publication_layer=publication_layer,
+                artifact_candidates=database.list_artifact_job_candidates(
+                    review_status="official_content_verified", limit=500
+                ),
+            )
+            records = [annotate_student_discovery_job(job) for job in records]
+            if profile is not None:
+                records = [annotate_profile_match(job, profile) for job in records]
+                if match_filter:
+                    # A discovery row without a persisted qualification can
+                    # only be a review item for a selected student profile.
+                    allowed = {match_filter}
+                    if match_filter == "review":
+                        allowed.add("not_recommended")
+                    records = [
+                        job
+                        for job in records
+                        if job.get("profile_match", {}).get("level") in allowed
+                    ]
+            page_size = 20
+            start = (page - 1) * page_size
+            return records[start : start + page_size], len(records)
         if profile is None:
             return database.list_jobs(
                 category=category,
@@ -689,27 +740,56 @@ def create_app(settings: Settings | None = None) -> Flask:
         )
         return annotated
 
+    def annotate_student_discovery_job(job: dict[str, Any]) -> dict[str, Any]:
+        """Add the explicit warning fields used by the discovery UI/API."""
+        annotated = dict(job)
+        annotated["discovery_missing_fields"] = discovery_missing_fields(job)
+        if annotated.get("discovery_status") == "official_incomplete":
+            annotated["discovery_label"] = "官方信息不完整，需核验"
+        return annotated
+
+    def find_student_discovery_job(job_id: int) -> dict[str, Any] | None:
+        candidates, _ = database.list_jobs(
+            page_size=None,
+            only_open=False,
+            student_visible=False,
+            as_of_date=local_today(settings).isoformat(),
+        )
+        records, _counts = build_student_discovery_jobs(
+            candidates,
+            as_of_date=local_today(settings).isoformat(),
+            artifact_candidates=database.list_artifact_job_candidates(
+                review_status="official_content_verified", limit=500
+            ),
+        )
+        for record in records:
+            if int(record.get("id") or 0) == int(job_id):
+                return annotate_student_discovery_job(record)
+        return None
+
     @app.get("/")
     def home() -> str:
         report, is_preview = active_report()
+        business_date = local_today(settings).isoformat()
         featured = sorted(
             report["new_jobs"] + report["updated_jobs"],
             key=lambda item: (-item["relevance_score"], item["deadline_date"] or "9999-12-31"),
         )[:6]
         if not featured:
             featured, _ = database.list_jobs(
-                page_size=6, as_of_date=local_today(settings).isoformat()
+                page_size=6, as_of_date=business_date
             )
         return render_template(
             "home.html",
             report=report,
             is_preview=is_preview,
             live_open_total=database.count_open_jobs(
-                as_of_date=local_today(settings).isoformat()
+                as_of_date=business_date
             ),
+            as_of_date=business_date,
             featured=featured,
             categories=database.list_categories(
-                as_of_date=local_today(settings).isoformat()
+                as_of_date=business_date
             ),
             report_dates=database.list_report_dates(14),
             upcoming_positions=upcoming_government_positions(),
@@ -772,9 +852,11 @@ def create_app(settings: Settings | None = None) -> Flask:
             publication_layer = None
         query = request.args.get("q", "").strip() or None
         scope = request.args.get("scope", "").strip()
-        if scope not in {"", "official_pending"}:
+        if scope not in {"", "official_pending", DISCOVERY_SCOPE}:
             scope = ""
         official_pending = scope == "official_pending"
+        student_discovery = scope == DISCOVERY_SCOPE
+        business_date = local_today(settings).isoformat()
         profile = requested_profile()
         match_filter = request.args.get("match", "").strip()
         if match_filter not in {"", "explicit", "review"}:
@@ -813,20 +895,25 @@ def create_app(settings: Settings | None = None) -> Flask:
                 "scope": scope,
             },
             categories=database.list_categories(
-                as_of_date=local_today(settings).isoformat()
+                as_of_date=business_date
             ),
             profile=profile,
             official_pending=official_pending,
+            student_discovery=student_discovery,
+            as_of_date=business_date,
         )
 
     @app.get("/jobs/<int:job_id>")
     def job_detail(job_id: int) -> str:
         scope = request.args.get("scope", "").strip()
         official_pending = scope == "official_pending"
+        student_discovery = scope == DISCOVERY_SCOPE
         if official_pending:
             job = database.find_official_pending_job(
                 job_id, as_of_date=local_today(settings).isoformat()
             )
+        elif student_discovery:
+            job = find_student_discovery_job(job_id)
         else:
             job = database.find_public_job(
                 job_id, as_of_date=local_today(settings).isoformat()
@@ -841,6 +928,22 @@ def create_app(settings: Settings | None = None) -> Flask:
             job=annotate_profile_match(job, profile) if not official_pending else job,
             profile=profile if not official_pending else None,
             official_pending=official_pending,
+            student_discovery=student_discovery,
+        )
+
+    @app.get("/jobs/discovery-artifact/<int:candidate_id>")
+    def student_discovery_artifact_detail(candidate_id: int) -> str:
+        """Render a verified government attachment row without a jobs id."""
+        job = find_student_discovery_job(-abs(int(candidate_id)))
+        if job is None or not job.get("discovery_virtual"):
+            abort(404)
+        profile = requested_profile()
+        return render_template(
+            "job_detail.html",
+            job=annotate_profile_match(job, profile),
+            profile=profile,
+            official_pending=False,
+            student_discovery=True,
         )
 
     @app.get("/about")
@@ -954,11 +1057,13 @@ def create_app(settings: Settings | None = None) -> Flask:
     @app.get("/api/jobs")
     def jobs_api() -> Any:
         page = max(request.args.get("page", 1, type=int) or 1, 1)
+        business_date = local_today(settings).isoformat()
         profile = requested_profile()
         scope = request.args.get("scope", "").strip()
-        if scope not in {"", "official_pending"}:
+        if scope not in {"", "official_pending", DISCOVERY_SCOPE}:
             scope = ""
         official_pending = scope == "official_pending"
+        student_discovery = scope == DISCOVERY_SCOPE
         province = request.args.get("province", "").strip() or None
         if province and province not in PROVINCES:
             return jsonify({"error": "province is not a supported mainland province"}), 400
@@ -984,13 +1089,39 @@ def create_app(settings: Settings | None = None) -> Flask:
             publication_layer=publication_layer,
             scope=scope or "current",
         )
+        discovery_counts: dict[str, int] | None = None
+        if student_discovery:
+            all_candidates, _ = database.list_jobs(
+                page_size=None,
+                only_open=False,
+                student_visible=False,
+                as_of_date=business_date,
+            )
+            _all_discovery, discovery_counts = build_student_discovery_jobs(
+                all_candidates,
+                as_of_date=business_date,
+                artifact_candidates=database.list_artifact_job_candidates(
+                    review_status="official_content_verified", limit=500
+                ),
+            )
         return jsonify(
             {
                 "items": [_student_api_job(record) for record in records],
                 "total": total,
                 "page": page,
                 "scope": scope or "current",
-                "counts_as_current": not official_pending,
+                "counts_as_current": not official_pending and not student_discovery,
+                "as_of_date": business_date,
+                "discovery": (
+                    {
+                        "scope": DISCOVERY_SCOPE,
+                        "counts_as_current": False,
+                        "note": "官方信息发现层；包含明确标注的待核字段，不等同全部可直接投递。",
+                        "counts": discovery_counts or {},
+                    }
+                    if student_discovery
+                    else None
+                ),
                 "profile": (
                     {"id": profile.id, "label": profile.label}
                     if profile
@@ -1166,78 +1297,10 @@ def create_app(settings: Settings | None = None) -> Flask:
         lead = database.get_candidate_lead(lead_id)
         if lead is None:
             return {"error": "Candidate lead was not found."}, 404
-        if lead["verification_status"] != "official_content_verified":
-            return {"error": "Only official-content-verified leads can be published."}, 409
-        if not is_http_url(str(lead.get("official_url") or "")):
-            return {"error": "Lead has no valid official_url."}, 409
-        if lead.get("official_domain_status") not in {
-            "registered_source_match",
-            "manual_review_approved",
-        }:
-            return {
-                "error": (
-                    "Lead needs a registered-source match or explicit "
-                    "manual-domain approval."
-                )
-            }, 409
-        metadata = lead.get("metadata", {})
-        employer = str(metadata.get("employer") or lead.get("employer_hint") or "").strip()
-        if not employer:
-            return {"error": "Verified lead needs an employer before publication."}, 409
-        source = database.get_source(
-            str(
-                metadata.get("source_id")
-                or lead.get("official_source_id")
-                or "official-manual-import"
-            )
-        )
-        if source is None:
-            return {"error": "Configured source_id is not registered."}, 409
-        field_evidence = metadata.get("field_evidence")
-        if not isinstance(field_evidence, dict):
-            field_evidence = {}
-        else:
-            field_evidence = dict(field_evidence)
-        # This action is available only after an administrator verified the
-        # official original. Record that provenance so manual and automated
-        # sources pass through the same student-publication gate.
-        if field_evidence:
-            field_evidence.setdefault(
-                "evidence_scope", "admin_verified_official_record"
-            )
-            field_evidence.setdefault(
-                "岗位", str(metadata.get("title") or lead["title"]).strip()
-            )
-        raw = RawPosting(
-            title=str(metadata.get("title") or lead["title"]).strip(),
-            employer=employer,
-            source_url=str(lead["official_url"]).strip(),
-            application_url=str(
-                lead.get("official_application_url")
-                or metadata.get("application_url")
-                or ""
-            ).strip()
-            or None,
-            text=str(metadata.get("description") or lead["title"]).strip(),
-            summary=str(metadata.get("summary") or "").strip(),
-            published_date=str(
-                metadata.get("published_date") or lead.get("published_date") or ""
-            ).strip()
-            or None,
-            deadline_date=str(metadata.get("deadline_date") or "").strip() or None,
-            location=str(metadata.get("location") or lead.get("location_hint") or "").strip()
-            or None,
-            external_id=f"verified-lead-{lead_id}",
-            official_evidence_url=str(lead["official_url"]).strip(),
-            match_text=str(metadata.get("match_text") or "").strip() or None,
-            qualification_text=(
-                str(metadata.get("qualification_text") or "").strip() or None
-            ),
-            field_evidence=field_evidence or None,
-        )
-        job_id, outcome = database.save_job(pipeline.normalize_posting(raw, source))
         try:
-            published = database.mark_candidate_lead_published(lead_id, job_id)
+            job_id, outcome, published = publish_verified_candidate_lead(
+                database, pipeline, lead_id
+            )
         except ValueError as error:
             return {"error": str(error)}, 409
         return {"job_id": job_id, "outcome": outcome, "lead": published}, 201
@@ -1315,7 +1378,12 @@ def create_app(settings: Settings | None = None) -> Flask:
             worker_runs=database.recent_worker_runs(run_kind="daily_cycle", limit=8),
             recent_failures=database.recent_crawl_failures(limit=8),
             recent_events=database.recent_candidate_lead_events(limit=8),
-            discovery=discovery_funnel(leads, registry, jobs=jobs),
+            discovery=discovery_funnel(
+                leads,
+                registry,
+                jobs=jobs,
+                third_party_batches=database.list_third_party_batches(limit=1000),
+            ),
             third_party_batches=database.list_third_party_batches(limit=20),
             artifact_statuses=database.list_source_artifact_status_counts(),
             three_oil_entry=three_oil_entry_evidence_summary(
@@ -1468,7 +1536,10 @@ def create_app(settings: Settings | None = None) -> Flask:
         leads = database.list_candidate_leads(limit=5000)
         jobs, _ = database.list_jobs(page_size=None, as_of_date=today)
         discovery = discovery_funnel(
-            leads, load_discovery_source_registry(), jobs=jobs
+            leads,
+            load_discovery_source_registry(),
+            jobs=jobs,
+            third_party_batches=database.list_third_party_batches(limit=1000),
         )
         sources = database.list_sources()
         source_report = build_source_funnel(
@@ -1986,7 +2057,14 @@ def create_app(settings: Settings | None = None) -> Flask:
             page_size=None,
             as_of_date=local_today(settings).isoformat(),
         )
-        return jsonify(discovery_funnel(leads, registry, jobs=jobs))
+        return jsonify(
+            discovery_funnel(
+                leads,
+                registry,
+                jobs=jobs,
+                third_party_batches=database.list_third_party_batches(limit=1000),
+            )
+        )
 
     @app.patch("/api/admin/leads/<int:lead_id>")
     @require_admin

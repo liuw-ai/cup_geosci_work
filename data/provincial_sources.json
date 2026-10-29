@@ -563,6 +563,13 @@
       "attachment_discovery_enabled": true,
       "attachment_discovery_max_notices": 8,
       "government_evidence_recheck": true,
+      "current_availability_url": "http://rst.hunan.gov.cn/rst/xxgk/zpzl/sydwzp/202603/t20260330_33943916.html",
+      "availability_open_patterns": [
+        "报名时间.{0,120}2026年12月31日.{0,80}随到随招.{0,40}招满即止"
+      ],
+      "availability_closed_patterns": [
+        "招聘工作结束|取消招聘|已招满|停止报名"
+      ],
       "listing_selector": "a[href*='/dzy/c100643/c100646/20'][href$='.html']",
       "title_selector": "h2, h1, .article-title, title",
       "content_selector": "#div_content, .article-nr, article, main, body",

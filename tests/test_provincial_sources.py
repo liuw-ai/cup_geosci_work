@@ -119,6 +119,22 @@ def test_ningxia_current_availability_status_is_source_scoped() -> None:
     assert "availability_closed_patterns" not in anhui_config
 
 
+def test_hunan_current_availability_uses_official_recruitment_notice() -> None:
+    path = Path(__file__).resolve().parent.parent / "data" / "provincial_sources.json"
+    sources = {
+        item["id"]: item
+        for item in json.loads(path.read_text(encoding="utf-8"))
+    }
+
+    config = sources["hunan-geology-institute"]["config"]
+    assert config["current_availability_url"].startswith(
+        "http://rst.hunan.gov.cn/rst/xxgk/zpzl/sydwzp/202603/"
+    )
+    page_text = "报名时间：自公告发布之日至2026年12月31日。随到随招，招满即止。"
+    assert _availability_match(config, page_text)
+    assert not _availability_match(config, page_text + "招聘工作结束")
+
+
 def test_gansu_current_availability_ignores_non_terminal_hiring_language() -> None:
     path = Path(__file__).resolve().parent.parent / "data" / "provincial_sources.json"
     source = next(

@@ -36,12 +36,14 @@
       "organization_role": "mining_and_resources_group",
       "official_url": "https://www.minmetals.com.cn/",
       "backup_urls": ["https://www.minmetals.com/", "https://minmetals.iguopin.com/"],
-      "source_id": null,
-      "channel_type": "official_homepage",
-      "status": "official_identity_only",
-      "observed_on": "2026-10-03",
-      "field_validation": "服务器隔离 Chromium 直接渲染 https://minmetals.iguopin.com/jobCampus，页面标题为“中国五矿集团有限公司人才招聘”，但正文为“404 您访问的页面不存在”，没有岗位卡片、筛选器或岗位详情链接。该结果只能证明该候选子路径当前不可用，不能推断集团没有招聘。",
-      "next_action": "从中国五矿集团官网重新定位当前年度招聘公告或正式招聘系统；取得岗位级专业、学历、地点、截止日期和官方详情链接后再注册来源。"
+      "source_id": "iguopin-general-geoscience-browser",
+      "channel_type": "official_recruitment_platform",
+      "status": "official_job_sample_verified",
+      "observed_on": "2026-10-28",
+      "sample_announcement_url": "https://www.iguopin.com/job/detail?id=220382133716255745",
+      "sample_job_ids": ["iguopin-general-220382133716255745"],
+      "field_validation": "原候选子路径 https://minmetals.iguopin.com/jobCampus 仍为 404，不能作为招聘入口。2026-10-28 的国聘主站完整详情捕获则核验到五矿矿业控股有限公司“地质技术管理”岗位：专业范围为“资源勘查类，资源环境与安全全类，地质类”，学历为本科，地点为邯郸、鞍山、营口、六安、芜湖，报名截止为 2026-12-27；岗位官方详情为 https://www.iguopin.com/job/detail?id=220382133716255745。该岗位已通过当前学生端的宽泛地学公开层。",
+      "next_action": "复用国聘主站完整关键词、分页和详情核验流程持续刷新；集团主页可达只证明主体入口可访问，不替代岗位级国聘详情。"
     },
     {
       "id": "cnpc-riped-campus",

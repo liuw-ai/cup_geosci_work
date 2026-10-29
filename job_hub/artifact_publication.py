@@ -61,7 +61,7 @@ def auto_publish_verified_artifact_candidates(
         "items": [],
     }
     if verification_report.get("status") != "failed":
-        _reconcile_published_dynamic_candidates(database, pipeline, authorized, result)
+        _reconcile_published_authorized_candidates(database, pipeline, authorized, result)
     if not authorized:
         return result
 
@@ -103,7 +103,7 @@ def auto_publish_verified_artifact_candidates(
     return result
 
 
-def _reconcile_published_dynamic_candidates(
+def _reconcile_published_authorized_candidates(
     database: Any,
     pipeline: JobPipeline,
     authorized: dict[tuple[str, str], set[str]],
@@ -116,10 +116,6 @@ def _reconcile_published_dynamic_candidates(
             artifacts[artifact_id] = database.get_source_artifact(artifact_id)
         artifact = artifacts[artifact_id]
         metadata = artifact.get("metadata") if isinstance(artifact, dict) else None
-        if not isinstance(metadata, dict) or not metadata.get("discovery_only"):
-            continue
-        if metadata.get("government_artifact_id"):
-            continue
         key = (str(candidate["source_id"]), str(candidate["artifact_url"]))
         approved = str(candidate["id"]) in authorized.get(key, set())
         if approved:
@@ -152,7 +148,16 @@ def _reconcile_published_dynamic_candidates(
                         }
                     )
                 continue
-        if not approved and database.mark_published_artifact_review_state(
+        # A static ledger row is governed by its own verifier result and is
+        # left unchanged when this cycle does not authorize it. Dynamic
+        # discovery rows have no such durable ledger, so retain the existing
+        # review-state warning when they temporarily disappear.
+        is_dynamic = (
+            isinstance(metadata, dict)
+            and bool(metadata.get("discovery_only"))
+            and not metadata.get("government_artifact_id")
+        )
+        if is_dynamic and database.mark_published_artifact_review_state(
             int(candidate["id"]),
             availability_status="stale_pending_review",
             reason="temporary_absence",

@@ -128,8 +128,8 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
 
     assert len(rows) == 756
     assert statuses == {
-        "student_eligible": 159,
-        "pending_evidence": 30,
+        "student_eligible": 164,
+        "pending_evidence": 25,
         "out_of_scope": 567,
     }
     mixed_assignment = next(
@@ -169,7 +169,7 @@ def test_sinopec_snapshot_batch_gate_is_explicit_and_bounded(tmp_path: Path) -> 
 
 
 def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
-    """A promoted source stores the full audit set but exposes only 159 rows."""
+    """A promoted source stores the full audit set but exposes only matched rows."""
     settings = replace(make_settings(tmp_path), max_source_items=500)
     database = Database(settings.database_path)
     database.initialize()
@@ -182,12 +182,15 @@ def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
     database.upsert_source(source)
     pipeline = JobPipeline(settings, database=database)
 
-    result = pipeline.sync_source(source)
+    result = pipeline.sync_source(source, as_of_date="2026-10-28")
     assert result.status == "finished"
     assert result.discovered == 756
-    assert result.open_matches == 159
+    assert result.open_matches == 164
 
-    public_rows, public_count = database.list_jobs(page_size=None)
+    public_rows, public_count = database.list_jobs(
+        page_size=None,
+        as_of_date="2026-10-28",
+    )
     audit_rows, audit_count = database.list_jobs(
         page_size=None,
         student_visible=False,
@@ -197,8 +200,8 @@ def test_sinopec_promotion_keeps_pending_rows_private(tmp_path: Path) -> None:
         row for row in audit_rows if row["source_id"] == "sinopec-career"
     ]
 
-    assert public_count == 166
-    assert len(public_rows) == 166
+    assert public_count == 164
+    assert len(public_rows) == 164
     assert audit_count == 756
     assert len(source_audit_rows) == 756
     assert all(

@@ -132,9 +132,9 @@ def test_cupb_snapshot_rows_pass_the_same_publication_gate(tmp_path) -> None:
     normalized = [pipeline.normalize_posting(posting, source) for posting in postings]
     statuses = {item["external_id"]: item["publication_status"] for item in normalized}
 
-    assert statuses["cupb-460426-geoscience-faculty"] == "student_eligible"
-    assert statuses["cupb-460487-postdoc-mineral-green-mining"] == "student_eligible"
-    assert statuses["cupb-460487-postdoc-geohazard"] == "student_eligible"
+    assert statuses["cupb-460426-geoscience-faculty"] == "pending_evidence"
+    assert statuses["cupb-460487-postdoc-mineral-green-mining"] == "pending_evidence"
+    assert statuses["cupb-460487-postdoc-geohazard"] == "pending_evidence"
     assert statuses["cupb-460520-national-energy-unrestricted"] == "out_of_scope"
 
 
@@ -204,11 +204,10 @@ def test_cmgb_iguopin_snapshot_contains_only_verified_geoscience_rows(tmp_path) 
     normalized = [pipeline.normalize_posting(posting, source) for posting in postings]
     assert len(normalized) == 53
     statuses = [item["publication_status"] for item in normalized]
-    # Enterprise rows are eligible only when the official requirement names
-    # one of the four graduation majors; adjacent geoscience wording remains a
-    # separate similar-major or pending-evidence tier.
-    assert statuses.count("student_eligible") == 41
-    assert statuses.count("pending_evidence") == 10
+    # Explicit drilling/survey role evidence is a public broad-geoscience tier
+    # when the official major field covers the supported student profiles.
+    assert statuses.count("student_eligible") == 47
+    assert statuses.count("pending_evidence") == 4
     assert statuses.count("similar_eligible") == 0
     assert statuses.count("out_of_scope") == 2
     mixed_assignment = next(

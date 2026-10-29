@@ -44,7 +44,11 @@ def test_activation_keeps_manual_source_auditable_without_enabling_live_sync(
     database = Database(settings.database_path)
     database.initialize()
     database.upsert_source(_source())
-    result = activate_sinopec_snapshot(settings, database)
+    result = activate_sinopec_snapshot(
+        settings,
+        database,
+        as_of_date="2026-10-28",
+    )
 
     assert result["captured_rows"] == 363
     assert result["publication_status"] == {
@@ -67,8 +71,11 @@ def test_activation_does_not_count_pending_or_out_of_scope_rows(tmp_path: Path) 
     database = Database(settings.database_path)
     database.initialize()
     database.upsert_source(_source())
-    activate_sinopec_snapshot(settings, database)
-    public_rows, public_count = database.list_jobs(page_size=None)
+    activate_sinopec_snapshot(settings, database, as_of_date="2026-10-28")
+    public_rows, public_count = database.list_jobs(
+        page_size=None,
+        as_of_date="2026-10-28",
+    )
     audit_rows, audit_count = database.list_jobs(
         page_size=None, student_visible=False, only_open=False
     )

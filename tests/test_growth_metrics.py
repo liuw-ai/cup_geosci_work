@@ -68,8 +68,12 @@ def test_growth_metrics_keep_each_stage_separate() -> None:
     assert metrics["official_content_verified_count"] == 2
     assert metrics["field_complete_count"] == 2
     assert metrics["precise_major_pass_count"] == 2
+    assert metrics["student_read_snapshot_count"] == 2
+    assert metrics["student_read_domestic_snapshot_count"] == 2
+    assert metrics["strict_public_status_count"] == 1
     assert metrics["current_published_count"] == 1
     assert report["source_growth_metrics"]["source"]["current_published_count"] is None
+    assert report["source_growth_metrics"]["source"]["student_read_snapshot_count"] is None
 
 
 def test_growth_metrics_do_not_count_registration_footer_as_official_url() -> None:

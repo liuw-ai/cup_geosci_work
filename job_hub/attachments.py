@@ -59,7 +59,7 @@ USER_AGENT = "cupb-geoscience-job-hub-attachment-fetcher/0.1 (+official-public-s
 # worker uses this marker to reparse already-downloaded official files once.
 # Bump when candidate eligibility rules change so extracted official files are
 # reconciled automatically without downloading them again.
-PARSER_VERSION = "attachments-v5"
+PARSER_VERSION = "attachments-v6"
 REQUEST_ERRORS = request_exception_types()
 
 SUPPORTED_SUFFIXES = {
@@ -91,7 +91,7 @@ POSITION_TABLE_MARKERS = (
 
 
 _POSITION_CODE_LABEL_RE = re.compile(
-    r"(?:岗位|职位)(?:代码|编号)\s*[:：]?\s*"
+    r"(?:岗位|职位)(?:代码|编号|编码)\s*[:：]?\s*"
     r"([A-Za-z0-9][A-Za-z0-9_.\-/]{1,39})",
     re.IGNORECASE,
 )
@@ -132,7 +132,7 @@ def infer_position_code(row_text: str) -> str | None:
     """Recover a labeled position code when an attachment omits its code column.
 
     Several government spreadsheets flatten a row into text while retaining a
-    labeled ``岗位代码`` value in the row text. The label is required on
+    labeled ``岗位代码`` or ``岗位编码`` value in the row text. The label is required on
     purpose: extracting arbitrary numbers (dates, headcounts, phone numbers)
     would create a false link to the government position ledger.
     """
@@ -191,7 +191,8 @@ def build_attachment_field_evidence(
     # label check in ``infer_position_code`` and is therefore safe for dates
     # and other numeric values appearing elsewhere in the row.
     if not any(
-        key in evidence for key in ("职位代码", "岗位代码", "职位编号", "岗位编号")
+        key in evidence
+        for key in ("职位代码", "岗位代码", "职位编号", "岗位编号", "职位编码", "岗位编码")
     ):
         position_code = infer_position_code(row_text)
         if position_code:
@@ -977,10 +978,11 @@ class OfficialAttachmentProcessor:
         """Keep only position-table rows eligible for this student service.
 
         This gate intentionally applies before human review.  A reviewer should
-        see only rows that already contain a job title, a professional condition
-        (or an explicit unrestricted-major condition), and a degree condition.
-        The public publication gate remains stricter and runs again at publish
-        time with the same row-level evidence.
+        see only rows that already contain a job title and a professional
+        condition (or an explicit unrestricted-major condition).  An official
+        row may omit degree or work location; those are displayed as
+        incomplete-information warnings by the final student gate rather than
+        being discarded before review.
         """
         rejection_reason = self._attachment_queue_rejection_reason(artifact, rows)
         if rejection_reason:
@@ -1006,13 +1008,13 @@ class OfficialAttachmentProcessor:
         rejected = self.database.reject_unreviewed_artifact_candidates(
             int(artifact["id"]),
             reason=(
-                "Phase 62 候选净化：该附件行未同时提供岗位、专业/不限专业和学历"
+                "Phase 62 候选净化：该附件行未同时提供岗位和专业/不限专业"
                 "的地学院学生可核验条件。原始附件与行证据已保留。"
             ),
             keep_artifact_row_ids=accepted_row_ids,
         )
         detail = (
-            "已按岗位、专业/不限专业、学历和地学院学生范围完成候选净化；"
+            "已按岗位、专业/不限专业和地学院学生范围完成候选净化；"
             f"保留 {len(candidates)} 条，拒绝 {rejected} 条未复核候选。"
         )
         self._record_queue_decision(
@@ -1094,29 +1096,39 @@ class OfficialAttachmentProcessor:
             )
 
         # A file name alone is not sufficient evidence of a position table.
-        # Require a structured row with a job/position field plus distinct
-        # professional and degree fields before any row can reach review.
+        # Require a structured row with a job/position field plus a distinct
+        # professional field before any row can reach review.  Degree and
+        # work-location fields are useful but optional official information.
         for row in rows:
             cells = row.get("cells")
             if not isinstance(cells, dict):
                 continue
-            keys = " ".join(str(key) for key in cells)
+            # Government spreadsheets often insert visual spaces/newlines in
+            # headers (for example, ``专 业``).  Candidate field extraction
+            # already normalizes these labels; this table-shape gate must use
+            # the same normalization or it can reject a genuine position table
+            # before the row is ever evaluated.
+            keys = " ".join(
+                re.sub(r"[\s:：（）()【】\[\]]", "", str(key))
+                for key in cells
+            )
             condition_text = " ".join(
                 str(value)
                 for key, value in cells.items()
-                if any(marker in str(key) for marker in ("岗位条件", "任职条件", "资格条件"))
+                if any(
+                    marker
+                    in re.sub(r"[\s:：（）()【】\[\]]", "", str(key))
+                    for marker in ("岗位条件", "任职条件", "资格条件")
+                )
             )
             has_title = any(item in keys for item in ("岗位", "职位"))
             has_major = any(item in keys for item in ("专业", "学科")) or bool(
                 condition_text and extract_major_tags(condition_text)
             )
-            has_degree = any(item in keys for item in ("学历", "学位", "面向对象")) or bool(
-                condition_text and extract_degree_levels(condition_text)
-            )
-            if has_title and has_major and has_degree:
+            if has_title and has_major:
                 return None
         return (
-            "Phase 62 附件用途识别：未发现同时包含岗位/职位、专业和学历字段的"
+            "Phase 62 附件用途识别：未发现同时包含岗位/职位和专业字段的"
             "职位表结构；原始附件与行证据已保留。"
         )
 
@@ -1135,7 +1147,7 @@ class OfficialAttachmentProcessor:
         )
         position_code = self._field(
             cells,
-            ("职位代码", "岗位代码", "职位编号", "岗位编号", "代码"),
+            ("职位代码", "岗位代码", "职位编号", "岗位编号", "职位编码", "岗位编码", "代码"),
         )
         employer = self._field(
             cells,
@@ -1209,9 +1221,11 @@ class OfficialAttachmentProcessor:
         if title and major and title in {"专业技术", "专业技术岗", "专业技术岗位"}:
             title = f"{title}（{major[:100]}）"
         relevant_text = " ".join(filter(None, (title, major, degree, text)))
-        # Do not infer a job row from arbitrary document prose.  The three
-        # values below must all be extracted from the same structured row.
-        if not title or not major or not degree:
+        # Do not infer a job row from arbitrary document prose.  Title and
+        # professional evidence must come from the same structured row;
+        # degree and work location are allowed to be absent from an official
+        # row and are then presented as incomplete information.
+        if not title or not major:
             return None
         metadata = artifact.get("metadata") or {}
         source = self.database.get_source(str(artifact.get("source_id") or "")) or {}
@@ -1586,7 +1600,17 @@ class OfficialAttachmentProcessor:
     @staticmethod
     def _pdf_table_header(line: str) -> bool:
         normalized = re.sub(r"\s+", "", line)
-        keywords = ("岗位代码", "职位代码", "岗位名称", "招聘单位", "学历", "专业", "招聘人数")
+        keywords = (
+            "岗位代码",
+            "职位代码",
+            "岗位编码",
+            "职位编码",
+            "岗位名称",
+            "招聘单位",
+            "学历",
+            "专业",
+            "招聘人数",
+        )
         return sum(keyword in normalized for keyword in keywords) >= 2
 
     @classmethod

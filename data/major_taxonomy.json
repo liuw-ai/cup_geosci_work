@@ -1,6 +1,6 @@
 {
-  "version": 5,
-  "as_of": "2026-10-12",
+  "version": 6,
+  "as_of": "2026-10-28",
   "scope": "中国石油大学（北京）地球科学学院学生画像与岗位专业证据",
   "authority_note": "企业岗位只按四个毕业专业名称（及规范英文名）精确匹配；目录代码仅在公务员、事业编等公共招录职位表明确给出代码时参与匹配，不能把方向、相近专业或学科类别升级为企业岗位专业。岗位是否可报以官方原文为准。",
   "majors": [
@@ -24,7 +24,7 @@
     {
       "id": "geology",
       "name": "地质学",
-      "student_levels": ["硕士", "博士"],
+      "student_levels": ["本科", "硕士", "博士"],
       "classification": {
         "discipline_category": "理学",
         "undergraduate_category": "地质学类",

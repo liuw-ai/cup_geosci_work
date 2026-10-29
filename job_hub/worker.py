@@ -29,6 +29,7 @@ from job_hub.government_artifacts import (
 from job_hub.government_discovery import discover_configured_government_artifacts
 from job_hub.government_artifact_verification import verify_government_artifacts
 from job_hub.artifact_publication import auto_publish_verified_artifact_candidates
+from job_hub.lead_publication import auto_publish_verified_candidate_leads
 from job_hub.government_positions import (
     consecutive_qualified_source_refreshes,
     current_publishable_position_records,
@@ -177,10 +178,20 @@ class DailyWorker:
                 self.pipeline,
                 government_auto_verification,
             )
+            # Third-party rows remain private until an administrator has
+            # completed official-content verification.  Once that explicit
+            # state exists, the server worker applies the same final student
+            # gate automatically; Codex scheduling is not part of this path.
+            verified_lead_publication = auto_publish_verified_candidate_leads(
+                self.database,
+                self.pipeline,
+            )
             # Candidate publication happens after the normal reindex above.
             # Reindex once more so the government ledger/opening-date boundary
             # is applied before the coverage snapshot is written.
             if government_auto_publication.get("published") or government_auto_publication.get(
+                "unchanged"
+            ) or verified_lead_publication.get("published") or verified_lead_publication.get(
                 "unchanged"
             ):
                 government_auto_publication["reindex"] = self.pipeline.reindex_jobs()
@@ -227,6 +238,7 @@ class DailyWorker:
                     "attachments": attachment_summary,
                     "government_auto_verification": government_auto_verification,
                     "government_auto_publication": government_auto_publication,
+                    "verified_lead_publication": verified_lead_publication,
                     "government_quality": government_summary,
                     "link_health": link_health,
                 },

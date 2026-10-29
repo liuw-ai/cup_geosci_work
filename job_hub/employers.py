@@ -591,6 +591,18 @@ def enrich_job(job: dict[str, Any]) -> dict[str, Any]:
     if layer in PUBLICATION_LAYER_LABELS:
         enriched["publication_status_label"] = PUBLICATION_LAYER_LABELS[layer]
         enriched["publication_layer_label"] = PUBLICATION_LAYER_LABELS[layer]
+    basis = enriched.get("publication_basis")
+    if isinstance(basis, dict):
+        mode = str(basis.get("major_match_mode") or "")
+        if mode.startswith("social_"):
+            enriched["publication_status_label"] = "社会招聘拓展机会"
+            enriched["publication_layer_label"] = "社会招聘拓展机会"
+        elif mode == "extended_unrestricted_rule":
+            enriched["publication_status_label"] = "不限专业拓展机会"
+            enriched["publication_layer_label"] = "不限专业拓展机会"
+        elif mode == "extended_role_context_pending":
+            enriched["publication_status_label"] = "官方专业信息未明确"
+            enriched["publication_layer_label"] = "官方专业信息未明确"
     availability = str(job.get("source_availability_status") or "").strip()
     enriched["source_availability_status_label"] = SOURCE_AVAILABILITY_LABELS.get(
         availability, "来源状态待核验"

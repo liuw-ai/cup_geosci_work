@@ -13,6 +13,7 @@ import os
 import signal
 import argparse
 from contextlib import contextmanager
+from datetime import datetime
 from threading import Event
 from zoneinfo import ZoneInfo
 
@@ -297,6 +298,13 @@ class IguopinBrowserWorker:
                         "国聘 capture succeeded but source synchronization did not finish: "
                         f"{sync_result.status}: {sync_result.error or 'unknown error'}"
                     )
+                # A source-scoped browser worker can run between daily worker
+                # cycles. Keep the persisted lifecycle state aligned with the
+                # dated public read gate after a successful write.
+                expire_jobs_before = getattr(self.database, "expire_jobs_before", None)
+                if callable(expire_jobs_before):
+                    local_timezone = getattr(self, "timezone", ZoneInfo("Asia/Shanghai"))
+                    expire_jobs_before(datetime.now(local_timezone).date().isoformat())
             status = "running" if payload.get("status") == "success" else "degraded"
             self._heartbeat(status, f"国聘 capture: {payload.get('scan')}")
             LOGGER.info("国聘 capture completed: %s", payload.get("scan"))

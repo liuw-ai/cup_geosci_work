@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}{{ job.title }}{% if official_pending %}（官方待核）{% endif %} | {{ site_name }}{% endblock %}
+{% block title %}{{ job.title }}{% if official_pending %}（官方待核）{% elif student_discovery and job.discovery_status == 'official_incomplete' %}（官方信息不完整）{% endif %} | {{ site_name }}{% endblock %}
 
 {% block content %}
   <section class="page-heading job-heading">
     <div class="shell">
       {% if profile %}
-        <a class="back-link" href="{{ url_for('jobs', profile=profile.id, scope='official_pending' if official_pending else None) }}">返回匹配岗位</a>
+        <a class="back-link" href="{{ url_for('jobs', profile=profile.id, scope='official_pending' if official_pending else ('student_discovery' if student_discovery else None)) }}">返回匹配岗位</a>
       {% else %}
-        <a class="back-link" href="{{ url_for('jobs', scope='official_pending') if official_pending else url_for('jobs') }}">返回{% if official_pending %}官方待核岗位{% else %}全部岗位{% endif %}</a>
+        <a class="back-link" href="{{ url_for('jobs', scope='official_pending') if official_pending else url_for('jobs', scope='student_discovery' if student_discovery else None) }}">返回{% if official_pending %}官方待核岗位{% elif student_discovery %}学生岗位发现层{% else %}全部岗位{% endif %}</a>
       {% endif %}
       <div class="detail-topline">
         <span class="category-label">{{ job.category_label or job.category|category_label }}</span>
@@ -30,6 +30,10 @@
         <div class="notice-warning"><strong>官方待核记录</strong>：这条记录尚未通过学生端岗位级证据门禁，不计入当前可投递岗位。投递前必须以官方原文补齐并核对资格条件。</div>
         <h2>待补字段</h2>
         <p class="muted">{{ '、'.join(job.pending_missing_fields) if job.pending_missing_fields else '岗位级专业、学历、地点或截止日期证据' }}</p>
+      {% elif student_discovery and job.discovery_status == 'official_incomplete' %}
+        <div class="notice-warning"><strong>官方信息不完整，需核验</strong>：这条记录来自官方来源，但岗位级专业、学历、地点或截止日期信息不完整。它属于信息发现层，不代表学校或网站已确认你具备报名资格。</div>
+        <h2>待核字段</h2>
+        <p class="muted">{{ '、'.join(job.discovery_missing_fields) if job.discovery_missing_fields else '请打开官方原文逐项核对岗位条件' }}</p>
       {% endif %}
       {% if job.source_availability_status in ['source_unavailable', 'degraded', 'stale_pending_review'] %}
         <div class="notice-warning">岗位是否仍可申请，请以保留的官方链接和最新公告为准。</div>
@@ -112,8 +116,8 @@
     </article>
     <aside class="source-panel">
       <p class="eyebrow">核验与报名</p>
-      <h2>{% if official_pending %}先核对官方原文{% else %}以原始公告为准{% endif %}</h2>
-      <p>{% if official_pending %}该记录只用于官方来源补证，不代表当前可投递资格。请先核对岗位级专业、学历、地点和截止日期。{% else %}本页仅整理公开信息。请在投递前核对资格条件、报名入口、截止时间和单位通知。{% endif %}</p>
+      <h2>{% if official_pending %}先核对官方原文{% elif student_discovery %}先核对官方原文{% else %}以原始公告为准{% endif %}</h2>
+      <p>{% if official_pending %}该记录只用于官方来源补证，不代表当前可投递资格。请先核对岗位级专业、学历、地点和截止日期。{% elif student_discovery %}本页属于学生岗位发现层。缺失字段不是“不符合”，而是官方原文没有清晰写出；请在投递前自行确认资格、报名入口和截止时间。{% else %}本页仅整理公开信息。请在投递前核对资格条件、报名入口、截止时间和单位通知。{% endif %}</p>
       {% if job.source_id == "cnpc-career" and job.field_evidence.get("官方详情状态") == "official_detail_api_degraded" %}
           <a class="action-link full-width" href="{{ job.application_url or 'https://zhaopin.cnpc.com.cn/web/recruitInfolist.html' }}" target="_blank" rel="noopener noreferrer">打开中国石油官方招聘入口</a>
         {% if job.official_link_url %}
@@ -121,7 +125,7 @@
         {% endif %}
       {% else %}
         {% if job.official_link_url %}
-          <a class="action-link full-width" href="{{ job.official_link_url }}" target="_blank" rel="noopener noreferrer">{% if official_pending %}打开官方原文核验{% else %}{{ job.official_link_label or '打开官方原文' }}{% endif %}</a>
+        <a class="action-link full-width" href="{{ job.official_link_url }}" target="_blank" rel="noopener noreferrer">{% if official_pending or student_discovery %}打开官方原文核验{% else %}{{ job.official_link_label or '打开官方原文' }}{% endif %}</a>
         {% endif %}
       {% endif %}
       {% if job.field_evidence.get("官方地质筛选入口") %}

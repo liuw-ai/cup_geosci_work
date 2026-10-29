@@ -862,6 +862,7 @@ def discovery_funnel(
     registry: dict[str, Any],
     *,
     jobs: list[dict[str, Any]] | None = None,
+    third_party_batches: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Calculate an auditable lead funnel; no count is presented as a job count."""
     statuses = {
@@ -892,10 +893,28 @@ def discovery_funnel(
     def rate(value: int, denominator: int = total) -> float:
         return round(value / denominator, 4) if denominator else 0.0
 
-    public_jobs = list(jobs or [])
-    current_public_jobs = [job for job in public_jobs if is_public_job(job)]
+    # Callers provide the canonical student-read query result here.  That
+    # result can include a clearly labelled historical-source-unavailable row
+    # while ``is_public_job`` intentionally counts only strict publication
+    # statuses.  Keep both figures instead of relabelling the strict subset as
+    # the student-facing total.
+    student_read_jobs = list(jobs or [])
+    student_read_domestic_jobs = [
+        job for job in student_read_jobs if is_domestic_job(job)
+    ]
+    current_public_jobs = [job for job in student_read_jobs if is_public_job(job)]
     current_domestic_jobs = [job for job in current_public_jobs if is_domestic_job(job)]
-    growth_metrics = _growth_metrics(lead_rows, current_domestic_jobs)
+    growth_metrics = _growth_metrics(
+        lead_rows,
+        current_domestic_jobs,
+        student_read_count=len(student_read_jobs) if jobs is not None else None,
+        student_read_domestic_count=(
+            len(student_read_domestic_jobs) if jobs is not None else None
+        ),
+        strict_public_status_count=(
+            len(current_public_jobs) if jobs is not None else None
+        ),
+    )
     grouped_leads: dict[str, list[dict[str, Any]]] = {}
     for row in lead_rows:
         source_id = str(row.get("discovery_source_id") or "unattributed").strip()
@@ -926,15 +945,153 @@ def discovery_funnel(
             "source_attribution": rate(attributed),
         },
         "registered_discovery_sources": len(registry.get("sources", [])),
+        # This is the one student-facing total used by the public read path.
+        # Domestic-only and strict-status projections below remain useful
+        # audit dimensions, but must not be mistaken for the page total.
+        "canonical_student_read_count": (
+            len(student_read_jobs) if jobs is not None else None
+        ),
+        "canonical_student_domestic_read_count": (
+            len(student_read_domestic_jobs) if jobs is not None else None
+        ),
         "growth_metrics": growth_metrics,
         "source_growth_metrics": source_growth_metrics,
+        "third_party_table_funnel": build_third_party_table_funnel(
+            third_party_batches or [], lead_rows
+        ),
         "policy": "线索统计不等于公开岗位统计；第三方原文不会进入学生端。",
+    }
+
+
+def build_third_party_table_funnel(
+    batches: list[dict[str, Any]],
+    lead_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Explain where retained third-party tables stop producing public rows.
+
+    Batch counts describe captured files and parsed rows.  Lead counts are
+    joined by the durable ``metadata.batch_id`` or the retained table URL.
+    The function is intentionally read-only and never treats a parsed row as
+    a job until the normal official-content and student publication gates have
+    passed.
+    """
+
+    batch_rows = [item for item in batches if isinstance(item, dict)]
+    table_urls = {
+        str(item.get("third_party_table_url") or "").strip()
+        for item in batch_rows
+        if str(item.get("third_party_table_url") or "").strip()
+    }
+    batch_ids = {
+        str(item.get("batch_id") or "").strip()
+        for item in batch_rows
+        if str(item.get("batch_id") or "").strip()
+    }
+    leads: list[dict[str, Any]] = []
+    for row in lead_rows:
+        metadata = row.get("metadata")
+        metadata = metadata if isinstance(metadata, dict) else {}
+        batch_id = str(metadata.get("batch_id") or row.get("third_party_batch_id") or "").strip()
+        table_url = str(row.get("third_party_table_url") or "").strip()
+        if batch_id in batch_ids or table_url in table_urls:
+            leads.append(row)
+
+    def _status(row: dict[str, Any]) -> str:
+        return str(row.get("verification_status") or "candidate").strip()
+
+    status_counts: dict[str, int] = {}
+    for row in leads:
+        status = _status(row)
+        status_counts[status] = status_counts.get(status, 0) + 1
+
+    official_url_bound = sum(
+        1
+        for row in leads
+        if _status(row) in {"official_url_found", "official_content_verified", "published"}
+        and _lead_has_bound_official_url(row)
+    )
+    verified = sum(
+        1
+        for row in leads
+        if _status(row) in {"official_content_verified", "published"}
+        and _lead_has_bound_official_url(row)
+    )
+    field_complete = sum(1 for row in leads if _lead_fields_complete(row))
+    precise = sum(1 for row in leads if _lead_precise_major_passed(row))
+    published = status_counts.get("published", 0)
+    blockers = {
+        "missing_official_url": sum(
+            1
+            for row in leads
+            if _status(row) not in {"published", "official_content_verified"}
+            and not _is_http_url(row.get("official_url"))
+        ),
+        "official_source_not_bound": sum(
+            1
+            for row in leads
+            if _is_http_url(row.get("official_url"))
+            and str(row.get("official_domain_status") or "")
+            not in {"registered_source_match", "manual_review_approved"}
+        ),
+        "official_content_not_verified": sum(
+            1
+            for row in leads
+            if _status(row) in {"candidate", "official_url_found", "need_review"}
+            and _is_http_url(row.get("official_url"))
+        ),
+        "required_fields_incomplete": sum(
+            1
+            for row in leads
+            if _status(row) in {"official_content_verified", "published"}
+            and not _lead_fields_complete(row)
+        ),
+        "rejected_or_expired": sum(
+            1 for row in leads if _status(row) in {"rejected", "expired"}
+        ),
+    }
+
+    source_rows: dict[str, dict[str, int]] = {}
+    for item in batch_rows:
+        source_id = str(item.get("discovery_source_id") or "unattributed").strip()
+        entry = source_rows.setdefault(
+            source_id or "unattributed",
+            {"batches": 0, "parsed_rows": 0, "candidate_rows": 0, "published_rows": 0},
+        )
+        entry["batches"] += 1
+        entry["parsed_rows"] += int(item.get("parsed_row_count") or 0)
+        entry["candidate_rows"] += int(item.get("candidate_row_count") or 0)
+        entry["published_rows"] += int(item.get("published_links") or 0)
+
+    return {
+        "batch_count": len(batch_rows),
+        "captured_batch_count": sum(
+            1 for item in batch_rows if str(item.get("status") or "") in {"captured", "parsed", "imported"}
+        ),
+        "parsed_rows": sum(int(item.get("parsed_row_count") or 0) for item in batch_rows),
+        "candidate_rows": sum(int(item.get("candidate_row_count") or 0) for item in batch_rows),
+        "linked_leads": len(leads),
+        "official_url_bound": official_url_bound,
+        "official_content_verified": verified,
+        "field_complete": field_complete,
+        "precise_major_pass": precise,
+        "published": published,
+        "status_counts": dict(sorted(status_counts.items())),
+        "blockers": blockers,
+        "by_discovery_source": dict(sorted(source_rows.items())),
+        "scope_note": (
+            "第三方文件只作为发现和审计证据；只有官方链接、官方内容核验、"
+            "岗位级专业/学历/地点/截止日期和学生端发布门禁全部通过，才计入 published。"
+        ),
     }
 
 
 def _growth_metrics(
     lead_rows: list[dict[str, Any]],
     current_domestic_jobs: list[dict[str, Any]] | None,
+    *,
+    student_read_count: int | None = None,
+    student_read_domestic_count: int | None = None,
+    strict_public_status_count: int | None = None,
 ) -> dict[str, Any]:
     """Return the six explicit expansion metrics used by the admin plan.
 
@@ -1022,6 +1179,11 @@ def _growth_metrics(
         "official_content_verified_count": official_content_verified_count,
         "field_complete_count": field_complete_count,
         "precise_major_pass_count": precise_major_pass_count,
+        "student_read_snapshot_count": student_read_count,
+        "student_read_domestic_snapshot_count": student_read_domestic_count,
+        "canonical_student_read_count": student_read_count,
+        "canonical_student_domestic_read_count": student_read_domestic_count,
+        "strict_public_status_count": strict_public_status_count,
         "current_published_count": (
             len(current_domestic_jobs) if current_domestic_jobs is not None else None
         ),
@@ -1047,6 +1209,9 @@ def _growth_metrics(
             ),
         },
         "scope_note": (
+            "canonical_student_read_count 是学生端唯一读路径的主统计，"
+            "由官方 detail key 去重、截止日期和学生端公开门禁共同决定；"
+            "canonical_student_domestic_read_count 是其中国大陆子集。"
             "lead_count 是去重后的第三方线索行数；official_url_count 只计有效 HTTP(S)"
             "且已通过登记来源边界、线索不是考试/报名内容、链接不是通用首页或登录入口的"
             "岗位级官方 URL；field_complete_count 只计已核验且具备岗位、"
@@ -1055,8 +1220,11 @@ def _growth_metrics(
             "similar_major_pass_count 只统计同一官方岗位证据中明确出现相近地学方向的私有候选，"
             "broad_major_pass_count 只统计公共招录代码/大类/不限专业规则；二者均不改变企业岗位"
             "精确专业发布门禁；"
-            "不信任旧的 exact_four_names 标记；current_published_count 只计当前中国大陆学生端"
-            "公开岗位。official_url_candidate_count 只计未拒收线索中的岗位级私有 URL"
+            "不信任旧的 exact_four_names 标记；student_read_snapshot_count 是调用方提供的"
+            "学生端实际读路径快照，包含页面明确标注的来源暂不可用历史证据；"
+            "strict_public_status_count 只计 publication_status 通过严格公开状态的子集；"
+            "current_published_count 进一步只计该严格子集内的当前中国大陆岗位。"
+            "official_url_candidate_count 只计未拒收线索中的岗位级私有 URL"
             "候选；raw_official_url_candidate_count 保留原始提取量（含通用首页与被拒线索）。"
             "二者都不能当作已核验官方 URL 或岗位数。"
             "当前发布数是全站实时快照，不属于第三方线索同一队列，"

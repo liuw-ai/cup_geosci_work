@@ -5,7 +5,14 @@
       <span class="relevance publication-{{ job.publication_layer or job.publication_status }}">{{ job.publication_layer_label or job.publication_status_label }}</span>
     {% endif %}
   </div>
-  <h3><a href="{{ url_for('job_detail', job_id=job.id, scope='official_pending') if official_pending else url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
+  {% if student_discovery and job.discovery_virtual %}
+    {% set detail_url = url_for('student_discovery_artifact_detail', candidate_id=job.discovery_candidate_id, profile=active_profile_id or None) %}
+  {% elif official_pending %}
+    {% set detail_url = url_for('job_detail', job_id=job.id, scope='official_pending') %}
+  {% else %}
+    {% set detail_url = url_for('job_detail', job_id=job.id, scope='student_discovery' if student_discovery else None, profile=active_profile_id or None) %}
+  {% endif %}
+  <h3><a href="{{ detail_url }}">{{ job.title }}</a></h3>
   <p class="employer">{{ job.canonical_employer_name or job.employer }}</p>
   {% if job.canonical_employer_name and job.canonical_employer_name != job.employer %}
     <p class="muted">公告单位：{{ job.employer }}</p>
@@ -27,6 +34,8 @@
   </dl>
   {% if official_pending %}
     <p class="notice-warning">待补字段：{{ '、'.join(job.pending_missing_fields) if job.pending_missing_fields else '岗位级证据字段' }}</p>
+  {% elif student_discovery and job.discovery_status == 'official_incomplete' %}
+    <p class="notice-warning">官方信息不完整：{{ '、'.join(job.discovery_missing_fields) if job.discovery_missing_fields else '请打开官方原文核验岗位条件' }}</p>
   {% elif job.profile_match %}
     <div class="profile-match profile-match-{{ job.profile_match.level }}">
       <strong>{{ job.profile_match.label }}</strong>
@@ -67,7 +76,7 @@
     {% if active_profile_id %}
       <a class="text-link" href="{{ url_for('job_detail', job_id=job.id, profile=active_profile_id) }}">查看详情</a>
     {% else %}
-      <a class="text-link" href="{{ url_for('job_detail', job_id=job.id, scope='official_pending') if official_pending else url_for('job_detail', job_id=job.id) }}">查看详情</a>
+      <a class="text-link" href="{{ detail_url }}">查看详情</a>
     {% endif %}
   </div>
 </article>

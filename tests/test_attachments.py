@@ -21,6 +21,7 @@ from conftest import make_settings, make_settings_with_artifact_path, source
 
 def test_infer_position_code_requires_an_explicit_label() -> None:
     assert infer_position_code("岗位代码：2026113；专业：地质学") == "2026113"
+    assert infer_position_code("岗位编码：2026120；专业：地质学") == "2026120"
     assert infer_position_code("职位编号 A-07，学历：硕士") == "A-07"
     assert infer_position_code("报名截止：2026-10-31；招聘人数：1") is None
 
@@ -39,6 +40,23 @@ def test_attachment_evidence_recovers_code_from_flattened_row() -> None:
     )
 
     assert evidence["职位代码"] == "2026113"
+
+
+def test_position_code_alias_covers_government_job_encoding_header(tmp_path: Path) -> None:
+    body = _position_xlsx_bytes(
+        ["招聘单位", "岗位名称", "岗位编码", "招聘人数", "学历", "专 业"],
+        ["测试地质院", "地质技术岗", "2026113", "1", "博士研究生", "地质学"],
+    )
+    _, database, artifact, processor = _registered_artifact(
+        tmp_path,
+        session=FakeSession(body),
+        category="事业单位与人才引进",
+    )
+
+    processor.process(artifact["id"])
+
+    candidate = database.list_artifact_job_candidates(artifact_id=artifact["id"])[0]
+    assert candidate["field_evidence"]["职位代码"] == "2026113"
 
 
 def test_relative_artifact_storage_is_resolved_below_app_data(tmp_path: Path) -> None:
@@ -307,6 +325,113 @@ def test_reparse_reuses_legacy_null_suffix_row_identity(tmp_path: Path) -> None:
     assert candidates[0]["artifact_row_id"] == legacy_row_id
     assert candidates[0]["review_status"] == "official_content_verified"
     assert candidates[0]["row_cells"]["岗位代码"] == "G-002"
+
+
+def test_reparse_preserves_stronger_legacy_candidate_over_canonical_duplicate(
+    tmp_path: Path,
+) -> None:
+    """A legacy null-suffix row must not demote verified evidence on reparse."""
+    settings, database, artifact, _ = _registered_artifact(
+        tmp_path, session=FakeSession(_xlsx_bytes())
+    )
+    row_payload = {
+        "sheet_name": "岗位表",
+        "row_number": 2,
+        "cells": {
+            "岗位名称": "地质技术岗",
+            "岗位代码": "G-003",
+            "招聘单位": "测试能源集团",
+            "学历要求": "硕士",
+            "专业要求": "地质工程",
+        },
+        "row_text": "地质技术岗；G-003；地质工程；硕士",
+    }
+    canonical = database.upsert_source_artifact_rows(int(artifact["id"]), [row_payload])[0]
+    database.upsert_artifact_job_candidate(
+        {
+            "artifact_row_id": canonical["id"],
+            "source_id": "official-test-source",
+            "official_page_url": artifact["parent_url"],
+            "title": "地质技术岗",
+            "employer": "测试能源集团",
+            "degree_levels": ["硕士"],
+            "major_tags": ["地质工程"],
+            "summary": "canonical",
+            "description": "canonical",
+            "field_evidence": {
+                "artifact_url": artifact["artifact_url"],
+                "专业范围": "地质工程",
+                "学历要求": "硕士",
+                "table_row": "岗位表!2",
+            },
+            "review_status": "needs_review",
+        }
+    )
+    legacy_identity = {
+        "artifact_id": int(artifact["id"]),
+        "sheet_name": "岗位表",
+        "row_number": 2,
+        "row_kind": "tabular",
+        "row_key_suffix": None,
+    }
+    legacy_key = hashlib.sha256(
+        json.dumps(legacy_identity, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+    with database.transaction() as connection:
+        connection.execute(
+            """
+            INSERT INTO source_artifact_rows (
+                artifact_id, row_key, sheet_name, row_number, row_kind,
+                cells_json, row_text, extraction_confidence, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                artifact["id"],
+                legacy_key,
+                "岗位表",
+                2,
+                "tabular",
+                json.dumps(row_payload["cells"], ensure_ascii=False),
+                row_payload["row_text"],
+                "high",
+                "2026-01-01T00:00:00Z",
+                "2026-01-01T00:00:00Z",
+            ),
+        )
+        legacy_row_id = int(connection.execute("SELECT last_insert_rowid()").fetchone()[0])
+    database.upsert_artifact_job_candidate(
+        {
+            "artifact_row_id": legacy_row_id,
+            "source_id": "official-test-source",
+            "official_page_url": artifact["parent_url"],
+            "title": "地质技术岗",
+            "employer": "测试能源集团",
+            "degree_levels": ["硕士"],
+            "major_tags": ["地质工程"],
+            "summary": "legacy verified",
+            "description": "legacy verified",
+            "field_evidence": {
+                "artifact_url": artifact["artifact_url"],
+                "专业范围": "地质工程",
+                "学历要求": "硕士",
+                "table_row": "岗位表!2",
+            },
+            "review_status": "official_content_verified",
+        }
+    )
+
+    rows = database.upsert_source_artifact_rows(int(artifact["id"]), [row_payload])
+
+    candidates = database.list_artifact_job_candidates(artifact_id=int(artifact["id"]))
+    verified = next(
+        candidate
+        for candidate in candidates
+        if candidate["review_status"] == "official_content_verified"
+    )
+    rejected = next(candidate for candidate in candidates if candidate["review_status"] == "rejected")
+    assert rows[0]["id"] == legacy_row_id
+    assert verified["artifact_row_id"] == legacy_row_id
+    assert rejected["artifact_row_id"] == canonical["id"]
 
 
 def test_reconcile_reads_eligible_position_after_first_500_rows(tmp_path: Path) -> None:
@@ -646,6 +771,27 @@ def test_attachment_candidate_requires_review_then_publishes_with_evidence(tmp_p
         "official_page",
         "attachment",
     }
+
+    # Reprocessing a published row must remain idempotent. Older databases can
+    # contain a null/invalid evidence JSON payload, so this exercises the
+    # compatibility decoder used by the upsert path.
+    reparsed = database.upsert_artifact_job_candidate(
+        {
+            "artifact_row_id": candidate["artifact_row_id"],
+            "source_id": candidate["source_id"],
+            "official_page_url": candidate["official_page_url"],
+            "title": candidate["title"],
+            "employer": candidate["employer"],
+            "degree_levels": candidate["degree_levels"],
+            "major_tags": candidate["major_tags"],
+            "summary": candidate["summary"],
+            "description": candidate["description"],
+            "field_evidence": {**candidate["field_evidence"], "职位代码": "G-001"},
+            "review_status": "needs_review",
+        }
+    )
+    assert reparsed["review_status"] == "published"
+    assert reparsed["published_job_id"] == payload["job_id"]
 
 
 def test_status_update_preserves_official_major_and_degree_text(tmp_path) -> None:
@@ -1102,6 +1248,95 @@ def test_ningxia_style_position_table_maps_required_major_without_city(tmp_path)
     assert "地质工程" in candidate["major_tags"]
     assert candidate["field_evidence"]["职位代码"] == "001"
     assert candidate["field_evidence"]["招聘人数"] == "1"
+
+
+def test_official_position_row_without_degree_or_location_enters_review_queue(tmp_path) -> None:
+    """Missing optional fields must not discard a row with official major evidence."""
+    body = _position_xlsx_bytes(
+        ["岗位代码", "招聘单位", "岗位名称", "招聘人数", "专业要求"],
+        ["M-001", "测试地质院", "地质技术岗", "1", "地质工程、地质学"],
+    )
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path,
+        session=FakeSession(body),
+        category="事业单位与人才引进",
+    )
+
+    result = processor.process(artifact["id"])
+
+    assert result.candidates_created == 1
+    candidate = database.list_artifact_job_candidates(artifact_id=artifact["id"])[0]
+    assert candidate["location"] is None
+    assert candidate["degree_levels"] == []
+    assert not candidate["field_evidence"].get("学历要求")
+
+
+def test_spaced_government_headers_are_recognized_and_restore_only_shape_false_negative(
+    tmp_path,
+) -> None:
+    """A real XLS label such as ``专 业`` must not be rejected before parsing."""
+    body = _position_xlsx_bytes(
+        ["岗位名称", "专 业", "学历", "学位", "岗位代码", "招聘单位", "拟聘人数"],
+        [
+            "专业技术岗位",
+            "地质学、地质资源与地质工程、地球物理学",
+            "研究生",
+            "博士",
+            "2026113",
+            "安徽工业经济职业技术学院",
+            "1",
+        ],
+    )
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path,
+        session=FakeSession(body),
+        category="事业单位与人才引进",
+    )
+
+    first = processor.process(artifact["id"])
+    candidate = database.list_artifact_job_candidates(artifact_id=artifact["id"])[0]
+    database.reject_unreviewed_artifact_candidates(
+        artifact["id"],
+        reason=(
+            "Phase 62 附件用途识别：未发现同时包含岗位/职位和专业字段的"
+            "职位表结构；原始附件与行证据已保留。"
+        ),
+    )
+
+    reconciled = processor.reconcile_candidates(artifact["id"])
+    restored = database.get_artifact_job_candidate(candidate["id"])
+
+    assert first.candidates_created == 1
+    assert reconciled.candidates_created == 1
+    assert restored["review_status"] == "needs_review"
+    assert restored["review_note"] == ""
+    assert restored["location"] is None
+    assert restored["degree_levels"] == ["博士"]
+    assert "地质资源与地质工程" in restored["major_tags"]
+
+
+def test_spaced_government_headers_do_not_restore_other_rejections(tmp_path) -> None:
+    body = _position_xlsx_bytes(
+        ["岗位名称", "专 业", "岗位代码", "招聘单位"],
+        ["地质技术岗", "地质工程", "A-001", "测试地质院"],
+    )
+    settings, database, artifact, processor = _registered_artifact(
+        tmp_path,
+        session=FakeSession(body),
+        category="事业单位与人才引进",
+    )
+    processor.process(artifact["id"])
+    candidate = database.list_artifact_job_candidates(artifact_id=artifact["id"])[0]
+    database.reject_unreviewed_artifact_candidates(
+        artifact["id"],
+        reason="人工复核：该岗位明确要求五年行业经验，不适合应届学生。",
+    )
+
+    processor.reconcile_candidates(artifact["id"])
+
+    retained = database.get_artifact_job_candidate(candidate["id"])
+    assert retained["review_status"] == "rejected"
+    assert "人工复核" in retained["review_note"]
 
 
 def test_reconcile_rejects_old_candidates_from_an_application_form(tmp_path) -> None:

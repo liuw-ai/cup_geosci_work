@@ -44,6 +44,8 @@ IguopinBrowserCaptureError = CmgbBrowserCaptureError
 
 _DETERMINISTIC_REJECTION_PREFIXES = (
     "CMGB detail is missing required fields:",
+    "CMGB detail and official search card are missing title",
+    "CMGB detail and official search card are missing employer",
     "国聘详情岗位名称与公开搜索卡片不一致",
     "国聘详情招聘单位与公开搜索卡片不一致",
 )
@@ -52,10 +54,10 @@ _DETERMINISTIC_REJECTION_PREFIXES = (
 def _is_deterministic_rejection(reason: Any) -> bool:
     """Return whether a detail was opened but cannot represent its card row.
 
-    Missing eligibility fields and card/detail identity conflicts are both
-    evidence-backed row decisions. They must be retained as rejected records,
-    not treated as pagination or access failures that invalidate the whole
-    complete scan.
+    Missing eligibility fields and irreconcilable card/detail identity fields
+    are evidence-backed row decisions. They must be retained as rejected
+    records, not treated as pagination or access failures that invalidate the
+    whole complete scan.
     """
 
     value = str(reason or "")

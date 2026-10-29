@@ -31,7 +31,10 @@ from job_hub.expansion_targets import (
 from job_hub.source_diversity import build_source_diversity_plan
 from job_hub.readiness_axes import build_dual_axis_readiness, is_domestic_job
 from job_hub.source_funnel import build_source_funnel
-from job_hub.profiles import classify_major_match
+from job_hub.profiles import (
+    PUBLIC_STUDENT_PUBLICATION_STATUSES,
+    classify_major_match,
+)
 
 
 HEALTHY_SOURCE_STATUSES = {"source_active"}
@@ -320,7 +323,23 @@ def build_coverage_report(
 
     return {
         "generated_at": utc_now(),
+        # Keep the business date beside every aggregate. Without this field,
+        # a historical R4 total and today's deadline-filtered read can look
+        # like two contradictory values even though they use different dates.
+        "as_of_date": public_as_of_date,
         "scope": "公开学生端已发布官方岗位，不含内部候选线索",
+        # Keep the canonical public read count explicit. ``open_jobs`` is
+        # retained for backward compatibility, but this named field is the
+        # metric that must be compared with the Phase 7.2 target.
+        "canonical_student_read_count": total_jobs,
+        "canonical_student_domestic_read_count": len(domestic_jobs),
+        "persisted_publication_row_count": sum(
+            1
+            for job in open_review_jobs
+            if _is_current_persisted_record(job, as_of_date=public_as_of_date)
+            if str(job.get("publication_status") or "")
+            in PUBLIC_STUDENT_PUBLICATION_STATUSES
+        ),
         "open_jobs": total_jobs,
         "domestic_open_jobs": len(domestic_jobs),
         "current_job_metrics": current_job_metrics,
@@ -954,6 +973,27 @@ def _current_job_metrics(
             "\u4e0d\u8ba1\u5165\u5f53\u524d\u6709\u6548\u5c97\u4f4d\u3002\u76f8\u8fd1\u4e13\u4e1a\u7edf\u8ba1\u4e0d\u4f1a\u628a\u4f01\u4e1a\u5c97\u4f4d\u5347\u7ea7\u4e3a\u7cbe\u786e\u5339\u914d\u3002"
         ),
     }
+
+
+def _is_current_persisted_record(job: dict[str, Any], *, as_of_date: str) -> bool:
+    """Apply the audit lifecycle/date window to a non-canonical row."""
+
+    if str(job.get("status") or "") not in {"open", "expired"}:
+        return False
+    target = date.fromisoformat(as_of_date)
+    deadline = str(job.get("deadline_date") or "").strip()
+    if deadline:
+        try:
+            return date.fromisoformat(deadline) >= target
+        except ValueError:
+            return False
+    expiry = str(job.get("no_deadline_expires_at") or "").strip()
+    if expiry:
+        try:
+            return date.fromisoformat(expiry[:10]) >= target
+        except ValueError:
+            return False
+    return True
 
 
 def _category_source_metric(

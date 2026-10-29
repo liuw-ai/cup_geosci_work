@@ -53,7 +53,9 @@ def discover_configured_government_artifacts(
         "configured_sources": len(sources),
         "notices_found": 0,
         "notices_scanned": 0,
+        "attachments_observed": 0,
         "attachments_registered": 0,
+        "attachments_reencountered": 0,
         "position_table_attachments": 0,
         "blocked": 0,
         "failed": 0,
@@ -74,10 +76,21 @@ def discover_configured_government_artifacts(
             "source_id": source_id,
             "notices_found": 0,
             "notices_scanned": 0,
+            "attachments_observed": 0,
             "attachments_registered": 0,
+            "attachments_reencountered": 0,
             "position_table_attachments": 0,
             "status": "ok",
             "detail": "",
+        }
+        # ``discover_from_page`` is intentionally idempotent: its upsert may
+        # return an existing artifact after refreshing notice metadata.  Keep
+        # that useful observation separate from a new private-ledger entry so
+        # a rescan of an expired table is never reported as new capacity.
+        known_artifact_urls = {
+            str(artifact.get("artifact_url") or "")
+            for artifact in database.iter_source_artifacts(source_id=source_id)
+            if str(artifact.get("artifact_url") or "")
         }
         try:
             notices = collector.discover_notice_pages(source)
@@ -129,15 +142,31 @@ def discover_configured_government_artifacts(
                 for artifact in artifacts
                 if str(artifact.get("artifact_kind") or "") == "position_table"
             )
+            observed = len(artifacts)
+            newly_registered = 0
+            for artifact in artifacts:
+                artifact_url = str(artifact.get("artifact_url") or "")
+                if artifact_url and artifact_url not in known_artifact_urls:
+                    newly_registered += 1
+                    known_artifact_urls.add(artifact_url)
+            reencountered = observed - newly_registered
+            result["attachments_observed"] = int(result["attachments_observed"]) + observed
             result["attachments_registered"] = int(
                 result["attachments_registered"]
-            ) + len(artifacts)
+            ) + newly_registered
+            result["attachments_reencountered"] = int(
+                result["attachments_reencountered"]
+            ) + reencountered
             result["position_table_attachments"] = int(
                 result["position_table_attachments"]
             ) + position_tables
+            summary["attachments_observed"] = int(summary["attachments_observed"]) + observed
             summary["attachments_registered"] = int(
                 summary["attachments_registered"]
-            ) + len(artifacts)
+            ) + newly_registered
+            summary["attachments_reencountered"] = int(
+                summary["attachments_reencountered"]
+            ) + reencountered
             summary["position_table_attachments"] = int(
                 summary["position_table_attachments"]
             ) + position_tables

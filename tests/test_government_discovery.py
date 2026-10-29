@@ -122,3 +122,28 @@ def test_discovery_reports_blocked_and_failed_sources_without_false_zero_result(
     assert by_source["available"]["status"] == "ok"
     assert by_source["blocked"]["status"] == "blocked"
     assert by_source["failed"]["status"] == "failed"
+
+
+def test_discovery_does_not_report_reencountered_artifact_as_new_registration(tmp_path) -> None:
+    settings = make_settings(tmp_path)
+    database = Database(settings.database_path)
+    database.initialize()
+    database.upsert_source(_discovery_source("enabled"))
+    collector = FakeNoticeCollector(
+        {"enabled": [("2026年公开招聘", "https://careers.example.edu.cn/notices/1")]}
+    )
+    processor = FakeAttachmentProcessor(database)
+
+    first = discover_configured_government_artifacts(
+        settings, database, collector=collector, processor=processor
+    )
+    second = discover_configured_government_artifacts(
+        settings, database, collector=collector, processor=processor
+    )
+
+    assert first["attachments_observed"] == 1
+    assert first["attachments_registered"] == 1
+    assert first["attachments_reencountered"] == 0
+    assert second["attachments_observed"] == 1
+    assert second["attachments_registered"] == 0
+    assert second["attachments_reencountered"] == 1

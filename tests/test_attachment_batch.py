@@ -3,7 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
-from job_hub.attachments import AttachmentProcessingError, AttachmentResult, process_pending_attachments
+from job_hub.attachments import (
+    PARSER_VERSION,
+    AttachmentProcessingError,
+    AttachmentResult,
+    process_pending_attachments,
+)
 
 
 @dataclass
@@ -143,7 +148,7 @@ def test_batch_reparses_only_extracted_artifacts_with_stale_parser() -> None:
                 "id": 5,
                 "source_id": "source-e",
                 "extraction_status": "extracted",
-                "parser_version": "attachments-v5",
+                "parser_version": PARSER_VERSION,
             },
         ]
     )

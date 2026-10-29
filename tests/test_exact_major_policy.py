@@ -21,6 +21,7 @@ def _job(*, category: str, major: str, degree: str = "硕士研究生") -> dict[
 def test_enterprise_requires_one_of_four_named_graduation_majors() -> None:
     for major, degree in (
         ("资源勘查工程", "本科"),
+        ("地质学", "本科"),
         ("地质学", "硕士研究生"),
         ("地质工程", "硕士研究生"),
         ("地质资源与地质工程", "硕士研究生"),
@@ -36,6 +37,59 @@ def test_enterprise_requires_one_of_four_named_graduation_majors() -> None:
     )
     assert decision.status == "pending_evidence"
     assert decision.is_public is False
+
+
+def test_exact_major_without_degree_or_location_is_public_with_review_label() -> None:
+    candidate = _job(category="油气上游业主与研究机构", major="资源勘查工程", degree="")
+    candidate["field_evidence"].pop("工作地点")
+    candidate["location"] = ""
+    candidate["country_or_region"] = None
+    decision = evaluate_student_publication(candidate)
+
+    assert decision.status == "student_eligible"
+    assert decision.major_match_mode == "incomplete_but_basic"
+    assert decision.label == "官方信息不完整"
+    assert "学历" in decision.reason
+    assert "工作地点" in decision.reason
+
+
+def test_public_unrestricted_role_without_degree_is_public_with_review_label() -> None:
+    decision = evaluate_student_publication(
+        {
+            "title": "自然资源管理岗",
+            "category": "公务员与选调",
+            "field_evidence": {
+                "evidence_scope": "official_html_table_row",
+                "岗位": "自然资源管理岗",
+                "专业范围": "不限专业",
+            },
+        }
+    )
+
+    assert decision.status == "student_eligible"
+    assert decision.major_match_mode == "incomplete_but_basic"
+    assert decision.matched_profile_ids
+    assert "学历" in decision.reason
+
+
+def test_pure_petroleum_engineering_and_missing_major_evidence_remain_private() -> None:
+    petroleum = evaluate_student_publication(
+        _job(category="油气上游业主与研究机构", major="石油工程")
+    )
+    missing_major = evaluate_student_publication(
+        {
+            "title": "地质技术岗",
+            "category": "油气上游业主与研究机构",
+            "field_evidence": {
+                "evidence_scope": "official_detail_block",
+                "岗位": "地质技术岗",
+            },
+        }
+    )
+
+    assert petroleum.status == "out_of_scope"
+    assert missing_major.status == "pending_evidence"
+    assert missing_major.is_public is False
 
 
 def test_enterprise_broad_category_and_catalogue_code_are_not_exact_major_matches() -> None:
@@ -98,8 +152,9 @@ def test_split_location_must_match_the_published_variant() -> None:
         "工作地点": "福州-闽侯县，塔城-托里县，山南",
     })
     decision = evaluate_student_publication(candidate)
-    assert decision.status == "pending_evidence"
-    assert decision.label == "待核拆分地点"
+    assert decision.status == "student_eligible"
+    assert decision.label == "官方信息不完整"
+    assert "地点拆分记录" in decision.reason
 
     candidate["location"] = "塔城-托里县"
     assert evaluate_student_publication(candidate).status == "student_eligible"
@@ -113,7 +168,7 @@ def test_enterprise_category_wording_is_not_a_named_major() -> None:
 
 
 def test_enterprise_major_match_rejects_longer_compound_names() -> None:
-    for major in ("地质工程技术", "地质学类", "资源勘查工程技术"):
+    for major in ("地质工程技术", "地质学类", "地质学技术", "资源勘查工程技术"):
         decision = evaluate_student_publication(
             _job(category="油气上游业主与研究机构", major=major)
         )
@@ -151,7 +206,10 @@ def test_enterprise_major_match_accepts_named_major_after_list_connector() -> No
         )
         assert decision.status == "student_eligible", major
         assert decision.major_match_mode == "exact_four_names"
-        assert decision.matched_profile_ids == ("undergraduate-resource-exploration",)
+        expected = {"undergraduate-resource-exploration"}
+        if "地质学" in major:
+            expected.add("undergraduate-geology")
+        assert set(decision.matched_profile_ids) == expected
 
 
 def test_enterprise_major_match_rejects_target_embedded_in_longer_prefix() -> None:

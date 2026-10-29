@@ -94,6 +94,7 @@ from job_hub.discovery_scan import run_discovery_scan
 from job_hub.domain_probe import probe_public_domain
 from job_hub.expansion_targets import build_expansion_target_report, load_effective_job_target_plan
 from job_hub.pending_evidence_audit import build_pending_evidence_audit
+from job_hub.job_blocker_audit import build_job_blocker_audit
 from job_hub.unrestricted_audit import build_unrestricted_role_audit
 from job_hub.recruitment_batches import (
     build_recruitment_batch_report,
@@ -911,6 +912,30 @@ def main() -> None:
         "--output",
         type=Path,
         help="可选：将审计账本写入 JSON 文件",
+    )
+    blocker_audit_parser = subparsers.add_parser(
+        "job-blocker-audit",
+        help="只读解释岗位为何未进入学生端，并输出真实样例",
+    )
+    blocker_audit_parser.add_argument(
+        "--as-of",
+        help="业务日期（默认 Asia/Shanghai 今日）",
+    )
+    blocker_audit_parser.add_argument(
+        "--database",
+        type=Path,
+        help="可选：指定 SQLite 快照；使用真正只读连接，不会初始化或迁移数据库",
+    )
+    blocker_audit_parser.add_argument(
+        "--sample-limit",
+        type=int,
+        default=5,
+        help="每类阻断最多保留多少条样例（默认 5）",
+    )
+    blocker_audit_parser.add_argument(
+        "--output",
+        type=Path,
+        help="可选：将完整只读审计 JSON 写入指定文件",
     )
     unrestricted_audit_parser = subparsers.add_parser(
         "unrestricted-role-audit",
@@ -2186,6 +2211,35 @@ def main() -> None:
             )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
+    if args.command == "job-blocker-audit":
+        settings = Settings.from_env()
+        database = Database(args.database or settings.database_path, read_only=True)
+        jobs, _ = database.list_jobs(
+            page_size=None,
+            only_open=False,
+            student_visible=False,
+        )
+        canonical_as_of = args.as_of or coverage_snapshot_date(settings)
+        _visible_jobs, canonical_visible_count = database.list_jobs(
+            page_size=None,
+            only_open=True,
+            student_visible=True,
+            as_of_date=canonical_as_of,
+        )
+        result = build_job_blocker_audit(
+            jobs,
+            as_of=canonical_as_of,
+            sample_limit=args.sample_limit,
+            canonical_student_visible_count=canonical_visible_count,
+        )
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(result, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
     if args.command == "unrestricted-role-audit":
         jobs, _ = database.list_jobs(
             page_size=None,
@@ -2728,7 +2782,10 @@ def main() -> None:
             as_of_date=today,
         )
         discovery = discovery_funnel(
-            leads, load_discovery_source_registry(), jobs=jobs
+            leads,
+            load_discovery_source_registry(),
+            jobs=jobs,
+            third_party_batches=database.list_third_party_batches(limit=1000),
         )
         source_records = database.list_sources()
         source_funnel = build_source_funnel(
@@ -3138,7 +3195,12 @@ def main() -> None:
         )
         print(
             json.dumps(
-                discovery_funnel(leads, registry, jobs=jobs),
+                discovery_funnel(
+                    leads,
+                    registry,
+                    jobs=jobs,
+                    third_party_batches=database.list_third_party_batches(limit=1000),
+                ),
                 ensure_ascii=False,
                 indent=2,
             )

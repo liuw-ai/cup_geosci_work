@@ -43,8 +43,8 @@ def test_cgs_rows_pass_only_the_broad_geoscience_layer() -> None:
         )
         decisions.append(decision)
     assert len(decisions) == 4
-    assert all(item.status == "student_eligible" for item in decisions)
-    assert all(item.major_match_mode == "broad_geoscience" for item in decisions)
+    assert all(item.status == "pending_evidence" for item in decisions)
+    assert all("博士后" in item.reason for item in decisions)
 
 
 def test_cgs_trial_evidence_hash_matches_retained_attachment() -> None:

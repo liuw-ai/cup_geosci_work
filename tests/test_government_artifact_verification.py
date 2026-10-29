@@ -12,7 +12,14 @@ from job_hub.government_artifact_verification import (
 from conftest import make_settings, source
 
 
-def _setup(tmp_path: Path, *, rolling: bool = False, location: str | None = "测试市"):
+def _setup(
+    tmp_path: Path,
+    *,
+    rolling: bool = False,
+    location: str | None = "测试市",
+    degree: str | None = "硕士研究生",
+    major: str = "地质工程",
+):
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
     database.initialize()
@@ -46,8 +53,8 @@ def _setup(tmp_path: Path, *, rolling: bool = False, location: str | None = "测
                     "岗位代码": "A-001",
                     "岗位名称": "地质工程技术岗",
                     "招聘单位": "测试能源集团",
-                    "专业": "地质工程",
-                    "学历": "硕士研究生",
+                    "专业": major,
+                    "学历": degree or "",
                     "工作地点": location or "",
                     "招聘人数": "1",
                     "报名截止": "2099-12-31",
@@ -65,16 +72,16 @@ def _setup(tmp_path: Path, *, rolling: bool = False, location: str | None = "测
             "employer": "测试能源集团",
             "location": location,
             "deadline_date": "" if rolling else "2099-12-31",
-            "degree_levels": ["硕士"],
-            "major_tags": ["地质工程"],
+            "degree_levels": ["硕士"] if degree else [],
+            "major_tags": [] if major == "不限专业" else [major],
             "summary": "官方岗位表第2行",
             "description": "官方岗位表第2行",
             "extraction_confidence": "high",
             "field_evidence": {
                 "artifact_url": artifact_url,
                 "职位代码": "A-001",
-                "专业范围": "地质工程",
-                "学历要求": "硕士研究生",
+                "专业范围": major,
+                "学历要求": degree or "",
                 "工作地点": location or "",
                 "招聘人数": "1",
                 "table_row": "岗位表!2",
@@ -90,7 +97,7 @@ def _setup(tmp_path: Path, *, rolling: bool = False, location: str | None = "测
         "employer": "测试能源集团",
         "position_code": "A-001",
         "title": "地质工程技术岗",
-        "major_requirement": "地质工程",
+        "major_requirement": major,
         "degree_requirement": "硕士研究生",
         "location": location or "测试市",
         "headcount": 1,
@@ -187,6 +194,88 @@ def test_out_of_scope_row_is_audited_without_blocking_eligible_rows(tmp_path: Pa
     assert item["blocked_records"][0]["publication_status"] == "out_of_scope"
     assert database.get_artifact_job_candidate(int(candidate["id"]))["review_status"] == (
         "official_content_verified"
+    )
+
+
+def test_field_conflict_in_one_row_does_not_block_another_exact_row(tmp_path: Path) -> None:
+    database, declared, registry, candidate = _setup(tmp_path, location="北京市")
+    artifact = database.get_source_artifact(int(candidate["artifact_id"]))
+    assert artifact is not None
+    conflict_row = database.upsert_source_artifact_rows(
+        int(artifact["id"]),
+        [
+            {
+                "sheet_name": "岗位表",
+                "row_number": 3,
+                "cells": {
+                    "岗位代码": "A-002",
+                    "岗位名称": "地质工程技术岗",
+                    "招聘单位": "测试能源集团",
+                    "专业": "地质工程",
+                    "学历": "硕士研究生",
+                    "工作地点": "北京市",
+                    "招聘人数": "1",
+                    "报名截止": "2099-12-31",
+                },
+                "row_text": "岗位代码：A-002；专业：地质工程；学历：硕士研究生",
+            }
+        ],
+    )[0]
+    conflict_candidate = database.upsert_artifact_job_candidate(
+        {
+            "artifact_row_id": conflict_row["id"],
+            "source_id": "official-test-source",
+            "official_page_url": artifact["parent_url"],
+            "title": "地质工程技术岗",
+            "employer": "测试能源集团",
+            "location": "北京市",
+            "deadline_date": "2099-12-31",
+            "degree_levels": ["硕士"],
+            "major_tags": ["地质工程"],
+            "summary": "官方岗位表第3行",
+            "description": "官方岗位表第3行",
+            "extraction_confidence": "high",
+            "field_evidence": {
+                "artifact_url": artifact["artifact_url"],
+                "职位代码": "A-002",
+                "专业范围": "地质工程",
+                "学历要求": "硕士研究生",
+                "工作地点": "北京市",
+                "招聘人数": "1",
+                "table_row": "岗位表!3",
+            },
+            "review_status": "needs_review",
+        }
+    )
+    registry["records"].append(
+        registry["records"][0]
+        | {
+            "id": "test-record-field-conflict",
+            "position_code": "A-002",
+            "major_requirement": "地质学",
+            "evidence_locator": "岗位表!3",
+        }
+    )
+
+    report = verify_government_artifacts(
+        database,
+        {"artifacts": [declared]},
+        registry,
+        today="2026-10-07",
+    )
+
+    assert report["row_evidence_verified"] == 1, report["items"]
+    assert report["publication_ready"] == 1
+    assert report["candidates_promoted"] == 1
+    item = report["items"][0]
+    assert item["matched_record_ids"] == ["test-record"]
+    assert item["blocked_record_ids"] == ["test-record-field-conflict"]
+    assert item["blocked_records"][0]["reason"].startswith("record_field_mismatch:")
+    assert database.get_artifact_job_candidate(int(candidate["id"]))["review_status"] == (
+        "official_content_verified"
+    )
+    assert database.get_artifact_job_candidate(int(conflict_candidate["id"]))["review_status"] == (
+        "needs_review"
     )
 
 
@@ -507,7 +596,7 @@ def test_self_contained_row_does_not_require_stale_registry_field_equality(tmp_p
     )
 
 
-def test_missing_location_fails_closed_without_promoting_candidate(tmp_path: Path) -> None:
+def test_missing_location_is_verified_and_left_for_student_warning(tmp_path: Path) -> None:
     database, declared, registry, candidate = _setup(tmp_path, location=None)
 
     report = verify_government_artifacts(
@@ -517,10 +606,55 @@ def test_missing_location_fails_closed_without_promoting_candidate(tmp_path: Pat
         today="2026-10-07",
     )
 
-    assert report["row_evidence_verified"] == 0
-    assert report["publication_ready"] == 0
-    assert any("location" in reason for reason in report["items"][0]["blocked_reasons"])
-    assert database.get_artifact_job_candidate(int(candidate["id"]))["review_status"] == "needs_review"
+    assert report["row_evidence_verified"] == 1, report["items"]
+    assert report["publication_ready"] == 1
+    assert database.get_artifact_job_candidate(int(candidate["id"]))["review_status"] == (
+        "official_content_verified"
+    )
+
+
+def test_missing_degree_is_verified_and_left_for_student_warning(tmp_path: Path) -> None:
+    database, declared, registry, candidate = _setup(tmp_path, degree=None)
+
+    report = verify_government_artifacts(
+        database,
+        {"artifacts": [declared]},
+        registry,
+        today="2026-10-07",
+    )
+
+    assert report["row_evidence_verified"] == 1, report["items"]
+    assert report["publication_ready"] == 1
+    assert database.get_artifact_job_candidate(int(candidate["id"]))["review_status"] == (
+        "official_content_verified"
+    )
+
+
+def test_public_unrestricted_major_without_degree_or_location_is_verified(tmp_path: Path) -> None:
+    database, declared, registry, candidate = _setup(
+        tmp_path,
+        degree=None,
+        location=None,
+        major="不限专业",
+    )
+    public_source = source()
+    public_source["category"] = "公务员与选调"
+    database.upsert_source(public_source)
+    declared["evidence_mode"] = "row_self_contained"
+    registry["records"][0]["match_status"] = "unrestricted_match"
+
+    report = verify_government_artifacts(
+        database,
+        {"artifacts": [declared]},
+        registry,
+        today="2026-10-07",
+    )
+
+    assert report["row_evidence_verified"] == 1, report["items"]
+    assert report["publication_ready"] == 1
+    assert database.get_artifact_job_candidate(int(candidate["id"]))["review_status"] == (
+        "official_content_verified"
+    )
 
 
 def test_declared_registry_province_location_fallback_is_scoped_and_audited(tmp_path: Path) -> None:

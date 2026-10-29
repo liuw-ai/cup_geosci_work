@@ -264,8 +264,17 @@ def derive_publication_layer(
             "public_named_or_code",
             "public_unrestricted_rule",
             "broad_geoscience",
+            "social_broad_geoscience",
+            "social_unrestricted_rule",
+            "extended_unrestricted_rule",
         }:
             return "broad_geoscience_match"
+        if mode in {
+            "social_exact_four_names",
+            "social_incomplete_but_basic",
+            "extended_role_context_pending",
+        }:
+            return "incomplete_but_basic_match"
         return "exact_match"
     if status == "unrestricted_eligible":
         return "broad_geoscience_match"

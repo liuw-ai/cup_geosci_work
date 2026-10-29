@@ -317,6 +317,7 @@ def test_public_pages_and_verified_import_api(tmp_path) -> None:
     assert coverage_payload["domestic_open_jobs"] == 2
     assert coverage_payload["dual_axis"]["coverage_axis"]["domestic_effective_jobs"] == 2
     assert coverage_payload["open_jobs"] == client.get("/api/jobs").get_json()["total"]
+    assert coverage_payload["as_of_date"] == client.get("/api/jobs").get_json()["as_of_date"]
     assert "rows" not in coverage_payload["source_funnel"]
     assert client.get("/api/admin/source-funnel").status_code == 403
     funnel_payload = client.get(
@@ -462,11 +463,11 @@ def test_public_api_layer_filter_is_forwarded_without_profile(tmp_path) -> None:
     broad_id = save("宽泛岗位", "https://careers.example.edu.cn/jobs/broad")
     with database.transaction() as connection:
         connection.execute(
-            "UPDATE jobs SET publication_layer = 'exact_match' WHERE id = ?",
+            "UPDATE jobs SET publication_status = 'student_eligible', publication_layer = 'exact_match' WHERE id = ?",
             (exact_id,),
         )
         connection.execute(
-            "UPDATE jobs SET publication_layer = 'broad_geoscience_match' WHERE id = ?",
+            "UPDATE jobs SET publication_status = 'student_eligible', publication_layer = 'broad_geoscience_match' WHERE id = ?",
             (broad_id,),
         )
 
@@ -664,6 +665,13 @@ def test_government_position_activation_tasks_are_admin_only(tmp_path) -> None:
     registry_payload["source_opening_at"] = {
         "cea-2027-recruitment": "2099-01-01T00:00:00+08:00"
     }
+    # Keep the fixture's row-level deadline in the same future window.  The
+    # production rule must continue to expire rows whose official deadline has
+    # passed; changing only the source opening date would make this test depend
+    # on the calendar.
+    for record in registry_payload.get("position_batches", []):
+        if record.get("source_id") == "cea-2027-recruitment":
+            record["deadline_date"] = "2099-12-31"
     registry_path = tmp_path / "government_position_registry.json"
     registry_path.write_text(
         json.dumps(registry_payload, ensure_ascii=False), encoding="utf-8"

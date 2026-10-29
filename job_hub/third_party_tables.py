@@ -138,6 +138,7 @@ def normalize_third_party_table(
     official_notice_url: str = "",
     official_table_url: str = "",
     official_application_url: str = "",
+    official_source_id: str = "",
     batch_id: str,
     position_type: str,
     province: str,
@@ -172,6 +173,7 @@ def normalize_third_party_table(
         "official_notice_url": official_notice_url or None,
         "official_table_url": official_table_url or None,
         "official_application_url": official_application_url or None,
+        "official_source_id": official_source_id or None,
         "publication_status": "candidate_only",
         # This is evidence supplied for later review.  It is deliberately
         # never copied from the third-party table URL.
@@ -300,6 +302,7 @@ def _normalize_table_bytes(
     official_notice_url: str = "",
     official_table_url: str = "",
     official_application_url: str = "",
+    official_source_id: str = "",
     discovery_page_url: str = "",
     deadline_date: str = "",
     location: str = "",
@@ -323,6 +326,7 @@ def _normalize_table_bytes(
         official_notice_url=official_notice_url,
         official_table_url=official_table_url,
         official_application_url=official_application_url,
+        official_source_id=official_source_id,
         batch_id=batch_id,
         position_type=position_type,
         province=province,
@@ -358,6 +362,7 @@ def _normalize_table_bytes(
         official_notice_url=official_notice_url,
         official_table_url=official_table_url,
         official_application_url=official_application_url,
+        official_source_id=official_source_id,
         discovery_page_url=discovery_page_url,
     )
     return parsed
@@ -371,6 +376,7 @@ def table_candidates(
     official_notice_url: str = "",
     official_table_url: str = "",
     official_application_url: str = "",
+    official_source_id: str = "",
     discovery_page_url: str = "",
 ) -> list[dict[str, Any]]:
     """Convert normalized rows into private, auditable candidate-lead records."""
@@ -406,6 +412,10 @@ def table_candidates(
                 "official_url": official_notice_url or None,
                 "official_application_url": official_application_url or None,
                 "official_table_url": official_table_url or None,
+                # This is only a source binding hint.  It does not verify the
+                # row or grant publication permission; the lead still needs
+                # official-content verification and the student gate.
+                "official_source_id": official_source_id or None,
                 "third_party_table_url": third_party_table_url,
                 "trust_grade": "B",
                 "verification_note": "第三方职位表批量候选；必须回溯官方公告/岗位表并完成人工核验后才能发布。",
@@ -420,6 +430,7 @@ def table_candidates(
                     "official_notice_url": official_notice_url or None,
                     "official_table_url": official_table_url or None,
                     "application_url": official_application_url or None,
+                    "official_source_id": official_source_id or None,
                     "table_evidence": evidence,
                 },
             }
@@ -541,6 +552,7 @@ def fetch_and_normalize_third_party_table(
     official_notice_url: str = "",
     official_table_url: str = "",
     official_application_url: str = "",
+    official_source_id: str = "",
     discovery_page_url: str = "",
     deadline_date: str = "",
     location: str = "",
@@ -571,6 +583,7 @@ def fetch_and_normalize_third_party_table(
         official_notice_url=official_notice_url,
         official_table_url=official_table_url,
         official_application_url=official_application_url,
+        official_source_id=official_source_id,
         discovery_page_url=discovery_page_url,
         deadline_date=deadline_date,
         location=location,
@@ -590,6 +603,7 @@ def ingest_third_party_table_file(
     official_notice_url: str = "",
     official_table_url: str = "",
     official_application_url: str = "",
+    official_source_id: str = "",
     discovery_page_url: str = "",
     deadline_date: str = "",
     location: str = "",
@@ -622,6 +636,7 @@ def ingest_third_party_table_file(
         official_notice_url=official_notice_url,
         official_table_url=official_table_url,
         official_application_url=official_application_url,
+        official_source_id=official_source_id,
         discovery_page_url=discovery_page_url,
         deadline_date=deadline_date,
         location=location,

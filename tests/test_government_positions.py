@@ -30,10 +30,10 @@ def test_official_government_registry_loads_and_reports_verified_rows() -> None:
     assert report["records"] == 157
     # Rolling rows with official evidence remain visible. Current-availability
     # rechecks are health signals, not a student-visibility gate.
-    assert report["verified_open_records"] == 50
+    assert report["verified_open_records"] == 52
     assert report["verified_upcoming_records"] == 91
-    assert report["explicit_student_matches"] == 50
-    assert report["source_failures_or_pending"] == 5
+    assert report["explicit_student_matches"] == 52
+    assert report["source_failures_or_pending"] == 4
     assert report["availability_confirmation_required_sources"] == [
         "gansu-geology-bureau",
         "hubei-natural-resources",
@@ -129,6 +129,50 @@ def test_invalid_row_opening_date_is_rejected_during_registry_validation() -> No
 
     with pytest.raises(GovernmentPositionContractError, match="opening_date"):
         validate_position_record(record)
+
+
+def test_verified_government_row_without_degree_or_location_is_retained(tmp_path) -> None:
+    record = {
+        "id": "incomplete-official-row",
+        "source_id": "official-test-source",
+        "position_type": "public_institution",
+        "province": "测试省",
+        "employer": "测试地质调查院",
+        "position_code": "A-002",
+        "title": "地质技术岗",
+        "major_requirement": "地质学、地质工程",
+        "degree_requirement": "",
+        "location": "",
+        "headcount": 1,
+        "deadline_date": "2026-10-31",
+        "deadline_policy": "fixed_date",
+        "official_notice_url": "https://example.gov.cn/notice.html",
+        "official_attachment_url": "https://example.gov.cn/table.xlsx",
+        "evidence_locator": "岗位表!2",
+        "record_status": "verified_open",
+        "match_status": "explicit_match",
+    }
+
+    normalized = validate_position_record(record)
+    decision = evaluate_student_publication(
+        {
+            "source_id": normalized["source_id"],
+            "category": "事业单位与人才引进",
+            "title": normalized["title"],
+            "location": normalized["location"],
+            "field_evidence": {
+                "evidence_scope": "official_attachment_row",
+                "岗位": normalized["title"],
+                "专业范围": normalized["major_requirement"],
+                "学历要求": normalized["degree_requirement"],
+            },
+        }
+    )
+
+    assert normalized["degree_requirement"] == ""
+    assert normalized["location"] == ""
+    assert decision.status == "student_eligible"
+    assert decision.label == "官方信息不完整"
 
 
 def test_opening_at_requires_timezone_and_matching_date() -> None:
@@ -367,9 +411,10 @@ def test_stale_registry_report_keeps_rows_in_current_open_count() -> None:
     )
 
     assert report["registry_freshness"] == "stale"
-    assert report["verified_open_records"] == 50
-    assert report["explicit_student_matches"] == 50
+    assert report["verified_open_records"] == 52
+    assert report["explicit_student_matches"] == 52
     assert report["pending_evidence_sources"] == [
+        "anhui-geology-bureau",
         "cgs-notices",
         "gansu-geology-bureau",
         "hubei-natural-resources",
@@ -671,7 +716,7 @@ def test_hunan_closed_batch_is_not_publishable() -> None:
     assert all(item["deadline_date"] == "2026-09-16" for item in rows)
 
 
-def test_verified_open_row_requires_location_and_deadline() -> None:
+def test_verified_open_row_without_location_is_retained_for_warning_layer() -> None:
     record = {
         "id": "test-1",
         "source_id": "test-source",
@@ -692,8 +737,7 @@ def test_verified_open_row_requires_location_and_deadline() -> None:
         "record_status": "verified_open",
         "match_status": "explicit_match",
     }
-    with pytest.raises(GovernmentPositionContractError, match="location"):
-        validate_position_record(record)
+    assert validate_position_record(record)["location"] == ""
 
 
 def test_postdoctoral_is_a_distinct_government_source_type() -> None:

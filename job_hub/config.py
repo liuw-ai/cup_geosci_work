@@ -12,6 +12,22 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 _DOTENV_KEY = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
+def _project_path(value: str | Path, *, default: Path | None = None) -> Path:
+    """Resolve a configured relative path from the checkout, not the cwd.
+
+    CLI, WSGI and worker entry points are often started from different
+    directories after a machine move.  Relative paths in ``.env`` must still
+    identify the same database and source manifests.  Absolute paths remain
+    untouched so test sandboxes and explicitly mounted production paths keep
+    their existing behavior.
+    """
+
+    candidate = Path(value)
+    if candidate.is_absolute():
+        return candidate
+    return (default or PROJECT_ROOT) / candidate
+
+
 def load_project_env(path: Path | str | None = None) -> tuple[str, ...]:
     """Load simple project-local ``.env`` values without overriding real env.
 
@@ -181,12 +197,20 @@ class Settings:
     release_git_sha: str = "unknown"
     release_image_sha: str = "unknown"
     release_built_at: str = "unknown"
+    # Phase 7.2 can expose clearly labelled social-hire and unrestricted-role
+    # opportunities after the core four-major gate has passed. Tests and
+    # conservative local settings keep this disabled unless explicitly set.
+    include_extended_opportunities: bool = False
 
     @classmethod
     def from_env(cls) -> "Settings":
-        data_dir = Path(os.getenv("APP_DATA_DIR", PROJECT_ROOT / "runtime"))
-        database_path = Path(
-            os.getenv("APP_DATABASE_PATH", data_dir / "job_hub.sqlite3")
+        raw_data_dir = os.getenv("APP_DATA_DIR")
+        data_dir = _project_path(raw_data_dir) if raw_data_dir else PROJECT_ROOT / "runtime"
+        raw_database_path = os.getenv("APP_DATABASE_PATH")
+        database_path = (
+            _project_path(raw_database_path)
+            if raw_database_path
+            else data_dir / "job_hub.sqlite3"
         )
         recipients = tuple(
             item.strip()
@@ -204,11 +228,8 @@ class Settings:
             timezone=os.getenv("APP_TIMEZONE", "Asia/Shanghai"),
             data_dir=data_dir,
             database_path=database_path,
-            source_registry_path=Path(
-                os.getenv(
-                    "SOURCE_REGISTRY_PATH",
-                    PROJECT_ROOT / "data" / "sources.json",
-                )
+            source_registry_path=_project_path(
+                os.getenv("SOURCE_REGISTRY_PATH", PROJECT_ROOT / "data" / "sources.json")
             ),
             daily_publish_time=os.getenv("DAILY_PUBLISH_TIME", "20:00"),
             source_sync_interval_minutes=_env_int(
@@ -241,13 +262,13 @@ class Settings:
             artifact_storage_dir=Path(
                 os.getenv("ATTACHMENT_STORAGE_DIR", data_dir / "official-attachments")
             ),
-            government_artifact_manifest_path=Path(
+            government_artifact_manifest_path=_project_path(
                 os.getenv(
                     "GOVERNMENT_ARTIFACT_MANIFEST_PATH",
                     PROJECT_ROOT / "data" / "government_artifact_manifest.json",
                 )
             ),
-            government_position_registry_path=Path(
+            government_position_registry_path=_project_path(
                 os.getenv(
                     "GOVERNMENT_POSITION_REGISTRY_PATH",
                     PROJECT_ROOT / "data" / "government_position_registry.json",
@@ -312,6 +333,9 @@ class Settings:
                 5, _env_int("WORKER_FAILURE_RETRY_SECONDS", 60)
             ),
             worker_automation_enabled=_env_bool("WORKER_AUTOMATION_ENABLED", False),
+            include_extended_opportunities=_env_bool(
+                "INCLUDE_EXTENDED_OPPORTUNITIES", True
+            ),
             domestic_entry_health_interval_minutes=max(
                 30, _env_int("DOMESTIC_ENTRY_HEALTH_INTERVAL_MINUTES", 360)
             ),

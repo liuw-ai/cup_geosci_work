@@ -116,10 +116,14 @@ def test_domestic_expansion_queue_is_explicit_and_non_public() -> None:
     minmetals_row = next(
         item for item in queue["records"] if item["id"] == "minmetals-campus-entry"
     )
-    assert minmetals_row["status"] == "official_identity_only"
-    assert minmetals_row["source_id"] is None
+    assert minmetals_row["status"] == "official_job_sample_verified"
+    assert minmetals_row["source_id"] == "iguopin-general-geoscience-browser"
+    assert minmetals_row["sample_job_ids"] == ["iguopin-general-220382133716255745"]
+    assert minmetals_row["sample_announcement_url"] == (
+        "https://www.iguopin.com/job/detail?id=220382133716255745"
+    )
     assert "404" in minmetals_row["field_validation"]
-    assert "不能推断" in minmetals_row["field_validation"]
+    assert "地质技术管理" in minmetals_row["field_validation"]
 
     limited = domestic_expansion_rows(queue, status="access_limited")
     assert limited

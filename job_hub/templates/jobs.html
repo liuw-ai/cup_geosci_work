@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}{% if official_pending %}官方待核岗位{% else %}全部在招岗位{% endif %} | {{ site_name }}{% endblock %}
+{% block title %}{% if official_pending %}官方待核岗位{% elif student_discovery %}学生岗位发现层{% else %}全部在招岗位{% endif %} | {{ site_name }}{% endblock %}
 
 {% block content %}
   <section class="page-heading">
     <div class="shell">
-      <p class="eyebrow">{% if official_pending %}官方来源核验队列{% else %}公开岗位库{% endif %}</p>
-      <h1>{% if official_pending %}官方待核岗位{% else %}全部在招岗位{% endif %}</h1>
-      <p class="lede">{% if official_pending %}这些记录来自已登记的官方来源，但岗位级专业、学历、地点或截止日期证据尚未完整。它们只用于定位缺口，不计入当前可投递岗位。{% else %}按地球科学学院培养方向、就业类别和截止时间查找公开官方岗位。{% endif %}</p>
+      <p class="eyebrow">{% if official_pending %}官方来源核验队列{% elif student_discovery %}官方信息发现层{% else %}公开岗位库{% endif %}</p>
+      <h1>{% if official_pending %}官方待核岗位{% elif student_discovery %}学生岗位发现层{% else %}全部在招岗位{% endif %}</h1>
+      <p class="lede">{% if official_pending %}这些记录来自已登记的官方来源，但岗位级专业、学历、地点或截止日期证据尚未完整。它们只用于定位缺口，不计入当前可投递岗位。{% elif student_discovery %}这里汇总当前仍可核验的官方岗位，包括严格匹配、官方信息不完整和明确标注的拓展机会。学历、地点或岗位级条件缺失时不会被隐藏，但必须打开原公告自行核验。{% else %}按地球科学学院培养方向、就业类别和截止时间查找公开官方岗位。{% endif %}</p>
     </div>
   </section>
 
   <section class="shell content-section jobs-layout">
     <form class="filters" method="get" action="{{ url_for('jobs') }}">
-      {% if official_pending %}<input type="hidden" name="scope" value="official_pending">{% endif %}
+      {% if official_pending %}<input type="hidden" name="scope" value="official_pending">{% elif student_discovery %}<input type="hidden" name="scope" value="student_discovery">{% endif %}
       <div class="field">
         <label for="profile">我的学历与专业</label>
         <select id="profile" name="profile">
@@ -86,14 +86,18 @@
       {% if official_pending %}
         <p>当前找到 <strong>{{ total }}</strong> 条官方待核记录</p>
         <p class="muted">这些记录不计入当前可投递数量，也不会替代学生端的专业精确匹配结果；请打开原始公告补齐缺失字段。</p>
+      {% elif student_discovery %}
+        <p>当前找到 <strong>{{ total }}</strong> 条官方岗位信息</p>
+        <p class="muted">严格可报、官方信息不完整和拓展机会均已分层；带“需核验”的记录不等同于资格确认。</p>
       {% elif profile %}
         <p><strong>{{ profile.label }}</strong>：当前找到 <strong>{{ total }}</strong> 条可优先查看的岗位</p>
         <p class="muted">“明确匹配”同时具备专业和学历证据；其余岗位请以原始公告为准。</p>
       {% else %}
         <p>当前找到 <strong>{{ total }}</strong> 条可报的官方岗位</p>
       {% endif %}
+      <p class="muted">统计截至 {{ as_of_date }}；按截止日期、官方详情去重和当前公开门禁计算。</p>
       {% if selected.category or selected.degree or selected.province or selected.q or selected.layer %}
-        <p class="muted">仅展示岗位级专业与学历条件支持本院学生申请的官方岗位。</p>
+        <p class="muted">{% if student_discovery %}仅展示当前官方来源中符合筛选条件的岗位信息，缺失字段请以原公告为准。{% else %}仅展示岗位级专业与学历条件支持本院学生申请的官方岗位。{% endif %}</p>
       {% endif %}
     </div>
 

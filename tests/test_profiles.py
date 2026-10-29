@@ -35,10 +35,11 @@ def job(**overrides: object) -> dict[str, object]:
 def test_supported_profiles_exactly_cover_requested_tracks() -> None:
     profiles = list_student_profiles()
 
-    assert len(profiles) == 7
+    assert len(profiles) == 8
     assert get_student_profile("undergraduate-resource-exploration").label == (
         "本科 · 资源勘查工程"
     )
+    assert get_student_profile("undergraduate-geology").label == "本科 · 地质学"
     assert get_student_profile("master-geophysics") is None
     assert sum(item.degree == "硕士" for item in profiles) == 3
     assert sum(item.degree == "博士" for item in profiles) == 3
@@ -101,6 +102,55 @@ def test_explicit_geophysics_is_a_visible_broad_geoscience_tier() -> None:
     assert result.status == "student_eligible"
     assert result.major_match_mode == "broad_geoscience"
     assert result.is_public is True
+
+
+def test_drilling_and_engineering_survey_are_geoscience_role_evidence() -> None:
+    """Explicit drilling/survey duties must not remain private due to marker gaps."""
+    for title, duty in (
+        ("钻探专业技术岗", "负责野外钻探常规作业，整理钻探资料并编制钻探报告。"),
+        ("工程勘察技术岗", "负责工程勘察、地质资料整理和勘察报告编制。"),
+    ):
+        result = evaluate_student_publication(
+            job(
+                title=title,
+                description=(
+                    f"专业要求：地质工程、资源勘查工程。学历要求：本科。岗位职责：{duty}"
+                ),
+                degree_levels=["本科"],
+                major_tags=["地质工程", "资源勘查工程"],
+                field_evidence={
+                    "evidence_scope": "official_browser_capture_row",
+                    "岗位": title,
+                    "专业范围": "地质工程、资源勘查工程",
+                    "学历要求": "本科",
+                    "岗位职责": duty,
+                },
+            )
+        )
+        assert result.status == "student_eligible"
+        assert result.major_match_mode == "exact_four_names"
+
+
+def test_mine_water_prevention_is_geoscience_role_evidence() -> None:
+    result = evaluate_student_publication(
+        job(
+            title="矿山防治水技术岗",
+            description=(
+                "专业要求：地质资源与地质工程类、资源勘查类。"
+                "学历要求：硕士研究生。岗位职责：开展矿山防治水和水文地质分析。"
+            ),
+            field_evidence={
+                "evidence_scope": "official_iguopin_browser_detail",
+                "岗位": "矿山防治水技术岗",
+                "专业范围": "地质资源与地质工程类、资源勘查类",
+                "学历要求": "硕士研究生",
+                "岗位职责": "开展矿山防治水和水文地质分析",
+            },
+        )
+    )
+
+    assert result.status == "student_eligible"
+    assert result.major_match_mode == "broad_geoscience"
 
 
 def test_parenthesized_rock_mineralogy_term_is_broad_not_exact() -> None:
@@ -401,13 +451,13 @@ def test_lower_education_floor_covers_higher_geoscience_students() -> None:
 def test_degree_floor_hierarchy_preserves_explicit_degree_boundaries() -> None:
     """Official degree floors must not hide doctoral matches or widen exact rows."""
     expected_profiles = {
-        "本科": set(),
-        "本科及以上": {"master-geology", "doctoral-geology"},
+        "本科": {"undergraduate-geology"},
+        "本科及以上": {"undergraduate-geology", "master-geology", "doctoral-geology"},
         "硕士": {"master-geology"},
         "硕士研究生及以上": {"master-geology", "doctoral-geology"},
         "研究生及以上": {"master-geology", "doctoral-geology"},
         "博士": {"doctoral-geology"},
-        "本科、硕士": {"master-geology"},
+        "本科、硕士": {"undergraduate-geology", "master-geology"},
     }
     for degree, expected in expected_profiles.items():
         decision = evaluate_student_publication(
@@ -431,9 +481,9 @@ def test_degree_floor_hierarchy_preserves_explicit_degree_boundaries() -> None:
 def test_degree_floor_accepts_common_above_wording_without_widening_exact_rows() -> None:
     """Common official wording must preserve the same minimum-degree closure."""
     expected_profiles = {
-        "本科以上学历": {"master-geology", "doctoral-geology"},
+        "本科以上学历": {"undergraduate-geology", "master-geology", "doctoral-geology"},
         "硕士以上学历": {"master-geology", "doctoral-geology"},
-        "Bachelor's or higher": {"master-geology", "doctoral-geology"},
+        "Bachelor's or higher": {"undergraduate-geology", "master-geology", "doctoral-geology"},
         "Master's or higher": {"master-geology", "doctoral-geology"},
     }
     for degree, expected in expected_profiles.items():
@@ -860,12 +910,14 @@ def test_adjacent_geophysical_direction_is_separate_from_exact_match() -> None:
     assert decision.major_match_mode == "broad_geoscience"
 
 
-def test_government_position_without_row_location_stays_private() -> None:
+def test_government_position_without_row_location_is_public_with_warning() -> None:
     decision = evaluate_student_publication(
         job(
             source_id="anhui-geology-bureau",
             category="事业单位与人才引进",
             title="专业技术岗位",
+            location="",
+            country_or_region=None,
             field_evidence={
                 "evidence_scope": "official_attachment_row",
                 "岗位": "专业技术岗位",
@@ -875,8 +927,9 @@ def test_government_position_without_row_location_stays_private() -> None:
         )
     )
 
-    assert decision.status == "pending_evidence"
-    assert decision.label == "待补岗位地点"
+    assert decision.status == "student_eligible"
+    assert decision.label == "官方信息不完整"
+    assert "工作地点" in decision.reason
 
 
 def test_normalized_enterprise_row_without_location_enters_incomplete_basic_layer() -> None:
@@ -897,7 +950,7 @@ def test_normalized_enterprise_row_without_location_enters_incomplete_basic_laye
         )
     )
 
-    assert decision.status == "pending_evidence"
+    assert decision.status == "student_eligible"
     assert decision.label == "官方信息不完整"
     assert decision.major_match_mode == "incomplete_but_basic"
     assert decision.matched_profile_ids
@@ -1038,7 +1091,11 @@ def test_publication_gate_keeps_explicit_graduate_exception() -> None:
     )
 
     assert decision.status == "student_eligible"
-    assert set(decision.matched_profile_ids) == {"master-geology", "doctoral-geology"}
+    assert set(decision.matched_profile_ids) == {
+        "undergraduate-geology",
+        "master-geology",
+        "doctoral-geology",
+    }
 
 
 def test_publication_gate_recognizes_or_above_degree_wording() -> None:
@@ -1209,8 +1266,10 @@ def test_publication_gate_does_not_use_degree_mentions_outside_the_job_field() -
         )
     )
 
-    assert decision.status == "pending_evidence"
-    assert decision.is_public is False
+    assert decision.status == "student_eligible"
+    assert decision.is_public is True
+    assert decision.major_match_mode == "incomplete_but_basic"
+    assert "学历" in decision.reason
 
 
 def test_publication_gate_keeps_related_english_discipline_private() -> None:

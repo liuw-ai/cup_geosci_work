@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 
 from job_hub.config import Settings
 from job_hub.capture_evidence import source_requires_declared_capture
+from job_hub.phase3_policy import derive_publication_layer
 from job_hub.cnooc_browser_capture import (
     repair_cnooc_detail_requirement_evidence,
 )
@@ -495,7 +496,12 @@ class JobPipeline:
         exponent = min(consecutive, 30)
         return min(maximum, base * (2**exponent))
 
-    def sync_source(self, source: dict[str, Any]) -> SourceSyncResult:
+    def sync_source(
+        self,
+        source: dict[str, Any],
+        *,
+        as_of_date: date | str | None = None,
+    ) -> SourceSyncResult:
         self.database.recover_stale_crawl_runs(
             self.settings.crawl_run_stale_seconds,
             source["id"],
@@ -511,6 +517,7 @@ class JobPipeline:
             source["id"], transport_mode=transport_mode
         )
         result = SourceSyncResult(source_id=source["id"], status="finished", run_id=run_id)
+        effective_date = self._effective_business_date(as_of_date)
         evidence_complete_count = 0
         manual_review_count = 0
         growth_counts = {"official_url_count": 0, "field_complete_count": 0,
@@ -530,7 +537,11 @@ class JobPipeline:
             current_external_ids: set[str] = set()
             staged_jobs: list[dict[str, Any]] = []
             for posting in postings:
-                normalized = self.normalize_posting(posting, source)
+                normalized = self.normalize_posting(
+                    posting,
+                    source,
+                    as_of_date=effective_date,
+                )
                 self._count_growth_row(growth_counts, normalized, source)
                 minimum_score = int(source["config"].get("minimum_relevance", 0))
                 if normalized["relevance_score"] < minimum_score:
@@ -947,6 +958,8 @@ class JobPipeline:
         self,
         posting: RawPosting,
         source: dict[str, Any],
+        *,
+        as_of_date: date | str | None = None,
     ) -> dict[str, Any]:
         field_evidence = dict(posting.field_evidence or {})
         # Keep the CNPC snapshot contract consistent for both live collector
@@ -1026,7 +1039,7 @@ class JobPipeline:
             or posting.title
         )
         degree_levels = extract_degree_levels(qualification_text)
-        today = datetime.now(self.timezone).date()
+        today = self._effective_business_date(as_of_date)
         status = self._job_status(
             posting.deadline_date,
             published_date=posting.published_date,
@@ -1107,10 +1120,27 @@ class JobPipeline:
             allow_non_domestic=bool(
                 (source.get("config") or {}).get("allow_international_public", False)
             ),
+            include_extended_opportunities=bool(
+                getattr(self.settings, "include_extended_opportunities", False)
+            ),
         )
         normalized["publication_status"] = publication.status
         normalized["publication_basis"] = publication.as_dict()
+        if getattr(self.settings, "include_extended_opportunities", False):
+            normalized["publication_basis"]["extended_opportunity"] = True
         return normalized
+
+    def _effective_business_date(self, as_of_date: date | str | None = None) -> date:
+        """Return today's date unless a deterministic historical replay date is given."""
+
+        if as_of_date is None:
+            return datetime.now(self.timezone).date()
+        if isinstance(as_of_date, date):
+            return as_of_date
+        try:
+            return date.fromisoformat(str(as_of_date))
+        except (TypeError, ValueError) as error:
+            raise ValueError("as_of_date must use ISO YYYY-MM-DD format") from error
 
     @staticmethod
     def _skipped_source_health_status(detail: str) -> str:
@@ -1328,6 +1358,9 @@ class JobPipeline:
                 allow_non_domestic=bool(
                     source_config.get("allow_international_public", False)
                 ),
+                include_extended_opportunities=bool(
+                    getattr(self.settings, "include_extended_opportunities", False)
+                ),
             )
             if cnooc_repair_error:
                 publication = PublicationDecision(
@@ -1364,6 +1397,24 @@ class JobPipeline:
                     reason="官方来源当前已停用，历史岗位仅保留在审计库，不进入学生端。",
                     matched_profile_ids=(),
                 )
+            publication_basis = publication.as_dict()
+            if getattr(self.settings, "include_extended_opportunities", False):
+                publication_basis["extended_opportunity"] = True
+            if publication_layer is None:
+                # Reindexing must refresh the derived publication layer along
+                # with the status.  Preserving a stale layer is unsafe: an
+                # old incomplete marker could expose a row that the current
+                # professional gate now rejects.  The only exception is the
+                # explicit source-unavailable recovery layer, which keeps a
+                # previously verified official link visible with a warning.
+                if str(job.get("publication_layer") or "") == "source_unavailable":
+                    publication_layer = "source_unavailable"
+                else:
+                    publication_layer = derive_publication_layer(
+                        publication.status,
+                        publication_basis,
+                        has_basic_major_evidence=bool(publication.matched_profile_ids),
+                    )
             changed = self.database.update_derived_job_fields(
                 int(job["id"]),
                 category=category,
@@ -1373,7 +1424,7 @@ class JobPipeline:
                 relevance_band=relevance_band,
                 status=status,
                 publication_status=publication.status,
-                publication_basis=publication.as_dict(),
+                publication_basis=publication_basis,
                 publication_layer=publication_layer,
             )
             normalized = self.database.update_job_normalization(

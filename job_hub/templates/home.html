@@ -37,7 +37,7 @@
     <div class="stat">
       <span>当前在招</span>
       <strong>{{ live_open_total }}</strong>
-      <small>条实时可检索岗位</small>
+      <small>条实时可检索岗位，统计截至 {{ as_of_date }}</small>
     </div>
   </section>
 
@@ -66,7 +66,10 @@
         <p class="eyebrow">快速入口</p>
         <h2>按就业方向查看</h2>
       </div>
-      <a class="text-link" href="{{ url_for('jobs') }}">进入全部岗位库</a>
+      <div class="section-actions">
+        <a class="text-link" href="{{ url_for('jobs', scope='student_discovery') }}">学生岗位发现层</a>
+        <a class="text-link" href="{{ url_for('jobs') }}">严格当前岗位库</a>
+      </div>
     </div>
     <div class="category-grid">
       {% for category in category_order %}

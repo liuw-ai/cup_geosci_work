@@ -200,6 +200,46 @@ def test_discovery_program_relevance_patterns_are_optional_and_validated() -> No
         _optional_text_patterns(["["], field="program_relevance_patterns")
 
 
+def test_huatu_registry_filters_training_and_keeps_relevant_vacancy_or_table_clues(
+    tmp_path,
+) -> None:
+    registry = load_discovery_source_registry()
+    source = next(item for item in registry["sources"] if item["id"] == "huatu-discovery")
+    config = source["scan_config"]
+    scanner = DiscoveryScanner(make_settings(tmp_path))
+    body = """
+        <a href="/2026/1028/2875001.html">2026年自然资源部直属事业单位公开招聘公告</a>
+        <a href="/2026/1028/2875002.html">2026年国家公务员考试职位表</a>
+        <a href="/2026/1028/2875000.html">职位表下载</a>
+        <a href="/2026/1028/2875003.html">2026年公务员考试申论培训课程</a>
+        <a href="/2026/1028/2875004.html">2026年公务员考试笔试通知</a>
+    """
+
+    leads = scanner._html_leads(
+        source,
+        "https://www.huatu.com/",
+        body,
+        _optional_text_patterns(config["include_patterns"], field="include_patterns"),
+        _optional_text_patterns(config["exclude_patterns"], field="exclude_patterns"),
+        20,
+        set(config["allowed_hosts"]),
+        (),
+        _optional_text_patterns(
+            config["program_relevance_patterns"],
+            field="program_relevance_patterns",
+        ),
+        _optional_text_patterns(
+            config["announcement_title_patterns"],
+            field="announcement_title_patterns",
+        ),
+    )
+
+    assert [item["title"] for item in leads] == [
+        "2026年自然资源部直属事业单位公开招聘公告",
+        "2026年国家公务员考试职位表",
+    ]
+
+
 def test_discovery_announcement_title_filter_excludes_portal_and_faq_pages(tmp_path) -> None:
     scanner = DiscoveryScanner(make_settings(tmp_path))
     source = {"id": "offcn-discovery", "name": "中公教育招聘公告汇总"}

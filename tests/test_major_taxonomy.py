@@ -50,6 +50,7 @@ def test_profile_major_ids_resolve_to_taxonomy_records() -> None:
     assert profile_major_definition("undergraduate-resource-exploration").id == (
         "resource-exploration-engineering"
     )
+    assert profile_major_definition("undergraduate-geology").id == "geology"
     assert profile_major_definition("doctoral-geology").id == "geology"
 
 

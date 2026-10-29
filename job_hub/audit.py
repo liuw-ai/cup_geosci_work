@@ -101,15 +101,13 @@ def audit_database(
         source_id = str(job.get("source_id") or "")
         student_public = (
             job.get("status") == "open"
-            and (
-                job.get("publication_status") in PUBLIC_STUDENT_PUBLICATION_STATUSES
-                or job.get("publication_layer") in {
-                    "exact_match",
-                    "broad_geoscience_match",
-                    "incomplete_but_basic_match",
-                    "source_unavailable",
-                }
-            )
+            and job.get("publication_status") in PUBLIC_STUDENT_PUBLICATION_STATUSES
+            and job.get("publication_layer") in {
+                "exact_match",
+                "broad_geoscience_match",
+                "incomplete_but_basic_match",
+                "source_unavailable",
+            }
         )
         # Official but out-of-scope records stay available for administrator
         # re-review. They are not part of a student-facing daily publication

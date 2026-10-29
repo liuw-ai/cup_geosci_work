@@ -35,12 +35,16 @@ def revalidate_persisted_publication_gates(
         if current_status not in PUBLIC_STUDENT_PUBLICATION_STATUSES:
             continue
         checked += 1
-        decision = evaluate_student_publication(job)
-        status_counts[decision.status] = status_counts.get(decision.status, 0) + 1
         current_basis = job.get("publication_basis")
         if not isinstance(current_basis, dict):
             current_basis = {}
+        extended_opportunity = bool(current_basis.get("extended_opportunity"))
         desired_basis = dict(current_basis)
+        decision = evaluate_student_publication(
+            job,
+            include_extended_opportunities=extended_opportunity,
+        )
+        status_counts[decision.status] = status_counts.get(decision.status, 0) + 1
         desired_basis.update(decision.as_dict())
         desired_basis["revalidated_by"] = "publication_gate_v1"
         desired_basis["revalidation_applied"] = bool(apply)

@@ -49,6 +49,38 @@ def test_batch_parser_maps_civil_service_aliases_and_keeps_rejected_rows() -> No
     assert result["rejected_rows"][0]["missing"] == ["major"]
 
 
+def test_batch_parser_maps_national_civil_service_headers() -> None:
+    """The National Civil Service Bureau table uses its own header wording."""
+    result = parse_position_table_rows(
+        [
+            {
+                "职位代码": "400110001001",
+                "用人司局": "自然资源部",
+                "招考职位": "地质资源管理",
+                "专业": "地质学、地质工程",
+                "学历": "硕士研究生",
+                "招考人数": "2",
+                "工作地点": "北京",
+            }
+        ],
+        batch_id="scs-guokao-2027",
+        source_id="scs-guokao-2027",
+        position_type="civil_service",
+        province="北京",
+        official_notice_url="https://bm.scs.gov.cn/kl2027",
+        official_attachment_url="https://dl.scs.gov.cn/download/position-table.zip",
+    )
+
+    assert result["metrics"]["accepted_rows"] == 1
+    assert result["batch"]["rows"][0][1:6] == [
+        "自然资源部",
+        "地质资源管理",
+        "地质学、地质工程",
+        "硕士研究生",
+        2,
+    ]
+
+
 def test_batch_parser_produces_registry_compatible_position_batch() -> None:
     result = parse_position_table_rows(
         [

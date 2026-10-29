@@ -1961,7 +1961,13 @@ class Database:
             and publication_status != "source_unavailable"
             and not is_public_broad
         ):
-            decision = evaluate_student_publication(job)
+            extended_opportunity = bool(
+                publication_basis.get("extended_opportunity")
+            )
+            decision = evaluate_student_publication(
+                job,
+                include_extended_opportunities=extended_opportunity,
+            )
             if (
                 decision.status != publication_status
                 or decision.major_match_mode
@@ -1969,6 +1975,13 @@ class Database:
                     "exact_four_names",
                     "broad_geoscience",
                     "public_unrestricted_rule",
+                    "incomplete_but_basic",
+                    "social_exact_four_names",
+                    "social_broad_geoscience",
+                    "social_incomplete_but_basic",
+                    "social_unrestricted_rule",
+                    "extended_unrestricted_rule",
+                    "extended_role_context_pending",
                 }
                 or publication_basis.get("major_match_mode") != decision.major_match_mode
             ):
@@ -2681,16 +2694,22 @@ class Database:
                     (candidate for candidate in coordinate_rows if candidate["row_key"] == row_key),
                     None,
                 )
-                if exact is not None:
-                    target = exact
-                elif not str(item.get("row_key_suffix") or "").strip():
+                if not str(item.get("row_key_suffix") or "").strip():
+                    # A legacy parser encoded an empty suffix as JSON null.
+                    # Prefer the strongest review state even when a lower
+                    # priority row already owns the current canonical key;
+                    # otherwise a reparse can demote an independently
+                    # verified candidate merely because its legacy key differs.
                     target = self._choose_artifact_row_identity(
                         connection,
                         coordinate_rows,
                         canonical_key=row_key,
                     )
                 else:
-                    target = None
+                    # Parallel blocks deliberately share a spreadsheet
+                    # coordinate. Their non-empty suffix is the independent
+                    # row identity and must not be collapsed here.
+                    target = exact
                 if target is None:
                     connection.execute(
                         """
@@ -2871,6 +2890,8 @@ class Database:
             if cls._artifact_candidate_status_rank(duplicate["review_status"]) > cls._artifact_candidate_status_rank(target_candidate["review_status"]):
                 # The target was selected before this call, so this branch is
                 # defensive for rows introduced by a concurrent legacy run.
+                # Never demote the higher-status candidate: keeping it as the
+                # one active candidate is safer than rejecting both records.
                 connection.execute(
                     "UPDATE artifact_job_candidates SET review_status = ?, review_note = ?, updated_at = ? WHERE id = ?",
                     (
@@ -2880,6 +2901,8 @@ class Database:
                         target_candidate["id"],
                     ),
                 )
+                target_candidate = duplicate
+                continue
             connection.execute(
                 """
                 UPDATE artifact_job_candidates
@@ -2968,7 +2991,7 @@ class Database:
             candidate_key = self._artifact_candidate_key(normalized["artifact_row_id"])
             existing = connection.execute(
                 """
-                SELECT id, review_status FROM artifact_job_candidates
+                SELECT id, review_status, review_note FROM artifact_job_candidates
                 WHERE artifact_row_id = ?
                 """,
                 (normalized["artifact_row_id"],),
@@ -2979,6 +3002,35 @@ class Database:
                 )
                 if persisted is None:  # pragma: no cover - protected by SELECT above
                     raise RuntimeError("Published artifact candidate disappeared")
+                # A parser correction can recover a missing position code from
+                # the exact same official row. Preserve all published fields,
+                # but fill this one non-conflicting evidence key so the
+                # reviewed ledger can continue to recognize the linked job.
+                stored_evidence = self._json_object(persisted["field_evidence_json"])
+                recovered_code = self._optional_text(
+                    normalized.get("field_evidence", {}).get("职位代码")
+                )
+                if recovered_code and not self._optional_text(
+                    stored_evidence.get("职位代码")
+                ):
+                    stored_evidence["职位代码"] = recovered_code
+                    connection.execute(
+                        """
+                        UPDATE artifact_job_candidates
+                        SET field_evidence_json = ?, updated_at = ?
+                        WHERE id = ?
+                        """,
+                        (
+                            json.dumps(stored_evidence, ensure_ascii=False),
+                            now,
+                            int(existing["id"]),
+                        ),
+                    )
+                    persisted = self._select_artifact_job_candidate(
+                        connection, int(existing["id"])
+                    )
+                    if persisted is None:  # pragma: no cover - protected by SELECT above
+                        raise RuntimeError("Published artifact candidate disappeared")
                 return self._artifact_candidate_row(persisted)
             connection.execute(
                 """
@@ -3006,6 +3058,22 @@ class Database:
                     description = excluded.description,
                     field_evidence_json = excluded.field_evidence_json,
                     relevance_score = excluded.relevance_score,
+                    review_status = CASE
+                        -- Restore only the previous automated table-shape
+                        -- false negative when the same row now passes the
+                        -- parser. Human and all other rejection decisions
+                        -- remain immutable here.
+                        WHEN artifact_job_candidates.review_status = 'rejected'
+                             AND artifact_job_candidates.review_note = ?
+                        THEN excluded.review_status
+                        ELSE artifact_job_candidates.review_status
+                    END,
+                    review_note = CASE
+                        WHEN artifact_job_candidates.review_status = 'rejected'
+                             AND artifact_job_candidates.review_note = ?
+                        THEN excluded.review_note
+                        ELSE artifact_job_candidates.review_note
+                    END,
                     updated_at = excluded.updated_at
                 """,
                 (
@@ -3029,6 +3097,10 @@ class Database:
                     normalized["review_note"] or "",
                     now,
                     now,
+                    "Phase 62 附件用途识别：未发现同时包含岗位/职位和专业字段的"
+                    "职位表结构；原始附件与行证据已保留。",
+                    "Phase 62 附件用途识别：未发现同时包含岗位/职位和专业字段的"
+                    "职位表结构；原始附件与行证据已保留。",
                 ),
             )
             candidate_row = connection.execute(
@@ -3193,8 +3265,9 @@ class Database:
         if current is None:
             return None
         # Official tables often omit location while the notice body identifies
-        # the institution address. Location may be filled only in the private
-        # review queue and is required before public publication.
+        # an institution address. Do not infer a work location from that
+        # address: a missing location remains empty and is shown with the
+        # student-facing incomplete-information warning.
         editable = {
             "review_status",
             "review_note",
@@ -4021,12 +4094,23 @@ class Database:
             # explicit even though the status predicate above excludes it so
             # future historical-read modes cannot accidentally expose it.
             "jobs.status <> 'superseded'",
-            "(jobs.publication_status IN ('student_eligible', 'unrestricted_eligible', 'source_unavailable') "
-            "OR jobs.publication_layer IN ('exact_match', 'broad_geoscience_match', "
-            "'incomplete_but_basic_match', 'source_unavailable'))",
+            # Only a student/public status may enter the ordinary student
+            # read path.  Historical rows with ``pending_evidence`` plus an
+            # old ``incomplete_but_basic_match`` layer are deliberately kept
+            # in the private official-pending view until reindexed; a layer
+            # marker alone is not publication authorization.
+            "((jobs.publication_status IN ('student_eligible', 'unrestricted_eligible', 'source_unavailable') "
+            "AND jobs.publication_layer IN ('exact_match', 'broad_geoscience_match', "
+            "'incomplete_but_basic_match', 'source_unavailable')) "
+            "OR (jobs.publication_status IN ('student_eligible', 'unrestricted_eligible', "
+            "'pending_evidence', 'source_unavailable') "
+            "AND jobs.publication_layer = 'source_unavailable' "
+            "AND jobs.last_official_verified_at IS NOT NULL))",
             "(jobs.country_or_region IN ('中国大陆', '中国') OR "
             "((jobs.country_or_region IS NULL OR jobs.country_or_region = '') "
-            "AND jobs.publication_layer = 'incomplete_but_basic_match'))",
+            "AND (jobs.publication_layer = 'incomplete_but_basic_match' "
+            "OR (jobs.publication_layer = 'source_unavailable' "
+            "AND jobs.publication_layer_before_unavailable = 'incomplete_but_basic_match'))))",
             "(jobs.publication_layer <> 'source_unavailable' OR jobs.last_official_verified_at IS NOT NULL)",
         ]
         # The public API's default read must use the same Asia/Shanghai
@@ -5044,11 +5128,10 @@ class Database:
                 FROM jobs
                 WHERE source_id = ?
                   AND status = 'open'
-                  AND (
-                    publication_status IN ('student_eligible', 'unrestricted_eligible', 'source_unavailable')
-                    OR publication_layer IN ('exact_match', 'broad_geoscience_match',
-                                              'incomplete_but_basic_match', 'source_unavailable')
-                  )
+                  AND (publication_status IN ('student_eligible', 'unrestricted_eligible', 'source_unavailable')
+                       OR publication_layer = 'source_unavailable')
+                  AND publication_layer IN ('exact_match', 'broad_geoscience_match',
+                                            'incomplete_but_basic_match', 'source_unavailable')
                   AND country_or_region IN ('中国大陆', '中国')
                   AND external_id IS NOT NULL
                   AND external_id <> ''
@@ -5990,9 +6073,9 @@ class Database:
             if (
                 str(job_row["status"] or "") in {"withdrawn", "expired"}
                 or (
-                    str(job_row["publication_status"] or "")
-                    not in PUBLIC_STUDENT_PUBLICATION_STATUSES
-                    and str(job_row["publication_layer"] or "")
+                str(job_row["publication_status"] or "")
+                not in PUBLIC_STUDENT_PUBLICATION_STATUSES
+                or str(job_row["publication_layer"] or "")
                     not in {
                         "exact_match",
                         "broad_geoscience_match",
@@ -6525,6 +6608,17 @@ class Database:
     def _optional_text(value: Any) -> str | None:
         text = str(value or "").strip()
         return text or None
+
+    @staticmethod
+    def _json_object(value: Any) -> dict[str, Any]:
+        """Decode a persisted JSON object while tolerating legacy null/invalid data."""
+        if isinstance(value, dict):
+            return dict(value)
+        try:
+            parsed = json.loads(str(value or "{}"))
+        except (TypeError, json.JSONDecodeError):
+            return {}
+        return dict(parsed) if isinstance(parsed, dict) else {}
 
     @staticmethod
     def _job_row(row: sqlite3.Row) -> dict[str, Any]:

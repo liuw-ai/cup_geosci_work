@@ -10,7 +10,7 @@ from job_hub.pipeline import JobPipeline
 from conftest import make_settings, source
 
 
-def test_current_fixed_artifact_candidate_is_published_without_admin_action(tmp_path) -> None:
+def test_current_fixed_artifact_without_degree_or_location_is_published_with_warning(tmp_path) -> None:
     settings = make_settings(tmp_path)
     database = Database(settings.database_path)
     database.initialize()
@@ -40,11 +40,11 @@ def test_current_fixed_artifact_candidate_is_published_without_admin_action(tmp_
                     "岗位代码": "A-001",
                     "招聘单位": "测试能源集团",
                     "专业": "地质工程",
-                    "学历": "硕士研究生",
-                    "工作地点": "北京市",
+                    "学历": "",
+                    "工作地点": "",
                     "招聘人数": "1",
                 },
-                "row_text": "岗位代码：A-001；招聘单位：测试能源集团；专业：地质工程；学历：硕士研究生；工作地点：北京市；招聘人数：1",
+                "row_text": "岗位代码：A-001；招聘单位：测试能源集团；专业：地质工程；招聘人数：1",
             }
         ],
     )[0]
@@ -55,9 +55,9 @@ def test_current_fixed_artifact_candidate_is_published_without_admin_action(tmp_
             "official_page_url": parent_url,
             "title": "地质工程技术岗",
             "employer": "测试能源集团",
-            "location": "北京市",
+            "location": "",
             "deadline_date": "2099-12-31",
-            "degree_levels": ["硕士"],
+            "degree_levels": [],
             "major_tags": ["地质工程"],
             "summary": "官方岗位表第2行",
             "description": "官方岗位表第2行",
@@ -68,8 +68,8 @@ def test_current_fixed_artifact_candidate_is_published_without_admin_action(tmp_
                 "artifact_url": artifact_url,
                 "职位代码": "A-001",
                 "专业范围": "地质工程",
-                "学历要求": "硕士研究生",
-                "工作地点": "北京市",
+                "学历要求": "",
+                "工作地点": "",
                 "招聘人数": "1",
                 "table_row": "岗位表!2",
             },
@@ -164,6 +164,9 @@ def test_current_fixed_artifact_candidate_is_published_without_admin_action(tmp_
     job = database.find_public_job(publication["items"][0]["job_id"])
     assert job is not None
     assert job["publication_status"] == "student_eligible"
+    assert job["publication_layer"] == "incomplete_but_basic_match"
+    assert job["field_evidence"]["职位代码"] == "A-001"
+    assert JobPipeline._government_record_matches_job(record, job)
     assert database.mark_published_artifact_review_state(
         int(candidate["id"]),
         availability_status="source_unavailable",
@@ -176,6 +179,29 @@ def test_current_fixed_artifact_candidate_is_published_without_admin_action(tmp_
     assert reviewed_job["status"] == "open"
     assert reviewed_job["publication_layer"] == "source_unavailable"
     assert reviewed_job["source_availability_status"] == "source_unavailable"
+
+    # A static, declared government table is authoritative only when the
+    # current verifier explicitly sees this exact row again.  When it does,
+    # refresh the already-published job instead of retaining a stale private
+    # or source-unavailable state from an earlier failed download.
+    renewed = verify_government_artifacts(
+        database,
+        {"artifacts": [declared]},
+        registry,
+        today="2026-10-07",
+    )
+    assert renewed["publication_ready"] == 1, renewed["items"]
+    second_cycle = auto_publish_verified_artifact_candidates(
+        database, pipeline, renewed
+    )
+    assert second_cycle["published"] == 0
+    assert second_cycle["refreshed"] == 1, second_cycle
+    refreshed_job = database.find_public_job(publication["items"][0]["job_id"])
+    assert refreshed_job is not None
+    assert refreshed_job["publication_status"] == "student_eligible"
+    assert refreshed_job["publication_layer"] == "incomplete_but_basic_match"
+    assert refreshed_job["field_evidence"]["职位代码"] == "A-001"
+    assert JobPipeline._government_record_matches_job(record, refreshed_job)
     with database.connect() as connection:
         event = connection.execute(
             "SELECT event_type, payload_json FROM job_events WHERE job_id = ? ORDER BY id DESC LIMIT 1",

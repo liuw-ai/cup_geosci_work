@@ -3,9 +3,12 @@
 The attachment parser produces private candidates.  This module checks those
 rows against the reviewed government-position ledger without treating a
 successful download as proof that a vacancy is publishable. Static ledger
-rows require an exact ledger match. Newly discovered official attachments may
-use a separate dynamic path, but only when the same official row contains all
-required fields and passes the student publication gate. Rolling
+rows require an exact ledger match for every field actually supplied by the
+official row. Newly discovered official attachments may use a separate
+dynamic path, but only when the same official row contains the required
+identity, professional and lifecycle evidence and passes the student
+publication gate. Missing degree or location are retained as explicitly
+incomplete public information rather than fabricated. Rolling
 ``open_until_filled`` rows remain subject to a separate current-availability
 confirmation.
 """
@@ -35,7 +38,7 @@ _GOVERNMENT_DISCOVERY_ROLES = frozenset(
 _GOVERNMENT_DISCOVERY_SOURCE_TYPES = frozenset({"cgs_dynamic_json"})
 
 
-AUTO_VERIFICATION_VERSION = "government-artifact-verifier-v2"
+AUTO_VERIFICATION_VERSION = "government-artifact-verifier-v3"
 NOTICE_DEADLINE_MAX_AGE = timedelta(hours=48)
 _SHA256 = re.compile(r"^[0-9a-f]{64}$", re.IGNORECASE)
 _LOCATOR_NUMBER = re.compile(r"(?:!|第)\s*(\d+)\s*(?:行)?", re.IGNORECASE)
@@ -237,7 +240,8 @@ def _verify_dynamic_artifact(
                         ),
                         "review_note": (
                             "自动核验 government-artifact-dynamic-v1：官方来源、附件哈希、"
-                            "岗位行标题、单位、专业、学历、地点、人数、公告或岗位行截止日期和行定位完整。"
+                            "岗位行标题、单位、专业、人数、公告或岗位行截止日期和行定位已核验；"
+                            "学历或地点未列时按官方信息不完整展示。"
                         ),
                         "field_evidence_updates": evidence_updates,
                     },
@@ -310,16 +314,21 @@ def _dynamic_candidate_reasons(
     major = _value(evidence, "专业范围", "专业要求") or _value(
         cells, "专业", "所需专业", "专业要求", "专业范围", "专业类别", "专业名称"
     )
-    degree = _value(evidence, "学历要求", "学历") or _value(
-        cells, "学历", "学历学位", "学历层次", "面向对象"
-    )
+    # An omitted degree or work-location field is not evidence that a real,
+    # otherwise eligible public position should be hidden.  It is handled by
+    # ``evaluate_student_publication`` as an incomplete-information warning.
+    # A field that *is* present must still be bound to the same official row.
     location_cell = _value(cells, "工作地点", "工作区域", "工作城市", "所在地", "地点")
-    location = str(candidate.get("location") or "").strip()
-    if not major or not list(candidate.get("major_tags") or []):
+    location = str(
+        candidate.get("location")
+        or _value(evidence, "工作地点", "工作地点依据", "地点")
+        or ""
+    ).strip()
+    if not major:
         reasons.append("major_missing_or_unclassified")
-    if not degree or not extract_degree_levels(degree):
-        reasons.append("degree_missing_or_unrecognized")
-    if not location or not location_cell or _compact(location_cell) != _compact(location):
+    if bool(location) != bool(location_cell) or (
+        location and _compact(location_cell) != _compact(location)
+    ):
         reasons.append("location_not_row_bound")
     if location:
         location_info = normalize_location(location)
@@ -501,6 +510,23 @@ def _verify_one_artifact(
                 )
             if blocked is not None:
                 blocked_records.append(blocked)
+            elif has_same_code_candidate:
+                # An extracted candidate with the exact reviewed position
+                # code proves that this is a row-specific field conflict,
+                # rather than a missing attachment.  Keep that row in the
+                # private review queue, but do not let it invalidate other
+                # independently exact rows in the same official table.
+                blocked_records.append(
+                    {
+                        "record_id": str(record.get("id") or ""),
+                        "position_code": str(record.get("position_code") or "").strip(),
+                        "row_locator": str(record.get("evidence_locator") or "").strip(),
+                        "reason": "record_field_mismatch:"
+                        + ",".join(sorted(set(match_reasons))),
+                        "detail": "; ".join(match_reasons)[:1_000],
+                        "publication_status": "pending_evidence",
+                    }
+                )
             else:
                 reasons.extend(
                     match_reasons
@@ -539,7 +565,8 @@ def _verify_one_artifact(
                 "review_status": "official_content_verified",
                 "review_note": (
                     f"自动核验 {AUTO_VERIFICATION_VERSION}：附件 SHA-256、岗位代码、单位、"
-                    f"专业、学历、地点、人数、期限和行定位均与台账 {record.get('id')} 一致。"
+                    f"专业、人数、期限和行定位均与台账 {record.get('id')} 一致；"
+                    "学历或地点未列时按官方信息不完整展示。"
                 ),
             }
             if fallback_location and not str(candidate.get("location") or "").strip():
@@ -594,8 +621,10 @@ def _verify_row_self_contained_artifact(
     This path is opt-in per manifest entry. It deliberately does not compare
     employer, title, location, headcount or deadline to a stale static ledger;
     those values must instead be present in the extracted official row itself.
-    The row remains subject to source-host, hash, current-date and student
-    publication gates.
+    Degree and location may both be absent from the official row.  In that
+    case the normal student gate labels the resulting public record as
+    incomplete rather than inventing a value.  The row remains subject to
+    source-host, hash, current-date and student publication gates.
     """
 
     source = database.get_source(str(artifact.get("source_id") or ""))
@@ -657,7 +686,8 @@ def _verify_row_self_contained_artifact(
                 "review_status": "official_content_verified",
                 "review_note": (
                     "自动核验 government-artifact-row-v1：官方公告、附件哈希、岗位代码、"
-                    "单位、专业、学历、地点、人数、期限和表格定位均来自同一官方岗位行。"
+                    "单位、专业、人数、期限和表格定位均来自同一官方岗位行；"
+                    "学历或地点未列时按官方信息不完整展示。"
                 ),
             },
         )
@@ -712,19 +742,20 @@ def _row_self_contained_candidate_reasons(
     ).strip():
         reasons.append("artifact_url_evidence_mismatch")
 
-    code = _value(evidence, "职位代码", "岗位代码", "职位编号", "岗位编号") or _value(
-        cells, "职位代码", "岗位代码", "职位编号", "岗位编号", "代码"
+    code = _value(evidence, "职位代码", "岗位代码", "职位编号", "岗位编号", "职位编码", "岗位编码") or _value(
+        cells, "职位代码", "岗位代码", "职位编号", "岗位编号", "职位编码", "岗位编码", "代码"
     )
     title_cell = _value(cells, "岗位名称", "岗位", "职位", "招聘岗位", "需求岗位")
     employer_cell = _value(cells, "招聘单位", "用人单位", "单位名称", "招录单位")
     major = _value(evidence, "专业范围", "专业要求") or _value(
         cells, "专业", "所需专业", "专业要求", "专业范围", "专业类别", "专业名称"
     )
-    degree = _value(evidence, "学历要求", "学历") or _value(
-        cells, "学历", "学历学位", "学历层次", "面向对象"
-    )
     location_cell = _value(cells, "工作地点", "工作区域", "工作城市", "所在地", "地点")
-    location = str(candidate.get("location") or "").strip()
+    location = str(
+        candidate.get("location")
+        or _value(evidence, "工作地点", "工作地点依据", "地点")
+        or ""
+    ).strip()
     if not code:
         reasons.append("position_code_missing")
     if not title_cell or not str(candidate.get("title") or "").strip():
@@ -733,11 +764,11 @@ def _row_self_contained_candidate_reasons(
         reasons.append("title_not_row_bound")
     if not employer_cell or _compact(employer_cell) != _compact(candidate.get("employer")):
         reasons.append("employer_not_row_bound")
-    if not major or not list(candidate.get("major_tags") or []):
+    if not major:
         reasons.append("major_missing_or_unclassified")
-    if not degree or not extract_degree_levels(degree):
-        reasons.append("degree_missing_or_unrecognized")
-    if not location or not location_cell or _compact(location_cell) != _compact(location):
+    if bool(location) != bool(location_cell) or (
+        location and _compact(location_cell) != _compact(location)
+    ):
         reasons.append("location_not_row_bound")
     if location and normalize_location(location).get("country_or_region") != "中国大陆":
         reasons.append("mainland_location_not_verified")
@@ -948,7 +979,17 @@ def _classify_registry_record_block(
 
 def _row_position_code(row: dict[str, Any]) -> str:
     cells = row.get("cells") or {}
-    code = _value(cells, "职位代码", "岗位代码", "职位编号", "岗位编号", "代码", "序号")
+    code = _value(
+        cells,
+        "职位代码",
+        "岗位代码",
+        "职位编号",
+        "岗位编号",
+        "职位编码",
+        "岗位编码",
+        "代码",
+        "序号",
+    )
     if code:
         return code
     text = str(row.get("row_text") or "")
@@ -1162,9 +1203,13 @@ def _candidate_checks(
                 record, row_major, record.get("major_requirement")
             )
         ),
-        "degree_requirement": set(extract_degree_levels(degree))
+        # Missing degree/location are incomplete official information, not a
+        # mismatch.  Present values must still agree with the reviewed record.
+        "degree_requirement": not extract_degree_levels(degree)
+        or set(extract_degree_levels(degree))
         == set(extract_degree_levels(str(record.get("degree_requirement") or ""))),
-        "location": bool(location) and _compact(location) == _compact(record.get("location")),
+        "location": not location
+        or _compact(location) == _compact(record.get("location")),
         "headcount": _number(headcount) == int(record.get("headcount") or 0),
         "deadline": _deadline_matches(
             candidate_deadline,
@@ -1310,6 +1355,8 @@ def _position_code_binding(
         "岗位代码",
         "职位编号",
         "岗位编号",
+        "职位编码",
+        "岗位编码",
         "代码",
         # Government tables often use a serial-number column as the only
         # stable row identifier.  It is accepted only for a registry record
@@ -1325,6 +1372,8 @@ def _position_code_binding(
         "岗位代码",
         "职位编号",
         "岗位编号",
+        "职位编码",
+        "岗位编码",
     )
     # A hydrated code is derived evidence. Re-read the raw row first so a
     # later run cannot turn an adjacent-row binding into a same-row claim.

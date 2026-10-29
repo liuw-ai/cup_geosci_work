@@ -355,6 +355,46 @@ def test_promote_card_detail_identity_conflict_as_deterministic_rejection(
     assert promoted["scan"]["detail_failed"] == 0
 
 
+def test_promote_missing_card_and_detail_employer_as_deterministic_rejection(
+    tmp_path: Path,
+) -> None:
+    partial = _payload(
+        status="partial",
+        scan={
+            "pages_scanned": 1,
+            "pagination_complete": True,
+            "rows_discovered": 1,
+            "rows_exported": 1,
+            "failed_rows": 1,
+            "detail_discovered": 2,
+            "detail_succeeded": 1,
+            "detail_failed": 1,
+            "failure_records": [
+                {
+                    "keyword": "资源勘查",
+                    "detail_id": "missing-employer-1",
+                    "reason": "CMGB detail and official search card are missing employer",
+                }
+            ],
+        },
+    )
+    partial_path = tmp_path / "partial.json"
+    output = tmp_path / "success.json"
+    partial_path.write_text(json.dumps(partial, ensure_ascii=False), encoding="utf-8")
+
+    promoted = promote_deterministic_rejections(
+        partial_path,
+        output,
+        source_id="iguopin-general-geoscience-browser",
+        adapter_version="iguopin-general-browser-v1",
+    )
+
+    assert promoted["status"] == "success"
+    assert promoted["scan"]["detail_failed"] == 0
+    assert promoted["scan"]["rejected_rows"] == 1
+    assert promoted["scan"]["rejected_records"][0]["detail_id"] == "missing-employer-1"
+
+
 def test_rejected_detail_repair_merges_only_completed_targets() -> None:
     detail_url = "https://www.iguopin.com/job/detail?id=repair-1"
     repaired = {
@@ -1213,6 +1253,45 @@ def test_iguopin_worker_syncs_a_successful_capture_immediately(monkeypatch, tmp_
 
     assert worker.pipeline.calls == [source]
     assert heartbeats[-1][0] == "running"
+
+
+def test_iguopin_worker_expires_past_deadline_jobs_after_successful_sync(
+    monkeypatch, tmp_path: Path
+) -> None:
+    source = _source()
+    source["enabled"] = True
+    expired_on: list[str] = []
+
+    class FakeDatabase:
+        def get_source(self, source_id: str):
+            assert source_id == "chinalco-iguopin-browser"
+            return source
+
+        def expire_jobs_before(self, today: str) -> int:
+            expired_on.append(today)
+            return 2
+
+    class FakePipeline:
+        def sync_source_manual(self, _received_source):
+            return SimpleNamespace(status="finished", error=None)
+
+    worker = IguopinBrowserWorker.__new__(IguopinBrowserWorker)
+    worker.settings = SimpleNamespace(data_dir=tmp_path)
+    worker.database = FakeDatabase()
+    worker.pipeline = FakePipeline()
+    worker.source_id = "chinalco-iguopin-browser"
+    worker.service_name = worker.source_id
+    worker._heartbeat = lambda *_args, **_kwargs: None
+    monkeypatch.setattr(
+        worker_module,
+        "run_iguopin_browser_capture",
+        lambda **_kwargs: {"status": "success", "scan": {"rows_exported": 1}},
+    )
+
+    worker._run_once()
+
+    assert len(expired_on) == 1
+    assert len(expired_on[0]) == 10
 
 
 def test_iguopin_one_shot_failure_keeps_degraded_heartbeat() -> None:
