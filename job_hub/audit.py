@@ -194,7 +194,16 @@ def audit_database(
             not in {"incomplete_but_basic_match", "source_unavailable"}
             and not _audit_uses_public_broad_rule(job)
         ):
-            decision = evaluate_student_publication(job)
+            # Reindexing persists whether the row was evaluated with the
+            # explicitly labelled social/extended-opportunity policy.  Audit
+            # must replay that same policy or it will falsely reject valid
+            # ``social_*`` publication modes as if they used the strict rule.
+            decision = evaluate_student_publication(
+                job,
+                include_extended_opportunities=bool(
+                    job.get("publication_basis", {}).get("extended_opportunity")
+                ),
+            )
             declared_mode = str(
                 job.get("publication_basis", {}).get("major_match_mode") or ""
             )
