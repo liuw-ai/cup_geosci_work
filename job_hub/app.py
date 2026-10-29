@@ -4,6 +4,7 @@ import hmac
 import hashlib
 import re
 import secrets
+from collections import Counter
 from threading import Lock
 from time import monotonic
 from datetime import date, datetime, timezone
@@ -771,6 +772,26 @@ def create_app(settings: Settings | None = None) -> Flask:
     def home() -> str:
         report, is_preview = active_report()
         business_date = local_today(settings).isoformat()
+        discovery_candidates, _ = database.list_jobs(
+            page_size=None,
+            only_open=False,
+            student_visible=False,
+            as_of_date=business_date,
+        )
+        discovery_records, _discovery_counts = build_student_discovery_jobs(
+            discovery_candidates,
+            as_of_date=business_date,
+            artifact_candidates=database.list_artifact_job_candidates(
+                review_status="official_content_verified", limit=500
+            ),
+        )
+        discovery_category_counts = Counter(
+            str(item.get("category") or "") for item in discovery_records
+        )
+        discovery_categories = [
+            {**item, "count": discovery_category_counts.get(str(item.get("category") or ""), 0)}
+            for item in database.list_categories(as_of_date=business_date)
+        ]
         featured = sorted(
             report["new_jobs"] + report["updated_jobs"],
             key=lambda item: (-item["relevance_score"], item["deadline_date"] or "9999-12-31"),
@@ -783,14 +804,10 @@ def create_app(settings: Settings | None = None) -> Flask:
             "home.html",
             report=report,
             is_preview=is_preview,
-            live_open_total=database.count_open_jobs(
-                as_of_date=business_date
-            ),
+            live_open_total=len(discovery_records),
             as_of_date=business_date,
             featured=featured,
-            categories=database.list_categories(
-                as_of_date=business_date
-            ),
+            categories=discovery_categories,
             report_dates=database.list_report_dates(14),
             upcoming_positions=upcoming_government_positions(),
         )
